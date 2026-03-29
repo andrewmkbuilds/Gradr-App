@@ -137,6 +137,14 @@ export default function Auth() {
             </Button>
           </form>
 
+          {!isSignUp && (
+            <p className="text-center text-sm">
+              <a href="/forgot-password" className="text-primary hover:underline font-medium">
+                Forgot your password?
+              </a>
+            </p>
+          )}
+
           <p className="text-center text-sm text-muted-foreground">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button

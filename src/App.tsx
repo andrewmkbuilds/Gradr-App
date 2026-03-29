@@ -13,6 +13,8 @@ import InterviewEngine from "./pages/InterviewEngine";
 import GrowthEngine from "./pages/GrowthEngine";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
