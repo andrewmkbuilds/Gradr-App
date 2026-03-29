@@ -39,6 +39,7 @@ function ProtectedRoutes() {
         <Route path="/apply" element={<ApplicationEngine />} />
         <Route path="/interview" element={<InterviewEngine />} />
         <Route path="/growth" element={<GrowthEngine />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </DashboardLayout>
