@@ -11,6 +11,7 @@ import JobMatchingEngine from "./pages/JobMatchingEngine";
 import ApplicationEngine from "./pages/ApplicationEngine";
 import InterviewEngine from "./pages/InterviewEngine";
 import GrowthEngine from "./pages/GrowthEngine";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
