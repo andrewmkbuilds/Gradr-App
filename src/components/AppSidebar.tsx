@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   ChevronLeft,
   LogOut,
+  Settings,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -31,6 +32,7 @@ const engines = [
   { title: "Application Engine", url: "/apply", icon: Zap },
   { title: "Interview Coach", url: "/interview", icon: Mic },
   { title: "Growth & Proof", url: "/growth", icon: Rocket },
+  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {

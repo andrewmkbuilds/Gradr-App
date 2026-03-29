@@ -11,6 +11,7 @@ import JobMatchingEngine from "./pages/JobMatchingEngine";
 import ApplicationEngine from "./pages/ApplicationEngine";
 import InterviewEngine from "./pages/InterviewEngine";
 import GrowthEngine from "./pages/GrowthEngine";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ function ProtectedRoutes() {
         <Route path="/apply" element={<ApplicationEngine />} />
         <Route path="/interview" element={<InterviewEngine />} />
         <Route path="/growth" element={<GrowthEngine />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </DashboardLayout>
