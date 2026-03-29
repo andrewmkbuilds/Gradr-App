@@ -14,7 +14,147 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      job_matches: {
+        Row: {
+          ai_strategy: string | null
+          company: string | null
+          created_at: string
+          description: string | null
+          id: string
+          job_title: string
+          location: string | null
+          match_score: number | null
+          matched_skills: string[] | null
+          missing_skills: string[] | null
+          salary_range: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_strategy?: string | null
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_title: string
+          location?: string | null
+          match_score?: number | null
+          matched_skills?: string[] | null
+          missing_skills?: string[] | null
+          salary_range?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_strategy?: string | null
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_title?: string
+          location?: string | null
+          match_score?: number | null
+          matched_skills?: string[] | null
+          missing_skills?: string[] | null
+          salary_range?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          career_stage: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          skills: string[] | null
+          target_industry: string | null
+          target_job_title: string | null
+          target_salary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          career_stage?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          skills?: string[] | null
+          target_industry?: string | null
+          target_job_title?: string | null
+          target_salary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          career_stage?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          skills?: string[] | null
+          target_industry?: string | null
+          target_job_title?: string | null
+          target_salary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          ai_suggestions: Json | null
+          ats_score: number | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string
+          formatting_score: number | null
+          id: string
+          impact_score: number | null
+          keyword_match: number | null
+          parsed_text: string | null
+          readability_score: number | null
+          updated_at: string
+          user_id: string
+          version_label: string | null
+        }
+        Insert: {
+          ai_suggestions?: Json | null
+          ats_score?: number | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type: string
+          formatting_score?: number | null
+          id?: string
+          impact_score?: number | null
+          keyword_match?: number | null
+          parsed_text?: string | null
+          readability_score?: number | null
+          updated_at?: string
+          user_id: string
+          version_label?: string | null
+        }
+        Update: {
+          ai_suggestions?: Json | null
+          ats_score?: number | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          formatting_score?: number | null
+          id?: string
+          impact_score?: number | null
+          keyword_match?: number | null
+          parsed_text?: string | null
+          readability_score?: number | null
+          updated_at?: string
+          user_id?: string
+          version_label?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
