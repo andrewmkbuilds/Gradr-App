@@ -53,6 +53,13 @@ export default function Auth() {
     if (error) toast.error("Apple sign-in failed");
   };
 
+  const handleMicrosoftSignIn = async () => {
+    const { error } = await lovable.auth.signInWithOAuth("microsoft", {
+      redirect_uri: window.location.origin,
+    });
+    if (error) toast.error("Microsoft sign-in failed");
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8 animate-slide-up">
