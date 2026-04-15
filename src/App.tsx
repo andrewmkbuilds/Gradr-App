@@ -1,10 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { AnimatedPage } from "@/components/AnimatedPage";
+import { AnimatePresence } from "framer-motion";
 import Dashboard from "./pages/Dashboard";
 import ResumeEngine from "./pages/ResumeEngine";
 import JobMatchingEngine from "./pages/JobMatchingEngine";
@@ -21,6 +23,7 @@ const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -34,16 +37,18 @@ function ProtectedRoutes() {
 
   return (
     <DashboardLayout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/resume" element={<ResumeEngine />} />
-        <Route path="/jobs" element={<JobMatchingEngine />} />
-        <Route path="/apply" element={<ApplicationEngine />} />
-        <Route path="/interview" element={<InterviewEngine />} />
-        <Route path="/growth" element={<GrowthEngine />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<AnimatedPage><Dashboard /></AnimatedPage>} />
+          <Route path="/resume" element={<AnimatedPage><ResumeEngine /></AnimatedPage>} />
+          <Route path="/jobs" element={<AnimatedPage><JobMatchingEngine /></AnimatedPage>} />
+          <Route path="/apply" element={<AnimatedPage><ApplicationEngine /></AnimatedPage>} />
+          <Route path="/interview" element={<AnimatedPage><InterviewEngine /></AnimatedPage>} />
+          <Route path="/growth" element={<AnimatedPage><GrowthEngine /></AnimatedPage>} />
+          <Route path="/settings" element={<AnimatedPage><Settings /></AnimatedPage>} />
+          <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
+        </Routes>
+      </AnimatePresence>
     </DashboardLayout>
   );
 }
@@ -55,6 +60,20 @@ function AuthRoute() {
   return <Auth />;
 }
 
+function AppRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/auth" element={<AnimatedPage><AuthRoute /></AnimatedPage>} />
+        <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
+        <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
+        <Route path="/*" element={<ProtectedRoutes />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -62,12 +81,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthRoute />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/*" element={<ProtectedRoutes />} />
-          </Routes>
+          <AppRoutes />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
