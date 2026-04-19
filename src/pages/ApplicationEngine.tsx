@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { handleAiFunctionError } from "@/lib/aiErrors";
 
 type GenerationType = "cover_letter" | "recruiter_message";
 
@@ -63,8 +64,10 @@ export default function ApplicationEngine() {
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error || data?.error) {
+        if (handleAiFunctionError(error, data)) { setLoading(false); return; }
+        throw error ?? new Error(data?.error || "Generation failed");
+      }
 
       setResult(data);
       toast.success(`${type === "cover_letter" ? "Cover letter" : "Recruiter message"} generated!`);
