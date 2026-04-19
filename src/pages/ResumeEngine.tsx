@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { handleAiFunctionError } from "@/lib/aiErrors";
 
 interface Suggestion {
   type: string;
@@ -85,8 +86,10 @@ export default function ResumeEngine() {
         body: { resumeText: text },
       });
 
-      if (fnError) throw fnError;
-      if (analysisData?.error) throw new Error(analysisData.error);
+      if (fnError || analysisData?.error) {
+        if (handleAiFunctionError(fnError, analysisData)) return;
+        throw fnError ?? new Error(analysisData?.error || "AI analysis failed");
+      }
 
       setAnalysis(analysisData);
 

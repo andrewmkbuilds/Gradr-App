@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { handleAiFunctionError } from "@/lib/aiErrors";
 
 interface JobMatch {
   job_title: string;
@@ -79,8 +80,10 @@ export default function JobMatchingEngine() {
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error || data?.error) {
+        if (handleAiFunctionError(error, data)) { setLoading(false); return; }
+        throw error ?? new Error(data?.error || "Match failed");
+      }
 
       setMatches(data.matches || []);
       toast.success(`Found ${data.matches?.length || 0} job matches!`);
