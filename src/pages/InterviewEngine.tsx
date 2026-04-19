@@ -24,11 +24,17 @@ export default function InterviewEngine() {
   }, [messages]);
 
   const streamChat = async (allMessages: Msg[]) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      toast.error("Please sign in to use the interview coach");
+      return;
+    }
     const resp = await fetch(INTERVIEW_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
       body: JSON.stringify({ messages: allMessages, targetRole }),
     });
