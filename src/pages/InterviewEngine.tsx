@@ -40,8 +40,13 @@ export default function InterviewEngine() {
       body: JSON.stringify({ messages: allMessages, targetRole }),
     });
 
-    if (resp.status === 429) { toast.error("Rate limited — try again shortly"); return; }
-    if (resp.status === 402) { toast.error("AI credits exhausted — please add funds"); return; }
+    if (resp.status === 401) { handleAiFunctionError({ status: 401 }, null); return; }
+    if (resp.status === 429) {
+      const body = await resp.json().catch(() => ({}));
+      handleAiFunctionError({ status: 429 }, body);
+      return;
+    }
+    if (resp.status === 402) { handleAiFunctionError({ status: 402 }, null); return; }
     if (!resp.ok || !resp.body) throw new Error("Stream failed");
 
     const reader = resp.body.getReader();
