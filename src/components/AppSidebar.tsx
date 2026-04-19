@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   LogOut,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -32,6 +33,7 @@ const engines = [
   { title: "Application Engine", url: "/apply", icon: Zap },
   { title: "Interview Coach", url: "/interview", icon: Mic },
   { title: "Growth & Proof", url: "/growth", icon: Rocket },
+  { title: "Pricing", url: "/pricing", icon: Sparkles },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
