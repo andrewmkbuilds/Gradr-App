@@ -48,6 +48,20 @@ export default function Auth() {
     if (error) toast.error(`${provider} sign-in failed`);
   };
 
+  const handleGuest = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      toast.success("Signed in as guest");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Guest sign-in failed";
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthLayout>
       <div className="space-y-2">
@@ -174,6 +188,16 @@ export default function Auth() {
           )}
         </Button>
       </form>
+
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full h-11 text-muted-foreground hover:text-foreground"
+        onClick={handleGuest}
+        disabled={loading}
+      >
+        Continue as guest
+      </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         {isSignUp ? "Already have an account?" : "No account yet?"}{" "}
