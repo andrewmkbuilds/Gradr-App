@@ -32,7 +32,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             <div className="h-12 w-12 rounded-2xl bg-primary/20 glow-border flex items-center justify-center">
               <Zap className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold gradient-text tracking-tight">HireOS</h1>
+            <h1 className="text-3xl font-bold gradient-text tracking-tight">CareerFlow OS</h1>
           </div>
 
           <p className="text-2xl font-semibold text-foreground leading-snug">
@@ -72,7 +72,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             <div className="h-12 w-12 rounded-2xl bg-primary/20 glow-border flex items-center justify-center mx-auto">
               <Zap className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold gradient-text">HireOS</h1>
+            <h1 className="text-2xl font-bold gradient-text">CareerFlow OS</h1>
           </div>
 
           {children}
