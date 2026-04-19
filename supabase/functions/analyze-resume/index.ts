@@ -6,6 +6,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Per-user sliding window rate limit (in-memory, per instance)
+// 10 requests per 60 seconds per user
+const RATE_LIMIT = 10;
+const WINDOW_MS = 60_000;
+const userHits = new Map<string, number[]>();
+
+function checkRateLimit(userId: string): { ok: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
+  if (hits.length >= RATE_LIMIT) {
+    const retryAfter = Math.ceil((WINDOW_MS - (now - hits[0])) / 1000);
+    return { ok: false, retryAfter };
+  }
+  hits.push(now);
+  userHits.set(userId, hits);
+  return { ok: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -27,6 +45,15 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Rate limit per user
+    const rl = checkRateLimit(user.id);
+    if (!rl.ok) {
+      return new Response(
+        JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rl.retryAfter) } },
+      );
     }
 
     const { resumeText, targetRole } = await req.json();
