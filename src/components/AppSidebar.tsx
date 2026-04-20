@@ -9,6 +9,8 @@ import {
   LogOut,
   Settings,
   Sparkles,
+  Briefcase,
+  KanbanSquare,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -29,7 +31,9 @@ import {
 const engines = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Resume Intelligence", url: "/resume", icon: FileText },
-  { title: "Job Matching", url: "/jobs", icon: Target },
+  { title: "Job Feed", url: "/jobs", icon: Briefcase },
+  { title: "Pipeline", url: "/pipeline", icon: KanbanSquare },
+  { title: "AI Match", url: "/match", icon: Target },
   { title: "Application Engine", url: "/apply", icon: Zap },
   { title: "Interview Coach", url: "/interview", icon: Mic },
   { title: "Growth & Proof", url: "/growth", icon: Rocket },
