@@ -10,6 +10,8 @@ import { AnimatePresence } from "framer-motion";
 import Dashboard from "./pages/Dashboard";
 import ResumeEngine from "./pages/ResumeEngine";
 import JobMatchingEngine from "./pages/JobMatchingEngine";
+import JobsFeed from "./pages/JobsFeed";
+import Pipeline from "./pages/Pipeline";
 import ApplicationEngine from "./pages/ApplicationEngine";
 import InterviewEngine from "./pages/InterviewEngine";
 import GrowthEngine from "./pages/GrowthEngine";
@@ -42,7 +44,9 @@ function ProtectedRoutes() {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><Dashboard /></AnimatedPage>} />
           <Route path="/resume" element={<AnimatedPage><ResumeEngine /></AnimatedPage>} />
-          <Route path="/jobs" element={<AnimatedPage><JobMatchingEngine /></AnimatedPage>} />
+          <Route path="/jobs" element={<AnimatedPage><JobsFeed /></AnimatedPage>} />
+          <Route path="/match" element={<AnimatedPage><JobMatchingEngine /></AnimatedPage>} />
+          <Route path="/pipeline" element={<AnimatedPage><Pipeline /></AnimatedPage>} />
           <Route path="/apply" element={<AnimatedPage><ApplicationEngine /></AnimatedPage>} />
           <Route path="/interview" element={<AnimatedPage><InterviewEngine /></AnimatedPage>} />
           <Route path="/growth" element={<AnimatedPage><GrowthEngine /></AnimatedPage>} />
