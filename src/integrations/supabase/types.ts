@@ -59,6 +59,44 @@ export type Database = {
         }
         Relationships: []
       }
+      job_reminders: {
+        Row: {
+          created_at: string
+          done: boolean
+          due_at: string
+          id: string
+          title: string
+          tracked_job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          due_at: string
+          id?: string
+          title: string
+          tracked_job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          due_at?: string
+          id?: string
+          title?: string
+          tracked_job_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_reminders_tracked_job_id_fkey"
+            columns: ["tracked_job_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -152,6 +190,117 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version_label?: string | null
+        }
+        Relationships: []
+      }
+      tracked_jobs: {
+        Row: {
+          applied_at: string | null
+          company: string | null
+          created_at: string
+          description: string | null
+          external_id: string | null
+          id: string
+          location: string | null
+          match_score: number | null
+          notes: string | null
+          position: number | null
+          posted_at: string | null
+          remote: boolean | null
+          salary_max: number | null
+          salary_min: number | null
+          source: string | null
+          status: string
+          title: string
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          external_id?: string | null
+          id?: string
+          location?: string | null
+          match_score?: number | null
+          notes?: string | null
+          position?: number | null
+          posted_at?: string | null
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          external_id?: string | null
+          id?: string
+          location?: string | null
+          match_score?: number | null
+          notes?: string | null
+          position?: number | null
+          posted_at?: string | null
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          country: string | null
+          created_at: string
+          experience_level: string | null
+          id: string
+          keywords: string[] | null
+          locations: string[] | null
+          remote_preference: string | null
+          salary_min: number | null
+          target_role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          experience_level?: string | null
+          id?: string
+          keywords?: string[] | null
+          locations?: string[] | null
+          remote_preference?: string | null
+          salary_min?: number | null
+          target_role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          experience_level?: string | null
+          id?: string
+          keywords?: string[] | null
+          locations?: string[] | null
+          remote_preference?: string | null
+          salary_min?: number | null
+          target_role?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
