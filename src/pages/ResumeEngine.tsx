@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
+import { extractResumeText } from "@/lib/extractResumeText";
 
 interface Suggestion {
   type: string;
@@ -36,10 +37,7 @@ export default function ResumeEngine() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [fileName, setFileName] = useState("");
 
-  const extractTextFromFile = async (file: File): Promise<string> => {
-    // For text-based files or as fallback, read as text
-    return await file.text();
-  };
+  const extractTextFromFile = (file: File) => extractResumeText(file);
 
   const handleFileUpload = useCallback(async (selectedFile: File) => {
     if (!user) {
