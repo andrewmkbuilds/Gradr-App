@@ -62,6 +62,9 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Hard cap to avoid blowing the model's context window (PDF binary, etc.)
+    const MAX_CHARS = 80_000;
+    const safeText = String(resumeText).slice(0, MAX_CHARS);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -95,7 +98,7 @@ Rules:
       body: JSON.stringify({
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze this resume${targetRole ? ` for the role: ${targetRole}` : ""}:\n\n${resumeText}` },
+          { role: "user", content: `Analyze this resume${targetRole ? ` for the role: ${targetRole}` : ""}:\n\n${safeText}` },
         ],
         tools: [{
           type: "function",
