@@ -195,6 +195,7 @@ export type Database = {
       }
       tracked_jobs: {
         Row: {
+          application_pack: Json | null
           applied_at: string | null
           company: string | null
           created_at: string
@@ -217,6 +218,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          application_pack?: Json | null
           applied_at?: string | null
           company?: string | null
           created_at?: string
@@ -239,6 +241,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          application_pack?: Json | null
           applied_at?: string | null
           company?: string | null
           created_at?: string
@@ -266,10 +269,12 @@ export type Database = {
         Row: {
           country: string | null
           created_at: string
+          digest_enabled: boolean
           experience_level: string | null
           id: string
           keywords: string[] | null
           locations: string[] | null
+          onboarded: boolean
           remote_preference: string | null
           salary_min: number | null
           target_role: string | null
@@ -279,10 +284,12 @@ export type Database = {
         Insert: {
           country?: string | null
           created_at?: string
+          digest_enabled?: boolean
           experience_level?: string | null
           id?: string
           keywords?: string[] | null
           locations?: string[] | null
+          onboarded?: boolean
           remote_preference?: string | null
           salary_min?: number | null
           target_role?: string | null
@@ -292,10 +299,12 @@ export type Database = {
         Update: {
           country?: string | null
           created_at?: string
+          digest_enabled?: boolean
           experience_level?: string | null
           id?: string
           keywords?: string[] | null
           locations?: string[] | null
+          onboarded?: boolean
           remote_preference?: string | null
           salary_min?: number | null
           target_role?: string | null
