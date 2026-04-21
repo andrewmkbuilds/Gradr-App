@@ -88,13 +88,50 @@ serve(async (req) => {
         },
         required: ["subject", "body"],
       };
+    } else if (type === "application_pack") {
+      systemPrompt = `You are an expert career writer producing a complete application pack: a tailored cover letter, a short recruiter outreach message, and 3-5 rewritten resume bullet points that better target this role. Be specific, ATS-friendly, and quantitative where possible.`;
+      toolName = "generate_application_pack";
+      toolParams = {
+        type: "object",
+        properties: {
+          cover_letter: {
+            type: "object",
+            properties: {
+              subject: { type: "string" },
+              body: { type: "string", description: "Full cover letter, < 350 words, paragraphs separated by blank lines" },
+            },
+            required: ["subject", "body"],
+          },
+          recruiter_message: {
+            type: "object",
+            properties: {
+              subject: { type: "string" },
+              body: { type: "string", description: "Short outreach message, < 120 words" },
+            },
+            required: ["subject", "body"],
+          },
+          bullet_rewrites: {
+            type: "array",
+            description: "3-5 rewritten resume bullets tailored to the job",
+            items: {
+              type: "object",
+              properties: {
+                original_hint: { type: "string", description: "Topic/area from resume this rewrites" },
+                rewritten: { type: "string", description: "New bullet point, action verb + outcome + metric" },
+              },
+              required: ["rewritten"],
+            },
+          },
+        },
+        required: ["cover_letter", "recruiter_message", "bullet_rewrites"],
+      };
     } else {
-      return new Response(JSON.stringify({ error: "Invalid type. Use 'cover_letter' or 'recruiter_message'" }), {
+      return new Response(JSON.stringify({ error: "Invalid type. Use 'cover_letter', 'recruiter_message', or 'application_pack'" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userContent = `Resume:\n${resumeText.substring(0, 5000)}\n\nTarget Position: ${jobTitle || "Not specified"} at ${company || "Not specified"}\n${jobDescription ? `Job Description:\n${jobDescription}` : ""}\nApplicant Name: ${userName || "Not specified"}`;
+    const userContent = `Resume:\n${resumeText.substring(0, 5000)}\n\nTarget Position: ${jobTitle || "Not specified"} at ${company || "Not specified"}\n${jobDescription ? `Job Description:\n${jobDescription.substring(0, 4000)}` : ""}\nApplicant Name: ${userName || "Not specified"}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -112,7 +149,7 @@ serve(async (req) => {
           type: "function",
           function: {
             name: toolName,
-            description: `Generate a ${type.replace("_", " ")}`,
+            description: `Generate a ${type.replace(/_/g, " ")}`,
             parameters: toolParams,
           },
         }],
