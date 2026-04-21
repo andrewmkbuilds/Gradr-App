@@ -12,6 +12,7 @@ import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, L
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { formatDistanceToNow } from "date-fns";
+import { OnboardingDialog } from "@/components/OnboardingDialog";
 
 interface FeedJob {
   external_id: string;
@@ -55,21 +56,36 @@ export default function JobsFeed() {
   const [trackedIds, setTrackedIds] = useState<Set<string>>(new Set());
   const [pasteUrl, setPasteUrl] = useState("");
   const [pasting, setPasting] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    loadPrefs();
-    loadTracked();
+    if (user) {
+      void initialize();
+      void loadTracked();
+    }
   }, [user]);
 
-  const loadPrefs = async () => {
+  const initialize = async () => {
     if (!user) return;
     const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
-    if (data) {
-      setWhat(data.target_role || "");
-      setWhere(data.locations?.[0] || "");
-      setCountry(data.country || "us");
-      if (data.remote_preference === "remote") setRemoteOnly(true);
+    if (!data || !data.onboarded) {
+      setShowOnboarding(true);
+      return;
     }
+    setWhat(data.target_role || "");
+    setWhere(data.locations?.[0] || "");
+    setCountry(data.country || "us");
+    if (data.remote_preference === "remote") setRemoteOnly(true);
+  };
+
+  const handleOnboardingComplete = (prefs: { what: string; where: string; country: string; remoteOnly: boolean; salaryMin: number | null }) => {
+    setShowOnboarding(false);
+    setWhat(prefs.what);
+    setWhere(prefs.where);
+    setCountry(prefs.country);
+    setRemoteOnly(prefs.remoteOnly);
+    // Auto-run search with the chosen prefs
+    setTimeout(() => runSearch(prefs.what, prefs.where, prefs.country, prefs.remoteOnly), 100);
   };
 
   const loadTracked = async () => {
@@ -78,42 +94,43 @@ export default function JobsFeed() {
     if (data) setTrackedIds(new Set(data.map((d) => d.external_id).filter(Boolean) as string[]));
   };
 
-  const savePrefs = async () => {
+  const savePrefs = async (overrides?: { what?: string; where?: string; country?: string; remoteOnly?: boolean }) => {
     if (!user) return;
     await supabase.from("user_preferences").upsert(
       {
         user_id: user.id,
-        target_role: what,
-        locations: where ? [where] : [],
-        country,
-        remote_preference: remoteOnly ? "remote" : "any",
+        target_role: overrides?.what ?? what,
+        locations: (overrides?.where ?? where) ? [overrides?.where ?? where] : [],
+        country: overrides?.country ?? country,
+        remote_preference: (overrides?.remoteOnly ?? remoteOnly) ? "remote" : "any",
       },
       { onConflict: "user_id" },
     );
   };
 
-  const search = async () => {
+  const runSearch = async (q: string, loc: string, ctry: string, remote: boolean) => {
     if (!user) return;
     setLoading(true);
     setJobs([]);
     try {
       const { data, error } = await supabase.functions.invoke("search-jobs", {
-        body: { what, where, country, remoteOnly, sortBy },
+        body: { what: q, where: loc, country: ctry, remoteOnly: remote, sortBy },
       });
       if (error || data?.error) {
         if (!handleAiFunctionError(error, data)) toast.error(data?.error || "Search failed");
         return;
       }
       setJobs(data.jobs || []);
-      savePrefs();
-      // Kick off AI scoring against latest resume in background
-      scoreJobs(data.jobs || []);
+      void savePrefs({ what: q, where: loc, country: ctry, remoteOnly: remote });
+      void scoreJobs(data.jobs || []);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Search failed");
     } finally {
       setLoading(false);
     }
   };
+
+  const search = () => runSearch(what, where, country, remoteOnly);
 
   const scoreJobs = async (list: FeedJob[]) => {
     if (!user || list.length === 0) return;
@@ -131,14 +148,12 @@ export default function JobsFeed() {
       const { data, error } = await supabase.functions.invoke("recommend-jobs", {
         body: { jobs: list, resumeText },
       });
-      if (error || data?.error) return; // silent fail
+      if (error || data?.error) return;
       const scores: { i: number; score: number; reason: string }[] = data?.scores || [];
       setJobs((prev) => {
         const next = [...prev];
         scores.forEach((s) => {
-          if (next[s.i]) {
-            next[s.i] = { ...next[s.i], match_score: s.score, match_reason: s.reason };
-          }
+          if (next[s.i]) next[s.i] = { ...next[s.i], match_score: s.score, match_reason: s.reason };
         });
         return next;
       });
@@ -151,29 +166,37 @@ export default function JobsFeed() {
     if (!user) return;
     setSavingIds((s) => new Set(s).add(job.external_id));
     try {
-      const { error } = await supabase.from("tracked_jobs").upsert(
-        {
-          user_id: user.id,
-          external_id: job.external_id,
-          source: job.source,
-          title: job.title,
-          company: job.company,
-          location: job.location,
-          remote: job.remote,
-          url: job.url,
-          salary_min: job.salary_min,
-          salary_max: job.salary_max,
-          description: job.description,
-          posted_at: job.posted_at,
-          status,
-          applied_at: status === "applied" ? new Date().toISOString() : null,
-          match_score: job.match_score ?? null,
-        },
-        { onConflict: "user_id,source,external_id" },
-      );
+      const { data: inserted, error } = await supabase
+        .from("tracked_jobs")
+        .upsert(
+          {
+            user_id: user.id,
+            external_id: job.external_id,
+            source: job.source,
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            remote: job.remote,
+            url: job.url,
+            salary_min: job.salary_min,
+            salary_max: job.salary_max,
+            description: job.description,
+            posted_at: job.posted_at,
+            status,
+            applied_at: status === "applied" ? new Date().toISOString() : null,
+            match_score: job.match_score ?? null,
+          },
+          { onConflict: "user_id,source,external_id" },
+        )
+        .select("id")
+        .single();
       if (error) throw error;
       setTrackedIds((s) => new Set(s).add(job.external_id));
       toast.success(status === "applied" ? "Marked as applied" : "Saved to pipeline");
+
+      if (status === "applied" && inserted) {
+        void generateApplicationPack(inserted.id, job);
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to save");
     } finally {
@@ -182,6 +205,57 @@ export default function JobsFeed() {
         next.delete(job.external_id);
         return next;
       });
+    }
+  };
+
+  const generateApplicationPack = async (trackedId: string, job: FeedJob) => {
+    if (!user) return;
+    const { data: resumeRows } = await supabase
+      .from("resumes")
+      .select("parsed_text")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const resumeText = resumeRows?.[0]?.parsed_text;
+    if (!resumeText) {
+      toast.message("Upload a resume to auto-generate cover letters", {
+        description: "Visit Resume Engine to upload one.",
+      });
+      return;
+    }
+
+    const tId = toast.loading("Generating tailored cover letter & bullets…");
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const { data, error } = await supabase.functions.invoke("generate-application", {
+        body: {
+          type: "application_pack",
+          resumeText,
+          jobTitle: job.title,
+          company: job.company,
+          jobDescription: job.description,
+          userName: profile?.display_name || user.email,
+        },
+      });
+      if (error || data?.error) {
+        toast.dismiss(tId);
+        if (!handleAiFunctionError(error, data)) toast.error(data?.error || "Pack generation failed");
+        return;
+      }
+      await supabase
+        .from("tracked_jobs")
+        .update({ application_pack: data })
+        .eq("id", trackedId);
+      toast.dismiss(tId);
+      toast.success("Application pack ready — see it in Pipeline");
+    } catch (e) {
+      toast.dismiss(tId);
+      toast.error(e instanceof Error ? e.message : "Pack generation failed");
     }
   };
 
@@ -225,12 +299,13 @@ export default function JobsFeed() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
+
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Job Feed</h1>
         <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
       </div>
 
-      {/* Search bar */}
       <Card className="p-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-4 relative">
@@ -283,7 +358,6 @@ export default function JobsFeed() {
         </div>
       </Card>
 
-      {/* Paste URL */}
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-2">
           <Link2 className="h-4 w-4 text-primary" />
@@ -299,7 +373,6 @@ export default function JobsFeed() {
         </div>
       </Card>
 
-      {/* Results */}
       <div className="space-y-3">
         {filtered.length === 0 && !loading && (
           <Card className="p-12 text-center text-sm text-muted-foreground">

@@ -21,12 +21,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2 } from "lucide-react";
+import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 
 type Status = "saved" | "applied" | "interview" | "offer" | "rejected";
+
+interface ApplicationPack {
+  cover_letter?: { subject: string; body: string };
+  recruiter_message?: { subject: string; body: string };
+  bullet_rewrites?: { original_hint?: string; rewritten: string }[];
+}
 
 interface TrackedJob {
   id: string;
@@ -40,6 +46,7 @@ interface TrackedJob {
   applied_at: string | null;
   created_at: string;
   notes: string | null;
+  application_pack: ApplicationPack | null;
 }
 
 interface Reminder {
@@ -326,6 +333,76 @@ export default function Pipeline() {
                   <Button variant="outline" className="w-full gap-2" onClick={() => window.open(selected.url!, "_blank")}>
                     <ExternalLink className="h-4 w-4" /> Open job posting
                   </Button>
+                )}
+
+                {selected.application_pack && (
+                  <div className="space-y-3 pt-2 border-t border-border max-h-[300px] overflow-y-auto">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <Label className="text-xs uppercase tracking-wider text-primary">AI Application Pack</Label>
+                    </div>
+                    {selected.application_pack.cover_letter && (
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                            <FileText className="h-3 w-3" /> Cover letter
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs gap-1"
+                            onClick={() => {
+                              navigator.clipboard.writeText(selected.application_pack!.cover_letter!.body);
+                              toast.success("Cover letter copied");
+                            }}
+                          >
+                            <Copy className="h-3 w-3" /> Copy
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground italic">{selected.application_pack.cover_letter.subject}</p>
+                        <Textarea
+                          readOnly
+                          value={selected.application_pack.cover_letter.body}
+                          className="text-xs h-32 resize-none"
+                        />
+                      </div>
+                    )}
+                    {selected.application_pack.bullet_rewrites && selected.application_pack.bullet_rewrites.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-foreground">Resume bullet rewrites</p>
+                        <ul className="space-y-1.5 text-xs">
+                          {selected.application_pack.bullet_rewrites.map((b, i) => (
+                            <li key={i} className="p-2 rounded bg-secondary/50 text-foreground">
+                              {b.rewritten}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {selected.application_pack.recruiter_message && (
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-foreground">Recruiter outreach</p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs gap-1"
+                            onClick={() => {
+                              navigator.clipboard.writeText(selected.application_pack!.recruiter_message!.body);
+                              toast.success("Message copied");
+                            }}
+                          >
+                            <Copy className="h-3 w-3" /> Copy
+                          </Button>
+                        </div>
+                        <Textarea
+                          readOnly
+                          value={selected.application_pack.recruiter_message.body}
+                          className="text-xs h-20 resize-none"
+                        />
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <div className="space-y-2 pt-2 border-t border-border">

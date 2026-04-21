@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
-import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Loader2 } from "lucide-react";
+import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Loader2, Bookmark, Send, CalendarCheck, Trophy, XCircle, Bell, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ScoreRing } from "@/components/ScoreRing";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-
-const statusColors: Record<string, string> = {
-  Applied: "text-primary bg-primary/10",
-  Interview: "text-success bg-success/10",
-  Screening: "text-warning bg-warning/10",
-  Rejected: "text-destructive bg-destructive/10",
-};
+import { formatDistanceToNow } from "date-fns";
 
 interface DashboardStats {
   resumeScore: number;
@@ -22,12 +16,40 @@ interface DashboardStats {
   highConfidence: number;
   totalResumes: number;
   interviewRate: string;
+  appliedThisWeek: number;
 }
+
+interface StageCount {
+  saved: number;
+  applied: number;
+  interview: number;
+  offer: number;
+  rejected: number;
+}
+
+interface ReminderRow {
+  id: string;
+  title: string;
+  due_at: string;
+  done: boolean;
+  tracked_jobs?: { title: string; company: string | null } | null;
+}
+
+const STAGE_META: { key: keyof StageCount; label: string; icon: typeof Bookmark; color: string }[] = [
+  { key: "saved", label: "Saved", icon: Bookmark, color: "text-muted-foreground" },
+  { key: "applied", label: "Applied", icon: Send, color: "text-primary" },
+  { key: "interview", label: "Interview", icon: CalendarCheck, color: "text-warning" },
+  { key: "offer", label: "Offer", icon: Trophy, color: "text-success" },
+  { key: "rejected", label: "Rejected", icon: XCircle, color: "text-destructive" },
+];
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stages, setStages] = useState<StageCount>({ saved: 0, applied: 0, interview: 0, offer: 0, rejected: 0 });
+  const [reminders, setReminders] = useState<ReminderRow[]>([]);
+  const [overdueCount, setOverdueCount] = useState(0);
   const [jobMatches, setJobMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +58,11 @@ export default function Dashboard() {
   }, [user]);
 
   const loadDashboard = async () => {
-    const [resumeRes, matchRes] = await Promise.all([
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const now = new Date();
+
+    const [resumeRes, matchRes, trackedRes, remindersRes] = await Promise.all([
       supabase
         .from("resumes")
         .select("ats_score, keyword_match, formatting_score, impact_score")
@@ -49,11 +75,34 @@ export default function Dashboard() {
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(10),
+      supabase
+        .from("tracked_jobs")
+        .select("status, applied_at")
+        .eq("user_id", user!.id),
+      supabase
+        .from("job_reminders")
+        .select("id, title, due_at, done, tracked_jobs(title, company)")
+        .eq("user_id", user!.id)
+        .eq("done", false)
+        .order("due_at", { ascending: true })
+        .limit(20),
     ]);
 
     const resume = resumeRes.data?.[0];
     const matches = matchRes.data || [];
+    const tracked = trackedRes.data || [];
     const highConf = matches.filter((m) => (m.match_score ?? 0) >= 85).length;
+
+    const stageCounts: StageCount = { saved: 0, applied: 0, interview: 0, offer: 0, rejected: 0 };
+    let appliedThisWeek = 0;
+    tracked.forEach((t) => {
+      const k = (t.status || "saved") as keyof StageCount;
+      if (k in stageCounts) stageCounts[k]++;
+      if (t.applied_at && new Date(t.applied_at) >= weekAgo) appliedThisWeek++;
+    });
+
+    const allReminders = (remindersRes.data || []) as ReminderRow[];
+    const overdue = allReminders.filter((r) => new Date(r.due_at) < now).length;
 
     setStats({
       resumeScore: resume?.ats_score ?? 0,
@@ -64,7 +113,11 @@ export default function Dashboard() {
       highConfidence: highConf,
       totalResumes: resumeRes.data?.length ?? 0,
       interviewRate: matches.length > 0 ? `${Math.round((highConf / matches.length) * 100)}%` : "—",
+      appliedThisWeek,
     });
+    setStages(stageCounts);
+    setReminders(allReminders.slice(0, 5));
+    setOverdueCount(overdue);
     setJobMatches(matches.slice(0, 4));
     setLoading(false);
   };
@@ -78,6 +131,7 @@ export default function Dashboard() {
   }
 
   const s = stats!;
+  const totalTracked = stages.saved + stages.applied + stages.interview + stages.offer + stages.rejected;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -88,9 +142,32 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={FileText} title="Resume Score" value={s.resumeScore > 0 ? String(s.resumeScore) : "—"} subtitle={s.resumeScore > 0 ? "Latest ATS score" : "Upload a resume"} glowing={s.resumeScore > 0} />
-        <StatCard icon={Target} title="Job Matches" value={String(s.totalMatches)} subtitle={`${s.highConfidence} high-confidence`} />
-        <StatCard icon={Briefcase} title="Resumes" value={String(s.totalResumes)} subtitle="Uploaded" />
+        <StatCard icon={Send} title="Applied This Week" value={String(s.appliedThisWeek)} subtitle={`${stages.applied} total in pipeline`} />
+        <StatCard icon={Briefcase} title="Pipeline" value={String(totalTracked)} subtitle={`${stages.interview} in interview`} />
         <StatCard icon={TrendingUp} title="Match Rate" value={s.interviewRate} subtitle="High-confidence ratio" />
+      </div>
+
+      {/* Pipeline stage breakdown */}
+      <div className="glass-card p-6 animate-slide-up">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Pipeline by Stage</h3>
+          <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
+            View pipeline →
+          </button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {STAGE_META.map((stage) => (
+            <button
+              key={stage.key}
+              onClick={() => navigate("/pipeline")}
+              className="flex flex-col items-start p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-left"
+            >
+              <stage.icon className={`h-4 w-4 ${stage.color} mb-2`} />
+              <span className="text-2xl font-bold text-foreground">{stages[stage.key]}</span>
+              <span className="text-xs text-muted-foreground mt-0.5">{stage.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -122,35 +199,81 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Job Matches */}
-        <div className="glass-card p-6 lg:col-span-2 animate-slide-up">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Recent Job Matches</h3>
-          {jobMatches.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No job matches yet. Use the Job Matching engine to find opportunities.</p>
+        {/* Upcoming Reminders */}
+        <div className="glass-card p-6 animate-slide-up lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Bell className="h-4 w-4 text-primary" />
+              Upcoming Reminders
+              {overdueCount > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                  <AlertCircle className="h-3 w-3" /> {overdueCount} overdue
+                </span>
+              )}
+            </h3>
+            <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
+              Manage →
+            </button>
+          </div>
+          {reminders.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              No upcoming reminders. Add follow-ups from the Pipeline.
+            </p>
           ) : (
-            <div className="space-y-3">
-              {jobMatches.map((match) => (
-                <div
-                  key={match.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">{(match.company || "?")[0]}</span>
+            <div className="space-y-2">
+              {reminders.map((r) => {
+                const isOverdue = new Date(r.due_at) < new Date();
+                return (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">{r.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {r.tracked_jobs?.title || "—"}
+                        {r.tracked_jobs?.company ? ` · ${r.tracked_jobs.company}` : ""}
+                      </p>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{match.job_title}</p>
-                      <p className="text-xs text-muted-foreground">{match.company || "Unknown"}</p>
-                    </div>
+                    <span className={`text-xs shrink-0 ml-3 ${isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                      {formatDistanceToNow(new Date(r.due_at), { addSuffix: true })}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs text-muted-foreground">{match.match_score ?? 0}% match</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
+      </div>
+
+      {/* Recent Job Matches */}
+      <div className="glass-card p-6 animate-slide-up">
+        <h3 className="text-sm font-semibold text-foreground mb-4">Recent Job Matches</h3>
+        {jobMatches.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-8 text-center">No job matches yet. Use the Job Feed to find opportunities.</p>
+        ) : (
+          <div className="space-y-3">
+            {jobMatches.map((match) => (
+              <div
+                key={match.id}
+                className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-primary">{(match.company || "?")[0]}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{match.job_title}</p>
+                    <p className="text-xs text-muted-foreground">{match.company || "Unknown"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs text-muted-foreground">{match.match_score ?? 0}% match</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}
