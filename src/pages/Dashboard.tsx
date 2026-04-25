@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Loader2, Bookmark, Send, CalendarCheck, Trophy, XCircle, Bell, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -52,9 +52,12 @@ export default function Dashboard() {
   const [overdueCount, setOverdueCount] = useState(0);
   const [jobMatches, setJobMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const loadedUserId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (user) loadDashboard();
+    if (!user || loadedUserId.current === user.id) return;
+    loadedUserId.current = user.id;
+    void loadDashboard();
   }, [user]);
 
   const loadDashboard = async () => {
