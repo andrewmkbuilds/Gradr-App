@@ -8,11 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, Link2 } from "lucide-react";
+import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, Link2, AlertCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { formatDistanceToNow } from "date-fns";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
+import { useNavigate } from "react-router-dom";
 
 interface FeedJob {
   external_id: string;
@@ -43,6 +44,7 @@ const COUNTRIES = [
 
 export default function JobsFeed() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [what, setWhat] = useState("");
   const [where, setWhere] = useState("");
   const [country, setCountry] = useState("us");
@@ -57,6 +59,7 @@ export default function JobsFeed() {
   const [pasteUrl, setPasteUrl] = useState("");
   const [pasting, setPasting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -141,8 +144,12 @@ export default function JobsFeed() {
       .order("created_at", { ascending: false })
       .limit(1);
     const resumeText = resumeRows?.[0]?.parsed_text;
-    if (!resumeText) return;
+    if (!resumeText) {
+      setNoResumeScoringAttempted(true);
+      return;
+    }
 
+    setNoResumeScoringAttempted(false);
     setScoring(true);
     try {
       const { data, error } = await supabase.functions.invoke("recommend-jobs", {
@@ -357,6 +364,26 @@ export default function JobsFeed() {
           )}
         </div>
       </Card>
+
+      {noResumeScoringAttempted && (
+        <Card className="p-4 border-warning/40 bg-warning/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Upload a resume to unlock AI match scoring</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Job search is working, but match percentages need your latest resume to compare skills and experience.
+                </p>
+              </div>
+            </div>
+            <Button onClick={() => navigate("/resume")} className="gap-2 shrink-0">
+              <Upload className="h-4 w-4" />
+              Upload resume
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-2">
