@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Loader2, Bookmark, Send, CalendarCheck, Trophy, XCircle, Bell, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -6,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 
 interface DashboardStats {
   resumeScore: number;
@@ -46,21 +46,15 @@ const STAGE_META: { key: keyof StageCount; label: string; icon: typeof Bookmark;
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [stages, setStages] = useState<StageCount>({ saved: 0, applied: 0, interview: 0, offer: 0, rejected: 0 });
-  const [reminders, setReminders] = useState<ReminderRow[]>([]);
-  const [overdueCount, setOverdueCount] = useState(0);
-  const [jobMatches, setJobMatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const loadedUserId = useRef<string | null>(null);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["dashboard", user?.id],
+    enabled: !!user,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    queryFn: loadDashboard,
+  });
 
-  useEffect(() => {
-    if (!user || loadedUserId.current === user.id) return;
-    loadedUserId.current = user.id;
-    void loadDashboard();
-  }, [user]);
-
-  const loadDashboard = async () => {
+  async function loadDashboard() {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     const now = new Date();
@@ -107,7 +101,7 @@ export default function Dashboard() {
     const allReminders = (remindersRes.data || []) as ReminderRow[];
     const overdue = allReminders.filter((r) => new Date(r.due_at) < now).length;
 
-    setStats({
+    const stats: DashboardStats = {
       resumeScore: resume?.ats_score ?? 0,
       keywordMatch: resume?.keyword_match ?? 0,
       formattingScore: resume?.formatting_score ?? 0,
@@ -117,13 +111,16 @@ export default function Dashboard() {
       totalResumes: resumeRes.data?.length ?? 0,
       interviewRate: matches.length > 0 ? `${Math.round((highConf / matches.length) * 100)}%` : "—",
       appliedThisWeek,
-    });
-    setStages(stageCounts);
-    setReminders(allReminders.slice(0, 5));
-    setOverdueCount(overdue);
-    setJobMatches(matches.slice(0, 4));
-    setLoading(false);
-  };
+    };
+
+    return {
+      stats,
+      stages: stageCounts,
+      reminders: allReminders.slice(0, 5),
+      overdueCount: overdue,
+      jobMatches: matches.slice(0, 4),
+    };
+  }
 
   if (loading) {
     return (
@@ -133,7 +130,12 @@ export default function Dashboard() {
     );
   }
 
-  const s = stats!;
+  const stats = data!.stats;
+  const stages = data!.stages;
+  const reminders = data!.reminders;
+  const overdueCount = data!.overdueCount;
+  const jobMatches = data!.jobMatches;
+  const s = stats;
   const totalTracked = stages.saved + stages.applied + stages.interview + stages.offer + stages.rejected;
 
   return (
