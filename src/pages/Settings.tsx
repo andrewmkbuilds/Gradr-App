@@ -26,7 +26,7 @@ export default function Settings() {
       .from("profiles")
       .select("*")
       .eq("user_id", user!.id)
-      .single();
+      .maybeSingle();
 
     if (data) {
       setDisplayName(data.display_name || "");
@@ -45,15 +45,15 @@ export default function Settings() {
 
     const { error } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        user_id: user.id,
         display_name: displayName || null,
         target_job_title: targetJobTitle || null,
         target_salary: targetSalary || null,
         target_industry: targetIndustry || null,
         career_stage: careerStage || null,
         skills: skills ? skills.split(",").map((s) => s.trim()).filter(Boolean) : null,
-      })
-      .eq("user_id", user.id);
+      }, { onConflict: "user_id" });
 
     if (error) {
       toast.error("Failed to save profile");
