@@ -16,6 +16,7 @@ import ApplicationEngine from "./pages/ApplicationEngine";
 import InterviewEngine from "./pages/InterviewEngine";
 import GrowthEngine from "./pages/GrowthEngine";
 import Settings from "./pages/Settings";
+import DigestPreview from "./pages/DigestPreview";
 import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -51,6 +52,7 @@ function ProtectedRoutes() {
           <Route path="/interview" element={<AnimatedPage><InterviewEngine /></AnimatedPage>} />
           <Route path="/growth" element={<AnimatedPage><GrowthEngine /></AnimatedPage>} />
           <Route path="/settings" element={<AnimatedPage><Settings /></AnimatedPage>} />
+          <Route path="/admin/digest-preview" element={<AnimatedPage><DigestPreview /></AnimatedPage>} />
           <Route path="/pricing" element={<AnimatedPage><Pricing /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
