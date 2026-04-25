@@ -68,6 +68,24 @@ export default function JobsFeed() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (!user || !noResumeScoringAttempted || jobs.length === 0) return;
+    const id = window.setInterval(async () => {
+      const { data } = await supabase
+        .from("resumes")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (data?.[0]) {
+        window.clearInterval(id);
+        toast.success("Resume detected — re-running AI match scoring");
+        void scoreJobs(jobs);
+      }
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [user, noResumeScoringAttempted, jobs]);
+
   const initialize = async () => {
     if (!user) return;
     const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
@@ -374,6 +392,9 @@ export default function JobsFeed() {
                 <h3 className="text-sm font-semibold text-foreground">Upload a resume to unlock AI match scoring</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Job search is working, but match percentages need your latest resume to compare skills and experience.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  After upload finishes, keep this page open and scoring will restart automatically.
                 </p>
               </div>
             </div>
