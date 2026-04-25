@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Save, Loader2 } from "lucide-react";
+import { User, Save, Loader2, Bell, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,11 @@ export default function Settings() {
   const [targetIndustry, setTargetIndustry] = useState("");
   const [careerStage, setCareerStage] = useState("");
   const [skills, setSkills] = useState("");
+  const [digestEnabled, setDigestEnabled] = useState(true);
+  const [digestSendTime, setDigestSendTime] = useState("08:00");
+  const [digestTimezone, setDigestTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York");
+  const [testingDigest, setTestingDigest] = useState(false);
+  const [lastDigestStatus, setLastDigestStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) loadProfile();
@@ -36,6 +41,30 @@ export default function Settings() {
       setCareerStage(data.career_stage || "");
       setSkills(data.skills?.join(", ") || "");
     }
+
+    const { data: prefs } = await (supabase as any)
+      .from("user_preferences")
+      .select("digest_enabled, digest_send_time, digest_timezone")
+      .eq("user_id", user!.id)
+      .maybeSingle();
+
+    if (prefs) {
+      setDigestEnabled(prefs.digest_enabled ?? true);
+      setDigestSendTime(String(prefs.digest_send_time || "08:00").slice(0, 5));
+      setDigestTimezone(prefs.digest_timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York");
+    }
+
+    const { data: lastLog } = await (supabase as any)
+      .from("digest_send_logs")
+      .select("status, sent_at, jobs_count, reminders_count, error_message")
+      .eq("user_id", user!.id)
+      .order("sent_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastLog) {
+      setLastDigestStatus(`${lastLog.status} · ${lastLog.jobs_count} jobs · ${lastLog.reminders_count} reminders`);
+    }
     setLoading(false);
   };
 
@@ -55,12 +84,36 @@ export default function Settings() {
         skills: skills ? skills.split(",").map((s) => s.trim()).filter(Boolean) : null,
       }, { onConflict: "user_id" });
 
-    if (error) {
+    const { error: prefError } = await (supabase as any)
+      .from("user_preferences")
+      .upsert({
+        user_id: user.id,
+        digest_enabled: digestEnabled,
+        digest_send_time: digestSendTime,
+        digest_timezone: digestTimezone || "America/New_York",
+      }, { onConflict: "user_id" });
+
+    if (error || prefError) {
       toast.error("Failed to save profile");
     } else {
       toast.success("Profile saved!");
     }
     setSaving(false);
+  };
+
+  const sendTestDigest = async () => {
+    if (!user) return;
+    setTestingDigest(true);
+    const { data, error } = await supabase.functions.invoke("daily-digest", { body: { test: true } });
+    setTestingDigest(false);
+    if (error || data?.error) {
+      toast.error(data?.error || "Failed to prepare test digest");
+      setLastDigestStatus("failed");
+      return;
+    }
+    const status = `${data.status} · ${data.jobsCount} jobs · ${data.remindersCount} reminders`;
+    setLastDigestStatus(status);
+    toast.success("Test digest prepared");
   };
 
   if (loading) {
