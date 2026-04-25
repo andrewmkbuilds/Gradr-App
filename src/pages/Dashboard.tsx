@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Loader2, Bookmark, Send, CalendarCheck, Trophy, XCircle, Bell, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -6,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 
 interface DashboardStats {
   resumeScore: number;
