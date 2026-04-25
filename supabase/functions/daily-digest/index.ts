@@ -66,7 +66,7 @@ function buildPreview(jobs: DigestJob[], reminders: DigestReminder[]) {
   };
 }
 
-async function buildDigestForUser(supabase: ReturnType<typeof createClient>, userId: string) {
+async function buildDigestForUser(supabase: any, userId: string) {
   const now = new Date().toISOString();
   const [jobsRes, remindersRes] = await Promise.all([
     supabase
