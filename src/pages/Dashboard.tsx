@@ -54,7 +54,7 @@ export default function Dashboard() {
     queryFn: loadDashboard,
   });
 
-  const loadDashboard = async () => {
+  async function loadDashboard() {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     const now = new Date();
@@ -120,7 +120,7 @@ export default function Dashboard() {
       overdueCount: overdue,
       jobMatches: matches.slice(0, 4),
     };
-  };
+  }
 
   if (loading) {
     return (
@@ -130,7 +130,12 @@ export default function Dashboard() {
     );
   }
 
-  const s = stats!;
+  const stats = data!.stats;
+  const stages = data!.stages;
+  const reminders = data!.reminders;
+  const overdueCount = data!.overdueCount;
+  const jobMatches = data!.jobMatches;
+  const s = stats;
   const totalTracked = stages.saved + stages.applied + stages.interview + stages.offer + stages.rejected;
 
   return (
