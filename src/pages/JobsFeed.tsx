@@ -365,6 +365,26 @@ export default function JobsFeed() {
         </div>
       </Card>
 
+      {noResumeScoringAttempted && (
+        <Card className="p-4 border-warning/40 bg-warning/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Upload a resume to unlock AI match scoring</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Job search is working, but match percentages need your latest resume to compare skills and experience.
+                </p>
+              </div>
+            </div>
+            <Button onClick={() => navigate("/resume")} className="gap-2 shrink-0">
+              <Upload className="h-4 w-4" />
+              Upload resume
+            </Button>
+          </div>
+        </Card>
+      )}
+
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-2">
           <Link2 className="h-4 w-4 text-primary" />
