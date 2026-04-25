@@ -180,6 +180,50 @@ export default function Settings() {
           Save Profile
         </Button>
       </div>
+
+      <div className="glass-card p-6 space-y-5 animate-slide-up">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Bell className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">Daily Email Digest</p>
+            <p className="text-xs text-muted-foreground">High-match jobs and overdue follow-ups</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <label className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/40 p-3">
+            <span>
+              <span className="block text-sm font-medium text-foreground">Enable daily digest</span>
+              <span className="block text-xs text-muted-foreground mt-0.5">Prepared at your preferred local time.</span>
+            </span>
+            <input type="checkbox" checked={digestEnabled} onChange={(e) => setDigestEnabled(e.target.checked)} className="h-4 w-4 accent-primary" />
+          </label>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Preferred Send Time</label>
+              <Input type="time" value={digestSendTime} onChange={(e) => setDigestSendTime(e.target.value)} className="bg-secondary border-border" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Timezone</label>
+              <Input value={digestTimezone} onChange={(e) => setDigestTimezone(e.target.value)} placeholder="America/New_York" className="bg-secondary border-border" />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-secondary/40 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Last sent status</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{lastDigestStatus || "No digest prepared yet"}</p>
+            </div>
+            <Button onClick={sendTestDigest} disabled={testingDigest} variant="outline" className="gap-2">
+              {testingDigest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              Send test email
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
