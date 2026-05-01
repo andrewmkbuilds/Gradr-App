@@ -169,6 +169,11 @@ export default function JobsFeed() {
 
   const scoreJobs = async (list: FeedJob[]) => {
     if (!user || list.length === 0) return;
+    // Hard guard: if we already know there's no resume, don't even hit the resumes table or scoring API
+    if (hasResume === false) {
+      setNoResumeScoringAttempted(true);
+      return;
+    }
     const { data: resumeRows } = await supabase
       .from("resumes")
       .select("parsed_text")
@@ -177,10 +182,12 @@ export default function JobsFeed() {
       .limit(1);
     const resumeText = resumeRows?.[0]?.parsed_text;
     if (!resumeText) {
+      setHasResume(false);
       setNoResumeScoringAttempted(true);
       return;
     }
 
+    setHasResume(true);
     setNoResumeScoringAttempted(false);
     setScoring(true);
     try {
