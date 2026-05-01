@@ -59,26 +59,40 @@ export default function JobsFeed() {
   const [pasteUrl, setPasteUrl] = useState("");
   const [pasting, setPasting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasResume, setHasResume] = useState<boolean | null>(null);
   const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
 
   useEffect(() => {
     if (user) {
       void initialize();
       void loadTracked();
+      void checkResume();
     }
   }, [user]);
+
+  const checkResume = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("resumes")
+      .select("id,parsed_text")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    setHasResume(!!data?.[0]?.parsed_text);
+  };
 
   useEffect(() => {
     if (!user || !noResumeScoringAttempted || jobs.length === 0) return;
     const id = window.setInterval(async () => {
       const { data } = await supabase
         .from("resumes")
-        .select("id")
+        .select("id,parsed_text")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1);
-      if (data?.[0]) {
+      if (data?.[0]?.parsed_text) {
         window.clearInterval(id);
+        setHasResume(true);
         toast.success("Resume detected — re-running AI match scoring");
         void scoreJobs(jobs);
       }
