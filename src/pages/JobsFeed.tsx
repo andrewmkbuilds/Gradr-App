@@ -404,7 +404,7 @@ export default function JobsFeed() {
         </div>
       </Card>
 
-      {noResumeScoringAttempted && (
+      {(hasResume === false || noResumeScoringAttempted) && (
         <Card className="p-4 border-warning/40 bg-warning/10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3">
@@ -412,7 +412,7 @@ export default function JobsFeed() {
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Upload a resume to unlock AI match scoring</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Job search is working, but match percentages need your latest resume to compare skills and experience.
+                  Job search still works, but match percentages need your latest resume to compare skills and experience. AI scoring is paused until a resume is uploaded.
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   After upload finishes, keep this page open and scoring will restart automatically.
