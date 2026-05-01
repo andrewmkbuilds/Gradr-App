@@ -59,26 +59,40 @@ export default function JobsFeed() {
   const [pasteUrl, setPasteUrl] = useState("");
   const [pasting, setPasting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasResume, setHasResume] = useState<boolean | null>(null);
   const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
 
   useEffect(() => {
     if (user) {
       void initialize();
       void loadTracked();
+      void checkResume();
     }
   }, [user]);
+
+  const checkResume = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("resumes")
+      .select("id,parsed_text")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    setHasResume(!!data?.[0]?.parsed_text);
+  };
 
   useEffect(() => {
     if (!user || !noResumeScoringAttempted || jobs.length === 0) return;
     const id = window.setInterval(async () => {
       const { data } = await supabase
         .from("resumes")
-        .select("id")
+        .select("id,parsed_text")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1);
-      if (data?.[0]) {
+      if (data?.[0]?.parsed_text) {
         window.clearInterval(id);
+        setHasResume(true);
         toast.success("Resume detected — re-running AI match scoring");
         void scoreJobs(jobs);
       }
@@ -155,6 +169,11 @@ export default function JobsFeed() {
 
   const scoreJobs = async (list: FeedJob[]) => {
     if (!user || list.length === 0) return;
+    // Hard guard: if we already know there's no resume, don't even hit the resumes table or scoring API
+    if (hasResume === false) {
+      setNoResumeScoringAttempted(true);
+      return;
+    }
     const { data: resumeRows } = await supabase
       .from("resumes")
       .select("parsed_text")
@@ -163,10 +182,12 @@ export default function JobsFeed() {
       .limit(1);
     const resumeText = resumeRows?.[0]?.parsed_text;
     if (!resumeText) {
+      setHasResume(false);
       setNoResumeScoringAttempted(true);
       return;
     }
 
+    setHasResume(true);
     setNoResumeScoringAttempted(false);
     setScoring(true);
     try {
@@ -383,7 +404,7 @@ export default function JobsFeed() {
         </div>
       </Card>
 
-      {noResumeScoringAttempted && (
+      {(hasResume === false || noResumeScoringAttempted) && (
         <Card className="p-4 border-warning/40 bg-warning/10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3">
@@ -391,7 +412,7 @@ export default function JobsFeed() {
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Upload a resume to unlock AI match scoring</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Job search is working, but match percentages need your latest resume to compare skills and experience.
+                  Job search still works, but match percentages need your latest resume to compare skills and experience. AI scoring is paused until a resume is uploaded.
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   After upload finishes, keep this page open and scoring will restart automatically.
