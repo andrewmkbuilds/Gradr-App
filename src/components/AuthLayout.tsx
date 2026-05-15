@@ -150,7 +150,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           {children}
         </motion.div>
-      </div>
+      </main>
     </div>
   );
 }
