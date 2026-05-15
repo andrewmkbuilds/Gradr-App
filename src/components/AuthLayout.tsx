@@ -130,7 +130,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Right panel — form content */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 relative z-10">
+      <main className="flex-1 flex items-center justify-center p-6 sm:p-10 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -150,7 +150,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           {children}
         </motion.div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AnimatedPage } from "@/components/AnimatedPage";
+import { RouteSeo } from "@/components/RouteSeo";
 import { AnimatePresence } from "framer-motion";
 import Dashboard from "./pages/Dashboard";
 import ResumeEngine from "./pages/ResumeEngine";
@@ -89,6 +90,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <RouteSeo />
           <AppRoutes />
         </AuthProvider>
       </BrowserRouter>

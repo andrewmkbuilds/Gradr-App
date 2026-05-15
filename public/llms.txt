@@ -1,0 +1,22 @@
+# CareerFlow OS
+
+> AI-powered career command center: resume analysis, job matching, application generation, and interview coaching in one platform.
+
+CareerFlow OS helps job seekers and professionals run their entire job search lifecycle through five AI engines — resume intelligence, job matching, application automation, interview coaching, and career growth.
+
+## Pages
+
+- [Home / Dashboard](/): Overview of pipeline, scores, and reminders.
+- [Resume Engine](/resume): Upload and analyze resumes; AI scoring and rewrite suggestions.
+- [Job Feed](/jobs): Personalized job recommendations and search.
+- [Job Matching](/match): Score resumes against specific roles.
+- [Pipeline](/pipeline): Drag-and-drop application tracker by stage.
+- [Application Engine](/apply): Generate tailored cover letters and outreach.
+- [Interview Engine](/interview): Real-time AI mock interviews with feedback.
+- [Growth Engine](/growth): Skill gap analysis and career planning.
+- [Pricing](/pricing): Subscription plans and pay-per-use features.
+- [Settings](/settings): Account and profile preferences.
+
+## Optional
+
+- [Sign in](/auth): Account authentication.
