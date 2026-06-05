@@ -107,8 +107,13 @@ serve(async (req) => {
     );
 
     if (body?.cron === true) {
-      const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-      if (authHeader !== `Bearer ${anonKey}`) return json({ error: "Unauthorized" }, 401);
+      const cronSecret = Deno.env.get("CRON_SECRET");
+      if (!cronSecret) return json({ error: "Server misconfigured" }, 500);
+      // Constant-time-ish check via length+value compare
+      const expected = `Bearer ${cronSecret}`;
+      if (authHeader.length !== expected.length || authHeader !== expected) {
+        return json({ error: "Unauthorized" }, 401);
+      }
 
       const { data: preferences, error } = await serviceClient
         .from("user_preferences")
