@@ -51,6 +51,14 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Sanitize: only allow user/assistant roles + bounded content; cap message count
+    const safeMessages = messages
+      .filter((m: any) => m && typeof m.content === "string")
+      .slice(-50)
+      .map((m: any) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: String(m.content).slice(0, 4000),
+      }));
 
     const rl = checkRateLimit(user.id);
     if (!rl.ok) {
@@ -86,7 +94,7 @@ Keep responses concise and conversational. Use markdown for formatting when help
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...safeMessages,
         ],
         stream: true,
       }),
@@ -113,7 +121,7 @@ Keep responses concise and conversational. Use markdown for formatting when help
     });
   } catch (e) {
     console.error("interview-coach error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

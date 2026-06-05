@@ -142,7 +142,7 @@ Generate 5 job matches that would be realistic for this candidate. Each should h
     });
   } catch (e) {
     console.error("match-jobs error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
