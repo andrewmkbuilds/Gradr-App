@@ -94,7 +94,7 @@ Keep responses concise and conversational. Use markdown for formatting when help
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...safeMessages,
         ],
         stream: true,
       }),
