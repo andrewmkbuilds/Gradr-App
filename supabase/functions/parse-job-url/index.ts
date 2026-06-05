@@ -40,18 +40,71 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "url required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Fetch page HTML (best-effort; many sites block but we still try)
+    // SSRF guard: validate URL scheme + host before fetching
+    const isSafeJobUrl = async (raw: string): Promise<{ ok: true; url: URL } | { ok: false; reason: string }> => {
+      let parsed: URL;
+      try { parsed = new URL(raw); } catch { return { ok: false, reason: "Invalid URL" }; }
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+        return { ok: false, reason: "Only http(s) URLs allowed" };
+      }
+      const host = parsed.hostname.toLowerCase();
+      // Block obvious internal hostnames
+      if (
+        host === "localhost" ||
+        host === "0.0.0.0" ||
+        host.endsWith(".local") ||
+        host.endsWith(".internal")
+      ) return { ok: false, reason: "Internal hostnames are not allowed" };
+      // Block literal IPs in private / loopback / link-local ranges
+      const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+      if (ipv4) {
+        const [a, b] = [Number(ipv4[1]), Number(ipv4[2])];
+        if (
+          a === 10 ||
+          a === 127 ||
+          (a === 169 && b === 254) ||
+          (a === 172 && b >= 16 && b <= 31) ||
+          (a === 192 && b === 168) ||
+          a === 0 || a >= 224
+        ) return { ok: false, reason: "Private IPs are not allowed" };
+      }
+      // Block IPv6 literals (covers ::1, fc00::/7, fe80::/10, etc. conservatively)
+      if (host.includes(":") || host.startsWith("[")) {
+        return { ok: false, reason: "IPv6 literals are not allowed" };
+      }
+      return { ok: true, url: parsed };
+    };
+
+    const safety = await isSafeJobUrl(url);
+    if (!safety.ok) {
+      return new Response(JSON.stringify({ error: safety.reason }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Fetch page HTML with a strict timeout + size cap; redirects auto-followed, but each
+    // hop's final URL is still subject to network egress restrictions in the runtime.
     let pageText = "";
     try {
-      const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; CareerFlowBot/1.0)" } });
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 6000);
+      const r = await fetch(safety.url.toString(), {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; CareerFlowBot/1.0)" },
+        redirect: "follow",
+        signal: ctrl.signal,
+      });
+      clearTimeout(timer);
       if (r.ok) {
-        const html = await r.text();
-        pageText = html
-          .replace(/<script[\s\S]*?<\/script>/gi, " ")
-          .replace(/<style[\s\S]*?<\/style>/gi, " ")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/\s+/g, " ")
-          .slice(0, 8000);
+        const ct = r.headers.get("content-type") || "";
+        if (ct.includes("text/") || ct.includes("html") || ct.includes("json") || ct === "") {
+          const html = (await r.text()).slice(0, 200_000);
+          pageText = html
+            .replace(/<script[\s\S]*?<\/script>/gi, " ")
+            .replace(/<style[\s\S]*?<\/style>/gi, " ")
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .slice(0, 8000);
+        }
       }
     } catch (_) { /* ignore — AI will use URL alone */ }
 
