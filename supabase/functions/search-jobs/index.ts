@@ -70,7 +70,16 @@ serve(async (req) => {
       });
     }
 
-    const { what = "", where = "", country = "us", page = 1, remoteOnly = false, salaryMin, sortBy = "relevance" } = await req.json();
+    const { what = "", where = "", country: rawCountry = "us", page: rawPage = 1, remoteOnly = false, salaryMin, sortBy = "relevance" } = await req.json();
+
+    const ALLOWED_COUNTRIES = ["us","gb","ca","au","de","fr","in","nl","at","be","br","ch","es","it","mx","nz","pl","sg","za"];
+    const country = ALLOWED_COUNTRIES.includes(String(rawCountry).toLowerCase()) ? String(rawCountry).toLowerCase() : null;
+    const page = Math.max(1, Math.min(100, parseInt(String(rawPage), 10) || 1));
+    if (!country) {
+      return new Response(JSON.stringify({ error: "Invalid country code" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const params = new URLSearchParams({
       app_id: APP_ID,
