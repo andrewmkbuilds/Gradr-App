@@ -177,6 +177,6 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("daily-digest error", error);
-    return json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
+    return json({ error: "An internal error occurred. Please try again." }, 500);
   }
 });
