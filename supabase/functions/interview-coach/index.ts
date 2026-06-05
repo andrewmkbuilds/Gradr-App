@@ -51,6 +51,14 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Sanitize: only allow user/assistant roles + bounded content; cap message count
+    const safeMessages = messages
+      .filter((m: any) => m && typeof m.content === "string")
+      .slice(-50)
+      .map((m: any) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: String(m.content).slice(0, 4000),
+      }));
 
     const rl = checkRateLimit(user.id);
     if (!rl.ok) {
