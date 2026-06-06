@@ -69,13 +69,17 @@ export function RouteSeo() {
   const url = `${ORIGIN}${pathname}`;
   return (
     <Helmet>
+      <html lang="en" />
       <title>{fullTitle}</title>
       <meta name="description" content={meta.description} />
       <link rel="canonical" href={url} />
+      <link rel="alternate" hrefLang="en" href={url} />
+      <link rel="alternate" hrefLang="x-default" href={url} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={meta.description} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
+      <meta property="og:site_name" content={SITE} />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={meta.description} />
     </Helmet>
