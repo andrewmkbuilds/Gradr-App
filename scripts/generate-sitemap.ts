@@ -13,6 +13,8 @@ interface SitemapEntry {
 const entries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/auth", changefreq: "monthly", priority: "0.6" },
+  { path: "/forgot-password", changefreq: "yearly", priority: "0.3" },
+  { path: "/reset-password", changefreq: "yearly", priority: "0.3" },
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
   { path: "/resume", changefreq: "weekly", priority: "0.8" },
   { path: "/jobs", changefreq: "daily", priority: "0.8" },
@@ -21,6 +23,9 @@ const entries: SitemapEntry[] = [
   { path: "/apply", changefreq: "weekly", priority: "0.7" },
   { path: "/interview", changefreq: "weekly", priority: "0.7" },
   { path: "/growth", changefreq: "weekly", priority: "0.7" },
+  // Excluded intentionally:
+  // /settings — auth-gated user data, not indexable
+  // /admin/digest-preview — internal admin tool, not indexable
 ];
 
 function generateSitemap(items: SitemapEntry[]) {
