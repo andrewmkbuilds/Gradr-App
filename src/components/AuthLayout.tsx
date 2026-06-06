@@ -71,7 +71,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               </div>
               <Sparkles className="stop-motion absolute -top-2 -right-2 h-4 w-4 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight kinetic-text">{TITLE}</h1>
+            <h1 className="text-3xl font-bold tracking-tight kinetic-text">CareerFlow OS — AI Career Command Center</h1>
           </div>
 
           {/* Expressive typography — letter reveal + kinetic gradient */}
@@ -145,7 +145,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <Zap className="h-6 w-6 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold kinetic-text">{TITLE}</h1>
+            <h1 className="text-2xl font-bold kinetic-text">CareerFlow OS — AI Career Command Center</h1>
           </div>
 
           {children}
