@@ -59,7 +59,7 @@ export function AppSidebar() {
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h1 className="text-sm font-bold text-foreground tracking-tight">CareerFlow OS</h1>
+                <div className="text-sm font-bold text-foreground tracking-tight">CareerFlow OS</div>
                 <p className="text-[10px] text-muted-foreground">AI Career System</p>
               </div>
             </div>
@@ -84,6 +84,7 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end
+                        aria-label={item.title}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
                           isActive
                             ? "bg-primary/10 text-primary"
@@ -106,6 +107,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-3 space-y-1">
         <button
           onClick={signOut}
+          aria-label="Sign Out"
           className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors text-sm"
         >
           <LogOut className="h-4 w-4 shrink-0" />
@@ -113,6 +115,7 @@ export function AppSidebar() {
         </button>
         <button
           onClick={toggleSidebar}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="flex items-center justify-center w-full py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
         >
           <ChevronLeft className={`h-4 w-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
