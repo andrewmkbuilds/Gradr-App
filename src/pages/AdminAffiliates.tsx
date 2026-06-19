@@ -158,7 +158,7 @@ function AffiliatesPanel() {
     qc.invalidateQueries({ queryKey: ["adminAffiliates"] });
   };
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("affiliate_profiles").update({ status }).eq("id", id);
+    await supabase.from("affiliate_profiles").update({ status: status as "active" | "suspended" | "revoked" }).eq("id", id);
     toast.success("Status updated");
     qc.invalidateQueries({ queryKey: ["adminAffiliates"] });
   };
