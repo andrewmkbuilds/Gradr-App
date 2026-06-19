@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -8,6 +9,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
 import { AnimatePresence } from "framer-motion";
+import { captureReferralFromUrl } from "@/lib/affiliateTracking";
 import Dashboard from "./pages/Dashboard";
 import ResumeEngine from "./pages/ResumeEngine";
 import JobMatchingEngine from "./pages/JobMatchingEngine";
@@ -23,6 +25,11 @@ import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import AffiliateProgram from "./pages/AffiliateProgram";
+import AffiliateApply from "./pages/AffiliateApply";
+import AffiliateDashboard from "./pages/AffiliateDashboard";
+import AffiliateResources from "./pages/AffiliateResources";
+import AdminAffiliates from "./pages/AdminAffiliates";
 
 const queryClient = new QueryClient();
 
@@ -54,7 +61,12 @@ function ProtectedRoutes() {
           <Route path="/growth" element={<AnimatedPage><GrowthEngine /></AnimatedPage>} />
           <Route path="/settings" element={<AnimatedPage><Settings /></AnimatedPage>} />
           <Route path="/admin/digest-preview" element={<AnimatedPage><DigestPreview /></AnimatedPage>} />
+          <Route path="/admin/affiliates" element={<AnimatedPage><AdminAffiliates /></AnimatedPage>} />
           <Route path="/pricing" element={<AnimatedPage><Pricing /></AnimatedPage>} />
+          <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
+          <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
+          <Route path="/affiliate/dashboard" element={<AnimatedPage><AffiliateDashboard /></AnimatedPage>} />
+          <Route path="/affiliate/resources" element={<AnimatedPage><AffiliateResources /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
@@ -83,12 +95,18 @@ function AppRoutes() {
   );
 }
 
+function ReferralCapture() {
+  useEffect(() => { void captureReferralFromUrl(); }, []);
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ReferralCapture />
         <AuthProvider>
           <RouteSeo />
           <AppRoutes />
