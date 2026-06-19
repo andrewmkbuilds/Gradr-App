@@ -12,6 +12,7 @@ import {
   Briefcase,
   KanbanSquare,
   Mail,
+  Gift,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -39,7 +40,9 @@ const engines = [
   { title: "Interview Coach", url: "/interview", icon: Mic },
   { title: "Growth & Proof", url: "/growth", icon: Rocket },
   { title: "Pricing", url: "/pricing", icon: Sparkles },
+  { title: "Affiliate", url: "/affiliate", icon: Gift },
   { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
+  { title: "Affiliate Admin", url: "/admin/affiliates", icon: Sparkles },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
