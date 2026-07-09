@@ -57,6 +57,10 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Settings",
     description: "Manage your CareerFlow OS account, preferences, and digest settings.",
   },
+  "/blog/ai-resume-optimization": {
+    title: "AI Resume Builder & ATS Optimization Guide",
+    description: "How AI resume builders help candidates beat Applicant Tracking Systems — keyword matching, formatting rules, and AI-driven rewrites.",
+  },
 };
 
 export function RouteSeo() {

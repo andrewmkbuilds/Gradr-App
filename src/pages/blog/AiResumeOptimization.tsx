@@ -1,0 +1,329 @@
+import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
+
+const URL = "https://careerflowos.lovable.app/blog/ai-resume-optimization";
+const TITLE = "AI Resume Builder & ATS Optimization: The 2026 Guide";
+const DESCRIPTION =
+  "How AI resume builders help candidates beat Applicant Tracking Systems (ATS). A technical, plain-English guide to keyword matching, formatting rules, and AI-driven rewrites.";
+const PUBLISHED = "2026-07-09";
+
+export default function AiResumeOptimization() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: TITLE,
+    description: DESCRIPTION,
+    author: { "@type": "Organization", name: "CareerFlow OS" },
+    publisher: {
+      "@type": "Organization",
+      name: "CareerFlow OS",
+      url: "https://careerflowos.lovable.app",
+    },
+    datePublished: PUBLISHED,
+    dateModified: PUBLISHED,
+    mainEntityOfPage: URL,
+    about: [
+      { "@type": "Thing", name: "AI resume builder" },
+      { "@type": "Thing", name: "Applicant Tracking System" },
+      { "@type": "Thing", name: "Resume optimization" },
+    ],
+  };
+
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "Does an AI resume builder actually help you beat the ATS?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Yes — a good AI resume builder aligns your resume with the language, structure, and keywords a specific job description uses, which is exactly what ATS parsers score against. It won't fabricate experience, but it will make real experience discoverable.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Will an ATS reject me for using AI to write my resume?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "No. ATS software scores structure and keyword match — it doesn't detect AI-written content. What matters is whether the resume is parseable, honest, and relevant.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "What format should an AI-optimized resume use?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "A single-column PDF or DOCX with standard section headings (Experience, Education, Skills), no tables, no text inside images, and consistent date formatting. This is what ATS parsers reliably read.",
+        },
+      },
+    ],
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{TITLE} — CareerFlow OS</title>
+        <meta name="description" content={DESCRIPTION} />
+        <link rel="canonical" href={URL} />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:url" content={URL} />
+        <meta property="og:type" content="article" />
+        <meta property="article:published_time" content={PUBLISHED} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={TITLE} />
+        <meta name="twitter:description" content={DESCRIPTION} />
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqLd)}</script>
+      </Helmet>
+
+      <header className="border-b border-border">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
+            <ArrowLeft className="h-3.5 w-3.5" /> CareerFlow OS
+          </Link>
+          <Link
+            to="/auth"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Try the AI resume builder
+          </Link>
+        </div>
+      </header>
+
+      <article className="max-w-3xl mx-auto px-6 py-12">
+        <p className="text-xs uppercase tracking-wider text-primary font-medium mb-3">Guide · Resume Intelligence</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight leading-tight">
+          {TITLE}
+        </h1>
+        <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+          Applicant Tracking Systems (ATS) reject up to 75% of resumes before a human ever
+          reads them. An AI resume builder isn't a gimmick — it's the fastest way to make
+          sure your real experience gets past the parser and in front of a recruiter.
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">Published July 9, 2026 · 9 min read</p>
+
+        <div className="prose prose-invert max-w-none mt-10 space-y-8 text-foreground">
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight">What is an AI resume builder?</h2>
+            <p className="mt-3 text-muted-foreground leading-relaxed">
+              An AI resume builder is software that uses large language models and job-market
+              data to write, restructure, and optimize a resume for a specific role. The best
+              ones do three things at once: (1) parse your existing experience, (2) compare it
+              against the target job description, and (3) rewrite each bullet so the language,
+              keywords, and structure match how the role is scored — both by ATS software and
+              by a human recruiter skimming for 7 seconds.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight">How an ATS actually reads your resume</h2>
+            <p className="mt-3 text-muted-foreground leading-relaxed">
+              Modern ATS platforms (Workday, Greenhouse, Lever, Taleo, iCIMS) all follow the
+              same three-stage pipeline:
+            </p>
+            <ol className="mt-4 space-y-3 text-muted-foreground list-decimal pl-5">
+              <li>
+                <strong className="text-foreground">Parse.</strong> The file is converted to
+                plain text and split into fields (name, contact, experience, education,
+                skills). Tables, columns, images, and unusual fonts break this step.
+              </li>
+              <li>
+                <strong className="text-foreground">Score.</strong> The parsed text is matched
+                against the job posting's keywords, required skills, and years of experience.
+                Each match adds to a relevance score.
+              </li>
+              <li>
+                <strong className="text-foreground">Rank.</strong> Recruiters see candidates
+                sorted by that score. Below a threshold, you're never surfaced.
+              </li>
+            </ol>
+            <p className="mt-4 text-muted-foreground leading-relaxed">
+              A resume can be beautifully designed and still score zero if the parser can't
+              read it. This is where AI resume optimization matters most.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight">Where AI outperforms a template</h2>
+            <div className="mt-4 grid gap-3">
+              {[
+                {
+                  t: "Keyword extraction from the job description",
+                  d: "AI reads the full posting and pulls the exact skills, tools, and phrases the hiring manager wrote — not a generic keyword list.",
+                },
+                {
+                  t: "Bullet rewriting with measurable impact",
+                  d: 'Turns "Responsible for managing the pipeline" into "Grew qualified pipeline 42% in two quarters by rebuilding the outbound sequence." Same job — scored differently.',
+                },
+                {
+                  t: "Format sanitization",
+                  d: "Strips ATS-hostile elements automatically: multi-column layouts, tables, text inside images, decorative headers, custom bullet glyphs.",
+                },
+                {
+                  t: "Role-aware phrasing",
+                  d: "A senior engineer, a junior PM, and a career-switcher need different tones and different keyword density. AI adapts to each without you rewriting from scratch.",
+                },
+                {
+                  t: "Score before you submit",
+                  d: "Instead of guessing, you see the match score — usually 0–100 — and specific gaps to close before the recruiter ever sees the file.",
+                },
+              ].map((row) => (
+                <div key={row.t} className="glass-card p-4 flex gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
+                  <div>
+                    <div className="font-medium text-foreground">{row.t}</div>
+                    <div className="text-sm text-muted-foreground mt-1 leading-relaxed">{row.d}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight">The 7-step AI resume optimization workflow</h2>
+            <ol className="mt-4 space-y-4 text-muted-foreground list-decimal pl-5">
+              <li>
+                <strong className="text-foreground">Upload your current resume.</strong> Any
+                PDF or DOCX. The AI extracts your experience into structured fields.
+              </li>
+              <li>
+                <strong className="text-foreground">Paste the target job description.</strong>{" "}
+                One posting at a time — general resumes score badly on all roles, targeted
+                resumes score highly on one.
+              </li>
+              <li>
+                <strong className="text-foreground">Review the match score and gap analysis.</strong>{" "}
+                Missing keywords, weak verbs, and low-signal bullets are highlighted.
+              </li>
+              <li>
+                <strong className="text-foreground">Accept AI rewrite suggestions.</strong> Per
+                bullet, not the whole document — you keep control.
+              </li>
+              <li>
+                <strong className="text-foreground">Add quantified outcomes.</strong> Numbers
+                (%, $, users, throughput) score higher than adjectives. If the AI suggests a
+                metric, only accept it if it's true.
+              </li>
+              <li>
+                <strong className="text-foreground">Export as an ATS-safe PDF.</strong>{" "}
+                Single column, selectable text, standard section headings.
+              </li>
+              <li>
+                <strong className="text-foreground">Re-score before applying.</strong> A 90+
+                match rarely happens on the first pass — it takes one iteration.
+              </li>
+            </ol>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight">ATS formatting rules the AI enforces for you</h2>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground border-b border-border">
+                    <th className="py-2 pr-4">Do</th>
+                    <th className="py-2">Don't</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  {[
+                    ["Single-column layout", "Two-column or sidebar templates"],
+                    ["Standard headings: Experience, Education, Skills", "Creative headings like 'My Journey'"],
+                    ["Selectable text PDF or DOCX", "Scanned PDFs or images of a resume"],
+                    ["Standard fonts (Inter, Arial, Calibri, Helvetica)", "Decorative or handwriting fonts"],
+                    ["Consistent date format (MMM YYYY)", "Mixed date formats or ranges without years"],
+                    ["Contact info as plain text", "Contact info inside a header or footer"],
+                    ["Simple bullets (·, -)", "Emoji, icons, or custom glyphs as bullets"],
+                  ].map(([yes, no]) => (
+                    <tr key={yes} className="border-b border-border/50">
+                      <td className="py-2 pr-4">{yes}</td>
+                      <td className="py-2">{no}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight">What AI can't (and shouldn't) do</h2>
+            <p className="mt-3 text-muted-foreground leading-relaxed">
+              A good AI resume builder never invents jobs, titles, or metrics. It rewrites what
+              you actually did in the language the ATS is scoring against. If a tool is padding
+              your resume with skills you don't have, walk away — the interview will expose it.
+              The right test: every bullet the AI wrote should be something you can defend for
+              five minutes in a technical interview.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight">Frequently asked questions</h2>
+            <div className="mt-4 space-y-4">
+              <div>
+                <h3 className="font-semibold text-foreground">Does an AI resume builder actually help you beat the ATS?</h3>
+                <p className="text-muted-foreground mt-1 leading-relaxed">
+                  Yes — a good one aligns your resume with the language, structure, and
+                  keywords a specific job description uses, which is exactly what ATS parsers
+                  score against.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Will an ATS reject me for using AI to write my resume?</h3>
+                <p className="text-muted-foreground mt-1 leading-relaxed">
+                  No. ATS software scores structure and keyword match — it doesn't detect
+                  AI-written content. What matters is whether the resume is parseable, honest,
+                  and relevant.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">What format should an AI-optimized resume use?</h3>
+                <p className="text-muted-foreground mt-1 leading-relaxed">
+                  A single-column PDF or DOCX with standard section headings, no tables, no
+                  text inside images, and consistent date formatting.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="glass-card p-6 mt-10">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Try the CareerFlow OS Resume Engine
+            </h2>
+            <p className="mt-2 text-muted-foreground leading-relaxed">
+              Upload your resume, paste any job description, and see your ATS match score,
+              missing keywords, and AI rewrite suggestions in seconds. Free to start.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/auth"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> Start free
+              </Link>
+              <Link
+                to="/pricing"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-foreground text-sm hover:bg-secondary/80 transition"
+              >
+                See pricing
+              </Link>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <footer className="border-t border-border mt-8">
+        <div className="max-w-4xl mx-auto px-6 py-6 text-xs text-muted-foreground flex items-center justify-between flex-wrap gap-2">
+          <span>© {new Date().getFullYear()} CareerFlow OS</span>
+          <div className="flex gap-4">
+            <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
+            <Link to="/affiliate" className="hover:text-foreground">Affiliate program</Link>
+            <Link to="/auth" className="hover:text-foreground">Sign in</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

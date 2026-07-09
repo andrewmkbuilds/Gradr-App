@@ -30,6 +30,7 @@ import AffiliateApply from "./pages/AffiliateApply";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
 import AffiliateResources from "./pages/AffiliateResources";
 import AdminAffiliates from "./pages/AdminAffiliates";
+import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,7 @@ function AppRoutes() {
         <Route path="/auth" element={<AnimatedPage><AuthRoute /></AnimatedPage>} />
         <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
         <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
+        <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
         <Route path="/*" element={<ProtectedRoutes />} />
       </Routes>
     </AnimatePresence>
