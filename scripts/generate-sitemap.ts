@@ -23,6 +23,7 @@ const entries: SitemapEntry[] = [
   { path: "/apply", changefreq: "weekly", priority: "0.7" },
   { path: "/interview", changefreq: "weekly", priority: "0.7" },
   { path: "/growth", changefreq: "weekly", priority: "0.7" },
+  { path: "/blog/ai-resume-optimization", changefreq: "monthly", priority: "0.8" },
   // Excluded intentionally:
   // /settings — auth-gated user data, not indexable
   // /admin/digest-preview — internal admin tool, not indexable
