@@ -80,6 +80,62 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_campaigns: {
+        Row: {
+          affiliate_profile_id: string
+          click_count: number
+          created_at: string
+          id: string
+          landing_path: string
+          name: string
+          notes: string | null
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          affiliate_profile_id: string
+          click_count?: number
+          created_at?: string
+          id?: string
+          landing_path?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          affiliate_profile_id?: string
+          click_count?: number
+          created_at?: string
+          id?: string
+          landing_path?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_campaigns_affiliate_profile_id_fkey"
+            columns: ["affiliate_profile_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_clicks: {
         Row: {
           affiliate_code: string
@@ -207,11 +263,13 @@ export type Database = {
           affiliate_profile_id: string
           amount: number
           created_at: string
+          created_by: string | null
           id: string
           notes: string | null
           payout_date: string | null
           payout_method: string | null
           payout_reference: string | null
+          reference: string | null
           status: Database["public"]["Enums"]["affiliate_payout_status"]
           updated_at: string
         }
@@ -219,11 +277,13 @@ export type Database = {
           affiliate_profile_id: string
           amount: number
           created_at?: string
+          created_by?: string | null
           id?: string
           notes?: string | null
           payout_date?: string | null
           payout_method?: string | null
           payout_reference?: string | null
+          reference?: string | null
           status?: Database["public"]["Enums"]["affiliate_payout_status"]
           updated_at?: string
         }
@@ -231,11 +291,13 @@ export type Database = {
           affiliate_profile_id?: string
           amount?: number
           created_at?: string
+          created_by?: string | null
           id?: string
           notes?: string | null
           payout_date?: string | null
           payout_method?: string | null
           payout_reference?: string | null
+          reference?: string | null
           status?: Database["public"]["Enums"]["affiliate_payout_status"]
           updated_at?: string
         }
@@ -533,6 +595,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          metadata: Json | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          metadata?: Json | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          metadata?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -781,12 +879,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_payout: {
+        Args: {
+          _affiliate_profile_id: string
+          _amount: number
+          _commission_ids?: string[]
+          _notes?: string
+          _payout_method: string
+          _reference?: string
+        }
+        Returns: string
+      }
+      admin_mark_payout_paid: {
+        Args: {
+          _payout_id: string
+          _payout_method?: string
+          _reference?: string
+        }
+        Returns: undefined
+      }
       approve_affiliate_application: {
         Args: { _application_id: string }
         Returns: string
       }
       attribute_signup_referral: {
         Args: { _click_id?: string; _code: string }
+        Returns: string
+      }
+      enqueue_notification: {
+        Args: {
+          _body?: string
+          _link?: string
+          _metadata?: Json
+          _title: string
+          _type: string
+          _user_id: string
+        }
         Returns: string
       }
       generate_affiliate_code: { Args: never; Returns: string }
@@ -805,6 +933,16 @@ export type Database = {
           profile_id: string
         }[]
       }
+      notify_admins: {
+        Args: {
+          _body?: string
+          _link?: string
+          _metadata?: Json
+          _title: string
+          _type: string
+        }
+        Returns: number
+      }
       record_conversion_commission: {
         Args: {
           _conversion_type?: Database["public"]["Enums"]["affiliate_conversion_type"]
@@ -813,6 +951,10 @@ export type Database = {
           _source_record_id?: string
         }
         Returns: string
+      }
+      reject_affiliate_application: {
+        Args: { _application_id: string; _reason?: string }
+        Returns: undefined
       }
     }
     Enums: {

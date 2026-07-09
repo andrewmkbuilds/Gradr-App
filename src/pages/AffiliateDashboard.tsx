@@ -1,18 +1,23 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, MousePointerClick, Users, DollarSign, TrendingUp, Loader2, Link2 } from "lucide-react";
+import { Copy, MousePointerClick, Users, DollarSign, TrendingUp, Loader2, Link2, BarChart3, Wrench, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMyAffiliate } from "@/hooks/useAffiliate";
 import { StatCard } from "@/components/StatCard";
 import { format } from "date-fns";
+import { CampaignBuilder } from "@/components/affiliate/CampaignBuilder";
+import { AffiliateAnalytics } from "@/components/affiliate/AffiliateAnalytics";
+
+type Tab = "overview" | "analytics" | "campaigns";
 
 export default function AffiliateDashboard() {
   const navigate = useNavigate();
   const { data: my, isLoading: loadingMy } = useMyAffiliate();
   const profile = my?.profile;
   const [copied, setCopied] = useState(false);
+  const [tab, setTab] = useState<Tab>("overview");
 
   const link = useMemo(() => {
     if (!profile) return "";
@@ -68,6 +73,12 @@ export default function AffiliateDashboard() {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "campaigns", label: "Campaign links", icon: Wrench },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
@@ -89,89 +100,89 @@ export default function AffiliateDashboard() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={MousePointerClick} title="Clicks" value={String(totalClicks)} subtitle="all-time" />
-        <StatCard icon={Users} title="Referrals" value={String(totalReferrals)} subtitle={`${conversions} converted`} />
-        <StatCard icon={TrendingUp} title="Conversion rate" value={convRate} subtitle="referrals / clicks" />
-        <StatCard icon={DollarSign} title="Unpaid balance" value={`$${totals.unpaid.toFixed(2)}`} subtitle={`$${totals.lifetime.toFixed(2)} lifetime`} glowing={totals.unpaid > 0} />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
-          { label: "Pending", value: totals.pending },
-          { label: "Approved", value: totals.approved },
-          { label: "Paid", value: totals.paid },
-          { label: "Reversed", value: totals.reversed },
-        ].map((s) => (
-          <div key={s.label} className="glass-card p-4">
-            <div className="text-xs text-muted-foreground">{s.label}</div>
-            <div className="text-xl font-bold text-foreground mt-1">${s.value.toFixed(2)}</div>
-          </div>
+      <div className="flex gap-1 border-b border-border overflow-x-auto">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm border-b-2 transition whitespace-nowrap ${
+              tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <t.icon className="h-3.5 w-3.5" /> {t.label}
+          </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Recent referrals</h3>
-          {data!.referrals.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No referrals yet — share your link to start.</p>
-          ) : (
-            <ul className="space-y-2 text-sm">
-              {data!.referrals.slice(0, 8).map((r) => (
-                <li key={r.id} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/50">
-                  <span className="text-foreground">{r.conversion_type || "signup"}</span>
-                  <span className="text-xs text-muted-foreground">{format(new Date(r.created_at), "MMM d")}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      {tab === "overview" && (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard icon={MousePointerClick} title="Clicks" value={String(totalClicks)} subtitle="recent" />
+            <StatCard icon={Users} title="Referrals" value={String(totalReferrals)} subtitle={`${conversions} converted`} />
+            <StatCard icon={TrendingUp} title="Conversion rate" value={convRate} subtitle="referrals / clicks" />
+            <StatCard icon={DollarSign} title="Unpaid balance" value={`$${totals.unpaid.toFixed(2)}`} subtitle={`$${totals.lifetime.toFixed(2)} lifetime`} glowing={totals.unpaid > 0} />
+          </div>
 
-        <div className="glass-card p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Commission history</h3>
-          {data!.commissions.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No commissions yet.</p>
-          ) : (
-            <ul className="space-y-2 text-sm">
-              {data!.commissions.slice(0, 8).map((c) => (
-                <li key={c.id} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/50">
-                  <div>
-                    <div className="text-foreground">${Number(c.commission_amount).toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{format(new Date(c.created_date), "MMM d, yyyy")}</div>
-                  </div>
-                  <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
-                    c.status === "paid" ? "bg-success/10 text-success" :
-                    c.status === "approved" ? "bg-primary/10 text-primary" :
-                    c.status === "reversed" || c.status === "canceled" ? "bg-destructive/10 text-destructive" :
-                    "bg-warning/10 text-warning"
-                  }`}>{c.status}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[
+              { label: "Pending", value: totals.pending },
+              { label: "Approved", value: totals.approved },
+              { label: "Paid", value: totals.paid },
+              { label: "Reversed", value: totals.reversed },
+            ].map((s) => (
+              <div key={s.label} className="glass-card p-4">
+                <div className="text-xs text-muted-foreground">{s.label}</div>
+                <div className="text-xl font-bold text-foreground mt-1">${s.value.toFixed(2)}</div>
+              </div>
+            ))}
+          </div>
 
-      <div className="glass-card p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-3">Payout history</h3>
-        {data!.payouts.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">No payouts yet. Payouts are processed monthly once you hit the minimum threshold.</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead><tr className="text-left text-xs text-muted-foreground"><th className="pb-2">Date</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
-            <tbody>
-              {data!.payouts.map((p) => (
-                <tr key={p.id} className="border-t border-border">
-                  <td className="py-2">{p.payout_date ? format(new Date(p.payout_date), "MMM d, yyyy") : "—"}</td>
-                  <td>${Number(p.amount).toFixed(2)}</td>
-                  <td>{p.payout_method || "—"}</td>
-                  <td>{p.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="glass-card p-6">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Recent referrals</h3>
+              {data!.referrals.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">No referrals yet — share your link to start.</p>
+              ) : (
+                <ul className="space-y-2 text-sm">
+                  {data!.referrals.slice(0, 8).map((r) => (
+                    <li key={r.id} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/50">
+                      <span className="text-foreground">{r.conversion_type || "signup"}</span>
+                      <span className="text-xs text-muted-foreground">{format(new Date(r.created_at), "MMM d")}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="glass-card p-6">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Payout history</h3>
+              {data!.payouts.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">No payouts yet. Payouts are processed monthly once you hit the minimum threshold.</p>
+              ) : (
+                <ul className="space-y-2 text-sm">
+                  {data!.payouts.slice(0, 8).map((p) => (
+                    <li key={p.id} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/50">
+                      <div>
+                        <div className="text-foreground">${Number(p.amount).toFixed(2)}</div>
+                        <div className="text-xs text-muted-foreground">{p.payout_method || "—"} · {p.reference || "no ref"}</div>
+                      </div>
+                      <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                        p.status === "paid" ? "bg-success/10 text-success"
+                        : p.status === "failed" ? "bg-destructive/10 text-destructive"
+                        : "bg-warning/10 text-warning"
+                      }`}>{p.status}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {tab === "analytics" && <AffiliateAnalytics affiliateProfileId={profile.id} />}
+
+      {tab === "campaigns" && <CampaignBuilder affiliateProfileId={profile.id} affiliateCode={profile.affiliate_code} />}
     </div>
   );
 }

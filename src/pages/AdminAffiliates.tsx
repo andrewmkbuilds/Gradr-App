@@ -6,8 +6,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin, useAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
+import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
 
-type Tab = "applications" | "affiliates" | "commissions" | "settings";
+type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "settings";
 
 export default function AdminAffiliates() {
   const { data: isAdmin, isLoading: loadingAdmin } = useIsAdmin();
@@ -23,9 +24,9 @@ export default function AdminAffiliates() {
         <p className="text-sm text-muted-foreground mt-1">Review applications, manage affiliates, and configure program settings.</p>
       </div>
 
-      <div className="flex gap-2 border-b border-border">
-        {(["applications", "affiliates", "commissions", "settings"] as Tab[]).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm capitalize border-b-2 transition ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+      <div className="flex gap-2 border-b border-border overflow-x-auto">
+        {(["applications", "affiliates", "commissions", "payouts", "settings"] as Tab[]).map((t) => (
+          <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm capitalize border-b-2 transition whitespace-nowrap ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
             {t}
           </button>
         ))}
@@ -34,6 +35,7 @@ export default function AdminAffiliates() {
       {tab === "applications" && <ApplicationsPanel />}
       {tab === "affiliates" && <AffiliatesPanel />}
       {tab === "commissions" && <CommissionsPanel />}
+      {tab === "payouts" && <PayoutsPanel />}
       {tab === "settings" && <SettingsPanel />}
     </div>
   );
@@ -66,9 +68,16 @@ function ApplicationsPanel() {
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
   const setStatus = async (id: string, status: "rejected" | "suspended" | "pending") => {
-    const { error } = await supabase.from("affiliate_applications").update({ status, reviewed_date: new Date().toISOString() }).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success(`Marked ${status}`);
+    if (status === "rejected") {
+      const reason = window.prompt("Optional rejection reason (shown to applicant):", "") ?? undefined;
+      const { error } = await supabase.rpc("reject_affiliate_application", { _application_id: id, _reason: reason || null });
+      if (error) return toast.error(error.message);
+      toast.success("Rejected — applicant notified");
+    } else {
+      const { error } = await supabase.from("affiliate_applications").update({ status, reviewed_date: new Date().toISOString() }).eq("id", id);
+      if (error) return toast.error(error.message);
+      toast.success(`Marked ${status}`);
+    }
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
   const saveNote = async (id: string, note: string) => {
