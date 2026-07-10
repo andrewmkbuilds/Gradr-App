@@ -140,7 +140,15 @@ export default function ResumeEngine() {
       <div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Resume Intelligence</h1>
         <p className="text-sm text-muted-foreground mt-1">AI-powered resume analysis and optimization</p>
+        <Link
+          to="/blog/ai-resume-optimization"
+          className="mt-3 inline-flex items-center gap-2 text-xs text-primary hover:underline"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          Guide: AI resume builders & ATS optimization
+        </Link>
       </div>
+
 
       {!analysis && !uploading && !analyzing ? (
         <label
