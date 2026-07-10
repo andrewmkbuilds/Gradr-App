@@ -67,8 +67,57 @@ export default function AiResumeOptimization() {
           text: "A single-column PDF or DOCX with standard section headings (Experience, Education, Skills), no tables, no text inside images, and consistent date formatting. This is what ATS parsers reliably read.",
         },
       },
+      {
+        "@type": "Question",
+        name: "What is ATS resume optimization?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "ATS resume optimization is the process of tailoring a resume's keywords, structure, and formatting so Applicant Tracking Systems (Workday, Greenhouse, Lever, Taleo, iCIMS) can parse it correctly and rank it highly against a specific job description. It focuses on plain-text parseability, exact keyword matches from the job posting, and standard section headings.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "What is a good AI resume ATS score?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "A match score of 80 or above is considered strong for most roles, and 90+ puts you in the top tier for that specific job description. Anything below 60 usually means missing keywords, weak verbs, or formatting the parser can't read. Scores are always relative to one posting — a resume that scores 92 for one role can score 55 for another.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "How do I check my resume's ATS score for free?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Upload your resume and paste the target job description into an AI resume scanner like the CareerFlow OS Resume Engine. It parses the file the same way an ATS would, compares it to the posting, and returns a 0–100 match score plus the specific missing keywords and formatting issues to fix.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "How many keywords should I add to my resume for ATS?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Aim to cover every hard skill, tool, and required qualification listed in the job posting at least once, using the exact phrasing from the posting. Don't keyword-stuff — repeating the same term five times doesn't raise your score and reads badly to a recruiter. Coverage matters more than frequency.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Can AI tailor my resume for each job automatically?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Yes. An AI resume builder can rewrite bullets, reorder sections, and adjust keyword density for each specific job description in seconds, so you send a targeted version to every application instead of one generic resume. This is the single highest-leverage change most candidates can make to their ATS scores.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Do ATS systems read PDFs or Word documents better?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Modern ATS platforms parse both single-column PDFs and DOCX files reliably as long as the text is selectable (not a scanned image). PDF is usually safer because it preserves formatting across systems. Avoid image-based PDFs, multi-column templates, and DOCX files that rely on text boxes or tables.",
+        },
+      },
     ],
   };
+
 
   return (
     <div className="min-h-screen bg-background">
