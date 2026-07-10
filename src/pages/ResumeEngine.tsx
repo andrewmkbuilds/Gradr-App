@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
-import { Upload, FileText, CheckCircle, AlertTriangle, Sparkles, RefreshCw, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Upload, FileText, CheckCircle, AlertTriangle, Sparkles, RefreshCw, Loader2, BookOpen } from "lucide-react";
+
 import { ScoreRing } from "@/components/ScoreRing";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
