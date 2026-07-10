@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Target, TrendingUp, MapPin, DollarSign, Star, Loader2, Search } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Target, TrendingUp, MapPin, DollarSign, Star, Loader2, Search, BookOpen } from "lucide-react";
+
 import { ScoreRing } from "@/components/ScoreRing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
