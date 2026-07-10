@@ -1,6 +1,15 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
+
+const trackCta = (location: string, destination: string) => () =>
+  trackEvent("blog_cta_click", {
+    article: "ai-resume-optimization",
+    location,
+    destination,
+  });
+
 
 const URL = "https://careerflowos.lovable.app/blog/ai-resume-optimization";
 const TITLE = "AI Resume Builder & ATS Optimization: The 2026 Guide";
