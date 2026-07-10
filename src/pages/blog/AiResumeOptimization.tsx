@@ -322,29 +322,49 @@ export default function AiResumeOptimization() {
           <section>
             <h2 className="text-2xl font-semibold tracking-tight">Frequently asked questions</h2>
             <div className="mt-4 space-y-4">
-              <div>
-                <h3 className="font-semibold text-foreground">Does an AI resume builder actually help you beat the ATS?</h3>
-                <p className="text-muted-foreground mt-1 leading-relaxed">
-                  Yes — a good one aligns your resume with the language, structure, and
-                  keywords a specific job description uses, which is exactly what ATS parsers
-                  score against.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">Will an ATS reject me for using AI to write my resume?</h3>
-                <p className="text-muted-foreground mt-1 leading-relaxed">
-                  No. ATS software scores structure and keyword match — it doesn't detect
-                  AI-written content. What matters is whether the resume is parseable, honest,
-                  and relevant.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">What format should an AI-optimized resume use?</h3>
-                <p className="text-muted-foreground mt-1 leading-relaxed">
-                  A single-column PDF or DOCX with standard section headings, no tables, no
-                  text inside images, and consistent date formatting.
-                </p>
-              </div>
+              {[
+                {
+                  q: "Does an AI resume builder actually help you beat the ATS?",
+                  a: "Yes — a good one aligns your resume with the language, structure, and keywords a specific job description uses, which is exactly what ATS parsers score against.",
+                },
+                {
+                  q: "Will an ATS reject me for using AI to write my resume?",
+                  a: "No. ATS software scores structure and keyword match — it doesn't detect AI-written content. What matters is whether the resume is parseable, honest, and relevant.",
+                },
+                {
+                  q: "What format should an AI-optimized resume use?",
+                  a: "A single-column PDF or DOCX with standard section headings, no tables, no text inside images, and consistent date formatting.",
+                },
+                {
+                  q: "What is ATS resume optimization?",
+                  a: "Tailoring a resume's keywords, structure, and formatting so Applicant Tracking Systems (Workday, Greenhouse, Lever, Taleo, iCIMS) can parse it correctly and rank it highly against a specific job description.",
+                },
+                {
+                  q: "What is a good AI resume ATS score?",
+                  a: "80+ is strong; 90+ is top-tier for that specific posting. Anything under 60 means missing keywords, weak verbs, or formatting the parser can't read. Scores are always relative to one job description.",
+                },
+                {
+                  q: "How do I check my resume's ATS score for free?",
+                  a: "Upload your resume and paste the target job description into an AI resume scanner like the CareerFlow OS Resume Engine. You'll get a 0–100 match score plus the exact missing keywords and formatting fixes.",
+                },
+                {
+                  q: "How many keywords should I add to my resume for ATS?",
+                  a: "Cover every hard skill, tool, and requirement in the posting at least once using the posting's exact phrasing. Coverage beats frequency — keyword-stuffing doesn't raise your score and reads badly to recruiters.",
+                },
+                {
+                  q: "Can AI tailor my resume for each job automatically?",
+                  a: "Yes. An AI resume builder rewrites bullets, reorders sections, and adjusts keyword density per job description in seconds, so every application gets a targeted version instead of one generic resume.",
+                },
+                {
+                  q: "Do ATS systems read PDFs or Word documents better?",
+                  a: "Modern ATS platforms parse both reliably if the text is selectable. PDF is usually safer for formatting portability. Avoid image-based PDFs, multi-column templates, and DOCX files that rely on tables or text boxes.",
+                },
+              ].map((item) => (
+                <div key={item.q}>
+                  <h3 className="font-semibold text-foreground">{item.q}</h3>
+                  <p className="text-muted-foreground mt-1 leading-relaxed">{item.a}</p>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -359,18 +379,28 @@ export default function AiResumeOptimization() {
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
                 to="/auth"
+                onClick={trackCta("footer_cta", "/auth")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
               >
                 <Sparkles className="h-3.5 w-3.5" /> Start free
               </Link>
               <Link
+                to="/resume"
+                onClick={trackCta("footer_cta", "/resume")}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-foreground text-sm hover:bg-secondary/80 transition"
+              >
+                Open Resume Engine
+              </Link>
+              <Link
                 to="/pricing"
+                onClick={trackCta("footer_cta", "/pricing")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-foreground text-sm hover:bg-secondary/80 transition"
               >
                 See pricing
               </Link>
             </div>
           </section>
+
         </div>
       </article>
 
