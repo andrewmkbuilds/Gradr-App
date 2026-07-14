@@ -476,6 +476,60 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          article: string | null
+          created_at: string
+          destination: string | null
+          event_name: string
+          id: string
+          location: string | null
+          metadata: Json
+          path: string | null
+          referrer: string | null
+          session_id: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          article?: string | null
+          created_at?: string
+          destination?: string | null
+          event_name: string
+          id?: string
+          location?: string | null
+          metadata?: Json
+          path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          article?: string | null
+          created_at?: string
+          destination?: string | null
+          event_name?: string
+          id?: string
+          location?: string | null
+          metadata?: Json
+          path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       digest_send_logs: {
         Row: {
           created_at: string
