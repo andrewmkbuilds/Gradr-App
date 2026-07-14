@@ -157,7 +157,7 @@ export default function AiResumeOptimization() {
             <ArrowLeft className="h-3.5 w-3.5" /> CareerFlow OS
           </Link>
           <Link
-            to="/auth"
+            to={ctaHref("/auth", "header")}
             onClick={trackCta("header", "/auth")}
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
           >
