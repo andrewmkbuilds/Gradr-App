@@ -1,14 +1,28 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
-import { trackEvent } from "@/lib/analytics";
+import { ArrowLeft, CheckCircle2, Sparkles, BookOpen } from "lucide-react";
+import { trackEvent, withUtm } from "@/lib/analytics";
+
+const UTM = {
+  source: "blog",
+  medium: "article",
+  campaign: "ai_resume_optimization",
+};
+
+const ctaHref = (path: string, content: string) =>
+  withUtm(path, { ...UTM, content });
 
 const trackCta = (location: string, destination: string) => () =>
   trackEvent("blog_cta_click", {
     article: "ai-resume-optimization",
     location,
     destination,
+    utm_source: UTM.source,
+    utm_medium: UTM.medium,
+    utm_campaign: UTM.campaign,
+    utm_content: location,
   });
+
 
 
 const URL = "https://careerflowos.lovable.app/blog/ai-resume-optimization";
