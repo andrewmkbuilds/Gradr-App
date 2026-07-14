@@ -30,6 +30,7 @@ import AffiliateApply from "./pages/AffiliateApply";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
 import AffiliateResources from "./pages/AffiliateResources";
 import AdminAffiliates from "./pages/AdminAffiliates";
+import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 
 const queryClient = new QueryClient();
