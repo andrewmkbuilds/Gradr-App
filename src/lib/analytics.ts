@@ -67,7 +67,7 @@ async function persistEvent(event: string, props: AnalyticsProps) {
       user_id: auth?.user?.id ?? null,
       metadata: props as Record<string, unknown>,
     };
-    await supabase.from("analytics_events").insert(row);
+    await supabase.from("analytics_events").insert([row]);
   } catch {
     /* fire-and-forget */
   }
