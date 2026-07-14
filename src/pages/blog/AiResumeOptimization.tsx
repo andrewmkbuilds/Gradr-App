@@ -1,14 +1,29 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
-import { trackEvent } from "@/lib/analytics";
+import { ArrowLeft, CheckCircle2, Sparkles, BookOpen } from "lucide-react";
+import { trackEvent, withUtm } from "@/lib/analytics";
+
+const UTM = {
+  source: "blog",
+  medium: "article",
+  campaign: "ai_resume_optimization",
+};
+
+const ctaHref = (path: string, content: string) =>
+  withUtm(path, { ...UTM, content });
 
 const trackCta = (location: string, destination: string) => () =>
   trackEvent("blog_cta_click", {
     article: "ai-resume-optimization",
     location,
     destination,
+    utm_source: UTM.source,
+    utm_medium: UTM.medium,
+    utm_campaign: UTM.campaign,
+    utm_content: location,
   });
+
 
 
 const URL = "https://careerflowos.lovable.app/blog/ai-resume-optimization";
@@ -18,6 +33,10 @@ const DESCRIPTION =
 const PUBLISHED = "2026-07-09";
 
 export default function AiResumeOptimization() {
+  useEffect(() => {
+    trackEvent("blog_page_view", { article: "ai-resume-optimization" });
+  }, []);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -143,7 +162,7 @@ export default function AiResumeOptimization() {
             <ArrowLeft className="h-3.5 w-3.5" /> CareerFlow OS
           </Link>
           <Link
-            to="/auth"
+            to={ctaHref("/auth", "header")}
             onClick={trackCta("header", "/auth")}
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
           >
@@ -368,6 +387,69 @@ export default function AiResumeOptimization() {
             </div>
           </section>
 
+          <section className="mt-10">
+            <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" /> Related guides
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Keep going with the CareerFlow OS Resume Intelligence and ATS optimization stack.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {[
+                {
+                  to: "/resume",
+                  title: "Resume Intelligence Engine",
+                  desc: "Upload your resume, score it against any job description, and get AI rewrites bullet-by-bullet.",
+                  location: "related_resume_engine",
+                },
+                {
+                  to: "/match",
+                  title: "Job Matching Engine",
+                  desc: "See your ATS match score for every open role and close the exact keyword gaps.",
+                  location: "related_match_engine",
+                },
+                {
+                  to: "/apply",
+                  title: "Application Automation",
+                  desc: "Generate tailored resumes and cover letters for each posting in one click.",
+                  location: "related_apply_engine",
+                },
+                {
+                  to: "/interview",
+                  title: "AI Interview Coach",
+                  desc: "Practice role-specific mock interviews with real-time streaming feedback.",
+                  location: "related_interview_engine",
+                },
+                {
+                  to: "/pricing",
+                  title: "Pricing & plans",
+                  desc: "Compare free and premium tiers for the full CareerFlow OS suite.",
+                  location: "related_pricing",
+                },
+                {
+                  to: "/jobs",
+                  title: "Live jobs feed",
+                  desc: "Browse curated roles matched to your resume and preferences.",
+                  location: "related_jobs_feed",
+                },
+              ].map((g) => (
+                <Link
+                  key={g.to}
+                  to={ctaHref(g.to, g.location)}
+                  onClick={trackCta(g.location, g.to)}
+                  className="glass-card p-4 hover:border-primary/40 transition group"
+                >
+                  <div className="font-medium text-foreground group-hover:text-primary transition">
+                    {g.title}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                    {g.desc}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
           <section className="glass-card p-6 mt-10">
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               Try the CareerFlow OS Resume Engine
@@ -378,21 +460,21 @@ export default function AiResumeOptimization() {
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
-                to="/auth"
+                to={ctaHref("/auth", "footer_cta_auth")}
                 onClick={trackCta("footer_cta", "/auth")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
               >
                 <Sparkles className="h-3.5 w-3.5" /> Start free
               </Link>
               <Link
-                to="/resume"
+                to={ctaHref("/resume", "footer_cta_resume")}
                 onClick={trackCta("footer_cta", "/resume")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-foreground text-sm hover:bg-secondary/80 transition"
               >
                 Open Resume Engine
               </Link>
               <Link
-                to="/pricing"
+                to={ctaHref("/pricing", "footer_cta_pricing")}
                 onClick={trackCta("footer_cta", "/pricing")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-foreground text-sm hover:bg-secondary/80 transition"
               >

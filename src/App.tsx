@@ -30,6 +30,7 @@ import AffiliateApply from "./pages/AffiliateApply";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
 import AffiliateResources from "./pages/AffiliateResources";
 import AdminAffiliates from "./pages/AdminAffiliates";
+import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ function ProtectedRoutes() {
           <Route path="/settings" element={<AnimatedPage><Settings /></AnimatedPage>} />
           <Route path="/admin/digest-preview" element={<AnimatedPage><DigestPreview /></AnimatedPage>} />
           <Route path="/admin/affiliates" element={<AnimatedPage><AdminAffiliates /></AnimatedPage>} />
+          <Route path="/admin/blog-analytics" element={<AnimatedPage><AdminBlogAnalytics /></AnimatedPage>} />
           <Route path="/pricing" element={<AnimatedPage><Pricing /></AnimatedPage>} />
           <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
           <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
