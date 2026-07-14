@@ -33,6 +33,10 @@ const DESCRIPTION =
 const PUBLISHED = "2026-07-09";
 
 export default function AiResumeOptimization() {
+  useEffect(() => {
+    trackEvent("blog_page_view", { article: "ai-resume-optimization" });
+  }, []);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
