@@ -32,6 +32,7 @@ import AffiliateResources from "./pages/AffiliateResources";
 import AdminAffiliates from "./pages/AdminAffiliates";
 import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
+import OAuthConsent from "./pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -79,8 +80,14 @@ function ProtectedRoutes() {
 
 function AuthRoute() {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) {
+    const params = new URLSearchParams(location.search);
+    const next = params.get("next");
+    const safe = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+    return <Navigate to={safe} replace />;
+  }
   return <Auth />;
 }
 
@@ -93,6 +100,7 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
         <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
+        <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
         <Route path="/*" element={<ProtectedRoutes />} />
       </Routes>
     </AnimatePresence>
