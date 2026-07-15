@@ -80,8 +80,14 @@ function ProtectedRoutes() {
 
 function AuthRoute() {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) {
+    const params = new URLSearchParams(location.search);
+    const next = params.get("next");
+    const safe = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+    return <Navigate to={safe} replace />;
+  }
   return <Auth />;
 }
 

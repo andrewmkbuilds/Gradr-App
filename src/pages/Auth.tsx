@@ -14,6 +14,15 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const nextParam = (() => {
+    if (typeof window === "undefined") return null;
+    const raw = new URLSearchParams(window.location.search).get("next");
+    return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : null;
+  })();
+  const postAuthUrl = nextParam
+    ? `${window.location.origin}/auth?next=${encodeURIComponent(nextParam)}`
+    : window.location.origin;
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -24,7 +33,7 @@ export default function Auth() {
           password,
           options: {
             data: { full_name: fullName },
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: postAuthUrl,
           },
         });
         if (error) throw error;
@@ -43,7 +52,7 @@ export default function Auth() {
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
     const { error } = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin,
+      redirect_uri: postAuthUrl,
     });
     if (error) toast.error(`${provider} sign-in failed`);
   };
