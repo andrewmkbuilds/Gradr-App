@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "sdk_version": "0.22.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://xaeyjrekewnwjujnrqgu.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "careerflow-mcp",
+      "version": "0.1.0",
+      "title": "CareerFlow OS"
+    },
+    "tools": [
+      {
+        "name": "get_profile",
+        "title": "Get my CareerFlow profile",
+        "description": "Return the signed-in user's CareerFlow profile: name, email, target role, and career preferences.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_resumes",
+        "title": "List resumes",
+        "description": "List the signed-in user's uploaded resumes with their ATS scores and AI analysis metadata.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum resumes to return. Defaults to 20."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_job_matches",
+        "title": "List AI job matches",
+        "description": "List AI-generated job matches for the signed-in user, sorted by match score.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum matches to return. Defaults to 10."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_tracked_jobs",
+        "title": "List tracked jobs",
+        "description": "List jobs the signed-in user is tracking in their CareerFlow pipeline, optionally filtered by status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Filter by pipeline status (e.g. 'saved', 'applied', 'interview', 'offer', 'rejected')."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Maximum jobs to return. Defaults to 50."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_tracked_job",
+        "title": "Add tracked job",
+        "description": "Add a job opportunity to the signed-in user's CareerFlow pipeline.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Job title (e.g. 'Senior Frontend Engineer')."
+            },
+            "company": {
+              "type": "string",
+              "description": "Company name."
+            },
+            "location": {
+              "type": "string",
+              "description": "Job location."
+            },
+            "status": {
+              "type": "string",
+              "description": "Initial pipeline status. Defaults to 'saved'."
+            },
+            "remote": {
+              "type": "boolean",
+              "description": "Whether the role is remote."
+            },
+            "salary_min": {
+              "type": "number"
+            },
+            "salary_max": {
+              "type": "number"
+            },
+            "description": {
+              "type": "string",
+              "description": "Full job description text."
+            },
+            "notes": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string",
+              "description": "Where this job came from (e.g. 'linkedin', 'manual')."
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
