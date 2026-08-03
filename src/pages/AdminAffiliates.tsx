@@ -7,6 +7,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin, useAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
 import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
+import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "settings";
 
@@ -67,23 +78,29 @@ function ApplicationsPanel() {
     toast.success("Approved & affiliate profile created");
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
-  const setStatus = async (id: string, status: "rejected" | "suspended" | "pending") => {
-    if (status === "rejected") {
-      const reason = window.prompt("Optional rejection reason (shown to applicant):", "") ?? undefined;
-      const { error } = await supabase.rpc("reject_affiliate_application", { _application_id: id, _reason: reason || null });
-      if (error) return toast.error(error.message);
-      toast.success("Rejected — applicant notified");
-    } else {
-      const { error } = await supabase.from("affiliate_applications").update({ status, reviewed_date: new Date().toISOString() }).eq("id", id);
-      if (error) return toast.error(error.message);
-      toast.success(`Marked ${status}`);
-    }
+  const reject = async (id: string, reason: string) => {
+    const { error } = await supabase.rpc("reject_affiliate_application", {
+      _application_id: id,
+      _reason: reason.trim() || null,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Rejected — applicant notified");
+    qc.invalidateQueries({ queryKey: ["adminApplications"] });
+  };
+  const setStatus = async (id: string, status: "suspended" | "pending") => {
+    const { error } = await supabase
+      .from("affiliate_applications")
+      .update({ status, reviewed_date: new Date().toISOString() })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(`Marked ${status}`);
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
   const saveNote = async (id: string, note: string) => {
     await supabase.from("affiliate_applications").update({ admin_notes: note }).eq("id", id);
     toast.success("Note saved");
   };
+
 
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
@@ -134,12 +151,22 @@ function ApplicationsPanel() {
                   <label className="text-xs text-muted-foreground">Admin notes</label>
                   <textarea defaultValue={a.admin_notes || ""} onBlur={(e) => saveNote(a.id, e.target.value)} rows={2} className="w-full mt-1 px-3 py-2 rounded-lg bg-secondary border border-border text-sm" />
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap items-center">
                   {a.status !== "approved" && <ActionBtn icon={Check} label="Approve" onClick={() => approve(a.id)} variant="primary" />}
-                  {a.status !== "rejected" && <ActionBtn icon={X} label="Reject" onClick={() => setStatus(a.id, "rejected")} variant="destructive" />}
-                  {a.status === "approved" && <ActionBtn icon={Pause} label="Suspend" onClick={() => setStatus(a.id, "suspended")} />}
+                  {a.status !== "rejected" && <RejectApplicationButton applicantName={a.full_name} onReject={async (reason) => { await reject(a.id, reason); }} />}
+                  {a.status === "approved" && (
+                    <ConfirmDestructive
+                      title="Suspend this affiliate application?"
+                      description={<>Suspending pauses <strong>{a.full_name}</strong>'s participation. Existing referrals stay attributed, but new activity stops until reactivated.</>}
+                      confirmLabel="Suspend"
+                      onConfirm={async () => { await setStatus(a.id, "suspended"); }}
+                    >
+                      <ActionBtn icon={Pause} label="Suspend" />
+                    </ConfirmDestructive>
+                  )}
                   {a.status === "suspended" && <ActionBtn icon={Play} label="Reactivate" onClick={() => setStatus(a.id, "pending")} />}
                 </div>
+
               </div>
             </details>
           ))}
@@ -183,12 +210,13 @@ function AffiliatesPanel() {
             <tr key={p.id} className="border-t border-border">
               <td className="p-3 font-mono text-foreground">{p.affiliate_code}</td>
               <td>
-                <select defaultValue={p.status} onChange={(e) => updateStatus(p.id, e.target.value)} className="px-2 py-1 rounded bg-secondary border border-border text-xs">
-                  <option value="active">active</option>
-                  <option value="suspended">suspended</option>
-                  <option value="revoked">revoked</option>
-                </select>
+                <AffiliateStatusSelect
+                  code={p.affiliate_code}
+                  status={p.status}
+                  onChange={(next) => updateStatus(p.id, next)}
+                />
               </td>
+
               <td>
                 <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
               </td>
@@ -241,7 +269,18 @@ function CommissionsPanel() {
               <td className="space-x-1">
                 {c.status === "pending" && <button onClick={() => setStatus(c.id, "approved")} className="text-xs text-primary hover:underline">Approve</button>}
                 {c.status === "approved" && <button onClick={() => setStatus(c.id, "paid")} className="text-xs text-success hover:underline">Mark paid</button>}
-                {(c.status === "pending" || c.status === "approved") && <button onClick={() => setStatus(c.id, "reversed")} className="text-xs text-destructive hover:underline">Reverse</button>}
+                {(c.status === "pending" || c.status === "approved") && (
+                  <ConfirmDestructive
+                    title="Reverse this commission?"
+                    description={<>This removes <strong>${Number(c.commission_amount).toFixed(2)}</strong> from affiliate <strong>{c.affiliate_profiles?.affiliate_code}</strong>'s balance. Reversals should only be used for refunded or fraudulent conversions.</>}
+                    confirmLabel="Reverse commission"
+                    typeToConfirm="REVERSE"
+                    onConfirm={async () => { await setStatus(c.id, "reversed"); }}
+                  >
+                    <span role="button" tabIndex={0} className="text-xs text-destructive hover:underline cursor-pointer">Reverse</span>
+                  </ConfirmDestructive>
+                )}
+
               </td>
             </tr>
           ))}
@@ -308,11 +347,121 @@ function SettingsPanel() {
   );
 }
 
+/**
+ * Status changes that cut off an affiliate (suspend / revoke) require a
+ * confirmation step; re-activating does not.
+ */
+function AffiliateStatusSelect({
+  code,
+  status,
+  onChange,
+}: {
+  code: string;
+  status: string;
+  onChange: (next: string) => Promise<void> | void;
+}) {
+  const [value, setValue] = useState(status);
+  const [pending, setPending] = useState<string | null>(null);
+
+  const cls = "px-2 py-1 rounded bg-secondary border border-border text-xs";
+
+  const apply = async (next: string) => {
+    setValue(next);
+    await onChange(next);
+  };
+
+  return (
+    <>
+      <select
+        value={value}
+        onChange={(e) => {
+          const next = e.target.value;
+          if (next === "suspended" || next === "revoked") setPending(next);
+          else void apply(next);
+        }}
+        className={cls}
+      >
+        <option value="active">active</option>
+        <option value="suspended">suspended</option>
+        <option value="revoked">revoked</option>
+      </select>
+
+      <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-destructive" />
+              {pending === "revoked" ? "Revoke" : "Suspend"} affiliate {code}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pending === "revoked"
+                ? "Revoking permanently ends this affiliate's participation. Their referral link stops attributing new signups immediately."
+                : "Suspending pauses this affiliate. Their referral link stops attributing new signups until you set them back to active."}
+              {" "}This action is recorded in the admin audit log.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                const next = pending!;
+                setPending(null);
+                void apply(next);
+              }}
+            >
+              {pending === "revoked" ? "Revoke access" : "Suspend"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 function Field({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return <div><div className="text-xs text-muted-foreground">{label}</div><div className="text-sm text-foreground whitespace-pre-wrap">{value}</div></div>;
 }
-function ActionBtn({ icon: Icon, label, onClick, variant }: { icon: any; label: string; onClick: () => void; variant?: "primary" | "destructive" }) {
+function ActionBtn({ icon: Icon, label, onClick, variant }: { icon: any; label: string; onClick?: () => void; variant?: "primary" | "destructive" }) {
   const cls = variant === "primary" ? "bg-primary text-primary-foreground" : variant === "destructive" ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-secondary text-foreground";
-  return <button onClick={onClick} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition ${cls}`}><Icon className="h-3.5 w-3.5" /> {label}</button>;
+  return <span onClick={onClick} role="button" tabIndex={0} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition cursor-pointer ${cls}`}><Icon className="h-3.5 w-3.5" /> {label}</span>;
 }
+
+/**
+ * Rejecting an application notifies the applicant and cannot be undone from
+ * this screen, so it requires an explicit confirmation step with an optional
+ * reason rather than a bare click.
+ */
+function RejectApplicationButton({
+  applicantName,
+  onReject,
+}: {
+  applicantName: string;
+  onReject: (reason: string) => Promise<void>;
+}) {
+  const [reason, setReason] = useState("");
+  return (
+    <ConfirmDestructive
+      title="Reject this application?"
+      description={
+        <>
+          <strong>{applicantName}</strong> will be notified immediately that their affiliate
+          application was not approved.
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            placeholder="Optional reason shown to the applicant…"
+            className="w-full mt-3 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground"
+          />
+        </>
+      }
+      confirmLabel="Reject application"
+      onConfirm={() => onReject(reason)}
+    >
+      <ActionBtn icon={X} label="Reject" variant="destructive" />
+    </ConfirmDestructive>
+  );
+}
+

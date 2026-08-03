@@ -13,6 +13,7 @@ import {
   KanbanSquare,
   Mail,
   Gift,
+  ScrollText,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -43,6 +44,7 @@ const engines = [
   { title: "Affiliate", url: "/affiliate", icon: Gift },
   { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
   { title: "Affiliate Admin", url: "/admin/affiliates", icon: Sparkles },
+  { title: "Audit Log", url: "/admin/audit-log", icon: ScrollText },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
