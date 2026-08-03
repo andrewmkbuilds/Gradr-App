@@ -31,6 +31,7 @@ import AffiliateDashboard from "./pages/AffiliateDashboard";
 import AffiliateResources from "./pages/AffiliateResources";
 import AdminAffiliates from "./pages/AdminAffiliates";
 import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
+import AdminAuditLog from "./pages/AdminAuditLog";
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 import OAuthConsent from "./pages/OAuthConsent";
 
