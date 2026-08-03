@@ -952,6 +952,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      affiliate_click_is_valid: {
+        Args: { _code: string; _profile_id: string }
+        Returns: boolean
+      }
       approve_affiliate_application: {
         Args: { _application_id: string }
         Returns: string
