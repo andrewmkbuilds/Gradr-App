@@ -143,7 +143,7 @@ function ApplicationsPanel() {
                 </div>
                 <div className="flex gap-2 flex-wrap items-center">
                   {a.status !== "approved" && <ActionBtn icon={Check} label="Approve" onClick={() => approve(a.id)} variant="primary" />}
-                  {a.status !== "rejected" && <RejectApplicationButton applicantName={a.full_name} onReject={(reason) => reject(a.id, reason)} />}
+                  {a.status !== "rejected" && <RejectApplicationButton applicantName={a.full_name} onReject={async (reason) => { await reject(a.id, reason); }} />}
                   {a.status === "approved" && (
                     <ConfirmDestructive
                       title="Suspend this affiliate application?"
