@@ -329,7 +329,45 @@ function Field({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return <div><div className="text-xs text-muted-foreground">{label}</div><div className="text-sm text-foreground whitespace-pre-wrap">{value}</div></div>;
 }
-function ActionBtn({ icon: Icon, label, onClick, variant }: { icon: any; label: string; onClick: () => void; variant?: "primary" | "destructive" }) {
+function ActionBtn({ icon: Icon, label, onClick, variant }: { icon: any; label: string; onClick?: () => void; variant?: "primary" | "destructive" }) {
   const cls = variant === "primary" ? "bg-primary text-primary-foreground" : variant === "destructive" ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-secondary text-foreground";
-  return <button onClick={onClick} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition ${cls}`}><Icon className="h-3.5 w-3.5" /> {label}</button>;
+  return <span onClick={onClick} role="button" tabIndex={0} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition cursor-pointer ${cls}`}><Icon className="h-3.5 w-3.5" /> {label}</span>;
 }
+
+/**
+ * Rejecting an application notifies the applicant and cannot be undone from
+ * this screen, so it requires an explicit confirmation step with an optional
+ * reason rather than a bare click.
+ */
+function RejectApplicationButton({
+  applicantName,
+  onReject,
+}: {
+  applicantName: string;
+  onReject: (reason: string) => Promise<void>;
+}) {
+  const [reason, setReason] = useState("");
+  return (
+    <ConfirmDestructive
+      title="Reject this application?"
+      description={
+        <>
+          <strong>{applicantName}</strong> will be notified immediately that their affiliate
+          application was not approved.
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            placeholder="Optional reason shown to the applicant…"
+            className="w-full mt-3 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground"
+          />
+        </>
+      }
+      confirmLabel="Reject application"
+      onConfirm={() => onReject(reason)}
+    >
+      <ActionBtn icon={X} label="Reject" variant="destructive" />
+    </ConfirmDestructive>
+  );
+}
+
