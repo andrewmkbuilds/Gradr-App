@@ -149,7 +149,7 @@ function ApplicationsPanel() {
                       title="Suspend this affiliate application?"
                       description={<>Suspending pauses <strong>{a.full_name}</strong>'s participation. Existing referrals stay attributed, but new activity stops until reactivated.</>}
                       confirmLabel="Suspend"
-                      onConfirm={() => setStatus(a.id, "suspended")}
+                      onConfirm={async () => { await setStatus(a.id, "suspended"); }}
                     >
                       <ActionBtn icon={Pause} label="Suspend" />
                     </ConfirmDestructive>
