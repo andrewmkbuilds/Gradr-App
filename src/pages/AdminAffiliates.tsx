@@ -258,7 +258,18 @@ function CommissionsPanel() {
               <td className="space-x-1">
                 {c.status === "pending" && <button onClick={() => setStatus(c.id, "approved")} className="text-xs text-primary hover:underline">Approve</button>}
                 {c.status === "approved" && <button onClick={() => setStatus(c.id, "paid")} className="text-xs text-success hover:underline">Mark paid</button>}
-                {(c.status === "pending" || c.status === "approved") && <button onClick={() => setStatus(c.id, "reversed")} className="text-xs text-destructive hover:underline">Reverse</button>}
+                {(c.status === "pending" || c.status === "approved") && (
+                  <ConfirmDestructive
+                    title="Reverse this commission?"
+                    description={<>This removes <strong>${Number(c.commission_amount).toFixed(2)}</strong> from affiliate <strong>{c.affiliate_profiles?.affiliate_code}</strong>'s balance. Reversals should only be used for refunded or fraudulent conversions.</>}
+                    confirmLabel="Reverse commission"
+                    typeToConfirm="REVERSE"
+                    onConfirm={async () => { await setStatus(c.id, "reversed"); }}
+                  >
+                    <span role="button" tabIndex={0} className="text-xs text-destructive hover:underline cursor-pointer">Reverse</span>
+                  </ConfirmDestructive>
+                )}
+
               </td>
             </tr>
           ))}
