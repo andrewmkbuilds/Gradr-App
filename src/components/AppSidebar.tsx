@@ -43,6 +43,7 @@ const engines = [
   { title: "Affiliate", url: "/affiliate", icon: Gift },
   { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
   { title: "Affiliate Admin", url: "/admin/affiliates", icon: Sparkles },
+  { title: "Audit Log", url: "/admin/audit-log", icon: ScrollText },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
