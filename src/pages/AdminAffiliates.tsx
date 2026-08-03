@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin, useAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
 import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
+import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
 
 type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "settings";
 
