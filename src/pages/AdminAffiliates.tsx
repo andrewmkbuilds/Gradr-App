@@ -200,12 +200,13 @@ function AffiliatesPanel() {
             <tr key={p.id} className="border-t border-border">
               <td className="p-3 font-mono text-foreground">{p.affiliate_code}</td>
               <td>
-                <select defaultValue={p.status} onChange={(e) => updateStatus(p.id, e.target.value)} className="px-2 py-1 rounded bg-secondary border border-border text-xs">
-                  <option value="active">active</option>
-                  <option value="suspended">suspended</option>
-                  <option value="revoked">revoked</option>
-                </select>
+                <AffiliateStatusSelect
+                  code={p.affiliate_code}
+                  status={p.status}
+                  onChange={(next) => updateStatus(p.id, next)}
+                />
               </td>
+
               <td>
                 <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
               </td>
