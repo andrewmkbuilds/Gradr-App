@@ -140,12 +140,22 @@ function ApplicationsPanel() {
                   <label className="text-xs text-muted-foreground">Admin notes</label>
                   <textarea defaultValue={a.admin_notes || ""} onBlur={(e) => saveNote(a.id, e.target.value)} rows={2} className="w-full mt-1 px-3 py-2 rounded-lg bg-secondary border border-border text-sm" />
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap items-center">
                   {a.status !== "approved" && <ActionBtn icon={Check} label="Approve" onClick={() => approve(a.id)} variant="primary" />}
-                  {a.status !== "rejected" && <ActionBtn icon={X} label="Reject" onClick={() => setStatus(a.id, "rejected")} variant="destructive" />}
-                  {a.status === "approved" && <ActionBtn icon={Pause} label="Suspend" onClick={() => setStatus(a.id, "suspended")} />}
+                  {a.status !== "rejected" && <RejectApplicationButton applicantName={a.full_name} onReject={(reason) => reject(a.id, reason)} />}
+                  {a.status === "approved" && (
+                    <ConfirmDestructive
+                      title="Suspend this affiliate application?"
+                      description={<>Suspending pauses <strong>{a.full_name}</strong>'s participation. Existing referrals stay attributed, but new activity stops until reactivated.</>}
+                      confirmLabel="Suspend"
+                      onConfirm={() => setStatus(a.id, "suspended")}
+                    >
+                      <ActionBtn icon={Pause} label="Suspend" />
+                    </ConfirmDestructive>
+                  )}
                   {a.status === "suspended" && <ActionBtn icon={Play} label="Reactivate" onClick={() => setStatus(a.id, "pending")} />}
                 </div>
+
               </div>
             </details>
           ))}
