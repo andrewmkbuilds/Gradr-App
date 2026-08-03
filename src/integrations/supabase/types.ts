@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          record_count: number
+          resource_id: string | null
+          resource_type: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          record_count?: number
+          resource_id?: string | null
+          resource_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          record_count?: number
+          resource_id?: string | null
+          resource_type?: string
+        }
+        Relationships: []
+      }
       affiliate_applications: {
         Row: {
           admin_notes: string | null
@@ -933,6 +966,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_audit_actors: {
+        Args: never
+        Returns: {
+          display_name: string
+          user_id: string
+        }[]
+      }
       admin_create_payout: {
         Args: {
           _affiliate_profile_id: string
@@ -960,6 +1000,10 @@ export type Database = {
         Args: { _application_id: string }
         Returns: string
       }
+      assert_admin_write_rate_limit: {
+        Args: { _actor: string; _limit?: number }
+        Returns: undefined
+      }
       attribute_signup_referral: {
         Args: { _click_id?: string; _code: string }
         Returns: string
@@ -982,6 +1026,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_admin_access: {
+        Args: {
+          _action: string
+          _details?: Json
+          _record_count?: number
+          _resource_id?: string
+          _resource_type: string
+        }
+        Returns: string
       }
       lookup_affiliate_by_code: {
         Args: { _code: string }
