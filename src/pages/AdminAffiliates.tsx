@@ -67,23 +67,29 @@ function ApplicationsPanel() {
     toast.success("Approved & affiliate profile created");
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
-  const setStatus = async (id: string, status: "rejected" | "suspended" | "pending") => {
-    if (status === "rejected") {
-      const reason = window.prompt("Optional rejection reason (shown to applicant):", "") ?? undefined;
-      const { error } = await supabase.rpc("reject_affiliate_application", { _application_id: id, _reason: reason || null });
-      if (error) return toast.error(error.message);
-      toast.success("Rejected — applicant notified");
-    } else {
-      const { error } = await supabase.from("affiliate_applications").update({ status, reviewed_date: new Date().toISOString() }).eq("id", id);
-      if (error) return toast.error(error.message);
-      toast.success(`Marked ${status}`);
-    }
+  const reject = async (id: string, reason: string) => {
+    const { error } = await supabase.rpc("reject_affiliate_application", {
+      _application_id: id,
+      _reason: reason.trim() || null,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Rejected — applicant notified");
+    qc.invalidateQueries({ queryKey: ["adminApplications"] });
+  };
+  const setStatus = async (id: string, status: "suspended" | "pending") => {
+    const { error } = await supabase
+      .from("affiliate_applications")
+      .update({ status, reviewed_date: new Date().toISOString() })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(`Marked ${status}`);
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
   const saveNote = async (id: string, note: string) => {
     await supabase.from("affiliate_applications").update({ admin_notes: note }).eq("id", id);
     toast.success("Note saved");
   };
+
 
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
