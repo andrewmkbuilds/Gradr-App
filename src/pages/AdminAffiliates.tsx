@@ -337,6 +337,78 @@ function SettingsPanel() {
   );
 }
 
+/**
+ * Status changes that cut off an affiliate (suspend / revoke) require a
+ * confirmation step; re-activating does not.
+ */
+function AffiliateStatusSelect({
+  code,
+  status,
+  onChange,
+}: {
+  code: string;
+  status: string;
+  onChange: (next: string) => Promise<void> | void;
+}) {
+  const [value, setValue] = useState(status);
+  const [pending, setPending] = useState<string | null>(null);
+
+  const cls = "px-2 py-1 rounded bg-secondary border border-border text-xs";
+
+  const apply = async (next: string) => {
+    setValue(next);
+    await onChange(next);
+  };
+
+  return (
+    <>
+      <select
+        value={value}
+        onChange={(e) => {
+          const next = e.target.value;
+          if (next === "suspended" || next === "revoked") setPending(next);
+          else void apply(next);
+        }}
+        className={cls}
+      >
+        <option value="active">active</option>
+        <option value="suspended">suspended</option>
+        <option value="revoked">revoked</option>
+      </select>
+
+      <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-destructive" />
+              {pending === "revoked" ? "Revoke" : "Suspend"} affiliate {code}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pending === "revoked"
+                ? "Revoking permanently ends this affiliate's participation. Their referral link stops attributing new signups immediately."
+                : "Suspending pauses this affiliate. Their referral link stops attributing new signups until you set them back to active."}
+              {" "}This action is recorded in the admin audit log.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                const next = pending!;
+                setPending(null);
+                void apply(next);
+              }}
+            >
+              {pending === "revoked" ? "Revoke access" : "Suspend"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 function Field({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return <div><div className="text-xs text-muted-foreground">{label}</div><div className="text-sm text-foreground whitespace-pre-wrap">{value}</div></div>;
