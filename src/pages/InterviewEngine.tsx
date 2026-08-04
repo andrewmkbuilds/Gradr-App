@@ -11,7 +11,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
 
-export default function InterviewEngine() {
+function InterviewEngineInner() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
