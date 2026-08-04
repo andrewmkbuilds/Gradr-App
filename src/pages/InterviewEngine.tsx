@@ -6,12 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
+import { ProGate } from "@/components/ProGate";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
 
-export default function InterviewEngine() {
+function InterviewEngineInner() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -209,5 +210,17 @@ export default function InterviewEngine() {
         </Button>
       </div>
     </div>
+  );
+}
+
+export default function InterviewEngine() {
+  return (
+    <ProGate
+      feature="Interview Coach"
+      description="Run unlimited AI mock interviews with Pro, or buy an interview prep pack."
+      creditType="interview"
+    >
+      <InterviewEngineInner />
+    </ProGate>
   );
 }

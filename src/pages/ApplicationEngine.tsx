@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
+import { ProGate } from "@/components/ProGate";
 
 type GenerationType = "cover_letter" | "recruiter_message";
 
@@ -15,7 +16,7 @@ interface GeneratedContent {
   body: string;
 }
 
-export default function ApplicationEngine() {
+function ApplicationEngineInner() {
   const { user } = useAuth();
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
@@ -173,5 +174,17 @@ export default function ApplicationEngine() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ApplicationEngine() {
+  return (
+    <ProGate
+      feature="Application Engine"
+      description="Generate unlimited tailored applications with Pro, or buy an extra applications pack."
+      creditType="application"
+    >
+      <ApplicationEngineInner />
+    </ProGate>
   );
 }

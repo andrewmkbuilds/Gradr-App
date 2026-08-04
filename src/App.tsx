@@ -21,6 +21,7 @@ import GrowthEngine from "./pages/GrowthEngine";
 import Settings from "./pages/Settings";
 import DigestPreview from "./pages/DigestPreview";
 import Pricing from "./pages/Pricing";
+import Billing from "./pages/Billing";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -70,6 +71,7 @@ function ProtectedRoutes() {
          <Route path="/admin/audit-log" element={<AnimatedPage><AdminAuditLog /></AnimatedPage>} />
 
           <Route path="/pricing" element={<AnimatedPage><Pricing /></AnimatedPage>} />
+          <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
           <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
           <Route path="/affiliate/dashboard" element={<AnimatedPage><AffiliateDashboard /></AnimatedPage>} />

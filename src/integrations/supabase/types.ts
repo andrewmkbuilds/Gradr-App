@@ -760,6 +760,54 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          amount_total: number
+          created_at: string
+          credits_granted: number
+          currency: string
+          id: string
+          pack_key: string
+          pack_label: string | null
+          quantity: number
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_total?: number
+          created_at?: string
+          credits_granted?: number
+          currency?: string
+          id?: string
+          pack_key: string
+          pack_label?: string | null
+          quantity?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_total?: number
+          created_at?: string
+          credits_granted?: number
+          currency?: string
+          id?: string
+          pack_key?: string
+          pack_label?: string | null
+          quantity?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       resumes: {
         Row: {
           ai_suggestions: Json | null
@@ -811,6 +859,57 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version_label?: string | null
+        }
+        Relationships: []
+      }
+      subscribers: {
+        Row: {
+          billing_interval: string | null
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          email: string
+          id: string
+          price_id: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscribed: boolean
+          subscription_status: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          email: string
+          id?: string
+          price_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscribed?: boolean
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          email?: string
+          id?: string
+          price_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscribed?: boolean
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -882,6 +981,33 @@ export type Database = {
           title?: string
           updated_at?: string
           url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usage_credits: {
+        Row: {
+          application_credits: number
+          created_at: string
+          id: string
+          interview_credits: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_credits?: number
+          created_at?: string
+          id?: string
+          interview_credits?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_credits?: number
+          created_at?: string
+          id?: string
+          interview_credits?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
