@@ -3,20 +3,29 @@ import { Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useCredits, useSubscription } from "@/hooks/useSubscription";
 
 interface ProGateProps {
   children: ReactNode;
   feature?: string;
   description?: string;
+  /** If set, users holding pay-per-use credits of this type also get access. */
+  creditType?: "application" | "interview";
 }
 
-/** Renders children for Pro subscribers; free users get an upgrade prompt instead. */
-export function ProGate({ children, feature = "This feature", description }: ProGateProps) {
+/** Renders children for Pro subscribers (or credit holders); free users get an upgrade prompt. */
+export function ProGate({ children, feature = "This feature", description, creditType }: ProGateProps) {
   const { isPro, isLoading } = useSubscription();
+  const { data: credits, isLoading: creditsLoading } = useCredits();
   const navigate = useNavigate();
 
-  if (isLoading) {
+  const hasCredits = creditType
+    ? (creditType === "application"
+      ? credits?.application_credits ?? 0
+      : credits?.interview_credits ?? 0) > 0
+    : false;
+
+  if (isLoading || (creditType && creditsLoading)) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -24,7 +33,8 @@ export function ProGate({ children, feature = "This feature", description }: Pro
     );
   }
 
-  if (isPro) return <>{children}</>;
+  if (isPro || hasCredits) return <>{children}</>;
+
 
   return (
     <Card className="p-8 text-center border-border/60 bg-card/60 backdrop-blur-sm">
