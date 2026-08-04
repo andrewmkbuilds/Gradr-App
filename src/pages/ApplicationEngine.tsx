@@ -176,3 +176,15 @@ function ApplicationEngineInner() {
     </div>
   );
 }
+
+export default function ApplicationEngine() {
+  return (
+    <ProGate
+      feature="Application Engine"
+      description="Generate unlimited tailored applications with Pro, or buy an extra applications pack."
+      creditType="application"
+    >
+      <ApplicationEngineInner />
+    </ProGate>
+  );
+}
