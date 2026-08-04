@@ -4,7 +4,7 @@ import { Loader2, Check, X, Pause, Play, Search, ShieldAlert } from "lucide-reac
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useIsAdmin, useAffiliateSettings } from "@/hooks/useAffiliate";
+import { useIsAdmin, useFullAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
 import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
 import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
@@ -293,7 +293,7 @@ function CommissionsPanel() {
 
 function SettingsPanel() {
   const qc = useQueryClient();
-  const { data: settings, isLoading } = useAffiliateSettings();
+  const { data: settings, isLoading } = useFullAffiliateSettings();
   const [saving, setSaving] = useState(false);
 
   if (isLoading || !settings) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
@@ -316,7 +316,7 @@ function SettingsPanel() {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Settings saved");
-    qc.invalidateQueries({ queryKey: ["affiliateSettings"] });
+    qc.invalidateQueries({ queryKey: ["affiliateSettingsAdmin"] });
   };
 
   const inputCls = "w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm";

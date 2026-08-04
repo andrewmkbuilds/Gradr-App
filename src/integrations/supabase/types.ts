@@ -1020,6 +1020,17 @@ export type Database = {
         Returns: string
       }
       generate_affiliate_code: { Args: never; Returns: string }
+      get_affiliate_public_settings: {
+        Args: never
+        Returns: {
+          affiliate_terms: string
+          cookie_duration_days: number
+          default_commission_rate: number
+          default_commission_type: Database["public"]["Enums"]["affiliate_commission_type"]
+          minimum_payout_threshold: number
+          program_enabled: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -1,8 +1,8 @@
-import { useAffiliateSettings } from "@/hooks/useAffiliate";
+import { useFullAffiliateSettings } from "@/hooks/useAffiliate";
 import { BookOpen, FileText, ShieldCheck } from "lucide-react";
 
 export default function AffiliateResources() {
-  const { data: settings } = useAffiliateSettings();
+  const { data: settings } = useFullAffiliateSettings();
   const rate = settings?.default_commission_rate ?? 20;
   const cookieDays = settings?.cookie_duration_days ?? 90;
   const threshold = settings?.minimum_payout_threshold ?? 50;

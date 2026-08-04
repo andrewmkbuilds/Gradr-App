@@ -63,13 +63,10 @@ export async function captureReferralFromUrl() {
     const hit = Array.isArray(lookup) ? lookup[0] : null;
     if (!hit || !hit.is_active) return;
 
-    // Pull cookie duration from settings, fall back to 90.
+    // Pull cookie duration from public settings, fall back to 90.
     let days = DEFAULT_DAYS;
-    const { data: settings } = await supabase
-      .from("affiliate_settings")
-      .select("cookie_duration_days")
-      .eq("id", 1)
-      .maybeSingle();
+    const { data: settingsRows } = await supabase.rpc("get_affiliate_public_settings");
+    const settings = Array.isArray(settingsRows) ? settingsRows[0] : settingsRows;
     if (settings?.cookie_duration_days) days = settings.cookie_duration_days;
 
     setCookie(COOKIE_NAME, code, days);
