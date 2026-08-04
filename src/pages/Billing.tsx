@@ -39,7 +39,11 @@ export default function Billing() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Seo title="Billing & Subscription | CareerFlow OS" description="Manage your CareerFlow OS subscription, credits and purchase history." />
+      <Seo
+        title="Billing & Subscription"
+        description="Manage your CareerFlow OS subscription, credits and purchase history."
+        path="/billing"
+      />
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
