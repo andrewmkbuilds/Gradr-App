@@ -211,3 +211,15 @@ function InterviewEngineInner() {
     </div>
   );
 }
+
+export default function InterviewEngine() {
+  return (
+    <ProGate
+      feature="Interview Coach"
+      description="Run unlimited AI mock interviews with Pro, or buy an interview prep pack."
+      creditType="interview"
+    >
+      <InterviewEngineInner />
+    </ProGate>
+  );
+}
