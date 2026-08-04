@@ -50,10 +50,23 @@ export function useMyAffiliate() {
   });
 }
 
+/** Public marketing settings (safe for anyone) — internal config stays admin-only. */
 export function useAffiliateSettings() {
   return useQuery({
     queryKey: ["affiliateSettings"],
     staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data } = await supabase.rpc("get_affiliate_public_settings");
+      return Array.isArray(data) ? data[0] ?? null : data;
+    },
+  });
+}
+
+/** Full settings row — only readable by admins. */
+export function useAdminAffiliateSettings() {
+  return useQuery({
+    queryKey: ["affiliateSettingsAdmin"],
+    staleTime: 30_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("affiliate_settings")
