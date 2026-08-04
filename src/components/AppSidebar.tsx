@@ -41,6 +41,7 @@ const engines = [
   { title: "Interview Coach", url: "/interview", icon: Mic },
   { title: "Growth & Proof", url: "/growth", icon: Rocket },
   { title: "Pricing", url: "/pricing", icon: Sparkles },
+  { title: "Billing", url: "/billing", icon: CreditCard },
   { title: "Affiliate", url: "/affiliate", icon: Gift },
   { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
   { title: "Affiliate Admin", url: "/admin/affiliates", icon: Sparkles },
