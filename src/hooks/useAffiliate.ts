@@ -62,8 +62,8 @@ export function useAffiliateSettings() {
   });
 }
 
-/** Full settings row — only readable by admins. */
-export function useAdminAffiliateSettings() {
+/** Full settings row — readable by admins and active affiliates only. */
+export function useFullAffiliateSettings() {
   return useQuery({
     queryKey: ["affiliateSettingsAdmin"],
     staleTime: 30_000,
