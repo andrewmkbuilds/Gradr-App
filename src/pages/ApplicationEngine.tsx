@@ -16,7 +16,7 @@ interface GeneratedContent {
   body: string;
 }
 
-export default function ApplicationEngine() {
+function ApplicationEngineInner() {
   const { user } = useAuth();
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
