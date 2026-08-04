@@ -1,0 +1,166 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { useCallback, useState } from "react";
+
+export interface SubscriptionState {
+  subscribed: boolean;
+  tier: string | null;
+  status: string | null;
+  billingInterval: "monthly" | "annual" | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+}
+
+const EMPTY: SubscriptionState = {
+  subscribed: false,
+  tier: null,
+  status: null,
+  billingInterval: null,
+  currentPeriodEnd: null,
+  cancelAtPeriodEnd: false,
+};
+
+export function useSubscription() {
+  const { user } = useAuth();
+
+  const query = useQuery({
+    queryKey: ["subscription", user?.id],
+    enabled: Boolean(user),
+    staleTime: 30_000,
+    queryFn: async (): Promise<SubscriptionState> => {
+      const { data, error } = await supabase
+        .from("subscribers")
+        .select(
+          "subscribed, subscription_tier, subscription_status, billing_interval, current_period_end, cancel_at_period_end",
+        )
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return EMPTY;
+      return {
+        subscribed: data.subscribed,
+        tier: data.subscription_tier,
+        status: data.subscription_status,
+        billingInterval: (data.billing_interval as "monthly" | "annual" | null) ?? null,
+        currentPeriodEnd: data.current_period_end,
+        cancelAtPeriodEnd: data.cancel_at_period_end,
+      };
+    },
+  });
+
+  return {
+    ...(query.data ?? EMPTY),
+    isLoading: query.isLoading,
+    isPro: Boolean(query.data?.subscribed),
+    refetch: query.refetch,
+  };
+}
+
+export function useCredits() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["usage-credits", user?.id],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("usage_credits")
+        .select("application_credits, interview_credits")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data ?? { application_credits: 0, interview_credits: 0 };
+    },
+  });
+}
+
+export function usePurchases() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["purchases", user?.id],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("purchases")
+        .select("id, pack_label, pack_key, credits_granted, amount_total, currency, status, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useBillingActions() {
+  const queryClient = useQueryClient();
+  const [pending, setPending] = useState<string | null>(null);
+
+  const openExternal = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const startSubscription = useCallback(async (plan: "monthly" | "annual") => {
+    setPending(plan);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { mode: "subscription", plan },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      openExternal(data.url);
+    } catch {
+      toast.error("Couldn't start checkout. Make sure billing is configured and try again.");
+    } finally {
+      setPending(null);
+    }
+  }, []);
+
+  const buyPack = useCallback(async (pack: string) => {
+    setPending(pack);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { mode: "payment", pack },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      openExternal(data.url);
+    } catch {
+      toast.error("Couldn't start checkout. Please try again.");
+    } finally {
+      setPending(null);
+    }
+  }, []);
+
+  const openPortal = useCallback(async () => {
+    setPending("portal");
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (!data?.url) throw new Error("No portal URL returned");
+      openExternal(data.url);
+    } catch {
+      toast.error("Couldn't open the billing portal. Start a plan first, then try again.");
+    } finally {
+      setPending(null);
+    }
+  }, []);
+
+  const restorePurchases = useCallback(async () => {
+    setPending("restore");
+    try {
+      const { error } = await supabase.functions.invoke("check-subscription");
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ["subscription"] });
+      await queryClient.invalidateQueries({ queryKey: ["usage-credits"] });
+      await queryClient.invalidateQueries({ queryKey: ["purchases"] });
+      toast.success("Subscription status refreshed.");
+    } catch {
+      toast.error("Couldn't refresh your subscription right now.");
+    } finally {
+      setPending(null);
+    }
+  }, [queryClient]);
+
+  return { pending, startSubscription, buyPack, openPortal, restorePurchases };
+}
