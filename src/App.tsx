@@ -21,6 +21,7 @@ import GrowthEngine from "./pages/GrowthEngine";
 import Settings from "./pages/Settings";
 import DigestPreview from "./pages/DigestPreview";
 import Pricing from "./pages/Pricing";
+import Billing from "./pages/Billing";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
