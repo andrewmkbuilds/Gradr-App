@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
+import { ProGate } from "@/components/ProGate";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
