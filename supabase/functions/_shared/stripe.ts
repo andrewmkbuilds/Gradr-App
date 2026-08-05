@@ -1,9 +1,22 @@
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 
-export const PRICE_CONFIG = {
-  monthly: { amount: 1900, interval: "month" as const, label: "CareerFlow OS Pro (Monthly)" },
-  annual: { amount: 16800, interval: "year" as const, label: "CareerFlow OS Pro (Annual)" },
+export type PlanTier = "starter" | "pro";
+export type PlanInterval = "monthly" | "annual";
+
+export const PRICE_CONFIG: Record<
+  PlanTier,
+  Record<PlanInterval, { amount: number; interval: "month" | "year"; label: string }>
+> = {
+  starter: {
+    monthly: { amount: 900, interval: "month", label: "CareerFlow OS Starter (Monthly)" },
+    annual: { amount: 8400, interval: "year", label: "CareerFlow OS Starter (Annual)" },
+  },
+  pro: {
+    monthly: { amount: 1900, interval: "month", label: "CareerFlow OS Pro (Monthly)" },
+    annual: { amount: 16800, interval: "year", label: "CareerFlow OS Pro (Annual)" },
+  },
 };
+
 
 export const PACKS: Record<
   string,
