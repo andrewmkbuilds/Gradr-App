@@ -76,7 +76,12 @@ async function syncSubscription(stripe: Stripe, subscription: Stripe.Subscriptio
       stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
       subscribed: active && subscription.status !== "past_due",
-      subscription_tier: active ? "pro" : null,
+      subscription_tier: active
+        ? ((subscription.metadata?.tier === "starter" ||
+            item?.price?.lookup_key?.includes("starter"))
+          ? "starter"
+          : "pro")
+        : null,
       billing_interval: planFromInterval(interval),
       subscription_status: subscription.status,
       price_id: item?.price?.id ?? null,
