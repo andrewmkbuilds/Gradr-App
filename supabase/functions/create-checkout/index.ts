@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { ensureProPrice, getStripe, PACKS } from "../_shared/stripe.ts";
+import { ensurePlanPrice, getStripe, PACKS } from "../_shared/stripe.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -66,7 +66,8 @@ Deno.serve(async (req) => {
     }
 
     if (mode === "subscription") {
-      const price = await ensureProPrice(stripe, plan as "monthly" | "annual");
+      const tier = body?.tier === "starter" ? "starter" : "pro";
+      const price = await ensurePlanPrice(stripe, tier, plan as "monthly" | "annual");
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "subscription",
@@ -74,11 +75,12 @@ Deno.serve(async (req) => {
         allow_promotion_codes: true,
         success_url: `${origin}/billing?checkout=success`,
         cancel_url: `${origin}/pricing?checkout=cancelled`,
-        subscription_data: { metadata: { supabase_user_id: user.id, plan } },
-        metadata: { supabase_user_id: user.id, plan, kind: "subscription" },
+        subscription_data: { metadata: { supabase_user_id: user.id, plan, tier } },
+        metadata: { supabase_user_id: user.id, plan, tier, kind: "subscription" },
       });
       return json({ url: session.url });
     }
+
 
     const pack = PACKS[packKey!];
     const session = await stripe.checkout.sessions.create({

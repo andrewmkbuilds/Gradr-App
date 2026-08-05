@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
+import { CreditsBalance } from "@/components/CreditsBalance";
+import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 
 interface DashboardStats {
   resumeScore: number;
@@ -144,6 +146,10 @@ export default function Dashboard() {
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Career Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">Your AI-powered career command center</p>
       </div>
+
+      <PaymentIssueBanner />
+      <CreditsBalance />
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={FileText} title="Resume Score" value={s.resumeScore > 0 ? String(s.resumeScore) : "—"} subtitle={s.resumeScore > 0 ? "Latest ATS score" : "Upload a resume"} glowing={s.resumeScore > 0} />

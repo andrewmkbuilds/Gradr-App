@@ -1,9 +1,22 @@
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 
-export const PRICE_CONFIG = {
-  monthly: { amount: 1900, interval: "month" as const, label: "CareerFlow OS Pro (Monthly)" },
-  annual: { amount: 16800, interval: "year" as const, label: "CareerFlow OS Pro (Annual)" },
+export type PlanTier = "starter" | "pro";
+export type PlanInterval = "monthly" | "annual";
+
+export const PRICE_CONFIG: Record<
+  PlanTier,
+  Record<PlanInterval, { amount: number; interval: "month" | "year"; label: string }>
+> = {
+  starter: {
+    monthly: { amount: 900, interval: "month", label: "CareerFlow OS Starter (Monthly)" },
+    annual: { amount: 8400, interval: "year", label: "CareerFlow OS Starter (Annual)" },
+  },
+  pro: {
+    monthly: { amount: 1900, interval: "month", label: "CareerFlow OS Pro (Monthly)" },
+    annual: { amount: 16800, interval: "year", label: "CareerFlow OS Pro (Annual)" },
+  },
 };
+
 
 export const PACKS: Record<
   string,
@@ -41,24 +54,34 @@ export function getStripe(): Stripe {
   return new Stripe(key, { apiVersion: "2025-08-27.basil", httpClient: Stripe.createFetchHttpClient() });
 }
 
-/** Finds or creates the Stripe price for a Pro plan interval, keyed by lookup_key so it is idempotent. */
-export async function ensureProPrice(stripe: Stripe, plan: "monthly" | "annual") {
-  const cfg = PRICE_CONFIG[plan];
-  const lookupKey = `careerflow_pro_${plan}`;
+const PRODUCT_META: Record<PlanTier, { name: string; description: string }> = {
+  starter: {
+    name: "CareerFlow OS Starter",
+    description: "Core resume analysis, ATS scoring and job matching for early job seekers.",
+  },
+  pro: {
+    name: "CareerFlow OS Pro",
+    description: "Unlimited resume analysis, AI matching, cover letters and interview coaching.",
+  },
+};
+
+/** Finds or creates the Stripe price for a tier + interval, keyed by lookup_key so it is idempotent. */
+export async function ensurePlanPrice(stripe: Stripe, tier: PlanTier, plan: PlanInterval) {
+  const cfg = PRICE_CONFIG[tier][plan];
+  const lookupKey = `careerflow_${tier}_${plan}`;
 
   const existing = await stripe.prices.list({ lookup_keys: [lookupKey], active: true, limit: 1 });
   if (existing.data.length > 0) return existing.data[0];
 
   const products = await stripe.products.search({
-    query: `metadata['careerflow_product']:'pro'`,
+    query: `metadata['careerflow_product']:'${tier}'`,
     limit: 1,
   });
   const product =
     products.data[0] ??
     (await stripe.products.create({
-      name: "CareerFlow OS Pro",
-      description: "Unlimited resume analysis, AI matching, cover letters and interview coaching.",
-      metadata: { careerflow_product: "pro" },
+      ...PRODUCT_META[tier],
+      metadata: { careerflow_product: tier },
     }));
 
   return await stripe.prices.create({

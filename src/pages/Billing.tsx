@@ -1,17 +1,32 @@
-import { useEffect } from "react";
-import { CreditCard, RefreshCw, Zap, Mic, ExternalLink, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CreditCard, RefreshCw, Zap, Mic, ExternalLink, Sparkles, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useBillingActions, useCredits, usePurchases, useSubscription } from "@/hooks/useSubscription";
 import { Seo } from "@/components/Seo";
+import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 
 function formatMoney(cents: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() })
     .format(cents / 100);
 }
+
+function packTypeOf(packKey: string) {
+  return packKey.startsWith("interview") ? "interview" : "application";
+}
+
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -28,6 +43,46 @@ export default function Billing() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [packType, setPackType] = useState("all");
+  const [status, setStatus] = useState("all");
+
+  const filtered = useMemo(() => {
+    return (purchases ?? []).filter((p) => {
+      const created = new Date(p.created_at);
+      if (from && created < new Date(`${from}T00:00:00`)) return false;
+      if (to && created > new Date(`${to}T23:59:59`)) return false;
+      if (packType !== "all" && packTypeOf(p.pack_key) !== packType) return false;
+      if (status !== "all" && p.status !== status) return false;
+      return true;
+    });
+  }, [purchases, from, to, packType, status]);
+
+  const exportCsv = () => {
+    const header = ["Date", "Pack", "Type", "Credits", "Amount", "Currency", "Status"];
+    const rows = filtered.map((p) => [
+      new Date(p.created_at).toISOString(),
+      p.pack_label ?? p.pack_key,
+      packTypeOf(p.pack_key),
+      String(p.credits_granted),
+      (p.amount_total / 100).toFixed(2),
+      p.currency.toUpperCase(),
+      p.status,
+    ]);
+    const csv = [header, ...rows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `careerflow-purchases-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+
 
   const renews = sub.currentPeriodEnd
     ? new Date(sub.currentPeriodEnd).toLocaleDateString(undefined, {
@@ -55,6 +110,10 @@ export default function Billing() {
           Restore purchases
         </Button>
       </div>
+
+      <PaymentIssueBanner />
+
+
 
       <Card className="p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -120,12 +179,55 @@ export default function Billing() {
       </div>
 
       <Card className="p-6">
-        <h2 className="text-sm font-semibold text-foreground mb-4">Purchase history</h2>
-        {!purchases || purchases.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No pack purchases yet.</p>
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+          <h2 className="text-sm font-semibold text-foreground">Purchase history</h2>
+          <Button variant="outline" size="sm" className="gap-2" onClick={exportCsv} disabled={filtered.length === 0}>
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-4">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">From</Label>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">To</Label>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Pack type</Label>
+            <Select value={packType} onValueChange={setPackType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All packs</SelectItem>
+                <SelectItem value="application">Applications</SelectItem>
+                <SelectItem value="interview">Interview prep</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {filtered.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {purchases && purchases.length > 0 ? "No purchases match these filters." : "No pack purchases yet."}
+          </p>
         ) : (
           <div className="divide-y divide-border">
-            {purchases.map((p) => (
+            {filtered.map((p) => (
               <div key={p.id} className="py-3 flex items-center justify-between gap-4 text-sm">
                 <div>
                   <div className="text-foreground">{p.pack_label ?? p.pack_key}</div>
@@ -142,6 +244,7 @@ export default function Billing() {
           </div>
         )}
       </Card>
+
 
       <Button variant="ghost" className="w-full" onClick={() => navigate("/pricing")}>
         Browse plans and pay-per-use packs

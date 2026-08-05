@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useCallback, useState } from "react";
+import { billingService, type PlanInterval, type PlanKey } from "@/lib/billing";
 
 export interface SubscriptionState {
   subscribed: boolean;
@@ -100,31 +101,26 @@ export function useBillingActions() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const startSubscription = useCallback(async (plan: "monthly" | "annual") => {
-    setPending(plan);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { mode: "subscription", plan },
-      });
-      if (error) throw error;
-      if (!data?.url) throw new Error("No checkout URL returned");
-      openExternal(data.url);
-    } catch {
-      toast.error("Couldn't start checkout. Make sure billing is configured and try again.");
-    } finally {
-      setPending(null);
-    }
-  }, []);
+  const startSubscription = useCallback(
+    async (interval: PlanInterval, plan: PlanKey = "pro") => {
+      setPending(`${plan}-${interval}`);
+      try {
+        const { url } = await billingService.createCheckout({ plan, interval });
+        openExternal(url);
+      } catch {
+        toast.error("Couldn't start checkout. Make sure billing is configured and try again.");
+      } finally {
+        setPending(null);
+      }
+    },
+    [],
+  );
 
   const buyPack = useCallback(async (pack: string) => {
     setPending(pack);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { mode: "payment", pack },
-      });
-      if (error) throw error;
-      if (!data?.url) throw new Error("No checkout URL returned");
-      openExternal(data.url);
+      const { url } = await billingService.createPackCheckout({ pack });
+      openExternal(url);
     } catch {
       toast.error("Couldn't start checkout. Please try again.");
     } finally {
@@ -135,10 +131,8 @@ export function useBillingActions() {
   const openPortal = useCallback(async () => {
     setPending("portal");
     try {
-      const { data, error } = await supabase.functions.invoke("customer-portal");
-      if (error) throw error;
-      if (!data?.url) throw new Error("No portal URL returned");
-      openExternal(data.url);
+      const { url } = await billingService.openCustomerPortal();
+      openExternal(url);
     } catch {
       toast.error("Couldn't open the billing portal. Start a plan first, then try again.");
     } finally {
@@ -149,8 +143,7 @@ export function useBillingActions() {
   const restorePurchases = useCallback(async () => {
     setPending("restore");
     try {
-      const { error } = await supabase.functions.invoke("check-subscription");
-      if (error) throw error;
+      await billingService.syncSubscription();
       await queryClient.invalidateQueries({ queryKey: ["subscription"] });
       await queryClient.invalidateQueries({ queryKey: ["usage-credits"] });
       await queryClient.invalidateQueries({ queryKey: ["purchases"] });
@@ -164,3 +157,11 @@ export function useBillingActions() {
 
   return { pending, startSubscription, buyPack, openPortal, restorePurchases };
 }
+
+/** True when Stripe reports a failed/overdue invoice needing user action. */
+export function usePaymentIssue() {
+  const { status, isLoading } = useSubscription();
+  const failing = status === "past_due" || status === "unpaid" || status === "incomplete";
+  return { hasPaymentIssue: !isLoading && failing, status };
+}
+
