@@ -120,12 +120,55 @@ export default function Billing() {
       </div>
 
       <Card className="p-6">
-        <h2 className="text-sm font-semibold text-foreground mb-4">Purchase history</h2>
-        {!purchases || purchases.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No pack purchases yet.</p>
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+          <h2 className="text-sm font-semibold text-foreground">Purchase history</h2>
+          <Button variant="outline" size="sm" className="gap-2" onClick={exportCsv} disabled={filtered.length === 0}>
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-4">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">From</Label>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">To</Label>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Pack type</Label>
+            <Select value={packType} onValueChange={setPackType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All packs</SelectItem>
+                <SelectItem value="application">Applications</SelectItem>
+                <SelectItem value="interview">Interview prep</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {filtered.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {purchases && purchases.length > 0 ? "No purchases match these filters." : "No pack purchases yet."}
+          </p>
         ) : (
           <div className="divide-y divide-border">
-            {purchases.map((p) => (
+            {filtered.map((p) => (
               <div key={p.id} className="py-3 flex items-center justify-between gap-4 text-sm">
                 <div>
                   <div className="text-foreground">{p.pack_label ?? p.pack_key}</div>
@@ -142,6 +185,7 @@ export default function Billing() {
           </div>
         )}
       </Card>
+
 
       <Button variant="ghost" className="w-full" onClick={() => navigate("/pricing")}>
         Browse plans and pay-per-use packs
