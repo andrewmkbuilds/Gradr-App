@@ -44,6 +44,46 @@ export default function Billing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [packType, setPackType] = useState("all");
+  const [status, setStatus] = useState("all");
+
+  const filtered = useMemo(() => {
+    return (purchases ?? []).filter((p) => {
+      const created = new Date(p.created_at);
+      if (from && created < new Date(`${from}T00:00:00`)) return false;
+      if (to && created > new Date(`${to}T23:59:59`)) return false;
+      if (packType !== "all" && packTypeOf(p.pack_key) !== packType) return false;
+      if (status !== "all" && p.status !== status) return false;
+      return true;
+    });
+  }, [purchases, from, to, packType, status]);
+
+  const exportCsv = () => {
+    const header = ["Date", "Pack", "Type", "Credits", "Amount", "Currency", "Status"];
+    const rows = filtered.map((p) => [
+      new Date(p.created_at).toISOString(),
+      p.pack_label ?? p.pack_key,
+      packTypeOf(p.pack_key),
+      String(p.credits_granted),
+      (p.amount_total / 100).toFixed(2),
+      p.currency.toUpperCase(),
+      p.status,
+    ]);
+    const csv = [header, ...rows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `careerflow-purchases-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+
+
   const renews = sub.currentPeriodEnd
     ? new Date(sub.currentPeriodEnd).toLocaleDateString(undefined, {
         year: "numeric",
