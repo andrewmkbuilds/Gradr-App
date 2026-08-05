@@ -1,17 +1,32 @@
-import { useEffect } from "react";
-import { CreditCard, RefreshCw, Zap, Mic, ExternalLink, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CreditCard, RefreshCw, Zap, Mic, ExternalLink, Sparkles, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useBillingActions, useCredits, usePurchases, useSubscription } from "@/hooks/useSubscription";
 import { Seo } from "@/components/Seo";
+import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 
 function formatMoney(cents: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() })
     .format(cents / 100);
 }
+
+function packTypeOf(packKey: string) {
+  return packKey.startsWith("interview") ? "interview" : "application";
+}
+
 
 export default function Billing() {
   const navigate = useNavigate();
