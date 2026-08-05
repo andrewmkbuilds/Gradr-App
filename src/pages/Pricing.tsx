@@ -180,6 +180,7 @@ export default function Pricing() {
                   <span className="text-4xl font-bold text-foreground">{tier.price}</span>
                   <span className="text-sm text-muted-foreground ml-1">/ {tier.period}</span>
                 </div>
+                {tier.note && <p className="text-xs text-primary mb-3">{tier.note}</p>}
 
                 <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
 
@@ -196,9 +197,9 @@ export default function Pricing() {
                   onClick={() => (current ? navigate("/billing") : handleSelect(tier.plan))}
                   variant={tier.highlighted ? "default" : "outline"}
                   className="w-full"
-                  disabled={pending === tier.plan}
+                  disabled={pending === pendingKey}
                 >
-                  {current ? "Manage plan" : pending === tier.plan ? "Opening checkout…" : tier.cta}
+                  {current ? "Manage plan" : pending === pendingKey ? "Opening checkout…" : tier.cta}
                 </Button>
               </Card>
             );
