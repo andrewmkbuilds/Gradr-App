@@ -151,10 +151,11 @@ export default function Pricing() {
       </div>
 
       {tab === "plans" ? (
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {tiers.map((tier) => {
             const Icon = tier.icon;
-            const current = isPro && tier.plan === billingInterval;
+            const pendingKey = tier.plan ? `${tier.plan.tier}-${tier.plan.interval}` : "free";
+            const current = isPro && tier.plan?.interval === billingInterval;
             return (
               <Card
                 key={tier.name}
