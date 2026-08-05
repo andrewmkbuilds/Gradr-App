@@ -107,17 +107,18 @@ export default function Pricing() {
   const { pending, startSubscription, buyPack } = useBillingActions();
   const [tab, setTab] = useState<"plans" | "packs">("plans");
 
-  const handleSelect = (plan: null | "monthly" | "annual") => {
+  const handleSelect = (plan: PlanRef) => {
     if (!user) {
       navigate("/auth");
       return;
     }
     if (!plan) {
-      toast.success("You're on the Starter plan!");
+      toast.success("You're on the Free plan!");
       return;
     }
-    void startSubscription(plan);
+    void startSubscription(plan.interval, plan.tier);
   };
+
 
   const handlePack = (key: string) => {
     if (!user) {
