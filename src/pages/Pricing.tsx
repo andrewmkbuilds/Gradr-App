@@ -7,15 +7,28 @@ import { useAuth } from "@/hooks/useAuth";
 import { useBillingActions, useSubscription } from "@/hooks/useSubscription";
 import { toast } from "sonner";
 
-const tiers = [
+type PlanRef = { tier: "starter" | "pro"; interval: "monthly" | "annual" } | null;
+
+const tiers: {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  icon: typeof Sparkles;
+  highlighted: boolean;
+  plan: PlanRef;
+  note?: string;
+  features: string[];
+  cta: string;
+}[] = [
   {
-    name: "Starter",
+    name: "Free",
     price: "$0",
     period: "forever",
     description: "Explore the basics of CareerFlow OS.",
     icon: Sparkles,
     highlighted: false,
-    plan: null as null | "monthly" | "annual",
+    plan: null,
     features: [
       "1 resume analysis per month",
       "Basic ATS scoring",
@@ -25,13 +38,31 @@ const tiers = [
     cta: "Get started",
   },
   {
+    name: "Starter",
+    price: "$9",
+    period: "per month",
+    description: "Core AI tools for an active job search.",
+    icon: Zap,
+    highlighted: false,
+    plan: { tier: "starter", interval: "monthly" },
+    note: "or $84 billed annually",
+    features: [
+      "10 resume analyses per month",
+      "ATS optimization",
+      "50 job matches per month",
+      "5 cover letters per month",
+      "Email support",
+    ],
+    cta: "Start Starter",
+  },
+  {
     name: "Pro Monthly",
     price: "$19",
     period: "per month",
     description: "For serious job seekers ready to land roles fast.",
     icon: Rocket,
     highlighted: false,
-    plan: "monthly" as const,
+    plan: { tier: "pro", interval: "monthly" },
     features: [
       "Unlimited resume analysis",
       "Advanced ATS + AI suggestions",
@@ -40,7 +71,7 @@ const tiers = [
       "Mock interview coach",
       "Priority email support",
     ],
-    cta: "Subscribe monthly",
+    cta: "Start Pro",
   },
   {
     name: "Pro Annual",
@@ -49,16 +80,18 @@ const tiers = [
     description: "Everything in Pro — billed yearly, just $14/month.",
     icon: Crown,
     highlighted: true,
-    plan: "annual" as const,
+    plan: { tier: "pro", interval: "annual" },
+    note: "Equivalent to $14/month · save $60",
     features: [
       "Everything in Pro Monthly",
       "Save $60 vs monthly billing",
       "Priority feature access",
       "Annual career strategy review",
     ],
-    cta: "Subscribe annually",
+    cta: "Start Annual",
   },
 ];
+
 
 const packs = [
   { key: "applications_10", label: "10 Extra Applications", price: "$9", icon: Zap, blurb: "Top up your application generator." },
