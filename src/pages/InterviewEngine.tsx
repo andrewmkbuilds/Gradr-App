@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { ProGate } from "@/components/ProGate";
+import { CreditsBalance } from "@/components/CreditsBalance";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -127,6 +128,7 @@ function InterviewEngineInner() {
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Interview Coach</h1>
           <p className="text-sm text-muted-foreground mt-1">AI-powered mock interview with real-time feedback</p>
         </div>
+        <CreditsBalance only="interview" compact />
         <div className="glass-card p-8 flex flex-col items-center animate-slide-up">
           <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
             <Mic className="h-8 w-8 text-primary" />
