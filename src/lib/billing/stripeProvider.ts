@@ -1,5 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { BillingProvider, CheckoutRequest, PackCheckoutRequest } from "./types";
+import type {
+  BillingProvider,
+  CheckoutRequest,
+  CheckoutResult,
+  PackCheckoutRequest,
+} from "./types";
 
 async function invoke<T>(fn: string, body?: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke(fn, body ? { body } : undefined);
@@ -11,7 +16,7 @@ async function invoke<T>(fn: string, body?: Record<string, unknown>): Promise<T>
 export const stripeBillingProvider: BillingProvider = {
   id: "stripe",
 
-  async createCheckout({ plan, interval }: CheckoutRequest) {
+  async createCheckout({ plan, interval }: CheckoutRequest): Promise<CheckoutResult> {
     const data = await invoke<{ url?: string }>("create-checkout", {
       mode: "subscription",
       plan: interval,
@@ -21,13 +26,13 @@ export const stripeBillingProvider: BillingProvider = {
     return { url: data.url };
   },
 
-  async createPackCheckout({ pack }: PackCheckoutRequest) {
+  async createPackCheckout({ pack }: PackCheckoutRequest): Promise<CheckoutResult> {
     const data = await invoke<{ url?: string }>("create-checkout", { mode: "payment", pack });
     if (!data?.url) throw new Error("No checkout URL returned");
     return { url: data.url };
   },
 
-  async openCustomerPortal() {
+  async openCustomerPortal(): Promise<CheckoutResult> {
     const data = await invoke<{ url?: string }>("customer-portal");
     if (!data?.url) throw new Error("No portal URL returned");
     return { url: data.url };

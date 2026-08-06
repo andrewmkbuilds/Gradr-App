@@ -101,38 +101,49 @@ export function useBillingActions() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  /** Used by in-page providers (RevenueCat) once a purchase settles. */
+  const refreshEntitlements = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["subscription"] });
+    await queryClient.invalidateQueries({ queryKey: ["usage-credits"] });
+    await queryClient.invalidateQueries({ queryKey: ["purchases"] });
+    toast.success("Purchase complete. Your plan is active.");
+  }, [queryClient]);
+
   const startSubscription = useCallback(
     async (interval: PlanInterval, plan: PlanKey = "pro") => {
       setPending(`${plan}-${interval}`);
       try {
         const { url } = await billingService.createCheckout({ plan, interval });
-        openExternal(url);
+        if (url) openExternal(url);
+        else await refreshEntitlements();
       } catch {
         toast.error("Couldn't start checkout. Make sure billing is configured and try again.");
       } finally {
         setPending(null);
       }
     },
-    [],
+    [refreshEntitlements],
   );
 
   const buyPack = useCallback(async (pack: string) => {
     setPending(pack);
     try {
       const { url } = await billingService.createPackCheckout({ pack });
-      openExternal(url);
+      if (url) openExternal(url);
+      else await refreshEntitlements();
     } catch {
       toast.error("Couldn't start checkout. Please try again.");
     } finally {
       setPending(null);
     }
-  }, []);
+  }, [refreshEntitlements]);
 
   const openPortal = useCallback(async () => {
     setPending("portal");
     try {
       const { url } = await billingService.openCustomerPortal();
-      openExternal(url);
+      if (url) openExternal(url);
+      else toast.info("Manage your plan from the Billing page.");
     } catch {
       toast.error("Couldn't open the billing portal. Start a plan first, then try again.");
     } finally {
