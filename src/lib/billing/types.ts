@@ -22,18 +22,29 @@ export interface PackCheckoutRequest {
 }
 
 /**
+ * Result of a checkout action.
+ * - Hosted providers (Stripe) return a `url` the app opens in a new tab.
+ * - In-page providers (RevenueCat Web Billing) complete inline and return
+ *   `completed: true` with no URL.
+ */
+export interface CheckoutResult {
+  url?: string;
+  completed?: boolean;
+}
+
+/**
  * Every billing action in the app routes through this interface.
  * Swapping StripeBillingProvider for RevenueCatBillingProvider requires no
  * changes outside `src/lib/billing`.
  */
 export interface BillingProvider {
   readonly id: "stripe" | "revenuecat";
-  /** Start a subscription checkout; returns a URL to redirect/open. */
-  createCheckout(req: CheckoutRequest): Promise<{ url: string }>;
+  /** Start a subscription checkout. */
+  createCheckout(req: CheckoutRequest): Promise<CheckoutResult>;
   /** Start a one-off credit pack checkout. */
-  createPackCheckout(req: PackCheckoutRequest): Promise<{ url: string }>;
+  createPackCheckout(req: PackCheckoutRequest): Promise<CheckoutResult>;
   /** Open the self-serve management surface (upgrade/downgrade/cancel/resume/card). */
-  openCustomerPortal(): Promise<{ url: string }>;
+  openCustomerPortal(): Promise<CheckoutResult>;
   /** Re-sync entitlements from the provider into the database. */
   syncSubscription(): Promise<void>;
 }
@@ -45,3 +56,6 @@ export const PLAN_CATALOG: Record<
   starter: { label: "Starter", monthly: 900, annual: 8400 },
   pro: { label: "Pro", monthly: 1900, annual: 16800 },
 };
+
+/** Entitlement identifier shared by both providers. */
+export const PRO_ENTITLEMENT = "CareerFlow OS Pro";
