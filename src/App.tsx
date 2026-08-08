@@ -52,7 +52,10 @@ function ProtectedRoutes() {
     );
   }
 
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) {
+    if (location.pathname === "/") return <Landing />;
+    return <Navigate to={`/auth?next=${encodeURIComponent(location.pathname)}`} replace />;
+  }
 
   return (
     <DashboardLayout>
@@ -65,6 +68,7 @@ function ProtectedRoutes() {
           <Route path="/pipeline" element={<AnimatedPage><Pipeline /></AnimatedPage>} />
           <Route path="/apply" element={<AnimatedPage><ApplicationEngine /></AnimatedPage>} />
           <Route path="/interview" element={<AnimatedPage><InterviewEngine /></AnimatedPage>} />
+          <Route path="/interview/history" element={<AnimatedPage><InterviewHistory /></AnimatedPage>} />
           <Route path="/growth" element={<AnimatedPage><GrowthEngine /></AnimatedPage>} />
           <Route path="/settings" element={<AnimatedPage><Settings /></AnimatedPage>} />
           <Route path="/admin/digest-preview" element={<AnimatedPage><DigestPreview /></AnimatedPage>} />
@@ -103,6 +107,7 @@ function AppRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        <Route path="/landing" element={<AnimatedPage><Landing /></AnimatedPage>} />
         <Route path="/auth" element={<AnimatedPage><AuthRoute /></AnimatedPage>} />
         <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
         <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
