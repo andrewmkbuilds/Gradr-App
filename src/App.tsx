@@ -35,6 +35,8 @@ import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 import OAuthConsent from "./pages/OAuthConsent";
+import Landing from "./pages/Landing";
+import InterviewHistory from "./pages/InterviewHistory";
 
 const queryClient = new QueryClient();
 
