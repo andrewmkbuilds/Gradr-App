@@ -599,6 +599,51 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_sessions: {
+        Row: {
+          created_at: string
+          duration_sec: number
+          focus_areas: string[] | null
+          id: string
+          integrity: Json | null
+          overall_score: number | null
+          pdf_path: string | null
+          practice_plan: Json | null
+          report: Json
+          target_role: string | null
+          transcript: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_sec?: number
+          focus_areas?: string[] | null
+          id?: string
+          integrity?: Json | null
+          overall_score?: number | null
+          pdf_path?: string | null
+          practice_plan?: Json | null
+          report: Json
+          target_role?: string | null
+          transcript?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_sec?: number
+          focus_areas?: string[] | null
+          id?: string
+          integrity?: Json | null
+          overall_score?: number | null
+          pdf_path?: string | null
+          practice_plan?: Json | null
+          report?: Json
+          target_role?: string | null
+          transcript?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_matches: {
         Row: {
           ai_strategy: string | null
