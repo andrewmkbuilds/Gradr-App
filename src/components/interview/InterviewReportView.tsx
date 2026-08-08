@@ -1,4 +1,13 @@
-import { CheckCircle2, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  TrendingUp,
+  ArrowRight,
+  RefreshCw,
+  CalendarDays,
+  FileDown,
+  Loader2,
+  HistoryIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScoreRing } from "@/components/ScoreRing";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
@@ -20,10 +29,30 @@ interface Props {
   integrity?: IntegritySnapshot | null;
   durationSec: number;
   onRestart: () => void;
+  onRerun?: () => void;
+  onGeneratePlan?: () => void;
+  planLoading?: boolean;
+  hasPlan?: boolean;
+  onExportPdf?: () => void;
+  exporting?: boolean;
+  onViewHistory?: () => void;
 }
 
 /** Post-session scorecard for a completed mock interview. */
-export function InterviewReportView({ report, integrity, durationSec, onRestart }: Props) {
+export function InterviewReportView({
+  report,
+  integrity,
+  durationSec,
+  onRestart,
+  onRerun,
+  onGeneratePlan,
+  planLoading,
+  hasPlan,
+  onExportPdf,
+  exporting,
+  onViewHistory,
+}: Props) {
+
   const mins = Math.floor(durationSec / 60);
   const secs = durationSec % 60;
 
@@ -69,7 +98,34 @@ export function InterviewReportView({ report, integrity, durationSec, onRestart 
 
       <List title="Next steps" icon={<ArrowRight className="h-4 w-4 text-primary" />} items={report.nextSteps} />
 
-      <Button onClick={onRestart} className="w-full sm:w-auto">Run another interview</Button>
+      <div className="flex flex-wrap gap-2">
+        {onRerun && (
+          <Button onClick={onRerun} className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Re-run with improvements
+          </Button>
+        )}
+        {onGeneratePlan && (
+          <Button variant="outline" onClick={onGeneratePlan} disabled={planLoading}>
+            {planLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CalendarDays className="h-4 w-4 mr-2" />}
+            {hasPlan ? "Regenerate 7-day plan" : "Build 7-day practice plan"}
+          </Button>
+        )}
+        {onExportPdf && (
+          <Button variant="outline" onClick={onExportPdf} disabled={exporting}>
+            {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileDown className="h-4 w-4 mr-2" />}
+            Export PDF
+          </Button>
+        )}
+        {onViewHistory && (
+          <Button variant="ghost" onClick={onViewHistory}>
+            <HistoryIcon className="h-4 w-4 mr-2" />
+            Interview history
+          </Button>
+        )}
+        <Button variant="ghost" onClick={onRestart}>Run another interview</Button>
+      </div>
+
     </div>
   );
 }

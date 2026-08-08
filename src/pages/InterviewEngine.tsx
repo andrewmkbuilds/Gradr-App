@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,12 @@ import { ProGate } from "@/components/ProGate";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { CameraMonitor } from "@/components/interview/CameraMonitor";
 import { InterviewReportView, type InterviewReport } from "@/components/interview/InterviewReportView";
+import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
+import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
+import type { Json } from "@/integrations/supabase/types";
+
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -25,9 +30,16 @@ function InterviewEngineInner() {
   const [voiceMode, setVoiceMode] = useState(true);
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [buildingReport, setBuildingReport] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [plan, setPlan] = useState<PracticePlan | null>(null);
+  const [planLoading, setPlanLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [durationSec, setDurationSec] = useState(0);
   const startedAt = useRef<number>(0);
   const integrityRef = useRef<IntegritySnapshot | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
 
   const voice = useVoiceSession();
   const { speak, stopSpeaking, ttsSupported } = voice;
@@ -103,18 +115,51 @@ function InterviewEngineInner() {
     if (voiceMode && ttsSupported && assistantText) speak(assistantText);
   };
 
-  const startInterview = async () => {
+  const startInterview = async (kickoff?: string) => {
     setStarted(true);
     setReport(null);
+    setPlan(null);
+    setSessionId(null);
+    setMessages([]);
     startedAt.current = Date.now();
     setIsLoading(true);
     try {
-      await streamChat([{ role: "user", content: "Start the mock interview. Introduce yourself and ask the first question." }]);
+      await streamChat([
+        {
+          role: "user",
+          content:
+            kickoff ??
+            "Start the mock interview. Introduce yourself and ask the first question.",
+        },
+      ]);
     } catch (e: any) {
       toast.error(e.message || "Failed to start interview");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /** Replays the same role question set with the report's next steps applied as coaching focus. */
+  const rerunWithImprovements = () => {
+    if (!report) return;
+    const questions = messages
+      .filter((m) => m.role === "assistant")
+      .map((m) => m.content.replace(/\s+/g, " ").trim())
+      .slice(0, 12);
+    const focus = [...(report.improvements ?? []), ...(report.nextSteps ?? [])].slice(0, 8);
+    const kickoff = [
+      `Re-run the same mock interview for the role: ${targetRole || "the same role"}.`,
+      "Ask the SAME question set, in the same order, as this previous session:",
+      questions.map((q, i) => `${i + 1}. ${q}`).join("\n"),
+      "",
+      "The candidate is retrying to apply this coaching feedback:",
+      focus.map((f) => `- ${f}`).join("\n"),
+      "",
+      "Before each question, add one short reminder (max 15 words) of the improvement to apply. Then ask the question. Start now with your introduction and the first question.",
+    ].join("\n");
+    setDurationSec(0);
+    toast.success("Re-running the same question set with your improvements applied.");
+    void startInterview(kickoff);
   };
 
   const submitAnswer = async (text: string) => {
@@ -153,22 +198,84 @@ function InterviewEngineInner() {
     stopSpeaking();
     if (voice.listening) voice.stopListening();
     setBuildingReport(true);
+    const elapsed = Math.round((Date.now() - startedAt.current) / 1000);
     try {
       const { data, error } = await supabase.functions.invoke("interview-report", {
         body: {
           messages,
           targetRole,
           integrity: integrityRef.current,
-          durationSec: Math.round((Date.now() - startedAt.current) / 1000),
+          durationSec: elapsed,
         },
       });
       if (error) throw error;
       if (!data?.report) throw new Error("No report returned");
-      setReport(data.report as InterviewReport);
+      const newReport = data.report as InterviewReport;
+      setReport(newReport);
+      setDurationSec(elapsed);
+
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        const { data: saved } = await supabase
+          .from("interview_sessions")
+          .insert({
+            user_id: userData.user.id,
+            target_role: targetRole || null,
+            duration_sec: elapsed,
+            overall_score: Math.round(newReport.overallScore),
+            report: newReport as unknown as Json,
+            integrity: (integrityRef.current ?? null) as unknown as Json,
+            transcript: messages as unknown as Json,
+          })
+          .select("id")
+          .maybeSingle();
+        if (saved?.id) setSessionId(saved.id);
+      }
     } catch {
       toast.error("Couldn't generate your scorecard. Please try again.");
     } finally {
       setBuildingReport(false);
+    }
+  };
+
+  const generatePlan = async () => {
+    if (!report) return;
+    setPlanLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("practice-plan", {
+        body: { report, targetRole },
+      });
+      if (error) throw error;
+      if (!data?.plan) throw new Error("No plan returned");
+      const newPlan = data.plan as PracticePlan;
+      setPlan(newPlan);
+      if (sessionId) {
+        await supabase
+          .from("interview_sessions")
+          .update({
+            practice_plan: newPlan as unknown as Json,
+            focus_areas: newPlan.focusAreas ?? [],
+          })
+          .eq("id", sessionId);
+      }
+    } catch {
+      toast.error("Couldn't build your practice plan. Please try again.");
+    } finally {
+      setPlanLoading(false);
+    }
+  };
+
+  const exportPdf = async () => {
+    if (!report) return;
+    setExporting(true);
+    try {
+      const { blob } = await exportReportPdf({ report, targetRole, durationSec, plan, sessionId });
+      downloadBlob(blob, "gradr-interview-scorecard.pdf");
+      toast.success("Scorecard saved to your account and downloaded.");
+    } catch {
+      toast.error("Couldn't export your scorecard. Please try again.");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -179,21 +286,33 @@ function InterviewEngineInner() {
     setStarted(false);
     setInput("");
     setReport(null);
+    setPlan(null);
+    setSessionId(null);
     integrityRef.current = null;
   };
 
+
   if (report) {
     return (
-      <div className="max-w-3xl mx-auto py-2">
+      <div className="max-w-3xl mx-auto py-2 space-y-6">
         <InterviewReportView
           report={report}
           integrity={integrityRef.current}
-          durationSec={Math.round((Date.now() - startedAt.current) / 1000)}
+          durationSec={durationSec}
           onRestart={resetInterview}
+          onRerun={rerunWithImprovements}
+          onGeneratePlan={generatePlan}
+          planLoading={planLoading}
+          hasPlan={!!plan}
+          onExportPdf={exportPdf}
+          exporting={exporting}
+          onViewHistory={() => navigate("/interview/history")}
         />
+        {plan && <PracticePlanView plan={plan} />}
       </div>
     );
   }
+
 
   if (!started) {
     return (
@@ -230,7 +349,7 @@ function InterviewEngineInner() {
               Voice {voiceMode ? "on" : "off"}
             </Button>
           </div>
-          <Button onClick={startInterview} className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button onClick={() => void startInterview()} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Mic className="h-4 w-4 mr-2" />
             Begin Interview
           </Button>
