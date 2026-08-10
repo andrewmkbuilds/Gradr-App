@@ -88,12 +88,18 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
+    connectionLost, onDismissConnectionError,
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
   const [elapsed, setElapsed] = useState(0);
   const [captionsOn, setCaptionsOn] = useState(true);
+  const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeMatch, setActiveMatch] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const matchRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const tick = () => setElapsed(Math.round((Date.now() - startedAt) / 1000));
@@ -103,13 +109,37 @@ export function InterviewStudio(props: Props) {
   }, [startedAt]);
 
   useEffect(() => {
+    if (query.trim()) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, partialUser, partialModel]);
+  }, [messages, partialUser, partialModel, query]);
+
+  const matchIndexes = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return messages.reduce<number[]>((acc, m, i) => {
+      if (m.content.toLowerCase().includes(q)) acc.push(i);
+      return acc;
+    }, []);
+  }, [messages, query]);
+
+  useEffect(() => setActiveMatch(0), [query]);
+
+  useEffect(() => {
+    const target = matchIndexes[activeMatch];
+    if (target === undefined) return;
+    matchRefs.current[target]?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [activeMatch, matchIndexes]);
+
+  const jump = (dir: 1 | -1) => {
+    if (matchIndexes.length === 0) return;
+    setActiveMatch((i) => (i + dir + matchIndexes.length) % matchIndexes.length);
+  };
 
   const overtime = limits ? elapsed > limits.maxSessionMinutes * 60 : false;
   const currentQuestion =
     partialModel || [...messages].reverse().find((m) => m.role === "assistant")?.content || "";
   const liveCaption = partialModel || partialUser;
+  const activeMessageIndex = matchIndexes[activeMatch];
 
   return (
     <TooltipProvider delayDuration={200}>
