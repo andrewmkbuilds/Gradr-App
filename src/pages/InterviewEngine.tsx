@@ -31,7 +31,10 @@ function InterviewEngineInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [targetRole, setTargetRole] = useState("");
   const [started, setStarted] = useState(false);
+  const [stage, setStage] = useState<"setup" | "preflight">("setup");
+  const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);
+
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [buildingReport, setBuildingReport] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
