@@ -45,7 +45,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, targetRole, resumeText } = await req.json();
+    const { messages, targetRole, resumeText, directive } = await req.json();
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "messages array is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
