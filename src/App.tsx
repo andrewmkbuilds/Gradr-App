@@ -10,6 +10,9 @@ import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
 import { AnimatePresence } from "framer-motion";
 import { captureReferralFromUrl } from "@/lib/affiliateTracking";
+import { SentryErrorBoundary, addBreadcrumb } from "@/lib/telemetry/sentry";
+import { phPageview } from "@/lib/telemetry/posthog";
+
 import Dashboard from "./pages/Dashboard";
 import ResumeEngine from "./pages/ResumeEngine";
 import JobMatchingEngine from "./pages/JobMatchingEngine";
