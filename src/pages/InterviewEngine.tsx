@@ -37,6 +37,7 @@ function InterviewEngineInner() {
   const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);
   const [engine, setEngine] = useState<Engine>("fallback");
+  const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
   const [report, setReport] = useState<InterviewReport | null>(null);
