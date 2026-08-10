@@ -14,6 +14,7 @@ import { useRealtimeInterview } from "@/hooks/useRealtimeInterview";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
 import { InterviewStudio } from "@/components/interview/InterviewStudio";
+import { SessionDebrief } from "@/components/interview/SessionDebrief";
 import type { InterviewerState } from "@/components/interview/InterviewerOrb";
 import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
 
@@ -37,6 +38,7 @@ function InterviewEngineInner() {
   const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);
   const [engine, setEngine] = useState<Engine>("fallback");
+  const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
   const [report, setReport] = useState<InterviewReport | null>(null);
@@ -435,6 +437,12 @@ function InterviewEngineInner() {
           exporting={exporting}
           onViewHistory={() => navigate("/interview/history")}
         />
+        <SessionDebrief
+          report={report}
+          messages={messages}
+          targetRole={targetRole}
+          durationSec={durationSec}
+        />
         {plan && <PracticePlanView plan={plan} />}
       </div>
     );
@@ -479,6 +487,9 @@ function InterviewEngineInner() {
 
 
   const liveRealtime = engine === "realtime" && realtime.isLive;
+  // Realtime streaming dropped mid-session: surface a retry overlay unless dismissed.
+  const connectionLost =
+    engine === "realtime" && !realtime.isLive && !connecting && !connectionErrorDismissed;
 
   const interviewerState: InterviewerState = connecting
     ? "connecting"
@@ -519,6 +530,8 @@ function InterviewEngineInner() {
       input={input}
       limits={realtime.limits}
       startedAt={startedAt.current}
+      connectionLost={connectionLost}
+      onDismissConnectionError={() => setConnectionErrorDismissed(true)}
       onInputChange={setInput}
       onSubmit={() => void submitAnswer(input)}
       onToggleMic={toggleMic}
@@ -528,7 +541,10 @@ function InterviewEngineInner() {
         setVoiceMode((v) => !v);
       }}
       onInterrupt={() => realtime.interrupt()}
-      onReconnect={() => void retryRealtime()}
+      onReconnect={() => {
+        setConnectionErrorDismissed(false);
+        void retryRealtime();
+      }}
       onEnd={() => void endAndScore()}
       onReset={resetInterview}
       onSnapshot={handleSnapshot}

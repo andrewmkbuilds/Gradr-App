@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX,
-  Square, Radio, Hand, Zap, Captions, WifiOff,
+  Square, Radio, Hand, Zap, Captions, WifiOff, Search, X, ChevronUp, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { CameraMonitor } from "@/components/interview/CameraMonitor";
 import { InterviewerOrb, type InterviewerState } from "@/components/interview/InterviewerOrb";
+import { ConnectionErrorOverlay } from "@/components/interview/ConnectionErrorOverlay";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 
 export type Msg = { role: "user" | "assistant"; content: string };
@@ -38,6 +39,8 @@ interface Props {
   input: string;
   limits: Limits | null;
   startedAt: number;
+  connectionLost?: boolean;
+  onDismissConnectionError?: () => void;
   onInputChange: (value: string) => void;
   onSubmit: () => void;
   onToggleMic: () => void;
@@ -47,6 +50,25 @@ interface Props {
   onEnd: () => void;
   onReset: () => void;
   onSnapshot: (s: IntegritySnapshot) => void;
+}
+
+/** Splits text into highlighted / plain segments for the transcript search. */
+function highlight(text: string, query: string) {
+  const q = query.trim();
+  if (!q) return [{ text, match: false }];
+  const parts: { text: string; match: boolean }[] = [];
+  const lower = text.toLowerCase();
+  const needle = q.toLowerCase();
+  let i = 0;
+  let idx = lower.indexOf(needle);
+  while (idx !== -1) {
+    if (idx > i) parts.push({ text: text.slice(i, idx), match: false });
+    parts.push({ text: text.slice(idx, idx + needle.length), match: true });
+    i = idx + needle.length;
+    idx = lower.indexOf(needle, i);
+  }
+  if (i < text.length) parts.push({ text: text.slice(i), match: false });
+  return parts;
 }
 
 function formatClock(sec: number) {
@@ -66,12 +88,18 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
+    connectionLost, onDismissConnectionError,
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
   const [elapsed, setElapsed] = useState(0);
   const [captionsOn, setCaptionsOn] = useState(true);
+  const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeMatch, setActiveMatch] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const matchRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const tick = () => setElapsed(Math.round((Date.now() - startedAt) / 1000));
@@ -81,17 +109,49 @@ export function InterviewStudio(props: Props) {
   }, [startedAt]);
 
   useEffect(() => {
+    if (query.trim()) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, partialUser, partialModel]);
+  }, [messages, partialUser, partialModel, query]);
+
+  const matchIndexes = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return messages.reduce<number[]>((acc, m, i) => {
+      if (m.content.toLowerCase().includes(q)) acc.push(i);
+      return acc;
+    }, []);
+  }, [messages, query]);
+
+  useEffect(() => setActiveMatch(0), [query]);
+
+  useEffect(() => {
+    const target = matchIndexes[activeMatch];
+    if (target === undefined) return;
+    matchRefs.current[target]?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [activeMatch, matchIndexes]);
+
+  const jump = (dir: 1 | -1) => {
+    if (matchIndexes.length === 0) return;
+    setActiveMatch((i) => (i + dir + matchIndexes.length) % matchIndexes.length);
+  };
 
   const overtime = limits ? elapsed > limits.maxSessionMinutes * 60 : false;
   const currentQuestion =
     partialModel || [...messages].reverse().find((m) => m.role === "assistant")?.content || "";
   const liveCaption = partialModel || partialUser;
+  const activeMessageIndex = matchIndexes[activeMatch];
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
+        {connectionLost && (
+          <ConnectionErrorOverlay
+            open
+            retrying={connecting}
+            onRetry={onReconnect}
+            onDismiss={onDismissConnectionError}
+          />
+        )}
         {/* ---------- Header ---------- */}
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
@@ -184,32 +244,134 @@ export function InterviewStudio(props: Props) {
               )}
 
               {captionsOn && liveCaption && (
-                <p
-                  className="mx-auto mt-6 max-w-2xl rounded-lg bg-background/70 px-4 py-2 text-center text-sm text-muted-foreground"
-                  aria-live="polite"
-                >
+                <p className="mx-auto mt-6 max-w-2xl rounded-lg bg-background/70 px-4 py-2 text-center text-sm text-foreground">
                   {liveCaption}
                 </p>
               )}
+
+              {/* Screen-reader live region: always announces, independent of visual captions */}
+              <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                {liveCaption}
+              </p>
             </section>
 
             {/* Transcript */}
-            <section className="glass-card flex min-h-[220px] flex-col p-4 sm:p-5">
-              <div className="mb-3 flex items-center justify-between">
+            <section className="glass-card flex min-h-[220px] flex-col p-4 sm:p-5" aria-label="Interview transcript">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Transcript
                 </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCaptionsOn((c) => !c)}
-                  aria-pressed={captionsOn}
-                  className="h-8 text-xs"
-                >
-                  <Captions className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                  Captions {captionsOn ? "on" : "off"}
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSearchOpen((o) => {
+                            if (o) setQuery("");
+                            else window.setTimeout(() => searchRef.current?.focus(), 0);
+                            return !o;
+                          });
+                        }}
+                        aria-pressed={searchOpen}
+                        aria-label={searchOpen ? "Close transcript search" : "Search transcript"}
+                        className="h-8 text-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <Search className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Search transcript</TooltipContent>
+                  </Tooltip>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCaptionsOn((c) => !c)}
+                    role="switch"
+                    aria-checked={captionsOn}
+                    aria-label={captionsOn ? "Turn live captions off" : "Turn live captions on"}
+                    className="h-8 text-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <Captions
+                      className={cn("mr-1.5 h-3.5 w-3.5", captionsOn ? "text-primary" : "text-muted-foreground")}
+                      aria-hidden="true"
+                    />
+                    Captions {captionsOn ? "on" : "off"}
+                  </Button>
+                </div>
               </div>
+
+              {/* Announces control state changes to screen readers */}
+              <p className="sr-only" role="status" aria-live="polite">
+                {`Live captions ${captionsOn ? "on" : "off"}.`}
+                {searchOpen && query.trim()
+                  ? ` ${matchIndexes.length} matching ${matchIndexes.length === 1 ? "message" : "messages"}${
+                      matchIndexes.length ? `, showing result ${activeMatch + 1}` : ""
+                    }.`
+                  : ""}
+              </p>
+
+              {searchOpen && (
+                <div className="mb-3 flex items-center gap-2">
+                  <label htmlFor="transcript-search" className="sr-only">
+                    Search transcript
+                  </label>
+                  <Input
+                    id="transcript-search"
+                    ref={searchRef}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        jump(e.shiftKey ? -1 : 1);
+                      }
+                      if (e.key === "Escape") {
+                        setQuery("");
+                        setSearchOpen(false);
+                      }
+                    }}
+                    placeholder="Search the transcript…"
+                    className="h-9 flex-1 bg-secondary/60"
+                  />
+                  <span className="min-w-[4.5rem] text-center text-xs tabular-nums text-muted-foreground">
+                    {query.trim() ? `${matchIndexes.length ? activeMatch + 1 : 0}/${matchIndexes.length}` : "—"}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => jump(-1)}
+                    disabled={matchIndexes.length === 0}
+                    aria-label="Previous match"
+                  >
+                    <ChevronUp className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => jump(1)}
+                    disabled={matchIndexes.length === 0}
+                    aria-label="Next match"
+                  >
+                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => {
+                      setQuery("");
+                      setSearchOpen(false);
+                    }}
+                    aria-label="Close search"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              )}
 
               <div ref={scrollRef} className="max-h-[38vh] flex-1 space-y-3 overflow-y-auto pr-1">
                 {messages.length === 0 && !thinking && (
@@ -217,8 +379,17 @@ export function InterviewStudio(props: Props) {
                     Your interview transcript will appear here as you speak.
                   </p>
                 )}
+                {query.trim() && matchIndexes.length === 0 && messages.length > 0 && (
+                  <p className="py-6 text-center text-sm text-muted-foreground">
+                    No transcript lines match “{query.trim()}”.
+                  </p>
+                )}
                 {messages.map((msg, i) => (
-                  <div key={i} className={cn("flex gap-3", msg.role === "user" && "justify-end")}>
+                  <div
+                    key={i}
+                    ref={(el) => { matchRefs.current[i] = el; }}
+                    className={cn("flex gap-3", msg.role === "user" && "justify-end")}
+                  >
                     {msg.role === "assistant" && (
                       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         <Bot className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -226,13 +397,27 @@ export function InterviewStudio(props: Props) {
                     )}
                     <div
                       className={cn(
-                        "max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed",
+                        "max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed transition-shadow",
                         msg.role === "user"
                           ? "bg-primary text-primary-foreground"
                           : "bg-secondary/60 text-foreground",
+                        activeMessageIndex === i && "ring-2 ring-primary ring-offset-2 ring-offset-background",
                       )}
                     >
-                      <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                      <p className="whitespace-pre-wrap break-words">
+                        {highlight(msg.content, query).map((part, pi) =>
+                          part.match ? (
+                            <mark
+                              key={pi}
+                              className="rounded bg-primary/30 px-0.5 text-foreground"
+                            >
+                              {part.text}
+                            </mark>
+                          ) : (
+                            <span key={pi}>{part.text}</span>
+                          ),
+                        )}
+                      </p>
                     </div>
                     {msg.role === "user" && (
                       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary">

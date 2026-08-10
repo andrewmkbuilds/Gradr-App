@@ -103,10 +103,16 @@ serve(async (req) => {
                   strengths: { type: "array", items: { type: "string" } },
                   improvements: { type: "array", items: { type: "string" } },
                   nextSteps: { type: "array", items: { type: "string" } },
+                  recommendedQuestions: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "3-5 specific interview questions the candidate should practise next, based on their weakest answers.",
+                  },
                 },
                 required: [
                   "overallScore", "communication", "technicalDepth", "structure",
                   "confidence", "summary", "strengths", "improvements", "nextSteps",
+                  "recommendedQuestions",
                 ],
                 additionalProperties: false,
               },

@@ -22,6 +22,7 @@ export interface InterviewReport {
   strengths: string[];
   improvements: string[];
   nextSteps: string[];
+  recommendedQuestions?: string[];
 }
 
 interface Props {
