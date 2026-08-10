@@ -8,12 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, Link2, AlertCircle, Upload } from "lucide-react";
+import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, Link2, AlertCircle, Upload, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { formatDistanceToNow } from "date-fns";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
 import { useNavigate } from "react-router-dom";
+import { CompanyResearchDialog } from "@/components/research/CompanyResearchDialog";
 
 interface FeedJob {
   external_id: string;
