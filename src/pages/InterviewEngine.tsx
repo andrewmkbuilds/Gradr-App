@@ -48,7 +48,7 @@ function InterviewEngineInner() {
   const [durationSec, setDurationSec] = useState(0);
   const startedAt = useRef<number>(0);
   const integrityRef = useRef<IntegritySnapshot | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  
   const messagesRef = useRef<Msg[]>([]);
   const fallbackHandled = useRef(false);
   const navigate = useNavigate();
