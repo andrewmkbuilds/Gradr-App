@@ -39,6 +39,8 @@ interface Props {
   input: string;
   limits: Limits | null;
   startedAt: number;
+  connectionLost?: boolean;
+  onDismissConnectionError?: () => void;
   onInputChange: (value: string) => void;
   onSubmit: () => void;
   onToggleMic: () => void;
@@ -48,6 +50,25 @@ interface Props {
   onEnd: () => void;
   onReset: () => void;
   onSnapshot: (s: IntegritySnapshot) => void;
+}
+
+/** Splits text into highlighted / plain segments for the transcript search. */
+function highlight(text: string, query: string) {
+  const q = query.trim();
+  if (!q) return [{ text, match: false }];
+  const parts: { text: string; match: boolean }[] = [];
+  const lower = text.toLowerCase();
+  const needle = q.toLowerCase();
+  let i = 0;
+  let idx = lower.indexOf(needle);
+  while (idx !== -1) {
+    if (idx > i) parts.push({ text: text.slice(i, idx), match: false });
+    parts.push({ text: text.slice(idx, idx + needle.length), match: true });
+    i = idx + needle.length;
+    idx = lower.indexOf(needle, i);
+  }
+  if (i < text.length) parts.push({ text: text.slice(i), match: false });
+  return parts;
 }
 
 function formatClock(sec: number) {
