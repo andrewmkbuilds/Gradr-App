@@ -524,11 +524,29 @@ export default function JobsFeed() {
                   <ExternalLink className="h-3.5 w-3.5" />
                   Apply
                 </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setResearchTarget({ company: job.company || "", role: job.title })}
+                  disabled={!job.company}
+                  className="gap-1.5"
+                  aria-label={`Research ${job.company || "company"}`}
+                >
+                  <Building2 className="h-3.5 w-3.5" />
+                  Research
+                </Button>
               </div>
             </div>
           </Card>
         ))}
       </div>
+
+      <CompanyResearchDialog
+        open={!!researchTarget}
+        onOpenChange={(o) => !o && setResearchTarget(null)}
+        company={researchTarget?.company ?? ""}
+        role={researchTarget?.role}
+      />
     </div>
   );
 }
