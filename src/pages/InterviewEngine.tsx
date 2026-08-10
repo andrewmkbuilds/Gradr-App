@@ -180,6 +180,8 @@ function InterviewEngineInner() {
     setSessionId(null);
     setMessages([]);
     startedAt.current = Date.now();
+    trackJourney("interview_started", { engine: "fallback", has_role: Boolean(targetRole) });
+
     setIsLoading(true);
     try {
       await streamChat([
@@ -206,6 +208,8 @@ function InterviewEngineInner() {
     setSessionId(null);
     setMessages([]);
     startedAt.current = Date.now();
+    trackJourney("interview_started", { engine: "realtime", has_role: Boolean(targetRole) });
+
     setConnecting(true);
 
     const result = await realtime.start({
