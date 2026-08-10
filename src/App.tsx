@@ -127,20 +127,44 @@ function ReferralCapture() {
   return null;
 }
 
+function TelemetryRouteTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    phPageview(location.pathname);
+    addBreadcrumb("navigation", location.pathname);
+  }, [location.pathname]);
+  return null;
+}
+
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ReferralCapture />
-        <AuthProvider>
-          <RouteSeo />
-          <AppRoutes />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <SentryErrorBoundary
+    fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
+        <div className="space-y-2">
+          <p className="text-lg font-semibold text-foreground">Something broke on our side</p>
+          <p className="text-sm text-muted-foreground">
+            The issue has been reported. Refresh the page to continue.
+          </p>
+        </div>
+      </div>
+    }
+  >
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ReferralCapture />
+          <TelemetryRouteTracker />
+          <AuthProvider>
+            <RouteSeo />
+            <AppRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </SentryErrorBoundary>
 );
+
 
 export default App;
