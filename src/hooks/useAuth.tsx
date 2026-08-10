@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { identifyUser, setSessionContext } from "@/lib/telemetry/journey";
+
 
 interface AuthContextType {
   session: Session | null;
@@ -36,6 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    identifyUser(session?.user?.id ?? null);
+    setSessionContext(session?.user?.id ? session.access_token.slice(-8) : null);
+  }, [session?.user?.id]);
+
 
   const signOut = async () => {
     await supabase.auth.signOut();

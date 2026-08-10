@@ -15,6 +15,9 @@ import {
   Newspaper,
   Building2,
 } from "lucide-react";
+import { CompanyLogo } from "@/components/CompanyLogo";
+import { trackJourney } from "@/lib/telemetry/journey";
+
 
 export interface CompanyResearch {
   overview: string;
@@ -85,6 +88,12 @@ export function CompanyResearchDialog({ open, onOpenChange, company, role }: Pro
           return;
         }
         setData(res as CompanyResearch);
+        trackJourney("company_research_viewed", {
+          cached: Boolean((res as CompanyResearch)?.cached),
+          confidence: (res as CompanyResearch)?.confidence,
+          refreshed: refresh,
+        });
+
       } catch {
         setError("Research could not be completed right now. Please try again.");
       } finally {
@@ -104,9 +113,10 @@ export function CompanyResearchDialog({ open, onOpenChange, company, role }: Pro
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/60">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <Building2 className="h-5 w-5 text-primary" aria-hidden="true" />
+              <DialogTitle className="flex items-center gap-2.5 text-lg">
+                <CompanyLogo company={company} size={28} rounded="md" />
                 <span className="truncate">{company}</span>
+
               </DialogTitle>
               <DialogDescription className="mt-1">
                 {role ? `Interview research for ${role}` : "Company interview research"}

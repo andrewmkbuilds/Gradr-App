@@ -20,6 +20,8 @@ import { buildSessionDirective, type SessionContext } from "@/lib/interview/pers
 
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 import type { Json } from "@/integrations/supabase/types";
+import { trackJourney } from "@/lib/telemetry/journey";
+
 
 
 type Msg = { role: "user" | "assistant"; content: string };

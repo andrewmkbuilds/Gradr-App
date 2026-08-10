@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { IntegrationsPanel } from "@/components/settings/IntegrationsPanel";
+
 
 export default function Settings() {
   const { user } = useAuth();
@@ -224,6 +226,9 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      <IntegrationsPanel />
     </div>
   );
 }
+

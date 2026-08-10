@@ -15,6 +15,10 @@ import { formatDistanceToNow } from "date-fns";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
 import { useNavigate } from "react-router-dom";
 import { CompanyResearchDialog } from "@/components/research/CompanyResearchDialog";
+import { CompanyLogo } from "@/components/CompanyLogo";
+import { prefetchLogos } from "@/lib/logos";
+import { trackJourney } from "@/lib/telemetry/journey";
+
 
 interface FeedJob {
   external_id: string;
@@ -158,8 +162,11 @@ export default function JobsFeed() {
         return;
       }
       setJobs(data.jobs || []);
+      prefetchLogos((data.jobs || []).map((j: FeedJob) => j.company));
+      trackJourney("job_match_started", { results: (data.jobs || []).length, remote_only: remote });
       void savePrefs({ what: q, where: loc, country: ctry, remoteOnly: remote });
       void scoreJobs(data.jobs || []);
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Search failed");
     } finally {
@@ -198,6 +205,11 @@ export default function JobsFeed() {
       });
       if (error || data?.error) return;
       const scores: { i: number; score: number; reason: string }[] = data?.scores || [];
+      trackJourney("job_match_completed", {
+        scored: scores.length,
+        top_score: scores.length ? Math.max(...scores.map((s) => s.score)) : 0,
+      });
+
       setJobs((prev) => {
         const next = [...prev];
         scores.forEach((s) => {
@@ -243,8 +255,14 @@ export default function JobsFeed() {
       toast.success(status === "applied" ? "Marked as applied" : "Saved to pipeline");
 
       if (status === "applied" && inserted) {
+        trackJourney("application_created", {
+          source: job.source,
+          has_match_score: typeof job.match_score === "number",
+          match_score: job.match_score ?? undefined,
+        });
         void generateApplicationPack(inserted.id, job);
       }
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to save");
     } finally {
@@ -310,14 +328,23 @@ export default function JobsFeed() {
   const addFromUrl = async () => {
     if (!user || !pasteUrl.trim()) return;
     setPasting(true);
+    let host = "unknown";
+    try {
+      host = new URL(pasteUrl.trim()).hostname.replace(/^www\./, "");
+    } catch {
+      /* ignore */
+    }
+    trackJourney("job_url_import_started", { host });
     try {
       const { data, error } = await supabase.functions.invoke("parse-job-url", {
         body: { url: pasteUrl.trim() },
       });
       if (error || data?.error) {
+        trackJourney("job_url_import_failed", { host, reason: "parse_failed" });
         if (!handleAiFunctionError(error, data)) toast.error(data?.error || "Failed to parse URL");
         return;
       }
+
       const { error: insErr } = await supabase.from("tracked_jobs").insert({
         user_id: user.id,
         source: "manual",
@@ -344,13 +371,20 @@ export default function JobsFeed() {
       setPasteUrl("");
       const missing: string[] = Array.isArray(data.missingFields) ? data.missingFields : [];
       const notable = missing.filter((f) => ["company", "salary_min", "description", "requirements"].includes(f));
+      trackJourney("job_url_import_completed", {
+        host,
+        missing_fields: missing.length,
+        extraction_source: data.extractionSource ?? "unknown",
+      });
       toast.success("Job added to pipeline", {
         description: notable.length
           ? `Some details weren't on the page (${notable.join(", ").replace(/_/g, " ")}). Add them in Pipeline.`
           : undefined,
       });
     } catch (e) {
+      trackJourney("job_url_import_failed", { host, reason: "insert_failed" });
       toast.error(e instanceof Error ? e.message : "Failed");
+
     } finally {
       setPasting(false);
     }
@@ -471,9 +505,8 @@ export default function JobsFeed() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-primary">{(job.company || "?")[0]?.toUpperCase()}</span>
-                  </div>
+                  <CompanyLogo company={job.company} size={40} className="mt-0.5" />
+
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-foreground truncate">{job.title}</h3>
                     <p className="text-sm text-muted-foreground">
