@@ -14,6 +14,8 @@ import {
   Mail,
   Gift,
   ScrollText,
+  Search,
+
   CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -47,6 +49,8 @@ const engines = [
   { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
   { title: "Affiliate Admin", url: "/admin/affiliates", icon: Sparkles },
   { title: "Audit Log", url: "/admin/audit-log", icon: ScrollText },
+  { title: "Search Console", url: "/admin/search-console", icon: Search },
+
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

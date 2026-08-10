@@ -45,7 +45,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, targetRole, resumeText } = await req.json();
+    const { messages, targetRole, resumeText, directive } = await req.json();
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "messages array is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -71,6 +71,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const safeDirective = typeof directive === "string" ? directive.slice(0, 8000) : "";
+
     const systemPrompt = `You are an expert interview coach conducting a realistic mock interview. Your role:
 
 1. Act as the interviewer for a ${targetRole || "software engineering"} position
@@ -80,9 +82,12 @@ serve(async (req) => {
 5. Be encouraging but honest
 6. If the conversation just started, introduce yourself and ask the first question
 7. Vary question types: behavioral (STAR method), technical knowledge, system design, culture fit
-${resumeText ? `\nCandidate's resume context:\n${resumeText.substring(0, 2000)}` : ""}
+8. Speak like a human on a live call: short sentences, natural connectors, no bullet lists or headings
+${safeDirective ? `\n--- Session brief (follow this precisely) ---\n${safeDirective}\n--- End session brief ---` : ""}
+${resumeText ? `\nCandidate's resume context:\n${String(resumeText).substring(0, 2000)}` : ""}
 
-Keep responses concise and conversational. Use markdown for formatting when helpful.`;
+Keep responses concise and conversational — this is spoken aloud, so avoid markdown formatting.`;
+
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

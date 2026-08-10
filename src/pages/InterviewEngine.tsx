@@ -13,6 +13,10 @@ import { InterviewReportView, type InterviewReport } from "@/components/intervie
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
+import { InterviewSetup } from "@/components/interview/InterviewSetup";
+import { PreflightCheck } from "@/components/interview/PreflightCheck";
+import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
+
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -27,7 +31,10 @@ function InterviewEngineInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [targetRole, setTargetRole] = useState("");
   const [started, setStarted] = useState(false);
+  const [stage, setStage] = useState<"setup" | "preflight">("setup");
+  const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);
+
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [buildingReport, setBuildingReport] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -65,7 +72,12 @@ function InterviewEngineInner() {
         Authorization: `Bearer ${session.access_token}`,
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
-      body: JSON.stringify({ messages: allMessages, targetRole }),
+      body: JSON.stringify({
+        messages: allMessages,
+        targetRole,
+        directive: sessionCtx ? buildSessionDirective(sessionCtx) : undefined,
+      }),
+
     });
 
     if (resp.status === 401) { handleAiFunctionError({ status: 401 }, null); return; }
@@ -284,6 +296,8 @@ function InterviewEngineInner() {
     if (voice.listening) voice.stopListening();
     setMessages([]);
     setStarted(false);
+    setStage("setup");
+
     setInput("");
     setReport(null);
     setPlan(null);
@@ -324,44 +338,32 @@ function InterviewEngineInner() {
           </p>
         </div>
         <CreditsBalance only="interview" compact />
-        <div className="glass-card p-8 flex flex-col items-center animate-slide-up">
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-            <Mic className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">Start a Mock Interview</h3>
-          <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
-            Speak your answers, get instant follow-ups, and finish with a scorecard on communication,
-            technical depth, structure and confidence.
-          </p>
-          <Input
-            placeholder="Target role (e.g., Senior Frontend Engineer)"
-            value={targetRole}
-            onChange={(e) => setTargetRole(e.target.value)}
-            className="max-w-sm mb-4 bg-secondary border-border"
+
+        {stage === "setup" ? (
+          <InterviewSetup
+            initial={sessionCtx ?? undefined}
+            onContinue={(ctx) => {
+              setSessionCtx(ctx);
+              setTargetRole(ctx.targetRole ?? "");
+              setStage("preflight");
+            }}
           />
-          <div className="flex items-center gap-2 mb-4">
-            <Button
-              variant={voiceMode ? "default" : "outline"}
-              size="sm"
-              onClick={() => setVoiceMode((v) => !v)}
-            >
-              {voiceMode ? <Volume2 className="h-4 w-4 mr-2" /> : <VolumeX className="h-4 w-4 mr-2" />}
-              Voice {voiceMode ? "on" : "off"}
-            </Button>
-          </div>
-          <Button onClick={() => void startInterview()} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Mic className="h-4 w-4 mr-2" />
-            Begin Interview
-          </Button>
-          {!voice.supported && (
-            <p className="text-xs text-muted-foreground mt-3">
-              Speech input isn't supported in this browser — you can still type your answers.
-            </p>
-          )}
-        </div>
+        ) : (
+          <PreflightCheck
+            onCancel={() => setStage("setup")}
+            onReady={() => void startInterview()}
+          />
+        )}
+
+        {!voice.supported && (
+          <p className="text-xs text-muted-foreground">
+            Speech input isn't supported in this browser — you can still type your answers.
+          </p>
+        )}
       </div>
     );
   }
+
 
   return (
     <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[1fr_320px]">
