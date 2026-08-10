@@ -143,7 +143,14 @@ export function InterviewStudio(props: Props) {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
+        {connectionLost && (
+          <ConnectionErrorOverlay
+            retrying={connecting}
+            onRetry={onReconnect}
+            onDismiss={onDismissConnectionError}
+          />
+        )}
         {/* ---------- Header ---------- */}
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
