@@ -1,15 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX, Square, Radio, Hand, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { ProGate } from "@/components/ProGate";
 import { CreditsBalance } from "@/components/CreditsBalance";
-import { CameraMonitor } from "@/components/interview/CameraMonitor";
 import { InterviewReportView, type InterviewReport } from "@/components/interview/InterviewReportView";
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
@@ -18,6 +13,8 @@ import { usePremiumVoice } from "@/hooks/usePremiumVoice";
 import { useRealtimeInterview } from "@/hooks/useRealtimeInterview";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
+import { InterviewStudio } from "@/components/interview/InterviewStudio";
+import type { InterviewerState } from "@/components/interview/InterviewerOrb";
 import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
 
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
@@ -26,6 +23,7 @@ import type { Json } from "@/integrations/supabase/types";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type Engine = "realtime" | "fallback";
+
 
 const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
 
