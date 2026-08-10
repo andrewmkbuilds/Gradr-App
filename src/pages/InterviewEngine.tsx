@@ -343,6 +343,16 @@ function InterviewEngineInner() {
       const newReport = data.report as InterviewReport;
       setReport(newReport);
       setDurationSec(elapsed);
+      trackJourney("interview_completed", {
+        engine,
+        duration_sec: elapsed,
+        turns: messages.length,
+      });
+      trackJourney("interview_report_generated", {
+        overall_score: Math.round(newReport.overallScore),
+        duration_sec: elapsed,
+      });
+
 
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
