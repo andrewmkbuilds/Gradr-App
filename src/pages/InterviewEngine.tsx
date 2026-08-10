@@ -84,9 +84,8 @@ function InterviewEngineInner() {
     onFallback: degradeToFallback,
   });
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, realtime.partialUser, realtime.partialModel]);
+
+
 
   const handleSnapshot = useCallback((s: IntegritySnapshot) => {
     integrityRef.current = s;
