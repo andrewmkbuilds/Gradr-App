@@ -296,6 +296,8 @@ function InterviewEngineInner() {
     if (voice.listening) voice.stopListening();
     setMessages([]);
     setStarted(false);
+    setStage("setup");
+
     setInput("");
     setReport(null);
     setPlan(null);
