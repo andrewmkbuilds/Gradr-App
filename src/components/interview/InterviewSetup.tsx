@@ -46,7 +46,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         const uid = userData.user?.id;
         if (!uid) return;
 
-        const [{ data: profile }, { data: resume }] = await Promise.all([
+        const [{ data: profile }, { data: resume }, { data: sub }] = await Promise.all([
           supabase.from("profiles").select("target_job_title").eq("user_id", uid).maybeSingle(),
           supabase
             .from("resumes")
@@ -55,13 +55,20 @@ export function InterviewSetup({ initial, onContinue }: Props) {
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle(),
+          supabase
+            .from("subscribers")
+            .select("subscribed, subscription_tier")
+            .eq("user_id", uid)
+            .maybeSingle(),
         ]);
         if (cancelled) return;
+        setTier(sub?.subscribed ? (sub.subscription_tier ?? "free") : "free");
         if (!initial?.targetRole && profile?.target_job_title) setTargetRole(profile.target_job_title);
         if (!initial?.resumeText && resume?.parsed_text) {
           setResumeText(resume.parsed_text);
           setResumeLabel(resume.file_name ?? "Latest resume");
         }
+
       } finally {
         if (!cancelled) setLoadingContext(false);
       }
