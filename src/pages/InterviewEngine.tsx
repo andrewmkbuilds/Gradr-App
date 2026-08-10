@@ -14,6 +14,7 @@ import { useRealtimeInterview } from "@/hooks/useRealtimeInterview";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
 import { InterviewStudio } from "@/components/interview/InterviewStudio";
+import { SessionDebrief } from "@/components/interview/SessionDebrief";
 import type { InterviewerState } from "@/components/interview/InterviewerOrb";
 import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
 
