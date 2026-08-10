@@ -479,6 +479,9 @@ function InterviewEngineInner() {
 
 
   const liveRealtime = engine === "realtime" && realtime.isLive;
+  // Realtime streaming dropped mid-session: surface a retry overlay unless dismissed.
+  const connectionLost =
+    engine === "realtime" && !realtime.isLive && !connecting && !connectionErrorDismissed;
 
   const interviewerState: InterviewerState = connecting
     ? "connecting"
