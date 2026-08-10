@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Loader2, FileText } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import {
   PERSONAS,
@@ -13,6 +15,7 @@ import {
   type DifficultyId,
   type SessionContext,
 } from "@/lib/interview/personas";
+import { entitlementFor, personaAllowed, difficultyAllowed } from "@/lib/interview/entitlements";
 
 interface Props {
   initial?: Partial<SessionContext>;
@@ -29,6 +32,10 @@ export function InterviewSetup({ initial, onContinue }: Props) {
   const [resumeText, setResumeText] = useState(initial?.resumeText ?? "");
   const [resumeLabel, setResumeLabel] = useState<string | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
+  const [tier, setTier] = useState<string | null>(null);
+
+  const ent = entitlementFor(tier);
+
 
   // Auto-fill from the user's saved profile and most recent parsed resume.
   useEffect(() => {
