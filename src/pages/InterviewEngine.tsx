@@ -481,178 +481,62 @@ function InterviewEngineInner() {
 
   const liveRealtime = engine === "realtime" && realtime.isLive;
 
+  const interviewerState: InterviewerState = connecting
+    ? "connecting"
+    : realtime.speaking || premium.speaking || voice.speaking
+      ? "speaking"
+      : isLoading
+        ? "thinking"
+        : liveRealtime && !realtime.muted
+          ? "listening"
+          : voice.listening
+            ? "listening"
+            : "idle";
+
+  const micMuted = liveRealtime ? realtime.muted : !voice.listening;
+  const micLabel = liveRealtime
+    ? realtime.muted
+      ? "Unmute your microphone"
+      : "Mute your microphone"
+    : voice.listening
+      ? "Stop recording and submit your answer"
+      : "Start recording your answer";
+
   return (
-    <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">AI Mock Interview</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-sm text-muted-foreground">{targetRole || "Mock Interview"}</p>
-              {liveRealtime ? (
-                <Badge variant="outline" className="border-primary/50 text-primary gap-1">
-                  <Radio className="h-3 w-3 animate-pulse" /> Realtime voice
-                </Badge>
-              ) : connecting ? (
-                <Badge variant="outline" className="gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" /> Connecting
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="gap-1">Standard voice</Badge>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            {liveRealtime && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => realtime.interrupt()}
-                disabled={!realtime.speaking}
-                title="Interrupt the interviewer"
-              >
-                <Hand className="h-4 w-4 mr-2" />
-                Jump in
-              </Button>
-            )}
-            {!liveRealtime && realtime.limits?.realtimeVoice && (
-              <Button variant="outline" size="sm" onClick={retryRealtime} disabled={connecting}>
-                <Zap className="h-4 w-4 mr-2" />
-                Reconnect realtime
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                stopSpeaking();
-                premium.stop();
-                setVoiceMode((v) => !v);
-              }}
-            >
-              {voiceMode ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-            </Button>
-            <Button variant="outline" size="sm" onClick={endAndScore} disabled={buildingReport}>
-              {buildingReport ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Square className="h-4 w-4 mr-2" />}
-              End &amp; score
-            </Button>
-            <Button variant="outline" size="sm" onClick={resetInterview}>
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div ref={scrollRef} className="flex-1 overflow-auto space-y-4 pr-2 mb-4">
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
-              {msg.role === "assistant" && (
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-                  <Bot className="h-4 w-4 text-primary" />
-                </div>
-              )}
-              <div className={`max-w-[80%] rounded-xl px-4 py-3 text-sm ${
-                msg.role === "user" ? "bg-primary text-primary-foreground" : "glass-card text-foreground"
-              }`}>
-                <p className="whitespace-pre-wrap">{msg.content}</p>
-              </div>
-              {msg.role === "user" && (
-                <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center shrink-0 mt-1">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          ))}
-          {realtime.partialModel && (
-            <div className="flex gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-                <Bot className="h-4 w-4 text-primary" />
-              </div>
-              <div className="max-w-[80%] rounded-xl px-4 py-3 text-sm glass-card text-muted-foreground italic">
-                {realtime.partialModel}
-              </div>
-            </div>
-          )}
-          {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-            <div className="flex gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Bot className="h-4 w-4 text-primary" />
-              </div>
-              <div className="glass-card rounded-xl px-4 py-3">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              </div>
-            </div>
-          )}
-          {(voice.listening || realtime.partialUser) && (
-            <div className="flex justify-end">
-              <div className="max-w-[80%] rounded-xl px-4 py-3 text-sm border border-primary/40 bg-primary/5 text-muted-foreground">
-                {realtime.partialUser || voice.transcript || "Listening…"}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          {(voice.supported || liveRealtime) && (
-            <Button
-              variant={liveRealtime ? (realtime.muted ? "outline" : "default") : voice.listening ? "default" : "outline"}
-              onClick={toggleMic}
-              disabled={isLoading && !liveRealtime}
-              className="shrink-0"
-              title={liveRealtime ? (realtime.muted ? "Unmute" : "Mute") : "Push to talk"}
-            >
-              {liveRealtime ? (
-                realtime.muted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />
-              ) : voice.listening ? (
-                <MicOff className="h-4 w-4" />
-              ) : (
-                <Mic className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-          <Input
-            placeholder={
-              liveRealtime
-                ? "Just talk — or type to add something"
-                : voice.listening
-                  ? "Listening… tap the mic to submit"
-                  : "Type your answer..."
-            }
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && submitAnswer(input)}
-            disabled={(isLoading || voice.listening) && !liveRealtime}
-            className="bg-secondary border-border"
-          />
-          <Button onClick={() => submitAnswer(input)} disabled={(isLoading && !liveRealtime) || !input.trim()} className="bg-primary text-primary-foreground">
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <CameraMonitor active={started} onSnapshot={handleSnapshot} />
-        {realtime.limits && (
-          <div className="glass-card p-4 text-xs text-muted-foreground space-y-1">
-            <p className="text-sm font-semibold text-foreground capitalize">{realtime.limits.tier} plan</p>
-            <p>
-              {realtime.limits.sessionsRemaining === null
-                ? "Unlimited interviews this month"
-                : `${realtime.limits.sessionsRemaining} of ${realtime.limits.sessionsPerMonth} interviews left this month`}
-            </p>
-            <p>Up to {realtime.limits.maxSessionMinutes} minutes per session</p>
-          </div>
-        )}
-        <div className="glass-card p-4 text-xs text-muted-foreground space-y-2">
-          <p className="text-sm font-semibold text-foreground">Session tips</p>
-          {liveRealtime && <p>You can interrupt the interviewer any time — just start talking.</p>}
-          <p>Use the STAR structure: Situation, Task, Action, Result.</p>
-          <p>Speak for 60–120 seconds per behavioural answer.</p>
-          <p>Hit “End &amp; score” whenever you're ready for your report.</p>
-        </div>
-      </div>
-    </div>
+    <InterviewStudio
+      targetRole={targetRole}
+      messages={messages}
+      partialUser={realtime.partialUser || (voice.listening ? voice.transcript : "")}
+      partialModel={realtime.partialModel}
+      interviewerState={interviewerState}
+      realtime={liveRealtime}
+      connecting={connecting}
+      canReconnect={!liveRealtime && !!realtime.limits?.realtimeVoice}
+      micMuted={micMuted}
+      micLabel={micLabel}
+      voiceOn={voiceMode}
+      thinking={isLoading && messages[messages.length - 1]?.role !== "assistant"}
+      ending={buildingReport}
+      input={input}
+      limits={realtime.limits}
+      startedAt={startedAt.current}
+      onInputChange={setInput}
+      onSubmit={() => void submitAnswer(input)}
+      onToggleMic={toggleMic}
+      onToggleVoice={() => {
+        stopSpeaking();
+        premium.stop();
+        setVoiceMode((v) => !v);
+      }}
+      onInterrupt={() => realtime.interrupt()}
+      onReconnect={() => void retryRealtime()}
+      onEnd={() => void endAndScore()}
+      onReset={resetInterview}
+      onSnapshot={handleSnapshot}
+    />
   );
 }
+
 
 export default function InterviewEngine() {
   return (
