@@ -88,47 +88,85 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         </p>
       </div>
 
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-secondary/30 p-3">
+        <div className="flex items-center gap-2 text-sm">
+          <Radio className={`h-4 w-4 ${ent.realtimeVoice ? "text-primary" : "text-muted-foreground"}`} />
+          <span className="text-foreground">
+            {ent.realtimeVoice ? "Realtime voice interview enabled" : "Realtime voice is a Starter & Pro feature"}
+          </span>
+          <Badge variant="outline" className="capitalize">{ent.label}</Badge>
+        </div>
+        {!ent.realtimeVoice && (
+          <Button asChild size="sm" variant="outline">
+            <Link to="/pricing">Upgrade</Link>
+          </Button>
+        )}
+      </div>
+
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Interviewer</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          {PERSONAS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setPersonaId(p.id)}
-              className={`text-left rounded-xl border p-3 transition-colors ${
-                personaId === p.id
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-secondary/40 hover:bg-secondary"
-              }`}
-            >
-              <div className="text-sm font-medium text-foreground">{p.label}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{p.blurb}</div>
-            </button>
-          ))}
+          {PERSONAS.map((p) => {
+            const locked = !personaAllowed(ent, p.id);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                disabled={locked}
+                onClick={() => setPersonaId(p.id)}
+                className={`text-left rounded-xl border p-3 transition-colors ${
+                  locked
+                    ? "border-border bg-secondary/20 opacity-60 cursor-not-allowed"
+                    : personaId === p.id
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-secondary/40 hover:bg-secondary"
+                }`}
+              >
+                <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  {p.label}
+                  {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {locked ? "Unlocks on a higher plan" : p.blurb}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Difficulty</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {DIFFICULTIES.map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              onClick={() => setDifficultyId(d.id)}
-              className={`text-left rounded-xl border p-3 transition-colors ${
-                difficultyId === d.id
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-secondary/40 hover:bg-secondary"
-              }`}
-            >
-              <div className="text-sm font-medium text-foreground">{d.label}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{d.blurb}</div>
-            </button>
-          ))}
+          {DIFFICULTIES.map((d) => {
+            const locked = !difficultyAllowed(ent, d.id);
+            return (
+              <button
+                key={d.id}
+                type="button"
+                disabled={locked}
+                onClick={() => setDifficultyId(d.id)}
+                className={`text-left rounded-xl border p-3 transition-colors ${
+                  locked
+                    ? "border-border bg-secondary/20 opacity-60 cursor-not-allowed"
+                    : difficultyId === d.id
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-secondary/40 hover:bg-secondary"
+                }`}
+              >
+                <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  {d.label}
+                  {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {locked ? "Unlocks on a higher plan" : d.blurb}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
+
 
       <div className="grid sm:grid-cols-2 gap-3">
         <Input
