@@ -523,6 +523,8 @@ function InterviewEngineInner() {
       input={input}
       limits={realtime.limits}
       startedAt={startedAt.current}
+      connectionLost={connectionLost}
+      onDismissConnectionError={() => setConnectionErrorDismissed(true)}
       onInputChange={setInput}
       onSubmit={() => void submitAnswer(input)}
       onToggleMic={toggleMic}
@@ -532,7 +534,10 @@ function InterviewEngineInner() {
         setVoiceMode((v) => !v);
       }}
       onInterrupt={() => realtime.interrupt()}
-      onReconnect={() => void retryRealtime()}
+      onReconnect={() => {
+        setConnectionErrorDismissed(false);
+        void retryRealtime();
+      }}
       onEnd={() => void endAndScore()}
       onReset={resetInterview}
       onSnapshot={handleSnapshot}
