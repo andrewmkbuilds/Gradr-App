@@ -59,6 +59,7 @@ export default function JobsFeed() {
   const [trackedIds, setTrackedIds] = useState<Set<string>>(new Set());
   const [pasteUrl, setPasteUrl] = useState("");
   const [pasting, setPasting] = useState(false);
+  const [researchTarget, setResearchTarget] = useState<{ company: string; role?: string } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasResume, setHasResume] = useState<boolean | null>(null);
   const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
