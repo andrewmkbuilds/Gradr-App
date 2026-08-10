@@ -1,158 +1,218 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  ArrowRight, Check, FileText, ShieldCheck, Target, Sparkles, Mic, LineChart,
-  Briefcase, Search, Layers, Bot, GraduationCap, Rocket, Compass, Award,
-  Camera, Waves, Clock, Menu, X, CircleDot, BarChart3, Lock,
+  ArrowRight, Check, FileText, Target, Mic, LineChart, Briefcase, Users,
+  GraduationCap, Rocket, Compass, Award, Menu, X, Sparkles, ShieldCheck,
+  Layers, Bot, Search, Send, RefreshCw, BarChart3, Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/useAuth";
+import { Reveal } from "@/components/landing/Reveal";
+import {
+  HeroWorkspace, ResumeVisual, MatchVisual, ApplicationVisual,
+  InterviewVisual, AssistantVisual, AnalyticsVisual,
+} from "@/components/landing/visuals";
 
-/* --------------------------------- data --------------------------------- */
+/* ---------------------------------- data ---------------------------------- */
 
 const NAV = [
   { label: "Product", href: "#product" },
-  { label: "Features", href: "#features" },
+  { label: "How it works", href: "#how-it-works" },
   { label: "AI Interview", href: "#interview" },
   { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
+  { label: "For Students", href: "#students" },
+  { label: "For Professionals", href: "#professionals" },
 ];
 
-const VALUE_STRIP = [
-  { icon: FileText, label: "Optimize your resume" },
-  { icon: Target, label: "Find better matches" },
-  { icon: Mic, label: "Practice real interviews" },
-  { icon: LineChart, label: "Track your career progress" },
+const FRAGMENTS = [
+  "Resume builders", "Job boards", "Spreadsheets", "Interview prep tools",
+  "LinkedIn", "Scattered notes", "AI chatbots", "Email threads", "Calendars",
 ];
 
-const FLOW = ["Resume", "ATS Optimization", "Job Matching", "Application", "AI Interview", "Feedback", "Career Growth"];
-
-const WORKFLOW = [
-  { n: "01", title: "BUILD", copy: "Create and manage a professional resume." },
-  { n: "02", title: "OPTIMIZE", copy: "Analyze ATS compatibility and improve your resume." },
-  { n: "03", title: "DISCOVER", copy: "Find jobs matched to your skills, experience, and goals." },
-  { n: "04", title: "APPLY", copy: "Track every application from one pipeline." },
-  { n: "05", title: "PRACTICE", copy: "Run realistic AI mock interviews and improve." },
-];
-
-const PERSONAS = [
-  { role: "Software Engineer", persona: "Technical Engineering Interviewer" },
-  { role: "Product Manager", persona: "Senior Product Leader" },
-  { role: "Investment Banking", persona: "High-Pressure Banking VP" },
-  { role: "Management Consulting", persona: "Strategy Consultant" },
-  { role: "Sales", persona: "Enterprise Sales Manager" },
-  { role: "Marketing", persona: "Marketing Director" },
-  { role: "Healthcare", persona: "Clinical Hiring Manager" },
-  { role: "HR", persona: "Senior HR Recruiter" },
+const SYSTEM = [
+  { n: "01", title: "Resume Intelligence", copy: "Parse your resume and score what recruiters and parsers actually read.", icon: FileText },
+  { n: "02", title: "ATS Optimization", copy: "Fix keywords, structure, and impact language before you apply.", icon: ShieldCheck },
+  { n: "03", title: "Job Matching", copy: "Score live roles against your real skills, not a keyword blob.", icon: Target },
+  { n: "04", title: "Application Strategy", copy: "Turn one job description into a complete application package.", icon: Send },
+  { n: "05", title: "Networking", copy: "Draft outreach that references the role and the company, not a template.", icon: Users },
+  { n: "06", title: "AI Mock Interview", copy: "Hold a real spoken interview with an adaptive AI interviewer.", icon: Mic },
+  { n: "07", title: "Career Analytics", copy: "See what's improving — and what's blocking your pipeline.", icon: BarChart3 },
+  { n: "08", title: "Continuous Improvement", copy: "Every session feeds the next practice plan and resume pass.", icon: RefreshCw },
 ];
 
 const AUDIENCE = [
-  { icon: GraduationCap, title: "Students", copy: "Build career confidence before your first major interview." },
-  { icon: Award, title: "Graduates", copy: "Turn your education into a competitive application." },
-  { icon: Rocket, title: "Early-career", copy: "Apply smarter and improve faster." },
-  { icon: Compass, title: "Career changers", copy: "Translate your existing experience into a new direction." },
-  { icon: Briefcase, title: "Experienced professionals", copy: "Target better opportunities with stronger positioning." },
+  { icon: GraduationCap, title: "Students", copy: "Build your first serious career profile before recruiting season starts.", id: "students" },
+  { icon: Award, title: "New graduates", copy: "Move from graduation to your first offer with a system, not a spreadsheet." },
+  { icon: Compass, title: "Career changers", copy: "Translate the experience you already have into the language of a new field." },
+  { icon: Rocket, title: "Early-career professionals", copy: "Sharpen your positioning and stop losing offers at the interview stage.", id: "professionals" },
+  { icon: Briefcase, title: "Experienced professionals", copy: "Make deliberate moves: target better roles and prepare for harder rooms." },
 ];
 
 const HOW = [
-  { n: "01", title: "Create your profile" },
-  { n: "02", title: "Add your resume and target roles" },
-  { n: "03", title: "Apply and practice" },
-  { n: "04", title: "Use AI feedback to improve" },
+  "Build your profile",
+  "Upload your resume",
+  "Set your career goals",
+  "Find matching opportunities",
+  "Prepare your applications",
+  "Practice interviews",
+  "Improve continuously",
 ];
 
-const FAQS = [
-  ["What is Gradr?", "Gradr is an AI-powered career operating system that connects your resume, ATS optimization, job matching, applications, interview practice, and career analytics in one workspace."],
-  ["Who is Gradr for?", "Students, university students, recent graduates, early-career professionals, career changers, and anyone actively applying for jobs."],
-  ["Is Gradr free?", "Yes. The Free plan includes basic resume tools, basic job discovery, application tracking, and a short guided preview of the AI Mock Interview."],
-  ["What does Pro include?", "Unlimited live interview sessions, advanced role and company simulations, advanced interviewer personas, deep reports and transcript analysis, personalized improvement plans, long-term analytics, role readiness tracking, sharing and exports."],
-  ["How does the AI Mock Interview work?", "You choose a target role, then hold a real spoken conversation with an adaptive AI interviewer. It asks follow-ups based on your answers, and afterwards you get a scored report with concrete coaching."],
-  ["Does Gradr use my camera?", "Only if you enable it. Camera analysis runs on-device to produce practice integrity signals such as presence, framing, and attention observations."],
-  ["Is my interview video stored?", "No. Raw video is not retained by default — only derived coaching signals are used for your feedback."],
-  ["How does the AI interviewer adapt to my job?", "The interviewer adapts to the selected job, company, industry, seniority, and interview stage, and you can override the automatically selected persona."],
-  ["Can I practice without voice?", "Yes. You can type your answers and still receive the same structured scorecard."],
-  ["Can I cancel my subscription?", "Yes. Manage, upgrade, downgrade, or cancel at any time from the billing portal in your account."],
-  ["How does Gradr protect my data?", "Your data is scoped to your account with row-level access rules, camera analysis stays on your device, and you can delete your interview data whenever you want."],
+const OLD_WAY = [
+  "A resume you edit blind",
+  "Five job boards, no signal",
+  "A spreadsheet you stop updating",
+  "Interview prep from a blog post",
+  "A chatbot with no memory of you",
 ];
 
-const PLANS = {
-  free: {
-    name: "Free", price: "$0", note: "forever",
-    description: "Get career-ready with the essentials.",
+const NEW_WAY = [
+  "A resume scored against real roles",
+  "Matches ranked by actual fit",
+  "A pipeline that updates as you apply",
+  "Spoken interviews with a scored report",
+  "One system that remembers your history",
+];
+
+const PLANS = [
+  {
+    name: "Free",
+    tagline: "Enough to feel the whole system.",
+    monthly: { price: "$0", note: "forever" },
+    annual: { price: "$0", note: "forever" },
     features: [
+      "Resume upload and ATS scoring",
+      "Job discovery and matching",
+      "Application tracking",
       "Guided AI interview preview",
-      "One short sample mock experience",
-      "Basic resume tools",
-      "Basic ATS scoring",
-      "Basic job discovery",
-      "Basic application tracking",
+      "Basic career analytics",
     ],
+    cta: "Get started free",
   },
-  starter: {
+  {
+    name: "Starter",
+    tagline: "For an active job search.",
     monthly: { price: "$9", note: "per month" },
     annual: { price: "$84", note: "per year · save $24" },
-    name: "Starter",
-    description: "Meaningful usage for an active job search.",
     features: [
-      "More AI interview sessions",
-      "Expanded resume + ATS features",
-      "Job matching",
-      "Application tracking",
-      "More interview reports",
+      "Everything in Free",
+      "Expanded resume and ATS passes",
+      "Full AI mock interview sessions",
+      "Application packages and outreach drafts",
       "Selected interviewer personas",
-      "Limited analytics",
+      "Interview reports and transcripts",
     ],
+    cta: "Start with Starter",
   },
-  pro: {
+  {
+    name: "Pro",
+    tagline: "The complete Gradr experience.",
     monthly: { price: "$19", note: "per month" },
     annual: { price: "$168", note: "per year · $14/month" },
-    name: "Pro",
-    description: "For serious job seekers who want every advantage.",
+    highlight: true,
     features: [
+      "Everything in Starter",
       "Unlimited live interview sessions",
-      "Advanced company + role simulations",
-      "Advanced interviewer personas",
-      "Deep reports and transcript analysis",
-      "Personalized improvement plans",
-      "Long-term analytics and role readiness",
-      "Coach/mentor sharing and exports",
-      "Advanced AI career features",
+      "Company and role-specific simulations",
+      "Advanced personas and difficulty control",
+      "Deep transcript analysis and coaching plans",
+      "Long-term analytics and readiness tracking",
+      "PDF exports and mentor sharing",
+    ],
+    cta: "Go Pro",
+  },
+];
+
+const FAQS: [string, string][] = [
+  ["What is Gradr?", "Gradr is an AI career operating system. It connects resume intelligence, ATS optimization, job matching, application generation, networking outreach, AI mock interviews, and career analytics in a single workspace — so each step feeds the next instead of living in a different tool."],
+  ["Who is Gradr for?", "People actively moving toward a job: students preparing for recruiting, new graduates chasing a first offer, career changers repositioning existing experience, and early-career or experienced professionals who want a more deliberate search."],
+  ["Can I use Gradr for free?", "Yes. The Free plan includes resume upload with ATS scoring, job matching, application tracking, and a guided preview of the AI Mock Interview. No card required to start."],
+  ["What does Pro include?", "Unlimited live interview sessions, company and role-specific simulations, advanced interviewer personas and difficulty control, deep transcript analysis, personalized practice plans, long-term analytics, and PDF exports you can share with a mentor."],
+  ["Does Gradr analyze my resume?", "It parses your PDF or DOCX, extracts the real text a parser would see, and scores ATS compatibility, keyword coverage, impact language, and structure — then gives specific line-level changes rather than generic advice."],
+  ["How does the AI Mock Interview work?", "You pick a role, seniority, and difficulty, optionally attaching a job description. The interviewer speaks with you in real time, asks follow-ups based on what you actually said, and produces a scored report with a transcript and a recommended practice plan afterwards."],
+  ["Does Gradr store interview recordings?", "No. Raw video is never uploaded — camera analysis for framing and attention runs on your device. Transcripts and scores are saved to your account so you can track progress, and you can delete any session at any time."],
+  ["How does Gradr protect my data?", "Your data is scoped to your account with row-level access rules in the database. Resume files live in a private bucket only you can read. Interview keys never reach the browser — realtime sessions use short-lived tokens minted by our backend."],
+  ["Can I cancel?", "Yes. Upgrade, downgrade, or cancel any time from the billing portal in your account. Cancelling keeps access until the end of the period you already paid for."],
+];
+
+const FOOTER = [
+  {
+    title: "Product",
+    links: [
+      ["Resume Intelligence", "#resume"],
+      ["Job Matching", "#matching"],
+      ["Applications", "#applications"],
+      ["AI Interview", "#interview"],
+      ["Career Assistant", "#assistant"],
+      ["Pricing", "#pricing"],
     ],
   },
-};
+  {
+    title: "Company",
+    links: [
+      ["About", "#product"],
+      ["Contact", "mailto:hello@gradr.app"],
+      ["Careers", "#product"],
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      ["Help Center", "#faq"],
+      ["Privacy", "#faq"],
+      ["Terms", "#faq"],
+      ["Security", "#faq"],
+    ],
+  },
+];
 
-/* ------------------------------- primitives ------------------------------ */
+/* ------------------------------- primitives -------------------------------- */
 
-function Section({ id, className = "", children }: { id?: string; className?: string; children: React.ReactNode }) {
+function Section({
+  id, className = "", children,
+}: { id?: string; className?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className={`w-full px-5 sm:px-8 py-20 sm:py-28 ${className}`}>
-      <div className="mx-auto max-w-6xl">{children}</div>
+    <section id={id} className={`relative w-full scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 ${className}`}>
+      <div className="mx-auto w-full max-w-6xl">{children}</div>
     </section>
   );
 }
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium tracking-wide text-primary">
+    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+      <span className="h-px w-6 bg-primary/50" aria-hidden />
       {children}
     </span>
   );
 }
 
-function Panel({ className = "", children }: { className?: string; children: React.ReactNode }) {
-  return <div className={`glassmorphic rounded-2xl ${className}`}>{children}</div>;
+function Heading({
+  children, className = "",
+}: { children: React.ReactNode; className?: string }) {
+  return (
+    <h2 className={`text-balance text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-[2.75rem] ${className}`}>
+      {children}
+    </h2>
+  );
 }
 
-/* --------------------------------- page ---------------------------------- */
+function Lede({ children }: { children: React.ReactNode }) {
+  return <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">{children}</p>;
+}
+
+/* ---------------------------------- page ----------------------------------- */
 
 export default function Landing() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [interval, setInterval] = useState<"monthly" | "annual">("annual");
+  const [billing, setBilling] = useState<"monthly" | "annual">("annual");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -161,65 +221,86 @@ export default function Landing() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const goStart = () => navigate(user ? "/" : "/auth");
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
+  const start = () => navigate(user ? "/" : "/auth");
+  const login = () => navigate(user ? "/" : "/auth");
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden scroll-smooth">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <Helmet>
-        <title>Gradr | Your Career, Upgraded</title>
+        <title>Gradr — From resume to offer</title>
         <meta
           name="description"
-          content="Gradr is an AI-powered career platform for resumes, ATS optimization, job matching, applications, interview practice, and career growth."
+          content="Gradr is an AI career operating system: resume intelligence, ATS optimization, job matching, application packages, AI mock interviews, and career analytics in one workspace."
         />
-        <link rel="canonical" href="https://careerflowos.lovable.app/landing" />
-        <meta property="og:title" content="Gradr | Your Career, Upgraded" />
+        <link rel="canonical" href="https://careerflowos.lovable.app/" />
+        <meta property="og:title" content="Gradr — From resume to offer" />
         <meta
           property="og:description"
-          content="An AI career operating system: resume, ATS, job matching, applications, realistic AI mock interviews, and measurable progress."
+          content="One workspace for the entire job search: resume, ATS, matching, applications, AI mock interviews, and analytics."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://careerflowos.lovable.app/landing" />
+        <meta property="og:url" content="https://careerflowos.lovable.app/" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
-      {/* ------------------------------- navbar ------------------------------ */}
+      <a
+        href="#hero"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
+
+      {/* --------------------------------- nav -------------------------------- */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          scrolled ? "backdrop-blur-xl bg-background/70 border-b border-border" : "bg-transparent"
+          scrolled ? "border-b border-border bg-background/80 backdrop-blur-xl" : "border-b border-transparent"
         }`}
       >
-        <nav className={`mx-auto max-w-6xl px-5 sm:px-8 flex items-center justify-between transition-all ${scrolled ? "h-14" : "h-16"}`}>
-          <a href="#top" className="flex items-center gap-2">
-            <span className="h-7 w-7 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary" />
+        <nav
+          aria-label="Main"
+          className={`mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 transition-all sm:px-8 ${scrolled ? "h-14" : "h-16"}`}
+        >
+          <a href="#hero" className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <span className="grid h-7 w-7 place-items-center rounded-lg border border-primary/30 bg-primary/15">
+              <Sparkles className="h-4 w-4 text-primary" aria-hidden />
             </span>
-            <span className="text-base font-bold tracking-[0.2em] text-foreground">GRADR</span>
+            <span className="text-base font-bold tracking-[0.24em]">GRADR</span>
           </a>
 
-          <ul className="hidden md:flex items-center gap-7">
+          <ul className="hidden items-center gap-6 lg:flex">
             {NAV.map((n) => (
               <li key={n.label}>
-                <a href={n.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href={n.href}
+                  className="rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   {n.label}
                 </a>
               </li>
             ))}
           </ul>
 
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden shrink-0 items-center gap-2 md:flex">
             {user ? (
-              <Button size="sm" onClick={() => navigate("/")}>Open Dashboard</Button>
+              <Button size="sm" onClick={() => navigate("/")}>Open Gradr</Button>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Log in</Button>
-                <Button size="sm" onClick={() => navigate("/auth")}>Get Started</Button>
+                <Button variant="ghost" size="sm" onClick={login}>Log in</Button>
+                <Button size="sm" onClick={start}>Get started</Button>
               </>
             )}
           </div>
 
           <button
-            className="md:hidden text-muted-foreground"
+            type="button"
+            className="grid h-11 w-11 place-items-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -227,24 +308,27 @@ export default function Landing() {
         </nav>
 
         {menuOpen && (
-          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl px-5 py-4 space-y-3">
-            {NAV.map((n) => (
-              <a
-                key={n.label}
-                href={n.href}
-                onClick={() => setMenuOpen(false)}
-                className="block text-sm text-muted-foreground hover:text-foreground"
-              >
-                {n.label}
-              </a>
-            ))}
-            <div className="flex gap-2 pt-2">
+          <div className="max-h-[calc(100vh-3.5rem)] overflow-y-auto border-t border-border bg-background/98 px-5 py-4 backdrop-blur-xl lg:hidden">
+            <ul className="space-y-1">
+              {NAV.map((n) => (
+                <li key={n.label}>
+                  <a
+                    href={n.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex min-h-11 items-center rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-secondary/50 hover:text-foreground"
+                  >
+                    {n.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-3 flex gap-2">
               {user ? (
-                <Button className="flex-1" onClick={() => navigate("/")}>Open Dashboard</Button>
+                <Button className="flex-1" onClick={() => navigate("/")}>Open Gradr</Button>
               ) : (
                 <>
-                  <Button variant="outline" className="flex-1" onClick={() => navigate("/auth")}>Log in</Button>
-                  <Button className="flex-1" onClick={() => navigate("/auth")}>Get Started</Button>
+                  <Button variant="outline" className="flex-1" onClick={login}>Log in</Button>
+                  <Button className="flex-1" onClick={start}>Get started</Button>
                 </>
               )}
             </div>
@@ -252,834 +336,569 @@ export default function Landing() {
         )}
       </header>
 
-      {/* -------------------------------- hero ------------------------------- */}
-      <div id="top" className="relative pt-28 sm:pt-36">
-        <div className="pointer-events-none absolute inset-0 -z-10 aurora-bg opacity-[0.55]" aria-hidden />
-        <Section className="!py-0 pb-16 sm:pb-24">
-          <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-            <div className="space-y-6">
-              <Eyebrow><CircleDot className="h-3 w-3" /> AI career operating system</Eyebrow>
-              <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
-                Your career, <span className="kinetic-text">upgraded.</span>
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground max-w-xl">
-                Gradr brings your resume, job search, applications, interview practice, and career growth
-                into one intelligent workspace.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Button size="lg" onClick={goStart} className="hover-lift">
-                  {user ? "Open Dashboard" : "Start for free"}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <a href="#product">Explore Gradr</a>
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Built for students, graduates, and ambitious job seekers.
-              </p>
-            </div>
+      {/* -------------------------------- hero -------------------------------- */}
+      <main id="hero">
+        <div className="relative pt-28 sm:pt-32">
+          <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+            <div className="absolute inset-0 grid-lines opacity-40" />
+            <div className="absolute left-1/2 top-[-12rem] h-[28rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
+          </div>
 
-            <HeroPreview />
+          <Section className="!pb-0 !pt-0">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_1.1fr] lg:gap-14">
+              <Reveal className="space-y-6">
+                <Eyebrow>AI career operating system</Eyebrow>
+                <h1 className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+                  From resume<br className="hidden sm:block" /> to offer.
+                </h1>
+                <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  Gradr is your AI career operating system. Build a stronger resume, find better-fit jobs, prepare for
+                  interviews, and make smarter career moves — in one connected workspace.
+                </p>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button size="lg" className="h-12 px-6 text-base" onClick={start}>
+                    Get started free
+                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-6 text-base"
+                    onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+                  >
+                    See how Gradr works
+                  </Button>
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  One workspace for the entire job search. No card required to start.
+                </p>
+
+                <ul className="flex flex-wrap gap-x-5 gap-y-2 pt-2">
+                  {[
+                    [FileText, "Resume + ATS"],
+                    [Target, "Job matching"],
+                    [Mic, "AI interviews"],
+                    [LineChart, "Career analytics"],
+                  ].map(([Icon, label]) => {
+                    const I = Icon as typeof FileText;
+                    return (
+                      <li key={label as string} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <I className="h-3.5 w-3.5 text-primary" aria-hidden />
+                        {label as string}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Reveal>
+
+              <Reveal delay={120} className="lg:pl-4">
+                <HeroWorkspace />
+              </Reveal>
+            </div>
+          </Section>
+        </div>
+
+        {/* ------------------------------- problem ------------------------------ */}
+        <Section id="product" className="border-t border-border/60">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+            <Reveal className="space-y-5">
+              <Eyebrow>The problem</Eyebrow>
+              <Heading>Job searching is fragmented.</Heading>
+              <Lede>
+                Your resume lives in one tool, your applications in a spreadsheet, your interview prep in a browser tab,
+                and your decisions in your head. Nothing knows what anything else learned about you.
+              </Lede>
+            </Reveal>
+
+            <Reveal delay={100} className="space-y-6">
+              <ul className="flex flex-wrap gap-2">
+                {FRAGMENTS.map((f) => (
+                  <li
+                    key={f}
+                    className="rounded-lg border border-border bg-secondary/30 px-3 py-2 text-xs text-muted-foreground"
+                  >
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex items-center gap-3">
+                <span className="h-px flex-1 bg-border" aria-hidden />
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Gradr brings it together</span>
+                <span className="h-px flex-1 bg-border" aria-hidden />
+              </div>
+              <div className="flex items-center gap-3 rounded-xl border border-primary/25 bg-primary/[0.06] px-4 py-4">
+                <Layers className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                <p className="text-sm leading-relaxed text-foreground">
+                  One profile. One resume model. One pipeline. Every module reads the same context about you.
+                </p>
+              </div>
+            </Reveal>
           </div>
         </Section>
-      </div>
 
-      {/* ----------------------------- value strip ---------------------------- */}
-      <div className="px-5 sm:px-8">
-        <div className="mx-auto max-w-6xl grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {VALUE_STRIP.map(({ icon: Icon, label }) => (
-            <Panel key={label} className="p-4 flex items-center gap-3">
-              <span className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Icon className="h-4 w-4 text-primary" />
-              </span>
-              <span className="text-sm text-foreground">{label}</span>
-            </Panel>
-          ))}
-        </div>
-      </div>
+        {/* ---------------------------- the gradr system ------------------------ */}
+        <Section className="border-t border-border/60 bg-card/30">
+          <Reveal className="space-y-5">
+            <Eyebrow>The Gradr system</Eyebrow>
+            <Heading>Eight modules. One continuous loop.</Heading>
+            <Lede>
+              Gradr doesn't treat each career task as a separate tool. Your resume informs your matches, your matches
+              shape your applications, your applications set up your interviews, and every interview improves the next pass.
+            </Lede>
+          </Reveal>
 
-      {/* ---------------------------- what is gradr --------------------------- */}
-      <Section id="product">
-        <div className="max-w-2xl space-y-4">
-          <Eyebrow>What is Gradr</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Everything you need to move your career forward.
-          </h2>
-          <p className="text-muted-foreground">
-            Gradr is an AI-powered career operating system that connects every part of the job search.
-            Traditional tools force you into separate products for resume optimization, ATS checking,
-            job searching, application tracking, interview preparation, and career analytics. Gradr
-            brings them together into one connected workflow.
-          </p>
-        </div>
-
-        <Panel className="mt-10 p-6 sm:p-8">
-          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {FLOW.map((step, i) => (
-              <li key={step} className="relative rounded-xl border border-border bg-card/60 p-4">
-                <span className="text-[11px] font-mono text-primary">{String(i + 1).padStart(2, "0")}</span>
-                <p className="text-sm font-semibold text-foreground mt-1">{step}</p>
-                {i < FLOW.length - 1 && (
-                  <ArrowRight className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
-                )}
-              </li>
+          <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+            {SYSTEM.map((s, i) => (
+              <Reveal as="li" key={s.n} delay={i * 50} className="group bg-card p-5 transition-colors hover:bg-secondary/40">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold tabular-nums tracking-widest text-primary">{s.n}</span>
+                  <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
+                </div>
+                <h3 className="mt-4 text-sm font-semibold text-foreground">{s.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.copy}</p>
+              </Reveal>
             ))}
           </ol>
-        </Panel>
-      </Section>
+        </Section>
 
-      {/* ----------------------------- core workflow -------------------------- */}
-      <Section className="border-y border-border bg-card/20">
-        <div className="max-w-2xl space-y-3">
-          <Eyebrow>Core workflow</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">From resume to offer, without the chaos.</h2>
-        </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {WORKFLOW.map((s) => (
-            <Panel key={s.n} className="p-5 hover-lift">
-              <p className="text-xs font-mono text-primary">{s.n}</p>
-              <p className="text-sm font-bold tracking-wide text-foreground mt-2">{s.title}</p>
-              <p className="text-sm text-muted-foreground mt-2">{s.copy}</p>
-            </Panel>
-          ))}
-        </div>
-        <Button variant="outline" className="mt-8" asChild>
-          <a href="#features">Explore the workflow <ArrowRight className="h-4 w-4 ml-2" /></a>
-        </Button>
-      </Section>
-
-      {/* --------------------------- feature showcase ------------------------- */}
-      <Section id="features" className="space-y-24">
-        <Feature
-          eyebrow="Resume Intelligence"
-          title="Turn your resume into a competitive advantage."
-          copy="Gradr analyzes resume structure, keywords, impact, experience, formatting, and job alignment — then tells you exactly what to change."
-          cta={{ label: "Optimize your resume", onClick: goStart }}
-          visual={
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "ATS Score", value: "86" },
-                { label: "Keywords", value: "24 matched" },
-                { label: "Formatting", value: "Clean" },
-                { label: "Impact", value: "12 metrics" },
-              ].map((c) => (
-                <Panel key={c.label} className="p-4">
-                  <p className="text-xs text-muted-foreground">{c.label}</p>
-                  <p className="text-lg font-semibold text-foreground mt-1">{c.value}</p>
-                </Panel>
-              ))}
-              <Panel className="p-4 col-span-2">
-                <p className="text-xs text-muted-foreground mb-2">Recommendations</p>
-                <ul className="space-y-1.5 text-sm text-muted-foreground">
-                  <li className="flex gap-2"><span className="text-primary">•</span>Quantify impact in your two most recent roles</li>
-                  <li className="flex gap-2"><span className="text-primary">•</span>Add 4 missing keywords from the target job description</li>
-                </ul>
-              </Panel>
-            </div>
-          }
-        />
-
-        <Feature
-          reverse
-          eyebrow="ATS Engine"
-          title="Know how your resume performs before you apply."
-          copy="Analyze your resume against any job description and surface missing keywords, weak bullet points, skill gaps, formatting problems, and experience alignment."
-          visual={<AtsVisual />}
-        />
-
-        <Feature
-          eyebrow="Job Matching"
-          title="Stop searching. Start matching."
-          copy="Gradr evaluates skills, experience, role, seniority, your resume, the job description, and your career goals to rank what's genuinely worth applying to."
-          visual={
-            <Panel className="p-6 space-y-4">
-              {[
-                { role: "Frontend Engineer · Series B SaaS", match: 92 },
-                { role: "Product Analyst · Fintech", match: 81 },
-                { role: "Associate PM · Marketplace", match: 74 },
-              ].map((j) => (
-                <div key={j.role} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-foreground">{j.role}</span>
-                    <span className="text-primary font-semibold tabular-nums">{j.match}% Match</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${j.match}%` }} />
-                  </div>
-                </div>
-              ))}
-            </Panel>
-          }
-        />
-
-        <Feature
-          reverse
-          eyebrow="Application Tracker"
-          title="Every application. One pipeline."
-          copy="Move roles through your pipeline, keep notes and reminders in context, and always know what needs your attention next."
-          visual={<PipelineVisual />}
-        />
-      </Section>
-
-      {/* --------------------------- AI mock interview ------------------------ */}
-      <Section id="interview" className="border-y border-border bg-card/20">
-        <div className="max-w-2xl space-y-4">
-          <Eyebrow><Mic className="h-3 w-3" /> Flagship</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Practice interviews that actually feel like interviews.
-          </h2>
-          <p className="text-muted-foreground">
-            Gradr's AI Mock Interview simulates realistic conversations instead of simply showing you a
-            list of questions.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-4 lg:grid-cols-3">
-          <TechCard
-            icon={Waves}
-            title="Gemini Live"
-            items={["Real-time conversational AI", "Natural voice interaction", "Adaptive questioning", "Multi-turn conversation", "Natural follow-ups and interruptions"]}
-          />
-          <TechCard
-            icon={Mic}
-            title="Fish Audio"
-            items={["Premium voice fallback", "More natural interviewer voices", "Provider abstraction for future voice providers"]}
-          />
-          <TechCard
-            icon={Camera}
-            title="MediaPipe"
-            items={["Camera-based visual analysis", "Face presence and framing", "Gaze direction estimates", "Head pose and attention patterns", "Nonverbal communication signals"]}
-          />
-        </div>
-
-        <Panel className="mt-4 p-6">
-          <p className="text-sm font-semibold text-foreground mb-2">Practice integrity monitoring</p>
-          <p className="text-sm text-muted-foreground">
-            Gradr surfaces interview integrity signals — obvious disruptions, face absence, multiple people
-            where technically possible, and attention observations where available. These are neutral coaching
-            observations, not accusations, and they are not a guarantee of detection.
-          </p>
-        </Panel>
-
-        <div className="mt-12">
-          <InterviewRoomVisual />
-        </div>
-
-        {/* personas */}
-        <div className="mt-16 space-y-4">
-          <h3 className="text-2xl font-bold tracking-tight">An interviewer that matches the job.</h3>
-          <p className="text-muted-foreground max-w-2xl">
-            The interviewer adapts to the selected job, company, industry, seniority, and interview stage —
-            each with its own personality, questioning style, tone, difficulty, voice, and follow-up behaviour.
-            You can always override the automatically selected persona.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {PERSONAS.map((p) => (
-              <Panel key={p.role} className="p-4 hover-lift">
-                <p className="text-sm font-semibold text-foreground">{p.role}</p>
-                <p className="text-xs text-muted-foreground mt-1">{p.persona}</p>
-              </Panel>
-            ))}
-          </div>
-        </div>
-
-        {/* report */}
-        <div className="mt-16 space-y-4">
-          <h3 className="text-2xl font-bold tracking-tight">Don't just finish the interview. Learn from it.</h3>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_1.2fr]">
-            <Panel className="p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <ScoreTile label="Overall Score" value="84" big />
-                <ScoreTile label="Readiness" value="Strong" big />
-                <ScoreTile label="Communication" value="88" />
-                <ScoreTile label="Structure" value="82" />
-                <ScoreTile label="Relevance" value="91" />
-                <ScoreTile label="Evidence" value="76" />
-                <ScoreTile label="Technical Depth" value="87" />
-              </div>
-            </Panel>
-            <Panel className="p-6 space-y-4">
-              {[
-                ["Strongest answer", "Your system design walkthrough — clear tradeoffs and a decisive recommendation."],
-                ["Weakest answer", "Conflict example lacked a measurable outcome."],
-                ["Missed opportunities", "You never mentioned the migration you led — it directly answers the scale question."],
-                ["Suggested stronger response", "Reframe with STAR and close with the metric you moved."],
-                ["Recommended practice", "Two behavioural reps focused on evidence and outcomes."],
-                ["Next interview focus", "Quantified impact and tighter answer structure."],
-              ].map(([label, body]) => (
-                <div key={label}>
-                  <p className="text-xs uppercase tracking-wide text-primary">{label}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{body}</p>
-                </div>
-              ))}
-              <p className="text-xs text-muted-foreground border-t border-border pt-3">
-                Scores are coaching estimates, not hiring predictions.
-              </p>
-            </Panel>
-          </div>
-        </div>
-
-        {/* privacy */}
-        <Panel className="mt-12 p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <span className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Lock className="h-5 w-5 text-primary" />
-            </span>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-foreground">Your interview should be private.</h3>
-              <ul className="text-sm text-muted-foreground space-y-1.5">
-                <li className="flex gap-2"><span className="text-primary">•</span>Camera analysis is consent-based, according to the experience you select.</li>
-                <li className="flex gap-2"><span className="text-primary">•</span>Raw video is not retained by default.</li>
-                <li className="flex gap-2"><span className="text-primary">•</span>Only derived coaching signals are used for feedback.</li>
-                <li className="flex gap-2"><span className="text-primary">•</span>You can delete your interview data at any time.</li>
-                <li className="flex gap-2"><span className="text-primary">•</span>AI scores are coaching estimates, not hiring decisions.</li>
+        {/* --------------------------- resume intelligence ---------------------- */}
+        <Section id="resume" className="border-t border-border/60">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <Reveal className="space-y-5">
+              <Eyebrow>01 — Resume intelligence</Eyebrow>
+              <Heading>Know exactly what your resume is doing wrong.</Heading>
+              <Lede>
+                Upload a PDF or DOCX. Gradr reads the text a parser actually extracts — not what the layout looks like —
+                then scores it and tells you which lines to change.
+              </Lede>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {["ATS compatibility", "Keyword coverage", "Impact language", "Structure", "Clarity", "Role alignment"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    {f}
+                  </li>
+                ))}
               </ul>
-            </div>
+              <Button size="lg" className="h-11" onClick={start}>
+                Optimize my resume
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+              </Button>
+            </Reveal>
+            <Reveal delay={100}><ResumeVisual /></Reveal>
           </div>
-        </Panel>
-      </Section>
+        </Section>
 
-      {/* --------------------------- career assistant ------------------------- */}
-      <Section>
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <div className="space-y-4">
-            <Eyebrow><Bot className="h-3 w-3" /> Career Assistant</Eyebrow>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Your AI career copilot.</h2>
-            <p className="text-muted-foreground">
-              Connected to your entire Gradr workspace — your resume, target roles, applications and
-              interview history — so its advice is about your search, not generic career tips.
-            </p>
+        {/* ------------------------------ job matching -------------------------- */}
+        <Section id="matching" className="border-t border-border/60 bg-card/30">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <Reveal delay={100} className="lg:order-2 lg:pl-4">
+              <MatchVisual />
+            </Reveal>
+            <Reveal className="space-y-5 lg:order-1">
+              <Eyebrow>02 — Job matching</Eyebrow>
+              <Heading>Stop applying everywhere. Apply where you actually fit.</Heading>
+              <Lede>
+                Gradr scores live listings against your resume and goals, and shows you the skills you already match
+                alongside the ones you're missing — before you spend an hour on the application.
+              </Lede>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {["Match score", "Matched skills", "Missing skills", "Salary where listed", "Location and work mode", "Role alignment"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button size="lg" variant="outline" className="h-11" onClick={start}>
+                <Search className="mr-2 h-4 w-4" aria-hidden />
+                Find my matches
+              </Button>
+            </Reveal>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+        </Section>
+
+        {/* --------------------------- application engine ----------------------- */}
+        <Section id="applications" className="border-t border-border/60">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <Reveal className="space-y-5">
+              <Eyebrow>03 — Application engine</Eyebrow>
+              <Heading>One job description in. A full application out.</Heading>
+              <Lede>
+                Paste a link or a description. Gradr produces tailored resume bullets, a cover letter written for that
+                specific role, a short recruiter message, and a tracked entry in your pipeline.
+              </Lede>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Everything stays editable. Gradr drafts the first version so you spend your time on judgment, not
+                formatting.
+              </p>
+              <Button size="lg" className="h-11" onClick={start}>
+                Build an application
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+              </Button>
+            </Reveal>
+            <Reveal delay={100}><ApplicationVisual /></Reveal>
+          </div>
+        </Section>
+
+        {/* -------------------------- flagship: interview ----------------------- */}
+        <Section id="interview" className="relative border-t border-border/60 bg-card/40">
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64 bg-gradient-to-b from-primary/[0.07] to-transparent" aria-hidden />
+          <Reveal className="max-w-3xl space-y-5">
+            <Eyebrow>Flagship — AI mock interview</Eyebrow>
+            <Heading>Practice the interview before the interview.</Heading>
+            <Lede>
+              A spoken, real-time interview with an AI interviewer that listens, interrupts naturally, and asks follow-ups
+              based on what you actually said. Not a chatbot with a question list.
+            </Lede>
+          </Reveal>
+
+          <Reveal delay={100} className="mt-10"><InterviewVisual /></Reveal>
+
+          <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
             {[
-              "Improve resumes", "Understand job descriptions", "Prepare for interviews",
-              "Draft outreach", "Analyze career gaps", "Recommend next steps",
-              "Plan applications", "Explain job requirements",
-            ].map((c) => (
-              <Panel key={c} className="p-4 flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-sm text-foreground">{c}</span>
-              </Panel>
+              { icon: Bot, title: "Adaptive interviewer", copy: "The session adapts to role, company, industry, seniority, difficulty, and how you're performing in the moment." },
+              { icon: Mic, title: "Real conversation", copy: "Speak naturally, interrupt mid-question, and get a contextual follow-up instead of a scripted next prompt." },
+              { icon: LineChart, title: "Scored report", copy: "Every session ends with strengths, specific improvements, a full transcript, and the questions to practice next." },
+            ].map((f, i) => (
+              <Reveal key={f.title} delay={i * 60} className="bg-card p-6">
+                <f.icon className="h-5 w-5 text-primary" aria-hidden />
+                <h3 className="mt-4 text-sm font-semibold text-foreground">{f.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.copy}</p>
+              </Reveal>
             ))}
           </div>
-        </div>
-      </Section>
 
-      {/* ------------------------------ audience ----------------------------- */}
-      <Section className="border-y border-border bg-card/20">
-        <div className="max-w-2xl space-y-3">
-          <Eyebrow>Who it's for</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Built for every stage of a career.</h2>
-        </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {AUDIENCE.map(({ icon: Icon, title, copy }) => (
-            <Panel key={title} className="p-6 hover-lift">
-              <span className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Icon className="h-5 w-5 text-primary" />
-              </span>
-              <p className="text-sm font-bold tracking-wide text-foreground mt-4 uppercase">{title}</p>
-              <p className="text-sm text-muted-foreground mt-2">{copy}</p>
-            </Panel>
-          ))}
-        </div>
-      </Section>
+          <Reveal delay={80} className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button size="lg" className="h-12 px-6" onClick={start}>
+              Run a mock interview
+              <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+            </Button>
+            <Button size="lg" variant="outline" className="h-12 px-6" onClick={() => navigate("/pricing")}>
+              See interview plans
+            </Button>
+          </Reveal>
+        </Section>
 
-      {/* ------------------------------ analytics ---------------------------- */}
-      <Section>
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <div className="space-y-4">
-            <Eyebrow><BarChart3 className="h-3 w-3" /> Progress</Eyebrow>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">See whether you're actually getting better.</h2>
-            <p className="text-muted-foreground">
-              Gradr turns your career activity into measurable progress: ATS score history, interview score
-              trends, competency trends, applications, interview conversion, job match quality, practice
-              streaks, and readiness by role.
-            </p>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground">Interview score</span>
-              <span className="font-semibold text-foreground tabular-nums">72</span>
-              <ArrowRight className="h-3.5 w-3.5 text-primary" />
-              <span className="font-semibold text-foreground tabular-nums">78</span>
-              <ArrowRight className="h-3.5 w-3.5 text-primary" />
-              <span className="font-semibold text-primary tabular-nums">84</span>
-            </div>
+        {/* ---------------------------- career assistant ------------------------ */}
+        <Section id="assistant" className="border-t border-border/60">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <Reveal delay={100} className="lg:order-2"><AssistantVisual /></Reveal>
+            <Reveal className="space-y-5 lg:order-1">
+              <Eyebrow>04 — Career assistant</Eyebrow>
+              <Heading>Your career strategist, whenever you need it.</Heading>
+              <Lede>
+                The assistant sees your resume, your matches, your pipeline, and your interview history — so its answers
+                are about your search, not job-hunting in general.
+              </Lede>
+              <ul className="space-y-2">
+                {[
+                  "What jobs should I apply to?",
+                  "Why am I getting rejected?",
+                  "How should I improve my resume?",
+                  "What should I practice before my interview?",
+                  "Which skills should I learn next?",
+                ].map((q) => (
+                  <li key={q} className="rounded-lg border border-border bg-secondary/30 px-3 py-2.5 text-sm text-muted-foreground">
+                    “{q}”
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
           </div>
-          <Panel className="p-6">
-            <p className="text-sm font-semibold text-foreground mb-4">Interview score trend</p>
-            <div className="flex items-end gap-2 h-40">
-              {[52, 58, 61, 66, 72, 78, 84].map((v, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                  <div className="w-full rounded-t-md bg-gradient-to-t from-primary/30 to-primary" style={{ height: `${v}%` }} />
-                  <span className="text-[10px] text-muted-foreground tabular-nums">{v}</span>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-3 gap-3 mt-6">
-              {[["Applications", "34"], ["Interview rate", "21%"], ["Practice streak", "6 days"]].map(([l, v]) => (
-                <div key={l} className="rounded-lg bg-secondary/60 px-3 py-2">
-                  <p className="text-[11px] text-muted-foreground">{l}</p>
-                  <p className="text-sm font-semibold text-foreground">{v}</p>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        </div>
-      </Section>
+        </Section>
 
-      {/* ------------------------------ how it works -------------------------- */}
-      <Section className="border-y border-border bg-card/20">
-        <div className="max-w-2xl space-y-3">
-          <Eyebrow>How Gradr works</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Set up in minutes. Improve for months.</h2>
-        </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {HOW.map((s) => (
-            <Panel key={s.n} className="p-6">
-              <p className="text-xs font-mono text-primary">{s.n}</p>
-              <p className="text-sm font-semibold text-foreground mt-2">{s.title}</p>
-            </Panel>
-          ))}
-        </div>
-        <Button className="mt-8" onClick={goStart}>
-          Start building your career system <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </Section>
+        {/* -------------------------------- analytics --------------------------- */}
+        <Section className="border-t border-border/60 bg-card/30">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <Reveal className="space-y-5">
+              <Eyebrow>05 — Career analytics</Eyebrow>
+              <Heading>A command center for your search.</Heading>
+              <Lede>
+                Track what's moving and what's stuck: ATS health, pipeline stages, interview performance over time,
+                competency trends, and how ready you are for the roles you're targeting.
+              </Lede>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {["ATS health", "Application pipeline", "Interview performance", "Competency trends", "Job readiness", "Practice progress"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+            <Reveal delay={100}><AnalyticsVisual /></Reveal>
+          </div>
+        </Section>
 
-      {/* -------------------------------- pricing ---------------------------- */}
-      <Section id="pricing">
-        <div className="max-w-2xl space-y-3">
-          <Eyebrow>Pricing</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Start free. Upgrade when it matters.</h2>
-          <p className="text-muted-foreground">Switch to annual and save.</p>
-        </div>
+        {/* ------------------------------- audience ----------------------------- */}
+        <Section className="border-t border-border/60">
+          <Reveal className="space-y-5">
+            <Eyebrow>Who it's for</Eyebrow>
+            <Heading>Built for people actively moving toward a job.</Heading>
+          </Reveal>
 
-        <div className="mt-8 inline-flex rounded-full border border-border bg-card/60 p-1">
-          {(["monthly", "annual"] as const).map((i) => (
-            <button
-              key={i}
-              onClick={() => setInterval(i)}
-              className={`px-4 py-1.5 text-sm rounded-full transition-colors ${
-                interval === i ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              }`}
+          <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+            {AUDIENCE.map((a, i) => (
+              <Reveal key={a.title} delay={i * 50} className="bg-card p-6">
+                <div id={a.id} className="scroll-mt-28" />
+                <a.icon className="h-5 w-5 text-primary" aria-hidden />
+                <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+              </Reveal>
+            ))}
+            <Reveal delay={250} className="flex flex-col justify-center bg-card p-6">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Not sure where you fit? Start free — Gradr adapts to the stage you're actually at.
+              </p>
+              <Button variant="outline" className="mt-4 h-11 w-full sm:w-auto" onClick={start}>
+                Get started free
+              </Button>
+            </Reveal>
+          </div>
+        </Section>
+
+        {/* ------------------------------ how it works -------------------------- */}
+        <Section id="how-it-works" className="border-t border-border/60 bg-card/30">
+          <Reveal className="space-y-5">
+            <Eyebrow>How it works</Eyebrow>
+            <Heading>Seven steps, one system.</Heading>
+          </Reveal>
+
+          <ol className="mt-10 space-y-px overflow-hidden rounded-2xl border border-border bg-border">
+            {HOW.map((step, i) => (
+              <Reveal as="li" key={step} delay={i * 40} className="flex items-center gap-4 bg-card px-5 py-4 sm:px-6">
+                <span className="w-8 shrink-0 text-sm font-semibold tabular-nums text-primary">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="text-sm font-medium text-foreground sm:text-base">{step}</span>
+              </Reveal>
+            ))}
+          </ol>
+
+          <Reveal delay={80} className="mt-8">
+            <Button size="lg" className="h-12 px-6" onClick={start}>
+              Start building your career system
+              <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+            </Button>
+          </Reveal>
+        </Section>
+
+        {/* -------------------------------- why gradr --------------------------- */}
+        <Section className="border-t border-border/60">
+          <Reveal className="space-y-5">
+            <Eyebrow>Why Gradr</Eyebrow>
+            <Heading>Same job search. Different workflow.</Heading>
+          </Reveal>
+
+          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+            <Reveal className="rounded-2xl border border-border bg-secondary/20 p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                The usual setup
+              </h3>
+              <ul className="mt-5 space-y-3">
+                {OLD_WAY.map((t) => (
+                  <li key={t} className="flex gap-3 text-sm text-muted-foreground">
+                    <Minus className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" aria-hidden />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-5 text-xs text-muted-foreground/80">
+                Five tools that never talk to each other.
+              </p>
+            </Reveal>
+
+            <Reveal delay={100} className="rounded-2xl border border-primary/30 bg-primary/[0.05] p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Gradr</h3>
+              <ul className="mt-5 space-y-3">
+                {NEW_WAY.map((t) => (
+                  <li key={t} className="flex gap-3 text-sm text-foreground">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-5 text-xs text-muted-foreground">
+                One connected career system.
+              </p>
+            </Reveal>
+          </div>
+        </Section>
+
+        {/* --------------------------------- pricing ---------------------------- */}
+        <Section id="pricing" className="border-t border-border/60 bg-card/30">
+          <Reveal className="space-y-5">
+            <Eyebrow>Pricing</Eyebrow>
+            <Heading>Start free. Upgrade when it's working.</Heading>
+            <Lede>No trials that expire without warning, no countdown timers. Cancel any time.</Lede>
+          </Reveal>
+
+          <Reveal delay={60} className="mt-8">
+            <div
+              role="group"
+              aria-label="Billing interval"
+              className="inline-flex rounded-xl border border-border bg-secondary/40 p-1"
             >
-              {i === "monthly" ? "Monthly" : "Annual"}
-            </button>
+              {(["monthly", "annual"] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={billing === k}
+                  onClick={() => setBilling(k)}
+                  className={`min-h-10 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    billing === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {k === "monthly" ? "Monthly" : "Annual"}
+                  {k === "annual" && <span className="ml-2 text-[11px] opacity-80">save up to 26%</span>}
+                </button>
+              ))}
+            </div>
+          </Reveal>
+
+          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            {PLANS.map((p, i) => {
+              const price = p[billing];
+              return (
+                <Reveal
+                  key={p.name}
+                  delay={i * 70}
+                  className={`flex flex-col rounded-2xl border p-6 ${
+                    p.highlight
+                      ? "border-primary/40 bg-primary/[0.05] shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
+                      : "border-border bg-card"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
+                    {p.highlight && (
+                      <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                        Most complete
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">{p.tagline}</p>
+
+                  <div className="mt-6 flex items-baseline gap-2">
+                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{price.price}</span>
+                    <span className="text-sm text-muted-foreground">{price.note}</span>
+                  </div>
+
+                  <ul className="mt-6 flex-1 space-y-2.5">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex gap-2.5 text-sm text-muted-foreground">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className="mt-6 h-11 w-full"
+                    variant={p.highlight ? "default" : "outline"}
+                    onClick={() => (p.name === "Free" ? start() : navigate(user ? "/pricing" : "/auth"))}
+                  >
+                    {p.cta}
+                  </Button>
+                </Reveal>
+              );
+            })}
+          </div>
+        </Section>
+
+        {/* ----------------------------------- faq ------------------------------ */}
+        <Section id="faq" className="border-t border-border/60">
+          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+            <Reveal className="space-y-5">
+              <Eyebrow>FAQ</Eyebrow>
+              <Heading>Questions, answered directly.</Heading>
+            </Reveal>
+            <Reveal delay={80}>
+              <Accordion type="single" collapsible className="w-full">
+                {FAQS.map(([q, a], i) => (
+                  <AccordionItem key={q} value={`faq-${i}`} className="border-border">
+                    <AccordionTrigger className="py-4 text-left text-sm font-medium hover:no-underline sm:text-base">
+                      {q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+                      {a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </Reveal>
+          </div>
+        </Section>
+
+        {/* -------------------------------- final CTA --------------------------- */}
+        <Section className="border-t border-border/60">
+          <Reveal className="relative overflow-hidden rounded-3xl border border-primary/25 bg-card px-6 py-14 text-center sm:px-12 sm:py-20">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/10 to-transparent" aria-hidden />
+            <h2 className="relative mx-auto max-w-3xl text-balance text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
+              Your next opportunity deserves more than another resume.
+            </h2>
+            <p className="relative mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+              Build a smarter career system with Gradr.
+            </p>
+            <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button size="lg" className="h-12 px-7 text-base" onClick={start}>
+                Get started free
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 px-7 text-base"
+                onClick={() => document.getElementById("product")?.scrollIntoView({ behavior: "smooth" })}
+              >
+                Explore Gradr
+              </Button>
+            </div>
+          </Reveal>
+        </Section>
+      </main>
+
+      {/* --------------------------------- footer ------------------------------ */}
+      <footer className="border-t border-border bg-card/40 px-5 py-14 sm:px-8">
+        <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="grid h-7 w-7 place-items-center rounded-lg border border-primary/30 bg-primary/15">
+                <Sparkles className="h-4 w-4 text-primary" aria-hidden />
+              </span>
+              <span className="text-base font-bold tracking-[0.24em]">GRADR</span>
+            </div>
+            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+              An AI career operating system for the whole path from resume to offer.
+            </p>
+          </div>
+
+          {FOOTER.map((col) => (
+            <nav key={col.title} aria-label={col.title}>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground">{col.title}</h3>
+              <ul className="mt-4 space-y-2.5">
+                {col.links.map(([label, href]) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      className="rounded text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           ))}
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-3">
-          <PriceCard
-            name={PLANS.free.name}
-            price={PLANS.free.price}
-            note={PLANS.free.note}
-            description={PLANS.free.description}
-            features={PLANS.free.features}
-            cta={user ? "Open Dashboard" : "Start for free"}
-            onClick={goStart}
-          />
-          <PriceCard
-            name={PLANS.starter.name}
-            price={PLANS.starter[interval].price}
-            note={PLANS.starter[interval].note}
-            description={PLANS.starter.description}
-            features={PLANS.starter.features}
-            cta="Choose Starter"
-            onClick={() => navigate("/pricing")}
-          />
-          <PriceCard
-            highlighted
-            badge={interval === "annual" ? "BEST VALUE" : undefined}
-            name={PLANS.pro.name}
-            price={PLANS.pro[interval].price}
-            note={PLANS.pro[interval].note}
-            description={PLANS.pro.description}
-            features={PLANS.pro.features}
-            cta="Go Pro"
-            onClick={() => navigate("/pricing")}
-          />
-        </div>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Secure billing with card payments. Cancel or change your plan any time.
-        </p>
-      </Section>
-
-      {/* --------------------------------- FAQ -------------------------------- */}
-      <Section id="faq" className="border-y border-border bg-card/20">
-        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="space-y-3">
-            <Eyebrow>FAQ</Eyebrow>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Questions, answered.</h2>
-          </div>
-          <Accordion type="single" collapsible className="w-full">
-            {FAQS.map(([q, a]) => (
-              <AccordionItem key={q} value={q}>
-                <AccordionTrigger className="text-left text-sm">{q}</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">{a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </Section>
-
-      {/* ------------------------------ final CTA ----------------------------- */}
-      <Section>
-        <Panel className="p-10 sm:p-14 text-center relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 -z-10 opacity-40 aurora-bg" aria-hidden />
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Your next opportunity starts with better preparation.
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Build stronger applications, practice smarter, and walk into your next interview ready.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button size="lg" onClick={goStart} className="hover-lift">
-              {user ? "Open Dashboard" : "Start for free"} <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <a href="#product">Explore Gradr</a>
-            </Button>
-          </div>
-        </Panel>
-      </Section>
-
-      {/* -------------------------------- footer ------------------------------ */}
-      <footer className="border-t border-border px-5 sm:px-8 py-14">
-        <div className="mx-auto max-w-6xl grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2 space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="h-7 w-7 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-primary" />
-              </span>
-              <span className="text-base font-bold tracking-[0.2em]">GRADR</span>
-            </div>
-            <p className="text-sm text-muted-foreground">Your career, upgraded.</p>
-          </div>
-
-          <FooterCol
-            title="Product"
-            links={[
-              ["Resume", "/resume"], ["ATS", "/resume"], ["Job Matching", "/match"],
-              ["Applications", "/pipeline"], ["AI Mock Interview", "/interview"],
-              ["Career Assistant", "/growth"], ["Analytics", "/growth"],
-            ]}
-          />
-          <FooterCol title="Company" links={[["About", "#product"], ["Contact", "#faq"], ["Careers", "#faq"]]} />
-          <div className="space-y-6">
-            <FooterCol
-              title="Resources"
-              links={[["Help Center", "#faq"], ["Blog", "/blog/ai-resume-optimization"], ["Interview Resources", "#interview"]]}
-            />
-            <FooterCol title="Legal" links={[["Privacy", "#interview"], ["Terms", "#faq"], ["Cookie Policy", "#faq"]]} />
-          </div>
-        </div>
-        <div className="mx-auto max-w-6xl mt-10 pt-6 border-t border-border text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Gradr. AI outputs are coaching estimates, not hiring decisions.
+        <div className="mx-auto mt-12 flex max-w-6xl flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Gradr. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">Built for people actively looking for their next role.</p>
         </div>
       </footer>
     </div>
-  );
-}
-
-/* ------------------------------- subcomponents ---------------------------- */
-
-function FooterCol({ title, links }: { title: string; links: [string, string][] }) {
-  return (
-    <div>
-      <p className="text-sm font-semibold text-foreground mb-3">{title}</p>
-      <ul className="space-y-2">
-        {links.map(([label, href]) => (
-          <li key={label}>
-            {href.startsWith("#") ? (
-              <a href={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</a>
-            ) : (
-              <Link to={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</Link>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function Feature({
-  eyebrow, title, copy, visual, reverse, cta,
-}: {
-  eyebrow: string; title: string; copy: string; visual: React.ReactNode; reverse?: boolean;
-  cta?: { label: string; onClick: () => void };
-}) {
-  return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-      <div className={`space-y-4 ${reverse ? "lg:order-2" : ""}`}>
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h3 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h3>
-        <p className="text-muted-foreground">{copy}</p>
-        {cta && (
-          <Button variant="outline" onClick={cta.onClick}>
-            {cta.label} <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        )}
-      </div>
-      <div className={reverse ? "lg:order-1" : ""}>{visual}</div>
-    </div>
-  );
-}
-
-function TechCard({ icon: Icon, title, items }: { icon: typeof Mic; title: string; items: string[] }) {
-  return (
-    <Panel className="p-6 hover-lift">
-      <span className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-        <Icon className="h-5 w-5 text-primary" />
-      </span>
-      <p className="text-sm font-semibold text-foreground mt-4">{title}</p>
-      <ul className="mt-3 space-y-1.5">
-        {items.map((i) => (
-          <li key={i} className="text-sm text-muted-foreground flex gap-2">
-            <span className="text-primary">•</span><span>{i}</span>
-          </li>
-        ))}
-      </ul>
-    </Panel>
-  );
-}
-
-function ScoreTile({ label, value, big }: { label: string; value: string; big?: boolean }) {
-  return (
-    <div className={`rounded-xl border border-border bg-card/60 p-4 ${big ? "col-span-1" : ""}`}>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className={`font-bold text-foreground tabular-nums ${big ? "text-3xl" : "text-xl"}`}>{value}</p>
-    </div>
-  );
-}
-
-function PriceCard({
-  name, price, note, description, features, cta, onClick, highlighted, badge,
-}: {
-  name: string; price: string; note: string; description: string; features: string[];
-  cta: string; onClick: () => void; highlighted?: boolean; badge?: string;
-}) {
-  return (
-    <div
-      className={`relative rounded-2xl p-6 flex flex-col ${
-        highlighted ? "glassmorphic glow-border ring-1 ring-primary/40" : "glass-card"
-      }`}
-    >
-      {badge && (
-        <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-[10px] font-bold tracking-wider text-primary-foreground">
-          {badge}
-        </span>
-      )}
-      <p className="text-sm font-semibold text-foreground">{name}</p>
-      <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-4xl font-bold tracking-tight text-foreground">{price}</span>
-        <span className="text-xs text-muted-foreground">{note}</span>
-      </div>
-      <p className="text-sm text-muted-foreground mt-3">{description}</p>
-      <ul className="mt-5 space-y-2 flex-1">
-        {features.map((f) => (
-          <li key={f} className="text-sm text-muted-foreground flex gap-2">
-            <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span>{f}</span>
-          </li>
-        ))}
-      </ul>
-      <Button className="mt-6 w-full" variant={highlighted ? "default" : "outline"} onClick={onClick}>
-        {cta}
-      </Button>
-    </div>
-  );
-}
-
-function HeroPreview() {
-  return (
-    <div className="relative">
-      <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-primary/10 blur-3xl" aria-hidden />
-      <Panel className="p-5 sm:p-6 float-slow">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-xs text-muted-foreground">Career readiness</p>
-            <p className="text-sm font-semibold text-foreground">Frontend Engineer track</p>
-          </div>
-          <span className="text-xs rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-primary">Live</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <StatTile icon={ShieldCheck} label="ATS score" value="86" sub="+8 this week" />
-          <StatTile icon={Target} label="Top job match" value="92%" sub="Series B SaaS" />
-          <StatTile icon={Layers} label="Active applications" value="12" sub="3 in interview" />
-          <StatTile icon={Mic} label="Interview readiness" value="Strong" sub="Score 84" />
-        </div>
-
-        <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
-          <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-          <div>
-            <p className="text-xs text-primary">Recommended next action</p>
-            <p className="text-sm text-foreground mt-0.5">
-              Run a 15-minute mock interview focused on quantified impact before Thursday's screen.
-            </p>
-          </div>
-        </div>
-      </Panel>
-    </div>
-  );
-}
-
-function StatTile({ icon: Icon, label, value, sub }: { icon: typeof Mic; label: string; value: string; sub: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-card/70 p-4">
-      <div className="flex items-center gap-2">
-        <Icon className="h-3.5 w-3.5 text-primary" />
-        <p className="text-[11px] text-muted-foreground">{label}</p>
-      </div>
-      <p className="text-2xl font-bold tracking-tight text-foreground mt-1 tabular-nums">{value}</p>
-      <p className="text-[11px] text-muted-foreground">{sub}</p>
-    </div>
-  );
-}
-
-function AtsVisual() {
-  return (
-    <Panel className="p-6">
-      <div className="flex items-center gap-5">
-        <div className="relative h-24 w-24 shrink-0">
-          <div className="absolute inset-0 rounded-full border-4 border-secondary" />
-          <div className="absolute inset-0 rounded-full border-4 border-primary border-r-transparent border-b-transparent rotate-45" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold tabular-nums text-foreground">72</span>
-          </div>
-        </div>
-        <div className="space-y-2 text-sm">
-          <p className="text-foreground font-semibold">ATS compatibility</p>
-          <p className="text-muted-foreground">6 missing keywords · 3 weak bullets · 1 formatting issue</p>
-        </div>
-      </div>
-      <div className="mt-5 space-y-3">
-        {[
-          ["Keyword coverage", 68],
-          ["Experience alignment", 81],
-          ["Formatting", 94],
-          ["Skill gap closure", 57],
-        ].map(([label, v]) => (
-          <div key={label as string} className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">{label}</span>
-              <span className="text-foreground tabular-nums">{v}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full rounded-full bg-primary" style={{ width: `${v}%` }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </Panel>
-  );
-}
-
-function PipelineVisual() {
-  const stages: [string, string[]][] = [
-    ["Saved", ["Design Systems Eng", "Platform Eng"]],
-    ["Applied", ["Frontend Eng · Fintech"]],
-    ["Interview", ["Product Eng · SaaS"]],
-    ["Offer", []],
-    ["Rejected", ["Growth Eng"]],
-  ];
-  return (
-    <Panel className="p-4 overflow-x-auto">
-      <div className="flex gap-3 min-w-[520px]">
-        {stages.map(([stage, items]) => (
-          <div key={stage} className="flex-1 min-w-[100px]">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">{stage}</p>
-            <div className="space-y-2">
-              {items.length === 0 && (
-                <div className="rounded-lg border border-dashed border-border h-14" />
-              )}
-              {items.map((i) => (
-                <div key={i} className="rounded-lg border border-border bg-card/70 p-2.5 text-xs text-foreground">
-                  {i}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Panel>
-  );
-}
-
-function InterviewRoomVisual() {
-  return (
-    <Panel className="p-4 sm:p-6">
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-4">
-          <div className="rounded-xl border border-border bg-card/70 p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="h-10 w-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-primary" />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Senior Product Leader</p>
-                  <p className="text-xs text-muted-foreground">Round 2 · Behavioural + product sense</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 12:41</span>
-                <span className="flex items-center gap-1"><CircleDot className="h-3 w-3 text-primary" /> Connected</span>
-              </div>
-            </div>
-
-            <p className="text-sm text-foreground mt-5">
-              "Walk me through a product decision you made with incomplete data. What did you ship, and what
-              did you learn?"
-            </p>
-
-            <div className="mt-5 flex items-end gap-1 h-10" aria-hidden>
-              {[30, 55, 80, 45, 65, 90, 40, 70, 35, 60, 85, 50, 75, 42, 62].map((h, i) => (
-                <span key={i} className="flex-1 rounded-full bg-primary/60" style={{ height: `${h}%` }} />
-              ))}
-            </div>
-
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-full bg-secondary px-2.5 py-1 text-muted-foreground flex items-center gap-1"><Mic className="h-3 w-3" /> Mic live</span>
-              <span className="rounded-full bg-secondary px-2.5 py-1 text-muted-foreground flex items-center gap-1"><Camera className="h-3 w-3" /> Camera on</span>
-              <span className="rounded-full bg-secondary px-2.5 py-1 text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" /> Question 4 of 8</span>
-            </div>
-
-            <div className="mt-4 h-1.5 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full w-1/2 rounded-full bg-primary" />
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card/70 p-4 space-y-2 text-sm">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Live transcript</p>
-            <p className="text-muted-foreground"><span className="text-primary">Interviewer:</span> What signal made you confident enough to ship?</p>
-            <p className="text-foreground"><span className="text-primary">You:</span> We ran a two-week holdout with 4,000 users and watched activation…</p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="rounded-xl border border-border bg-secondary/40 aspect-video flex items-center justify-center">
-            <span className="text-xs text-muted-foreground">Your camera preview</span>
-          </div>
-          <div className="rounded-xl border border-border bg-card/70 p-4 space-y-3">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Integrity signals</p>
-            {[["In frame", 97], ["Eye contact", 82], ["Attention", 88]].map(([l, v]) => (
-              <div key={l as string} className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">{l}</span>
-                  <span className="text-foreground tabular-nums">{v}%</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${v}%` }} />
-                </div>
-              </div>
-            ))}
-            <p className="text-[11px] text-muted-foreground pt-1">
-              Neutral coaching observations. Not a cheating verdict.
-            </p>
-          </div>
-        </div>
-      </div>
-    </Panel>
   );
 }
