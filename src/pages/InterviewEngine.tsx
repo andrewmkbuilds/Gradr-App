@@ -436,6 +436,12 @@ function InterviewEngineInner() {
           exporting={exporting}
           onViewHistory={() => navigate("/interview/history")}
         />
+        <SessionDebrief
+          report={report}
+          messages={messages}
+          targetRole={targetRole}
+          durationSec={durationSec}
+        />
         {plan && <PracticePlanView plan={plan} />}
       </div>
     );
