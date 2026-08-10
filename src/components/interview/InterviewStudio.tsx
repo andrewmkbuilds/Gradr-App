@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX,
-  Square, Radio, Hand, Zap, Captions, WifiOff,
+  Square, Radio, Hand, Zap, Captions, WifiOff, Search, X, ChevronUp, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { CameraMonitor } from "@/components/interview/CameraMonitor";
 import { InterviewerOrb, type InterviewerState } from "@/components/interview/InterviewerOrb";
+import { ConnectionErrorOverlay } from "@/components/interview/ConnectionErrorOverlay";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 
 export type Msg = { role: "user" | "assistant"; content: string };
