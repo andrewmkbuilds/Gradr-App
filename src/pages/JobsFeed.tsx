@@ -329,11 +329,26 @@ export default function JobsFeed() {
         description: data.description,
         salary_min: data.salary_min,
         salary_max: data.salary_max,
+        details: {
+          employment_type: data.employment_type ?? null,
+          salary_currency: data.salary_currency ?? null,
+          responsibilities: data.responsibilities ?? [],
+          requirements: data.requirements ?? [],
+          skills: data.skills ?? [],
+          benefits: data.benefits ?? [],
+          extraction_source: data.extractionSource ?? null,
+        },
         status: "saved",
       });
       if (insErr) throw insErr;
       setPasteUrl("");
-      toast.success("Job added to pipeline");
+      const missing: string[] = Array.isArray(data.missingFields) ? data.missingFields : [];
+      const notable = missing.filter((f) => ["company", "salary_min", "description", "requirements"].includes(f));
+      toast.success("Job added to pipeline", {
+        description: notable.length
+          ? `Some details weren't on the page (${notable.join(", ").replace(/_/g, " ")}). Add them in Pipeline.`
+          : undefined,
+      });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
     } finally {
