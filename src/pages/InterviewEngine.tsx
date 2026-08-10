@@ -324,44 +324,32 @@ function InterviewEngineInner() {
           </p>
         </div>
         <CreditsBalance only="interview" compact />
-        <div className="glass-card p-8 flex flex-col items-center animate-slide-up">
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-            <Mic className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">Start a Mock Interview</h3>
-          <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
-            Speak your answers, get instant follow-ups, and finish with a scorecard on communication,
-            technical depth, structure and confidence.
-          </p>
-          <Input
-            placeholder="Target role (e.g., Senior Frontend Engineer)"
-            value={targetRole}
-            onChange={(e) => setTargetRole(e.target.value)}
-            className="max-w-sm mb-4 bg-secondary border-border"
+
+        {stage === "setup" ? (
+          <InterviewSetup
+            initial={sessionCtx ?? undefined}
+            onContinue={(ctx) => {
+              setSessionCtx(ctx);
+              setTargetRole(ctx.targetRole ?? "");
+              setStage("preflight");
+            }}
           />
-          <div className="flex items-center gap-2 mb-4">
-            <Button
-              variant={voiceMode ? "default" : "outline"}
-              size="sm"
-              onClick={() => setVoiceMode((v) => !v)}
-            >
-              {voiceMode ? <Volume2 className="h-4 w-4 mr-2" /> : <VolumeX className="h-4 w-4 mr-2" />}
-              Voice {voiceMode ? "on" : "off"}
-            </Button>
-          </div>
-          <Button onClick={() => void startInterview()} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Mic className="h-4 w-4 mr-2" />
-            Begin Interview
-          </Button>
-          {!voice.supported && (
-            <p className="text-xs text-muted-foreground mt-3">
-              Speech input isn't supported in this browser — you can still type your answers.
-            </p>
-          )}
-        </div>
+        ) : (
+          <PreflightCheck
+            onCancel={() => setStage("setup")}
+            onReady={() => void startInterview()}
+          />
+        )}
+
+        {!voice.supported && (
+          <p className="text-xs text-muted-foreground">
+            Speech input isn't supported in this browser — you can still type your answers.
+          </p>
+        )}
       </div>
     );
   }
+
 
   return (
     <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[1fr_320px]">
