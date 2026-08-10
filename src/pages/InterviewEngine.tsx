@@ -72,7 +72,12 @@ function InterviewEngineInner() {
         Authorization: `Bearer ${session.access_token}`,
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
-      body: JSON.stringify({ messages: allMessages, targetRole }),
+      body: JSON.stringify({
+        messages: allMessages,
+        targetRole,
+        directive: sessionCtx ? buildSessionDirective(sessionCtx) : undefined,
+      }),
+
     });
 
     if (resp.status === 401) { handleAiFunctionError({ status: 401 }, null); return; }
