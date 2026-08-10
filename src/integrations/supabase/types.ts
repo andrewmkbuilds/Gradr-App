@@ -563,6 +563,39 @@ export type Database = {
         }
         Relationships: []
       }
+      company_research: {
+        Row: {
+          cache_key: string
+          company: string
+          created_at: string
+          id: string
+          payload: Json
+          provider: string
+          role: string | null
+          sources: Json
+        }
+        Insert: {
+          cache_key: string
+          company: string
+          created_at?: string
+          id?: string
+          payload: Json
+          provider: string
+          role?: string | null
+          sources?: Json
+        }
+        Update: {
+          cache_key?: string
+          company?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          provider?: string
+          role?: string | null
+          sources?: Json
+        }
+        Relationships: []
+      }
       digest_send_logs: {
         Row: {
           created_at: string
@@ -965,6 +998,7 @@ export type Database = {
           company: string | null
           created_at: string
           description: string | null
+          details: Json | null
           external_id: string | null
           id: string
           location: string | null
@@ -988,6 +1022,7 @@ export type Database = {
           company?: string | null
           created_at?: string
           description?: string | null
+          details?: Json | null
           external_id?: string | null
           id?: string
           location?: string | null
@@ -1011,6 +1046,7 @@ export type Database = {
           company?: string | null
           created_at?: string
           description?: string | null
+          details?: Json | null
           external_id?: string | null
           id?: string
           location?: string | null

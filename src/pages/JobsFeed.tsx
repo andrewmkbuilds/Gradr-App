@@ -8,12 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, Link2, AlertCircle, Upload } from "lucide-react";
+import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, Link2, AlertCircle, Upload, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { formatDistanceToNow } from "date-fns";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
 import { useNavigate } from "react-router-dom";
+import { CompanyResearchDialog } from "@/components/research/CompanyResearchDialog";
 
 interface FeedJob {
   external_id: string;
@@ -58,6 +59,7 @@ export default function JobsFeed() {
   const [trackedIds, setTrackedIds] = useState<Set<string>>(new Set());
   const [pasteUrl, setPasteUrl] = useState("");
   const [pasting, setPasting] = useState(false);
+  const [researchTarget, setResearchTarget] = useState<{ company: string; role?: string } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasResume, setHasResume] = useState<boolean | null>(null);
   const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
@@ -327,11 +329,26 @@ export default function JobsFeed() {
         description: data.description,
         salary_min: data.salary_min,
         salary_max: data.salary_max,
+        details: {
+          employment_type: data.employment_type ?? null,
+          salary_currency: data.salary_currency ?? null,
+          responsibilities: data.responsibilities ?? [],
+          requirements: data.requirements ?? [],
+          skills: data.skills ?? [],
+          benefits: data.benefits ?? [],
+          extraction_source: data.extractionSource ?? null,
+        },
         status: "saved",
       });
       if (insErr) throw insErr;
       setPasteUrl("");
-      toast.success("Job added to pipeline");
+      const missing: string[] = Array.isArray(data.missingFields) ? data.missingFields : [];
+      const notable = missing.filter((f) => ["company", "salary_min", "description", "requirements"].includes(f));
+      toast.success("Job added to pipeline", {
+        description: notable.length
+          ? `Some details weren't on the page (${notable.join(", ").replace(/_/g, " ")}). Add them in Pipeline.`
+          : undefined,
+      });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
     } finally {
@@ -507,11 +524,29 @@ export default function JobsFeed() {
                   <ExternalLink className="h-3.5 w-3.5" />
                   Apply
                 </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setResearchTarget({ company: job.company || "", role: job.title })}
+                  disabled={!job.company}
+                  className="gap-1.5"
+                  aria-label={`Research ${job.company || "company"}`}
+                >
+                  <Building2 className="h-3.5 w-3.5" />
+                  Research
+                </Button>
               </div>
             </div>
           </Card>
         ))}
       </div>
+
+      <CompanyResearchDialog
+        open={!!researchTarget}
+        onOpenChange={(o) => !o && setResearchTarget(null)}
+        company={researchTarget?.company ?? ""}
+        role={researchTarget?.role}
+      />
     </div>
   );
 }

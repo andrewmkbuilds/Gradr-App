@@ -1,10 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { assertSafeUrl, FirecrawlError, scrape } from "../_shared/firecrawl.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 
 const RATE_LIMIT = 15;
 const WINDOW_MS = 60_000;
@@ -13,16 +20,37 @@ function checkRateLimit(userId: string) {
   const now = Date.now();
   const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
   if (hits.length >= RATE_LIMIT) return { ok: false, retryAfter: Math.ceil((WINDOW_MS - (now - hits[0])) / 1000) };
-  hits.push(now); userHits.set(userId, hits);
+  hits.push(now);
+  userHits.set(userId, hits);
   return { ok: true as const };
 }
+
+const JOB_SCHEMA = {
+  type: "object",
+  properties: {
+    title: { type: ["string", "null"] },
+    company: { type: ["string", "null"] },
+    location: { type: ["string", "null"] },
+    remote: { type: ["boolean", "null"] },
+    employment_type: { type: ["string", "null"], description: "e.g. Full-time, Contract, Internship" },
+    salary_min: { type: ["number", "null"] },
+    salary_max: { type: ["number", "null"] },
+    salary_currency: { type: ["string", "null"] },
+    description: { type: ["string", "null"] },
+    responsibilities: { type: "array", items: { type: "string" } },
+    requirements: { type: "array", items: { type: "string" } },
+    skills: { type: "array", items: { type: "string" } },
+    benefits: { type: "array", items: { type: "string" } },
+  },
+  required: ["title"],
+} as const;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!authHeader) return json({ error: "Unauthorized", code: "unauthorized" }, 401);
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -30,86 +58,69 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (authError || !user) return json({ error: "Unauthorized", code: "unauthorized" }, 401);
 
     const rl = checkRateLimit(user.id);
-    if (!rl.ok) return new Response(JSON.stringify({ error: `Rate limit. Retry in ${rl.retryAfter}s.` }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!rl.ok) {
+      return json({ error: `Too many imports. Try again in ${rl.retryAfter}s.`, code: "rate_limited" }, 429);
+    }
 
     const { url } = await req.json();
-    if (!url || typeof url !== "string") {
-      return new Response(JSON.stringify({ error: "url required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    if (!url || typeof url !== "string") return json({ error: "A job link is required.", code: "invalid_url" }, 400);
 
-    // SSRF guard: validate URL scheme + host before fetching
-    const isSafeJobUrl = async (raw: string): Promise<{ ok: true; url: URL } | { ok: false; reason: string }> => {
-      let parsed: URL;
-      try { parsed = new URL(raw); } catch { return { ok: false, reason: "Invalid URL" }; }
-      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-        return { ok: false, reason: "Only http(s) URLs allowed" };
-      }
-      const host = parsed.hostname.toLowerCase();
-      // Block obvious internal hostnames
-      if (
-        host === "localhost" ||
-        host === "0.0.0.0" ||
-        host.endsWith(".local") ||
-        host.endsWith(".internal")
-      ) return { ok: false, reason: "Internal hostnames are not allowed" };
-      // Block literal IPs in private / loopback / link-local ranges
-      const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-      if (ipv4) {
-        const [a, b] = [Number(ipv4[1]), Number(ipv4[2])];
-        if (
-          a === 10 ||
-          a === 127 ||
-          (a === 169 && b === 254) ||
-          (a === 172 && b >= 16 && b <= 31) ||
-          (a === 192 && b === 168) ||
-          a === 0 || a >= 224
-        ) return { ok: false, reason: "Private IPs are not allowed" };
-      }
-      // Block IPv6 literals (covers ::1, fc00::/7, fe80::/10, etc. conservatively)
-      if (host.includes(":") || host.startsWith("[")) {
-        return { ok: false, reason: "IPv6 literals are not allowed" };
-      }
-      return { ok: true, url: parsed };
-    };
+    const safe = assertSafeUrl(url);
 
-    const safety = await isSafeJobUrl(url);
-    if (!safety.ok) {
-      return new Response(JSON.stringify({ error: safety.reason }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Primary extraction: Firecrawl structured JSON + markdown (handles JS-heavy pages).
+    let extracted: Record<string, unknown> | null = null;
+    let markdown = "";
+    let extractionSource: "firecrawl" | "fallback_fetch" = "firecrawl";
 
-    // Fetch page HTML with a strict timeout + size cap; redirects auto-followed, but each
-    // hop's final URL is still subject to network egress restrictions in the runtime.
-    let pageText = "";
     try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 6000);
-      const r = await fetch(safety.url.toString(), {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; CareerFlowBot/1.0)" },
-        redirect: "follow",
-        signal: ctrl.signal,
+      const doc = await scrape(safe.toString(), {
+        formats: ["markdown", { type: "json", schema: JOB_SCHEMA }],
+        onlyMainContent: true,
+        waitFor: 1500,
       });
-      clearTimeout(timer);
-      if (r.ok) {
-        const ct = r.headers.get("content-type") || "";
-        if (ct.includes("text/") || ct.includes("html") || ct.includes("json") || ct === "") {
-          const html = (await r.text()).slice(0, 200_000);
-          pageText = html
+      markdown = (doc.markdown ?? "").slice(0, 12_000);
+      if (doc.json && typeof doc.json === "object") extracted = doc.json as Record<string, unknown>;
+    } catch (e) {
+      if (e instanceof FirecrawlError && (e.code === "no_credits" || e.code === "rate_limited")) {
+        return json({ error: e.message, code: e.code }, e.status);
+      }
+      // Fall back to a plain fetch before giving up.
+      extractionSource = "fallback_fetch";
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 8000);
+        const r = await fetch(safe.toString(), {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; GradrBot/1.0)" },
+          redirect: "follow",
+          signal: ctrl.signal,
+        });
+        clearTimeout(timer);
+        if (r.ok) {
+          markdown = (await r.text())
+            .slice(0, 200_000)
             .replace(/<script[\s\S]*?<\/script>/gi, " ")
             .replace(/<style[\s\S]*?<\/style>/gi, " ")
             .replace(/<[^>]+>/g, " ")
             .replace(/\s+/g, " ")
-            .slice(0, 8000);
+            .slice(0, 10_000);
         }
-      }
-    } catch (_) { /* ignore — AI will use URL alone */ }
+      } catch { /* handled below */ }
 
+      if (!markdown) {
+        const known = e instanceof FirecrawlError ? e : null;
+        return json({
+          error: known?.message ?? "That page could not be read automatically. Paste the job description manually instead.",
+          code: known?.code ?? "extraction_failed",
+        }, known?.status ?? 422);
+      }
+    }
+
+    // Gemini normalises / fills gaps from the page text. Never invents values.
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
+    if (!LOVABLE_API_KEY) return json({ error: "AI is not configured.", code: "not_configured" }, 503);
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -117,47 +128,67 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "Extract structured job posting details. Use null when unknown." },
-          { role: "user", content: `URL: ${url}\n\nPage text:\n${pageText || "(unavailable — infer from URL only)"}` },
+          {
+            role: "system",
+            content:
+              "You normalise scraped job postings. Only use information present in the supplied page content. Use null or an empty array when a field is genuinely absent — never guess or invent salaries, companies, or requirements.",
+          },
+          {
+            role: "user",
+            content: `URL: ${url}\n\nPre-extracted fields (may be incomplete):\n${JSON.stringify(extracted ?? {})}\n\nPage content:\n${markdown || "(none)"}`,
+          },
         ],
         tools: [{
           type: "function",
-          function: {
-            name: "extract_job",
-            description: "Extract job details",
-            parameters: {
-              type: "object",
-              properties: {
-                title: { type: "string" },
-                company: { type: ["string", "null"] },
-                location: { type: ["string", "null"] },
-                remote: { type: "boolean" },
-                description: { type: ["string", "null"] },
-                salary_min: { type: ["number", "null"] },
-                salary_max: { type: ["number", "null"] },
-              },
-              required: ["title", "remote"],
-            },
-          },
+          function: { name: "extract_job", description: "Normalised job posting", parameters: JOB_SCHEMA },
         }],
         tool_choice: { type: "function", function: { name: "extract_job" } },
       }),
     });
 
     if (!resp.ok) {
-      if (resp.status === 429 || resp.status === 402) {
-        return new Response(JSON.stringify({ error: resp.status === 402 ? "AI credits exhausted" : "AI rate limited" }), { status: resp.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      throw new Error(`AI error ${resp.status}`);
+      if (resp.status === 429) return json({ error: "AI is busy. Try again in a moment.", code: "rate_limited" }, 429);
+      if (resp.status === 402) return json({ error: "AI credits exhausted.", code: "no_credits" }, 402);
+      console.error(`AI error ${resp.status}: ${await resp.text()}`);
+      return json({ error: "The job could not be analysed. Try again.", code: "ai_failed" }, 502);
     }
+
     const data = await resp.json();
     const tc = data.choices?.[0]?.message?.tool_calls?.[0];
     const result = tc ? JSON.parse(tc.function.arguments) : null;
-    if (!result) throw new Error("Failed to parse AI response");
+    if (!result?.title) {
+      return json({
+        error: "No job posting was recognised on that page. Check the link points directly at a job ad.",
+        code: "not_a_job",
+      }, 422);
+    }
 
-    return new Response(JSON.stringify({ ...result, url }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const arr = (v: unknown) => (Array.isArray(v) ? v.filter((x) => typeof x === "string" && x.trim()) : []);
+    const payload = {
+      title: result.title,
+      company: result.company ?? null,
+      location: result.location ?? null,
+      remote: result.remote ?? false,
+      employment_type: result.employment_type ?? null,
+      salary_min: result.salary_min ?? null,
+      salary_max: result.salary_max ?? null,
+      salary_currency: result.salary_currency ?? null,
+      description: result.description ?? null,
+      responsibilities: arr(result.responsibilities),
+      requirements: arr(result.requirements),
+      skills: arr(result.skills),
+      benefits: arr(result.benefits),
+    };
+
+    // Be honest about what could not be extracted.
+    const missingFields = Object.entries(payload)
+      .filter(([, v]) => v === null || (Array.isArray(v) && v.length === 0))
+      .map(([k]) => k);
+
+    return json({ ...payload, url, extractionSource, missingFields });
   } catch (e) {
+    if (e instanceof FirecrawlError) return json({ error: e.message, code: e.code }, e.status);
     console.error("parse-job-url error:", e);
-    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return json({ error: "Something failed while importing the job. Please try again.", code: "internal" }, 500);
   }
 });
