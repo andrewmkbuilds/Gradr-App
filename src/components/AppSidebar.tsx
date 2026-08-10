@@ -14,6 +14,8 @@ import {
   Mail,
   Gift,
   ScrollText,
+  Search,
+
   CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
