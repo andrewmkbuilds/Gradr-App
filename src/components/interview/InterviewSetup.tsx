@@ -79,6 +79,15 @@ export function InterviewSetup({ initial, onContinue }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Keep the selection inside what the plan allows once the tier resolves.
+  useEffect(() => {
+    if (!personaAllowed(ent, personaId)) setPersonaId((ent.personas?.[0] as PersonaId) ?? DEFAULT_PERSONA);
+    if (!difficultyAllowed(ent, difficultyId)) {
+      setDifficultyId((ent.difficulties?.[0] as DifficultyId) ?? DEFAULT_DIFFICULTY);
+    }
+  }, [ent, personaId, difficultyId]);
+
+
   return (
     <div className="glass-card p-6 space-y-6 animate-slide-up">
       <div>
