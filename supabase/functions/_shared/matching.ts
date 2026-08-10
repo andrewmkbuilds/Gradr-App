@@ -32,7 +32,7 @@ const STOPWORDS = new Set(
    "you your we our they their it its will would can could should may might must have has had do does did not no yes " +
    "job role work working team teams company companies experience experiences year years plus etc other others including include " +
    "us new our who what when where how all any more most about into over under out up down who's please apply applicant candidates " +
-   "candidate opportunity opportunities benefits salary位 位").split(/\s+/),
+   "candidate opportunity opportunities benefits salary").split(/\s+/),
 );
 
 function normalize(text: string): string {
