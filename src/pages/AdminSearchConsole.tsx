@@ -100,7 +100,7 @@ export default function AdminSearchConsole() {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <Seo title="Search Console health" description="Crawl errors and indexing issues from Google Search Console." noIndex />
+      <Seo title="Search Console health" description="Crawl errors and indexing issues from Google Search Console." path="/admin/search-console" />
 
       <div className="flex items-start justify-between gap-4">
         <div>
