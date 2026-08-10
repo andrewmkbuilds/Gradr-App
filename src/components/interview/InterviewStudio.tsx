@@ -146,6 +146,7 @@ export function InterviewStudio(props: Props) {
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
         {connectionLost && (
           <ConnectionErrorOverlay
+            open
             retrying={connecting}
             onRetry={onReconnect}
             onDismiss={onDismissConnectionError}
