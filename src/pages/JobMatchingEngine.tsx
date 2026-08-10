@@ -259,7 +259,7 @@ export default function JobMatchingEngine() {
                           <ScoreRing score={job.match.score} size={56} />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <CompanyLogo name={job.company ?? "Unknown"} size={20} />
+                              <CompanyLogo company={job.company} size={20} />
                               <h3 className="truncate text-sm font-semibold text-foreground">{job.title}</h3>
                             </div>
                             <p className="text-xs text-muted-foreground">{job.company ?? "Company not listed"}</p>
