@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX, Square } from "lucide-react";
+import { Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX, Square, Radio, Hand, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
@@ -13,6 +14,8 @@ import { InterviewReportView, type InterviewReport } from "@/components/intervie
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
+import { usePremiumVoice } from "@/hooks/usePremiumVoice";
+import { useRealtimeInterview } from "@/hooks/useRealtimeInterview";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
 import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
@@ -22,6 +25,7 @@ import type { Json } from "@/integrations/supabase/types";
 
 
 type Msg = { role: "user" | "assistant"; content: string };
+type Engine = "realtime" | "fallback";
 
 const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
 
@@ -34,6 +38,8 @@ function InterviewEngineInner() {
   const [stage, setStage] = useState<"setup" | "preflight">("setup");
   const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);
+  const [engine, setEngine] = useState<Engine>("fallback");
+  const [connecting, setConnecting] = useState(false);
 
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [buildingReport, setBuildingReport] = useState(false);
@@ -45,19 +51,57 @@ function InterviewEngineInner() {
   const startedAt = useRef<number>(0);
   const integrityRef = useRef<IntegritySnapshot | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<Msg[]>([]);
+  const fallbackHandled = useRef(false);
   const navigate = useNavigate();
-
 
   const voice = useVoiceSession();
   const { speak, stopSpeaking, ttsSupported } = voice;
+  const premium = usePremiumVoice();
+
+  messagesRef.current = messages;
+
+  const appendTurn = useCallback((turn: Msg) => {
+    setMessages((prev) => {
+      const last = prev[prev.length - 1];
+      // Realtime transcripts can arrive as a continuation of the same speaker.
+      if (last && last.role === turn.role && turn.content.startsWith(last.content)) {
+        return prev.map((m, i) => (i === prev.length - 1 ? turn : m));
+      }
+      return [...prev, turn];
+    });
+  }, []);
+
+  /** Switches from Gemini Live to the text coach + premium voice, keeping the transcript. */
+  const degradeToFallback = useCallback((reason: string) => {
+    if (fallbackHandled.current) return;
+    fallbackHandled.current = true;
+    setEngine("fallback");
+    setConnecting(false);
+    toast.info(`${reason} Continuing with standard voice — your transcript is preserved.`);
+  }, []);
+
+  const realtime = useRealtimeInterview({
+    onTurn: appendTurn,
+    onFallback: degradeToFallback,
+  });
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, [messages, realtime.partialUser, realtime.partialModel]);
 
   const handleSnapshot = useCallback((s: IntegritySnapshot) => {
     integrityRef.current = s;
   }, []);
+
+  const speakReply = useCallback(
+    (text: string) => {
+      if (!voiceMode || !text) return;
+      if (realtime.limits?.premiumVoiceFallback) void premium.speak(text);
+      else if (ttsSupported) speak(text);
+    },
+    [premium, realtime.limits, speak, ttsSupported, voiceMode],
+  );
 
   const streamChat = async (allMessages: Msg[]) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -124,11 +168,12 @@ function InterviewEngineInner() {
       }
     }
 
-    if (voiceMode && ttsSupported && assistantText) speak(assistantText);
+    if (assistantText) speakReply(assistantText);
   };
 
   const startInterview = async (kickoff?: string) => {
     setStarted(true);
+    setEngine("fallback");
     setReport(null);
     setPlan(null);
     setSessionId(null);
@@ -151,6 +196,57 @@ function InterviewEngineInner() {
     }
   };
 
+  /** Opens the low-latency Gemini Live session, falling back to the text coach on any failure. */
+  const startRealtime = async (ctx: SessionContext) => {
+    fallbackHandled.current = false;
+    setStarted(true);
+    setReport(null);
+    setPlan(null);
+    setSessionId(null);
+    setMessages([]);
+    startedAt.current = Date.now();
+    setConnecting(true);
+
+    const result = await realtime.start({
+      directive: buildSessionDirective(ctx),
+      personaId: ctx.personaId,
+      difficultyId: ctx.difficultyId,
+    });
+    setConnecting(false);
+
+    if (result.ok) {
+      fallbackHandled.current = false;
+      setEngine("realtime");
+      return;
+    }
+    // Entitlement blocks are informational; everything else silently degrades.
+    if (result.code === "realtime_not_entitled" || result.code === "quota_exceeded") {
+      toast.info(result.reason);
+    }
+    setEngine("fallback");
+    await startInterview();
+  };
+
+  /** Reconnects realtime after a drop, replaying the transcript so context survives. */
+  const retryRealtime = async () => {
+    if (!sessionCtx) return;
+    fallbackHandled.current = false;
+    setConnecting(true);
+    const result = await realtime.start({
+      directive: buildSessionDirective(sessionCtx),
+      personaId: sessionCtx.personaId,
+      difficultyId: sessionCtx.difficultyId,
+      resumeTranscript: messagesRef.current,
+    });
+    setConnecting(false);
+    if (result.ok) {
+      setEngine("realtime");
+      toast.success("Realtime voice reconnected — picking up where you left off.");
+    } else {
+      toast.error(result.reason);
+    }
+  };
+
   /** Replays the same role question set with the report's next steps applied as coaching focus. */
   const rerunWithImprovements = () => {
     if (!report) return;
@@ -170,6 +266,7 @@ function InterviewEngineInner() {
       "Before each question, add one short reminder (max 15 words) of the improvement to apply. Then ask the question. Start now with your introduction and the first question.",
     ].join("\n");
     setDurationSec(0);
+    realtime.stop();
     toast.success("Re-running the same question set with your improvements applied.");
     void startInterview(kickoff);
   };
@@ -177,7 +274,16 @@ function InterviewEngineInner() {
   const submitAnswer = async (text: string) => {
     const answer = text.trim();
     if (!answer || isLoading) return;
+
+    if (engine === "realtime" && realtime.isLive) {
+      appendTurn({ role: "user", content: answer });
+      realtime.sendText(answer);
+      setInput("");
+      return;
+    }
+
     stopSpeaking();
+    premium.stop();
     const newMessages: Msg[] = [...messages, { role: "user", content: answer }];
     setMessages(newMessages);
     setInput("");
@@ -193,11 +299,16 @@ function InterviewEngineInner() {
   };
 
   const toggleMic = () => {
+    if (engine === "realtime") {
+      realtime.setMuted(!realtime.muted);
+      return;
+    }
     if (voice.listening) {
       const finalText = voice.stopListening();
       void submitAnswer(finalText);
     } else {
       stopSpeaking();
+      premium.stop();
       voice.startListening();
     }
   };
@@ -208,6 +319,8 @@ function InterviewEngineInner() {
       return;
     }
     stopSpeaking();
+    premium.stop();
+    realtime.stop();
     if (voice.listening) voice.stopListening();
     setBuildingReport(true);
     const elapsed = Math.round((Date.now() - startedAt.current) / 1000);
@@ -293,10 +406,13 @@ function InterviewEngineInner() {
 
   const resetInterview = () => {
     stopSpeaking();
+    premium.stop();
+    realtime.stop();
     if (voice.listening) voice.stopListening();
     setMessages([]);
     setStarted(false);
     setStage("setup");
+    setEngine("fallback");
 
     setInput("");
     setReport(null);
@@ -334,7 +450,7 @@ function InterviewEngineInner() {
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">AI Mock Interview</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Voice interview with live presence coaching and a scored report at the end
+            Realtime voice interview with live presence coaching and a scored report at the end
           </p>
         </div>
         <CreditsBalance only="interview" compact />
@@ -351,7 +467,7 @@ function InterviewEngineInner() {
         ) : (
           <PreflightCheck
             onCancel={() => setStage("setup")}
-            onReady={() => void startInterview()}
+            onReady={() => (sessionCtx ? void startRealtime(sessionCtx) : void startInterview())}
           />
         )}
 
@@ -365,21 +481,62 @@ function InterviewEngineInner() {
   }
 
 
+  const liveRealtime = engine === "realtime" && realtime.isLive;
+
   return (
     <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">AI Mock Interview</h1>
-            <p className="text-sm text-muted-foreground mt-1">{targetRole || "Mock Interview"}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-sm text-muted-foreground">{targetRole || "Mock Interview"}</p>
+              {liveRealtime ? (
+                <Badge variant="outline" className="border-primary/50 text-primary gap-1">
+                  <Radio className="h-3 w-3 animate-pulse" /> Realtime voice
+                </Badge>
+              ) : connecting ? (
+                <Badge variant="outline" className="gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Connecting
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="gap-1">Standard voice</Badge>
+              )}
+            </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => (voice.speaking ? stopSpeaking() : setVoiceMode((v) => !v))}>
-              {voice.speaking ? <VolumeX className="h-4 w-4" /> : voiceMode ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            {liveRealtime && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => realtime.interrupt()}
+                disabled={!realtime.speaking}
+                title="Interrupt the interviewer"
+              >
+                <Hand className="h-4 w-4 mr-2" />
+                Jump in
+              </Button>
+            )}
+            {!liveRealtime && realtime.limits?.realtimeVoice && (
+              <Button variant="outline" size="sm" onClick={retryRealtime} disabled={connecting}>
+                <Zap className="h-4 w-4 mr-2" />
+                Reconnect realtime
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                stopSpeaking();
+                premium.stop();
+                setVoiceMode((v) => !v);
+              }}
+            >
+              {voiceMode ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
             </Button>
             <Button variant="outline" size="sm" onClick={endAndScore} disabled={buildingReport}>
               {buildingReport ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Square className="h-4 w-4 mr-2" />}
-              End & score
+              End &amp; score
             </Button>
             <Button variant="outline" size="sm" onClick={resetInterview}>
               <RotateCcw className="h-4 w-4" />
@@ -407,6 +564,16 @@ function InterviewEngineInner() {
               )}
             </div>
           ))}
+          {realtime.partialModel && (
+            <div className="flex gap-3">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-1">
+                <Bot className="h-4 w-4 text-primary" />
+              </div>
+              <div className="max-w-[80%] rounded-xl px-4 py-3 text-sm glass-card text-muted-foreground italic">
+                {realtime.partialModel}
+              </div>
+            </div>
+          )}
           {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
             <div className="flex gap-3">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -417,35 +584,48 @@ function InterviewEngineInner() {
               </div>
             </div>
           )}
-          {voice.listening && (
+          {(voice.listening || realtime.partialUser) && (
             <div className="flex justify-end">
               <div className="max-w-[80%] rounded-xl px-4 py-3 text-sm border border-primary/40 bg-primary/5 text-muted-foreground">
-                {voice.transcript || "Listening…"}
+                {realtime.partialUser || voice.transcript || "Listening…"}
               </div>
             </div>
           )}
         </div>
 
         <div className="flex gap-2">
-          {voice.supported && (
+          {(voice.supported || liveRealtime) && (
             <Button
-              variant={voice.listening ? "default" : "outline"}
+              variant={liveRealtime ? (realtime.muted ? "outline" : "default") : voice.listening ? "default" : "outline"}
               onClick={toggleMic}
-              disabled={isLoading}
+              disabled={isLoading && !liveRealtime}
               className="shrink-0"
+              title={liveRealtime ? (realtime.muted ? "Unmute" : "Mute") : "Push to talk"}
             >
-              {voice.listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              {liveRealtime ? (
+                realtime.muted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />
+              ) : voice.listening ? (
+                <MicOff className="h-4 w-4" />
+              ) : (
+                <Mic className="h-4 w-4" />
+              )}
             </Button>
           )}
           <Input
-            placeholder={voice.listening ? "Listening… tap the mic to submit" : "Type your answer..."}
+            placeholder={
+              liveRealtime
+                ? "Just talk — or type to add something"
+                : voice.listening
+                  ? "Listening… tap the mic to submit"
+                  : "Type your answer..."
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && submitAnswer(input)}
-            disabled={isLoading || voice.listening}
+            disabled={(isLoading || voice.listening) && !liveRealtime}
             className="bg-secondary border-border"
           />
-          <Button onClick={() => submitAnswer(input)} disabled={isLoading || !input.trim()} className="bg-primary text-primary-foreground">
+          <Button onClick={() => submitAnswer(input)} disabled={(isLoading && !liveRealtime) || !input.trim()} className="bg-primary text-primary-foreground">
             <Send className="h-4 w-4" />
           </Button>
         </div>
@@ -453,8 +633,20 @@ function InterviewEngineInner() {
 
       <div className="space-y-4">
         <CameraMonitor active={started} onSnapshot={handleSnapshot} />
+        {realtime.limits && (
+          <div className="glass-card p-4 text-xs text-muted-foreground space-y-1">
+            <p className="text-sm font-semibold text-foreground capitalize">{realtime.limits.tier} plan</p>
+            <p>
+              {realtime.limits.sessionsRemaining === null
+                ? "Unlimited interviews this month"
+                : `${realtime.limits.sessionsRemaining} of ${realtime.limits.sessionsPerMonth} interviews left this month`}
+            </p>
+            <p>Up to {realtime.limits.maxSessionMinutes} minutes per session</p>
+          </div>
+        )}
         <div className="glass-card p-4 text-xs text-muted-foreground space-y-2">
           <p className="text-sm font-semibold text-foreground">Session tips</p>
+          {liveRealtime && <p>You can interrupt the interviewer any time — just start talking.</p>}
           <p>Use the STAR structure: Situation, Task, Action, Result.</p>
           <p>Speak for 60–120 seconds per behavioural answer.</p>
           <p>Hit “End &amp; score” whenever you're ready for your report.</p>

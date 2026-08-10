@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Loader2, FileText } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import {
   PERSONAS,
@@ -13,6 +15,7 @@ import {
   type DifficultyId,
   type SessionContext,
 } from "@/lib/interview/personas";
+import { entitlementFor, personaAllowed, difficultyAllowed } from "@/lib/interview/entitlements";
 
 interface Props {
   initial?: Partial<SessionContext>;
@@ -29,6 +32,10 @@ export function InterviewSetup({ initial, onContinue }: Props) {
   const [resumeText, setResumeText] = useState(initial?.resumeText ?? "");
   const [resumeLabel, setResumeLabel] = useState<string | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
+  const [tier, setTier] = useState<string | null>(null);
+
+  const ent = entitlementFor(tier);
+
 
   // Auto-fill from the user's saved profile and most recent parsed resume.
   useEffect(() => {
@@ -39,7 +46,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         const uid = userData.user?.id;
         if (!uid) return;
 
-        const [{ data: profile }, { data: resume }] = await Promise.all([
+        const [{ data: profile }, { data: resume }, { data: sub }] = await Promise.all([
           supabase.from("profiles").select("target_job_title").eq("user_id", uid).maybeSingle(),
           supabase
             .from("resumes")
@@ -48,13 +55,20 @@ export function InterviewSetup({ initial, onContinue }: Props) {
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle(),
+          supabase
+            .from("subscribers")
+            .select("subscribed, subscription_tier")
+            .eq("user_id", uid)
+            .maybeSingle(),
         ]);
         if (cancelled) return;
+        setTier(sub?.subscribed ? (sub.subscription_tier ?? "free") : "free");
         if (!initial?.targetRole && profile?.target_job_title) setTargetRole(profile.target_job_title);
         if (!initial?.resumeText && resume?.parsed_text) {
           setResumeText(resume.parsed_text);
           setResumeLabel(resume.file_name ?? "Latest resume");
         }
+
       } finally {
         if (!cancelled) setLoadingContext(false);
       }
@@ -65,6 +79,15 @@ export function InterviewSetup({ initial, onContinue }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Keep the selection inside what the plan allows once the tier resolves.
+  useEffect(() => {
+    if (!personaAllowed(ent, personaId)) setPersonaId((ent.personas?.[0] as PersonaId) ?? DEFAULT_PERSONA);
+    if (!difficultyAllowed(ent, difficultyId)) {
+      setDifficultyId((ent.difficulties?.[0] as DifficultyId) ?? DEFAULT_DIFFICULTY);
+    }
+  }, [ent, personaId, difficultyId]);
+
+
   return (
     <div className="glass-card p-6 space-y-6 animate-slide-up">
       <div>
@@ -74,47 +97,85 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         </p>
       </div>
 
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-secondary/30 p-3">
+        <div className="flex items-center gap-2 text-sm">
+          <Radio className={`h-4 w-4 ${ent.realtimeVoice ? "text-primary" : "text-muted-foreground"}`} />
+          <span className="text-foreground">
+            {ent.realtimeVoice ? "Realtime voice interview enabled" : "Realtime voice is a Starter & Pro feature"}
+          </span>
+          <Badge variant="outline" className="capitalize">{ent.label}</Badge>
+        </div>
+        {!ent.realtimeVoice && (
+          <Button asChild size="sm" variant="outline">
+            <Link to="/pricing">Upgrade</Link>
+          </Button>
+        )}
+      </div>
+
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Interviewer</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          {PERSONAS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setPersonaId(p.id)}
-              className={`text-left rounded-xl border p-3 transition-colors ${
-                personaId === p.id
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-secondary/40 hover:bg-secondary"
-              }`}
-            >
-              <div className="text-sm font-medium text-foreground">{p.label}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{p.blurb}</div>
-            </button>
-          ))}
+          {PERSONAS.map((p) => {
+            const locked = !personaAllowed(ent, p.id);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                disabled={locked}
+                onClick={() => setPersonaId(p.id)}
+                className={`text-left rounded-xl border p-3 transition-colors ${
+                  locked
+                    ? "border-border bg-secondary/20 opacity-60 cursor-not-allowed"
+                    : personaId === p.id
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-secondary/40 hover:bg-secondary"
+                }`}
+              >
+                <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  {p.label}
+                  {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {locked ? "Unlocks on a higher plan" : p.blurb}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Difficulty</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {DIFFICULTIES.map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              onClick={() => setDifficultyId(d.id)}
-              className={`text-left rounded-xl border p-3 transition-colors ${
-                difficultyId === d.id
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-secondary/40 hover:bg-secondary"
-              }`}
-            >
-              <div className="text-sm font-medium text-foreground">{d.label}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{d.blurb}</div>
-            </button>
-          ))}
+          {DIFFICULTIES.map((d) => {
+            const locked = !difficultyAllowed(ent, d.id);
+            return (
+              <button
+                key={d.id}
+                type="button"
+                disabled={locked}
+                onClick={() => setDifficultyId(d.id)}
+                className={`text-left rounded-xl border p-3 transition-colors ${
+                  locked
+                    ? "border-border bg-secondary/20 opacity-60 cursor-not-allowed"
+                    : difficultyId === d.id
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-secondary/40 hover:bg-secondary"
+                }`}
+              >
+                <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  {d.label}
+                  {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {locked ? "Unlocks on a higher plan" : d.blurb}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
+
 
       <div className="grid sm:grid-cols-2 gap-3">
         <Input
