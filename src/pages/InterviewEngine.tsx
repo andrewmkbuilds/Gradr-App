@@ -13,6 +13,10 @@ import { InterviewReportView, type InterviewReport } from "@/components/intervie
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
+import { InterviewSetup } from "@/components/interview/InterviewSetup";
+import { PreflightCheck } from "@/components/interview/PreflightCheck";
+import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
+
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 import type { Json } from "@/integrations/supabase/types";
 
