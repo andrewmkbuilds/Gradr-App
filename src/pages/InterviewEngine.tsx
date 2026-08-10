@@ -20,6 +20,8 @@ import { buildSessionDirective, type SessionContext } from "@/lib/interview/pers
 
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 import type { Json } from "@/integrations/supabase/types";
+import { trackJourney } from "@/lib/telemetry/journey";
+
 
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -178,6 +180,8 @@ function InterviewEngineInner() {
     setSessionId(null);
     setMessages([]);
     startedAt.current = Date.now();
+    trackJourney("interview_started", { engine: "fallback", has_role: Boolean(targetRole) });
+
     setIsLoading(true);
     try {
       await streamChat([
@@ -204,6 +208,8 @@ function InterviewEngineInner() {
     setSessionId(null);
     setMessages([]);
     startedAt.current = Date.now();
+    trackJourney("interview_started", { engine: "realtime", has_role: Boolean(targetRole) });
+
     setConnecting(true);
 
     const result = await realtime.start({
@@ -337,6 +343,16 @@ function InterviewEngineInner() {
       const newReport = data.report as InterviewReport;
       setReport(newReport);
       setDurationSec(elapsed);
+      trackJourney("interview_completed", {
+        engine,
+        duration_sec: elapsed,
+        turns: messages.length,
+      });
+      trackJourney("interview_report_generated", {
+        overall_score: Math.round(newReport.overallScore),
+        duration_sec: elapsed,
+      });
+
 
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
