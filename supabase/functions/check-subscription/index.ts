@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { getStripe } from "../_shared/stripe.ts";
+import { getStripe, resolveTier } from "../_shared/stripe.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
