@@ -19,11 +19,12 @@ function db() {
   return _supabase;
 }
 
-async function emailFor(userId: string): Promise<string> {
+async function emailFor(userId: string, env: PaddleEnv): Promise<string> {
   const { data: row } = await db()
     .from("subscribers")
     .select("email")
     .eq("user_id", userId)
+    .eq("environment", env)
     .maybeSingle();
   if (row?.email) return row.email as string;
   const { data } = await db().auth.admin.getUserById(userId);
@@ -31,7 +32,7 @@ async function emailFor(userId: string): Promise<string> {
 }
 
 // deno-lint-ignore no-explicit-any
-async function upsertSubscription(data: any) {
+async function upsertSubscription(data: any, env: PaddleEnv) {
   const userId = data?.customData?.userId;
   if (!userId) {
     console.error("payments-webhook: no userId in customData");
@@ -52,7 +53,8 @@ async function upsertSubscription(data: any) {
   await db().from("subscribers").upsert(
     {
       user_id: userId,
-      email: await emailFor(userId),
+      email: await emailFor(userId, env),
+      environment: env,
       // Provider customer/subscription identifiers (Paddle).
       stripe_customer_id: data.customerId ?? null,
       stripe_subscription_id: data.id ?? null,
@@ -64,12 +66,12 @@ async function upsertSubscription(data: any) {
       current_period_end: data.currentBillingPeriod?.endsAt ?? null,
       cancel_at_period_end: data.scheduledChange?.action === "cancel",
     },
-    { onConflict: "user_id" },
+    { onConflict: "user_id,environment" },
   );
 }
 
 // deno-lint-ignore no-explicit-any
-async function updateSubscription(data: any) {
+async function updateSubscription(data: any, env: PaddleEnv) {
   const status: string = data.status ?? "active";
   await db()
     .from("subscribers")
@@ -80,12 +82,13 @@ async function updateSubscription(data: any) {
       cancel_at_period_end: data.scheduledChange?.action === "cancel",
       ...(status === "canceled" ? { subscription_tier: null } : {}),
     })
-    .eq("stripe_subscription_id", data.id);
+    .eq("stripe_subscription_id", data.id)
+    .eq("environment", env);
 }
 
 /** One-off credit packs are granted from completed transactions. */
 // deno-lint-ignore no-explicit-any
-async function grantPackCredits(data: any) {
+async function grantPackCredits(data: any, env: PaddleEnv) {
   const userId = data?.customData?.userId;
   if (!userId) return;
 
@@ -99,6 +102,7 @@ async function grantPackCredits(data: any) {
       .from("purchases")
       .select("id")
       .eq("stripe_session_id", data.id)
+      .eq("environment", env)
       .maybeSingle();
     if (existing) continue;
 
@@ -108,6 +112,7 @@ async function grantPackCredits(data: any) {
     await db().from("purchases").insert({
       user_id: userId,
       stripe_session_id: data.id,
+      environment: env,
       pack_key: priceId,
       pack_label: pack.label,
       quantity,
@@ -121,17 +126,19 @@ async function grantPackCredits(data: any) {
       .from("usage_credits")
       .select("application_credits, interview_credits")
       .eq("user_id", userId)
+      .eq("environment", env)
       .maybeSingle();
 
     await db().from("usage_credits").upsert(
       {
         user_id: userId,
+        environment: env,
         application_credits: Number(current?.application_credits ?? 0) +
           (pack.kind === "application" ? credits : 0),
         interview_credits: Number(current?.interview_credits ?? 0) +
           (pack.kind === "interview" ? credits : 0),
       },
-      { onConflict: "user_id" },
+      { onConflict: "user_id,environment" },
     );
   }
 }
@@ -145,16 +152,16 @@ Deno.serve(async (req) => {
     const event = await verifyWebhook(req, env);
     switch (event.eventType) {
       case EventName.SubscriptionCreated:
-        await upsertSubscription(event.data);
+        await upsertSubscription(event.data, env);
         break;
       case EventName.SubscriptionUpdated:
-        await updateSubscription(event.data);
+        await updateSubscription(event.data, env);
         break;
       case EventName.SubscriptionCanceled:
-        await updateSubscription({ ...event.data, status: "canceled" });
+        await updateSubscription({ ...event.data, status: "canceled" }, env);
         break;
       case EventName.TransactionCompleted:
-        await grantPackCredits(event.data);
+        await grantPackCredits(event.data, env);
         break;
       default:
         console.log("Unhandled event:", event.eventType);

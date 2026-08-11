@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { consume, planTier, refund, resolveEnv } from "../_shared/entitlements.ts";
 
 /**
  * Secure session gateway for the Gemini Live realtime interview.
@@ -86,61 +87,70 @@ serve(async (req) => {
     const voiceName = typeof body.voiceName === "string" ? body.voiceName.slice(0, 40) : "Puck";
     /** Prior turns replayed when recovering a dropped session. */
     const resumeTranscript = Array.isArray(body.resumeTranscript) ? body.resumeTranscript.slice(-30) : [];
+    /** Reconnects replay an in-flight session and must not be charged twice. */
+    const isReconnect = body.reconnect === true || resumeTranscript.length > 0;
+    const paymentEnv = resolveEnv(body.environment);
 
-    // ---- Plan resolution -------------------------------------------------
-    const { data: sub } = await supabase
-      .from("subscribers")
-      .select("subscribed, subscription_tier, subscription_status")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    // ---- Plan resolution (authoritative, server-side) ---------------------
+    const tierKey = await planTier(user.id, paymentEnv);
+    const ent = ENTITLEMENTS[tierKey] ?? ENTITLEMENTS.free;
 
-    const rawTier = (sub?.subscribed ? sub?.subscription_tier : null) ?? "free";
-    const active = !sub?.subscription_status || ["active", "trialing", "past_due"].includes(sub.subscription_status);
-    const tierKey = active && ENTITLEMENTS[String(rawTier).toLowerCase()]
-      ? String(rawTier).toLowerCase()
-      : "free";
-    const ent = ENTITLEMENTS[tierKey];
-
-    // ---- Quota -----------------------------------------------------------
-    const monthStart = new Date();
-    monthStart.setUTCDate(1);
-    monthStart.setUTCHours(0, 0, 0, 0);
-
-    const { count } = await supabase
-      .from("interview_sessions")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", monthStart.toISOString());
-
-    const used = count ?? 0;
-    const remaining = ent.sessionsPerMonth === null ? null : Math.max(0, ent.sessionsPerMonth - used);
-
-    const limits = {
+    const baseLimits = {
       tier: ent.tier,
       realtimeVoice: ent.realtimeVoice,
       maxSessionMinutes: ent.maxSessionMinutes,
       sessionsPerMonth: ent.sessionsPerMonth,
-      sessionsUsed: used,
-      sessionsRemaining: remaining,
       premiumVoiceFallback: ent.premiumVoiceFallback,
     };
 
     if (!ent.realtimeVoice) {
-      return json({ error: "realtime_not_entitled", reason: "Realtime voice requires Starter or Pro.", limits }, 403);
+      return json({
+        error: "realtime_not_entitled",
+        reason: "Realtime voice requires Starter or Pro.",
+        limits: { ...baseLimits, sessionsUsed: 0, sessionsRemaining: 0 },
+      }, 403);
     }
-    if (remaining !== null && remaining <= 0) {
-      return json({ error: "quota_exceeded", reason: "Monthly interview quota reached.", limits }, 403);
+
+    // ---- Quota: spend allowance first, then any purchased interview credits
+    let used = 0;
+    let remaining: number | null = ent.sessionsPerMonth;
+    if (!isReconnect) {
+      const entitlement = await consume(user.id, "interview", paymentEnv);
+      used = entitlement.used;
+      remaining = entitlement.remaining ?? null;
+      if (!entitlement.allowed) {
+        return json({
+          error: "quota_exceeded",
+          reason: entitlement.reason === "no_credits"
+            ? "You're out of interview credits. Buy a pack or upgrade to keep practising."
+            : "Monthly interview quota reached.",
+          limits: { ...baseLimits, sessionsUsed: used, sessionsRemaining: 0 },
+        }, 403);
+      }
     }
+
+    const limits = { ...baseLimits, sessionsUsed: used, sessionsRemaining: remaining };
+
+    /** Hand the session back if we charged but never actually started one. */
+    const releaseCharge = async () => {
+      if (!isReconnect) await refund(user.id, "interview", paymentEnv);
+    };
+
     if (ent.personas && !ent.personas.includes(personaId)) {
+      await releaseCharge();
       return json({ error: "persona_not_entitled", reason: "This interviewer persona requires a higher plan.", limits }, 403);
     }
     if (ent.difficulties && !ent.difficulties.includes(difficultyId)) {
+      await releaseCharge();
       return json({ error: "difficulty_not_entitled", reason: "This difficulty requires a higher plan.", limits }, 403);
     }
 
     // ---- Ephemeral token -------------------------------------------------
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiKey) return json({ error: "gemini_unavailable", reason: "Realtime voice is not configured.", limits }, 503);
+    if (!geminiKey) {
+      await releaseCharge();
+      return json({ error: "gemini_unavailable", reason: "Realtime voice is not configured.", limits }, 503);
+    }
 
     const systemText = [
       "You are conducting a live, spoken mock interview. You are the interviewer, not an assistant.",
@@ -205,6 +215,7 @@ serve(async (req) => {
     if (!tokenRes.ok) {
       const detail = await tokenRes.text();
       console.error("gemini auth_tokens failed", tokenRes.status, detail);
+      await releaseCharge();
       return json(
         { error: "token_mint_failed", reason: "Couldn't start the realtime voice session.", status: tokenRes.status, limits },
         502,
@@ -213,7 +224,10 @@ serve(async (req) => {
 
     const tokenBody = await tokenRes.json();
     const token = tokenBody?.name;
-    if (!token) return json({ error: "token_mint_failed", reason: "No token returned.", limits }, 502);
+    if (!token) {
+      await releaseCharge();
+      return json({ error: "token_mint_failed", reason: "No token returned.", limits }, 502);
+    }
 
     return json({
       token,

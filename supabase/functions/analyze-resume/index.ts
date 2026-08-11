@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { scoreResume, deterministicSuggestions } from "../_shared/resumeScoring.ts";
+import { consume, paymentRequired, refund, resolveEnv, type PaymentEnv } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,6 +27,10 @@ function checkRateLimit(userId: string): { ok: boolean; retryAfter?: number } {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Set once the request has been charged, so a later failure can be refunded.
+  let meteredUserId: string | null = null;
+  let paymentEnv: PaymentEnv = "sandbox";
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -54,12 +59,18 @@ serve(async (req) => {
       );
     }
 
-    const { resumeText, targetRole, jobDescription, jobTitle } = await req.json();
+    const { resumeText, targetRole, jobDescription, jobTitle, environment } = await req.json();
     if (!resumeText) {
       return new Response(JSON.stringify({ error: "resumeText is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // ---- Entitlement: monthly allowance first, then purchased credits -----
+    paymentEnv = resolveEnv(environment);
+    const entitlement = await consume(user.id, "resume", paymentEnv);
+    if (!entitlement.allowed) return paymentRequired(entitlement, corsHeaders);
+    meteredUserId = user.id;
 
     const MAX_CHARS = 80_000;
     const safeText = String(resumeText).slice(0, MAX_CHARS);
@@ -174,6 +185,7 @@ Rewrites must only use facts present in the resume. Never invent metrics, employ
     );
   } catch (e) {
     console.error("analyze-resume error:", e);
+    if (meteredUserId) await refund(meteredUserId, "resume", paymentEnv);
     return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

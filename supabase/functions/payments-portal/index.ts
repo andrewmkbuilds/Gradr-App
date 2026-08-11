@@ -36,10 +36,15 @@ Deno.serve(async (req) => {
       .from("subscribers")
       .select("stripe_customer_id, stripe_subscription_id")
       .eq("user_id", user.id)
+      .eq("environment", env)
       .maybeSingle();
 
     const customerId = sub?.stripe_customer_id as string | undefined;
-    if (!customerId) return json({ error: "No billing account found yet." }, 404);
+    if (!customerId) {
+      // Credit-pack-only buyers have no subscription record; tell the UI so it
+      // can show purchase history instead of a dead-end error.
+      return json({ error: "no_billing_account", message: "No subscription to manage yet." }, 404);
+    }
 
     const paddle = getPaddleClient(env);
     const session = await paddle.customerPortalSessions.create(

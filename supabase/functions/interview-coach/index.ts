@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { consume, paymentRequired, resolveEnv } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,7 +46,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, targetRole, resumeText, directive } = await req.json();
+    const { messages, targetRole, resumeText, directive, environment } = await req.json();
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "messages array is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -66,6 +67,14 @@ serve(async (req) => {
         JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rl.retryAfter) } },
       );
+    }
+
+    // ---- Entitlement: charged once per session, on the opening turn ------
+    const isSessionStart = !safeMessages.some((m: { role: string }) => m.role === "assistant");
+    if (isSessionStart) {
+      const paymentEnv = resolveEnv(environment);
+      const entitlement = await consume(user.id, "interview", paymentEnv);
+      if (!entitlement.allowed) return paymentRequired(entitlement, corsHeaders);
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
