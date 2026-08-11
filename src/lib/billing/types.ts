@@ -38,7 +38,7 @@ export interface CheckoutResult {
  * changes outside `src/lib/billing`.
  */
 export interface BillingProvider {
-  readonly id: "stripe" | "revenuecat";
+  readonly id: "paddle" | "revenuecat";
   /** Start a subscription checkout. */
   createCheckout(req: CheckoutRequest): Promise<CheckoutResult>;
   /** Start a one-off credit pack checkout. */

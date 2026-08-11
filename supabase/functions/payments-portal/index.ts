@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { getStripe } from "../_shared/stripe.ts";
+import { getPaddleClient, type PaddleEnv } from "../_shared/paddle.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -22,37 +22,34 @@ Deno.serve(async (req) => {
     );
     const { data: userData } = await anon.auth.getUser();
     const user = userData?.user;
-    if (!user?.email) return json({ error: "Not authenticated" }, 401);
+    if (!user) return json({ error: "Not authenticated" }, 401);
+
+    const body = await req.json().catch(() => ({}));
+    const env: PaddleEnv = body?.environment === "live" ? "live" : "sandbox";
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       { auth: { persistSession: false } },
     );
-    const stripe = getStripe();
-
     const { data: sub } = await admin
       .from("subscribers")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id, stripe_subscription_id")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    let customerId = sub?.stripe_customer_id as string | undefined;
-    if (!customerId) {
-      const found = await stripe.customers.list({ email: user.email, limit: 1 });
-      customerId = found.data[0]?.id;
-    }
+    const customerId = sub?.stripe_customer_id as string | undefined;
     if (!customerId) return json({ error: "No billing account found yet." }, 404);
 
-    const origin = req.headers.get("origin") ?? "http://localhost:8080";
-    const portal = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${origin}/billing`,
-    });
+    const paddle = getPaddleClient(env);
+    const session = await paddle.customerPortalSessions.create(
+      customerId,
+      sub?.stripe_subscription_id ? [sub.stripe_subscription_id as string] : [],
+    );
 
-    return json({ url: portal.url });
+    return json({ url: session.urls?.general?.overview });
   } catch (err) {
-    console.error("customer-portal error", err);
+    console.error("payments-portal error", err);
     return json({ error: "Unable to open the billing portal. Please try again." }, 500);
   }
 });

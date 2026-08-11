@@ -122,9 +122,9 @@ export function useBillingActions() {
     async (interval: PlanInterval, plan: PlanKey = "pro") => {
       setPending(`${plan}-${interval}`);
       try {
-        const { url } = await billingService.createCheckout({ plan, interval });
+        const { url, completed } = await billingService.createCheckout({ plan, interval });
         if (url) openExternal(url);
-        else await refreshEntitlements();
+        else if (completed) await refreshEntitlements();
       } catch {
         toast.error("Couldn't start checkout. Make sure billing is configured and try again.");
       } finally {
@@ -137,9 +137,9 @@ export function useBillingActions() {
   const buyPack = useCallback(async (pack: string) => {
     setPending(pack);
     try {
-      const { url } = await billingService.createPackCheckout({ pack });
+      const { url, completed } = await billingService.createPackCheckout({ pack });
       if (url) openExternal(url);
-      else await refreshEntitlements();
+      else if (completed) await refreshEntitlements();
     } catch {
       toast.error("Couldn't start checkout. Please try again.");
     } finally {
