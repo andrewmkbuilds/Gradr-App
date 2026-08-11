@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { getStripe } from "../_shared/stripe.ts";
+import { getStripe, resolveTier } from "../_shared/stripe.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -56,10 +56,20 @@ Deno.serve(async (req) => {
       customer: customerId,
       status: "all",
       limit: 10,
+      expand: ["data.items.data.price.product"],
     });
     const active = subs.data.find((s) => ["active", "trialing", "past_due"].includes(s.status));
     const item = active?.items.data[0];
     const interval = item?.price?.recurring?.interval;
+    const product = item?.price?.product as { metadata?: Record<string, string> } | undefined;
+    const tier = active
+      ? resolveTier({
+        lookupKey: item?.price?.lookup_key,
+        metadataTier: active.metadata?.tier,
+        productMetadataTier: product?.metadata?.careerflow_product,
+        amount: item?.price?.unit_amount,
+      })
+      : null;
     const periodEnd = (item as unknown as { current_period_end?: number })?.current_period_end ??
       (active as unknown as { current_period_end?: number })?.current_period_end;
 
@@ -70,7 +80,7 @@ Deno.serve(async (req) => {
         stripe_customer_id: customerId,
         stripe_subscription_id: active?.id ?? null,
         subscribed: Boolean(active) && active!.status !== "past_due",
-        subscription_tier: active ? "pro" : null,
+        subscription_tier: tier,
         billing_interval: interval === "year" ? "annual" : interval === "month" ? "monthly" : null,
         subscription_status: active?.status ?? "none",
         price_id: item?.price?.id ?? null,
@@ -82,7 +92,7 @@ Deno.serve(async (req) => {
 
     return json({
       subscribed: Boolean(active) && active!.status !== "past_due",
-      tier: active ? "pro" : null,
+      tier,
       status: active?.status ?? "none",
       billing_interval: interval === "year" ? "annual" : interval === "month" ? "monthly" : null,
       current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,

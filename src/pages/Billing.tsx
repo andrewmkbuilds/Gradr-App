@@ -124,24 +124,26 @@ export default function Billing() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-foreground">
-                {sub.isPro ? `CareerFlow OS Pro (${sub.billingInterval === "annual" ? "Annual" : "Monthly"})` : "Starter (Free)"}
+                {sub.isSubscribed
+                  ? `CareerFlow OS ${sub.isPro ? "Pro" : "Starter"} (${sub.billingInterval === "annual" ? "Annual" : "Monthly"})`
+                  : "Free plan"}
               </span>
               {sub.status && sub.status !== "none" && (
-                <Badge variant={sub.isPro ? "default" : "secondary"}>{sub.status}</Badge>
+                <Badge variant={sub.isSubscribed ? "default" : "secondary"}>{sub.status}</Badge>
               )}
             </div>
-            {sub.isPro && renews && (
+            {sub.isSubscribed && renews && (
               <p className="text-sm text-muted-foreground">
                 {sub.cancelAtPeriodEnd ? `Cancels on ${renews}` : `Renews on ${renews}`}
               </p>
             )}
-            {!sub.isPro && (
+            {!sub.isSubscribed && (
               <p className="text-sm text-muted-foreground">Upgrade to unlock unlimited AI analysis and coaching.</p>
             )}
           </div>
 
           <div className="flex gap-2">
-            {sub.isPro ? (
+            {sub.isSubscribed ? (
               <Button className="gap-2" onClick={() => void openPortal()} disabled={pending === "portal"}>
                 <ExternalLink className="h-4 w-4" />
                 Manage subscription
@@ -154,7 +156,7 @@ export default function Billing() {
             )}
           </div>
         </div>
-        {sub.isPro && (
+        {sub.isSubscribed && (
           <p className="text-xs text-muted-foreground mt-4">
             Switch between monthly and annual billing, update your card, or cancel from the Stripe customer portal.
           </p>

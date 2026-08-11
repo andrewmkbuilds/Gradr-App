@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { getStripe } from "../_shared/stripe.ts";
+import { getStripe, resolveTier } from "../_shared/stripe.ts";
 import type Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 
 const admin = createClient(
@@ -77,10 +77,14 @@ async function syncSubscription(stripe: Stripe, subscription: Stripe.Subscriptio
       stripe_subscription_id: subscription.id,
       subscribed: active && subscription.status !== "past_due",
       subscription_tier: active
-        ? ((subscription.metadata?.tier === "starter" ||
-            item?.price?.lookup_key?.includes("starter"))
-          ? "starter"
-          : "pro")
+        ? resolveTier({
+          lookupKey: item?.price?.lookup_key,
+          metadataTier: subscription.metadata?.tier,
+          productMetadataTier:
+            (item?.price?.product as { metadata?: Record<string, string> } | undefined)?.metadata
+              ?.careerflow_product,
+          amount: item?.price?.unit_amount,
+        })
         : null,
       billing_interval: planFromInterval(interval),
       subscription_status: subscription.status,
