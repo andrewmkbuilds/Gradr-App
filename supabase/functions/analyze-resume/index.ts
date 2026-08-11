@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { scoreResume, deterministicSuggestions } from "../_shared/resumeScoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,7 +8,6 @@ const corsHeaders = {
 };
 
 // Per-user sliding window rate limit (in-memory, per instance)
-// 10 requests per 60 seconds per user
 const RATE_LIMIT = 10;
 const WINDOW_MS = 60_000;
 const userHits = new Map<string, number[]>();
@@ -28,7 +28,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -47,7 +46,6 @@ serve(async (req) => {
       });
     }
 
-    // Rate limit per user
     const rl = checkRateLimit(user.id);
     if (!rl.ok) {
       return new Response(
@@ -56,108 +54,124 @@ serve(async (req) => {
       );
     }
 
-    const { resumeText, targetRole } = await req.json();
+    const { resumeText, targetRole, jobDescription, jobTitle } = await req.json();
     if (!resumeText) {
       return new Response(JSON.stringify({ error: "resumeText is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    // Hard cap to avoid blowing the model's context window (PDF binary, etc.)
+
     const MAX_CHARS = 80_000;
     const safeText = String(resumeText).slice(0, MAX_CHARS);
+    const safeJd = typeof jobDescription === "string" ? jobDescription.slice(0, 20_000) : "";
+    const hasJd = safeJd.trim().length > 40;
+
+    // ---- Deterministic scoring (source of truth for every number) ---------
+    const scores = scoreResume({
+      resumeText: safeText,
+      jobDescription: safeJd,
+      jobTitle: typeof jobTitle === "string" ? jobTitle : null,
+      targetRole: typeof targetRole === "string" ? targetRole : null,
+    });
+    const ruleSuggestions = deterministicSuggestions(scores, hasJd);
+
+    // ---- Optional AI layer: qualitative rewrite coaching only -------------
+    let aiSuggestions: { type: string; text: string }[] = [];
+    let rewrites: { before: string; after: string }[] = [];
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (LOVABLE_API_KEY) {
+      try {
+        const systemPrompt = `You are a resume editor. You DO NOT score resumes — scores are already computed elsewhere and you must never output numbers as scores.
+Return: (1) 3-5 qualitative, specific coaching notes about wording, positioning and relevance, and (2) up to 3 concrete bullet rewrites taken verbatim from the resume with an improved version.
+Rewrites must only use facts present in the resume. Never invent metrics, employers or dates.`;
 
-    const systemPrompt = `You are an expert ATS resume analyzer and career coach. Analyze the resume text and return a JSON object with this exact structure:
-{
-  "ats_score": <number 0-100>,
-  "keyword_match": <number 0-100>,
-  "formatting_score": <number 0-100>,
-  "impact_score": <number 0-100>,
-  "readability_score": <number 0-100>,
-  "suggestions": [
-    { "type": "critical|warning|improvement|good", "text": "<suggestion text>" }
-  ]
-}
-Rules:
-- "critical" = must fix for ATS pass
-- "warning" = should improve
-- "improvement" = nice to have
-- "good" = already well done
-- Give 5-8 suggestions total
-- Be specific and actionable
-- If a target role is provided, tailor suggestions to that role`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze this resume${targetRole ? ` for the role: ${targetRole}` : ""}:\n\n${safeText}` },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "resume_analysis",
-            description: "Return structured resume analysis",
-            parameters: {
-              type: "object",
-              properties: {
-                ats_score: { type: "number" },
-                keyword_match: { type: "number" },
-                formatting_score: { type: "number" },
-                impact_score: { type: "number" },
-                readability_score: { type: "number" },
-                suggestions: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      type: { type: "string", enum: ["critical", "warning", "improvement", "good"] },
-                      text: { type: "string" },
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              { role: "system", content: systemPrompt },
+              {
+                role: "user",
+                content: `Resume:\n\n${safeText}\n\n${
+                  hasJd ? `Target job${jobTitle ? ` (${jobTitle})` : ""}:\n\n${safeJd}\n\n` : targetRole ? `Target role: ${targetRole}\n\n` : ""
+                }Measured weaknesses to address: ${
+                  scores.evidence.filter((e) => !e.ok).map((e) => `${e.label} — ${e.detail}`).join("; ") || "none"
+                }`,
+              },
+            ],
+            tools: [{
+              type: "function",
+              function: {
+                name: "resume_coaching",
+                description: "Qualitative resume coaching",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    suggestions: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          type: { type: "string", enum: ["critical", "warning", "improvement", "good"] },
+                          text: { type: "string" },
+                        },
+                        required: ["type", "text"],
+                      },
                     },
-                    required: ["type", "text"],
+                    rewrites: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: { before: { type: "string" }, after: { type: "string" } },
+                        required: ["before", "after"],
+                      },
+                    },
                   },
+                  required: ["suggestions"],
                 },
               },
-              required: ["ats_score", "keyword_match", "formatting_score", "impact_score", "readability_score", "suggestions"],
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "resume_analysis" } },
-      }),
-    });
+            }],
+            tool_choice: { type: "function", function: { name: "resume_coaching" } },
+          }),
+        });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        if (response.ok) {
+          const data = await response.json();
+          const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+          if (toolCall) {
+            const parsed = JSON.parse(toolCall.function.arguments);
+            aiSuggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions.slice(0, 6) : [];
+            rewrites = Array.isArray(parsed.rewrites) ? parsed.rewrites.slice(0, 3) : [];
+          }
+        } else if (response.status === 429 || response.status === 402) {
+          console.warn("AI coaching unavailable:", response.status);
+        } else {
+          console.error("AI gateway error:", response.status, await response.text());
+        }
+      } catch (aiErr) {
+        // Scoring stands on its own — AI coaching is strictly additive.
+        console.error("AI coaching failed:", aiErr);
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Credits exhausted, please add funds." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      throw new Error("AI analysis failed");
     }
 
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    const analysis = toolCall ? JSON.parse(toolCall.function.arguments) : null;
-
-    if (!analysis) throw new Error("Failed to parse AI response");
-
-    return new Response(JSON.stringify(analysis), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        ats_score: scores.ats_score,
+        keyword_match: scores.keyword_match,
+        formatting_score: scores.formatting_score,
+        impact_score: scores.impact_score,
+        readability_score: scores.readability_score,
+        metrics: scores.metrics,
+        evidence: scores.evidence,
+        suggestions: [...ruleSuggestions, ...aiSuggestions],
+        rewrites,
+        tailoredTo: hasJd ? (jobTitle || "the pasted job description") : null,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (e) {
     console.error("analyze-resume error:", e);
     return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
