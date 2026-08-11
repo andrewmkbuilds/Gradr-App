@@ -83,6 +83,9 @@ export default function Auth() {
       const { error } = await supabase.auth.signInAnonymously();
       if (error) throw error;
       toast.success("Signed in as guest");
+      // Guests stay allowed on /auth (so they can upgrade later), so navigate explicitly.
+      navigate(nextParam ?? "/", { replace: true });
+
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Guest sign-in failed";
       toast.error(message);
