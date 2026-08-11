@@ -93,3 +93,24 @@ export async function ensurePlanPrice(stripe: Stripe, tier: PlanTier, plan: Plan
     nickname: cfg.label,
   });
 }
+
+/**
+ * Resolves the plan tier for a subscription from price lookup_key / product metadata /
+ * subscription metadata. Never assume "pro" — that promoted every paying user.
+ */
+export function resolveTier(input: {
+  lookupKey?: string | null;
+  metadataTier?: string | null;
+  productMetadataTier?: string | null;
+  amount?: number | null;
+}): PlanTier {
+  const candidates = [input.metadataTier, input.productMetadataTier, input.lookupKey]
+    .filter(Boolean)
+    .map((v) => String(v).toLowerCase());
+  if (candidates.some((c) => c.includes("starter"))) return "starter";
+  if (candidates.some((c) => c.includes("pro"))) return "pro";
+  if (input.amount === PRICE_CONFIG.starter.monthly.amount || input.amount === PRICE_CONFIG.starter.annual.amount) {
+    return "starter";
+  }
+  return "pro";
+}
