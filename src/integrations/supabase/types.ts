@@ -632,6 +632,42 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_usage: {
+        Row: {
+          created_at: string
+          credits_used: number
+          environment: string
+          feature: string
+          id: string
+          period_start: string
+          updated_at: string
+          used: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_used?: number
+          environment?: string
+          feature: string
+          id?: string
+          period_start: string
+          updated_at?: string
+          used?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_used?: number
+          environment?: string
+          feature?: string
+          id?: string
+          period_start?: string
+          updated_at?: string
+          used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       interview_sessions: {
         Row: {
           created_at: string
@@ -844,6 +880,7 @@ export type Database = {
           created_at: string
           credits_granted: number
           currency: string
+          environment: string
           id: string
           pack_key: string
           pack_label: string | null
@@ -859,6 +896,7 @@ export type Database = {
           created_at?: string
           credits_granted?: number
           currency?: string
+          environment?: string
           id?: string
           pack_key: string
           pack_label?: string | null
@@ -874,6 +912,7 @@ export type Database = {
           created_at?: string
           credits_granted?: number
           currency?: string
+          environment?: string
           id?: string
           pack_key?: string
           pack_label?: string | null
@@ -947,6 +986,7 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           email: string
+          environment: string
           id: string
           price_id: string | null
           stripe_customer_id: string | null
@@ -963,6 +1003,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           email: string
+          environment?: string
           id?: string
           price_id?: string | null
           stripe_customer_id?: string | null
@@ -979,6 +1020,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           email?: string
+          environment?: string
           id?: string
           price_id?: string | null
           stripe_customer_id?: string | null
@@ -1070,6 +1112,7 @@ export type Database = {
         Row: {
           application_credits: number
           created_at: string
+          environment: string
           id: string
           interview_credits: number
           updated_at: string
@@ -1078,6 +1121,7 @@ export type Database = {
         Insert: {
           application_credits?: number
           created_at?: string
+          environment?: string
           id?: string
           interview_credits?: number
           updated_at?: string
@@ -1086,6 +1130,7 @@ export type Database = {
         Update: {
           application_credits?: number
           created_at?: string
+          environment?: string
           id?: string
           interview_credits?: number
           updated_at?: string
@@ -1254,6 +1299,19 @@ export type Database = {
         Args: { _click_id?: string; _code: string }
         Returns: string
       }
+      consume_entitlement: {
+        Args: {
+          _amount?: number
+          _env?: string
+          _feature: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      current_plan_tier: {
+        Args: { _env?: string; _user_id: string }
+        Returns: string
+      }
       enqueue_notification: {
         Args: {
           _body?: string
@@ -1265,6 +1323,7 @@ export type Database = {
         }
         Returns: string
       }
+      entitlement_snapshot: { Args: { _env?: string }; Returns: Json }
       generate_affiliate_code: { Args: never; Returns: string }
       get_affiliate_public_settings: {
         Args: never
@@ -1276,6 +1335,10 @@ export type Database = {
           minimum_payout_threshold: number
           program_enabled: boolean
         }[]
+      }
+      has_active_subscription: {
+        Args: { _env?: string; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -1312,6 +1375,10 @@ export type Database = {
         }
         Returns: number
       }
+      plan_allowance: {
+        Args: { _feature: string; _tier: string }
+        Returns: number
+      }
       record_conversion_commission: {
         Args: {
           _conversion_type?: Database["public"]["Enums"]["affiliate_conversion_type"]
@@ -1320,6 +1387,15 @@ export type Database = {
           _source_record_id?: string
         }
         Returns: string
+      }
+      refund_entitlement: {
+        Args: {
+          _amount?: number
+          _env?: string
+          _feature: string
+          _user_id: string
+        }
+        Returns: undefined
       }
       reject_affiliate_application: {
         Args: { _application_id: string; _reason?: string }

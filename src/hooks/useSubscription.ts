@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useCallback, useState } from "react";
 import { billingService, type PlanInterval, type PlanKey } from "@/lib/billing";
+import { getPaddleEnvironment } from "@/lib/paddle";
 
 export interface SubscriptionState {
   subscribed: boolean;
@@ -23,11 +24,15 @@ const EMPTY: SubscriptionState = {
   cancelAtPeriodEnd: false,
 };
 
+/** Test and live rows share one table — every read must be scoped. */
+const paymentEnv = () => getPaddleEnvironment();
+
 export function useSubscription() {
   const { user } = useAuth();
+  const env = paymentEnv();
 
   const query = useQuery({
-    queryKey: ["subscription", user?.id],
+    queryKey: ["subscription", user?.id, env],
     enabled: Boolean(user),
     staleTime: 30_000,
     queryFn: async (): Promise<SubscriptionState> => {
@@ -37,6 +42,7 @@ export function useSubscription() {
           "subscribed, subscription_tier, subscription_status, billing_interval, current_period_end, cancel_at_period_end",
         )
         .eq("user_id", user!.id)
+        .eq("environment", env)
         .maybeSingle();
       if (error) throw error;
       if (!data) return EMPTY;
@@ -53,7 +59,12 @@ export function useSubscription() {
 
   const state = query.data ?? EMPTY;
   const tier = (state.tier ?? "free").toLowerCase();
-  const active = Boolean(state.subscribed);
+
+  // A canceled plan keeps working until the paid period actually runs out.
+  const periodLive = !state.currentPeriodEnd || new Date(state.currentPeriodEnd) > new Date();
+  const active = Boolean(state.subscribed) ||
+    (state.status === "canceled" && periodLive && tier !== "free");
+
   const plan: PlanKey = active && tier === "starter" ? "starter" : active && tier === "pro" ? "pro" : "free";
 
   return {
@@ -64,20 +75,72 @@ export function useSubscription() {
     isSubscribed: active,
     isStarter: plan === "starter",
     isPro: plan === "pro",
+    /** True when the plan is at least as high as `min` in the free < starter < pro order. */
+    hasTier: (min: PlanKey) => TIER_RANK[plan] >= TIER_RANK[min],
     refetch: query.refetch,
   };
 }
 
+export const TIER_RANK: Record<PlanKey, number> = { free: 0, starter: 1, pro: 2 };
+
+export interface FeatureAllowance {
+  /** null means unlimited. */
+  allowance: number | null;
+  used: number;
+  remaining: number | null;
+}
+
+export interface EntitlementSnapshot {
+  tier: PlanKey;
+  features: Record<"resume" | "application" | "interview", FeatureAllowance>;
+}
+
+const EMPTY_FEATURE: FeatureAllowance = { allowance: 0, used: 0, remaining: 0 };
+
+/**
+ * Authoritative monthly usage as the server sees it: plan tier, allowance per
+ * feature, and how much is left this billing month.
+ */
+export function useEntitlements() {
+  const { user } = useAuth();
+  const env = paymentEnv();
+
+  return useQuery({
+    queryKey: ["entitlements", user?.id, env],
+    enabled: Boolean(user),
+    staleTime: 15_000,
+    queryFn: async (): Promise<EntitlementSnapshot> => {
+      const { data, error } = await supabase.rpc("entitlement_snapshot", { _env: env });
+      if (error) throw error;
+      const raw = (data ?? {}) as {
+        tier?: string;
+        features?: Record<string, FeatureAllowance>;
+      };
+      return {
+        tier: (raw.tier as PlanKey) ?? "free",
+        features: {
+          resume: raw.features?.resume ?? EMPTY_FEATURE,
+          application: raw.features?.application ?? EMPTY_FEATURE,
+          interview: raw.features?.interview ?? EMPTY_FEATURE,
+        },
+      };
+    },
+  });
+}
+
 export function useCredits() {
   const { user } = useAuth();
+  const env = paymentEnv();
+
   return useQuery({
-    queryKey: ["usage-credits", user?.id],
+    queryKey: ["usage-credits", user?.id, env],
     enabled: Boolean(user),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("usage_credits")
         .select("application_credits, interview_credits")
         .eq("user_id", user!.id)
+        .eq("environment", env)
         .maybeSingle();
       if (error) throw error;
       return data ?? { application_credits: 0, interview_credits: 0 };
@@ -87,13 +150,16 @@ export function useCredits() {
 
 export function usePurchases() {
   const { user } = useAuth();
+  const env = paymentEnv();
+
   return useQuery({
-    queryKey: ["purchases", user?.id],
+    queryKey: ["purchases", user?.id, env],
     enabled: Boolean(user),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("purchases")
         .select("id, pack_label, pack_key, credits_granted, amount_total, currency, status, created_at")
+        .eq("environment", env)
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -113,6 +179,7 @@ export function useBillingActions() {
   /** Used by in-page providers (RevenueCat) once a purchase settles. */
   const refreshEntitlements = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["subscription"] });
+    await queryClient.invalidateQueries({ queryKey: ["entitlements"] });
     await queryClient.invalidateQueries({ queryKey: ["usage-credits"] });
     await queryClient.invalidateQueries({ queryKey: ["purchases"] });
     toast.success("Purchase complete. Your plan is active.");
@@ -154,7 +221,7 @@ export function useBillingActions() {
       if (url) openExternal(url);
       else toast.info("Manage your plan from the Billing page.");
     } catch {
-      toast.error("Couldn't open the billing portal. Start a plan first, then try again.");
+      toast.error("No subscription to manage yet. Start a plan first, then try again.");
     } finally {
       setPending(null);
     }
@@ -165,6 +232,7 @@ export function useBillingActions() {
     try {
       await billingService.syncSubscription();
       await queryClient.invalidateQueries({ queryKey: ["subscription"] });
+      await queryClient.invalidateQueries({ queryKey: ["entitlements"] });
       await queryClient.invalidateQueries({ queryKey: ["usage-credits"] });
       await queryClient.invalidateQueries({ queryKey: ["purchases"] });
       toast.success("Subscription status refreshed.");
@@ -178,10 +246,9 @@ export function useBillingActions() {
   return { pending, startSubscription, buyPack, openPortal, restorePurchases };
 }
 
-/** True when Stripe reports a failed/overdue invoice needing user action. */
+/** True when the provider reports a failed/overdue invoice needing user action. */
 export function usePaymentIssue() {
   const { status, isLoading } = useSubscription();
   const failing = status === "past_due" || status === "unpaid" || status === "incomplete";
   return { hasPaymentIssue: !isLoading && failing, status };
 }
-

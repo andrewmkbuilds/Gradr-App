@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -300,6 +301,7 @@ export default function JobsFeed() {
 
       const { data, error } = await supabase.functions.invoke("generate-application", {
         body: {
+          environment: getPaddleEnvironment(),
           type: "application_pack",
           resumeText,
           jobTitle: job.title,

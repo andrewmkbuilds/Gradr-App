@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { GeminiLiveSession, type LiveStatus } from "@/lib/interview/geminiLive";
 
 export interface RealtimeLimits {
@@ -70,6 +71,8 @@ export function useRealtimeInterview(cb: RealtimeCallbacks = {}) {
   const preflightEntitlement = useCallback(async (args: StartArgs) => {
     const { data, error } = await supabase.functions.invoke("interview-realtime-token", {
       body: {
+        environment: getPaddleEnvironment(),
+        reconnect: (args.resumeTranscript?.length ?? 0) > 0,
         directive: args.directive,
         personaId: args.personaId,
         difficultyId: args.difficultyId,

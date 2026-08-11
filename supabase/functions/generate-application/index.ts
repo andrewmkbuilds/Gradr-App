@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { consume, paymentRequired, refund, resolveEnv, type PaymentEnv } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,6 +25,12 @@ function checkRateLimit(userId: string): { ok: boolean; retryAfter?: number } {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Set once the request has been charged, so a later failure can be refunded.
+  let meteredUserId: string | null = null;
+  let paymentEnv: PaymentEnv = "sandbox";
+
+
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -52,12 +59,19 @@ serve(async (req) => {
       );
     }
 
-    const { type, resumeText, jobTitle, company, jobDescription, userName } = await req.json();
+    const { type, resumeText, jobTitle, company, jobDescription, userName, environment } =
+      await req.json();
     if (!type || !resumeText) {
       return new Response(JSON.stringify({ error: "type and resumeText are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // ---- Entitlement: monthly allowance first, then purchased credits -----
+    paymentEnv = resolveEnv(environment);
+    const entitlement = await consume(user.id, "application", paymentEnv);
+    if (!entitlement.allowed) return paymentRequired(entitlement, corsHeaders);
+    meteredUserId = user.id;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -158,6 +172,10 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      if (meteredUserId) {
+        await refund(meteredUserId, "application", paymentEnv);
+        meteredUserId = null; // already refunded — don't refund twice in catch
+      }
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -182,6 +200,7 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("generate-application error:", e);
+    if (meteredUserId) await refund(meteredUserId, "application", paymentEnv);
     return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
