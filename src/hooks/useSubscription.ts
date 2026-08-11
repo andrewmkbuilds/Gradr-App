@@ -51,10 +51,19 @@ export function useSubscription() {
     },
   });
 
+  const state = query.data ?? EMPTY;
+  const tier = (state.tier ?? "free").toLowerCase();
+  const active = Boolean(state.subscribed);
+  const plan: PlanKey = active && tier === "starter" ? "starter" : active && tier === "pro" ? "pro" : "free";
+
   return {
-    ...(query.data ?? EMPTY),
+    ...state,
+    plan,
     isLoading: query.isLoading,
-    isPro: Boolean(query.data?.subscribed),
+    /** Paying subscriber on any tier. */
+    isSubscribed: active,
+    isStarter: plan === "starter",
+    isPro: plan === "pro",
     refetch: query.refetch,
   };
 }
