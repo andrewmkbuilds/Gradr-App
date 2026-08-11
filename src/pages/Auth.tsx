@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +10,13 @@ import { Mail, Lock, User, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Auth() {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isGuest = user?.is_anonymous === true;
+  const [isSignUp, setIsSignUp] = useState(
+    () => searchParams.get("mode") === "signup" || user?.is_anonymous === true,
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -28,6 +36,17 @@ export default function Auth() {
     setLoading(true);
     try {
       if (isSignUp) {
+        if (isGuest) {
+          // Upgrade the existing anonymous session so guest data is preserved.
+          const { error } = await supabase.auth.updateUser(
+            { email, password, data: { full_name: fullName } },
+            { emailRedirectTo: postAuthUrl },
+          );
+          if (error) throw error;
+          toast.success("Check your email to confirm your new account!");
+          navigate(nextParam ?? "/", { replace: true });
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -49,6 +68,7 @@ export default function Auth() {
       setLoading(false);
     }
   };
+
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
     const { error } = await lovable.auth.signInWithOAuth(provider, {
