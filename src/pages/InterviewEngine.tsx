@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { ProGate } from "@/components/ProGate";
@@ -118,6 +119,7 @@ function InterviewEngineInner() {
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
       body: JSON.stringify({
+        environment: getPaddleEnvironment(),
         messages: allMessages,
         targetRole,
         directive: sessionCtx ? buildSessionDirective(sessionCtx) : undefined,
