@@ -63,6 +63,8 @@ export async function verifyWebhook(req: Request, env: PaddleEnv) {
 export const PLAN_PRICES: Record<string, { tier: "starter" | "pro"; interval: "monthly" | "annual" }> = {
   pro_monthly: { tier: "pro", interval: "monthly" },
   pro_annual: { tier: "pro", interval: "annual" },
+  starter_monthly: { tier: "starter", interval: "monthly" },
+  starter_annual: { tier: "starter", interval: "annual" },
 };
 
 /** Human-readable price id -> one-off credit grant. */
