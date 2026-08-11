@@ -99,7 +99,9 @@ function AuthRoute() {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return null;
-  if (user) {
+  // Guests (anonymous Supabase users) are "signed in" but must still be able to
+  // reach this page to upgrade to a real account.
+  if (user && user.is_anonymous !== true) {
     const params = new URLSearchParams(location.search);
     const next = params.get("next");
     const safe = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
@@ -107,6 +109,7 @@ function AuthRoute() {
   }
   return <Auth />;
 }
+
 
 function AppRoutes() {
   const location = useLocation();

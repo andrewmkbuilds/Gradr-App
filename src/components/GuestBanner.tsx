@@ -21,11 +21,12 @@ export function GuestBanner() {
         <p className="text-sm text-foreground truncate">
           You're browsing as a guest.{" "}
           <Link
-            to="/auth"
+            to="/auth?mode=signup"
             className="font-semibold text-primary hover:underline"
           >
             Create a free account
           </Link>{" "}
+
           <span className="text-muted-foreground">to save your data permanently.</span>
         </p>
       </div>
