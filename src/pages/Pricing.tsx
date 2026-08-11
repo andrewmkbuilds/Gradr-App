@@ -11,24 +11,23 @@ type PlanRef = { tier: "starter" | "pro"; interval: "monthly" | "annual" } | nul
 
 const tiers: {
   name: string;
-  price: string;
-  period: string;
+  monthly: number;
+  annual: number;
   description: string;
   icon: typeof Sparkles;
   highlighted: boolean;
-  plan: PlanRef;
-  note?: string;
+  tierKey: "free" | "starter" | "pro";
   features: string[];
   cta: string;
 }[] = [
   {
     name: "Free",
-    price: "$0",
-    period: "forever",
+    monthly: 0,
+    annual: 0,
     description: "Explore the basics of CareerFlow OS.",
     icon: Sparkles,
     highlighted: false,
-    plan: null,
+    tierKey: "free",
     features: [
       "1 resume analysis per month",
       "Basic ATS scoring",
@@ -39,13 +38,12 @@ const tiers: {
   },
   {
     name: "Starter",
-    price: "$9",
-    period: "per month",
+    monthly: 9,
+    annual: 84,
     description: "Core AI tools for an active job search.",
     icon: Zap,
     highlighted: false,
-    plan: { tier: "starter", interval: "monthly" },
-    note: "or $84 billed annually",
+    tierKey: "starter",
     features: [
       "10 resume analyses per month",
       "ATS optimization",
@@ -56,42 +54,24 @@ const tiers: {
     cta: "Start Starter",
   },
   {
-    name: "Pro Monthly",
-    price: "$19",
-    period: "per month",
+    name: "Pro",
+    monthly: 19,
+    annual: 168,
     description: "For serious job seekers ready to land roles fast.",
     icon: Rocket,
-    highlighted: false,
-    plan: { tier: "pro", interval: "monthly" },
+    highlighted: true,
+    tierKey: "pro",
     features: [
       "Unlimited resume analysis",
       "Advanced ATS + AI suggestions",
       "Unlimited job matching",
       "AI-generated cover letters",
-      "Mock interview coach",
-      "Priority email support",
+      "Realtime AI mock interviews",
+      "Priority support",
     ],
     cta: "Start Pro",
   },
-  {
-    name: "Pro Annual",
-    price: "$168",
-    period: "per year",
-    description: "Everything in Pro — billed yearly, just $14/month.",
-    icon: Crown,
-    highlighted: true,
-    plan: { tier: "pro", interval: "annual" },
-    note: "Equivalent to $14/month · save $60",
-    features: [
-      "Everything in Pro Monthly",
-      "Save $60 vs monthly billing",
-      "Priority feature access",
-      "Annual career strategy review",
-    ],
-    cta: "Start Annual",
-  },
 ];
-
 
 const packs = [
   { key: "applications_10", label: "10 Extra Applications", price: "$9", icon: Zap, blurb: "Top up your application generator." },
@@ -103,9 +83,10 @@ const packs = [
 export default function Pricing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isPro, billingInterval } = useSubscription();
+  const { plan: currentPlan, billingInterval } = useSubscription();
   const { pending, startSubscription, buyPack } = useBillingActions();
   const [tab, setTab] = useState<"plans" | "packs">("plans");
+  const [interval, setInterval] = useState<"monthly" | "annual">("annual");
 
   const handleSelect = (plan: PlanRef) => {
     if (!user) {
@@ -151,59 +132,96 @@ export default function Pricing() {
       </div>
 
       {tab === "plans" ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {tiers.map((tier) => {
-            const Icon = tier.icon;
-            const pendingKey = tier.plan ? `${tier.plan.tier}-${tier.plan.interval}` : "free";
-            const current = isPro && tier.plan?.interval === billingInterval;
-            return (
-              <Card
-                key={tier.name}
-                className={`relative p-6 flex flex-col ${
-                  tier.highlighted ? "border-primary shadow-lg shadow-primary/10 scale-[1.02]" : "border-border"
-                }`}
-              >
-                {tier.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                    Best value
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground">{tier.name}</h3>
-                </div>
-
-                <div className="mb-3">
-                  <span className="text-4xl font-bold text-foreground">{tier.price}</span>
-                  <span className="text-sm text-muted-foreground ml-1">/ {tier.period}</span>
-                </div>
-                {tier.note && <p className="text-xs text-primary mb-3">{tier.note}</p>}
-
-                <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
-
-                <ul className="space-y-2.5 mb-6 flex-1">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-foreground">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  onClick={() => (current ? navigate("/billing") : handleSelect(tier.plan))}
-                  variant={tier.highlighted ? "default" : "outline"}
-                  className="w-full"
-                  disabled={pending === pendingKey}
+        <div className="space-y-8">
+          <div className="flex justify-center">
+            <div className="inline-flex items-center rounded-full border border-border bg-card/60 p-1">
+              {(["monthly", "annual"] as const).map((i) => (
+                <button
+                  key={i}
+                  onClick={() => setInterval(i)}
+                  aria-pressed={interval === i}
+                  className={`px-4 py-1.5 text-sm rounded-full transition-colors ${
+                    interval === i
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  {current ? "Manage plan" : pending === pendingKey ? "Opening checkout…" : tier.cta}
-                </Button>
-              </Card>
-            );
-          })}
+                  {i === "monthly" ? "Monthly" : "Annual"}
+                  {i === "annual" && (
+                    <span className={`ml-2 text-[10px] font-semibold uppercase tracking-wide ${interval === "annual" ? "text-primary-foreground/80" : "text-primary"}`}>
+                      Save 26%
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {tiers.map((tier) => {
+              const Icon = tier.icon;
+              const isFree = tier.tierKey === "free";
+              const pendingKey = isFree ? "free" : `${tier.tierKey}-${interval}`;
+              const current = currentPlan === tier.tierKey &&
+                (isFree || billingInterval === interval);
+              const price = interval === "annual" ? tier.annual : tier.monthly;
+              const perMonth = interval === "annual" && !isFree ? (tier.annual / 12).toFixed(0) : null;
+              return (
+                <Card
+                  key={tier.name}
+                  className={`relative p-6 flex flex-col ${
+                    tier.highlighted ? "border-primary shadow-lg shadow-primary/10 lg:scale-[1.02]" : "border-border"
+                  }`}
+                >
+                  {tier.highlighted && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                      Most popular
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">{tier.name}</h3>
+                  </div>
+
+                  <div className="mb-1">
+                    <span className="text-4xl font-bold text-foreground">${price}</span>
+                    <span className="text-sm text-muted-foreground ml-1">
+                      / {isFree ? "forever" : interval === "annual" ? "year" : "month"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-primary h-5 mb-3">
+                    {perMonth ? `Just $${perMonth}/month billed yearly` : ""}
+                  </p>
+
+                  <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
+
+                  <ul className="space-y-2.5 mb-6 flex-1">
+                    {tier.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-foreground">
+                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    onClick={() =>
+                      current
+                        ? navigate("/billing")
+                        : handleSelect(isFree ? null : { tier: tier.tierKey as "starter" | "pro", interval })}
+                    variant={tier.highlighted ? "default" : "outline"}
+                    className="w-full"
+                    disabled={pending === pendingKey}
+                  >
+                    {current ? "Current plan" : pending === pendingKey ? "Opening checkout…" : tier.cta}
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
