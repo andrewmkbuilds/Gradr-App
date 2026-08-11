@@ -1,4 +1,4 @@
-import { Check, Sparkles, Rocket, Crown, Zap, Mic } from "lucide-react";
+import { Check, Sparkles, Rocket, Zap, Mic } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
