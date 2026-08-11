@@ -102,6 +102,7 @@ Deno.serve(async (req) => {
         supabase_user_id: user.id,
         kind: "pack",
         pack_key: packKey!,
+        pack_label: pack.label,
         credits: String(pack.credits),
         credit_kind: pack.kind,
       },
