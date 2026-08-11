@@ -1,9 +1,14 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Upload, FileText, CheckCircle, AlertTriangle, Sparkles, RefreshCw, Loader2, BookOpen } from "lucide-react";
+import {
+  Upload, FileText, CheckCircle, AlertTriangle, Sparkles, RefreshCw, Loader2, BookOpen,
+  Target, Gauge, ChevronRight, XCircle,
+} from "lucide-react";
 
 import { ScoreRing } from "@/components/ScoreRing";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -15,6 +20,12 @@ interface Suggestion {
   text: string;
 }
 
+interface Evidence {
+  label: string;
+  detail: string;
+  ok: boolean;
+}
+
 interface AnalysisResult {
   ats_score: number;
   keyword_match: number;
@@ -22,6 +33,17 @@ interface AnalysisResult {
   impact_score: number;
   readability_score: number;
   suggestions: Suggestion[];
+  evidence?: Evidence[];
+  rewrites?: { before: string; after: string }[];
+  tailoredTo?: string | null;
+  metrics?: {
+    wordCount: number;
+    quantifiedBullets: number;
+    actionVerbCount: number;
+    missingSkills: string[];
+    matchedKeywords: string[];
+    fleschReadingEase: number;
+  };
 }
 
 const typeStyles: Record<string, { icon: typeof CheckCircle; color: string }> = {
@@ -38,8 +60,9 @@ export default function ResumeEngine() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [fileName, setFileName] = useState("");
-
-  const extractTextFromFile = (file: File) => extractResumeText(file);
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [showTailor, setShowTailor] = useState(false);
 
   const handleFileUpload = useCallback(async (selectedFile: File) => {
     if (!user) {
@@ -52,7 +75,7 @@ export default function ResumeEngine() {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
     ];
-    if (!validTypes.includes(selectedFile.type) && !selectedFile.name.endsWith('.txt')) {
+    if (!validTypes.includes(selectedFile.type) && !selectedFile.name.endsWith(".txt")) {
       toast.error("Please upload a PDF, DOCX, or TXT file");
       return;
     }
@@ -67,7 +90,6 @@ export default function ResumeEngine() {
     setUploading(true);
 
     try {
-      // Upload to storage
       const filePath = `${user.id}/${Date.now()}_${selectedFile.name}`;
       const { error: uploadError } = await supabase.storage
         .from("resumes")
@@ -75,25 +97,22 @@ export default function ResumeEngine() {
 
       if (uploadError) throw uploadError;
 
-      // Extract text for analysis
-      const text = await extractTextFromFile(selectedFile);
+      const text = await extractResumeText(selectedFile);
 
       setUploading(false);
       setAnalyzing(true);
 
-      // Call AI analysis
       const { data: analysisData, error: fnError } = await supabase.functions.invoke("analyze-resume", {
-        body: { resumeText: text },
+        body: { resumeText: text, jobDescription, jobTitle },
       });
 
       if (fnError || analysisData?.error) {
         if (handleAiFunctionError(fnError, analysisData)) return;
-        throw fnError ?? new Error(analysisData?.error || "AI analysis failed");
+        throw fnError ?? new Error(analysisData?.error || "Analysis failed");
       }
 
       setAnalysis(analysisData);
 
-      // Save to DB
       await supabase.from("resumes").insert({
         user_id: user.id,
         file_name: selectedFile.name,
@@ -108,7 +127,7 @@ export default function ResumeEngine() {
         parsed_text: text.substring(0, 10000),
       });
 
-      toast.success("Resume analyzed successfully!");
+      toast.success("Resume analyzed");
     } catch (error: any) {
       toast.error(error.message || "Failed to analyze resume");
       console.error(error);
@@ -116,7 +135,7 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(false);
     }
-  }, [user]);
+  }, [user, jobDescription, jobTitle]);
 
   const handleRescan = async () => {
     if (!file) return;
@@ -135,11 +154,52 @@ export default function ResumeEngine() {
     if (selectedFile) handleFileUpload(selectedFile);
   };
 
+  const tailorPanel = (
+    <div className="glass-card p-5 animate-slide-up">
+      <button
+        type="button"
+        onClick={() => setShowTailor((v) => !v)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Target className="h-4 w-4 text-primary" />
+          Tailor to a specific job
+          {jobDescription.trim().length > 40 && (
+            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">Active</span>
+          )}
+        </span>
+        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showTailor ? "rotate-90" : ""}`} />
+      </button>
+      {showTailor && (
+        <div className="mt-4 space-y-3">
+          <Input
+            placeholder="Job title (optional)"
+            value={jobTitle}
+            onChange={(e) => setJobTitle(e.target.value)}
+            className="bg-secondary/40"
+          />
+          <Textarea
+            placeholder="Paste the full job description to score keyword coverage against this exact role…"
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            rows={6}
+            className="bg-secondary/40 resize-y"
+          />
+          <p className="text-xs text-muted-foreground">
+            With a job description, keyword match is measured against the posting instead of a general skill lexicon.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Resume Intelligence</h1>
-        <p className="text-sm text-muted-foreground mt-1">AI-powered resume analysis and optimization</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Deterministic ATS scoring, keyword overlap and readability analysis — every number computed from your actual text.
+        </p>
         <Link
           to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=resume_engine_header"
           className="mt-3 inline-flex items-center gap-2 text-xs text-primary hover:underline"
@@ -149,6 +209,7 @@ export default function ResumeEngine() {
         </Link>
       </div>
 
+      {!uploading && !analyzing && tailorPanel}
 
       {!analysis && !uploading && !analyzing ? (
         <label
@@ -170,7 +231,7 @@ export default function ResumeEngine() {
         <div className="glass-card p-12 flex flex-col items-center justify-center animate-slide-up">
           <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-1">
-            {uploading ? "Uploading resume..." : "AI is analyzing your resume..."}
+            {uploading ? "Uploading resume..." : "Scoring your resume..."}
           </h3>
           <p className="text-sm text-muted-foreground">This may take a moment</p>
         </div>
@@ -182,11 +243,14 @@ export default function ResumeEngine() {
             <ScoreRing score={analysis.ats_score} size={160} />
             <p className="text-sm text-muted-foreground mt-4 text-center">
               {analysis.ats_score >= 80
-                ? "Great! Your resume is well-optimized for ATS."
+                ? "Great — your resume is well-optimized for ATS parsing."
                 : analysis.ats_score >= 60
-                ? "Your resume needs some optimization to pass most ATS filters."
-                : "Your resume needs significant improvement for ATS compatibility."}
+                ? "Solid base, but keyword and impact gaps will cost you screens."
+                : "Significant structural and keyword work needed."}
             </p>
+            {analysis.tailoredTo && (
+              <p className="mt-2 text-xs text-primary text-center">Scored against {analysis.tailoredTo}</p>
+            )}
             <div className="w-full mt-6 space-y-2">
               {[
                 { label: "Keyword Match", value: analysis.keyword_match },
@@ -200,7 +264,7 @@ export default function ResumeEngine() {
                     <span className="text-foreground">{m.value}%</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${m.value}%` }} />
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${m.value}%` }} />
                   </div>
                 </div>
               ))}
@@ -210,7 +274,7 @@ export default function ResumeEngine() {
           {/* Suggestions */}
           <div className="glass-card p-6 lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-foreground">AI Suggestions</h3>
+              <h3 className="text-sm font-semibold text-foreground">Fix list</h3>
               <span className="text-xs text-muted-foreground">{analysis.suggestions.length} items</span>
             </div>
             <div className="space-y-3">
@@ -225,7 +289,7 @@ export default function ResumeEngine() {
                 );
               })}
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-wrap gap-3 mt-6">
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleRescan}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Re-scan
@@ -242,14 +306,84 @@ export default function ResumeEngine() {
             </div>
           </div>
 
+          {/* Evidence */}
+          {analysis.evidence?.length ? (
+            <div className="glass-card p-6 lg:col-span-2">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Gauge className="h-4 w-4 text-primary" />
+                How these scores were calculated
+              </h3>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {analysis.evidence.map((e) => (
+                  <div key={e.label} className="flex items-start gap-2.5 rounded-lg bg-secondary/40 p-3">
+                    {e.ok ? (
+                      <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                    ) : (
+                      <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-foreground">{e.label}</p>
+                      <p className="break-words text-xs text-muted-foreground">{e.detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Keyword gaps */}
+          {analysis.metrics?.missingSkills?.length ? (
+            <div className="glass-card p-6">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Missing job keywords</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {analysis.metrics.missingSkills.slice(0, 20).map((s) => (
+                  <span key={s} className="rounded-md bg-destructive/10 px-2 py-1 text-xs text-destructive">{s}</span>
+                ))}
+              </div>
+              {analysis.metrics.matchedKeywords?.length ? (
+                <>
+                  <h4 className="mb-2 mt-5 text-xs font-medium text-muted-foreground">Already covered</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {analysis.metrics.matchedKeywords.slice(0, 20).map((s) => (
+                      <span key={s} className="rounded-md bg-success/10 px-2 py-1 text-xs text-success">{s}</span>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* Rewrites */}
+          {analysis.rewrites?.length ? (
+            <div className="glass-card p-6 lg:col-span-3">
+              <h3 className="mb-4 text-sm font-semibold text-foreground">Suggested bullet rewrites</h3>
+              <div className="space-y-3">
+                {analysis.rewrites.map((r, i) => (
+                  <div key={i} className="grid gap-2 rounded-lg bg-secondary/40 p-4 sm:grid-cols-2">
+                    <div>
+                      <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Before</p>
+                      <p className="text-sm text-muted-foreground line-through decoration-destructive/40">{r.before}</p>
+                    </div>
+                    <div>
+                      <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-primary">After</p>
+                      <p className="text-sm text-foreground">{r.after}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           {/* Resume Preview */}
           <div className="glass-card p-6 lg:col-span-3">
             <h3 className="text-sm font-semibold text-foreground mb-4">Uploaded Resume</h3>
             <div className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50">
               <FileText className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm font-medium text-foreground">{fileName}</p>
-                <p className="text-xs text-muted-foreground">Analyzed just now</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-foreground">{fileName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {analysis.metrics ? `${analysis.metrics.wordCount} words • ${analysis.metrics.actionVerbCount} action verbs • Flesch ${analysis.metrics.fleschReadingEase}` : "Analyzed just now"}
+                </p>
               </div>
             </div>
           </div>
