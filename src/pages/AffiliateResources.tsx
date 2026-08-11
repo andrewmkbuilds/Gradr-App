@@ -26,7 +26,9 @@ export default function AffiliateResources() {
 
       <div className="glass-card p-6">
         <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Payout terms</h2>
-        <p className="text-sm text-muted-foreground whitespace-pre-line">{settings?.payout_instructions}</p>
+        <p className="text-sm text-muted-foreground whitespace-pre-line">
+          Payouts are reviewed and sent by the Gradr team once your approved commissions clear the minimum threshold. You'll get a notification when a payout is marked as paid.
+        </p>
         <p className="text-sm text-foreground mt-2">Minimum payout: ${Number(threshold).toFixed(2)}</p>
       </div>
 
