@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
@@ -57,6 +58,7 @@ function ApplicationEngineInner() {
 
       const { data, error } = await supabase.functions.invoke("generate-application", {
         body: {
+          environment: getPaddleEnvironment(),
           type,
           resumeText,
           jobTitle: jobTitle || undefined,

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
@@ -103,7 +104,7 @@ export default function ResumeEngine() {
       setAnalyzing(true);
 
       const { data: analysisData, error: fnError } = await supabase.functions.invoke("analyze-resume", {
-        body: { resumeText: text, jobDescription, jobTitle },
+        body: { resumeText: text, jobDescription, jobTitle, environment: getPaddleEnvironment() },
       });
 
       if (fnError || analysisData?.error) {
