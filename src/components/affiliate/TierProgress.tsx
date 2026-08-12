@@ -32,7 +32,7 @@ function Celebration({ active }: { active: boolean }) {
             rotate: Math.random() * 360,
           }}
           transition={{ duration: 1.2 + Math.random() * 0.6, ease: "easeOut" }}
-          className="absolute h-1.5 w-1.5 rounded-sm"
+          className="absolute h-1.5 w-1.5 rounded-xs"
           style={{ background: i % 3 === 0 ? "hsl(var(--primary))" : i % 3 === 1 ? "hsl(var(--success))" : "hsl(var(--warning))" }}
         />
       ))}

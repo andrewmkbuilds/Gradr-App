@@ -222,7 +222,7 @@ function AffiliatesPanel() {
               </td>
 
               <td>
-                <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
+                <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded-sm bg-secondary border border-border text-xs" />
               </td>
               <td className="text-xs text-muted-foreground">{format(new Date(p.approval_date), "MMM d, yyyy")}</td>
               <td></td>
@@ -369,7 +369,7 @@ function AffiliateStatusSelect({
   const [value, setValue] = useState(status);
   const [pending, setPending] = useState<string | null>(null);
 
-  const cls = "px-2 py-1 rounded bg-secondary border border-border text-xs";
+  const cls = "px-2 py-1 rounded-sm bg-secondary border border-border text-xs";
 
   const apply = async (next: string) => {
     setValue(next);

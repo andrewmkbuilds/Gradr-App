@@ -150,7 +150,7 @@ export function ResumeVisual() {
           </div>
           <div className="space-y-2" aria-hidden>
             {[92, 74, 88, 60, 80, 45, 70].map((w, i) => (
-              <div key={i} className="h-2 rounded bg-muted" style={{ width: `${w}%` }} />
+              <div key={i} className="h-2 rounded-sm bg-muted" style={{ width: `${w}%` }} />
             ))}
           </div>
         </div>

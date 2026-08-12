@@ -88,7 +88,7 @@ export function ConfirmDestructive({
         {typeToConfirm && (
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">
-              Type <code className="px-1 rounded bg-secondary">{typeToConfirm}</code> to confirm
+              Type <code className="px-1 rounded-sm bg-secondary">{typeToConfirm}</code> to confirm
             </label>
             <input
               value={typed}

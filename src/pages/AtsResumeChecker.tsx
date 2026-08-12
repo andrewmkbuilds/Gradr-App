@@ -200,7 +200,7 @@ export default function AtsResumeChecker() {
           {STEPS.map((step, i) => (
             <div
               key={step.title}
-              className="rounded-2xl border border-border/70 bg-card/60 p-5 backdrop-blur transition-colors hover:border-primary/40"
+              className="rounded-2xl border border-border/70 bg-card/60 p-5 backdrop-blur-sm transition-colors hover:border-primary/40"
             >
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
