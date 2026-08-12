@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { IntegrationsPanel } from "@/components/settings/IntegrationsPanel";
 import { LegalLinksPanel } from "@/components/legal/LegalLinksPanel";
 import { AccountDataPanel } from "@/components/settings/AccountDataPanel";
+import { EligibilityPanel } from "@/components/settings/EligibilityPanel";
 import { UsageBars } from "@/components/UsageBars";
 
 
@@ -247,6 +248,8 @@ export default function Settings() {
       <UsageBars />
 
       <IntegrationsPanel />
+
+      <EligibilityPanel />
 
       <AccountDataPanel />
 
