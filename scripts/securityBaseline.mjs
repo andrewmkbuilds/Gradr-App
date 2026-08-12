@@ -94,7 +94,7 @@ export function runBaselineChecks(baseline = loadBaseline()) {
     cmd,
     roles: (roles || "").split(",").filter(Boolean),
   }));
-  const grants = q_rows(q.grants);
+  const grants = new Map(q_rows(q.grants).map(([t, acl]) => [t, tablePrivileges(acl || "")]));
   const funcs = q_rows(q.funcs).map(([name, acl, secdef]) => ({
     name,
     grantees: aclGrantees(acl || ""),
