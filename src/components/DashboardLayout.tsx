@@ -8,9 +8,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { PolicyUpdateGate } from "@/components/legal/PolicyUpdateGate";
 import { NavBreadcrumb } from "@/components/NavBreadcrumb";
+import { AnimatePresence } from "framer-motion";
+import { useLocation } from "@/lib/router-compat";
 
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
   return (
     <SidebarProvider>
       <AmbientBackground />
@@ -40,7 +43,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               stops wide children (tables, charts) creating a horizontal bar. */}
           <main id="main-content" className="flex-1 min-w-0 overflow-x-clip p-4 pb-24 sm:p-6 md:pb-6">
 
-            {children}
+            {/* Route-level exit/enter choreography for authenticated navigation. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <div key={pathname} className="contents">
+                {children}
+              </div>
+            </AnimatePresence>
           </main>
           <MobileTabBar />
           <PolicyUpdateGate />
