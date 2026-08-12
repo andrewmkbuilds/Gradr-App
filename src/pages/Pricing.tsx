@@ -244,7 +244,7 @@ export default function Pricing() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => (currentPlan === "free" ? navigate("/dashboard") : handleSelect(null))}
+                onClick={() => (currentPlan === "free" ? navigate("/") : handleSelect(null))}
               >
                 {currentPlan === "free" ? "Current plan" : "Get started"}
               </Button>

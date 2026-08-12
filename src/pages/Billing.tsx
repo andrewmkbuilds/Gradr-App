@@ -164,7 +164,7 @@ export default function Billing() {
         </div>
         {sub.isSubscribed && (
           <p className="text-xs text-muted-foreground mt-4">
-            Switch between monthly and annual billing, update your card, or cancel from the Stripe customer portal.
+            Switch between monthly and annual billing, update your card, or cancel from the Paddle billing portal.
           </p>
         )}
       </Card>
