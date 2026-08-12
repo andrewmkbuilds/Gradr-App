@@ -336,43 +336,60 @@ export default function Auth() {
       </div>
 
       {/* Email form */}
-      <form onSubmit={handleEmailAuth} className="space-y-3.5">
+      <form onSubmit={handleEmailAuth} noValidate className="space-y-3.5">
         {isSignUp && (
+          <div className="space-y-1.5">
+            <div className="relative">
+              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Full name"
+                value={fullName}
+                onChange={(e) => { setFullName(e.target.value); setFieldErrors((p) => ({ ...p, fullName: undefined })); }}
+                aria-invalid={!!fieldErrors.fullName}
+                aria-describedby={fieldErrors.fullName ? "error-fullName" : undefined}
+                className="pl-10 h-11 bg-secondary border-border"
+              />
+            </div>
+            {fieldErrors.fullName && (
+              <p id="error-fullName" className="text-xs text-destructive">{fieldErrors.fullName}</p>
+            )}
+          </div>
+        )}
+        <div className="space-y-1.5">
           <div className="relative">
-            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Full name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }}
+              aria-invalid={!!fieldErrors.email || !!formError}
+              aria-describedby={fieldErrors.email ? "error-email" : undefined}
               className="pl-10 h-11 bg-secondary border-border"
             />
           </div>
-        )}
-        <div className="relative">
-          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
-            required
-            aria-invalid={!!formError}
-            className="pl-10 h-11 bg-secondary border-border"
+          {fieldErrors.email && (
+            <p id="error-email" className="text-xs text-destructive">{fieldErrors.email}</p>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }}
+              aria-invalid={!!fieldErrors.password}
+              aria-describedby={fieldErrors.password ? "error-password" : undefined}
+              className="pl-10 h-11 bg-secondary border-border"
+            />
+          </div>
+          {fieldErrors.password && (
+            <p id="error-password" className="text-xs text-destructive">{fieldErrors.password}</p>
+          )}
+        </div>
 
-          />
-        </div>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
-            required
-            minLength={6}
-            className="pl-10 h-11 bg-secondary border-border"
-          />
-        </div>
 
         {!isSignUp && (
           <div className="flex justify-end">
