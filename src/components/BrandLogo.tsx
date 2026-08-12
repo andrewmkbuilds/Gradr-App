@@ -1,7 +1,7 @@
+import { cn } from "@/lib/utils";
+
 /** Official Gradr mark. Lives in public/ so it also backs the favicon + PWA icons. */
 export const BRAND_LOGO_URL = "/gradr-logo.png";
-
-import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
   /** Rendered box size in px. The source is square, so width === height. */
