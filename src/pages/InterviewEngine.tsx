@@ -477,6 +477,7 @@ function InterviewEngineInner() {
           </p>
         </div>
         <CreditsBalance only="interview" compact />
+        <VoiceUsageMeter compact />
 
         {stage === "setup" ? (
           <InterviewSetup
@@ -493,6 +494,9 @@ function InterviewEngineInner() {
             onReady={() => (sessionCtx ? void startRealtime(sessionCtx) : void startInterview())}
           />
         )}
+
+        {stage === "setup" && <InterviewScheduler defaultRole={targetRole || sessionCtx?.targetRole} />}
+
 
         {!voice.supported && (
           <p className="text-xs text-muted-foreground">
