@@ -6,17 +6,28 @@ import { useLocation } from "react-router-dom";
  * scroll container) plus any opt-in nested [data-scroll-container].
  */
 export function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
     const behavior: ScrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? "auto"
       : "smooth";
+
+    if (hash) {
+      // Let the target render, then bring the anchored section into view.
+      const id = hash.slice(1);
+      const raf = requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior, block: "start" });
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+
     window.scrollTo({ top: 0, left: 0, behavior });
     document.querySelectorAll<HTMLElement>("[data-scroll-container]").forEach((el) => {
       el.scrollTo({ top: 0, left: 0, behavior });
     });
-  }, [pathname]);
+  }, [pathname, hash]);
+
 
   return null;
 }
