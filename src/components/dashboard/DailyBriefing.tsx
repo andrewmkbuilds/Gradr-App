@@ -109,6 +109,7 @@ export function DailyBriefing({ briefing, name }: { briefing: Briefing; name?: s
             </div>
           </div>
 
+          {!briefing.isNewUser && (
           <motion.ul
             className="mt-5 space-y-2.5"
             initial="hidden"
@@ -145,6 +146,7 @@ export function DailyBriefing({ briefing, name }: { briefing: Briefing; name?: s
               );
             })}
           </motion.ul>
+          )}
         </div>
       </div>
     </section>
