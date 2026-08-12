@@ -22,14 +22,29 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const nextParam = (() => {
-    if (typeof window === "undefined") return null;
-    const raw = new URLSearchParams(window.location.search).get("next");
-    return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : null;
-  })();
-  const postAuthUrl = nextParam
-    ? `${window.location.origin}/auth?next=${encodeURIComponent(nextParam)}`
-    : window.location.origin;
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+
+  // Single source of truth for the post-auth destination (validated, loop-safe).
+  const nextParam = readNext(location.search);
+  const nextTarget = nextParam ?? "/";
+  // Email links and OAuth always come back to /auth: the session is established
+  // from the URL first, then AuthRoute forwards to `next`.
+  const postAuthUrl = authCallbackUrl(nextParam);
+
+  // Surface expired/invalid confirmation links instead of silently showing the form.
+  useEffect(() => {
+    const message = consumeAuthCallbackError();
+    if (message) toast.error(message);
+  }, []);
+
+  // Belt and braces: AuthRoute redirects once a real session exists, but if this
+  // page is ever rendered with one (e.g. session restored after confirmation),
+  // forward to the destination rather than stranding the user on the form.
+  useEffect(() => {
+    if (user && user.is_anonymous !== true) {
+      navigate(nextTarget, { replace: true });
+    }
+  }, [user, nextTarget, navigate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +58,11 @@ export default function Auth() {
             { emailRedirectTo: postAuthUrl },
           );
           if (error) throw error;
+          setPendingEmail(email);
           toast.success("Check your email to confirm your new account!");
-          navigate(nextParam ?? "/", { replace: true });
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -56,10 +71,17 @@ export default function Auth() {
           },
         });
         if (error) throw error;
+        if (data.session) {
+          // Email confirmation is disabled — the user is signed in right now.
+          navigate(nextTarget, { replace: true });
+          return;
+        }
+        setPendingEmail(email);
         toast.success("Check your email to confirm your account!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        navigate(nextTarget, { replace: true });
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "An error occurred";
@@ -68,6 +90,7 @@ export default function Auth() {
       setLoading(false);
     }
   };
+
 
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
