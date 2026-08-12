@@ -30,6 +30,7 @@ import {
   HoverLift,
   AnimatedList,
 } from "@/components/motion";
+import { ConceptLoop, GlowFrame, Glare } from "@/components/reactbits";
 import { ProductDemos } from "@/components/landing/ProductDemos";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
@@ -333,6 +334,21 @@ export default function Landing() {
                     </div>
                   ))}
                 </dl>
+
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                  <span className="uppercase tracking-[0.18em]">Now running</span>
+                  <span aria-hidden className="h-1 w-1 rounded-full bg-primary/70" />
+                  <ConceptLoop
+                    className="font-medium text-primary"
+                    items={[
+                      "Resume Intelligence",
+                      "ATS Optimization",
+                      "Job Matching",
+                      "Interview Coaching",
+                      "Career Intelligence",
+                    ]}
+                  />
+                </p>
               </div>
 
               <motion.div className="lg:pl-4" style={heroParallax ? { y: heroY } : undefined}>
@@ -608,11 +624,15 @@ export default function Landing() {
 
           <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
             {AUDIENCE.map((a, i) => (
-              <Reveal key={a.title} delay={i * 50} className="bg-card p-6">
-                <div id={a.id} className="scroll-mt-28" />
-                <a.icon className="h-5 w-5 text-primary" aria-hidden />
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+              <Reveal key={a.title} delay={i * 50} className="bg-card">
+                <Glare className="h-full p-6" radius="0px" background="hsl(var(--card))">
+                  <div>
+                    <div id={a.id} className="scroll-mt-28" />
+                    <a.icon className="h-5 w-5 text-primary" aria-hidden />
+                    <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+                  </div>
+                </Glare>
               </Reveal>
             ))}
             <Reveal delay={250} className="flex flex-col justify-center bg-card p-6">
@@ -728,16 +748,8 @@ export default function Landing() {
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {PLANS.map((p, i) => {
               const price = p[billing];
-              return (
-                <Reveal
-                  key={p.name}
-                  delay={i * 70}
-                  className={`flex flex-col rounded-2xl border p-6 ${
-                    p.highlight
-                      ? "border-primary/40 bg-primary/[0.05] shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
-                      : "border-border bg-card"
-                  }`}
-                >
+              const body = (
+                <div className="flex h-full flex-col p-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
                     {p.highlight && (
@@ -769,6 +781,24 @@ export default function Landing() {
                   >
                     {p.cta}
                   </Button>
+                </div>
+              );
+              return (
+                <Reveal key={p.name} delay={i * 70} className="h-full">
+                  {p.highlight ? (
+                    <GlowFrame className="h-full" radius={16}>
+                      {body}
+                    </GlowFrame>
+                  ) : (
+                    <Glare
+                      className="h-full"
+                      radius="16px"
+                      background="hsl(var(--card))"
+                      borderColor="hsl(var(--border))"
+                    >
+                      {body}
+                    </Glare>
+                  )}
                 </Reveal>
               );
             })}
