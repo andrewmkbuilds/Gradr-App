@@ -26,3 +26,5 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
+
+export default RequireAdmin;
