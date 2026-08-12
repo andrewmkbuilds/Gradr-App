@@ -1,5 +1,4 @@
-import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { dashboardItem, navGroups } from "@/config/nav";
 import { trackMobileTab } from "@/lib/navAnalytics";
@@ -38,7 +37,9 @@ export function MobileTabBar() {
               : tab.paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
           return (
             <li key={tab.id}>
-              <NavLink
+              {/* Plain Link: active state is section-scoped (any child route of the
+                  group counts), which react-router's NavLink exact matching cannot express. */}
+              <Link
                 to={tab.url}
                 aria-current={active ? "page" : undefined}
                 onClick={() => trackMobileTab(tab.id, tab.title, tab.url)}
@@ -53,7 +54,7 @@ export function MobileTabBar() {
                   className={cn("h-[18px] w-[18px] transition-transform", active && "scale-110")}
                 />
                 <span className="truncate">{tab.title}</span>
-              </NavLink>
+              </Link>
             </li>
           );
         })}

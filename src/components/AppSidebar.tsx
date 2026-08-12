@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronDown, LogOut } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -104,9 +103,8 @@ export function AppSidebar() {
                 {/* Dashboard */}
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink
+                    <Link
                       to={dashboardItem.url}
-                      end
                       data-nav-focusable=""
                       onClick={() => {
                         trackDashboardClick(surface);
@@ -121,7 +119,7 @@ export function AppSidebar() {
                       ) : (
                         <span className="truncate">{dashboardItem.title}</span>
                       )}
-                    </NavLink>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -194,7 +192,7 @@ export function AppSidebar() {
                               const active = isItemActive(item, pathname);
                               return (
                                 <li key={item.url}>
-                                  <NavLink
+                                  <Link
                                     to={item.url}
                                     data-nav-focusable=""
                                     data-nav-parent={group.id}
@@ -212,7 +210,7 @@ export function AppSidebar() {
                                   >
                                     <item.icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                     <span className="truncate">{item.title}</span>
-                                  </NavLink>
+                                  </Link>
                                 </li>
                               );
                             })}
