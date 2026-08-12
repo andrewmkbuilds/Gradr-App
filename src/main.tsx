@@ -14,3 +14,16 @@ createRoot(document.getElementById("root")!).render(
     </HelmetProvider>
   </RootErrorBoundary>,
 );
+
+// Fade out and remove the static splash once React has painted.
+const removeSplash = () => {
+  const splash = document.getElementById("app-splash");
+  if (!splash) return;
+  splash.style.transition = "opacity 220ms ease";
+  splash.style.opacity = "0";
+  window.setTimeout(() => splash.remove(), 240);
+};
+
+requestAnimationFrame(() => requestAnimationFrame(removeSplash));
+window.setTimeout(removeSplash, 4000);
+
