@@ -3,10 +3,14 @@
  * pages. Paddle's readiness check reads these pages, so they must stay
  * publicly accessible (no auth) and must name the seller and Paddle's role.
  *
- * NOTE: replace SELLER_LEGAL_NAME with the registered legal entity (or the
- * individual's full legal name) before submitting for Paddle verification.
+ * SELLER IDENTITY IS CONFIGURABLE — single source of truth.
+ * The values below are TEMPORARY placeholders for the development/testing
+ * phase. When the final verified legal business (or individual) name is
+ * provided, change it here only: every policy page, billing disclosure and
+ * checkout-facing reference reads from these constants. Do not hardcode the
+ * seller name anywhere else.
  */
-export const SELLER_LEGAL_NAME = "Gradr";
+export const SELLER_LEGAL_NAME = "Gradr"; // TEMPORARY — replace at go-live
 export const SELLER_CONTACT_EMAIL = "support@careerflowos.lovable.app";
 export const SELLER_TRADING_NAME = "Gradr";
 export const REFUND_WINDOW_DAYS = 30;
