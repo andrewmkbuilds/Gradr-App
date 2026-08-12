@@ -38,11 +38,29 @@ const DECISION_STYLE: Record<string, string> = {
   failed: "bg-destructive/10 text-destructive",
 };
 
+const EXPORT_COLUMNS: (keyof SecurityEvent)[] = [
+  "created_at",
+  "category",
+  "event",
+  "decision",
+  "user_id",
+  "feature",
+  "environment",
+  "reason",
+  "source",
+  "details",
+  "id",
+];
+
+const isoDay = (d: Date) => format(d, "yyyy-MM-dd");
+
 export default function AdminSecurityLog() {
   const { user, loading: authLoading } = useAuth();
   const [category, setCategory] = useState("all");
   const [decision, setDecision] = useState("all");
-  const [days, setDays] = useState(30);
+  const [from, setFrom] = useState(() => isoDay(new Date(Date.now() - 30 * 86_400_000)));
+  const [to, setTo] = useState(() => isoDay(new Date()));
+  const [exporting, setExporting] = useState<"csv" | "json" | null>(null);
 
   const { data: isAdmin, isLoading: roleLoading } = useQuery({
     queryKey: ["is-admin", user?.id],
@@ -53,23 +71,77 @@ export default function AdminSecurityLog() {
     },
   });
 
+  // Inclusive range: from 00:00 on `from` to 23:59:59.999 on `to`, local time.
+  const rangeBounds = () => ({
+    since: new Date(`${from}T00:00:00`).toISOString(),
+    until: new Date(`${to}T23:59:59.999`).toISOString(),
+  });
+
+  const buildQuery = (limit: number, offset = 0) => {
+    const { since, until } = rangeBounds();
+    let q = (supabase as any)
+      .from("security_audit_log")
+      .select("*")
+      .gte("created_at", since)
+      .lte("created_at", until)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (category !== "all") q = q.eq("category", category);
+    if (decision !== "all") q = q.eq("decision", decision);
+    return q;
+  };
+
   const { data: events, isLoading } = useQuery({
-    queryKey: ["security-audit", category, decision, days],
+    queryKey: ["security-audit", category, decision, from, to],
     enabled: Boolean(isAdmin),
     queryFn: async (): Promise<SecurityEvent[]> => {
-      const since = new Date(Date.now() - days * 86_400_000).toISOString();
-      let q = (supabase as any)
-        .from("security_audit_log")
-        .select("*")
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(300);
-      if (category !== "all") q = q.eq("category", category);
-      if (decision !== "all") q = q.eq("decision", decision);
-      const { data, error } = await q;
+      const { data, error } = await buildQuery(300);
       if (error) throw error;
       return (data ?? []) as SecurityEvent[];
     },
+  });
+
+  /** Page through the full selected range rather than exporting only what's on screen. */
+  const fetchAll = async (): Promise<SecurityEvent[]> => {
+    const pageSize = 1000;
+    const all: SecurityEvent[] = [];
+    for (let offset = 0; offset < 50_000; offset += pageSize) {
+      const { data, error } = await buildQuery(pageSize, offset);
+      if (error) throw error;
+      const batch = (data ?? []) as SecurityEvent[];
+      all.push(...batch);
+      if (batch.length < pageSize) break;
+    }
+    return all;
+  };
+
+  const handleExport = async (fmt: "csv" | "json") => {
+    setExporting(fmt);
+    try {
+      const all = await fetchAll();
+      if (all.length === 0) {
+        toast.info("No events in that date range.");
+        return;
+      }
+      const name = `security-audit_${from}_to_${to}`;
+      if (fmt === "csv") {
+        downloadCsv(`${name}.csv`, all as unknown as Record<string, unknown>[], EXPORT_COLUMNS as string[]);
+      } else {
+        downloadJson(`${name}.json`, {
+          exported_at: new Date().toISOString(),
+          filters: { from, to, category, decision },
+          count: all.length,
+          events: all,
+        });
+      }
+      toast.success(`Exported ${all.length} event${all.length === 1 ? "" : "s"}.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Export failed");
+    } finally {
+      setExporting(null);
+    }
+  };
+
   });
 
   if (authLoading || roleLoading) {
