@@ -269,7 +269,7 @@ export const handler = async (req: Request): Promise<Response> => {
         alerts.push({ level: "error", title: "Blocked by robots.txt", detail: `${i.url} — ${i.robotsTxtState}.` });
       }
     }
-    for (const lh of lighthousePages as Record<string, number | string | null>[]) {
+    for (const lh of lighthousePages as unknown as Record<string, number | string | null>[]) {
       if (lh.error) {
         alerts.push({ level: "info", title: "Lighthouse audit unavailable", detail: `${lh.url} — ${lh.error}.` });
         continue;
@@ -311,7 +311,7 @@ export const handler = async (req: Request): Promise<Response> => {
         }
       }
       const prevLh = ((previous.lighthouse ?? {}) as { pages?: Record<string, number | string>[] }).pages ?? [];
-      for (const lh of lighthousePages as Record<string, number | string | null>[]) {
+      for (const lh of lighthousePages as unknown as Record<string, number | string | null>[]) {
         const before = prevLh.find((p) => p.url === lh.url);
         if (before && typeof before.performance === "number" && typeof lh.performance === "number") {
           const delta = lh.performance - before.performance;
