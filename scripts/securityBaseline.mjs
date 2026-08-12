@@ -42,9 +42,11 @@ const q = {
         where n.nspname = 'public' and c.relkind = 'r'`,
   policies: `select tablename, policyname, cmd, array_to_string(roles, ',')
              from pg_policies where schemaname = 'public'`,
-  grants: `select table_name, grantee, privilege_type
-           from information_schema.table_privileges
-           where table_schema = 'public' and grantee in ('anon','authenticated','PUBLIC')`,
+  // Read grants straight from pg_class.relacl: information_schema only shows
+  // grants visible to the connecting role, which hides them from a read-only CI role.
+  grants: `select c.relname, coalesce(array_to_string(c.relacl, ','), '') from pg_class c
+           join pg_namespace n on n.oid = c.relnamespace
+           where n.nspname = 'public' and c.relkind = 'r'`,
   funcs: `select p.proname, coalesce(array_to_string(p.proacl, ','), '') , p.prosecdef
           from pg_proc p join pg_namespace n on n.oid = p.pronamespace
           where n.nspname = 'public'`,
