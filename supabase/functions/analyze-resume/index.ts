@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { scoreResume, deterministicSuggestions } from "../_shared/resumeScoring.ts";
 import { consume, paymentRequired, refund, resolveEnv, type PaymentEnv } from "../_shared/entitlements.ts";
+import { logAiAuthorization } from "../_shared/securityAudit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,6 +47,7 @@ serve(async (req) => {
     );
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
+      void logAiAuthorization({ source: "analyze-resume", decision: "denied", reason: "invalid_token" });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -69,6 +71,7 @@ serve(async (req) => {
     // ---- Entitlement: monthly allowance first, then purchased credits -----
     paymentEnv = resolveEnv(environment);
     const entitlement = await consume(user.id, "resume", paymentEnv);
+    void logAiAuthorization({ source: "analyze-resume", decision: entitlement.allowed ? "allowed" : "denied", userId: user.id, feature: "resume", env: paymentEnv, reason: entitlement.reason ?? entitlement.source ?? null, details: { tier: entitlement.tier, used: entitlement.used, allowance: entitlement.allowance } });
     if (!entitlement.allowed) return paymentRequired(entitlement, corsHeaders);
     meteredUserId = user.id;
 
