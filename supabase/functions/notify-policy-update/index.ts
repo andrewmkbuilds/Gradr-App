@@ -10,7 +10,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const FROM = Deno.env.get("NOTIFICATION_FROM_EMAIL") || "Gradr <onboarding@resend.dev>";
-const APP_URL = Deno.env.get("APP_PUBLIC_URL") || "https://gradr-app.lovable.app";
+const APP_URL = Deno.env.get("APP_PUBLIC_URL") || "https://gradr.me";
 
 const escape = (v: unknown) =>
   String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

@@ -10,7 +10,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const FROM = Deno.env.get("NOTIFICATION_FROM_EMAIL") || "Gradr <onboarding@resend.dev>";
-const APP_URL = Deno.env.get("APP_PUBLIC_URL") || "https://careerflowos.lovable.app";
+const APP_URL = Deno.env.get("APP_PUBLIC_URL") || "https://gradr.me";
 
 type TemplateId =
   | "interview_scheduled"

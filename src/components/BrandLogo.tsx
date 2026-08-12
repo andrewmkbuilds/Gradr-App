@@ -9,8 +9,13 @@ import { cn } from "@/lib/utils";
  * Both are rendered and swapped with CSS (`dark:`) rather than JS, so the right
  * one paints on the very first frame with no flash.
  */
-export const BRAND_LOGO_URL = "/gradr-logo.png";
-export const BRAND_LOGO_DARK_URL = "/gradr-logo-dark.png";
+/**
+ * UI marks use a 256px variant (~40KB instead of ~170KB) — the full-size
+ * files stay reserved for PWA icons and social cards.
+ */
+export const BRAND_LOGO_URL = "/gradr-logo-256.png";
+export const BRAND_LOGO_DARK_URL = "/gradr-logo-dark-256.png";
+export const BRAND_LOGO_FULL_URL = "/gradr-logo.png";
 
 type BrandLogoProps = {
   /** Rendered box size in px. The source is square, so width === height. */

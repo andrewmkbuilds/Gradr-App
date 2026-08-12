@@ -1,5 +1,5 @@
 import { BrandLogo } from "@/components/BrandLogo";
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,55 +19,69 @@ import { SentryErrorBoundary, addBreadcrumb } from "@/lib/telemetry/sentry";
 import { phPageview } from "@/lib/telemetry/posthog";
 
 import Dashboard from "./pages/Dashboard";
-import ResumeEngine from "./pages/ResumeEngine";
-import JobMatchingEngine from "./pages/JobMatchingEngine";
-import JobsFeed from "./pages/JobsFeed";
-import Pipeline from "./pages/Pipeline";
-import ApplicationEngine from "./pages/ApplicationEngine";
-import InterviewEngine from "./pages/InterviewEngine";
-import GrowthEngine from "./pages/GrowthEngine";
-import Settings from "./pages/Settings";
-import DigestPreview from "./pages/DigestPreview";
-import Pricing from "./pages/Pricing";
-import Billing from "./pages/Billing";
-import Welcome from "./pages/Welcome";
 import Auth from "./pages/Auth";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
-import AffiliateProgram from "./pages/AffiliateProgram";
-import AffiliateApply from "./pages/AffiliateApply";
-import AffiliateDashboard from "./pages/AffiliateDashboard";
-import AffiliateResources from "./pages/AffiliateResources";
-import AdminAffiliates from "./pages/AdminAffiliates";
-import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
-import AdminAuditLog from "./pages/AdminAuditLog";
-import AdminSecurityLog from "@/pages/AdminSecurityLog";
-import AdminNavAnalytics from "@/pages/AdminNavAnalytics";
-import AdminPaddle from "@/pages/AdminPaddle";
-import AdminLegal from "@/pages/AdminLegal";
-import AdminDiscounts from "@/pages/AdminDiscounts";
-import AdminSearchConsole from "./pages/AdminSearchConsole";
-import AdminPaymentsStatus from "@/pages/AdminPaymentsStatus";
-import Privacy from "./pages/legal/Privacy";
-import Terms from "./pages/legal/Terms";
-import RefundPolicy from "./pages/legal/RefundPolicy";
-import CookiePolicy from "./pages/legal/CookiePolicy";
-import Dpa from "./pages/legal/Dpa";
 
-import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
-import CareerAdvice from "./pages/CareerAdvice";
-import GuideArticle from "./pages/GuideArticle";
-import JobSearchIndex from "./pages/JobSearchIndex";
-import JobLanding from "./pages/JobLanding";
-import OAuthConsent from "./pages/OAuthConsent";
 import Landing from "./pages/Landing";
 import { authPath, nextFromLocation, resolveNext } from "./lib/nextRedirect";
-import InterviewHistory from "./pages/InterviewHistory";
 import RequireAdmin from "@/components/RequireAdmin";
-import VerifyEmail from "./pages/VerifyEmail";
+
+// Route-level code splitting: only the shell, dashboard, auth and landing
+// pages ship in the initial bundle. Everything else loads on navigation.
+const ResumeEngine = lazy(() => import("./pages/ResumeEngine"));
+const JobMatchingEngine = lazy(() => import("./pages/JobMatchingEngine"));
+const JobsFeed = lazy(() => import("./pages/JobsFeed"));
+const Pipeline = lazy(() => import("./pages/Pipeline"));
+const ApplicationEngine = lazy(() => import("./pages/ApplicationEngine"));
+const InterviewEngine = lazy(() => import("./pages/InterviewEngine"));
+const GrowthEngine = lazy(() => import("./pages/GrowthEngine"));
+const Settings = lazy(() => import("./pages/Settings"));
+const DigestPreview = lazy(() => import("./pages/DigestPreview"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Billing = lazy(() => import("./pages/Billing"));
+const Welcome = lazy(() => import("./pages/Welcome"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const AffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
+const AffiliateApply = lazy(() => import("./pages/AffiliateApply"));
+const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
+const AffiliateResources = lazy(() => import("./pages/AffiliateResources"));
+const AdminAffiliates = lazy(() => import("./pages/AdminAffiliates"));
+const AdminBlogAnalytics = lazy(() => import("./pages/AdminBlogAnalytics"));
+const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
+const AdminSecurityLog = lazy(() => import("@/pages/AdminSecurityLog"));
+const AdminNavAnalytics = lazy(() => import("@/pages/AdminNavAnalytics"));
+const AdminSeoMonitor = lazy(() => import("@/pages/AdminSeoMonitor"));
+const AdminPaddle = lazy(() => import("@/pages/AdminPaddle"));
+const AdminLegal = lazy(() => import("@/pages/AdminLegal"));
+const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
+const AdminSearchConsole = lazy(() => import("./pages/AdminSearchConsole"));
+const AdminPaymentsStatus = lazy(() => import("@/pages/AdminPaymentsStatus"));
+const Privacy = lazy(() => import("./pages/legal/Privacy"));
+const Terms = lazy(() => import("./pages/legal/Terms"));
+const RefundPolicy = lazy(() => import("./pages/legal/RefundPolicy"));
+const CookiePolicy = lazy(() => import("./pages/legal/CookiePolicy"));
+const Dpa = lazy(() => import("./pages/legal/Dpa"));
+const AiResumeOptimization = lazy(() => import("./pages/blog/AiResumeOptimization"));
+const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
+const GuideArticle = lazy(() => import("./pages/GuideArticle"));
+const JobSearchIndex = lazy(() => import("./pages/JobSearchIndex"));
+const JobLanding = lazy(() => import("./pages/JobLanding"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
+const InterviewHistory = lazy(() => import("./pages/InterviewHistory"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 const queryClient = new QueryClient();
+
+/** Lightweight placeholder shown while a route chunk streams in. */
+function RouteFallback() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center" role="status" aria-live="polite">
+      <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <span className="sr-only">Loading page</span>
+    </div>
+  );
+}
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
@@ -116,6 +130,7 @@ function ProtectedRoutes() {
           <Route path="/admin/affiliates" element={<RequireAdmin><AnimatedPage><AdminAffiliates /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/blog-analytics" element={<RequireAdmin><AnimatedPage><AdminBlogAnalytics /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/security-log" element={<RequireAdmin><AnimatedPage><AdminSecurityLog /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/seo-monitor" element={<RequireAdmin><AnimatedPage><AdminSeoMonitor /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/nav-analytics" element={<RequireAdmin><AnimatedPage><AdminNavAnalytics /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/audit-log" element={<RequireAdmin><AnimatedPage><AdminAuditLog /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/legal" element={<RequireAdmin><AnimatedPage><AdminLegal /></AnimatedPage></RequireAdmin>} />
@@ -237,7 +252,9 @@ const App = () => (
           <TelemetryRouteTracker />
           <AuthProvider>
             <RouteSeo />
-            <AppRoutes />
+            <Suspense fallback={<RouteFallback />}>
+              <AppRoutes />
+            </Suspense>
             <CookieConsent />
           </AuthProvider>
         </BrowserRouter>
