@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { Zap, FileText, Mail, MessageSquare, Loader2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +57,7 @@ function ApplicationEngineInner() {
         .eq("user_id", user.id)
         .single();
 
-      const { data, error } = await supabase.functions.invoke("generate-application", {
+      const { data, error } = await invokeFunction("generate-application", {
         body: {
           environment: getPaddleEnvironment(),
           type,

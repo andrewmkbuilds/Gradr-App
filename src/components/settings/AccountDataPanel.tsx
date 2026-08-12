@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { Download, Trash2, Loader2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,7 +68,7 @@ export function AccountDataPanel() {
     }
     setDeleting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("delete-account", {
+      const { data, error } = await invokeFunction("delete-account", {
         body: { confirm: "DELETE" },
       });
       if (error) throw error;

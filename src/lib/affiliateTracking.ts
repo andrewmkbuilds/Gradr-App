@@ -11,6 +11,7 @@
  *     signs up, calls `attribute_signup_referral` RPC and clears the cookie.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 
 const COOKIE_NAME = "cf_ref";
 const CLICK_COOKIE_NAME = "cf_ref_click";
@@ -60,7 +61,7 @@ export async function captureReferralFromUrl() {
 
     // Validate the code + read the cookie window server-side. The underlying
     // lookups are service-role only; visitors never touch them directly.
-    const { data: publicInfo } = await supabase.functions.invoke("affiliate-public", {
+    const { data: publicInfo } = await invokeFunction("affiliate-public", {
       body: { code },
     });
     const hit = publicInfo?.affiliate ?? null;

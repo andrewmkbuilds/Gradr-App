@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { Link } from "@/lib/router-compat";
 import {
   Upload, FileText, CheckCircle, AlertTriangle, Sparkles, RefreshCw, Loader2, BookOpen,
@@ -106,7 +107,7 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(true);
 
-      const { data: analysisData, error: fnError } = await supabase.functions.invoke("analyze-resume", {
+      const { data: analysisData, error: fnError } = await invokeFunction("analyze-resume", {
         body: { resumeText: text, jobDescription, jobTitle, environment: getPaddleEnvironment() },
       });
 

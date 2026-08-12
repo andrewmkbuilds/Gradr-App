@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import {
   DndContext,
   DragEndEvent,
@@ -198,7 +199,7 @@ export default function Pipeline() {
     if (!pasteUrl.trim()) return;
     setPasting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("parse-job-url", {
+      const { data, error } = await invokeFunction("parse-job-url", {
         body: { url: pasteUrl.trim() },
       });
       if (error || data?.error) {

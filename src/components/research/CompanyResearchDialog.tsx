@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -79,7 +80,7 @@ export function CompanyResearchDialog({ open, onOpenChange, company, role }: Pro
       setLoading(true);
       setError(null);
       try {
-        const { data: res, error: fnError } = await supabase.functions.invoke("company-research", {
+        const { data: res, error: fnError } = await invokeFunction("company-research", {
           body: { company, role, refresh },
         });
         if (fnError || res?.error) {
