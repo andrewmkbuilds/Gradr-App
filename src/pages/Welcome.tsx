@@ -4,7 +4,7 @@ import { CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
-import Seo from "@/components/Seo";
+import { Seo } from "@/components/Seo";
 
 /** Post-checkout landing page. Paddle redirects here on success. */
 export default function Welcome() {
