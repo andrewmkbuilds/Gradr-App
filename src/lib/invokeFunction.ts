@@ -13,7 +13,8 @@ export interface InvokeResult<T> {
  * exposes the raw `Response` on `error.context` so callers can read status
  * codes and JSON error bodies (rate limits, entitlement 402s, ...).
  */
-export async function invokeFunction<T = unknown>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function invokeFunction<T = any>(
   name: string,
   options: { body?: unknown; headers?: Record<string, string> } = {},
 ): Promise<InvokeResult<T>> {
