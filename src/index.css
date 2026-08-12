@@ -173,6 +173,29 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
+  /* Scrolling model:
+     - the document is the single primary scroll container
+     - nested scrollers (sidebar, dialogs, popovers) keep working, but render as
+       slim overlay-style bars instead of chunky legacy OS scrollbars
+     Nothing is hidden: the bars remain visible and draggable while scrollable. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+    overflow-x: clip;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.32);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover { background-color: hsl(var(--muted-foreground) / 0.5); }
+  *::-webkit-scrollbar-corner { background: transparent; }
+  /* Legacy stepper arrows are what makes the bar look broken/inset. */
+  *::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
+
   /* Theme switch: colours cross-fade, nothing moves. */
   html.theme-transition,
   html.theme-transition *,

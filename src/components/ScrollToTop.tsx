@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 /**
- * Resets scroll on every route change — both the window and the dashboard's
- * scrollable <main>, which is the real scroll container inside the app shell.
+ * Resets scroll on every route change: the window (the app's single primary
+ * scroll container) plus any opt-in nested [data-scroll-container].
  */
 export function ScrollToTop() {
   const { pathname } = useLocation();
