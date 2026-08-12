@@ -123,8 +123,50 @@ export default function Auth() {
     }
   };
 
+  if (pendingEmail) {
+    return (
+      <AuthLayout>
+        <div className="space-y-6 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+            <CheckCircle className="h-6 w-6 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold text-foreground">Confirm your email</h1>
+            <p className="text-sm text-muted-foreground">
+              We sent a confirmation link to{" "}
+              <span className="font-medium text-foreground">{pendingEmail}</span>. Open it and
+              you'll land straight on{" "}
+              <span className="font-medium text-foreground">{nextTarget}</span>.
+            </p>
+          </div>
+          {isGuest && (
+            <p className="text-xs text-muted-foreground">
+              Your guest work is saved — keep using the app while you confirm.
+            </p>
+          )}
+          <div className="space-y-2">
+            {isGuest && (
+              <Button className="w-full h-11" onClick={() => navigate(nextTarget, { replace: true })}>
+                Continue for now
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              className="w-full h-11 text-muted-foreground"
+              onClick={() => setPendingEmail(null)}
+            >
+              Use a different email
+            </Button>
+          </div>
+        </div>
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout>
+
       <div className="space-y-2">
         <h1 className="text-xl font-semibold text-foreground">
           {isSignUp ? "Create your account" : "Sign in to CareerFlow OS"}
