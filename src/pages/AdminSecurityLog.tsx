@@ -142,7 +142,7 @@ export default function AdminSecurityLog() {
     }
   };
 
-  });
+
 
   if (authLoading || roleLoading) {
     return (
