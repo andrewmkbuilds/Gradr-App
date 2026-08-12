@@ -258,7 +258,7 @@ export const handler = async (req: Request): Promise<Response> => {
         alerts.push({ level: "info", title: "Sitemap not fetched yet", detail: `${s.path} submitted, not downloaded yet.` });
       }
     }
-    for (const i of inspections as Record<string, string | null>[]) {
+    for (const i of inspections as unknown as Record<string, string | null>[]) {
       if (i.error) continue;
       if (i.verdict === "FAIL") {
         alerts.push({ level: "error", title: "Page not indexed", detail: `${i.url} — ${i.coverageState ?? "not indexed"}.` });

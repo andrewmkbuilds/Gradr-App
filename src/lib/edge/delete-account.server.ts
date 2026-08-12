@@ -85,7 +85,7 @@ export const handler = async (req: Request): Promise<Response> => {
   for (const bucket of BUCKETS) {
     try {
       const { data: files } = await admin.storage.from(bucket).list(user.id, { limit: 1000 });
-      const paths = (files ?? []).map((f) => `${user.id}/${f.name}`);
+      const paths = (files ?? []).map((f: { name: string }) => `${user.id}/${f.name}`);
       if (paths.length) await admin.storage.from(bucket).remove(paths);
     } catch (err) {
       console.warn(`delete-account: bucket ${bucket} cleanup failed`, err);
