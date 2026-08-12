@@ -5,12 +5,15 @@
  * degrades to a plain fade (or no motion at all) when reduced motion is on.
  * Motion tokens come from `@/lib/motion` — never inline durations here.
  */
-import { forwardRef, type ReactNode, useRef } from "react";
+import { forwardRef, type ReactNode, useEffect, useRef, useState } from "react";
 import {
+  animate,
   motion,
+  useInView,
   useMotionTemplate,
   useMotionValue,
   useReducedMotion,
+  useScroll,
   useSpring,
   useTransform,
   type HTMLMotionProps,
@@ -231,5 +234,195 @@ export function MotionPressable({
     >
       {children}
     </motion.div>
+  );
+}
+
+/* ------------------------------ magnetic CTA ------------------------------ */
+
+/**
+ * Magnetic wrapper — the child drifts toward the pointer inside a radius,
+ * then springs home on leave. Used for primary CTAs and nav actions.
+ */
+export function Magnetic({
+  children,
+  className,
+  strength = 0.28,
+}: {
+  children: ReactNode;
+  className?: string;
+  strength?: number;
+}) {
+  const reduce = useReducedMotion();
+  const x = useSpring(useMotionValue(0), spring.smooth);
+  const y = useSpring(useMotionValue(0), spring.smooth);
+
+  if (reduce) return <div className={className}>{children}</div>;
+
+  return (
+    <motion.div
+      className={cn("inline-block will-change-transform", className)}
+      style={{ x, y }}
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        x.set((e.clientX - (r.left + r.width / 2)) * strength);
+        y.set((e.clientY - (r.top + r.height / 2)) * strength);
+      }}
+      onPointerLeave={() => {
+        x.set(0);
+        y.set(0);
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* -------------------------------- count-up -------------------------------- */
+
+/** Spring-driven number that counts up the first time it scrolls into view. */
+export function CountUp({
+  value,
+  decimals = 0,
+  prefix = "",
+  suffix = "",
+  className,
+  duration = 1.1,
+}: {
+  value: number;
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+  className?: string;
+  duration?: number;
+}) {
+  const reduce = useReducedMotion();
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
+  const [shown, setShown] = useState(reduce ? value : 0);
+
+  useEffect(() => {
+    if (!inView) return;
+    if (reduce) {
+      setShown(value);
+      return;
+    }
+    const controls = animate(0, value, {
+      duration,
+      ease: ease.entrance,
+      onUpdate: (v) => setShown(v),
+    });
+    return () => controls.stop();
+  }, [inView, value, duration, reduce]);
+
+  return (
+    <span ref={ref} className={cn("numeric", className)}>
+      {prefix}
+      {shown.toFixed(decimals)}
+      {suffix}
+    </span>
+  );
+}
+
+/* -------------------------------- parallax -------------------------------- */
+
+/** Translates its children as the page scrolls past. `speed` in px of travel. */
+export function Parallax({
+  children,
+  speed = 60,
+  className,
+}: {
+  children: ReactNode;
+  speed?: number;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [speed, -speed]);
+
+  return (
+    <div ref={ref} className={className}>
+      <motion.div style={reduce ? undefined : { y }} className="will-change-transform">
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+/* ------------------------------ spotlight card ----------------------------- */
+
+/** Card surface with a pointer-tracked light bloom. Pure GPU (opacity/gradient). */
+export function SpotlightCard({
+  children,
+  className,
+  radius = 380,
+}: {
+  children: ReactNode;
+  className?: string;
+  radius?: number;
+}) {
+  const reduce = useReducedMotion();
+  const mx = useMotionValue(-9999);
+  const my = useMotionValue(-9999);
+  const bg = useMotionTemplate`radial-gradient(${radius}px circle at ${mx}px ${my}px, hsl(var(--primary) / 0.14), transparent 70%)`;
+
+  return (
+    <div
+      className={cn("group relative overflow-hidden", className)}
+      onPointerMove={(e) => {
+        if (reduce) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        mx.set(e.clientX - r.left);
+        my.set(e.clientY - r.top);
+      }}
+      onPointerLeave={() => {
+        mx.set(-9999);
+        my.set(-9999);
+      }}
+    >
+      {!reduce && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{ background: bg }}
+        />
+      )}
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
+/* ---------------------------- animated progress ---------------------------- */
+
+/** Track + fill that grows from 0 when scrolled into view. */
+export function MotionMeter({
+  value,
+  className,
+  tone = "primary",
+  delay = 0,
+}: {
+  value: number;
+  className?: string;
+  tone?: "primary" | "success" | "warning" | "secondary";
+  delay?: number;
+}) {
+  const reduce = useReducedMotion();
+  const toneClass = {
+    primary: "bg-primary",
+    success: "bg-success",
+    warning: "bg-warning",
+    secondary: "bg-brand-secondary",
+  }[tone];
+
+  return (
+    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-secondary", className)}>
+      <motion.div
+        className={cn("h-full rounded-full", toneClass)}
+        initial={{ width: reduce ? `${value}%` : 0 }}
+        whileInView={{ width: `${value}%` }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.9, ease: ease.entrance, delay }}
+      />
+    </div>
   );
 }
