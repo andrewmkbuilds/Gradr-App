@@ -59,6 +59,7 @@ import OAuthConsent from "./pages/OAuthConsent";
 import Landing from "./pages/Landing";
 import { authPath, nextFromLocation, resolveNext } from "./lib/nextRedirect";
 import InterviewHistory from "./pages/InterviewHistory";
+import RequireAdmin from "@/components/RequireAdmin";
 
 const queryClient = new QueryClient();
 
@@ -97,16 +98,16 @@ function ProtectedRoutes() {
           <Route path="/interview/history" element={<AnimatedPage><InterviewHistory /></AnimatedPage>} />
           <Route path="/growth" element={<AnimatedPage><GrowthEngine /></AnimatedPage>} />
           <Route path="/settings" element={<AnimatedPage><Settings /></AnimatedPage>} />
-          <Route path="/admin/digest-preview" element={<AnimatedPage><DigestPreview /></AnimatedPage>} />
-          <Route path="/admin/affiliates" element={<AnimatedPage><AdminAffiliates /></AnimatedPage>} />
-         <Route path="/admin/blog-analytics" element={<AnimatedPage><AdminBlogAnalytics /></AnimatedPage>} />
-         <Route path="/admin/security-log" element={<AnimatedPage><AdminSecurityLog /></AnimatedPage>} />
-         <Route path="/admin/audit-log" element={<AnimatedPage><AdminAuditLog /></AnimatedPage>} />
-         <Route path="/admin/legal" element={<AnimatedPage><AdminLegal /></AnimatedPage>} />
-         <Route path="/admin/paddle" element={<AnimatedPage><AdminPaddle /></AnimatedPage>} />
-         <Route path="/admin/payments-status" element={<AnimatedPage><AdminPaymentsStatus /></AnimatedPage>} />
+          <Route path="/admin/digest-preview" element={<RequireAdmin><AnimatedPage><DigestPreview /></AnimatedPage></RequireAdmin>} />
+          <Route path="/admin/affiliates" element={<RequireAdmin><AnimatedPage><AdminAffiliates /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/blog-analytics" element={<RequireAdmin><AnimatedPage><AdminBlogAnalytics /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/security-log" element={<RequireAdmin><AnimatedPage><AdminSecurityLog /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/audit-log" element={<RequireAdmin><AnimatedPage><AdminAuditLog /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/legal" element={<RequireAdmin><AnimatedPage><AdminLegal /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/paddle" element={<RequireAdmin><AnimatedPage><AdminPaddle /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/payments-status" element={<RequireAdmin><AnimatedPage><AdminPaymentsStatus /></AnimatedPage></RequireAdmin>} />
 
-         <Route path="/admin/search-console" element={<AnimatedPage><AdminSearchConsole /></AnimatedPage>} />
+         <Route path="/admin/search-console" element={<RequireAdmin><AnimatedPage><AdminSearchConsole /></AnimatedPage></RequireAdmin>} />
 
           <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />

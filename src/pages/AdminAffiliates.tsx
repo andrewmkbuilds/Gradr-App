@@ -8,6 +8,7 @@ import { useIsAdmin, useFullAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
 import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
 import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
+import { AffiliateTiersPanel } from "@/components/admin/AffiliateTiersPanel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "settings";
+type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "tiers" | "settings";
 
 export default function AdminAffiliates() {
   const { data: isAdmin, isLoading: loadingAdmin } = useIsAdmin();
@@ -32,11 +33,11 @@ export default function AdminAffiliates() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Affiliate Admin</h1>
-        <p className="text-sm text-muted-foreground mt-1">Review applications, manage affiliates, and configure program settings.</p>
+        <p className="text-sm text-muted-foreground mt-1">Review applications, manage affiliates, moderate commissions, and configure the program.</p>
       </div>
 
       <div className="flex gap-2 border-b border-border overflow-x-auto">
-        {(["applications", "affiliates", "commissions", "payouts", "settings"] as Tab[]).map((t) => (
+        {(["applications", "affiliates", "commissions", "payouts", "tiers", "settings"] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm capitalize border-b-2 transition whitespace-nowrap ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
             {t}
           </button>
@@ -47,10 +48,12 @@ export default function AdminAffiliates() {
       {tab === "affiliates" && <AffiliatesPanel />}
       {tab === "commissions" && <CommissionsPanel />}
       {tab === "payouts" && <PayoutsPanel />}
+      {tab === "tiers" && <AffiliateTiersPanel />}
       {tab === "settings" && <SettingsPanel />}
     </div>
   );
 }
+
 
 function ApplicationsPanel() {
   const qc = useQueryClient();
@@ -242,15 +245,17 @@ function CommissionsPanel() {
   });
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
-  const setStatus = async (id: string, status: string) => {
-    const patch: Record<string, unknown> = { status };
-    if (status === "approved") patch.approved_date = new Date().toISOString();
-    if (status === "paid") patch.paid_date = new Date().toISOString();
-    if (status === "reversed") patch.reversed_date = new Date().toISOString();
-    await supabase.from("affiliate_commissions").update(patch).eq("id", id);
+  const setStatus = async (id: string, status: "pending" | "approved" | "paid" | "reversed" | "canceled") => {
+    const { error } = await supabase.rpc("admin_set_commission_status", {
+      _commission_ids: [id],
+      _status: status,
+    });
+
+    if (error) return toast.error(error.message);
     toast.success(`Marked ${status}`);
     qc.invalidateQueries({ queryKey: ["adminCommissions"] });
   };
+
 
   return (
     <div className="glass-card overflow-x-auto">

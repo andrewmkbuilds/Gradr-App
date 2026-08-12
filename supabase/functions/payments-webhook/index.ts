@@ -234,6 +234,72 @@ async function clearPaymentIssue(data: any, env: PaddleEnv) {
     .eq("subscription_status", "past_due");
 }
 
+/**
+ * Affiliate attribution. Idempotent by Paddle transaction id: the RPC refuses to
+ * create a second commission for the same source record, so webhook retries and
+ * duplicate deliveries can never double-pay.
+ */
+// deno-lint-ignore no-explicit-any
+async function recordAffiliateCommission(data: any, env: PaddleEnv) {
+  const userId = data?.customData?.userId;
+  if (!userId || !data?.id) return;
+
+  const grandTotal = Number(data?.details?.totals?.grandTotal ?? data?.details?.totals?.total ?? 0);
+  // Paddle reports minor units (cents).
+  const amount = grandTotal > 0 ? grandTotal / 100 : 0;
+  if (amount <= 0) return;
+
+  const { data: commissionId, error } = await db().rpc("record_conversion_commission", {
+    _referred_user_id: userId,
+    _source_amount: amount,
+    _conversion_type: "paid_upgrade",
+    _source_record_id: String(data.id),
+  });
+
+  if (error) {
+    console.error("affiliate commission failed", error.message);
+    return;
+  }
+  if (commissionId) {
+    await logSecurityEvent({
+      category: "affiliate",
+      event: "commission_recorded",
+      decision: "allowed",
+      userId,
+      env,
+      source: "payments-webhook",
+      details: { commission_id: commissionId, amount, transaction_id: data.id },
+    });
+  }
+}
+
+/** Refunds, chargebacks and cancellations reverse the matching commission. */
+// deno-lint-ignore no-explicit-any
+async function reverseAffiliateCommission(data: any, env: PaddleEnv, reason: string) {
+  const sourceId = data?.transactionId ?? data?.id;
+  if (!sourceId) return;
+  const { data: count, error } = await db().rpc("reverse_commission_for_source", {
+    _source_record_id: String(sourceId),
+    _reason: reason,
+  });
+  if (error) {
+    console.error("affiliate reversal failed", error.message);
+    return;
+  }
+  if (Number(count ?? 0) > 0) {
+    await logSecurityEvent({
+      category: "affiliate",
+      event: "commission_reversed",
+      decision: "allowed",
+      userId: data?.customData?.userId ?? null,
+      env,
+      source: "payments-webhook",
+      details: { reversed: count, reason, source_record_id: String(sourceId) },
+    });
+  }
+}
+
+
 
 /** One-off credit packs are granted from completed transactions. */
 // deno-lint-ignore no-explicit-any
@@ -343,10 +409,16 @@ Deno.serve(async (req) => {
       case EventName.TransactionCompleted:
         await clearPaymentIssue(event.data, env);
         await grantPackCredits(event.data, env);
+        await recordAffiliateCommission(event.data, env);
         break;
       case EventName.TransactionPaymentFailed:
         await handlePaymentFailed(event.data, env);
         break;
+      case EventName.AdjustmentCreated:
+        // Refunds / chargebacks arrive as adjustments against a transaction.
+        await reverseAffiliateCommission(event.data, env, "refund_adjustment");
+        break;
+
 
       default:
         console.log("Unhandled event:", event.eventType);
