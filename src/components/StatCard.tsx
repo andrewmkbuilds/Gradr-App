@@ -1,4 +1,7 @@
 import { LucideIcon } from "lucide-react";
+import { CountUp, SpotlightCard } from "@/components/motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { spring } from "@/lib/motion";
 
 interface StatCardProps {
   title: string;
@@ -9,17 +12,41 @@ interface StatCardProps {
   glowing?: boolean;
 }
 
+/** Parses "42", "42%", "4.2x" into a countable number + suffix; returns null for "—". */
+function parseMetric(value: string | number) {
+  if (typeof value === "number") return { n: value, suffix: "", decimals: 0 };
+  const m = /^(-?\d+(?:\.\d+)?)(.*)$/.exec(value.trim());
+  if (!m) return null;
+  const raw = m[1] ?? "0";
+  return { n: Number(raw), suffix: m[2] ?? "", decimals: raw.includes(".") ? 1 : 0 };
+}
+
 export function StatCard({ title, value, subtitle, icon: Icon, glowing }: StatCardProps) {
+  const reduce = useReducedMotion();
+  const metric = parseMetric(value);
+
   return (
-    <div className={`glass-card p-5 animate-slide-up ${glowing ? "glow-border" : ""}`}>
-      <div className="flex items-start justify-between mb-3">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Icon className="h-4 w-4 text-primary" />
+    <motion.div
+      whileHover={reduce ? undefined : { y: -3 }}
+      transition={spring.snappy}
+      className={`lume-border glass-panel overflow-hidden ${glowing ? "shadow-[var(--shadow-glow)]" : ""}`}
+    >
+      <SpotlightCard className="p-5">
+        <div className="mb-3 flex items-start justify-between">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+            <Icon className="h-4 w-4 text-primary" aria-hidden />
+          </div>
         </div>
-      </div>
-      <p className="stat-value text-foreground">{value}</p>
-      <p className="text-sm text-muted-foreground mt-1">{title}</p>
-      {subtitle && <p className="text-xs text-primary mt-1">{subtitle}</p>}
-    </div>
+        <p className="font-display text-3xl font-bold tracking-tight text-foreground">
+          {metric ? (
+            <CountUp value={metric.n} decimals={metric.decimals} suffix={metric.suffix} duration={0.9} />
+          ) : (
+            value
+          )}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{title}</p>
+        {subtitle && <p className="mt-1 text-xs text-primary">{subtitle}</p>}
+      </SpotlightCard>
+    </motion.div>
   );
 }
