@@ -37,7 +37,7 @@ export function MaskedHeading({ text, className = "", delay = 0, step = 0.055, a
             initial={{ y: "110%" }}
             {...(immediate
               ? { animate: { y: "0%" } }
-              : { whileInView: { y: "0%" }, viewport: { once: true, margin: "-12%" } })}
+              : { whileInView: { y: "0%" }, viewport: { once: true, margin: "0px 0px -12% 0px" } })}
             transition={{ delay: delay + i * step, duration: 0.75, ease: ease.entrance }}
           >
             {word}
@@ -63,7 +63,7 @@ export function SplitText({ text, className = "", delay = 0, step = 0.02, as = "
           className="inline-block whitespace-pre"
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
+          viewport={{ once: true, margin: "0px 0px -10% 0px" }}
           transition={{ delay: delay + i * step, duration: 0.4, ease: ease.standard }}
         >
           {ch}
@@ -84,7 +84,7 @@ export function BlurText({
       className={className}
       initial={{ opacity: 0, filter: "blur(10px)", y: 12 }}
       whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
+      viewport={{ once: true, margin: "0px 0px -10% 0px" }}
       transition={{ delay, duration: 0.8, ease: ease.entrance }}
     >
       {children}
@@ -187,7 +187,7 @@ export function AnimatedList({
           key={i}
           initial={reduce ? false : { opacity: 0, x: -14 }}
           whileInView={reduce ? undefined : { opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-8%" }}
+          viewport={{ once: true, margin: "0px 0px -8% 0px" }}
           transition={{ delay: i * step, duration: 0.5, ease: ease.entrance }}
         >
           {child}
