@@ -125,3 +125,10 @@ export function Glare({
     </GlareHoverBase>
   );
 }
+
+/* ---------------------- additional React Bits surfaces --------------------- */
+
+export { Dither } from "./Dither";
+export { FadeContent } from "./FadeContent";
+export { TestimonialRail, type Testimonial } from "./Testimonials";
+export { BentoGrid, type BentoItem } from "./BentoGrid";

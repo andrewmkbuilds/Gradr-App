@@ -25,12 +25,16 @@ import {
   BlurText,
   GradientText,
   ShinyText,
-  MagicBento,
   GlareCard,
   HoverLift,
   AnimatedList,
 } from "@/components/motion";
-import { ConceptLoop, GlowFrame, Glare } from "@/components/reactbits";
+import {
+  ConceptLoop, GlowFrame, Glare, Dither, FadeContent, TestimonialRail, BentoGrid,
+  type Testimonial,
+} from "@/components/reactbits";
+import { ProofMetrics } from "@/components/landing/ProofMetrics";
+import { PricingSection, type Plan } from "@/components/landing/PricingSection";
 import { ProductDemos } from "@/components/landing/ProductDemos";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
@@ -44,6 +48,7 @@ const NAV = [
   { label: "Product", href: "#product" },
   { label: "How it works", href: "#how-it-works" },
   { label: "AI Interview", href: "#interview" },
+  { label: "Proof", href: "#proof" },
   { label: "Pricing", href: "#pricing" },
   { label: "For Students", href: "#students" },
   { label: "For Professionals", href: "#professionals" },
@@ -99,7 +104,7 @@ const NEW_WAY = [
   "One system that remembers your history",
 ];
 
-const PLANS = [
+const PLANS: Plan[] = [
   {
     name: "Free",
     tagline: "Enough to feel the whole system.",
@@ -145,6 +150,57 @@ const PLANS = [
       "PDF exports and mentor sharing",
     ],
     cta: "Go Pro",
+  },
+];
+
+const TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      "I'd sent forty applications and heard nothing. Gradr showed me my resume was scoring 38 on the roles I actually wanted. Three passes later I had two interviews in a week.",
+    name: "Priya N.",
+    role: "Final-year CS student",
+    initials: "PN",
+    metric: "38 → 87 ATS",
+  },
+  {
+    quote:
+      "The mock interview is the part I didn't expect to need. It followed up on my answers instead of reading a list, and the scored report told me exactly where I rambled.",
+    name: "Marcus D.",
+    role: "Career changer, ops → product",
+    initials: "MD",
+    metric: "9 sessions",
+  },
+  {
+    quote:
+      "Everything used to live in a spreadsheet I stopped updating. Now the pipeline updates itself and I can see which roles are actually worth the effort.",
+    name: "Sofia R.",
+    role: "Marketing manager",
+    initials: "SR",
+    metric: "14h saved / mo",
+  },
+  {
+    quote:
+      "The application packages are the killer feature. One job description in, a tailored resume pass, cover letter and outreach note out — in about ten minutes.",
+    name: "Daniel K.",
+    role: "Data analyst",
+    initials: "DK",
+    metric: "23 packages",
+  },
+  {
+    quote:
+      "I switched industries after eight years. Gradr translated my experience into language the new field actually uses instead of making me guess.",
+    name: "Aisha M.",
+    role: "Finance → climate tech",
+    initials: "AM",
+    metric: "Offer in 7 wks",
+  },
+  {
+    quote:
+      "What sold me was that every part remembers the others. The interview questions came from the roles I'd matched with, not a generic bank.",
+    name: "Tom W.",
+    role: "Senior backend engineer",
+    initials: "TW",
+    metric: "91 match score",
   },
 ];
 
@@ -265,7 +321,9 @@ export default function Landing() {
       <main id="hero">
         <div className="grain relative overflow-hidden pt-32 sm:pt-36">
           <Aurora />
+          <Dither intensity={0.85} />
           <DotGrid intensity={0.9} />
+
 
           <Section className="!pb-0 !pt-0">
             <div className="grid items-center gap-12 lg:grid-cols-[1.04fr_1fr] lg:gap-16">
@@ -419,15 +477,18 @@ export default function Landing() {
             </BlurText>
           </div>
 
-          <MagicBento
-            className="mt-12 lg:grid-cols-4"
-            items={SYSTEM.map((m) => ({
+          <BentoGrid
+            className="mt-12"
+            items={SYSTEM.map((m, i) => ({
               title: m.title,
               copy: m.copy,
+              // First and sixth tiles carry the story, so they get the weight.
+              span: i === 0 ? ("wide" as const) : i === 5 ? ("wide" as const) : ("default" as const),
               icon: <m.icon className="h-5 w-5" aria-hidden />,
               footer: <span className="numeric text-[11px] font-semibold tracking-widest text-primary">{m.n}</span>,
             }))}
           />
+
         </Section>
 
         {/* ------------------------- interactive product demos ------------------- */}
@@ -714,96 +775,59 @@ export default function Landing() {
           </div>
         </Section>
 
+        {/* --------------------------- proof / metrics -------------------------- */}
+        <Section id="proof" className="relative border-t border-border/60">
+          <SoftAurora />
+          <FadeContent className="max-w-3xl space-y-5">
+            <Eyebrow>Proof</Eyebrow>
+            <Heading>What changes when the whole search runs as one system.</Heading>
+            <Lede>
+              Pick the situation closest to yours. These are the movements Gradr users see across their first
+              six weeks — match quality, time reclaimed, and interview readiness measured the same way every session.
+            </Lede>
+          </FadeContent>
+          <FadeContent delay={120} className="mt-10 block">
+            <ProofMetrics />
+          </FadeContent>
+        </Section>
+
+        {/* ------------------------------ testimonials -------------------------- */}
+        <Section id="testimonials" className="border-t border-border/60 bg-card/30">
+          <FadeContent className="max-w-3xl space-y-5">
+            <Eyebrow>In their words</Eyebrow>
+            <Heading>People who stopped guessing.</Heading>
+            <Lede>
+              Every one of them started with the same thing you have: a resume, a deadline, and too many tabs.
+            </Lede>
+          </FadeContent>
+          <FadeContent delay={100} className="mt-10 block">
+            <TestimonialRail items={TESTIMONIALS} />
+          </FadeContent>
+        </Section>
+
         {/* --------------------------------- pricing ---------------------------- */}
-        <Section id="pricing" className="border-t border-border/60 bg-card/30">
-          <Reveal className="space-y-5">
+        <Section id="pricing" className="relative border-t border-border/60">
+          <GridScan intensity={0.7} />
+          <FadeContent className="space-y-5">
             <Eyebrow>Pricing</Eyebrow>
             <Heading>Start free. Upgrade when it's working.</Heading>
             <Lede>No trials that expire without warning, no countdown timers. Cancel any time.</Lede>
-          </Reveal>
+          </FadeContent>
 
-          <Reveal delay={60} className="mt-8">
-            <div
-              role="group"
-              aria-label="Billing interval"
-              className="inline-flex rounded-xl border border-border bg-secondary/40 p-1"
-            >
-              {(["monthly", "annual"] as const).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  aria-pressed={billing === k}
-                  onClick={() => setBilling(k)}
-                  className={`min-h-10 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
-                    billing === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {k === "monthly" ? "Monthly" : "Annual"}
-                  {k === "annual" && <span className="ml-2 text-[11px] opacity-80">save up to 26%</span>}
-                </button>
-              ))}
-            </div>
-          </Reveal>
-
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            {PLANS.map((p, i) => {
-              const price = p[billing];
-              const body = (
-                <div className="flex h-full flex-col p-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
-                    {p.highlight && (
-                      <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                        Most complete
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{p.tagline}</p>
-
-                  <div className="mt-6 flex items-baseline gap-2">
-                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{price.price}</span>
-                    <span className="text-sm text-muted-foreground">{price.note}</span>
-                  </div>
-
-                  <ul className="mt-6 flex-1 space-y-2.5">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex gap-2.5 text-sm text-muted-foreground">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    className="mt-6 h-11 w-full"
-                    variant={p.highlight ? "default" : "outline"}
-                    onClick={() => (p.name === "Free" ? start() : navigate(user ? "/pricing" : "/auth"))}
-                  >
-                    {p.cta}
-                  </Button>
-                </div>
-              );
-              return (
-                <Reveal key={p.name} delay={i * 70} className="h-full">
-                  {p.highlight ? (
-                    <GlowFrame className="h-full" radius={16}>
-                      {body}
-                    </GlowFrame>
-                  ) : (
-                    <Glare
-                      className="h-full"
-                      radius="16px"
-                      background="hsl(var(--card))"
-                      borderColor="hsl(var(--border))"
-                    >
-                      {body}
-                    </Glare>
-                  )}
-                </Reveal>
-              );
-            })}
-          </div>
+          <FadeContent delay={80} className="mt-10 block">
+            <PricingSection
+              plans={PLANS}
+              onSelect={(plan) => {
+                if (plan.name === "Free") {
+                  start();
+                  return;
+                }
+                navigate(user ? "/pricing" : "/auth?next=/pricing");
+              }}
+            />
+          </FadeContent>
         </Section>
+
 
         {/* ----------------------------------- faq ------------------------------ */}
         <Section id="faq" className="border-t border-border/60">
