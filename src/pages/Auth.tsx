@@ -95,10 +95,59 @@ export default function Auth() {
     return raw;
   };
 
+  // Countdown for the "resend verification email" cooldown.
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  /** Validate the visible fields; returns the cleaned values or null. */
+  const validateForm = () => {
+    const errors: FieldErrors = {};
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) errors.email = emailResult.error.issues[0].message;
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) errors.password = passwordResult.error.issues[0].message;
+    let cleanName = "";
+    if (isSignUp) {
+      const nameResult = nameSchema.safeParse(fullName);
+      if (!nameResult.success) errors.fullName = nameResult.error.issues[0].message;
+      else cleanName = nameResult.data;
+    }
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return null;
+    return { email: emailResult.data!, password: passwordResult.data!, fullName: cleanName };
+  };
+
+  const handleResendVerification = async () => {
+    if (!pendingEmail || resending || resendIn > 0) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingEmail,
+        options: { emailRedirectTo: postAuthUrl },
+      });
+      if (error) throw error;
+      toast.success("Verification email sent again — check your inbox.");
+      setResendIn(60);
+    } catch (error: unknown) {
+      const raw = error instanceof Error ? error.message : "Could not resend the email.";
+      toast.error(friendlyAuthError(raw));
+      setResendIn(30);
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setFormError(null);
+    const valid = validateForm();
+    if (!valid) return;
+    const { email, password, fullName } = valid;
+    setLoading(true);
     try {
       if (isSignUp) {
         if (isGuest) {
