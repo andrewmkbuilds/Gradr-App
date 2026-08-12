@@ -334,6 +334,21 @@ export default function Landing() {
                     </div>
                   ))}
                 </dl>
+
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                  <span className="uppercase tracking-[0.18em]">Now running</span>
+                  <span aria-hidden className="h-1 w-1 rounded-full bg-primary/70" />
+                  <ConceptLoop
+                    className="font-medium text-primary"
+                    items={[
+                      "Resume Intelligence",
+                      "ATS Optimization",
+                      "Job Matching",
+                      "Interview Coaching",
+                      "Career Intelligence",
+                    ]}
+                  />
+                </p>
               </div>
 
               <motion.div className="lg:pl-4" style={heroParallax ? { y: heroY } : undefined}>
