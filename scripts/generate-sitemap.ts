@@ -14,19 +14,14 @@ interface SitemapEntry {
   priority?: string;
 }
 
+// Only publicly reachable, indexable marketing/content pages belong here.
+// Authenticated product surfaces and credential flows are noindexed in
+// RouteSeo and disallowed in robots.txt, so listing them would only send
+// crawlers to a sign-in wall.
 const entries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
-  { path: "/auth", changefreq: "monthly", priority: "0.6" },
-  { path: "/forgot-password", changefreq: "yearly", priority: "0.3" },
-  { path: "/reset-password", changefreq: "yearly", priority: "0.3" },
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
-  { path: "/resume", changefreq: "weekly", priority: "0.8" },
-  { path: "/jobs", changefreq: "daily", priority: "0.8" },
-  { path: "/match", changefreq: "weekly", priority: "0.8" },
-  { path: "/pipeline", changefreq: "weekly", priority: "0.7" },
-  { path: "/apply", changefreq: "weekly", priority: "0.7" },
-  { path: "/interview", changefreq: "weekly", priority: "0.7" },
-  { path: "/growth", changefreq: "weekly", priority: "0.7" },
+  { path: "/affiliate", changefreq: "monthly", priority: "0.6" },
   { path: "/blog/ai-resume-optimization", changefreq: "monthly", priority: "0.8" },
   { path: "/career-advice", changefreq: "weekly", priority: "0.9" },
   { path: "/job-search", changefreq: "weekly", priority: "0.9" },
@@ -48,10 +43,12 @@ const entries: SitemapEntry[] = [
     changefreq: "weekly" as const,
     priority: "0.7",
   })),
-  // Excluded intentionally:
-  // /settings — auth-gated user data, not indexable
-  // /admin/digest-preview — internal admin tool, not indexable
+  // Excluded intentionally (auth-gated, credential flows, or internal tools):
+  // /auth, /forgot-password, /reset-password, /verify-email, /welcome
+  // /resume, /jobs, /match, /pipeline, /apply, /interview, /growth
+  // /settings, /billing, /affiliate/dashboard, /admin/*
 ];
+
 
 
 function generateSitemap(items: SitemapEntry[]) {
