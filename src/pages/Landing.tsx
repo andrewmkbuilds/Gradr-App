@@ -321,7 +321,9 @@ export default function Landing() {
       <main id="hero">
         <div className="grain relative overflow-hidden pt-32 sm:pt-36">
           <Aurora />
+          <Dither intensity={0.85} />
           <DotGrid intensity={0.9} />
+
 
           <Section className="!pb-0 !pt-0">
             <div className="grid items-center gap-12 lg:grid-cols-[1.04fr_1fr] lg:gap-16">
