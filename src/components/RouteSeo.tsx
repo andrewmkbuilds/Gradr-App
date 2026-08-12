@@ -26,7 +26,23 @@ const META: Record<string, { title: string; description: string }> = {
   },
   "/reset-password": {
     title: "Reset password",
-    description: "Choose a new password for your Gradr account.",
+    description: "Choose a new secure password for your Gradr account and get straight back to your job search workflow.",
+  },
+  "/verify-email": {
+    title: "Verify your email",
+    description: "Confirm your email address to activate your Gradr account and unlock resume scoring, job matching, and AI mock interviews.",
+  },
+  "/privacy": {
+    title: "Privacy Policy",
+    description: "How Gradr collects, stores, and protects your resume data, interview recordings, and account information — plus your rights and choices.",
+  },
+  "/terms": {
+    title: "Terms & Conditions",
+    description: "The terms that govern your use of Gradr, including subscriptions, AI feature usage, acceptable use, and account responsibilities.",
+  },
+  "/refund-policy": {
+    title: "Refund Policy",
+    description: "Gradr's refund window, eligibility rules, and how to request a refund for a subscription or credit purchase billed through Paddle.",
   },
   "/resume": {
     title: "Resume Engine",
