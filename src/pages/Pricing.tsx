@@ -1,6 +1,7 @@
 import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DepthCard } from "@/components/motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -256,9 +257,9 @@ export default function Pricing() {
               const pendingKey = `${tier.key}-${interval}`;
               const current = currentPlan === tier.key && billingInterval === interval;
               return (
+                <DepthCard key={tier.name} tilt={tier.highlighted ? 5 : 3.5} lift={6} className="h-full">
                 <Card
-                  key={tier.name}
-                  className={`relative p-6 flex flex-col ${
+                  className={`relative flex h-full flex-col p-6 ${
                     tier.highlighted ? "border-primary shadow-lg shadow-primary/10 xl:scale-[1.02]" : "border-border"
                   }`}
                 >

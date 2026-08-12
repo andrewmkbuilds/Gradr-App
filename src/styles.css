@@ -915,3 +915,20 @@
   .depth-modal[data-state="open"],
   .depth-modal[data-state="closed"] { animation: none; }
 }
+
+/* Buttons sit slightly above the surface and press into it. */
+@layer utilities {
+  .depth-press {
+    transform: translateZ(0);
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .depth-press:hover:not(:disabled) { transform: translate3d(0, -1.5px, 0); }
+  }
+  .depth-press:active:not(:disabled) { transform: translate3d(0, 1px, 0) scale(0.985); }
+  @media (prefers-reduced-motion: reduce) {
+    .depth-press, .depth-press:hover, .depth-press:active { transform: none; transition: none; }
+  }
+}
