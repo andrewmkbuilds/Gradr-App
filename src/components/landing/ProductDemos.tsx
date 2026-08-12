@@ -27,7 +27,7 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { CountUp, MotionMeter , DepthScene, DepthLayer, FloatingPanel } from "@/components/motion";
+import { CountUp, MotionMeter , DepthScene, DepthLayer } from "@/components/motion";
 import { ease, spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
