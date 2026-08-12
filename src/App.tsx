@@ -25,6 +25,7 @@ import Settings from "./pages/Settings";
 import DigestPreview from "./pages/DigestPreview";
 import Pricing from "./pages/Pricing";
 import Billing from "./pages/Billing";
+import Welcome from "./pages/Welcome";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -86,6 +87,7 @@ function ProtectedRoutes() {
 
           <Route path="/pricing" element={<AnimatedPage><Pricing /></AnimatedPage>} />
           <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
+          <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
           <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
           <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
           <Route path="/affiliate/dashboard" element={<AnimatedPage><AffiliateDashboard /></AnimatedPage>} />

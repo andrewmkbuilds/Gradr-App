@@ -32,6 +32,65 @@ async function emailFor(userId: string, env: PaddleEnv): Promise<string> {
   return data?.user?.email ?? "unknown@gradr.local";
 }
 
+
+/** ---- Paddle state mirror (customers + subscriptions) --------------------- */
+
+async function existingEmail(customerId: string): Promise<string | null> {
+  const { data } = await db()
+    .from("paddle_customers")
+    .select("email")
+    .eq("customer_id", customerId)
+    .maybeSingle();
+  return (data?.email as string | undefined) ?? null;
+}
+
+// deno-lint-ignore no-explicit-any
+async function mirrorCustomer(data: any, env: PaddleEnv, userId?: string | null) {
+  if (!data?.id) return;
+  const patch: Record<string, unknown> = {
+    customer_id: data.id,
+    environment: env,
+    updated_at: new Date().toISOString(),
+  };
+  // Never overwrite a known email with a placeholder.
+  if (data.email) patch.email = data.email;
+  else patch.email = (await existingEmail(data.id)) ?? "unknown@gradr.local";
+  if (userId) patch.user_id = userId;
+  // Idempotent: keyed on the Paddle customer id, safe for out-of-order retries.
+  await db().from("paddle_customers").upsert(patch, { onConflict: "customer_id" });
+}
+
+// deno-lint-ignore no-explicit-any
+async function mirrorSubscription(data: any, env: PaddleEnv) {
+  if (!data?.id) return;
+  const item = data.items?.[0];
+  const userId = data?.customData?.userId ?? null;
+
+  if (data.customerId) {
+    await mirrorCustomer(
+      { id: data.customerId, email: userId ? await emailFor(userId, env) : undefined },
+      env,
+      userId,
+    );
+  }
+
+  const patch: Record<string, unknown> = {
+    subscription_id: data.id,
+    customer_id: data.customerId ?? "unknown",
+    status: data.status ?? "active",
+    price_id: item?.price?.importMeta?.externalId ?? item?.price?.id ?? "unknown",
+    product_id: item?.product?.importMeta?.externalId ?? item?.price?.productId ?? "unknown",
+    scheduled_change_action: data.scheduledChange?.action ?? null,
+    scheduled_change_at: data.scheduledChange?.effectiveAt ?? null,
+    current_period_end: data.currentBillingPeriod?.endsAt ?? null,
+    environment: env,
+    updated_at: new Date().toISOString(),
+  };
+  if (userId) patch.user_id = userId;
+
+  await db().from("paddle_subscriptions").upsert(patch, { onConflict: "subscription_id" });
+}
+
 // deno-lint-ignore no-explicit-any
 async function upsertSubscription(data: any, env: PaddleEnv) {
   const userId = data?.customData?.userId;
@@ -167,13 +226,22 @@ Deno.serve(async (req) => {
 
     switch (event.eventType) {
       case EventName.SubscriptionCreated:
+        await mirrorSubscription(event.data, env);
         await upsertSubscription(event.data, env);
         break;
       case EventName.SubscriptionUpdated:
+        // A scheduled cancellation is NOT a cancellation: we mirror the
+        // scheduled change but keep the status Paddle reports.
+        await mirrorSubscription(event.data, env);
         await updateSubscription(event.data, env);
         break;
       case EventName.SubscriptionCanceled:
+        await mirrorSubscription({ ...event.data, status: "canceled" }, env);
         await updateSubscription({ ...event.data, status: "canceled" }, env);
+        break;
+      case EventName.CustomerCreated:
+      case EventName.CustomerUpdated:
+        await mirrorCustomer(event.data, env);
         break;
       case EventName.TransactionCompleted:
         await grantPackCredits(event.data, env);

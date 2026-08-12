@@ -1,7 +1,7 @@
 /** Provider-agnostic billing contracts. The app only talks to these types. */
 
 export type PlanInterval = "monthly" | "annual";
-export type PlanKey = "free" | "starter" | "pro";
+export type PlanKey = "free" | "starter" | "pro" | "advanced";
 
 export interface SubscriptionSnapshot {
   subscribed: boolean;
@@ -55,6 +55,7 @@ export const PLAN_CATALOG: Record<
 > = {
   starter: { label: "Starter", monthly: 900, annual: 8400 },
   pro: { label: "Pro", monthly: 1900, annual: 16800 },
+  advanced: { label: "Advanced", monthly: 2900, annual: 26400 },
 };
 
 /** Entitlement identifier shared by both providers. */

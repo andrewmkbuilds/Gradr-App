@@ -832,6 +832,78 @@ export type Database = {
         }
         Relationships: []
       }
+      paddle_customers: {
+        Row: {
+          created_at: string
+          customer_id: string
+          email: string
+          environment: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          email: string
+          environment?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          email?: string
+          environment?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      paddle_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          customer_id: string
+          environment: string
+          price_id: string
+          product_id: string
+          scheduled_change_action: string | null
+          scheduled_change_at: string | null
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          customer_id: string
+          environment?: string
+          price_id: string
+          product_id: string
+          scheduled_change_action?: string | null
+          scheduled_change_at?: string | null
+          status: string
+          subscription_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          customer_id?: string
+          environment?: string
+          price_id?: string
+          product_id?: string
+          scheduled_change_action?: string | null
+          scheduled_change_at?: string | null
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1456,6 +1528,10 @@ export type Database = {
       reject_affiliate_application: {
         Args: { _application_id: string; _reason?: string }
         Returns: undefined
+      }
+      subscription_grants_access: {
+        Args: { _current_period_end: string; _status: string }
+        Returns: boolean
       }
     }
     Enums: {

@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getPaddleEnvironment, getPaddlePriceId, initializePaddle } from "@/lib/paddle";
+import { getPaddle, getPaddleEnvironment, getPaddlePriceId } from "@/lib/paddle";
 import type {
   BillingProvider,
   CheckoutRequest,
@@ -13,18 +13,25 @@ const PLAN_PRICE_IDS: Record<string, string> = {
   "starter-annual": "starter_annual",
   "pro-monthly": "pro_monthly",
   "pro-annual": "pro_annual",
+  "advanced-monthly": "advanced_monthly",
+  "advanced-annual": "advanced_annual",
 };
 
-async function openOverlay(priceId: string, successPath: string): Promise<CheckoutResult> {
+/** Opens the Paddle overlay for one human-readable price ID. */
+export async function openPaddleCheckout(
+  priceId: string,
+  successPath: string,
+): Promise<CheckoutResult> {
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   if (!user) throw new Error("Sign in before making a purchase.");
 
-  await initializePaddle();
+  const paddle = await getPaddle();
   const paddlePriceId = await getPaddlePriceId(priceId);
 
-  window.Paddle.Checkout.open({
+  paddle.Checkout.open({
     items: [{ priceId: paddlePriceId, quantity: 1 }],
+    // Prefill the signed-in customer's email.
     customer: user.email ? { email: user.email } : undefined,
     customData: { userId: user.id },
     settings: {
@@ -46,11 +53,11 @@ export const paddleBillingProvider: BillingProvider = {
   async createCheckout({ plan, interval }: CheckoutRequest): Promise<CheckoutResult> {
     const priceId = PLAN_PRICE_IDS[`${plan}-${interval}`];
     if (!priceId) throw new Error(`Unknown plan: ${plan} ${interval}`);
-    return openOverlay(priceId, "/billing?checkout=success");
+    return openPaddleCheckout(priceId, "/welcome");
   },
 
   async createPackCheckout({ pack }: PackCheckoutRequest): Promise<CheckoutResult> {
-    return openOverlay(pack, "/billing?purchase=success");
+    return openPaddleCheckout(pack, "/welcome?purchase=pack");
   },
 
   async openCustomerPortal(): Promise<CheckoutResult> {

@@ -60,7 +60,12 @@ export async function verifyWebhook(req: Request, env: PaddleEnv) {
 }
 
 /** Human-readable price id -> plan tier + billing interval. */
-export const PLAN_PRICES: Record<string, { tier: "starter" | "pro"; interval: "monthly" | "annual" }> = {
+export const PLAN_PRICES: Record<
+  string,
+  { tier: "starter" | "pro" | "advanced"; interval: "monthly" | "annual" }
+> = {
+  advanced_monthly: { tier: "advanced", interval: "monthly" },
+  advanced_annual: { tier: "advanced", interval: "annual" },
   pro_monthly: { tier: "pro", interval: "monthly" },
   pro_annual: { tier: "pro", interval: "annual" },
   starter_monthly: { tier: "starter", interval: "monthly" },

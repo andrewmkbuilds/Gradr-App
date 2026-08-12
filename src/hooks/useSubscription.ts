@@ -65,7 +65,11 @@ export function useSubscription() {
   const active = Boolean(state.subscribed) ||
     (state.status === "canceled" && periodLive && tier !== "free");
 
-  const plan: PlanKey = active && tier === "starter" ? "starter" : active && tier === "pro" ? "pro" : "free";
+  const plan: PlanKey = !active
+    ? "free"
+    : tier === "starter" || tier === "pro" || tier === "advanced"
+      ? (tier as PlanKey)
+      : "free";
 
   return {
     ...state,
@@ -74,14 +78,15 @@ export function useSubscription() {
     /** Paying subscriber on any tier. */
     isSubscribed: active,
     isStarter: plan === "starter",
-    isPro: plan === "pro",
+    isPro: plan === "pro" || plan === "advanced",
+    isAdvanced: plan === "advanced",
     /** True when the plan is at least as high as `min` in the free < starter < pro order. */
     hasTier: (min: PlanKey) => TIER_RANK[plan] >= TIER_RANK[min],
     refetch: query.refetch,
   };
 }
 
-export const TIER_RANK: Record<PlanKey, number> = { free: 0, starter: 1, pro: 2 };
+export const TIER_RANK: Record<PlanKey, number> = { free: 0, starter: 1, pro: 2, advanced: 3 };
 
 export interface FeatureAllowance {
   /** null means unlimited. */

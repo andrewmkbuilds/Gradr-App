@@ -39,7 +39,17 @@ Deno.serve(async (req) => {
       .eq("environment", env)
       .maybeSingle();
 
-    const customerId = sub?.stripe_customer_id as string | undefined;
+    let customerId = sub?.stripe_customer_id as string | undefined;
+    if (!customerId) {
+      // Fall back to the mirrored Paddle customer record.
+      const { data: mirrored } = await admin
+        .from("paddle_customers")
+        .select("customer_id")
+        .eq("user_id", user.id)
+        .eq("environment", env)
+        .maybeSingle();
+      customerId = mirrored?.customer_id as string | undefined;
+    }
     if (!customerId) {
       // Credit-pack-only buyers have no subscription record; tell the UI so it
       // can show purchase history instead of a dead-end error.
