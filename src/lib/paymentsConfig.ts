@@ -75,28 +75,35 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
       : "live"
     : undefined;
 
-  if (!configuredEnv) {
-    missing.push("VITE_PAYMENTS_ENVIRONMENT");
-    issues.push({
-      variable: "VITE_PAYMENTS_ENVIRONMENT",
-      message: "The payment environment is not set. It is never defaulted, so checkout stays disabled.",
-      fix: "Set VITE_PAYMENTS_ENVIRONMENT to 'sandbox' while testing, or 'live' once your Paddle account is approved.",
-    });
-  } else if (configuredEnv !== "sandbox" && configuredEnv !== "live") {
-    issues.push({
-      variable: "VITE_PAYMENTS_ENVIRONMENT",
-      message: `VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.`,
-      fix: "Correct the value to exactly 'sandbox' or 'live' (lowercase).",
-    });
-  } else if (tokenEnvironment && tokenEnvironment !== configuredEnv) {
-    issues.push({
-      message: `Environment mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnvironment}' token.`,
-      fix: `Either switch VITE_PAYMENTS_ENVIRONMENT to '${tokenEnvironment}', or replace the token with a ${configuredEnv} one.`,
-    });
+  // The environment is primarily derived from the client token prefix, which
+  // is the single source of truth after the build-time token swap. The explicit
+  // env var is an optional override/validation only.
+  const resolvedEnv: PaddleEnvName | undefined =
+    configuredEnv === "sandbox" || configuredEnv === "live"
+      ? configuredEnv
+      : tokenEnvironment;
+
+  if (configuredEnv) {
+    if (configuredEnv !== "sandbox" && configuredEnv !== "live") {
+      issues.push({
+        variable: "VITE_PAYMENTS_ENVIRONMENT",
+        message: `VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.`,
+        fix: "Correct the value to exactly 'sandbox' or 'live' (lowercase), or remove it to derive from the token prefix.",
+      });
+    } else if (tokenEnvironment && tokenEnvironment !== configuredEnv) {
+      issues.push({
+        message: `Environment mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnvironment}' token.`,
+        fix: `Either switch VITE_PAYMENTS_ENVIRONMENT to '${tokenEnvironment}', or replace the token with a ${configuredEnv} one.`,
+      });
+    }
   }
 
-  const ok = issues.length === 0;
-  const environment = ok ? (configuredEnv as PaddleEnvName) : undefined;
+  const ok = issues.length === 0 && tokenEnvironment !== undefined;
+  const environment = ok ? (resolvedEnv as PaddleEnvName) : undefined;
+
+  if (!ok && tokenEnvironment) {
+    missing.push("VITE_PAYMENTS_ENVIRONMENT");
+  }
 
   return {
     ok,
