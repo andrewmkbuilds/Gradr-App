@@ -1,17 +1,20 @@
-import { Check, Sparkles, Rocket, Zap, Crown, Loader2 } from "lucide-react";
+import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBillingActions, useSubscription } from "@/hooks/useSubscription";
 import { CREDIT_PACKS, FREE_TIER, TIERS, type Tier } from "@/config/tiers";
-import { previewPrices, type PreviewedPrice } from "@/lib/paddle";
+import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
+import { VerificationDialog } from "@/components/VerificationDialog";
+import { useDiscountPrograms, useMyEligibility } from "@/hooks/useEligibility";
 
 const TIER_ICONS: Record<string, typeof Sparkles> = {
   Starter: Zap,
@@ -26,6 +29,11 @@ export default function Pricing() {
   const { pending, startSubscription, buyPack } = useBillingActions();
   const [tab, setTab] = useState<"plans" | "packs">("plans");
   const [interval, setInterval] = useState<"monthly" | "annual">("annual");
+  const [verifyOpen, setVerifyOpen] = useState(false);
+
+  const { discountPercent } = useMyEligibility();
+  const { data: programs } = useDiscountPrograms();
+  const topProgram = programs?.[0];
 
   const [prices, setPrices] = useState<Record<string, PreviewedPrice>>({});
   const [pricesLoading, setPricesLoading] = useState(true);
