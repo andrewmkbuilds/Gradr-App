@@ -1,0 +1,107 @@
+{
+  "$comment": "Expected security baseline for the Gradr database. Checked in CI by scripts/security-baseline.mjs and by src/test/securityBaseline.test.ts. Update this file deliberately whenever a policy or grant intentionally changes.",
+  "rlsRequired": [
+    "admin_audit_log",
+    "affiliate_settings",
+    "analytics_events",
+    "digest_send_logs",
+    "email_notification_log",
+    "feature_usage",
+    "interview_sessions",
+    "interview_session_metrics",
+    "interview_session_state",
+    "job_matches",
+    "notifications",
+    "paddle_customers",
+    "paddle_subscriptions",
+    "profiles",
+    "purchases",
+    "resumes",
+    "security_audit_log",
+    "subscribers",
+    "tracked_jobs",
+    "usage_credits",
+    "user_roles"
+  ],
+  "noAnonPolicyTables": [
+    "admin_audit_log",
+    "affiliate_settings",
+    "digest_send_logs",
+    "email_notification_log",
+    "feature_usage",
+    "interview_sessions",
+    "notifications",
+    "paddle_customers",
+    "paddle_subscriptions",
+    "profiles",
+    "purchases",
+    "resumes",
+    "security_audit_log",
+    "subscribers",
+    "usage_credits",
+    "user_roles"
+  ],
+  "appendOnlyTables": [
+    "admin_audit_log",
+    "security_audit_log",
+    "digest_send_logs",
+    "email_notification_log",
+    "paddle_customers",
+    "paddle_subscriptions",
+    "subscribers",
+    "usage_credits",
+    "feature_usage",
+    "purchases",
+    "user_roles"
+  ],
+  "requiredPolicies": [
+    { "table": "resumes", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "resumes", "cmd": "INSERT", "roles": ["authenticated"] },
+    { "table": "resumes", "cmd": "UPDATE", "roles": ["authenticated"] },
+    { "table": "resumes", "cmd": "DELETE", "roles": ["authenticated"] },
+    { "table": "profiles", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "subscribers", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "usage_credits", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "feature_usage", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "user_roles", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "admin_audit_log", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "security_audit_log", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "paddle_customers", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "paddle_subscriptions", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "digest_send_logs", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "email_notification_log", "cmd": "SELECT", "roles": ["authenticated"] },
+    { "table": "interview_sessions", "cmd": "ALL", "roles": ["authenticated"] }
+  ],
+  "tableGrants": {
+    "digest_send_logs": { "anon": [], "authenticated": ["SELECT"] },
+    "email_notification_log": { "anon": [], "authenticated": ["SELECT"] }
+  },
+  "auditTriggers": [
+    { "table": "digest_send_logs", "trigger": "audit_digest_send_logs_write" },
+    { "table": "email_notification_log", "trigger": "audit_email_notification_log_write" },
+    { "table": "affiliate_clicks", "trigger": "audit_affiliate_clicks_write" },
+    { "table": "analytics_events", "trigger": "audit_analytics_events_write" }
+  ],
+  "functionExecute": {
+    "$comment": "SECURITY DEFINER functions in `public`. PUBLIC execute must never be granted. anon/authenticated execute is only allowed for the functions listed here.",
+    "anonAllowlist": [
+      "affiliate_click_is_valid",
+      "get_affiliate_public_settings",
+      "lookup_affiliate_by_code"
+    ],
+    "authenticatedAllowlist": [
+      "admin_audit_actors",
+      "admin_create_payout",
+      "admin_mark_payout_paid",
+      "affiliate_click_is_valid",
+      "approve_affiliate_application",
+      "attribute_signup_referral",
+      "entitlement_snapshot",
+      "get_affiliate_public_settings",
+      "has_role",
+      "log_admin_access",
+      "lookup_affiliate_by_code",
+      "reject_affiliate_application"
+    ]
+  }
+}
