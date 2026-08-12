@@ -3,11 +3,14 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import { initTelemetry } from "./lib/telemetry/journey";
+import RootErrorBoundary from "./components/RootErrorBoundary";
 
 initTelemetry();
 
 createRoot(document.getElementById("root")!).render(
-  <HelmetProvider>
-    <App />
-  </HelmetProvider>,
+  <RootErrorBoundary>
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
+  </RootErrorBoundary>,
 );
