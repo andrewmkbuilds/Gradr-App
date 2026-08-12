@@ -482,6 +482,7 @@ Deno.serve(async (req) => {
       case EventName.TransactionCompleted:
         await clearPaymentIssue(event.data, env);
         await grantPackCredits(event.data, env);
+        await recordDiscountUse(event.data, env);
         await recordAffiliateCommission(event.data, env);
         break;
       case EventName.TransactionPaymentFailed:
