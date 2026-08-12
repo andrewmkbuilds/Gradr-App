@@ -97,7 +97,7 @@ export function Dither({ className = "", intensity = 0.9, pixelSize = 4 }: Props
           data[idx] = r;
           data[idx + 1] = g;
           data[idx + 2] = b;
-          data[idx + 3] = Math.round(150 * value + 40);
+          data[idx + 3] = Math.round(210 * value + 45);
         }
       }
       ctx.putImageData(img, 0, 0);
@@ -133,7 +133,7 @@ export function Dither({ className = "", intensity = 0.9, pixelSize = 4 }: Props
     <canvas
       ref={ref}
       aria-hidden
-      className={`pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-70 mix-blend-screen [image-rendering:pixelated] ${className}`}
+      className={`pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-90 mix-blend-screen dark:opacity-100 [image-rendering:pixelated] ${className}`}
     />
   );
 }
