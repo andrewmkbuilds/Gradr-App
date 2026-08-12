@@ -52,9 +52,29 @@ export default function Auth() {
     }
   }, [user, nextTarget, navigate]);
 
+  // Map raw auth errors to short, human copy shown inline under the form.
+  const friendlyAuthError = (raw: string): string => {
+    const m = raw.toLowerCase();
+    if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already exists"))
+      return "That email already has an account. Try signing in instead.";
+    if (m.includes("email address") && m.includes("invalid")) return "Enter a valid email address.";
+    if (m.includes("password should be at least")) return "Password must be at least 6 characters.";
+    if (m.includes("weak password") || m.includes("pwned") || m.includes("compromised"))
+      return "That password is too weak. Pick something longer and less common.";
+    if (m.includes("invalid login credentials")) return "Incorrect email or password.";
+    if (m.includes("email not confirmed")) return "Confirm your email first — check your inbox for the link.";
+    if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Wait a minute and try again.";
+    if (m.includes("signups not allowed") || m.includes("signup is disabled"))
+      return "New signups are currently disabled.";
+    if (m.includes("failed to fetch") || m.includes("network"))
+      return "Network error — check your connection and try again.";
+    return raw;
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setFormError(null);
     try {
       if (isSignUp) {
         if (isGuest) {
@@ -90,12 +110,13 @@ export default function Auth() {
         navigate(nextTarget, { replace: true });
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "An error occurred";
-      toast.error(message);
+      const raw = error instanceof Error ? error.message : "Something went wrong. Please try again.";
+      setFormError(friendlyAuthError(raw));
     } finally {
       setLoading(false);
     }
   };
+
 
 
 
