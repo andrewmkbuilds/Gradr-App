@@ -7,6 +7,7 @@ import { AmbientBackground } from "@/components/AmbientBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { PolicyUpdateGate } from "@/components/legal/PolicyUpdateGate";
+import { NavBreadcrumb } from "@/components/NavBreadcrumb";
 
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -24,9 +25,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col min-w-0">
           <PaymentTestModeBanner />
           <GuestBanner />
-          <header className="glass-bar enter-up sticky top-0 z-30 h-14 flex items-center justify-between border-b border-border/70 px-4 shrink-0">
-            <SidebarTrigger className="interactive press-scale text-muted-foreground hover:text-foreground" />
-            <div className="flex items-center gap-1">
+          <header className="glass-bar enter-up sticky top-0 z-30 h-14 flex items-center justify-between gap-3 border-b border-border/70 px-4 shrink-0">
+            <div className="flex min-w-0 items-center gap-3">
+              <SidebarTrigger className="interactive press-scale shrink-0 text-muted-foreground hover:text-foreground" />
+              <NavBreadcrumb />
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
               <ThemeToggle />
               <NotificationsBell />
             </div>

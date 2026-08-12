@@ -2,6 +2,7 @@ import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { dashboardItem, navGroups } from "@/config/nav";
+import { trackMobileTab } from "@/lib/navAnalytics";
 
 const primaryIds = ["career", "interview", "growth", "account"];
 
@@ -39,14 +40,18 @@ export function MobileTabBar() {
             <li key={tab.id}>
               <NavLink
                 to={tab.url}
-                aria-label={tab.title}
                 aria-current={active ? "page" : undefined}
+                onClick={() => trackMobileTab(tab.id, tab.title, tab.url)}
                 className={cn(
-                  "interactive flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
+                  // min-h-11 keeps every tap target at least 44px tall.
+                  "interactive flex min-h-11 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <tab.icon className={cn("h-[18px] w-[18px] transition-transform", active && "scale-110")} />
+                <tab.icon
+                  aria-hidden="true"
+                  className={cn("h-[18px] w-[18px] transition-transform", active && "scale-110")}
+                />
                 <span className="truncate">{tab.title}</span>
               </NavLink>
             </li>
