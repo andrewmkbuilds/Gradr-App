@@ -979,6 +979,48 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          category: string
+          created_at: string
+          decision: string
+          details: Json
+          environment: string | null
+          event: string
+          feature: string | null
+          id: string
+          reason: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          decision: string
+          details?: Json
+          environment?: string | null
+          event: string
+          feature?: string | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          decision?: string
+          details?: Json
+          environment?: string | null
+          event?: string
+          feature?: string | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           billing_interval: string | null
@@ -1385,6 +1427,20 @@ export type Database = {
           _referred_user_id: string
           _source_amount: number
           _source_record_id?: string
+        }
+        Returns: string
+      }
+      record_security_event: {
+        Args: {
+          _category: string
+          _decision: string
+          _details?: Json
+          _env?: string
+          _event: string
+          _feature?: string
+          _reason?: string
+          _source?: string
+          _user_id?: string
         }
         Returns: string
       }
