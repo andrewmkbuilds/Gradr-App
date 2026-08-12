@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Sparkles } from "lucide-react";
+import { BadgePercent, Loader2, Sparkles } from "lucide-react";
+import { ONBOARDING_IDENTITIES } from "@/config/eligibility";
+import { VerificationDialog } from "@/components/VerificationDialog";
 
 const COUNTRIES = [
   { code: "us", label: "United States" },
