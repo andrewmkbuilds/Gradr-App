@@ -222,7 +222,8 @@ export default function Pricing() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            <Card className="relative p-6 flex flex-col border-border">
+            <DepthCard tilt={3.5} lift={6} className="h-full">
+            <Card className="relative flex h-full flex-col p-6 border-border">
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -250,6 +251,7 @@ export default function Pricing() {
                 {currentPlan === "free" ? "Current plan" : "Get started"}
               </Button>
             </Card>
+            </DepthCard>
 
             {TIERS.map((tier) => {
               const Icon = TIER_ICONS[tier.name] ?? Rocket;
