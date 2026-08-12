@@ -1926,6 +1926,57 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_snapshots: {
+        Row: {
+          alerts: Json
+          avg_position: number | null
+          captured_at: string
+          changes: Json
+          clicks: number
+          ctr: number
+          id: string
+          impressions: number
+          inspections: Json
+          lighthouse: Json
+          property: string | null
+          sitemaps: Json
+          top_pages: Json
+          top_queries: Json
+        }
+        Insert: {
+          alerts?: Json
+          avg_position?: number | null
+          captured_at?: string
+          changes?: Json
+          clicks?: number
+          ctr?: number
+          id?: string
+          impressions?: number
+          inspections?: Json
+          lighthouse?: Json
+          property?: string | null
+          sitemaps?: Json
+          top_pages?: Json
+          top_queries?: Json
+        }
+        Update: {
+          alerts?: Json
+          avg_position?: number | null
+          captured_at?: string
+          changes?: Json
+          clicks?: number
+          ctr?: number
+          id?: string
+          impressions?: number
+          inspections?: Json
+          lighthouse?: Json
+          property?: string | null
+          sitemaps?: Json
+          top_pages?: Json
+          top_queries?: Json
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           billing_interval: string | null
