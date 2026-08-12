@@ -318,6 +318,10 @@ export default function Auth() {
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
+                id="auth-full-name"
+                name="name"
+                autoComplete="name"
+                aria-label="Full name"
                 placeholder="Full name"
                 value={fullName}
                 onChange={(e) => { setFullName(e.target.value); setFieldErrors((p) => ({ ...p, fullName: undefined })); }}
