@@ -1,6 +1,7 @@
 import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DepthCard } from "@/components/motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -221,7 +222,8 @@ export default function Pricing() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            <Card className="relative p-6 flex flex-col border-border">
+            <DepthCard tilt={3.5} lift={6} className="h-full">
+            <Card className="relative flex h-full flex-col p-6 border-border">
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -249,6 +251,7 @@ export default function Pricing() {
                 {currentPlan === "free" ? "Current plan" : "Get started"}
               </Button>
             </Card>
+            </DepthCard>
 
             {TIERS.map((tier) => {
               const Icon = TIER_ICONS[tier.name] ?? Rocket;
@@ -256,9 +259,9 @@ export default function Pricing() {
               const pendingKey = `${tier.key}-${interval}`;
               const current = currentPlan === tier.key && billingInterval === interval;
               return (
+                <DepthCard key={tier.name} tilt={tier.highlighted ? 5 : 3.5} lift={6} className="h-full">
                 <Card
-                  key={tier.name}
-                  className={`relative p-6 flex flex-col ${
+                  className={`relative flex h-full flex-col p-6 ${
                     tier.highlighted ? "border-primary shadow-lg shadow-primary/10 xl:scale-[1.02]" : "border-border"
                   }`}
                 >
@@ -307,6 +310,7 @@ export default function Pricing() {
                     )}
                   </Button>
                 </Card>
+                </DepthCard>
               );
             })}
           </div>

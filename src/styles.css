@@ -347,6 +347,22 @@
   .glass-card {
     @apply bg-card border border-border rounded-xl;
     box-shadow: var(--shadow-card);
+    position: relative;
+    transform: translateZ(0);
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .glass-card:hover {
+      transform: translate3d(0, -3px, 0);
+      border-color: hsl(var(--primary) / 0.26);
+      box-shadow: 0 24px 48px -28px hsl(220 60% 2% / 0.9);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glass-card, .glass-card:hover { transform: none; transition: none; }
   }
   .glow-border { @apply border border-primary/20; box-shadow: var(--shadow-glow); }
   .gradient-text {
@@ -827,5 +843,92 @@
 
   @media (prefers-reduced-motion: reduce) {
     .sweep, .aurora-bg, .liquid-blob, .float-slow, .float-mid { animation: none !important; }
+  }
+}
+
+@layer utilities {
+  /* ---------- Spatial depth (3D layer) ---------- */
+  /* Soft, depth-scaled shadow for floating layers. --depth is set inline. */
+  .depth-shadow {
+    filter: drop-shadow(0 calc(6px * var(--depth, 1)) calc(18px * var(--depth, 1)) hsl(220 60% 2% / 0.35));
+  }
+
+  /* Any surface that should react to hover with elevation + light.
+     Pure CSS so it works on every card without a JS wrapper. */
+  .depth-surface {
+    transform: translateZ(0);
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .depth-surface:hover {
+      transform: translate3d(0, -3px, 0);
+      border-color: hsl(var(--primary) / 0.28);
+      box-shadow:
+        0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset,
+        0 22px 44px -26px hsl(220 60% 2% / 0.85),
+        0 0 0 1px hsl(var(--primary) / 0.06);
+    }
+  }
+
+  /* Top-edge reflection: reads as glass catching ambient light. */
+  .reflect::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      hsl(0 0% 100% / 0.07) 0%,
+      transparent 22%,
+      transparent 78%,
+      hsl(var(--primary) / 0.05) 100%
+    );
+  }
+
+  /* Perspective helpers for scenes composed in JSX. */
+  .scene { perspective: 1400px; }
+  .scene-flat { transform-style: preserve-3d; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .depth-surface,
+    .depth-surface:hover { transform: none; transition: none; }
+    .depth-shadow { filter: none; }
+  }
+}
+
+/* Modal panels arrive from depth rather than simply scaling up. */
+@keyframes depth-modal-in {
+  from { opacity: 0; transform: translate(-50%, -50%) perspective(1400px) translateZ(-90px) rotateX(6deg); }
+  to   { opacity: 1; transform: translate(-50%, -50%) perspective(1400px) translateZ(0) rotateX(0deg); }
+}
+@keyframes depth-modal-out {
+  from { opacity: 1; transform: translate(-50%, -50%) perspective(1400px) translateZ(0) rotateX(0deg); }
+  to   { opacity: 0; transform: translate(-50%, -50%) perspective(1400px) translateZ(-70px) rotateX(4deg); }
+}
+.depth-modal[data-state="open"] { animation: depth-modal-in 260ms cubic-bezier(0.16, 1, 0.3, 1); }
+.depth-modal[data-state="closed"] { animation: depth-modal-out 160ms cubic-bezier(0.4, 0, 1, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .depth-modal[data-state="open"],
+  .depth-modal[data-state="closed"] { animation: none; }
+}
+
+/* Buttons sit slightly above the surface and press into it. */
+@layer utilities {
+  .depth-press {
+    transform: translateZ(0);
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .depth-press:hover:not(:disabled) { transform: translate3d(0, -1.5px, 0); }
+  }
+  .depth-press:active:not(:disabled) { transform: translate3d(0, 1px, 0) scale(0.985); }
+  @media (prefers-reduced-motion: reduce) {
+    .depth-press, .depth-press:hover, .depth-press:active { transform: none; transition: none; }
   }
 }

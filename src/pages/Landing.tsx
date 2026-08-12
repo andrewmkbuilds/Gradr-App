@@ -13,7 +13,16 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
-import { AnimatedHeadline, TiltCard, MotionPressable, Magnetic, CountUp, SpotlightCard } from "@/components/motion";
+import {
+  AnimatedHeadline,
+  MotionPressable,
+  Magnetic,
+  CountUp,
+  SpotlightCard,
+  DepthScene,
+  DepthLayer,
+  FloatingPanel,
+} from "@/components/motion";
 import { ProductDemos } from "@/components/landing/ProductDemos";
 import { AiDemoSequence } from "@/components/landing/AiDemoSequence";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
@@ -414,11 +423,21 @@ export default function Landing() {
               </Reveal>
 
               <Reveal delay={120} className="lg:pl-4">
-                <motion.div style={heroParallax ? { y: heroY } : undefined} className="space-y-4">
-                  <TiltCard intensity={7}>
-                    <HeroWorkspace />
-                  </TiltCard>
-                  <AiDemoSequence />
+                <motion.div style={heroParallax ? { y: heroY } : undefined}>
+                  {/* Layered hero scene: panels sit on separate depth planes and
+                      drift at different rates as the pointer moves. */}
+                  <DepthScene tilt={5} perspective={1500} className="space-y-4">
+                    <DepthLayer depth={1} travel={9}>
+                      <div className="reflect relative rounded-2xl">
+                        <HeroWorkspace />
+                      </div>
+                    </DepthLayer>
+                    <DepthLayer depth={2.1} travel={9}>
+                      <FloatingPanel amplitude={5} duration={9}>
+                        <AiDemoSequence />
+                      </FloatingPanel>
+                    </DepthLayer>
+                  </DepthScene>
                 </motion.div>
               </Reveal>
             </div>

@@ -27,7 +27,7 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { CountUp, MotionMeter } from "@/components/motion";
+import { CountUp, MotionMeter , DepthScene, DepthLayer } from "@/components/motion";
 import { ease, spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -141,15 +141,19 @@ export function ProductDemos() {
 /** Product chrome: window bar + glass body. */
 function DemoFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="glass-panel edge-light overflow-hidden">
+    <DepthScene tilt={3} perspective={1600}>
+      <DepthLayer depth={1}>
+        <div className="glass-panel edge-light reflect overflow-hidden">
       <div className="flex items-center gap-2 border-b border-border/70 px-4 py-3">
         <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" aria-hidden />
         <span className="h-2.5 w-2.5 rounded-full bg-warning/60" aria-hidden />
         <span className="h-2.5 w-2.5 rounded-full bg-success/60" aria-hidden />
         <span className="ml-2 text-[11px] tracking-wide text-muted-foreground">gradr — live demo</span>
       </div>
-      <div className="p-4 sm:p-5">{children}</div>
-    </div>
+          <div className="p-4 sm:p-5">{children}</div>
+        </div>
+      </DepthLayer>
+    </DepthScene>
   );
 }
 
@@ -187,7 +191,7 @@ function ResumeDemo() {
   return (
     <div ref={ref} className="grid gap-4 sm:grid-cols-[1.15fr_1fr]">
       {/* document */}
-      <div className="rounded-xl border border-border/70 bg-background/60 p-3">
+      <div className="depth-surface reflect relative rounded-xl border border-border/70 bg-background/60 p-3">
         <div className="mb-3 flex items-center gap-2 text-[11px] text-muted-foreground">
           <FileText className="h-3.5 w-3.5 text-primary" aria-hidden />
           amara-reid-resume.pdf
@@ -232,7 +236,7 @@ function ResumeDemo() {
 
       {/* analysis */}
       <div className="space-y-3">
-        <div className="rounded-xl border border-border/70 bg-background/60 p-3">
+        <div className="depth-surface reflect relative rounded-xl border border-border/70 bg-background/60 p-3">
           <div className="flex items-baseline justify-between">
             <span className="label-wide text-muted-foreground">ATS score</span>
             <span className="font-display text-3xl font-bold text-primary">
@@ -267,7 +271,7 @@ function ResumeDemo() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/70 bg-background/60 p-3">
+        <div className="depth-surface reflect relative rounded-xl border border-border/70 bg-background/60 p-3">
           <span className="label-wide text-muted-foreground">Missing keywords</span>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {KEYWORDS.map((k, i) => (
@@ -479,7 +483,7 @@ function InterviewDemo() {
 
       {/* metrics */}
       <div className="space-y-3">
-        <div className="rounded-xl border border-border/70 bg-background/60 p-3 text-center">
+        <div className="depth-surface reflect relative rounded-xl border border-border/70 bg-background/60 p-3 text-center">
           <span className="label-wide text-muted-foreground">Readiness</span>
           <div className="font-display text-4xl font-bold text-primary">
             {step >= 3 ? <CountUp value={8.4} decimals={1} /> : <span className="opacity-30">—</span>}
@@ -562,7 +566,7 @@ function CareerDemo() {
       </div>
 
       {/* gaps */}
-      <div className="rounded-xl border border-border/70 bg-background/60 p-4">
+      <div className="depth-surface reflect relative rounded-xl border border-border/70 bg-background/60 p-4">
         <span className="label-wide text-muted-foreground">Skill gaps to close</span>
         <div className="mt-3 space-y-3">
           {GAPS.map((g, i) => (
