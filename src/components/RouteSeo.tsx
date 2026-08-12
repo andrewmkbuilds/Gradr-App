@@ -1,5 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { GUIDES_BY_SLUG } from "@/content/guides";
+import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
 
 const SITE = "Gradr";
 const ORIGIN = "https://careerflowos.lovable.app";
