@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { consume, planTier, refund, resolveEnv } from "../_shared/entitlements.ts";
+import { logAiAuthorization } from "../_shared/securityAudit.ts";
 
 /**
  * Secure session gateway for the Gemini Live realtime interview.
@@ -78,7 +79,10 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return json({ error: "Unauthorized" }, 401);
+    if (authError || !user) {
+      void logAiAuthorization({ source: "interview-realtime-token", decision: "denied", reason: "invalid_token" });
+      return json({ error: "Unauthorized" }, 401);
+    }
 
     const body = await req.json().catch(() => ({}));
     const directive = typeof body.directive === "string" ? body.directive.slice(0, 8000) : "";
@@ -104,6 +108,11 @@ serve(async (req) => {
     };
 
     if (!ent.realtimeVoice) {
+      void logAiAuthorization({
+        source: "interview-realtime-token", decision: "denied", userId: user.id,
+        feature: "interview", env: paymentEnv, reason: "realtime_not_entitled",
+        details: { tier: tierKey },
+      });
       return json({
         error: "realtime_not_entitled",
         reason: "Realtime voice requires Starter or Pro.",
@@ -118,6 +127,13 @@ serve(async (req) => {
       const entitlement = await consume(user.id, "interview", paymentEnv);
       used = entitlement.used;
       remaining = entitlement.remaining ?? null;
+      void logAiAuthorization({
+        source: "interview-realtime-token",
+        decision: entitlement.allowed ? "allowed" : "denied",
+        userId: user.id, feature: "interview", env: paymentEnv,
+        reason: entitlement.reason ?? entitlement.source ?? null,
+        details: { tier: entitlement.tier, used: entitlement.used, allowance: entitlement.allowance },
+      });
       if (!entitlement.allowed) {
         return json({
           error: "quota_exceeded",
