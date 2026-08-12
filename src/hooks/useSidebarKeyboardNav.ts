@@ -116,10 +116,11 @@ export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open:
     if (!enabled) return;
 
     if (!open) {
-      // Drawer closed: hand focus back to whatever opened it (the sidebar trigger).
-      // Runs after the sheet's own close-focus handling, which lands on <body>
-      // once focus was moved programmatically inside the drawer.
-      const opener = openerRef.current;
+      // Drawer closed: hand focus back to the trigger. Runs after the sheet's own
+      // close-focus handling, which lands on <body> once focus was moved
+      // programmatically inside the drawer.
+      const opener =
+        openerRef.current ?? document.querySelector<HTMLElement>('[data-sidebar="trigger"]');
       openerRef.current = null;
       if (!opener) return;
       const id = window.setTimeout(() => {
@@ -130,8 +131,12 @@ export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open:
       return () => window.clearTimeout(id);
     }
 
+    const activeEl = document.activeElement;
+    openerRef.current =
+      activeEl instanceof HTMLElement && activeEl !== document.body
+        ? activeEl
+        : document.querySelector<HTMLElement>('[data-sidebar="trigger"]');
 
-    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     // The drawer mounts its content asynchronously and Radix moves focus to the
     // first tabbable element on open, so poll briefly and claim focus after it.
