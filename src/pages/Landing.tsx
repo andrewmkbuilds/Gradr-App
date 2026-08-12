@@ -781,6 +781,19 @@ export default function Landing() {
                   >
                     {p.cta}
                   </Button>
+                </div>
+              );
+              return (
+                <Reveal key={p.name} delay={i * 70} className="h-full">
+                  {p.highlight ? (
+                    <GlowFrame className="h-full" radius={16}>
+                      {body}
+                    </GlowFrame>
+                  ) : (
+                    <Glare className="h-full rounded-2xl border border-border bg-card" radius="16px">
+                      {body}
+                    </Glare>
+                  )}
                 </Reveal>
               );
             })}
