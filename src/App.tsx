@@ -36,6 +36,7 @@ import AffiliateResources from "./pages/AffiliateResources";
 import AdminAffiliates from "./pages/AdminAffiliates";
 import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AdminAuditLog from "./pages/AdminAuditLog";
+import AdminSecurityLog from "@/pages/AdminSecurityLog";
 import AdminSearchConsole from "./pages/AdminSearchConsole";
 
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
@@ -79,6 +80,7 @@ function ProtectedRoutes() {
           <Route path="/admin/digest-preview" element={<AnimatedPage><DigestPreview /></AnimatedPage>} />
           <Route path="/admin/affiliates" element={<AnimatedPage><AdminAffiliates /></AnimatedPage>} />
          <Route path="/admin/blog-analytics" element={<AnimatedPage><AdminBlogAnalytics /></AnimatedPage>} />
+         <Route path="/admin/security-log" element={<AnimatedPage><AdminSecurityLog /></AnimatedPage>} />
          <Route path="/admin/audit-log" element={<AnimatedPage><AdminAuditLog /></AnimatedPage>} />
          <Route path="/admin/search-console" element={<AnimatedPage><AdminSearchConsole /></AnimatedPage>} />
 
