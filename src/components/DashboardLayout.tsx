@@ -6,6 +6,7 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AmbientBackground } from "@/components/AmbientBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileTabBar } from "@/components/MobileTabBar";
+import { PolicyUpdateGate } from "@/components/legal/PolicyUpdateGate";
 
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             {children}
           </main>
           <MobileTabBar />
+          <PolicyUpdateGate />
 
         </div>
       </div>

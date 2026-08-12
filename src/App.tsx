@@ -43,6 +43,7 @@ import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminSecurityLog from "@/pages/AdminSecurityLog";
 import AdminPaddle from "@/pages/AdminPaddle";
+import AdminLegal from "@/pages/AdminLegal";
 import AdminSearchConsole from "./pages/AdminSearchConsole";
 import AdminPaymentsStatus from "@/pages/AdminPaymentsStatus";
 import Privacy from "./pages/legal/Privacy";
@@ -101,6 +102,7 @@ function ProtectedRoutes() {
          <Route path="/admin/blog-analytics" element={<AnimatedPage><AdminBlogAnalytics /></AnimatedPage>} />
          <Route path="/admin/security-log" element={<AnimatedPage><AdminSecurityLog /></AnimatedPage>} />
          <Route path="/admin/audit-log" element={<AnimatedPage><AdminAuditLog /></AnimatedPage>} />
+         <Route path="/admin/legal" element={<AnimatedPage><AdminLegal /></AnimatedPage>} />
          <Route path="/admin/paddle" element={<AnimatedPage><AdminPaddle /></AnimatedPage>} />
          <Route path="/admin/payments-status" element={<AnimatedPage><AdminPaymentsStatus /></AnimatedPage>} />
 
