@@ -261,6 +261,35 @@ export function RouteSeo() {
     : null;
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
+
+  // Article schema for editorial routes (guides + blog posts) so they can
+  // qualify for article rich results. The sitewide Organization/SoftwareApp
+  // schema in __root only describes the brand, not the content pieces.
+  const guideForLd = pathname.startsWith("/career-advice/")
+    ? GUIDES_BY_SLUG[pathname.slice(15)]
+    : null;
+  const articleLd = isArticle
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: meta.title,
+        description: meta.description,
+        image: [ogImage],
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        inLanguage: "en",
+        ...(guideForLd?.updated
+          ? { datePublished: guideForLd.updated, dateModified: guideForLd.updated }
+          : {}),
+        author: { "@type": "Organization", name: SITE, url: `${ORIGIN}/` },
+        publisher: {
+          "@type": "Organization",
+          name: SITE,
+          url: `${ORIGIN}/`,
+          logo: { "@type": "ImageObject", url: `${ORIGIN}/gradr-logo.png` },
+        },
+      }
+    : null;
+
   return (
     <Helmet>
       <html lang="en" />
