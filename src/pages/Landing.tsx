@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import {
   ArrowRight, Check, FileText, Target, Mic, LineChart, Briefcase, Users,
-  GraduationCap, Rocket, Compass, Award, Menu, X, Sparkles, ShieldCheck,
+  GraduationCap, Rocket, Compass, Award, Sparkles, ShieldCheck,
   Layers, Bot, Search, Send, RefreshCw, BarChart3, Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,10 +31,9 @@ import {
   AnimatedList,
 } from "@/components/motion";
 import { ProductDemos } from "@/components/landing/ProductDemos";
-import { AiDemoSequence } from "@/components/landing/AiDemoSequence";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
-  HeroWorkspace, ResumeVisual, MatchVisual, ApplicationVisual,
+  ResumeVisual, MatchVisual, ApplicationVisual,
   InterviewVisual, AssistantVisual, AnalyticsVisual,
 } from "@/components/landing/visuals";
 
@@ -389,30 +387,31 @@ export default function Landing() {
         </Section>
 
         {/* ---------------------------- the gradr system ------------------------ */}
-        <Section className="border-t border-border/60 bg-card/30">
-          <Reveal className="space-y-5">
+        <Section className="relative border-t border-border/60">
+          <GridScan intensity={0.9} />
+          <div className="max-w-3xl space-y-5">
             <Eyebrow>The Gradr system</Eyebrow>
-            <Heading>Eight modules. One continuous loop.</Heading>
-            <Lede>
-              Gradr doesn't treat each career task as a separate tool. Your resume informs your matches, your matches
-              shape your applications, your applications set up your interviews, and every interview improves the next pass.
-            </Lede>
-          </Reveal>
+            <MaskedHeading
+              text="Eight modules. One continuous loop."
+              className="font-display text-balance text-3xl font-bold leading-[1.06] tracking-[-0.03em] sm:text-4xl lg:text-[2.9rem]"
+            />
+            <BlurText delay={0.1}>
+              <Lede>
+                Gradr doesn't treat each career task as a separate tool. Your resume informs your matches, your matches
+                shape your applications, your applications set up your interviews, and every interview improves the next pass.
+              </Lede>
+            </BlurText>
+          </div>
 
-          <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-            {SYSTEM.map((s, i) => (
-              <Reveal as="li" key={s.n} delay={i * 50} className="bg-card">
-                <SpotlightCard className="group h-full p-5 transition-colors hover:bg-secondary/30">
-                  <div className="flex items-center justify-between">
-                    <span className="numeric text-xs font-semibold tracking-widest text-primary">{s.n}</span>
-                    <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
-                  </div>
-                  <h3 className="mt-4 font-display text-sm font-semibold text-foreground">{s.title}</h3>
-                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.copy}</p>
-                </SpotlightCard>
-              </Reveal>
-            ))}
-          </ol>
+          <MagicBento
+            className="mt-12 lg:grid-cols-4"
+            items={SYSTEM.map((m) => ({
+              title: m.title,
+              copy: m.copy,
+              icon: <m.icon className="h-5 w-5" aria-hidden />,
+              footer: <span className="numeric text-[11px] font-semibold tracking-widest text-primary">{m.n}</span>,
+            }))}
+          />
         </Section>
 
         {/* ------------------------- interactive product demos ------------------- */}
