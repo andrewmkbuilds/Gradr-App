@@ -34,17 +34,27 @@ export function openCookiePreferences() {
  * Privacy Control signal is auto-honoured as "reject optional".
  */
 export function CookieConsent() {
-  const [decided, setDecided] = useState(() => readConsent() !== null);
+  // Start hidden so server and client markup match; the real state is read
+  // after mount, which also avoids showing the banner to people who already chose.
+  const [decided, setDecided] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [choices, setChoices] = useState<ConsentChoices>(() => readConsent()?.choices ?? ALL_OFF);
+  const [choices, setChoices] = useState<ConsentChoices>(ALL_OFF);
 
   useEffect(() => {
+    const stored = readConsent();
+    if (stored) {
+      setChoices(stored.choices);
+      setDecided(true);
+      return;
+    }
     // Honour GPC without prompting.
-    if (!decided && hasGlobalPrivacyControl()) {
+    if (hasGlobalPrivacyControl()) {
       writeConsent(ALL_OFF);
       setDecided(true);
+      return;
     }
-  }, [decided]);
+    setDecided(false);
+  }, []);
 
   useEffect(() => {
     const open = () => {
