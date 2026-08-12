@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackEvent } from "@/lib/analytics";
 import { LEGAL_PAGES } from "@/content/legal";
@@ -23,7 +24,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
           <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
-            <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+            <BrandLogo size={22} />
             Gradr
           </Link>
           <nav aria-label="Primary" className="hidden items-center gap-5 sm:flex">

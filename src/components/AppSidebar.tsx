@@ -19,6 +19,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { BrandLogo } from "@/components/BrandLogo";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -66,9 +67,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           {!collapsed && (
             <div className="flex items-center gap-2 animate-slide-up">
-              <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-primary" />
-              </div>
+              <BrandLogo size={32} />
               <div>
                 <div className="text-sm font-bold text-foreground tracking-tight">Gradr</div>
                 <p className="text-[10px] text-muted-foreground">AI Career System</p>
@@ -76,9 +75,7 @@ export function AppSidebar() {
             </div>
           )}
           {collapsed && (
-            <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center mx-auto">
-              <Zap className="h-4 w-4 text-primary" />
-            </div>
+            <BrandLogo size={32} className="mx-auto" />
           )}
         </div>
       </SidebarHeader>
