@@ -91,6 +91,27 @@ async function mirrorSubscription(data: any, env: PaddleEnv) {
   await db().from("paddle_subscriptions").upsert(patch, { onConflict: "subscription_id" });
 }
 
+/**
+ * Access is granted while Paddle is still collecting: `past_due` keeps working
+ * through dunning, and a cancelled/paused plan keeps working until the paid
+ * period actually ends. Revoking early and re-granting is worse than trusting
+ * Paddle's retry flow.
+ */
+function isEntitled(status: string, periodEnd: string | null): boolean {
+  if (["active", "trialing", "past_due"].includes(status)) return true;
+  if (["canceled", "paused"].includes(status)) {
+    return Boolean(periodEnd) && new Date(periodEnd as string) > new Date();
+  }
+  return false;
+}
+
+// deno-lint-ignore no-explicit-any
+function planFromItems(data: any) {
+  const item = data?.items?.[0];
+  const externalPriceId = item?.price?.importMeta?.externalId as string | undefined;
+  return { externalPriceId, plan: externalPriceId ? PLAN_PRICES[externalPriceId] : undefined };
+}
+
 // deno-lint-ignore no-explicit-any
 async function upsertSubscription(data: any, env: PaddleEnv) {
   const userId = data?.customData?.userId;
@@ -99,16 +120,19 @@ async function upsertSubscription(data: any, env: PaddleEnv) {
     return;
   }
 
-  const item = data.items?.[0];
-  const externalPriceId = item?.price?.importMeta?.externalId as string | undefined;
+  const { externalPriceId, plan } = planFromItems(data);
   if (!externalPriceId) {
-    console.warn("payments-webhook: missing importMeta.externalId", { rawPriceId: item?.price?.id });
+    // Raw pri_… ids differ between sandbox and live, so writing one would
+    // silently break tier gating after publish.
+    console.warn("payments-webhook: missing importMeta.externalId", {
+      rawPriceId: data.items?.[0]?.price?.id,
+    });
     return;
   }
 
-  const plan = PLAN_PRICES[externalPriceId];
   const status: string = data.status ?? "active";
-  const entitled = ["active", "trialing"].includes(status);
+  const periodEnd = data.currentBillingPeriod?.endsAt ?? null;
+  const entitled = isEntitled(status, periodEnd);
 
   await db().from("subscribers").upsert(
     {
@@ -119,11 +143,13 @@ async function upsertSubscription(data: any, env: PaddleEnv) {
       stripe_customer_id: data.customerId ?? null,
       stripe_subscription_id: data.id ?? null,
       subscribed: entitled,
+      // Tier always follows the price that is actually on the subscription,
+      // so upgrades and downgrades land on the right plan.
       subscription_tier: entitled ? plan?.tier ?? "pro" : null,
       billing_interval: plan?.interval ?? null,
       subscription_status: status,
       price_id: externalPriceId,
-      current_period_end: data.currentBillingPeriod?.endsAt ?? null,
+      current_period_end: periodEnd,
       cancel_at_period_end: data.scheduledChange?.action === "cancel",
     },
     { onConflict: "user_id,environment" },
@@ -133,16 +159,29 @@ async function upsertSubscription(data: any, env: PaddleEnv) {
 // deno-lint-ignore no-explicit-any
 async function updateSubscription(data: any, env: PaddleEnv) {
   const status: string = data.status ?? "active";
-  await db()
+  const periodEnd = data.currentBillingPeriod?.endsAt ?? null;
+  const entitled = isEntitled(status, periodEnd);
+  const { externalPriceId, plan } = planFromItems(data);
+
+  const patch: Record<string, unknown> = {
+    subscribed: entitled,
+    subscription_status: status,
+    current_period_end: periodEnd,
+    cancel_at_period_end: data.scheduledChange?.action === "cancel",
+    subscription_tier: entitled ? plan?.tier ?? undefined : null,
+  };
+  if (externalPriceId) {
+    // Plan changes arrive as subscription.updated with new items.
+    patch.price_id = externalPriceId;
+    if (plan?.interval) patch.billing_interval = plan.interval;
+  }
+  if (patch.subscription_tier === undefined) delete patch.subscription_tier;
+
+  const { data: updated } = await db()
     .from("subscribers")
-    .update({
-      subscribed: ["active", "trialing"].includes(status),
-      subscription_status: status,
-      current_period_end: data.currentBillingPeriod?.endsAt ?? null,
-      cancel_at_period_end: data.scheduledChange?.action === "cancel",
-      ...(status === "canceled" ? { subscription_tier: null } : {}),
-    })
+    .update(patch)
     .eq("stripe_subscription_id", data.id)
+
     .eq("environment", env);
 }
 
