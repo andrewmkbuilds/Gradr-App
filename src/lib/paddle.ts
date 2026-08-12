@@ -21,9 +21,12 @@ export type PaddleEnv = "sandbox" | "live";
 /** Internal sentinel for "we could not determine the country" — never sent to Paddle. */
 export const UNKNOWN_COUNTRY = "OTHERS";
 
-type ConfigResult =
-  | { ok: true; token: string; env: PaddleEnv }
-  | { ok: false; reason: string };
+interface ConfigResult {
+  ok: boolean;
+  token?: string;
+  env?: PaddleEnv;
+  reason?: string;
+}
 
 function resolveConfig(): ConfigResult {
   if (!clientToken) {
