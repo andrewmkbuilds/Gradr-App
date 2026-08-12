@@ -51,3 +51,22 @@
     100% 100%,
     0 0;
 }
+
+/* Gradr overrides: the glare is decoration only — it must never intercept
+   pointer events, force a pointer cursor, or stack above card content. */
+.gradr-glare {
+  display: block;
+  place-items: stretch;
+  isolation: isolate;
+}
+.gradr-glare::before {
+  pointer-events: none;
+  z-index: 2;
+}
+.gradr-glare > * {
+  position: relative;
+  z-index: 1;
+}
+.gradr-glare:hover {
+  cursor: inherit;
+}

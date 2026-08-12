@@ -75,7 +75,7 @@ export function GlowFrame({
       glowIntensity={intensity}
       edgeSensitivity={26}
       fillOpacity={0.18}
-      glowColor="var(--primary-hsl-fallback, 190 95% 55%)"
+      glowColor="190 95% 55%"
       backgroundColor="hsl(var(--card))"
       colors={["hsl(190 95% 55%)", "hsl(210 90% 62%)", "hsl(266 70% 68%)"]}
     >
@@ -103,7 +103,7 @@ export function Glare({
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <GlareHoverBase
-      className={className}
+      className={`gradr-glare ${className}`}
       width="100%"
       height="100%"
       background="transparent"
