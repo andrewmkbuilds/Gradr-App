@@ -12,6 +12,7 @@ import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { usePremiumVoice } from "@/hooks/usePremiumVoice";
 import { useRealtimeInterview } from "@/hooks/useRealtimeInterview";
+import { useInterviewMetrics } from "@/hooks/useInterviewMetrics";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
 import { InterviewStudio } from "@/components/interview/InterviewStudio";
