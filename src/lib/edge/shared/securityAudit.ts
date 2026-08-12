@@ -13,7 +13,8 @@ export type SecurityCategory =
   | "entitlement_check"
   | "ai_authorization"
   | "eligibility"
-  | "discount";
+  | "discount"
+  | "affiliate";
 export type SecurityDecision = "allowed" | "denied" | "received" | "processed" | "failed";
 
 export interface SecurityEvent {
