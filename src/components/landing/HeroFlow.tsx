@@ -232,7 +232,7 @@ export function HeroFlow() {
     <DepthScene className="relative w-full" tilt={4} perspective={1500}>
       {/* main product surface */}
       <DepthLayer depth={0.6}>
-        <div className="glass-panel edge-light relative overflow-hidden rounded-2xl">
+        <div className="glass-panel edge-light relative overflow-hidden rounded-2xl bg-card/85 backdrop-blur-xl">
           <div className="flex items-center gap-2 border-b border-border/60 px-4 py-3">
             <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
@@ -288,9 +288,9 @@ export function HeroFlow() {
       </DepthLayer>
 
       {/* floating satellites */}
-      <DepthLayer depth={1.5} className="pointer-events-none absolute -left-4 bottom-6 hidden w-48 sm:block">
+      <DepthLayer depth={1.5} className="pointer-events-none absolute -left-10 bottom-4 hidden w-44 xl:block">
         <motion.div
-          className="glass-panel rounded-xl px-3 py-2.5"
+          className="glass-panel rounded-xl bg-card/90 px-3 py-2.5 backdrop-blur-xl"
           animate={reduce ? undefined : { y: [0, -8, 0] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -304,7 +304,7 @@ export function HeroFlow() {
 
       <DepthLayer depth={1.8} className="pointer-events-none absolute -right-3 -top-5 hidden w-44 md:block">
         <motion.div
-          className="glass-panel rounded-xl px-3 py-2.5"
+          className="glass-panel rounded-xl bg-card/90 px-3 py-2.5 backdrop-blur-xl"
           animate={reduce ? undefined : { y: [0, 9, 0] }}
           transition={{ duration: 8.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         >
