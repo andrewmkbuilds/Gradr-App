@@ -91,14 +91,13 @@ export default function GrowthEngine() {
 
   const resumeWeaknesses = useMemo(() => {
     if (!resume) return [];
-    return (
-      [
-        { label: "Keyword coverage", value: resume.keyword_match },
-        { label: "Formatting", value: resume.formatting_score },
-        { label: "Impact / quantified results", value: resume.impact_score },
-        { label: "Readability", value: resume.readability_score },
-      ] as const
-    )
+    const rows: { label: string; value: number | null }[] = [
+      { label: "Keyword coverage", value: resume.keyword_match },
+      { label: "Formatting", value: resume.formatting_score },
+      { label: "Impact / quantified results", value: resume.impact_score },
+      { label: "Readability", value: resume.readability_score },
+    ];
+    return rows
       .filter((m): m is { label: string; value: number } => typeof m.value === "number" && m.value < 75)
       .sort((a, b) => a.value - b.value);
   }, [resume]);
