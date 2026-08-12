@@ -117,13 +117,19 @@ export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open:
 
     if (!open) {
       // Drawer closed: hand focus back to whatever opened it (the sidebar trigger).
+      // Runs after the sheet's own close-focus handling, which lands on <body>
+      // once focus was moved programmatically inside the drawer.
       const opener = openerRef.current;
       openerRef.current = null;
-      if (opener && document.contains(opener) && document.activeElement === document.body) {
-        opener.focus({ preventScroll: true });
-      }
-      return;
+      if (!opener) return;
+      const id = window.setTimeout(() => {
+        if (document.contains(opener) && document.activeElement === document.body) {
+          opener.focus({ preventScroll: true });
+        }
+      }, 80);
+      return () => window.clearTimeout(id);
     }
+
 
     openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
