@@ -1,4 +1,5 @@
 import {
+  BadgePercent,
   LayoutDashboard,
   FileText,
   Briefcase,
