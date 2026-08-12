@@ -14,7 +14,7 @@
  * Exit code 0 = all checks passed, 1 = at least one failure.
  */
 import { chromium } from "playwright";
-import { existsSync, readdirSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { join } from "path";
 
 /**
@@ -116,6 +116,18 @@ async function readPaymentsConfig(page) {
   });
 }
 
+/** Seller identity from the single source of truth (src/content/legal.ts). */
+function sellerIdentity() {
+  const src = readFileSync(new URL("../src/content/legal.ts", import.meta.url), "utf8");
+  const pick = (name) => src.match(new RegExp(`export const ${name} = "([^"]+)"`))?.[1] ?? "";
+  return {
+    legalName: pick("SELLER_LEGAL_NAME"),
+    tradingName: pick("SELLER_TRADING_NAME"),
+    contactEmail: pick("SELLER_CONTACT_EMAIL"),
+    paths: Array.from(src.matchAll(/\{ path: "([^"]+)", label:/g)).map((m) => m[1]),
+  };
+}
+
 async function main() {
   console.log(`Smoke testing ${BASE}\n`);
   const browser = await launchBrowser();
@@ -157,6 +169,57 @@ async function main() {
       missing.length === 0 && !forbidden,
       missing.length ? `missing ${missing.join(", ")}` : forbidden ? "contains no-refund language" : "ok",
     );
+  }
+
+  // ---- Seller name must match the configured legal business name --------
+  const seller = sellerIdentity();
+  const policyPaths = seller.paths.length ? seller.paths : ["/terms", "/privacy", "/refund-policy"];
+  for (const route of policyPaths) {
+    const { body } = await visit(page, route);
+    const hasLegal = body.includes(seller.legalName);
+    const hasEmail = body.includes(seller.contactEmail);
+    const staleBrand = /CareerFlow\s*OS/i.test(body);
+    record(
+      `seller name on ${route}`,
+      hasLegal && hasEmail && !staleBrand,
+      staleBrand
+        ? "page still shows the legacy CareerFlow OS brand"
+        : hasLegal && hasEmail
+          ? `"${seller.legalName}" + ${seller.contactEmail}`
+          : `missing ${[!hasLegal && `seller "${seller.legalName}"`, !hasEmail && "contact email"].filter(Boolean).join(" and ")}`,
+    );
+  }
+
+  // ---- Auth hero headline must never clip ------------------------------
+  for (const width of [360, 768, 1280]) {
+    const heroCtx = await browser.newContext({ viewport: { width, height: 900 } });
+    const heroPage = await heroCtx.newPage();
+    try {
+      await heroPage.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded", timeout: 45000 });
+      await heroPage.waitForSelector("[data-auth-hero]:visible", { timeout: 20000 });
+      await heroPage.waitForTimeout(1500);
+      const hero = await heroPage.evaluate(() => {
+        const node = Array.from(document.querySelectorAll("[data-auth-hero]")).find((n) => {
+          const r = n.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        });
+        if (!node) return null;
+        return {
+          text: (node.innerText || "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim(),
+          clipped: node.scrollHeight - node.clientHeight > 1 || node.scrollWidth - node.clientWidth > 1,
+        };
+      });
+      const ok = Boolean(hero) && hero.text === "Your AI career command center." && !hero.clipped;
+      record(
+        `auth hero @${width}px`,
+        ok,
+        !hero ? "hero not rendered" : ok ? "full headline visible" : `text="${hero.text}" clipped=${hero.clipped}`,
+      );
+    } catch (err) {
+      record(`auth hero @${width}px`, false, err.message.split("\n")[0]);
+    } finally {
+      await heroCtx.close();
+    }
   }
 
   // ---- Auth-gated routes must not crash ------------------------------

@@ -11,7 +11,7 @@
  * seller name anywhere else.
  */
 export const SELLER_LEGAL_NAME = "Gradr"; // TEMPORARY — replace at go-live
-export const SELLER_CONTACT_EMAIL = "support@careerflowos.lovable.app";
+export const SELLER_CONTACT_EMAIL = "support@gradr.me";
 export const SELLER_TRADING_NAME = "Gradr";
 export const REFUND_WINDOW_DAYS = 30;
 export const POLICIES_UPDATED = "2026-08-12";

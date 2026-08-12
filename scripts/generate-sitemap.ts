@@ -4,7 +4,7 @@ import { resolve } from "path";
 import { GUIDES, guidePath } from "../src/content/guides";
 import { JOB_LANDINGS, jobLandingPath } from "../src/content/jobLandings";
 
-const BASE_URL = "https://careerflowos.lovable.app";
+const BASE_URL = "https://gradr.me";
 
 interface SitemapEntry {
   path: string;

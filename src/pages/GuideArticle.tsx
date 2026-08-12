@@ -8,6 +8,7 @@ import { RelatedGuides } from "@/components/seo/RelatedGuides";
 import { GUIDES_BY_SLUG, guidePath } from "@/content/guides";
 import { guideJsonLd } from "@/lib/structuredData";
 import { trackEvent, withUtm } from "@/lib/analytics";
+import { useReadTracking } from "@/hooks/useReadTracking";
 
 export default function GuideArticle() {
   const { slug = "" } = useParams();
@@ -16,6 +17,8 @@ export default function GuideArticle() {
   useEffect(() => {
     if (guide) trackEvent("content_page_view", { article: guide.slug, location: guidePath(guide.slug) });
   }, [guide]);
+
+  useReadTracking(guide?.slug ?? "");
 
   if (!guide) return <Navigate to="/career-advice" replace />;
 

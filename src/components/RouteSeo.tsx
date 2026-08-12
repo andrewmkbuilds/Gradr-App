@@ -4,7 +4,7 @@ import { GUIDES_BY_SLUG } from "@/content/guides";
 import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
 
 const SITE = "Gradr";
-const ORIGIN = "https://careerflowos.lovable.app";
+const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
 const META: Record<string, { title: string; description: string }> = {

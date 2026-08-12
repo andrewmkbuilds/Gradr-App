@@ -13,6 +13,7 @@ import {
 } from "@/content/jobLandings";
 import { jobLandingJsonLd } from "@/lib/structuredData";
 import { trackEvent, withUtm } from "@/lib/analytics";
+import { useReadTracking } from "@/hooks/useReadTracking";
 
 export default function JobLanding() {
   const { slug = "" } = useParams();
@@ -22,6 +23,8 @@ export default function JobLanding() {
     if (landing)
       trackEvent("content_page_view", { article: landing.slug, location: jobLandingPath(landing.slug) });
   }, [landing]);
+
+  useReadTracking(landing?.slug ?? "");
 
   if (!landing) return <Navigate to="/job-search" replace />;
 

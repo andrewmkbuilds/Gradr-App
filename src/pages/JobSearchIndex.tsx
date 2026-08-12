@@ -47,6 +47,17 @@ export default function JobSearchIndex() {
     trackEvent("content_page_view", { article: "job-search-index", location: "/job-search" });
   }, []);
 
+  // Debounced search-term tracking so we learn which roles/cities people look
+  // for that we do not have a page for yet.
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) return;
+    const t = setTimeout(() => {
+      trackEvent("job_filter_search", { source: "job-search-index", location: q.toLowerCase().slice(0, 60) });
+    }, 900);
+    return () => clearTimeout(t);
+  }, [query]);
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     return JOB_LANDINGS.filter((landing) => {
@@ -124,7 +135,11 @@ export default function JobSearchIndex() {
                 aria-pressed={role === r.id}
                 onClick={() => {
                   setRole(r.id);
-                  trackEvent("job_filter_change", { source: "job-search-index", location: r.id });
+                  trackEvent("job_filter_change", {
+                    source: "job-search-index",
+                    location: r.id,
+                    filter: "role",
+                  });
                 }}
               >
                 {r.name}
@@ -138,7 +153,12 @@ export default function JobSearchIndex() {
             aria-pressed={remoteOnly}
             onClick={() => {
               setRemoteOnly((v) => !v);
-              trackEvent("job_filter_change", { source: "job-search-index", location: "remote-toggle" });
+              trackEvent("job_filter_change", {
+                source: "job-search-index",
+                location: "remote-toggle",
+                filter: "remote",
+                value: String(!remoteOnly),
+              });
             }}
             className="gap-1.5"
           >

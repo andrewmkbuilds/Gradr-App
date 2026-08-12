@@ -7,7 +7,7 @@ interface SeoProps {
 }
 
 const SITE = "Gradr";
-const ORIGIN = "https://careerflowos.lovable.app";
+const ORIGIN = "https://gradr.me";
 
 export function Seo({ title, description, path }: SeoProps) {
   const fullTitle = `${title} — ${SITE}`;

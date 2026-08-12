@@ -15,7 +15,9 @@
     "test:watch": "vitest",
     "security:baseline": "node scripts/security-baseline.mjs",
     "smoke": "node scripts/smoke-test.mjs",
-    "test:security": "vitest run src/test/securityBaseline.test.ts"
+    "test:security": "vitest run src/test/securityBaseline.test.ts",
+    "check:legal": "node scripts/check-legal-readiness.mjs",
+    "test:visual": "node scripts/auth-hero-visual.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

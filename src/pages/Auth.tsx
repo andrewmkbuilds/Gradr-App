@@ -14,14 +14,9 @@ import {
 } from "@/lib/nextRedirect";
 import { toast } from "sonner";
 import { z } from "zod";
+import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
 
 /** Client-side field validation — mirrors the server rules, fails fast and inline. */
-const emailSchema = z
-  .string()
-  .trim()
-  .min(1, "Enter your email address.")
-  .email("Enter a valid email address.")
-  .max(255, "Email must be under 255 characters.");
 const passwordSchema = z
   .string()
   .min(6, "Password must be at least 6 characters.")
@@ -75,25 +70,6 @@ export default function Auth() {
       navigate(nextTarget, { replace: true });
     }
   }, [user, nextTarget, navigate]);
-
-  // Map raw auth errors to short, human copy shown inline under the form.
-  const friendlyAuthError = (raw: string): string => {
-    const m = raw.toLowerCase();
-    if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already exists"))
-      return "That email already has an account. Try signing in instead.";
-    if (m.includes("email address") && m.includes("invalid")) return "Enter a valid email address.";
-    if (m.includes("password should be at least")) return "Password must be at least 6 characters.";
-    if (m.includes("weak password") || m.includes("pwned") || m.includes("compromised"))
-      return "That password is too weak. Pick something longer and less common.";
-    if (m.includes("invalid login credentials")) return "Incorrect email or password.";
-    if (m.includes("email not confirmed")) return "Confirm your email first — check your inbox for the link.";
-    if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Wait a minute and try again.";
-    if (m.includes("signups not allowed") || m.includes("signup is disabled"))
-      return "New signups are currently disabled.";
-    if (m.includes("failed to fetch") || m.includes("network"))
-      return "Network error — check your connection and try again.";
-    return raw;
-  };
 
   // Countdown for the "resend verification email" cooldown.
   useEffect(() => {

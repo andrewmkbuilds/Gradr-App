@@ -1,60 +1,119 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
-import { Mail, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
-import { toast } from "sonner";
+import { Mail, ArrowLeft, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { authPath, readNext } from "@/lib/nextRedirect";
+import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
+
+const RESEND_COOLDOWN = 45;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
   const location = useLocation();
   const nextParam = readNext(location.search);
 
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  const sendReset = async (address: string) => {
+    setLoading(true);
+    setError(null);
+    setNotice(null);
+    const { error: err } = await supabase.auth.resetPasswordForEmail(address, {
+      redirectTo: `${window.location.origin}/reset-password${
+        nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""
+      }`,
+    });
+    setLoading(false);
+    if (err) {
+      setError(friendlyAuthError(err.message));
+      return false;
+    }
+    setCooldown(RESEND_COOLDOWN);
+    return true;
+  };
+
+  // Never reloads the page: all feedback is rendered inline below.
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password${
-          nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""
-        }`,
-      });
-      if (error) throw error;
-      setSent(true);
-      toast.success("Check your email for a reset link!");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "An error occurred";
-      toast.error(message);
-    } finally {
-      setLoading(false);
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0].message);
+      return;
     }
+    if (await sendReset(parsed.data)) setSent(true);
   };
+
+  const handleResend = async () => {
+    if (cooldown > 0) return;
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) return setError(parsed.error.issues[0].message);
+    if (await sendReset(parsed.data)) setNotice("Reset link sent again.");
+  };
+
+  const errorBlock = error && (
+    <div
+      role="alert"
+      className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+    >
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      <span className="break-words">{error}</span>
+    </div>
+  );
 
   return (
     <AuthLayout>
       {sent ? (
         <div className="space-y-6">
           <div className="space-y-2">
-            <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
-              <CheckCircle className="h-6 w-6 text-primary" />
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+              <CheckCircle className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
-            <h1 className="text-xl font-semibold text-foreground text-center">Check your email</h1>
-            <p className="text-sm text-muted-foreground text-center">
+            <h1 className="text-center text-xl font-semibold text-foreground">Check your email</h1>
+            <p className="text-center text-sm text-muted-foreground">
               We sent a reset link to{" "}
-              <span className="text-foreground font-medium">{email}</span>
+              <span className="font-medium text-foreground break-words">{email}</span>
             </p>
           </div>
-          <Link to={authPath(nextParam)}>
-            <Button variant="outline" className="w-full h-11 border-border gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to sign in
+
+          {errorBlock}
+          {notice && (
+            <div
+              role="status"
+              className="flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm text-foreground"
+            >
+              <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <span>{notice}</span>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              className="h-11 w-full border-border"
+              onClick={handleResend}
+              disabled={loading || cooldown > 0}
+            >
+              {cooldown > 0 ? `Resend in ${cooldown}s` : loading ? "Sending…" : "Resend reset link"}
             </Button>
-          </Link>
+            <Link to={authPath(nextParam)}>
+              <Button variant="ghost" className="h-11 w-full gap-2">
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Back to sign in
+              </Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-6">
@@ -65,32 +124,39 @@ export default function ForgotPassword() {
             </p>
           </div>
 
-          <form onSubmit={handleReset} className="space-y-3.5">
+          {errorBlock}
+
+          <form onSubmit={handleReset} className="space-y-3.5" noValidate>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 type="email"
                 placeholder="Email address"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError(null);
+                }}
                 required
-                className="pl-10 h-11 bg-secondary border-border"
+                autoComplete="email"
+                aria-invalid={!!error}
+                className="h-11 border-border bg-secondary pl-10"
               />
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-primary text-primary-foreground font-medium gap-2"
+              className="h-11 w-full gap-2 bg-primary font-medium text-primary-foreground"
               disabled={loading}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
                   Sending...
                 </span>
               ) : (
                 <>
                   Send reset link
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </>
               )}
             </Button>
@@ -98,9 +164,9 @@ export default function ForgotPassword() {
 
           <Link
             to={authPath(nextParam)}
-            className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+            className="flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Back to sign in
           </Link>
         </div>

@@ -19,4 +19,4 @@ Allow: /
 Disallow: /settings
 Disallow: /admin/
 
-Sitemap: https://careerflowos.lovable.app/sitemap.xml
+Sitemap: https://gradr.me/sitemap.xml
