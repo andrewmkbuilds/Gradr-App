@@ -26,7 +26,8 @@ describe("diagnosePaymentsConfig", () => {
     const d = diagnosePaymentsConfig({});
     expect(d.ok).toBe(false);
     expect(d.missing).toEqual(["VITE_PAYMENTS_CLIENT_TOKEN", "VITE_PAYMENTS_ENVIRONMENT"]);
-    expect(d.issues).toHaveLength(2);
+    expect(d.issues).toHaveLength(1);
+    expect(d.issues[0].variable).toBe("VITE_PAYMENTS_CLIENT_TOKEN");
     expect(d.issues.every((i) => i.fix.length > 0)).toBe(true);
   });
 
@@ -39,11 +40,12 @@ describe("diagnosePaymentsConfig", () => {
     expect(d.ok).toBe(false);
   });
 
-  it("never defaults the environment", () => {
+  it("derives the environment from the token prefix when the env var is omitted", () => {
     const d = diagnosePaymentsConfig({ VITE_PAYMENTS_CLIENT_TOKEN: "test_abcdef1234567890" });
-    expect(d.ok).toBe(false);
-    expect(d.environment).toBeUndefined();
+    expect(d.ok).toBe(true);
+    expect(d.environment).toBe("sandbox");
     expect(d.missing).toEqual(["VITE_PAYMENTS_ENVIRONMENT"]);
+    expect(d.reason).toBeNull();
   });
 
   it("rejects an invalid environment value", () => {
