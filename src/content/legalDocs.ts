@@ -9,7 +9,7 @@
  * Markdown subset supported by the renderer: `## heading`, `- bullet`,
  * paragraphs, `**bold**` and `[label](href)` links.
  */
-import { REFUND_WINDOW_DAYS, SELLER_CONTACT_EMAIL, SELLER_LEGAL_NAME, SELLER_TRADING_NAME } from "./legal";
+import { REFUND_WINDOW_DAYS, SELLER_CONTACT_EMAIL, SELLER_DOMAIN, SELLER_LEGAL_NAME, SELLER_TRADING_NAME, SELLER_WEBSITE_URL } from "./legal";
 
 export const TERMS_V1_EFFECTIVE = "2026-08-12";
 export const PRIVACY_V1_EFFECTIVE = "2026-08-12";
