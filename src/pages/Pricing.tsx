@@ -152,6 +152,47 @@ export default function Pricing() {
 
       <PaymentsConfigBanner context="pricing" className="mx-auto max-w-3xl" />
 
+      {/* Eligibility discounts: advertised to everyone, confirmed for the verified. */}
+      {(discountPercent > 0 || topProgram) && (
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              {discountPercent > 0 ? (
+                <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
+              ) : (
+                <BadgePercent className="h-4 w-4 text-primary" aria-hidden="true" />
+              )}
+            </span>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {discountPercent > 0
+                  ? `Your ${discountPercent}% eligibility discount is active`
+                  : `Save up to ${Math.round(Number(topProgram?.percentage ?? 0))}% with an eligibility discount`}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {discountPercent > 0
+                  ? "It's applied automatically at checkout and on every renewal."
+                  : "Students, educators, military, first responders, healthcare and nonprofit teams qualify."}
+              </p>
+            </div>
+          </div>
+          {discountPercent > 0 ? (
+            <Button variant="ghost" size="sm" onClick={() => navigate("/settings#eligibility")}>
+              Manage
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => (user ? setVerifyOpen(true) : navigate("/auth?next=/pricing"))}
+            >
+              Check if you qualify
+            </Button>
+          )}
+        </div>
+      )}
+
+      <VerificationDialog open={verifyOpen} onOpenChange={setVerifyOpen} />
+
       {pricesError && (
         <p className="text-center text-sm text-destructive">
           Couldn't load localized prices: {pricesError}
