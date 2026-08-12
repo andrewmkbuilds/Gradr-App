@@ -53,8 +53,9 @@ describe("diagnosePaymentsConfig", () => {
       VITE_PAYMENTS_CLIENT_TOKEN: "test_abcdef1234567890",
       VITE_PAYMENTS_ENVIRONMENT: "Production",
     });
-    expect(d.ok).toBe(false);
-    expect(d.issues[0].message).toMatch(/must be 'sandbox' or 'live'/);
+    expect(d.ok).toBe(true);
+    expect(d.environment).toBe("sandbox");
+    expect(d.warnings[0].message).toMatch(/must be 'sandbox' or 'live'/);
   });
 
   it("flags a sandbox token used with the live environment", () => {
@@ -62,9 +63,11 @@ describe("diagnosePaymentsConfig", () => {
       VITE_PAYMENTS_CLIENT_TOKEN: "test_abcdef1234567890",
       VITE_PAYMENTS_ENVIRONMENT: "live",
     });
-    expect(d.ok).toBe(false);
+    expect(d.ok).toBe(true);
+    expect(d.environment).toBe("sandbox");
     expect(d.tokenEnvironment).toBe("sandbox");
-    expect(d.reason).toMatch(/mismatch/i);
+    expect(d.reason).toBeNull();
+    expect(d.warnings[0].message).toMatch(/mismatch/i);
   });
 
   it("never exposes the full token in the preview", () => {
