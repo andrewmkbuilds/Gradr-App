@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
@@ -11,9 +12,12 @@ const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
 const META: Record<string, { title: string; description: string }> = {
+  // "/" renders the public Gradr landing page for signed-out visitors (and the
+  // dashboard once authenticated), so its metadata must describe the product.
   "/": {
-    title: "Dashboard",
-    description: "Your Gradr dashboard — pipeline overview, AI scores, reminders, and quick actions.",
+    title: "Your AI Career Command Center",
+    description:
+      "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
   },
   "/landing": {
     title: "From resume to offer",
@@ -161,16 +165,74 @@ function resolveOgImage(pathname: string): string {
   return OG_IMAGE;
 }
 
+/**
+ * Routes that must never enter a search index: authenticated product surfaces,
+ * account/credential flows, admin tooling and affiliate back-office. They hold
+ * no public content and only dilute how search engines understand Gradr.
+ */
+const NOINDEX_EXACT = new Set([
+  "/auth",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/welcome",
+  "/settings",
+  "/billing",
+  "/resume",
+  "/jobs",
+  "/match",
+  "/pipeline",
+  "/apply",
+  "/interview",
+  "/interview/history",
+  "/growth",
+  "/affiliate/apply",
+  "/affiliate/dashboard",
+  "/affiliate/resources",
+]);
+
+const NOINDEX_PREFIXES = ["/admin", "/interview/", "/oauth", "/mcp"];
+
+function isNoIndex(pathname: string): boolean {
+  if (NOINDEX_EXACT.has(pathname)) return true;
+  return NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export function RouteSeo() {
   const { pathname } = useLocation();
   const meta = META[pathname] ??
     resolveDynamicMeta(pathname) ?? {
-      title: "AI Career Command Center",
-      description: "Gradr is the AI career command center for job seekers — resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
+      title: "Your AI Career Command Center",
+      description:
+        "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
     };
-  const fullTitle = pathname === "/" ? "Gradr | AI Career Command Center" : `${meta.title} — ${SITE}`;
+  const fullTitle =
+    pathname === "/" || pathname === "/landing"
+      ? "Gradr | Your AI Career Command Center"
+      : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
+  const noindex = isNoIndex(pathname);
+
+  // index.html ships a full static SEO head so crawlers that never execute
+  // JavaScript still read correct Gradr metadata. react-helmet-async only
+  // dedupes tags it owns (marked with data-rh), so once the app has mounted
+  // those static tags would sit alongside Helmet's per-route ones and give
+  // crawlers two conflicting canonicals/descriptions. Drop the static copies.
+  useEffect(() => {
+    const STATIC_SEO_SELECTOR = [
+      'link[rel="canonical"]',
+      'meta[name="robots"]',
+      'meta[name="description"]',
+      'meta[name^="twitter:"]',
+      'meta[property^="og:"]',
+    ]
+      .map((selector) => `${selector}:not([data-rh])`)
+      .join(", ");
+    document.head.querySelectorAll(STATIC_SEO_SELECTOR).forEach((node) => node.remove());
+  }, []);
+
+
 
   const legalUpdated: Record<string, string> = {
     "/terms": POLICIES_UPDATED,
@@ -194,9 +256,18 @@ export function RouteSeo() {
       <html lang="en" />
       <title>{fullTitle}</title>
       <meta name="description" content={meta.description} />
+      <meta
+        name="robots"
+        content={
+          noindex
+            ? "noindex, nofollow"
+            : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        }
+      />
       <link rel="canonical" href={url} />
       <link rel="alternate" hrefLang="en" href={url} />
       <link rel="alternate" hrefLang="x-default" href={url} />
+
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={meta.description} />
       <meta property="og:url" content={url} />
