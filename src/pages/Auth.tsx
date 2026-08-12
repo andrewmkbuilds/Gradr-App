@@ -280,7 +280,7 @@ export default function Auth() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
             required
             minLength={6}
             className="pl-10 h-11 bg-secondary border-border"
