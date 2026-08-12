@@ -55,6 +55,15 @@ Deno.serve(async (req) => {
   ).trim();
   if (!reference) return new Response("Missing reference", { status: 400 });
 
+  // The reference is always an opaque id (our row UUID, or the provider's
+  // verification id). Reject anything containing filter syntax or unexpected
+  // characters before it reaches a query.
+  if (reference.length > 100 || !/^[A-Za-z0-9._:-]+$/.test(reference)) {
+    return new Response("Invalid reference", { status: 400 });
+  }
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reference);
+
   const status = mapSheeridStatus(
     payload.currentStep as string | undefined,
     (payload.status ?? payload.segment) as string | undefined,
@@ -62,12 +71,28 @@ Deno.serve(async (req) => {
 
   const supabase = db();
 
-  // The tracking id we hand the provider IS our verification row id.
-  const { data: row } = await supabase
-    .from("eligibility_verifications")
-    .select("id, user_id, eligibility_type, status")
-    .or(`id.eq.${reference},provider_reference_id.eq.${reference}`)
-    .maybeSingle();
+  // The tracking id we hand the provider IS our verification row id. Look it up
+  // with parameterized equality filters instead of a concatenated .or() string.
+  const columns = "id, user_id, eligibility_type, status";
+  let row: { id: string; user_id: string; eligibility_type: string; status: string } | null = null;
+
+  if (isUuid) {
+    const { data } = await supabase
+      .from("eligibility_verifications")
+      .select(columns)
+      .eq("id", reference)
+      .maybeSingle();
+    row = data ?? null;
+  }
+
+  if (!row) {
+    const { data } = await supabase
+      .from("eligibility_verifications")
+      .select(columns)
+      .eq("provider_reference_id", reference)
+      .maybeSingle();
+    row = data ?? null;
+  }
 
   if (!row) return new Response("Unknown verification", { status: 404 });
 
