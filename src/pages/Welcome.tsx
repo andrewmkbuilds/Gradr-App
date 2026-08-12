@@ -48,7 +48,7 @@ export default function Welcome() {
         </div>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild>
-            <Link to="/dashboard">
+            <Link to="/">
               Go to dashboard <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
