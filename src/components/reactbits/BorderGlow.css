@@ -139,3 +139,10 @@
   overflow: auto;
   z-index: 1;
 }
+
+/* Gradr override: token-driven surface and a single soft elevation instead of
+   the upstream stacked black shadows (which read as dirty in light mode). */
+.gradr-glow {
+  border-color: hsl(var(--border));
+  box-shadow: 0 24px 60px -34px hsl(var(--primary) / 0.55);
+}

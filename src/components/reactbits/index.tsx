@@ -69,7 +69,7 @@ export function GlowFrame({
   }
   return (
     <BorderGlowBase
-      className={className}
+      className={`gradr-glow ${className}`}
       borderRadius={radius}
       glowRadius={28}
       glowIntensity={intensity}
@@ -94,10 +94,15 @@ export function Glare({
   children,
   className = "",
   radius = "16px",
+  background = "transparent",
+  borderColor = "transparent",
 }: {
   children: ReactNode;
   className?: string;
   radius?: string;
+  /** CSS color for the card surface — pass a token, e.g. `hsl(var(--card))`. */
+  background?: string;
+  borderColor?: string;
 }) {
   const reduce = useReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
@@ -106,8 +111,8 @@ export function Glare({
       className={`gradr-glare ${className}`}
       width="100%"
       height="100%"
-      background="transparent"
-      borderColor="transparent"
+      background={background}
+      borderColor={borderColor}
       borderRadius={radius}
       glareColor="#9be9ff"
       glareOpacity={0.16}
