@@ -1,4 +1,5 @@
 import { ThemeSegmentedControl } from "@/components/ThemeToggle";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { useState, useEffect } from "react";
 import { Palette, User, Save, Loader2, Bell, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -114,7 +115,7 @@ export default function Settings() {
   const sendTestDigest = async () => {
     if (!user) return;
     setTestingDigest(true);
-    const { data, error } = await supabase.functions.invoke("daily-digest", { body: { test: true } });
+    const { data, error } = await invokeFunction("daily-digest", { body: { test: true } });
     setTestingDigest(false);
     if (error || data?.error) {
       toast.error(data?.error || "Failed to prepare test digest");

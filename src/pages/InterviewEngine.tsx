@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
@@ -33,7 +34,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 type Engine = "realtime" | "fallback";
 
 
-const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
+const INTERVIEW_URL = "/api/public/interview-coach";
 
 function InterviewEngineInner() {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -351,7 +352,7 @@ function InterviewEngineInner() {
     setBuildingReport(true);
     const elapsed = Math.round((Date.now() - startedAt.current) / 1000);
     try {
-      const { data, error } = await supabase.functions.invoke("interview-report", {
+      const { data, error } = await invokeFunction("interview-report", {
         body: {
           messages,
           targetRole,
@@ -394,7 +395,7 @@ function InterviewEngineInner() {
           setSessionId(saved.id);
           void metrics.linkSession(saved.id);
           // Follow-up nudge with the scorecard + practice plan.
-          void supabase.functions.invoke("send-notification", {
+          void invokeFunction("send-notification", {
             body: {
               template: "interview_followup",
               input: { role: targetRole || undefined, link: `/interview/history` },
@@ -415,7 +416,7 @@ function InterviewEngineInner() {
     if (!report) return;
     setPlanLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("practice-plan", {
+      const { data, error } = await invokeFunction("practice-plan", {
         body: { report, targetRole },
       });
       if (error) throw error;

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
@@ -112,7 +113,7 @@ export default function AdminSeoMonitor() {
   const [selectedSiteUrl, setSelectedSiteUrl] = useState<string | undefined>();
 
   const call = async (refresh: boolean): Promise<MonitorResponse> => {
-    const { data, error } = await supabase.functions.invoke("seo-monitor", {
+    const { data, error } = await invokeFunction("seo-monitor", {
       body: { refresh, selectedSiteUrl },
     });
     if (error) throw error;

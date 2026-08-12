@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import { getPaddleEnvironment } from "@/lib/paddle";
@@ -157,7 +158,7 @@ export default function JobsFeed() {
     setLoading(true);
     setJobs([]);
     try {
-      const { data, error } = await supabase.functions.invoke("search-jobs", {
+      const { data, error } = await invokeFunction("search-jobs", {
         body: { what: q, where: loc, country: ctry, remoteOnly: remote, sortBy },
       });
       if (error || data?.error) {
@@ -203,7 +204,7 @@ export default function JobsFeed() {
     setNoResumeScoringAttempted(false);
     setScoring(true);
     try {
-      const { data, error } = await supabase.functions.invoke("recommend-jobs", {
+      const { data, error } = await invokeFunction("recommend-jobs", {
         body: { jobs: list, resumeText },
       });
       if (error || data?.error) return;
@@ -301,7 +302,7 @@ export default function JobsFeed() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      const { data, error } = await supabase.functions.invoke("generate-application", {
+      const { data, error } = await invokeFunction("generate-application", {
         body: {
           environment: getPaddleEnvironment(),
           type: "application_pack",
@@ -340,7 +341,7 @@ export default function JobsFeed() {
     }
     trackJourney("job_url_import_started", { host });
     try {
-      const { data, error } = await supabase.functions.invoke("parse-job-url", {
+      const { data, error } = await invokeFunction("parse-job-url", {
         body: { url: pasteUrl.trim() },
       });
       if (error || data?.error) {

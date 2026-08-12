@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { Navigate } from "@/lib/router-compat";
 import { Link } from "@/lib/router-compat";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, XCircle } from "lucide-react";
@@ -66,7 +67,7 @@ export default function AdminPaymentsStatus() {
     queryFn: async () => {
       const priceId = TIERS[0]?.priceId.month ?? CREDIT_PACKS[0]?.priceId;
       const started = performance.now();
-      const { data, error } = await supabase.functions.invoke("get-paddle-price", {
+      const { data, error } = await invokeFunction("get-paddle-price", {
         body: { priceId, environment: diag.environment ?? "sandbox" },
       });
       const ms = Math.round(performance.now() - started);

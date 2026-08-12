@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { Navigate } from "@/lib/router-compat";
 import {
   AlertTriangle,
@@ -80,7 +81,7 @@ export default function AdminSearchConsole() {
     enabled: !!isAdmin,
     staleTime: 15 * 60 * 1000,
     queryFn: async (): Promise<SearchConsoleSnapshot> => {
-      const { data, error } = await supabase.functions.invoke("search-console", { body: {} });
+      const { data, error } = await invokeFunction("search-console", { body: {} });
       if (error) throw new Error(error.message);
       return data as SearchConsoleSnapshot;
     },

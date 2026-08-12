@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -143,7 +144,7 @@ export function useAffiliateSettings() {
     queryKey: ["affiliateSettings"],
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data } = await supabase.functions.invoke("affiliate-public", { body: {} });
+      const { data } = await invokeFunction("affiliate-public", { body: {} });
       return data?.settings ?? null;
     },
   });

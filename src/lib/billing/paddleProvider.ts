@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { getPaddle, getPaddleEnvironment, getPaddlePriceId } from "@/lib/paddle";
 import { resolveCheckoutDiscount } from "@/hooks/useEligibility";
 import type {
@@ -67,7 +68,7 @@ export const paddleBillingProvider: BillingProvider = {
   },
 
   async openCustomerPortal(): Promise<CheckoutResult> {
-    const { data, error } = await supabase.functions.invoke("payments-portal", {
+    const { data, error } = await invokeFunction("payments-portal", {
       body: { environment: getPaddleEnvironment() },
     });
     if (error || !data?.url) throw new Error("No portal URL returned");

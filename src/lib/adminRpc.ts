@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 
 /**
  * Client wrapper for admin-only database routines.
@@ -14,7 +15,7 @@ export async function adminRpc<T = unknown>(
   fn: string,
   args: Record<string, unknown> = {},
 ): Promise<{ data: T | null; error: { message: string } | null }> {
-  const { data, error } = await supabase.functions.invoke("admin-rpc", {
+  const { data, error } = await invokeFunction("admin-rpc", {
     body: { fn, args },
   });
 

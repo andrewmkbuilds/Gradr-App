@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { invokeFunction } from "@/lib/invokeFunction";
 import {
   PRO_ENTITLEMENT,
   type BillingProvider,
@@ -80,7 +81,7 @@ async function findPackage(identifier: string) {
 async function pushEntitlements() {
   const purchases = await getPurchases();
   await purchases.getCustomerInfo();
-  await supabase.functions.invoke("revenuecat-sync", { body: {} });
+  await invokeFunction("revenuecat-sync", { body: {} });
 }
 
 

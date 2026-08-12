@@ -1,4 +1,5 @@
 import { initializePaddle as loadPaddle, type Paddle } from "@paddle/paddle-js";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { currentPaymentsDiagnostics } from "@/lib/paymentsConfig";
 
@@ -168,7 +169,7 @@ export async function getPaddlePriceId(priceId: string): Promise<string> {
   const cached = priceCache.get(priceId);
   if (cached) return cached;
 
-  const { data, error } = await supabase.functions.invoke("get-paddle-price", {
+  const { data, error } = await invokeFunction("get-paddle-price", {
     body: { priceId, environment: getPaddleEnvironment() },
   });
   if (error || !data?.paddleId) throw new Error(`Failed to resolve price: ${priceId}`);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { Link } from "@/lib/router-compat";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import {
@@ -96,7 +97,7 @@ export default function JobMatchingEngine() {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("match-jobs", {
+      const { data, error } = await invokeFunction("match-jobs", {
         body: {
           resumeText,
           targetRole: targetRole || profile?.target_job_title || "",

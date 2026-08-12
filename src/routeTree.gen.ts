@@ -58,6 +58,33 @@ import { Route as AppAffiliateDashboardRouteImport } from './routes/_app/affilia
 import { Route as AppAffiliateResourcesRouteImport } from './routes/_app/affiliate/resources'
 import { Route as AppInterviewIndexRouteImport } from './routes/_app/interview/index'
 import { Route as AppInterviewHistoryRouteImport } from './routes/_app/interview/history'
+import { Route as ApiPublicAdminRpcRouteImport } from './routes/api/public/admin-rpc'
+import { Route as ApiPublicAffiliatePublicRouteImport } from './routes/api/public/affiliate-public'
+import { Route as ApiPublicAnalyzeResumeRouteImport } from './routes/api/public/analyze-resume'
+import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
+import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
+import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
+import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
+import { Route as ApiPublicGenerateApplicationRouteImport } from './routes/api/public/generate-application'
+import { Route as ApiPublicGetPaddlePriceRouteImport } from './routes/api/public/get-paddle-price'
+import { Route as ApiPublicInterviewCoachRouteImport } from './routes/api/public/interview-coach'
+import { Route as ApiPublicInterviewRealtimeTokenRouteImport } from './routes/api/public/interview-realtime-token'
+import { Route as ApiPublicInterviewReportRouteImport } from './routes/api/public/interview-report'
+import { Route as ApiPublicInterviewVoiceRouteImport } from './routes/api/public/interview-voice'
+import { Route as ApiPublicJobsApifyRouteImport } from './routes/api/public/jobs-apify'
+import { Route as ApiPublicMatchJobsRouteImport } from './routes/api/public/match-jobs'
+import { Route as ApiPublicNotifyPolicyUpdateRouteImport } from './routes/api/public/notify-policy-update'
+import { Route as ApiPublicParseJobUrlRouteImport } from './routes/api/public/parse-job-url'
+import { Route as ApiPublicPaymentsPortalRouteImport } from './routes/api/public/payments-portal'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments-webhook'
+import { Route as ApiPublicPracticePlanRouteImport } from './routes/api/public/practice-plan'
+import { Route as ApiPublicRecommendJobsRouteImport } from './routes/api/public/recommend-jobs'
+import { Route as ApiPublicResolveDiscountRouteImport } from './routes/api/public/resolve-discount'
+import { Route as ApiPublicRevenuecatSyncRouteImport } from './routes/api/public/revenuecat-sync'
+import { Route as ApiPublicSearchConsoleRouteImport } from './routes/api/public/search-console'
+import { Route as ApiPublicSearchJobsRouteImport } from './routes/api/public/search-jobs'
+import { Route as ApiPublicSendNotificationRouteImport } from './routes/api/public/send-notification'
+import { Route as ApiPublicSeoMonitorRouteImport } from './routes/api/public/seo-monitor'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -304,6 +331,150 @@ const AppInterviewHistoryRoute = AppInterviewHistoryRouteImport.update({
   path: '/interview/history',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicAdminRpcRoute = ApiPublicAdminRpcRouteImport.update({
+  id: '/api/public/admin-rpc',
+  path: '/api/public/admin-rpc',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAffiliatePublicRoute =
+  ApiPublicAffiliatePublicRouteImport.update({
+    id: '/api/public/affiliate-public',
+    path: '/api/public/affiliate-public',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicAnalyzeResumeRoute = ApiPublicAnalyzeResumeRouteImport.update({
+  id: '/api/public/analyze-resume',
+  path: '/api/public/analyze-resume',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
+  id: '/api/public/calendar-sync',
+  path: '/api/public/calendar-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicCompanyResearchRoute =
+  ApiPublicCompanyResearchRouteImport.update({
+    id: '/api/public/company-research',
+    path: '/api/public/company-research',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicDailyDigestRoute = ApiPublicDailyDigestRouteImport.update({
+  id: '/api/public/daily-digest',
+  path: '/api/public/daily-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicDeleteAccountRoute = ApiPublicDeleteAccountRouteImport.update({
+  id: '/api/public/delete-account',
+  path: '/api/public/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicGenerateApplicationRoute =
+  ApiPublicGenerateApplicationRouteImport.update({
+    id: '/api/public/generate-application',
+    path: '/api/public/generate-application',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicGetPaddlePriceRoute = ApiPublicGetPaddlePriceRouteImport.update({
+  id: '/api/public/get-paddle-price',
+  path: '/api/public/get-paddle-price',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicInterviewCoachRoute = ApiPublicInterviewCoachRouteImport.update({
+  id: '/api/public/interview-coach',
+  path: '/api/public/interview-coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicInterviewRealtimeTokenRoute =
+  ApiPublicInterviewRealtimeTokenRouteImport.update({
+    id: '/api/public/interview-realtime-token',
+    path: '/api/public/interview-realtime-token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicInterviewReportRoute =
+  ApiPublicInterviewReportRouteImport.update({
+    id: '/api/public/interview-report',
+    path: '/api/public/interview-report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicInterviewVoiceRoute = ApiPublicInterviewVoiceRouteImport.update({
+  id: '/api/public/interview-voice',
+  path: '/api/public/interview-voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicJobsApifyRoute = ApiPublicJobsApifyRouteImport.update({
+  id: '/api/public/jobs-apify',
+  path: '/api/public/jobs-apify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMatchJobsRoute = ApiPublicMatchJobsRouteImport.update({
+  id: '/api/public/match-jobs',
+  path: '/api/public/match-jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicNotifyPolicyUpdateRoute =
+  ApiPublicNotifyPolicyUpdateRouteImport.update({
+    id: '/api/public/notify-policy-update',
+    path: '/api/public/notify-policy-update',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicParseJobUrlRoute = ApiPublicParseJobUrlRouteImport.update({
+  id: '/api/public/parse-job-url',
+  path: '/api/public/parse-job-url',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPaymentsPortalRoute = ApiPublicPaymentsPortalRouteImport.update({
+  id: '/api/public/payments-portal',
+  path: '/api/public/payments-portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments-webhook',
+    path: '/api/public/payments-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPracticePlanRoute = ApiPublicPracticePlanRouteImport.update({
+  id: '/api/public/practice-plan',
+  path: '/api/public/practice-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicRecommendJobsRoute = ApiPublicRecommendJobsRouteImport.update({
+  id: '/api/public/recommend-jobs',
+  path: '/api/public/recommend-jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicResolveDiscountRoute =
+  ApiPublicResolveDiscountRouteImport.update({
+    id: '/api/public/resolve-discount',
+    path: '/api/public/resolve-discount',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRevenuecatSyncRoute = ApiPublicRevenuecatSyncRouteImport.update({
+  id: '/api/public/revenuecat-sync',
+  path: '/api/public/revenuecat-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSearchConsoleRoute = ApiPublicSearchConsoleRouteImport.update({
+  id: '/api/public/search-console',
+  path: '/api/public/search-console',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSearchJobsRoute = ApiPublicSearchJobsRouteImport.update({
+  id: '/api/public/search-jobs',
+  path: '/api/public/search-jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSendNotificationRoute =
+  ApiPublicSendNotificationRouteImport.update({
+    id: '/api/public/send-notification',
+    path: '/api/public/send-notification',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicSeoMonitorRoute = ApiPublicSeoMonitorRouteImport.update({
+  id: '/api/public/seo-monitor',
+  path: '/api/public/seo-monitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -352,6 +523,33 @@ export interface FileRoutesByFullPath {
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
+  '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
+  '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
+  '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
+  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
+  '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
+  '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
+  '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
+  '/api/public/interview-realtime-token': typeof ApiPublicInterviewRealtimeTokenRoute
+  '/api/public/interview-report': typeof ApiPublicInterviewReportRoute
+  '/api/public/interview-voice': typeof ApiPublicInterviewVoiceRoute
+  '/api/public/jobs-apify': typeof ApiPublicJobsApifyRoute
+  '/api/public/match-jobs': typeof ApiPublicMatchJobsRoute
+  '/api/public/notify-policy-update': typeof ApiPublicNotifyPolicyUpdateRoute
+  '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
+  '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
+  '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
+  '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
+  '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
+  '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
+  '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
+  '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
+  '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
+  '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/affiliate/': typeof AppAffiliateIndexRoute
   '/interview/': typeof AppInterviewIndexRoute
 }
@@ -402,6 +600,33 @@ export interface FileRoutesByTo {
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
+  '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
+  '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
+  '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
+  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
+  '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
+  '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
+  '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
+  '/api/public/interview-realtime-token': typeof ApiPublicInterviewRealtimeTokenRoute
+  '/api/public/interview-report': typeof ApiPublicInterviewReportRoute
+  '/api/public/interview-voice': typeof ApiPublicInterviewVoiceRoute
+  '/api/public/jobs-apify': typeof ApiPublicJobsApifyRoute
+  '/api/public/match-jobs': typeof ApiPublicMatchJobsRoute
+  '/api/public/notify-policy-update': typeof ApiPublicNotifyPolicyUpdateRoute
+  '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
+  '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
+  '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
+  '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
+  '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
+  '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
+  '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
+  '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
+  '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
+  '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/affiliate': typeof AppAffiliateIndexRoute
   '/interview': typeof AppInterviewIndexRoute
 }
@@ -454,6 +679,33 @@ export interface FileRoutesById {
   '/_app/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/_app/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/_app/interview/history': typeof AppInterviewHistoryRoute
+  '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
+  '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
+  '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
+  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
+  '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
+  '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
+  '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
+  '/api/public/interview-realtime-token': typeof ApiPublicInterviewRealtimeTokenRoute
+  '/api/public/interview-report': typeof ApiPublicInterviewReportRoute
+  '/api/public/interview-voice': typeof ApiPublicInterviewVoiceRoute
+  '/api/public/jobs-apify': typeof ApiPublicJobsApifyRoute
+  '/api/public/match-jobs': typeof ApiPublicMatchJobsRoute
+  '/api/public/notify-policy-update': typeof ApiPublicNotifyPolicyUpdateRoute
+  '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
+  '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
+  '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
+  '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
+  '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
+  '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
+  '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
+  '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
+  '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
+  '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/_app/affiliate/': typeof AppAffiliateIndexRoute
   '/_app/interview/': typeof AppInterviewIndexRoute
 }
@@ -506,6 +758,33 @@ export interface FileRouteTypes {
     | '/affiliate/dashboard'
     | '/affiliate/resources'
     | '/interview/history'
+    | '/api/public/admin-rpc'
+    | '/api/public/affiliate-public'
+    | '/api/public/analyze-resume'
+    | '/api/public/calendar-sync'
+    | '/api/public/company-research'
+    | '/api/public/daily-digest'
+    | '/api/public/delete-account'
+    | '/api/public/generate-application'
+    | '/api/public/get-paddle-price'
+    | '/api/public/interview-coach'
+    | '/api/public/interview-realtime-token'
+    | '/api/public/interview-report'
+    | '/api/public/interview-voice'
+    | '/api/public/jobs-apify'
+    | '/api/public/match-jobs'
+    | '/api/public/notify-policy-update'
+    | '/api/public/parse-job-url'
+    | '/api/public/payments-portal'
+    | '/api/public/payments-webhook'
+    | '/api/public/practice-plan'
+    | '/api/public/recommend-jobs'
+    | '/api/public/resolve-discount'
+    | '/api/public/revenuecat-sync'
+    | '/api/public/search-console'
+    | '/api/public/search-jobs'
+    | '/api/public/send-notification'
+    | '/api/public/seo-monitor'
     | '/affiliate/'
     | '/interview/'
   fileRoutesByTo: FileRoutesByTo
@@ -556,6 +835,33 @@ export interface FileRouteTypes {
     | '/affiliate/dashboard'
     | '/affiliate/resources'
     | '/interview/history'
+    | '/api/public/admin-rpc'
+    | '/api/public/affiliate-public'
+    | '/api/public/analyze-resume'
+    | '/api/public/calendar-sync'
+    | '/api/public/company-research'
+    | '/api/public/daily-digest'
+    | '/api/public/delete-account'
+    | '/api/public/generate-application'
+    | '/api/public/get-paddle-price'
+    | '/api/public/interview-coach'
+    | '/api/public/interview-realtime-token'
+    | '/api/public/interview-report'
+    | '/api/public/interview-voice'
+    | '/api/public/jobs-apify'
+    | '/api/public/match-jobs'
+    | '/api/public/notify-policy-update'
+    | '/api/public/parse-job-url'
+    | '/api/public/payments-portal'
+    | '/api/public/payments-webhook'
+    | '/api/public/practice-plan'
+    | '/api/public/recommend-jobs'
+    | '/api/public/resolve-discount'
+    | '/api/public/revenuecat-sync'
+    | '/api/public/search-console'
+    | '/api/public/search-jobs'
+    | '/api/public/send-notification'
+    | '/api/public/seo-monitor'
     | '/affiliate'
     | '/interview'
   id:
@@ -607,6 +913,33 @@ export interface FileRouteTypes {
     | '/_app/affiliate/dashboard'
     | '/_app/affiliate/resources'
     | '/_app/interview/history'
+    | '/api/public/admin-rpc'
+    | '/api/public/affiliate-public'
+    | '/api/public/analyze-resume'
+    | '/api/public/calendar-sync'
+    | '/api/public/company-research'
+    | '/api/public/daily-digest'
+    | '/api/public/delete-account'
+    | '/api/public/generate-application'
+    | '/api/public/get-paddle-price'
+    | '/api/public/interview-coach'
+    | '/api/public/interview-realtime-token'
+    | '/api/public/interview-report'
+    | '/api/public/interview-voice'
+    | '/api/public/jobs-apify'
+    | '/api/public/match-jobs'
+    | '/api/public/notify-policy-update'
+    | '/api/public/parse-job-url'
+    | '/api/public/payments-portal'
+    | '/api/public/payments-webhook'
+    | '/api/public/practice-plan'
+    | '/api/public/recommend-jobs'
+    | '/api/public/resolve-discount'
+    | '/api/public/revenuecat-sync'
+    | '/api/public/search-console'
+    | '/api/public/search-jobs'
+    | '/api/public/send-notification'
+    | '/api/public/seo-monitor'
     | '/_app/affiliate/'
     | '/_app/interview/'
   fileRoutesById: FileRoutesById
@@ -630,6 +963,33 @@ export interface RootRouteChildren {
   CareerAdviceIndexRoute: typeof CareerAdviceIndexRoute
   JobSearchIndexRoute: typeof JobSearchIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  ApiPublicAdminRpcRoute: typeof ApiPublicAdminRpcRoute
+  ApiPublicAffiliatePublicRoute: typeof ApiPublicAffiliatePublicRoute
+  ApiPublicAnalyzeResumeRoute: typeof ApiPublicAnalyzeResumeRoute
+  ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
+  ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
+  ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
+  ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
+  ApiPublicGenerateApplicationRoute: typeof ApiPublicGenerateApplicationRoute
+  ApiPublicGetPaddlePriceRoute: typeof ApiPublicGetPaddlePriceRoute
+  ApiPublicInterviewCoachRoute: typeof ApiPublicInterviewCoachRoute
+  ApiPublicInterviewRealtimeTokenRoute: typeof ApiPublicInterviewRealtimeTokenRoute
+  ApiPublicInterviewReportRoute: typeof ApiPublicInterviewReportRoute
+  ApiPublicInterviewVoiceRoute: typeof ApiPublicInterviewVoiceRoute
+  ApiPublicJobsApifyRoute: typeof ApiPublicJobsApifyRoute
+  ApiPublicMatchJobsRoute: typeof ApiPublicMatchJobsRoute
+  ApiPublicNotifyPolicyUpdateRoute: typeof ApiPublicNotifyPolicyUpdateRoute
+  ApiPublicParseJobUrlRoute: typeof ApiPublicParseJobUrlRoute
+  ApiPublicPaymentsPortalRoute: typeof ApiPublicPaymentsPortalRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicPracticePlanRoute: typeof ApiPublicPracticePlanRoute
+  ApiPublicRecommendJobsRoute: typeof ApiPublicRecommendJobsRoute
+  ApiPublicResolveDiscountRoute: typeof ApiPublicResolveDiscountRoute
+  ApiPublicRevenuecatSyncRoute: typeof ApiPublicRevenuecatSyncRoute
+  ApiPublicSearchConsoleRoute: typeof ApiPublicSearchConsoleRoute
+  ApiPublicSearchJobsRoute: typeof ApiPublicSearchJobsRoute
+  ApiPublicSendNotificationRoute: typeof ApiPublicSendNotificationRoute
+  ApiPublicSeoMonitorRoute: typeof ApiPublicSeoMonitorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -977,6 +1337,195 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInterviewHistoryRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/admin-rpc': {
+      id: '/api/public/admin-rpc'
+      path: '/api/public/admin-rpc'
+      fullPath: '/api/public/admin-rpc'
+      preLoaderRoute: typeof ApiPublicAdminRpcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/affiliate-public': {
+      id: '/api/public/affiliate-public'
+      path: '/api/public/affiliate-public'
+      fullPath: '/api/public/affiliate-public'
+      preLoaderRoute: typeof ApiPublicAffiliatePublicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/analyze-resume': {
+      id: '/api/public/analyze-resume'
+      path: '/api/public/analyze-resume'
+      fullPath: '/api/public/analyze-resume'
+      preLoaderRoute: typeof ApiPublicAnalyzeResumeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/calendar-sync': {
+      id: '/api/public/calendar-sync'
+      path: '/api/public/calendar-sync'
+      fullPath: '/api/public/calendar-sync'
+      preLoaderRoute: typeof ApiPublicCalendarSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/company-research': {
+      id: '/api/public/company-research'
+      path: '/api/public/company-research'
+      fullPath: '/api/public/company-research'
+      preLoaderRoute: typeof ApiPublicCompanyResearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/daily-digest': {
+      id: '/api/public/daily-digest'
+      path: '/api/public/daily-digest'
+      fullPath: '/api/public/daily-digest'
+      preLoaderRoute: typeof ApiPublicDailyDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/delete-account': {
+      id: '/api/public/delete-account'
+      path: '/api/public/delete-account'
+      fullPath: '/api/public/delete-account'
+      preLoaderRoute: typeof ApiPublicDeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/generate-application': {
+      id: '/api/public/generate-application'
+      path: '/api/public/generate-application'
+      fullPath: '/api/public/generate-application'
+      preLoaderRoute: typeof ApiPublicGenerateApplicationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/get-paddle-price': {
+      id: '/api/public/get-paddle-price'
+      path: '/api/public/get-paddle-price'
+      fullPath: '/api/public/get-paddle-price'
+      preLoaderRoute: typeof ApiPublicGetPaddlePriceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/interview-coach': {
+      id: '/api/public/interview-coach'
+      path: '/api/public/interview-coach'
+      fullPath: '/api/public/interview-coach'
+      preLoaderRoute: typeof ApiPublicInterviewCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/interview-realtime-token': {
+      id: '/api/public/interview-realtime-token'
+      path: '/api/public/interview-realtime-token'
+      fullPath: '/api/public/interview-realtime-token'
+      preLoaderRoute: typeof ApiPublicInterviewRealtimeTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/interview-report': {
+      id: '/api/public/interview-report'
+      path: '/api/public/interview-report'
+      fullPath: '/api/public/interview-report'
+      preLoaderRoute: typeof ApiPublicInterviewReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/interview-voice': {
+      id: '/api/public/interview-voice'
+      path: '/api/public/interview-voice'
+      fullPath: '/api/public/interview-voice'
+      preLoaderRoute: typeof ApiPublicInterviewVoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs-apify': {
+      id: '/api/public/jobs-apify'
+      path: '/api/public/jobs-apify'
+      fullPath: '/api/public/jobs-apify'
+      preLoaderRoute: typeof ApiPublicJobsApifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/match-jobs': {
+      id: '/api/public/match-jobs'
+      path: '/api/public/match-jobs'
+      fullPath: '/api/public/match-jobs'
+      preLoaderRoute: typeof ApiPublicMatchJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/notify-policy-update': {
+      id: '/api/public/notify-policy-update'
+      path: '/api/public/notify-policy-update'
+      fullPath: '/api/public/notify-policy-update'
+      preLoaderRoute: typeof ApiPublicNotifyPolicyUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/parse-job-url': {
+      id: '/api/public/parse-job-url'
+      path: '/api/public/parse-job-url'
+      fullPath: '/api/public/parse-job-url'
+      preLoaderRoute: typeof ApiPublicParseJobUrlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments-portal': {
+      id: '/api/public/payments-portal'
+      path: '/api/public/payments-portal'
+      fullPath: '/api/public/payments-portal'
+      preLoaderRoute: typeof ApiPublicPaymentsPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments-webhook': {
+      id: '/api/public/payments-webhook'
+      path: '/api/public/payments-webhook'
+      fullPath: '/api/public/payments-webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/practice-plan': {
+      id: '/api/public/practice-plan'
+      path: '/api/public/practice-plan'
+      fullPath: '/api/public/practice-plan'
+      preLoaderRoute: typeof ApiPublicPracticePlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/recommend-jobs': {
+      id: '/api/public/recommend-jobs'
+      path: '/api/public/recommend-jobs'
+      fullPath: '/api/public/recommend-jobs'
+      preLoaderRoute: typeof ApiPublicRecommendJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/resolve-discount': {
+      id: '/api/public/resolve-discount'
+      path: '/api/public/resolve-discount'
+      fullPath: '/api/public/resolve-discount'
+      preLoaderRoute: typeof ApiPublicResolveDiscountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/revenuecat-sync': {
+      id: '/api/public/revenuecat-sync'
+      path: '/api/public/revenuecat-sync'
+      fullPath: '/api/public/revenuecat-sync'
+      preLoaderRoute: typeof ApiPublicRevenuecatSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/search-console': {
+      id: '/api/public/search-console'
+      path: '/api/public/search-console'
+      fullPath: '/api/public/search-console'
+      preLoaderRoute: typeof ApiPublicSearchConsoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/search-jobs': {
+      id: '/api/public/search-jobs'
+      path: '/api/public/search-jobs'
+      fullPath: '/api/public/search-jobs'
+      preLoaderRoute: typeof ApiPublicSearchJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/send-notification': {
+      id: '/api/public/send-notification'
+      path: '/api/public/send-notification'
+      fullPath: '/api/public/send-notification'
+      preLoaderRoute: typeof ApiPublicSendNotificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/seo-monitor': {
+      id: '/api/public/seo-monitor'
+      path: '/api/public/seo-monitor'
+      fullPath: '/api/public/seo-monitor'
+      preLoaderRoute: typeof ApiPublicSeoMonitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1069,6 +1618,33 @@ const rootRouteChildren: RootRouteChildren = {
   CareerAdviceIndexRoute: CareerAdviceIndexRoute,
   JobSearchIndexRoute: JobSearchIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  ApiPublicAdminRpcRoute: ApiPublicAdminRpcRoute,
+  ApiPublicAffiliatePublicRoute: ApiPublicAffiliatePublicRoute,
+  ApiPublicAnalyzeResumeRoute: ApiPublicAnalyzeResumeRoute,
+  ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
+  ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
+  ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
+  ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,
+  ApiPublicGenerateApplicationRoute: ApiPublicGenerateApplicationRoute,
+  ApiPublicGetPaddlePriceRoute: ApiPublicGetPaddlePriceRoute,
+  ApiPublicInterviewCoachRoute: ApiPublicInterviewCoachRoute,
+  ApiPublicInterviewRealtimeTokenRoute: ApiPublicInterviewRealtimeTokenRoute,
+  ApiPublicInterviewReportRoute: ApiPublicInterviewReportRoute,
+  ApiPublicInterviewVoiceRoute: ApiPublicInterviewVoiceRoute,
+  ApiPublicJobsApifyRoute: ApiPublicJobsApifyRoute,
+  ApiPublicMatchJobsRoute: ApiPublicMatchJobsRoute,
+  ApiPublicNotifyPolicyUpdateRoute: ApiPublicNotifyPolicyUpdateRoute,
+  ApiPublicParseJobUrlRoute: ApiPublicParseJobUrlRoute,
+  ApiPublicPaymentsPortalRoute: ApiPublicPaymentsPortalRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicPracticePlanRoute: ApiPublicPracticePlanRoute,
+  ApiPublicRecommendJobsRoute: ApiPublicRecommendJobsRoute,
+  ApiPublicResolveDiscountRoute: ApiPublicResolveDiscountRoute,
+  ApiPublicRevenuecatSyncRoute: ApiPublicRevenuecatSyncRoute,
+  ApiPublicSearchConsoleRoute: ApiPublicSearchConsoleRoute,
+  ApiPublicSearchJobsRoute: ApiPublicSearchJobsRoute,
+  ApiPublicSendNotificationRoute: ApiPublicSendNotificationRoute,
+  ApiPublicSeoMonitorRoute: ApiPublicSeoMonitorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { trackJourney } from "@/lib/telemetry/journey";
 
@@ -56,7 +57,7 @@ export function useScheduledInterviews() {
     setBusy(true);
     setCalendarError(null);
     try {
-      const { data, error } = await supabase.functions.invoke("calendar-sync", { body });
+      const { data, error } = await invokeFunction("calendar-sync", { body });
       if (error) {
         let detail = error.message;
         try {
@@ -127,7 +128,7 @@ export function useScheduledInterviews() {
       });
 
       // Best-effort confirmation email; never blocks scheduling.
-      void supabase.functions.invoke("send-notification", {
+      void invokeFunction("send-notification", {
         body: {
           template: "interview_scheduled",
           input: {
