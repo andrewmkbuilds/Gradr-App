@@ -293,6 +293,12 @@ export default function AiResumeOptimization() {
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {[
                 {
+                  to: "/ats-resume-checker",
+                  title: "Free ATS Resume Checker",
+                  desc: "Score your resume against any job description and get the exact missing keywords and formatting fixes.",
+                  location: "related_ats_checker",
+                },
+                {
                   to: "/resume",
                   title: "Resume Intelligence Engine",
                   desc: "Upload your resume, score it against any job description, and get AI rewrites bullet-by-bullet.",
