@@ -112,18 +112,33 @@ export function useSidebarKeyboardNav(
 export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open: boolean, enabled: boolean) {
   useEffect(() => {
     if (!enabled || !open) return;
-    const root = containerRef.current;
-    if (!root) return;
 
-    const id = window.setTimeout(() => {
+    // The drawer mounts its content asynchronously and Radix moves focus to the
+    // first tabbable element on open, so poll briefly and claim focus after it.
+    let cancelled = false;
+    let attempts = 0;
+    let timer = 0;
+
+    const tick = () => {
+      if (cancelled) return;
+      const root = containerRef.current;
       const active =
-        root.querySelector<HTMLElement>('[data-nav-focusable][aria-current="page"]') ??
-        root.querySelector<HTMLElement>("[data-nav-focusable]");
-      if (!active) return;
-      active.scrollIntoView({ block: "center", behavior: "auto" });
-      active.focus({ preventScroll: true });
-    }, 120); // let the sheet finish its open transition
+        root?.querySelector<HTMLElement>('[data-nav-focusable][aria-current="page"]') ??
+        root?.querySelector<HTMLElement>("[data-nav-focusable]");
 
-    return () => window.clearTimeout(id);
+      if (active) {
+        active.scrollIntoView({ block: "center", behavior: "auto" });
+        active.focus({ preventScroll: true });
+        return;
+      }
+      if (attempts++ < 12) timer = window.setTimeout(tick, 60);
+    };
+
+    timer = window.setTimeout(tick, 150);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [containerRef, open, enabled]);
 }
+
