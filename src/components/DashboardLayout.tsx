@@ -28,7 +28,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <NotificationsBell />
             </div>
           </header>
-          <main id="main-content" data-scroll-container className="flex-1 overflow-auto p-6">
+          {/* No nested scroll container: the page scrolls with the document so
+              there is only ever one vertical scrollbar. min-w-0 + overflow-x-clip
+              stops wide children (tables, charts) creating a horizontal bar. */}
+          <main id="main-content" className="flex-1 min-w-0 overflow-x-clip p-4 sm:p-6">
+
             {children}
           </main>
         </div>
