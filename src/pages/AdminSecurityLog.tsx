@@ -193,12 +193,57 @@ export default function AdminSecurityLog() {
           <option value="processed">Processed</option>
           <option value="failed">Failed</option>
         </select>
-        <select value={days} onChange={(e) => setDays(Number(e.target.value))} className={selectCls} aria-label="Time range">
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-        </select>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          From
+          <input
+            type="date"
+            value={from}
+            max={to}
+            onChange={(e) => setFrom(e.target.value)}
+            className={selectCls}
+            aria-label="Start date"
+          />
+        </label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          To
+          <input
+            type="date"
+            value={to}
+            min={from}
+            max={isoDay(new Date())}
+            onChange={(e) => setTo(e.target.value)}
+            className={selectCls}
+            aria-label="End date"
+          />
+        </label>
+
+        <div className="flex gap-2 ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={exporting !== null}
+            onClick={() => handleExport("csv")}
+          >
+            {exporting === "csv" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            Export CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={exporting !== null}
+            onClick={() => handleExport("json")}
+          >
+            {exporting === "json" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileJson className="h-3.5 w-3.5" />}
+            Export JSON
+          </Button>
+        </div>
       </div>
+      <p className="text-xs text-muted-foreground -mt-3">
+        Exports include every event in the selected date range and filters — not just the 300 rows shown below.
+      </p>
+
 
       <div className="glass-card overflow-x-auto">
         <table className="w-full text-sm">
