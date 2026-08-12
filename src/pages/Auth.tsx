@@ -246,6 +246,22 @@ export default function Auth() {
               </Button>
             )}
             <Button
+              variant="outline"
+              className="w-full h-11 gap-2"
+              onClick={handleResendVerification}
+              disabled={resending || resendIn > 0}
+            >
+              <RefreshCw className={resending ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
+              {resendIn > 0
+                ? `Resend verification email in ${resendIn}s`
+                : resending
+                  ? "Sending…"
+                  : "Resend verification email"}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              No email after a minute? Check your spam folder before resending.
+            </p>
+            <Button
               variant="ghost"
               className="w-full h-11 text-muted-foreground"
               onClick={() => setPendingEmail(null)}
