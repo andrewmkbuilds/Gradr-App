@@ -104,7 +104,7 @@ const NEW_WAY = [
   "One system that remembers your history",
 ];
 
-const PLANS = [
+const PLANS: Plan[] = [
   {
     name: "Free",
     tagline: "Enough to feel the whole system.",
