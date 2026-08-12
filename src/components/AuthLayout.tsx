@@ -147,16 +147,20 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-sm space-y-7 glassmorphic rounded-3xl p-7 sm:p-8"
         >
-          {/* Mobile-only logo */}
+          {/* Mobile/tablet-only brand + headline (the left panel is hidden below lg,
+              so the headline must render here or it disappears entirely). */}
           <div className="lg:hidden text-center space-y-3">
             <div className="relative h-14 w-14 mx-auto">
               <div className="conic-spin absolute inset-0 rounded-2xl opacity-90" />
-              <div className="absolute inset-[2px] rounded-2xl bg-background flex items-center justify-center">
-                <Zap className="h-6 w-6 text-primary" />
-              </div>
+              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl" />
             </div>
             <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
+            <p className="text-xl sm:text-2xl font-bold leading-[1.2] tracking-tight break-words text-balance max-w-full">
+              <span className="block">Your AI career</span>
+              <span className="kinetic-text block pb-1">command center.</span>
+            </p>
           </div>
+
 
           {children}
         </motion.div>
