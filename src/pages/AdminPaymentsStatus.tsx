@@ -220,6 +220,19 @@ export default function AdminPaymentsStatus() {
         </ul>
       </Card>
 
+      {diag.warnings.length > 0 && (
+        <Card className="border-warning/40 bg-warning/5 p-5">
+          <h2 className="mb-2 text-lg font-semibold text-foreground">Warnings (non-blocking)</h2>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            {diag.warnings.map((issue, i) => (
+              <li key={i} className="ml-4 list-disc">
+                <span className="text-foreground">{issue.message}</span> {issue.fix}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
       {diag.issues.length > 0 && (
         <Card className="p-5">
           <h2 className="mb-2 text-lg font-semibold text-foreground">How to fix</h2>
