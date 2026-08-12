@@ -94,7 +94,7 @@ export function InterviewReportView({
 
       <div className="grid gap-4 md:grid-cols-2">
         <List title="What worked" icon={<CheckCircle2 className="h-4 w-4 text-primary" />} items={report.strengths} />
-        <List title="What to improve" icon={<TrendingUp className="h-4 w-4 text-amber-500" />} items={report.improvements} />
+        <List title="What to improve" icon={<TrendingUp className="h-4 w-4 text-warning" />} items={report.improvements} />
       </div>
 
       <List title="Next steps" icon={<ArrowRight className="h-4 w-4 text-primary" />} items={report.nextSteps} />

@@ -1,6 +1,7 @@
 import { Zap, Sparkles, Target, Brain, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
 import { type ReactNode } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -18,16 +19,19 @@ const TITLE = "CareerFlow OS";
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-screen flex aurora-bg overflow-hidden relative">
+      <div className="absolute right-4 top-4 z-20">
+        <ThemeToggle />
+      </div>
       {/* Ambient background motion — liquid blobs across the whole screen */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="liquid-blob absolute -top-32 -left-24 h-[420px] w-[420px] bg-primary/20" />
-        <div className="liquid-blob absolute top-1/3 -right-32 h-[520px] w-[520px] bg-purple-500/15" style={{ animationDelay: "-6s" }} />
-        <div className="liquid-blob absolute -bottom-40 left-1/3 h-[380px] w-[380px] bg-cyan-400/15" style={{ animationDelay: "-12s" }} />
+        <div className="liquid-blob absolute -top-32 -left-24 h-[420px] w-[420px] bg-primary/20 opacity-[var(--decor-strength)]" />
+        <div className="liquid-blob absolute top-1/3 -right-32 h-[520px] w-[520px] bg-brand-secondary/15 opacity-[var(--decor-strength)]" style={{ animationDelay: "-6s" }} />
+        <div className="liquid-blob absolute -bottom-40 left-1/3 h-[380px] w-[380px] bg-primary/15 opacity-[var(--decor-strength)]" style={{ animationDelay: "-12s" }} />
         {/* Floating particles */}
         {Array.from({ length: 14 }).map((_, i) => (
           <span
             key={i}
-            className={`absolute h-1.5 w-1.5 rounded-full bg-primary/60 ${i % 2 ? "float-slow" : "float-mid"}`}
+            className={`absolute h-1.5 w-1.5 rounded-full bg-primary/50 ${i % 2 ? "float-slow" : "float-mid"}`}
             style={{
               left: `${(i * 73) % 100}%`,
               top: `${(i * 41) % 100}%`,
@@ -37,7 +41,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           />
         ))}
         {/* Self-drawing line decoration */}
-        <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 1200 800" fill="none" preserveAspectRatio="none">
+        <svg className="absolute inset-0 h-full w-full opacity-20 dark:opacity-30" viewBox="0 0 1200 800" fill="none" preserveAspectRatio="none">
           <path
             className="draw-stroke"
             d="M0,600 C200,500 400,700 600,520 S1000,300 1200,400"
@@ -48,7 +52,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             className="draw-stroke"
             style={{ animationDelay: "0.6s" }}
             d="M0,300 C300,200 500,420 800,260 S1100,180 1200,220"
-            stroke="hsl(265 90% 65%)"
+            stroke="hsl(var(--brand-secondary))"
             strokeWidth="1"
           />
         </svg>
@@ -121,7 +125,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           {/* Marquee trust strip */}
           <div className="overflow-hidden mask-marquee pt-2" style={{ maskImage: "linear-gradient(90deg, transparent, black 15%, black 85%, transparent)" }}>
-            <div className="flex gap-10 marquee whitespace-nowrap text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
+            <div className="flex gap-10 marquee whitespace-nowrap text-xs uppercase tracking-[0.2em] text-muted-foreground">
               {Array.from({ length: 2 }).map((_, dup) => (
                 <div key={dup} className="flex gap-10 shrink-0">
                   <span>· AI Resume Engine</span>

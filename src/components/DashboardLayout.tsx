@@ -4,6 +4,7 @@ import { GuestBanner } from "@/components/GuestBanner";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AmbientBackground } from "@/components/AmbientBackground";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +17,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <GuestBanner />
           <header className="glass-bar enter-up sticky top-0 z-30 h-14 flex items-center justify-between border-b border-border/70 px-4 shrink-0">
             <SidebarTrigger className="interactive press-scale text-muted-foreground hover:text-foreground" />
-            <NotificationsBell />
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              <NotificationsBell />
+            </div>
           </header>
           <main data-scroll-container className="flex-1 overflow-auto p-6">
             {children}

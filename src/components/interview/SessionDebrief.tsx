@@ -25,7 +25,7 @@ function fallbackQuestions(report: InterviewReport) {
 
 const columns = [
   { key: "strengths", title: "Strengths", icon: Sparkles, tone: "text-primary" },
-  { key: "improvements", title: "Improvements", icon: TrendingUp, tone: "text-amber-500" },
+  { key: "improvements", title: "Improvements", icon: TrendingUp, tone: "text-warning" },
 ] as const;
 
 /** End-of-session debrief: what went well, what to fix, and what to practise next. */
