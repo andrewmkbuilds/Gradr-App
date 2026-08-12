@@ -124,6 +124,7 @@ export const navGroups: NavGroup[] = [
       { title: "Search Console", url: "/admin/search-console", icon: Search },
       { title: "Blog Analytics", url: "/admin/blog-analytics", icon: BarChart3 },
       { title: "Nav Analytics", url: "/admin/nav-analytics", icon: BarChart3 },
+      { title: "SEO Monitor", url: "/admin/seo-monitor", icon: BarChart3 },
       { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
       { title: "Paddle Customers", url: "/admin/paddle", icon: Wallet },
       { title: "Payments Status", url: "/admin/payments-status", icon: Activity },
