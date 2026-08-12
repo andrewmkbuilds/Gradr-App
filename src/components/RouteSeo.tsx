@@ -211,6 +211,17 @@ export function RouteSeo() {
   const ogImage = resolveOgImage(pathname);
   const noindex = isNoIndex(pathname);
 
+  // index.html ships a static canonical + robots tag so non-JS crawlers always
+  // see one. Helmet dedupes <meta name="robots"> but NOT <link rel="canonical">,
+  // so drop the static tags once the app has mounted to avoid two conflicting
+  // canonicals on every non-home route.
+  useEffect(() => {
+    document
+      .querySelectorAll('link[rel="canonical"]:not([data-rh]), meta[name="robots"]:not([data-rh])')
+      .forEach((node) => node.remove());
+  }, []);
+
+
   const legalUpdated: Record<string, string> = {
     "/terms": POLICIES_UPDATED,
     "/privacy": POLICIES_UPDATED,
