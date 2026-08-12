@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, Clock } from "lucide-react";
 import { GUIDES, guidePath } from "@/content/guides";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Reveal } from "@/components/Reveal";
+import { Reveal } from "@/components/landing/Reveal";
 
 /** Long-form article that lives outside the guides registry. */
 const FEATURED = {

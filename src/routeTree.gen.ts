@@ -33,6 +33,7 @@ import { Route as AppPipelineRouteImport } from './routes/_app/pipeline'
 import { Route as AppResumeRouteImport } from './routes/_app/resume'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppWelcomeRouteImport } from './routes/_app/welcome'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogAiResumeOptimizationRouteImport } from './routes/blog/ai-resume-optimization'
 import { Route as CareerAdviceIndexRouteImport } from './routes/career-advice/index'
 import { Route as CareerAdviceSlugRouteImport } from './routes/career-advice/$slug'
@@ -205,6 +206,11 @@ const AppWelcomeRoute = AppWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
   getParentRoute: () => AppRoute,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BlogAiResumeOptimizationRoute =
   BlogAiResumeOptimizationRouteImport.update({
@@ -509,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/blog/ai-resume-optimization': typeof BlogAiResumeOptimizationRoute
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/career-advice/': typeof CareerAdviceIndexRoute
   '/job-search/': typeof JobSearchIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -587,6 +594,7 @@ export interface FileRoutesByTo {
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
   '/': typeof AppIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/career-advice': typeof CareerAdviceIndexRoute
   '/job-search': typeof JobSearchIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -667,6 +675,7 @@ export interface FileRoutesById {
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
   '/_app/': typeof AppIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/career-advice/': typeof CareerAdviceIndexRoute
   '/job-search/': typeof JobSearchIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -747,6 +756,7 @@ export interface FileRouteTypes {
     | '/blog/ai-resume-optimization'
     | '/career-advice/$slug'
     | '/job-search/$slug'
+    | '/blog/'
     | '/career-advice/'
     | '/job-search/'
     | '/.lovable/oauth/consent'
@@ -825,6 +835,7 @@ export interface FileRouteTypes {
     | '/career-advice/$slug'
     | '/job-search/$slug'
     | '/'
+    | '/blog'
     | '/career-advice'
     | '/job-search'
     | '/.lovable/oauth/consent'
@@ -904,6 +915,7 @@ export interface FileRouteTypes {
     | '/career-advice/$slug'
     | '/job-search/$slug'
     | '/_app/'
+    | '/blog/'
     | '/career-advice/'
     | '/job-search/'
     | '/.lovable/oauth/consent'
@@ -972,6 +984,7 @@ export interface RootRouteChildren {
   BlogAiResumeOptimizationRoute: typeof BlogAiResumeOptimizationRoute
   CareerAdviceSlugRoute: typeof CareerAdviceSlugRoute
   JobSearchSlugRoute: typeof JobSearchSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   CareerAdviceIndexRoute: typeof CareerAdviceIndexRoute
   JobSearchIndexRoute: typeof JobSearchIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -1173,6 +1186,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/welcome'
       preLoaderRoute: typeof AppWelcomeRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/blog/ai-resume-optimization': {
       id: '/blog/ai-resume-optimization'
@@ -1636,6 +1656,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogAiResumeOptimizationRoute: BlogAiResumeOptimizationRoute,
   CareerAdviceSlugRoute: CareerAdviceSlugRoute,
   JobSearchSlugRoute: JobSearchSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
   CareerAdviceIndexRoute: CareerAdviceIndexRoute,
   JobSearchIndexRoute: JobSearchIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
