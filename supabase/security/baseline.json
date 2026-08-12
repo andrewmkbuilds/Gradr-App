@@ -259,6 +259,24 @@
       ]
     },
     {
+      "internalId": "SUPA_auth_allow_anonymous_sign_ins",
+      "description": "Anonymous (guest) sessions must not be able to read or write user_integrations.",
+      "table": "user_integrations",
+      "policyRoles": [
+        "authenticated"
+      ],
+      "requiredCmds": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "predicateMustContain": [
+        "is_anonymous",
+        "auth.uid()"
+      ]
+    },
+    {
       "internalId": "SUPA_anon_security_definer_function_executable",
       "description": "Only allowlisted SECURITY DEFINER functions may be executable by anon; never by PUBLIC.",
       "functionExecuteRole": "anon"
