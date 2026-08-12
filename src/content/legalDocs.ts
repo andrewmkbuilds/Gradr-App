@@ -9,16 +9,16 @@
  * Markdown subset supported by the renderer: `## heading`, `- bullet`,
  * paragraphs, `**bold**` and `[label](href)` links.
  */
-import { REFUND_WINDOW_DAYS, SELLER_CONTACT_EMAIL, SELLER_LEGAL_NAME, SELLER_TRADING_NAME } from "./legal";
+import { REFUND_WINDOW_DAYS, SELLER_CONTACT_EMAIL, SELLER_DOMAIN, SELLER_LEGAL_NAME, SELLER_TRADING_NAME, SELLER_WEBSITE_URL } from "./legal";
 
 export const TERMS_V1_EFFECTIVE = "2026-08-12";
 export const PRIVACY_V1_EFFECTIVE = "2026-08-12";
 
 export const TERMS_V1 = `## 1. Agreement to these terms
 
-Gradr is operated by ${SELLER_LEGAL_NAME} (trading as ${SELLER_TRADING_NAME}), reachable at ${SELLER_CONTACT_EMAIL}. These Terms & Conditions form a binding agreement between you and us covering your access to and use of the Gradr website, application and related services (the "Service").
+Gradr is operated by ${SELLER_LEGAL_NAME} (trading as ${SELLER_TRADING_NAME}), reachable at ${SELLER_CONTACT_EMAIL}. These Terms & Conditions form a binding agreement between you and us covering your access to and use of the Gradr website at ${SELLER_WEBSITE_URL}, application and related services (the "Service").
 
-By creating an account, signing in, or purchasing a plan you confirm that you have read, understood and agree to these terms. If you do not agree, you must stop using the Service.
+By creating an account, signing in, or purchasing a plan on ${SELLER_DOMAIN} you confirm that you have read, understood and agree to these terms. If you do not agree, you must stop using the Service.
 
 We may update these terms from time to time. We will change the "Last updated" date and, where the changes are material, notify you in the product or by email. Continued use after an update means you accept the revised terms.
 
@@ -169,7 +169,7 @@ Questions about these terms: ${SELLER_CONTACT_EMAIL}. Payment, invoice and tax q
 
 export const PRIVACY_V1 = `## 1. Introduction
 
-This privacy notice explains how ${SELLER_LEGAL_NAME} (trading as ${SELLER_TRADING_NAME}, "we", "us") collects, uses, shares and protects personal data when you use the Gradr website and application (the "Services").
+This privacy notice explains how ${SELLER_LEGAL_NAME} (trading as ${SELLER_TRADING_NAME}, "we", "us") collects, uses, shares and protects personal data when you use the Gradr website at ${SELLER_WEBSITE_URL} and application (the "Services").
 
 We are the data controller for that personal data. If you have any question or want to exercise a privacy right, contact us at ${SELLER_CONTACT_EMAIL}.
 
