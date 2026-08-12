@@ -261,6 +261,11 @@ export function RouteSeo() {
     : null;
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
+  // Article/BlogPosting JSON-LD is emitted by the editorial pages themselves
+  // (GuideArticle + blog posts via structuredData.ts), so nothing extra here.
+
+
+
   return (
     <Helmet>
       <html lang="en" />
@@ -300,4 +305,5 @@ export function RouteSeo() {
     </Helmet>
   );
 }
+
 
