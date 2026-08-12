@@ -1,4 +1,5 @@
 import { Zap, Sparkles, Target, Brain, Rocket } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { motion } from "framer-motion";
 import { type ReactNode } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -70,10 +71,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="flex items-center gap-4">
             <div className="relative h-14 w-14 shrink-0">
               <div className="conic-spin absolute inset-0 rounded-2xl opacity-90" />
-              <div className="absolute inset-[2px] rounded-2xl bg-background flex items-center justify-center">
-                <Zap className="h-6 w-6 text-primary" />
-              </div>
-              <Sparkles className="stop-motion absolute -top-2 -right-2 h-4 w-4 text-primary" />
+              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl" />
             </div>
             {/* Brand mark, not a heading — each auth page owns the single page <h1>. */}
             <div className="text-3xl font-bold tracking-tight kinetic-text">{TITLE}</div>

@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/BrandLogo";
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
@@ -66,8 +67,10 @@ function ProtectedRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-5">
+        <BrandLogo size={64} className="animate-pulse" />
+        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="sr-only">Loading Gradr</span>
       </div>
     );
   }

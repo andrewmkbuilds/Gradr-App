@@ -11,6 +11,7 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/useAuth";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
 import {
   HeroWorkspace, ResumeVisual, MatchVisual, ApplicationVisual,
@@ -251,9 +252,7 @@ export default function Landing() {
           className={`mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 transition-all sm:px-8 ${scrolled ? "h-14" : "h-16"}`}
         >
           <a href="#hero" className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <span className="grid h-7 w-7 place-items-center rounded-lg border border-primary/30 bg-primary/15">
-              <Sparkles className="h-4 w-4 text-primary" aria-hidden />
-            </span>
+            <BrandLogo size={28} />
             <span className="text-base font-bold tracking-[0.24em]">GRADR</span>
           </a>
 
@@ -851,9 +850,7 @@ export default function Landing() {
         <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded-lg border border-primary/30 bg-primary/15">
-                <Sparkles className="h-4 w-4 text-primary" aria-hidden />
-              </span>
+              <BrandLogo size={28} />
               <span className="text-base font-bold tracking-[0.24em]">GRADR</span>
             </div>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
