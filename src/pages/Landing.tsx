@@ -233,13 +233,13 @@ export default function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <Helmet>
-        <title>CareerFlow OS — From resume to offer</title>
+        <title>Gradr | AI Career Command Center</title>
         <meta
           name="description"
-          content="CareerFlow OS is an AI career operating system: resume intelligence, ATS scoring, job matching, application packages, and AI mock interviews in one workspace."
+          content="Gradr is an AI career operating system: resume intelligence, ATS scoring, job matching, application packages, and AI mock interviews in one workspace."
         />
         <link rel="canonical" href="https://careerflowos.lovable.app/" />
-        <meta property="og:title" content="CareerFlow OS — From resume to offer" />
+        <meta property="og:title" content="Gradr | AI Career Command Center" />
         <meta
           property="og:description"
           content="One workspace for the entire job search: resume, ATS, matching, applications, AI mock interviews, and analytics."

@@ -97,7 +97,7 @@ export default function DigestPreview() {
         <div className="bg-background p-6 sm:p-8">
           <div className="max-w-2xl mx-auto rounded-xl border border-border bg-card p-6 space-y-6 shadow-lg">
             <div>
-              <p className="text-xs uppercase tracking-wide text-primary font-semibold">CareerFlow OS</p>
+              <p className="text-xs uppercase tracking-wide text-primary font-semibold">Gradr</p>
               <h2 className="text-2xl font-bold text-foreground mt-2">Your daily career digest</h2>
               <p className="text-sm text-muted-foreground mt-2">Fresh opportunities and follow-ups that need attention today.</p>
             </div>

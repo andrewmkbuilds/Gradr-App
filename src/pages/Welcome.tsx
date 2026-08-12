@@ -28,7 +28,7 @@ export default function Welcome() {
   return (
     <div className="max-w-2xl mx-auto py-16">
       <Seo
-        title="Welcome to CareerFlow OS"
+        title="Welcome to Gradr"
         description="Your purchase is confirmed — start using your new AI career tools."
         path="/welcome"
       />

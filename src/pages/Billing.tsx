@@ -96,7 +96,7 @@ export default function Billing() {
     <div className="max-w-4xl mx-auto space-y-6">
       <Seo
         title="Billing & Subscription"
-        description="Manage your CareerFlow OS subscription, credits and purchase history."
+        description="Manage your Gradr subscription, credits and purchase history."
         path="/billing"
       />
 
@@ -125,7 +125,7 @@ export default function Billing() {
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-foreground">
                 {sub.isSubscribed
-                  ? `CareerFlow OS ${sub.isPro ? "Pro" : "Starter"} (${sub.billingInterval === "annual" ? "Annual" : "Monthly"})`
+                  ? `Gradr ${sub.isPro ? "Pro" : "Starter"} (${sub.billingInterval === "annual" ? "Annual" : "Monthly"})`
                   : "Free plan"}
               </span>
               {sub.status && sub.status !== "none" && (

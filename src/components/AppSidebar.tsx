@@ -70,7 +70,7 @@ export function AppSidebar() {
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground tracking-tight">CareerFlow OS</div>
+                <div className="text-sm font-bold text-foreground tracking-tight">Gradr</div>
                 <p className="text-[10px] text-muted-foreground">AI Career System</p>
               </div>
             </div>

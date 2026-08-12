@@ -11,7 +11,7 @@ export default function AffiliateResources() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Affiliate Resources</h1>
-        <p className="text-sm text-muted-foreground mt-1">Everything you need to promote CareerFlow OS.</p>
+        <p className="text-sm text-muted-foreground mt-1">Everything you need to promote Gradr.</p>
       </div>
 
       <div className="glass-card p-6">
@@ -36,7 +36,7 @@ export default function AffiliateResources() {
         <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Referral rules</h2>
         <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
           <li>No self-referrals.</li>
-          <li>No paid search on "CareerFlow", "CareerFlow OS", or related branded keywords.</li>
+          <li>No paid search on "CareerFlow", "Gradr", or related branded keywords.</li>
           <li>No spam, misleading claims, or coupon-site stuffing.</li>
           <li>No incentivized fake signups.</li>
         </ul>

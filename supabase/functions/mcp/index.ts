@@ -190,7 +190,7 @@ var get_profile_default = defineTool5({
 var projectRef = "xaeyjrekewnwjujnrqgu";
 var mcp_default = defineMcp({
   name: "careerflow-mcp",
-  title: "CareerFlow OS",
+  title: "Gradr",
   version: "0.1.0",
   instructions: "Tools for the signed-in CareerFlow user. Use `get_profile` for identity and career preferences, `list_resumes` and `list_job_matches` for AI resume + matching data, and `list_tracked_jobs` / `create_tracked_job` to read and write the user's job pipeline.",
   auth: auth.oauth.issuer({
