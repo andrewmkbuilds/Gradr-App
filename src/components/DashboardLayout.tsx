@@ -5,6 +5,8 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AmbientBackground } from "@/components/AmbientBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MobileTabBar } from "@/components/MobileTabBar";
+
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
