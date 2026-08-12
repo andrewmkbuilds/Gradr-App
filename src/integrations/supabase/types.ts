@@ -237,6 +237,7 @@ export type Database = {
           paid_date: string | null
           reversed_date: string | null
           source_amount: number | null
+          source_record_id: string | null
           status: Database["public"]["Enums"]["affiliate_commission_status"]
           updated_at: string
         }
@@ -254,6 +255,7 @@ export type Database = {
           paid_date?: string | null
           reversed_date?: string | null
           source_amount?: number | null
+          source_record_id?: string | null
           status?: Database["public"]["Enums"]["affiliate_commission_status"]
           updated_at?: string
         }
@@ -271,6 +273,7 @@ export type Database = {
           paid_date?: string | null
           reversed_date?: string | null
           source_amount?: number | null
+          source_record_id?: string | null
           status?: Database["public"]["Enums"]["affiliate_commission_status"]
           updated_at?: string
         }
@@ -505,6 +508,48 @@ export type Database = {
           minimum_payout_threshold?: number
           payout_instructions?: string
           program_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      affiliate_tiers: {
+        Row: {
+          active: boolean
+          bonus_rate: number
+          color: string
+          created_at: string
+          id: string
+          key: string
+          min_referrals: number
+          name: string
+          perks: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          bonus_rate?: number
+          color?: string
+          created_at?: string
+          id?: string
+          key: string
+          min_referrals?: number
+          name: string
+          perks?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          bonus_rate?: number
+          color?: string
+          created_at?: string
+          id?: string
+          key?: string
+          min_referrals?: number
+          name?: string
+          perks?: string | null
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
@@ -1773,6 +1818,25 @@ export type Database = {
         Args: { _document_id: string; _user_agent?: string }
         Returns: string
       }
+      admin_affiliate_overview: {
+        Args: never
+        Returns: {
+          affiliate_code: string
+          approved_amount: number
+          clicks: number
+          conversions: number
+          created_at: string
+          display_name: string
+          paid_amount: number
+          pending_amount: number
+          profile_id: string
+          referrals: number
+          reversed_amount: number
+          status: Database["public"]["Enums"]["affiliate_profile_status"]
+          suspicious: boolean
+          user_id: string
+        }[]
+      }
       admin_audit_actors: {
         Args: never
         Returns: {
@@ -1822,9 +1886,28 @@ export type Database = {
         Args: { _document_id: string }
         Returns: string
       }
+      admin_set_commission_status: {
+        Args: {
+          _commission_ids: string[]
+          _reason?: string
+          _status: Database["public"]["Enums"]["affiliate_commission_status"]
+        }
+        Returns: number
+      }
       affiliate_click_is_valid: {
         Args: { _code: string; _profile_id: string }
         Returns: boolean
+      }
+      affiliate_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          alias: string
+          confirmed_referrals: number
+          is_me: boolean
+          rank: number
+          tier_color: string
+          tier_name: string
+        }[]
       }
       approve_affiliate_application: {
         Args: { _application_id: string }
@@ -1886,6 +1969,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       log_admin_access: {
         Args: {
           _action: string
@@ -1904,6 +1988,7 @@ export type Database = {
           profile_id: string
         }[]
       }
+      my_affiliate_overview: { Args: never; Returns: Json }
       notify_admins: {
         Args: {
           _body?: string
@@ -1964,6 +2049,10 @@ export type Database = {
       reject_affiliate_application: {
         Args: { _application_id: string; _reason?: string }
         Returns: undefined
+      }
+      reverse_commission_for_source: {
+        Args: { _reason?: string; _source_record_id: string }
+        Returns: number
       }
       subscription_grants_access: {
         Args: { _current_period_end: string; _status: string }
