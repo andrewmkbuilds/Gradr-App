@@ -159,7 +159,7 @@ export function OnboardingDialog({ open, onComplete }: Props) {
       <VerificationDialog
         open={verifyOpen}
         onOpenChange={setVerifyOpen}
-        defaultCategory={eligibleIdentity?.eligibilityType ?? undefined}
+        defaultType={eligibleIdentity?.eligibilityType ?? null}
       />
     </Dialog>
   );
