@@ -156,6 +156,11 @@ export function OnboardingDialog({ open, onComplete }: Props) {
           </Button>
         </DialogFooter>
       </DialogContent>
+      <VerificationDialog
+        open={verifyOpen}
+        onOpenChange={setVerifyOpen}
+        defaultCategory={eligibleIdentity?.eligibilityType ?? undefined}
+      />
     </Dialog>
   );
 }
