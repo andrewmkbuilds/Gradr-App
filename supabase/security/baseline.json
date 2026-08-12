@@ -55,32 +55,150 @@
     "user_roles"
   ],
   "requiredPolicies": [
-    { "table": "resumes", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "resumes", "cmd": "INSERT", "roles": ["authenticated"] },
-    { "table": "resumes", "cmd": "UPDATE", "roles": ["authenticated"] },
-    { "table": "resumes", "cmd": "DELETE", "roles": ["authenticated"] },
-    { "table": "profiles", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "subscribers", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "usage_credits", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "feature_usage", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "user_roles", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "admin_audit_log", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "security_audit_log", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "paddle_customers", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "paddle_subscriptions", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "digest_send_logs", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "email_notification_log", "cmd": "SELECT", "roles": ["authenticated"] },
-    { "table": "interview_sessions", "cmd": "ALL", "roles": ["authenticated"] }
+    {
+      "table": "resumes",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "resumes",
+      "cmd": "INSERT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "resumes",
+      "cmd": "UPDATE",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "resumes",
+      "cmd": "DELETE",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "profiles",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "subscribers",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "usage_credits",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "feature_usage",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "user_roles",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "admin_audit_log",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "security_audit_log",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "paddle_customers",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "paddle_subscriptions",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "digest_send_logs",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "email_notification_log",
+      "cmd": "SELECT",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "table": "interview_sessions",
+      "cmd": "ALL",
+      "roles": [
+        "authenticated"
+      ]
+    }
   ],
   "tableGrants": {
-    "digest_send_logs": { "anon": [], "authenticated": ["SELECT"] },
-    "email_notification_log": { "anon": [], "authenticated": ["SELECT"] }
+    "digest_send_logs": {
+      "anon": [],
+      "authenticated": [
+        "SELECT"
+      ]
+    },
+    "email_notification_log": {
+      "anon": [],
+      "authenticated": [
+        "SELECT"
+      ]
+    }
   },
   "auditTriggers": [
-    { "table": "digest_send_logs", "trigger": "audit_digest_send_logs_write" },
-    { "table": "email_notification_log", "trigger": "audit_email_notification_log_write" },
-    { "table": "affiliate_clicks", "trigger": "audit_affiliate_clicks_write" },
-    { "table": "analytics_events", "trigger": "audit_analytics_events_write" }
+    {
+      "table": "digest_send_logs",
+      "trigger": "audit_digest_send_logs_write"
+    },
+    {
+      "table": "email_notification_log",
+      "trigger": "audit_email_notification_log_write"
+    },
+    {
+      "table": "affiliate_clicks",
+      "trigger": "audit_affiliate_clicks_write"
+    },
+    {
+      "table": "analytics_events",
+      "trigger": "audit_analytics_events_write"
+    }
   ],
   "functionExecute": {
     "$comment": "SECURITY DEFINER functions in `public`. PUBLIC execute must never be granted. anon/authenticated execute is only allowed for the functions listed here.",
@@ -90,17 +208,31 @@
       "lookup_affiliate_by_code"
     ],
     "authenticatedAllowlist": [
+      "accept_legal_document",
+      "admin_affiliate_overview",
       "admin_audit_actors",
       "admin_create_payout",
+      "admin_legal_document_stats",
+      "admin_legal_pending_users",
       "admin_mark_payout_paid",
+      "admin_publish_legal_document",
+      "admin_review_verification",
+      "admin_set_commission_status",
       "affiliate_click_is_valid",
+      "affiliate_leaderboard",
       "approve_affiliate_application",
       "attribute_signup_referral",
+      "best_discount_for",
       "entitlement_snapshot",
       "get_affiliate_public_settings",
       "has_role",
+      "is_admin",
       "log_admin_access",
+      "log_admin_access_denied",
       "lookup_affiliate_by_code",
+      "my_affiliate_overview",
+      "my_eligibility_state",
+      "pending_legal_acceptances",
       "reject_affiliate_application"
     ]
   }
