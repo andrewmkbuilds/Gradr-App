@@ -35,6 +35,13 @@ export function OnboardingDialog({ open, onComplete }: Props) {
   const [salaryMin, setSalaryMin] = useState("");
   const [experience, setExperience] = useState<"entry" | "mid" | "senior" | "lead">("mid");
   const [saving, setSaving] = useState(false);
+  const [identity, setIdentity] = useState("");
+  const [verifyOpen, setVerifyOpen] = useState(false);
+
+  // Only identities tied to a verifiable category unlock the discount offer.
+  const eligibleIdentity = ONBOARDING_IDENTITIES.find(
+    (i) => i.value === identity && i.eligibilityType,
+  );
 
   const submit = async () => {
     if (!user || !role.trim()) return;
@@ -61,6 +68,8 @@ export function OnboardingDialog({ open, onComplete }: Props) {
       remoteOnly: remote === "remote",
       salaryMin: minSalary,
     });
+    // Offer verification once the essentials are saved, so setup never stalls.
+    if (eligibleIdentity) setVerifyOpen(true);
   };
 
   return (
