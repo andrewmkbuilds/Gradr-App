@@ -245,11 +245,12 @@ function CommissionsPanel() {
   });
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
-  const setStatus = async (id: string, status: string) => {
+  const setStatus = async (id: string, status: "pending" | "approved" | "paid" | "reversed" | "canceled") => {
     const { error } = await supabase.rpc("admin_set_commission_status", {
       _commission_ids: [id],
       _status: status,
     });
+
     if (error) return toast.error(error.message);
     toast.success(`Marked ${status}`);
     qc.invalidateQueries({ queryKey: ["adminCommissions"] });
