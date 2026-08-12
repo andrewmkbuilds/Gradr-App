@@ -8,6 +8,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { AnimatePresence } from "framer-motion";
 import { captureReferralFromUrl } from "@/lib/affiliateTracking";
 import { SentryErrorBoundary, addBreadcrumb } from "@/lib/telemetry/sentry";
@@ -164,6 +165,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <ReferralCapture />
           <TelemetryRouteTracker />
           <AuthProvider>
