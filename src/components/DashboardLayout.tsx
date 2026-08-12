@@ -5,6 +5,8 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AmbientBackground } from "@/components/AmbientBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MobileTabBar } from "@/components/MobileTabBar";
+
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -31,10 +33,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           {/* No nested scroll container: the page scrolls with the document so
               there is only ever one vertical scrollbar. min-w-0 + overflow-x-clip
               stops wide children (tables, charts) creating a horizontal bar. */}
-          <main id="main-content" className="flex-1 min-w-0 overflow-x-clip p-4 sm:p-6">
+          <main id="main-content" className="flex-1 min-w-0 overflow-x-clip p-4 pb-24 sm:p-6 md:pb-6">
 
             {children}
           </main>
+          <MobileTabBar />
+
         </div>
       </div>
     </SidebarProvider>

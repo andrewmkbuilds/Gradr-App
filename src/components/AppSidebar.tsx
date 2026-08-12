@@ -1,27 +1,13 @@
-import {
-  FileText,
-  Target,
-  Zap,
-  Mic,
-  Rocket,
-  LayoutDashboard,
-  ChevronLeft,
-  LogOut,
-  Settings,
-  Sparkles,
-  Briefcase,
-  KanbanSquare,
-  Mail,
-  Gift,
-  ScrollText,
-  Search,
-
-  CreditCard,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronDown, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { BrandLogo } from "@/components/BrandLogo";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useAffiliate";
+import { cn } from "@/lib/utils";
+import { dashboardItem, navGroups, type NavGroup, type NavItem } from "@/config/nav";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -35,81 +21,160 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const engines = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Resume Intelligence", url: "/resume", icon: FileText },
-  { title: "Job Feed", url: "/jobs", icon: Briefcase },
-  { title: "Pipeline", url: "/pipeline", icon: KanbanSquare },
-  { title: "AI Match", url: "/match", icon: Target },
-  { title: "Application Engine", url: "/apply", icon: Zap },
-  { title: "Interview Coach", url: "/interview", icon: Mic },
-  { title: "Growth & Proof", url: "/growth", icon: Rocket },
-  { title: "Pricing", url: "/pricing", icon: Sparkles },
-  { title: "Billing", url: "/billing", icon: CreditCard },
-  { title: "Affiliate", url: "/affiliate", icon: Gift },
-  { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
-  { title: "Affiliate Admin", url: "/admin/affiliates", icon: Sparkles },
-  { title: "Audit Log", url: "/admin/audit-log", icon: ScrollText },
-  { title: "Search Console", url: "/admin/search-console", icon: Search },
+const itemPath = (url: string) => url.split("#")[0];
 
-  { title: "Settings", url: "/settings", icon: Settings },
-];
+function isItemActive(item: NavItem, pathname: string) {
+  const path = itemPath(item.url);
+  return item.matchPrefix ? pathname === path || pathname.startsWith(`${path}/`) : pathname === path;
+}
+
+function isGroupActive(group: NavGroup, pathname: string) {
+  return group.items.some((i) => isItemActive(i, pathname));
+}
+
+const baseRow =
+  "nav-item interactive group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors";
+const idleRow = "text-muted-foreground hover:bg-secondary hover:text-foreground";
+const activeRow = "bg-primary/10 text-primary";
 
 export function AppSidebar() {
-  const { state, toggleSidebar } = useSidebar();
-  const collapsed = state === "collapsed";
-  const location = useLocation();
+  const { state, toggleSidebar, isMobile, setOpenMobile } = useSidebar();
+  const collapsed = state === "collapsed" && !isMobile;
+  const { pathname } = useLocation();
   const { signOut } = useAuth();
+  const { data: isAdmin } = useIsAdmin();
+
+  const groups = navGroups.filter((g) => !g.adminOnly || isAdmin);
+  const [openGroups, setOpenGroups] = useState<string[]>(() =>
+    groups.filter((g) => isGroupActive(g, pathname)).map((g) => g.id),
+  );
+
+  // Keep the group containing the active route expanded on navigation.
+  useEffect(() => {
+    const active = navGroups.find((g) => isGroupActive(g, pathname));
+    if (active) setOpenGroups((prev) => (prev.includes(active.id) ? prev : [...prev, active.id]));
+  }, [pathname]);
+
+  const closeMobile = () => isMobile && setOpenMobile(false);
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          {!collapsed && (
-            <div className="flex items-center gap-2 animate-slide-up">
+        <Link to="/" onClick={closeMobile} className="flex items-center gap-2" aria-label="Gradr home">
+          {collapsed ? (
+            <BrandLogo size={32} className="mx-auto" />
+          ) : (
+            <>
               <BrandLogo size={32} />
               <div>
-                <div className="text-sm font-bold text-foreground tracking-tight">Gradr</div>
+                <div className="text-sm font-bold tracking-tight text-foreground">Gradr</div>
                 <p className="text-[10px] text-muted-foreground">AI Career System</p>
               </div>
-            </div>
+            </>
           )}
-          {collapsed && (
-            <BrandLogo size={32} className="mx-auto" />
-          )}
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="stagger-children">
-              {engines.map((item) => {
-                const isActive = location.pathname === item.url;
+            <SidebarMenu className="gap-0.5">
+              {/* Dashboard */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to={dashboardItem.url}
+                    end
+                    onClick={closeMobile}
+                    aria-label={dashboardItem.title}
+                    className={cn(baseRow, pathname === "/" ? activeRow : idleRow)}
+                  >
+                    <dashboardItem.icon className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span className="truncate">{dashboardItem.title}</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {groups.map((group) => {
+                const groupActive = isGroupActive(group, pathname);
+                const open = openGroups.includes(group.id);
+
+                // Collapsed rail: group icon links to its primary route.
+                if (collapsed) {
+                  return (
+                    <SidebarMenuItem key={group.id}>
+                      <SidebarMenuButton asChild tooltip={group.title}>
+                        <Link
+                          to={group.url}
+                          aria-label={group.title}
+                          className={cn(baseRow, "justify-center px-0", groupActive ? activeRow : idleRow)}
+                        >
+                          <group.icon className="h-4 w-4 shrink-0" />
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+
                 return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        end
-                        aria-label={item.title}
-                        data-active={isActive}
-                        className={`nav-item interactive group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:translate-x-0.5"
-                        }`}
-                        activeClassName="bg-primary/10 text-primary"
-                      >
-                        <item.icon
-                          className={`h-4 w-4 shrink-0 transition-transform duration-200 ${
-                            isActive ? "scale-110" : "group-hover:scale-110"
-                          }`}
-                        />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <Collapsible
+                    key={group.id}
+                    open={open}
+                    onOpenChange={(next) =>
+                      setOpenGroups((prev) =>
+                        next ? [...new Set([...prev, group.id])] : prev.filter((id) => id !== group.id),
+                      )
+                    }
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <button
+                          type="button"
+                          className={cn(
+                            baseRow,
+                            "press-scale",
+                            groupActive && !open ? activeRow : "text-foreground/90 hover:bg-secondary",
+                          )}
+                          aria-label={group.title}
+                        >
+                          <group.icon className="h-4 w-4 shrink-0" />
+                          <span className="flex-1 text-left font-medium">{group.title}</span>
+                          <ChevronDown
+                            className={cn(
+                              "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+                              open && "rotate-180",
+                            )}
+                          />
+                        </button>
+                      </CollapsibleTrigger>
+
+                      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                        <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-border/60 pl-2">
+                          {group.items.map((item) => {
+                            const active = isItemActive(item, pathname);
+                            return (
+                              <li key={item.url}>
+                                <NavLink
+                                  to={item.url}
+                                  onClick={closeMobile}
+                                  aria-label={item.title}
+                                  className={cn(
+                                    "interactive flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
+                                    active
+                                      ? "bg-primary/10 font-medium text-primary"
+                                      : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                                  )}
+                                >
+                                  <item.icon className="h-3.5 w-3.5 shrink-0" />
+                                  <span className="truncate">{item.title}</span>
+                                </NavLink>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
                 );
               })}
             </SidebarMenu>
@@ -121,18 +186,20 @@ export function AppSidebar() {
         <button
           onClick={signOut}
           aria-label="Sign Out"
-          className="interactive press-scale flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-sm"
+          className="interactive press-scale flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign Out</span>}
         </button>
-        <button
-          onClick={toggleSidebar}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="interactive press-scale flex items-center justify-center w-full py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary"
-        >
-          <ChevronLeft className={`h-4 w-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
-        </button>
+        {!isMobile && (
+          <button
+            onClick={toggleSidebar}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="interactive press-scale flex w-full items-center justify-center rounded-lg py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
+          >
+            <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", collapsed && "rotate-180")} />
+          </button>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

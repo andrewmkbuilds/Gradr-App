@@ -119,7 +119,7 @@ export default function GrowthEngine() {
           <Loader2 className="h-4 w-4 animate-spin" /> Reading your resume and match history…
         </div>
       ) : !hasData ? (
-        <div className="glass-card p-6 sm:p-8">
+        <div id="skill-gaps" className="glass-card p-6 sm:p-8">
           <h2 className="text-sm font-semibold text-foreground">Nothing to analyse yet</h2>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Growth &amp; Proof is built entirely from your own data. Analyse a resume and match it against a few live
@@ -138,7 +138,7 @@ export default function GrowthEngine() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="glass-card p-6 lg:col-span-2">
+          <div id="skill-gaps" className="glass-card p-6 scroll-mt-20 lg:col-span-2">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Target className="h-4 w-4 text-primary" /> Top skill gaps across {matches.length} matched roles
             </h2>
@@ -168,7 +168,7 @@ export default function GrowthEngine() {
             )}
           </div>
 
-          <div className="space-y-6">
+          <div id="proof" className="space-y-6 scroll-mt-20">
             <div className="glass-card p-6">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <TrendingUp className="h-4 w-4 text-primary" /> Resume weak points
