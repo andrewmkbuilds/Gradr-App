@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
+import { adminRpc } from "@/lib/adminRpc";
   PRIVACY_V1,
   PRIVACY_V1_EFFECTIVE,
   TERMS_V1,
@@ -163,7 +164,7 @@ export function useAdminLegalDocuments(enabled: boolean) {
     setLoading(true);
     const [docs, stat] = await Promise.all([
       supabase.from("legal_documents").select("*").order("doc_type").order("version", { ascending: false }),
-      supabase.rpc("admin_legal_document_stats"),
+      adminRpc<LegalStat[]>("admin_legal_document_stats"),
     ]);
     if (!docs.error) setDocuments((docs.data ?? []) as LegalDocument[]);
     if (!stat.error) setStats((stat.data ?? []) as LegalStat[]);
