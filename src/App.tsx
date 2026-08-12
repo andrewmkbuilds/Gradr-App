@@ -61,6 +61,7 @@ import Landing from "./pages/Landing";
 import { authPath, nextFromLocation, resolveNext } from "./lib/nextRedirect";
 import InterviewHistory from "./pages/InterviewHistory";
 import RequireAdmin from "@/components/RequireAdmin";
+import VerifyEmail from "./pages/VerifyEmail";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,14 @@ function ProtectedRoutes() {
     // Preserve query + hash so deep links (e.g. /match?job=123) survive the bounce.
     return <Navigate to={authPath(nextFromLocation(location))} replace />;
   }
+
+  // Email/password accounts must confirm their address before using the app.
+  // Anonymous guests and OAuth identities have no unverified state.
+  const needsVerification =
+    user.is_anonymous !== true && !!user.email && !user.email_confirmed_at && !user.confirmed_at;
+  if (needsVerification) return <VerifyEmail />;
+
+
 
 
   return (
@@ -112,6 +121,7 @@ function ProtectedRoutes() {
          <Route path="/admin/search-console" element={<RequireAdmin><AnimatedPage><AdminSearchConsole /></AnimatedPage></RequireAdmin>} />
 
           <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
+          <Route path="/manage-subscription" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
           <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
           <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />

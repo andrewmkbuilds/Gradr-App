@@ -80,7 +80,14 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           {/* Expressive typography — letter reveal on line one, kinetic gradient on line two.
               Line two is a single gradient element: nesting per-letter spans inside a
               background-clip:text parent paints them transparent (the words disappear). */}
-          <p className="text-3xl xl:text-4xl font-bold leading-[1.15] tracking-tight break-words">
+          {/* LAYOUT GUARDRAIL: never add fixed heights, truncate, line-clamp,
+              whitespace-nowrap or overflow-hidden to the hero headline — the
+              full sentence must always be visible. Enforced by
+              src/test/authHeroLayout.test.ts. */}
+          <p
+            data-auth-hero="desktop"
+            className="text-3xl xl:text-4xl font-bold leading-[1.2] tracking-tight break-words text-balance min-w-0 max-w-full pb-1"
+          >
             <span className="letter-reveal block">
               {"Your AI career".split("").map((c, i) => (
                 <span key={`a${i}`} style={{ animationDelay: `${i * 35}ms` }}>
@@ -155,7 +162,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl" />
             </div>
             <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
-            <p className="text-xl sm:text-2xl font-bold leading-[1.2] tracking-tight break-words text-balance max-w-full">
+            <p
+              data-auth-hero="mobile"
+              className="text-xl sm:text-2xl font-bold leading-[1.25] tracking-tight break-words text-balance min-w-0 max-w-full pb-1"
+            >
               <span className="block">Your AI career</span>
               <span className="kinetic-text block pb-1">command center.</span>
             </p>

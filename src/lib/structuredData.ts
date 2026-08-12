@@ -6,11 +6,12 @@
  * src/test/structuredData.test.ts).
  */
 import type { Guide, GuideFaq } from "@/content/guides";
+import type { BlogPost } from "@/content/blogPosts";
 import type { JobLanding } from "@/content/jobLandings";
 import { jobLandingFaqs } from "@/content/jobLandings";
 
 export const SITE_NAME = "Gradr";
-export const SITE_ORIGIN = "https://careerflowos.lovable.app";
+export const SITE_ORIGIN = "https://gradr.me";
 export const OG_IMAGE = `${SITE_ORIGIN}/og-image.jpg`;
 
 export type JsonLd = Record<string, unknown>;
@@ -294,4 +295,27 @@ export function validateJsonLd(node: JsonLd, label = "jsonld"): string[] {
 export function assertValidJsonLd(nodes: JsonLd[], label: string) {
   const errors = nodes.flatMap((n, i) => validateJsonLd(n, `${label}[${i}]`));
   if (errors.length) throw new Error(`Invalid JSON-LD:\n${errors.join("\n")}`);
+}
+
+/** Full JSON-LD payload for one blog post. */
+export function blogPostJsonLd(post: BlogPost): JsonLd[] {
+  const path = `/blog/${post.slug}`;
+  return [
+    {
+      ...buildArticleLd({
+        path,
+        headline: post.metaTitle,
+        description: post.description,
+        published: post.published,
+        updated: post.updated,
+        keywords: [post.keyword],
+      }),
+      about: post.about.map((name) => ({ "@type": "Thing", name })),
+    },
+    buildFaqLd(post.faqs),
+    buildBreadcrumbLd([
+      { name: "Home", path: "/" },
+      { name: post.title, path },
+    ]),
+  ];
 }

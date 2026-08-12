@@ -39,6 +39,20 @@ export default function CareerAdvice() {
     trackEvent("content_page_view", { article: "career-advice-index", location: "/career-advice" });
   }, []);
 
+  // Debounced tracking of what readers search the guide index for.
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) return;
+    const t = setTimeout(() => {
+      trackEvent("guide_filter_search", {
+        source: "career-advice-index",
+        location: q.toLowerCase().slice(0, 60),
+      });
+    }, 900);
+    return () => clearTimeout(t);
+  }, [query]);
+
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return GUIDES;

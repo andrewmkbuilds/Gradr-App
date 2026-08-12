@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, CheckCircle2, Sparkles, BookOpen } from "lucide-react";
 import { trackEvent, withUtm } from "@/lib/analytics";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { useReadTracking } from "@/hooks/useReadTracking";
+import { getBlogPost } from "@/content/blogPosts";
+import { blogPostJsonLd } from "@/lib/structuredData";
 
 const UTM = {
   source: "blog",
@@ -26,126 +30,27 @@ const trackCta = (location: string, destination: string) => () =>
 
 
 
-const URL = "https://careerflowos.lovable.app/blog/ai-resume-optimization";
+const URL = "https://gradr.me/blog/ai-resume-optimization";
 const TITLE = "AI Resume Builder & ATS Guide";
 const DESCRIPTION =
   "How AI resume builders help candidates beat Applicant Tracking Systems (ATS). A technical, plain-English guide to keyword matching, formatting rules, and AI-driven rewrites.";
 const PUBLISHED = "2026-07-09";
+const POST = getBlogPost("ai-resume-optimization")!;
 
 export default function AiResumeOptimization() {
   useEffect(() => {
     trackEvent("blog_page_view", { article: "ai-resume-optimization" });
   }, []);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: TITLE,
-    description: DESCRIPTION,
-    author: { "@type": "Organization", name: "Gradr" },
-    publisher: {
-      "@type": "Organization",
-      name: "Gradr",
-      url: "https://careerflowos.lovable.app",
-    },
-    datePublished: PUBLISHED,
-    dateModified: PUBLISHED,
-    mainEntityOfPage: URL,
-    about: [
-      { "@type": "Thing", name: "AI resume builder" },
-      { "@type": "Thing", name: "Applicant Tracking System" },
-      { "@type": "Thing", name: "Resume optimization" },
-    ],
-  };
-
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Does an AI resume builder actually help you beat the ATS?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes — a good AI resume builder aligns your resume with the language, structure, and keywords a specific job description uses, which is exactly what ATS parsers score against. It won't fabricate experience, but it will make real experience discoverable.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Will an ATS reject me for using AI to write my resume?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "No. ATS software scores structure and keyword match — it doesn't detect AI-written content. What matters is whether the resume is parseable, honest, and relevant.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What format should an AI-optimized resume use?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "A single-column PDF or DOCX with standard section headings (Experience, Education, Skills), no tables, no text inside images, and consistent date formatting. This is what ATS parsers reliably read.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What is ATS resume optimization?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "ATS resume optimization is the process of tailoring a resume's keywords, structure, and formatting so Applicant Tracking Systems (Workday, Greenhouse, Lever, Taleo, iCIMS) can parse it correctly and rank it highly against a specific job description. It focuses on plain-text parseability, exact keyword matches from the job posting, and standard section headings.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What is a good AI resume ATS score?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "A match score of 80 or above is considered strong for most roles, and 90+ puts you in the top tier for that specific job description. Anything below 60 usually means missing keywords, weak verbs, or formatting the parser can't read. Scores are always relative to one posting — a resume that scores 92 for one role can score 55 for another.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How do I check my resume's ATS score for free?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Upload your resume and paste the target job description into an AI resume scanner like the Gradr Resume Engine. It parses the file the same way an ATS would, compares it to the posting, and returns a 0–100 match score plus the specific missing keywords and formatting issues to fix.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How many keywords should I add to my resume for ATS?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Aim to cover every hard skill, tool, and required qualification listed in the job posting at least once, using the exact phrasing from the posting. Don't keyword-stuff — repeating the same term five times doesn't raise your score and reads badly to a recruiter. Coverage matters more than frequency.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Can AI tailor my resume for each job automatically?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. An AI resume builder can rewrite bullets, reorder sections, and adjust keyword density for each specific job description in seconds, so you send a targeted version to every application instead of one generic resume. This is the single highest-leverage change most candidates can make to their ATS scores.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Do ATS systems read PDFs or Word documents better?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Modern ATS platforms parse both single-column PDFs and DOCX files reliably as long as the text is selectable (not a scanned image). PDF is usually safer because it preserves formatting across systems. Avoid image-based PDFs, multi-column templates, and DOCX files that rely on text boxes or tables.",
-        },
-      },
-    ],
-  };
-
+  useReadTracking("ai-resume-optimization");
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
         <meta property="og:type" content="article" />
         <meta property="article:published_time" content={PUBLISHED} />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-        <script type="application/ld+json">{JSON.stringify(faqLd)}</script>
       </Helmet>
+      <JsonLd nodes={blogPostJsonLd(POST)} label="blog/ai-resume-optimization" />
 
       <header className="border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
