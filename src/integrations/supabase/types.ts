@@ -632,6 +632,108 @@ export type Database = {
         }
         Relationships: []
       }
+      discovered_jobs: {
+        Row: {
+          company: string | null
+          currency: string | null
+          dedupe_key: string
+          description: string | null
+          external_id: string | null
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          location: string | null
+          posted_at: string | null
+          raw: Json
+          remote: boolean | null
+          salary_max: number | null
+          salary_min: number | null
+          source: string
+          title: string
+          url: string
+        }
+        Insert: {
+          company?: string | null
+          currency?: string | null
+          dedupe_key: string
+          description?: string | null
+          external_id?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          location?: string | null
+          posted_at?: string | null
+          raw?: Json
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source: string
+          title: string
+          url: string
+        }
+        Update: {
+          company?: string | null
+          currency?: string | null
+          dedupe_key?: string
+          description?: string | null
+          external_id?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          location?: string | null
+          posted_at?: string | null
+          raw?: Json
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      email_notification_log: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          idempotency_key: string
+          metadata: Json
+          provider_message_id: string | null
+          recipient: string
+          status: string
+          subject: string
+          template: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key: string
+          metadata?: Json
+          provider_message_id?: string | null
+          recipient: string
+          status?: string
+          subject: string
+          template: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key?: string
+          metadata?: Json
+          provider_message_id?: string | null
+          recipient?: string
+          status?: string
+          subject?: string
+          template?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feature_usage: {
         Row: {
           created_at: string
@@ -664,6 +766,138 @@ export type Database = {
           period_start?: string
           updated_at?: string
           used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interview_session_metrics: {
+        Row: {
+          avg_latency_ms: number | null
+          barge_in_count: number
+          created_at: string
+          details: Json
+          dropout_count: number
+          duration_sec: number
+          end_reason: string | null
+          ended_at: string | null
+          first_token_latency_ms: number | null
+          id: string
+          input_tokens: number
+          interruption_count: number
+          minutes_used: number
+          output_tokens: number
+          p95_latency_ms: number | null
+          provider: string
+          reconnect_count: number
+          session_id: string | null
+          started_at: string
+          target_role: string | null
+          turn_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_latency_ms?: number | null
+          barge_in_count?: number
+          created_at?: string
+          details?: Json
+          dropout_count?: number
+          duration_sec?: number
+          end_reason?: string | null
+          ended_at?: string | null
+          first_token_latency_ms?: number | null
+          id?: string
+          input_tokens?: number
+          interruption_count?: number
+          minutes_used?: number
+          output_tokens?: number
+          p95_latency_ms?: number | null
+          provider?: string
+          reconnect_count?: number
+          session_id?: string | null
+          started_at?: string
+          target_role?: string | null
+          turn_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_latency_ms?: number | null
+          barge_in_count?: number
+          created_at?: string
+          details?: Json
+          dropout_count?: number
+          duration_sec?: number
+          end_reason?: string | null
+          ended_at?: string | null
+          first_token_latency_ms?: number | null
+          id?: string
+          input_tokens?: number
+          interruption_count?: number
+          minutes_used?: number
+          output_tokens?: number
+          p95_latency_ms?: number | null
+          provider?: string
+          reconnect_count?: number
+          session_id?: string | null
+          started_at?: string
+          target_role?: string | null
+          turn_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interview_session_state: {
+        Row: {
+          context: Json
+          created_at: string
+          difficulty: string | null
+          elapsed_sec: number
+          id: string
+          interviewer_state: string
+          last_heartbeat_at: string
+          persona: string | null
+          session_key: string
+          status: string
+          target_role: string | null
+          transcript: Json
+          turn_index: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          difficulty?: string | null
+          elapsed_sec?: number
+          id?: string
+          interviewer_state?: string
+          last_heartbeat_at?: string
+          persona?: string | null
+          session_key: string
+          status?: string
+          target_role?: string | null
+          transcript?: Json
+          turn_index?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          difficulty?: string | null
+          elapsed_sec?: number
+          id?: string
+          interviewer_state?: string
+          last_heartbeat_at?: string
+          persona?: string | null
+          session_key?: string
+          status?: string
+          target_role?: string | null
+          transcript?: Json
+          turn_index?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1048,6 +1282,75 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version_label?: string | null
+        }
+        Relationships: []
+      }
+      scheduled_interviews: {
+        Row: {
+          calendar_id: string | null
+          company: string | null
+          created_at: string
+          ends_at: string | null
+          external_event_id: string | null
+          followup_sent_at: string | null
+          html_link: string | null
+          id: string
+          kind: string
+          location: string | null
+          notes: string | null
+          reminder_sent_at: string | null
+          source: string
+          starts_at: string
+          status: string
+          target_role: string | null
+          timezone: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calendar_id?: string | null
+          company?: string | null
+          created_at?: string
+          ends_at?: string | null
+          external_event_id?: string | null
+          followup_sent_at?: string | null
+          html_link?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          source?: string
+          starts_at: string
+          status?: string
+          target_role?: string | null
+          timezone?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calendar_id?: string | null
+          company?: string | null
+          created_at?: string
+          ends_at?: string | null
+          external_event_id?: string | null
+          followup_sent_at?: string | null
+          html_link?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          source?: string
+          starts_at?: string
+          status?: string
+          target_role?: string | null
+          timezone?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

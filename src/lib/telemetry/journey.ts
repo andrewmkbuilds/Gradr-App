@@ -32,7 +32,25 @@ export type JourneyEvent =
   | "interview_report_generated"
   | "resume_analyzed"
   | "integration_connected"
-  | "integration_disconnected";
+  | "integration_disconnected"
+  // Plan usage + conversion funnel
+  | "plan_limit_reached"
+  | "plan_gate_viewed"
+  | "checkout_started"
+  | "checkout_completed"
+  | "credits_consumed"
+  | "resume_to_application_converted"
+  // Realtime interview reliability
+  | "realtime_session_started"
+  | "realtime_session_ended"
+  | "realtime_dropout"
+  | "realtime_reconnected"
+  | "realtime_fallback_engaged"
+  // Scheduling + job sourcing
+  | "interview_scheduled"
+  | "calendar_imported"
+  | "external_jobs_searched";
+
 
 export type JourneyProps = Record<string, string | number | boolean | null | undefined>;
 

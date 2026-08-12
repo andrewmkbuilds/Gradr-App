@@ -12,9 +12,13 @@ import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { usePremiumVoice } from "@/hooks/usePremiumVoice";
 import { useRealtimeInterview } from "@/hooks/useRealtimeInterview";
+import { useInterviewMetrics } from "@/hooks/useInterviewMetrics";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
 import { InterviewStudio } from "@/components/interview/InterviewStudio";
+import { InterviewScheduler } from "@/components/interview/InterviewScheduler";
+import { VoiceUsageMeter } from "@/components/interview/VoiceUsageMeter";
+
 import { SessionDebrief } from "@/components/interview/SessionDebrief";
 import type { InterviewerState } from "@/components/interview/InterviewerOrb";
 import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
@@ -75,19 +79,28 @@ function InterviewEngineInner() {
     });
   }, []);
 
+  const metrics = useInterviewMetrics();
+
   /** Switches from Gemini Live to the text coach + premium voice, keeping the transcript. */
   const degradeToFallback = useCallback((reason: string) => {
     if (fallbackHandled.current) return;
     fallbackHandled.current = true;
+    metrics.markDropout(reason);
+    metrics.markFallback(reason);
     setEngine("fallback");
     setConnecting(false);
     toast.info(`${reason} Continuing with standard voice — your transcript is preserved.`);
-  }, []);
+  }, [metrics]);
 
   const realtime = useRealtimeInterview({
-    onTurn: appendTurn,
+    onTurn: (turn) => {
+      if (turn.role === "user") metrics.markUserTurnStart();
+      else metrics.markModelResponse();
+      appendTurn(turn);
+    },
     onFallback: degradeToFallback,
   });
+
 
 
 
@@ -211,6 +224,7 @@ function InterviewEngineInner() {
     setMessages([]);
     startedAt.current = Date.now();
     trackJourney("interview_started", { engine: "realtime", has_role: Boolean(targetRole) });
+    void metrics.begin({ provider: "gemini_live", targetRole: ctx.targetRole ?? null });
 
     setConnecting(true);
 
@@ -228,11 +242,14 @@ function InterviewEngineInner() {
     }
     // Entitlement blocks are informational; everything else silently degrades.
     if (result.code === "realtime_not_entitled" || result.code === "quota_exceeded") {
+      trackJourney("plan_limit_reached", { feature: "interview_realtime", code: result.code });
       toast.info(result.reason);
     }
+    metrics.markFallback(result.code ?? "start_failed");
     setEngine("fallback");
     await startInterview();
   };
+
 
   /** Reconnects realtime after a drop, replaying the transcript so context survives. */
   const retryRealtime = async () => {
@@ -248,11 +265,13 @@ function InterviewEngineInner() {
     setConnecting(false);
     if (result.ok) {
       setEngine("realtime");
+      metrics.markReconnect();
       toast.success("Realtime voice reconnected — picking up where you left off.");
     } else {
       toast.error(result.reason);
     }
   };
+
 
   /** Replays the same role question set with the report's next steps applied as coaching focus. */
   const rerunWithImprovements = () => {
@@ -354,7 +373,7 @@ function InterviewEngineInner() {
         overall_score: Math.round(newReport.overallScore),
         duration_sec: elapsed,
       });
-
+      void metrics.finish("completed");
 
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
@@ -371,8 +390,20 @@ function InterviewEngineInner() {
           })
           .select("id")
           .maybeSingle();
-        if (saved?.id) setSessionId(saved.id);
+        if (saved?.id) {
+          setSessionId(saved.id);
+          void metrics.linkSession(saved.id);
+          // Follow-up nudge with the scorecard + practice plan.
+          void supabase.functions.invoke("send-notification", {
+            body: {
+              template: "interview_followup",
+              input: { role: targetRole || undefined, link: `/interview/history` },
+              idempotencyKey: `interview_followup:${saved.id}`,
+            },
+          });
+        }
       }
+
     } catch {
       toast.error("Couldn't generate your scorecard. Please try again.");
     } finally {
@@ -477,6 +508,7 @@ function InterviewEngineInner() {
           </p>
         </div>
         <CreditsBalance only="interview" compact />
+        <VoiceUsageMeter compact />
 
         {stage === "setup" ? (
           <InterviewSetup
@@ -493,6 +525,9 @@ function InterviewEngineInner() {
             onReady={() => (sessionCtx ? void startRealtime(sessionCtx) : void startInterview())}
           />
         )}
+
+        {stage === "setup" && <InterviewScheduler defaultRole={targetRole || sessionCtx?.targetRole} />}
+
 
         {!voice.supported && (
           <p className="text-xs text-muted-foreground">
