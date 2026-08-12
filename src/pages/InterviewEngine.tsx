@@ -265,11 +265,13 @@ function InterviewEngineInner() {
     setConnecting(false);
     if (result.ok) {
       setEngine("realtime");
+      metrics.markReconnect();
       toast.success("Realtime voice reconnected — picking up where you left off.");
     } else {
       toast.error(result.reason);
     }
   };
+
 
   /** Replays the same role question set with the report's next steps applied as coaching focus. */
   const rerunWithImprovements = () => {
