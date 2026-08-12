@@ -38,7 +38,7 @@ export default function ForgotPassword() {
             <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
               <CheckCircle className="h-6 w-6 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground text-center">Check your email</h2>
+            <h1 className="text-xl font-semibold text-foreground text-center">Check your email</h1>
             <p className="text-sm text-muted-foreground text-center">
               We sent a reset link to{" "}
               <span className="text-foreground font-medium">{email}</span>
@@ -54,7 +54,7 @@ export default function ForgotPassword() {
       ) : (
         <div className="space-y-6">
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-foreground">Forgot your password?</h2>
+            <h1 className="text-xl font-semibold text-foreground">Reset your password</h1>
             <p className="text-sm text-muted-foreground">
               Enter your email and we'll send you a reset link.
             </p>

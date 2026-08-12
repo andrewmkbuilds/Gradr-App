@@ -153,7 +153,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <Zap className="h-6 w-6 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold kinetic-text">CareerFlow OS — AI Career Command Center</h1>
+            <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
           </div>
 
           {children}
