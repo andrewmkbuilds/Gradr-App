@@ -8,6 +8,7 @@ import { useIsAdmin, useFullAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
 import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
 import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
+import { AffiliateTiersPanel } from "@/components/admin/AffiliateTiersPanel";
 import {
   AlertDialog,
   AlertDialogAction,
