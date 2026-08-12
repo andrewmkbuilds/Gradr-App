@@ -224,6 +224,7 @@ function InterviewEngineInner() {
     setMessages([]);
     startedAt.current = Date.now();
     trackJourney("interview_started", { engine: "realtime", has_role: Boolean(targetRole) });
+    void metrics.begin({ provider: "gemini_live", targetRole: ctx.targetRole ?? null });
 
     setConnecting(true);
 
@@ -241,11 +242,14 @@ function InterviewEngineInner() {
     }
     // Entitlement blocks are informational; everything else silently degrades.
     if (result.code === "realtime_not_entitled" || result.code === "quota_exceeded") {
+      trackJourney("plan_limit_reached", { feature: "interview_realtime", code: result.code });
       toast.info(result.reason);
     }
+    metrics.markFallback(result.code ?? "start_failed");
     setEngine("fallback");
     await startInterview();
   };
+
 
   /** Reconnects realtime after a drop, replaying the transcript so context survives. */
   const retryRealtime = async () => {
