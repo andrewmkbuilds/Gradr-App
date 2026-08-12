@@ -326,7 +326,11 @@ export function RouteSeo() {
           {JSON.stringify(node)}
         </script>
       ))}
+      {articleLd ? (
+        <script type="application/ld+json">{JSON.stringify(articleLd)}</script>
+      ) : null}
     </Helmet>
   );
 }
+
 
