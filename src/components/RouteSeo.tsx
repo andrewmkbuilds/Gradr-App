@@ -144,6 +144,23 @@ function resolveDynamicMeta(pathname: string): { title: string; description: str
   return null;
 }
 
+/**
+ * Blog posts and guides ship a pre-rendered, per-article social card
+ * (scripts/generate-og-images.mjs). Everything else falls back to the
+ * generic site image.
+ */
+function resolveOgImage(pathname: string): string {
+  if (pathname.startsWith("/blog/")) {
+    const slug = pathname.slice(6);
+    if (slug) return `${ORIGIN}/og/blog-${slug}.png`;
+  }
+  if (pathname.startsWith("/career-advice/")) {
+    const slug = pathname.slice(15);
+    if (slug && GUIDES_BY_SLUG[slug]) return `${ORIGIN}/og/guide-${slug}.png`;
+  }
+  return OG_IMAGE;
+}
+
 export function RouteSeo() {
   const { pathname } = useLocation();
   const meta = META[pathname] ??
@@ -153,6 +170,8 @@ export function RouteSeo() {
     };
   const fullTitle = pathname === "/" ? "Gradr | AI Career Command Center" : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
+  const ogImage = resolveOgImage(pathname);
+
   const legalUpdated: Record<string, string> = {
     "/terms": POLICIES_UPDATED,
     "/privacy": POLICIES_UPDATED,
