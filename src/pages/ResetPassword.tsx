@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { resolveNext } from "@/lib/nextRedirect";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -13,6 +14,7 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -44,7 +46,7 @@ export default function ResetPassword() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast.success("Password updated! Redirecting...");
-      setTimeout(() => navigate("/"), 1500);
+      setTimeout(() => navigate(resolveNext(location.search), { replace: true }), 1200);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "An error occurred";
       toast.error(message);

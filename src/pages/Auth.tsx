@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CheckCircle } from "lucide-react";
+import {
+  authCallbackUrl,
+  consumeAuthCallbackError,
+  readNext,
+} from "@/lib/nextRedirect";
 import { toast } from "sonner";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const isGuest = user?.is_anonymous === true;
   const [isSignUp, setIsSignUp] = useState(
@@ -22,14 +28,29 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const nextParam = (() => {
-    if (typeof window === "undefined") return null;
-    const raw = new URLSearchParams(window.location.search).get("next");
-    return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : null;
-  })();
-  const postAuthUrl = nextParam
-    ? `${window.location.origin}/auth?next=${encodeURIComponent(nextParam)}`
-    : window.location.origin;
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+
+  // Single source of truth for the post-auth destination (validated, loop-safe).
+  const nextParam = readNext(location.search);
+  const nextTarget = nextParam ?? "/";
+  // Email links and OAuth always come back to /auth: the session is established
+  // from the URL first, then AuthRoute forwards to `next`.
+  const postAuthUrl = authCallbackUrl(nextParam);
+
+  // Surface expired/invalid confirmation links instead of silently showing the form.
+  useEffect(() => {
+    const message = consumeAuthCallbackError();
+    if (message) toast.error(message);
+  }, []);
+
+  // Belt and braces: AuthRoute redirects once a real session exists, but if this
+  // page is ever rendered with one (e.g. session restored after confirmation),
+  // forward to the destination rather than stranding the user on the form.
+  useEffect(() => {
+    if (user && user.is_anonymous !== true) {
+      navigate(nextTarget, { replace: true });
+    }
+  }, [user, nextTarget, navigate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +64,11 @@ export default function Auth() {
             { emailRedirectTo: postAuthUrl },
           );
           if (error) throw error;
+          setPendingEmail(email);
           toast.success("Check your email to confirm your new account!");
-          navigate(nextParam ?? "/", { replace: true });
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -56,10 +77,17 @@ export default function Auth() {
           },
         });
         if (error) throw error;
+        if (data.session) {
+          // Email confirmation is disabled — the user is signed in right now.
+          navigate(nextTarget, { replace: true });
+          return;
+        }
+        setPendingEmail(email);
         toast.success("Check your email to confirm your account!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        navigate(nextTarget, { replace: true });
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "An error occurred";
@@ -68,6 +96,7 @@ export default function Auth() {
       setLoading(false);
     }
   };
+
 
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
@@ -84,7 +113,7 @@ export default function Auth() {
       if (error) throw error;
       toast.success("Signed in as guest");
       // Guests stay allowed on /auth (so they can upgrade later), so navigate explicitly.
-      navigate(nextParam ?? "/", { replace: true });
+      navigate(nextTarget, { replace: true });
 
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Guest sign-in failed";
@@ -94,8 +123,50 @@ export default function Auth() {
     }
   };
 
+  if (pendingEmail) {
+    return (
+      <AuthLayout>
+        <div className="space-y-6 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+            <CheckCircle className="h-6 w-6 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold text-foreground">Confirm your email</h1>
+            <p className="text-sm text-muted-foreground">
+              We sent a confirmation link to{" "}
+              <span className="font-medium text-foreground">{pendingEmail}</span>. Open it and
+              you'll land straight on{" "}
+              <span className="font-medium text-foreground">{nextTarget}</span>.
+            </p>
+          </div>
+          {isGuest && (
+            <p className="text-xs text-muted-foreground">
+              Your guest work is saved — keep using the app while you confirm.
+            </p>
+          )}
+          <div className="space-y-2">
+            {isGuest && (
+              <Button className="w-full h-11" onClick={() => navigate(nextTarget, { replace: true })}>
+                Continue for now
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              className="w-full h-11 text-muted-foreground"
+              onClick={() => setPendingEmail(null)}
+            >
+              Use a different email
+            </Button>
+          </div>
+        </div>
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout>
+
       <div className="space-y-2">
         <h1 className="text-xl font-semibold text-foreground">
           {isSignUp ? "Create your account" : "Sign in to CareerFlow OS"}
@@ -194,7 +265,7 @@ export default function Auth() {
         {!isSignUp && (
           <div className="flex justify-end">
             <Link
-              to="/forgot-password"
+              to={nextParam ? `/forgot-password?next=${encodeURIComponent(nextParam)}` : "/forgot-password"}
               className="text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               Forgot password?

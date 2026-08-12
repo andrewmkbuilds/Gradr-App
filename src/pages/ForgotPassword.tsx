@@ -5,19 +5,24 @@ import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Mail, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { authPath, readNext } from "@/lib/nextRedirect";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const location = useLocation();
+  const nextParam = readNext(location.search);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/reset-password${
+          nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""
+        }`,
       });
       if (error) throw error;
       setSent(true);
@@ -44,7 +49,7 @@ export default function ForgotPassword() {
               <span className="text-foreground font-medium">{email}</span>
             </p>
           </div>
-          <Link to="/auth">
+          <Link to={authPath(nextParam)}>
             <Button variant="outline" className="w-full h-11 border-border gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to sign in
@@ -92,7 +97,7 @@ export default function ForgotPassword() {
           </form>
 
           <Link
-            to="/auth"
+            to={authPath(nextParam)}
             className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />

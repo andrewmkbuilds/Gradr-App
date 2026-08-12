@@ -44,6 +44,7 @@ import AdminSearchConsole from "./pages/AdminSearchConsole";
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 import OAuthConsent from "./pages/OAuthConsent";
 import Landing from "./pages/Landing";
+import { authPath, nextFromLocation, resolveNext } from "./lib/nextRedirect";
 import InterviewHistory from "./pages/InterviewHistory";
 
 const queryClient = new QueryClient();
@@ -62,8 +63,10 @@ function ProtectedRoutes() {
 
   if (!user) {
     if (location.pathname === "/") return <Landing />;
-    return <Navigate to={`/auth?next=${encodeURIComponent(location.pathname)}`} replace />;
+    // Preserve query + hash so deep links (e.g. /match?job=123) survive the bounce.
+    return <Navigate to={authPath(nextFromLocation(location))} replace />;
   }
+
 
   return (
     <DashboardLayout>
@@ -107,10 +110,7 @@ function AuthRoute() {
   // Guests (anonymous Supabase users) are "signed in" but must still be able to
   // reach this page to upgrade to a real account.
   if (user && user.is_anonymous !== true) {
-    const params = new URLSearchParams(location.search);
-    const next = params.get("next");
-    const safe = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
-    return <Navigate to={safe} replace />;
+    return <Navigate to={resolveNext(location.search)} replace />;
   }
   return <Auth />;
 }
