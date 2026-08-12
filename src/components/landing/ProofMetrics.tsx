@@ -146,11 +146,11 @@ export function ProofMetrics() {
               {isActive && (
                 <motion.span
                   layoutId="proof-pill"
-                  className="absolute inset-0 -z-10 rounded-xl bg-primary"
+                  className="absolute inset-0 rounded-xl bg-primary"
                   transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }}
                 />
               )}
-              <span className="relative flex items-center justify-center gap-2">
+              <span className="relative z-10 flex items-center justify-center gap-2">
                 <s.icon className="h-4 w-4 shrink-0" aria-hidden />
                 {s.label}
               </span>

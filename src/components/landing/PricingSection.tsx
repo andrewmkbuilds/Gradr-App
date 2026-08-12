@@ -76,11 +76,11 @@ export function PricingSection({
               {isActive && (
                 <motion.span
                   layoutId="billing-pill"
-                  className="absolute inset-0 -z-10 rounded-xl bg-primary"
+                  className="absolute inset-0 rounded-xl bg-primary"
                   transition={reduce ? { duration: 0 } : spring.layout}
                 />
               )}
-              <span className="relative">
+              <span className="relative z-10">
                 {k === "monthly" ? "Monthly" : "Annual"}
                 {k === "annual" && <span className="ml-2 text-[11px] opacity-80">save up to 26%</span>}
               </span>
