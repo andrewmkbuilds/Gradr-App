@@ -6,7 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
-import { Mail, Lock, User, ArrowRight, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 import {
   authCallbackUrl,
   consumeAuthCallbackError,
