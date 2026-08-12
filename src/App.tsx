@@ -63,6 +63,7 @@ const RefundPolicy = lazy(() => import("./pages/legal/RefundPolicy"));
 const CookiePolicy = lazy(() => import("./pages/legal/CookiePolicy"));
 const Dpa = lazy(() => import("./pages/legal/Dpa"));
 const AiResumeOptimization = lazy(() => import("./pages/blog/AiResumeOptimization"));
+const AtsResumeChecker = lazy(() => import("./pages/AtsResumeChecker"));
 const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
 const GuideArticle = lazy(() => import("./pages/GuideArticle"));
 const JobSearchIndex = lazy(() => import("./pages/JobSearchIndex"));
