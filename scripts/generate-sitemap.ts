@@ -8,6 +8,8 @@ const BASE_URL = "https://careerflowos.lovable.app";
 
 interface SitemapEntry {
   path: string;
+  /** Only set from a page-specific content timestamp — never build time. */
+  lastmod?: string;
   changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   priority?: string;
 }
@@ -26,10 +28,26 @@ const entries: SitemapEntry[] = [
   { path: "/interview", changefreq: "weekly", priority: "0.7" },
   { path: "/growth", changefreq: "weekly", priority: "0.7" },
   { path: "/blog/ai-resume-optimization", changefreq: "monthly", priority: "0.8" },
+  { path: "/career-advice", changefreq: "weekly", priority: "0.9" },
+  { path: "/job-search", changefreq: "weekly", priority: "0.9" },
+  // Career advice guides — lastmod comes from each guide's own `updated` date.
+  ...GUIDES.map((guide) => ({
+    path: guidePath(guide.slug),
+    lastmod: guide.updated,
+    changefreq: "monthly" as const,
+    priority: "0.8",
+  })),
+  // Role x location job search pages.
+  ...JOB_LANDINGS.map((landing) => ({
+    path: jobLandingPath(landing.slug),
+    changefreq: "weekly" as const,
+    priority: "0.7",
+  })),
   // Excluded intentionally:
   // /settings — auth-gated user data, not indexable
   // /admin/digest-preview — internal admin tool, not indexable
 ];
+
 
 function generateSitemap(items: SitemapEntry[]) {
   const urls = items.map((e) =>
