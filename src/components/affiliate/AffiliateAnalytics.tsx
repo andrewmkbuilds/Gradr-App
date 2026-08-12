@@ -141,7 +141,9 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
                 <XAxis dataKey="label" tick={chartAxisStyle} />
                 <YAxis tick={chartAxisStyle} tickFormatter={(v) => `$${v}`} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => `$${v.toFixed(2)}`} />
+                {/* recharts 3 widens tooltip values to string | number | array, so coerce before formatting */}
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => `$${Number(v).toFixed(2)}`} />
+
                 <Bar name="Earned" dataKey="earned" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
