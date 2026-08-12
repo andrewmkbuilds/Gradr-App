@@ -235,6 +235,67 @@ async function clearPaymentIssue(data: any, env: PaddleEnv) {
 }
 
 /**
+ * Eligibility discounts: record what was actually redeemed, and re-check that
+ * the buyer was entitled to it. A discounted transaction from someone with no
+ * verified eligibility is logged as a denied security event so it can be
+ * investigated — the sale is never blocked after the fact.
+ */
+// deno-lint-ignore no-explicit-any
+async function recordDiscountUse(data: any, env: PaddleEnv) {
+  const userId = data?.customData?.userId;
+  const discountAmount = Number(data?.details?.totals?.discount ?? 0);
+  if (!userId || !data?.id || discountAmount <= 0) return;
+
+  const item = data.items?.[0];
+  const externalPriceId = item?.price?.importMeta?.externalId as string | undefined;
+  const plan = externalPriceId ? PLAN_PRICES[externalPriceId] : undefined;
+
+  const { data: entitled } = await db().rpc("best_discount_for", {
+    _user_id: userId,
+    _plan: plan?.tier ?? null,
+    _interval: plan?.interval ?? null,
+  });
+  const resolved = (entitled ?? {}) as { percentage?: number; rule_id?: string; eligibility_type?: string };
+
+  const subtotal = Number(data?.details?.totals?.subtotal ?? 0);
+  const grandTotal = Number(data?.details?.totals?.grandTotal ?? data?.details?.totals?.total ?? 0);
+  const appliedPercent = subtotal > 0 ? Math.round((discountAmount / subtotal) * 10000) / 100 : 0;
+
+  await db().rpc("record_discount_redemption", {
+    _user_id: userId,
+    _rule_id: resolved.rule_id ?? null,
+    _eligibility_type: resolved.eligibility_type ?? null,
+    _percentage: appliedPercent,
+    _plan: plan?.tier ?? null,
+    _interval: plan?.interval ?? null,
+    _env: env,
+    _transaction_id: String(data.id),
+    _subscription_id: data.subscriptionId ?? null,
+    _gross: subtotal / 100,
+    _discount: discountAmount / 100,
+    _net: grandTotal / 100,
+    _currency: (data.currencyCode ?? "usd").toLowerCase(),
+  });
+
+  const legitimate = Number(resolved.percentage ?? 0) > 0;
+  await logSecurityEvent({
+    category: "discount",
+    event: "discount_redeemed",
+    decision: legitimate ? "allowed" : "denied",
+    userId,
+    env,
+    source: "payments-webhook",
+    reason: legitimate ? null : "discount_applied_without_verified_eligibility",
+    details: {
+      transaction_id: String(data.id),
+      applied_percent: appliedPercent,
+      entitled_percent: resolved.percentage ?? 0,
+      paddle_discount_id: data.discountId ?? null,
+    },
+  });
+}
+
+/**
  * Affiliate attribution. Idempotent by Paddle transaction id: the RPC refuses to
  * create a second commission for the same source record, so webhook retries and
  * duplicate deliveries can never double-pay.
@@ -244,9 +305,21 @@ async function recordAffiliateCommission(data: any, env: PaddleEnv) {
   const userId = data?.customData?.userId;
   if (!userId || !data?.id) return;
 
+  // Commission basis is configurable: 'net' pays on what the customer actually
+  // paid after an eligibility discount, 'gross' pays on the list price.
+  const { data: settings } = await db()
+    .from("discount_settings")
+    .select("affiliate_commission_basis")
+    .eq("id", 1)
+    .maybeSingle();
+
   const grandTotal = Number(data?.details?.totals?.grandTotal ?? data?.details?.totals?.total ?? 0);
+  const subtotal = Number(data?.details?.totals?.subtotal ?? 0);
+  const basisTotal = settings?.affiliate_commission_basis === "gross" && subtotal > 0
+    ? subtotal
+    : grandTotal;
   // Paddle reports minor units (cents).
-  const amount = grandTotal > 0 ? grandTotal / 100 : 0;
+  const amount = basisTotal > 0 ? basisTotal / 100 : 0;
   if (amount <= 0) return;
 
   const { data: commissionId, error } = await db().rpc("record_conversion_commission", {
@@ -409,6 +482,7 @@ Deno.serve(async (req) => {
       case EventName.TransactionCompleted:
         await clearPaymentIssue(event.data, env);
         await grantPackCredits(event.data, env);
+        await recordDiscountUse(event.data, env);
         await recordAffiliateCommission(event.data, env);
         break;
       case EventName.TransactionPaymentFailed:

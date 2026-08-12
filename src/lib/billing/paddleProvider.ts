@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddle, getPaddleEnvironment, getPaddlePriceId } from "@/lib/paddle";
+import { resolveCheckoutDiscount } from "@/hooks/useEligibility";
 import type {
   BillingProvider,
   CheckoutRequest,
@@ -21,6 +22,7 @@ const PLAN_PRICE_IDS: Record<string, string> = {
 export async function openPaddleCheckout(
   priceId: string,
   successPath: string,
+  discountId?: string | null,
 ): Promise<CheckoutResult> {
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -34,6 +36,9 @@ export async function openPaddleCheckout(
     // Prefill the signed-in customer's email.
     customer: user.email ? { email: user.email } : undefined,
     customData: { userId: user.id },
+    // Resolved server-side from verified eligibility — the browser never picks
+    // a percentage, it only receives an id it is entitled to.
+    ...(discountId ? { discountId } : {}),
     settings: {
       displayMode: "overlay",
       variant: "one-page",
@@ -53,7 +58,8 @@ export const paddleBillingProvider: BillingProvider = {
   async createCheckout({ plan, interval }: CheckoutRequest): Promise<CheckoutResult> {
     const priceId = PLAN_PRICE_IDS[`${plan}-${interval}`];
     if (!priceId) throw new Error(`Unknown plan: ${plan} ${interval}`);
-    return openPaddleCheckout(priceId, "/welcome");
+    const discount = await resolveCheckoutDiscount(plan, interval);
+    return openPaddleCheckout(priceId, "/welcome", discount.discountId ?? null);
   },
 
   async createPackCheckout({ pack }: PackCheckoutRequest): Promise<CheckoutResult> {

@@ -109,6 +109,25 @@ export interface PreviewedPrice {
   /** Localized, Paddle-formatted total. Render as-is — never re-format. */
   formattedTotal: string;
   currencyCode: string;
+  /** Raw subtotal in minor units — only used to render a discounted price. */
+  subtotalMinor: number;
+}
+
+/**
+ * Formats a minor-unit amount in the currency Paddle quoted. Used exclusively
+ * for showing an eligibility-discounted price next to the struck-through list
+ * price; the list price itself always comes from Paddle verbatim.
+ */
+export function formatMinorAmount(minor: number, currencyCode: string): string {
+  try {
+    return new Intl.NumberFormat(navigator.language, {
+      style: "currency",
+      currency: currencyCode,
+      maximumFractionDigits: minor % 100 === 0 ? 0 : 2,
+    }).format(minor / 100);
+  } catch {
+    return `${(minor / 100).toFixed(2)} ${currencyCode}`;
+  }
 }
 
 /**
@@ -137,6 +156,7 @@ export async function previewPrices(
     out[key] = {
       formattedTotal: line.formattedTotals.subtotal,
       currencyCode: result.data.currencyCode,
+      subtotalMinor: Number(line.totals.subtotal ?? 0),
     };
   }
   return out;

@@ -1,17 +1,20 @@
-import { Check, Sparkles, Rocket, Zap, Crown, Loader2 } from "lucide-react";
+import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBillingActions, useSubscription } from "@/hooks/useSubscription";
 import { CREDIT_PACKS, FREE_TIER, TIERS, type Tier } from "@/config/tiers";
-import { previewPrices, type PreviewedPrice } from "@/lib/paddle";
+import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
+import { VerificationDialog } from "@/components/VerificationDialog";
+import { useDiscountPrograms, useMyEligibility } from "@/hooks/useEligibility";
 
 const TIER_ICONS: Record<string, typeof Sparkles> = {
   Starter: Zap,
@@ -26,6 +29,11 @@ export default function Pricing() {
   const { pending, startSubscription, buyPack } = useBillingActions();
   const [tab, setTab] = useState<"plans" | "packs">("plans");
   const [interval, setInterval] = useState<"monthly" | "annual">("annual");
+  const [verifyOpen, setVerifyOpen] = useState(false);
+
+  const { discountPercent } = useMyEligibility();
+  const { data: programs } = useDiscountPrograms();
+  const topProgram = programs?.[0];
 
   const [prices, setPrices] = useState<Record<string, PreviewedPrice>>({});
   const [pricesLoading, setPricesLoading] = useState(true);
@@ -78,14 +86,44 @@ export default function Pricing() {
     void buyPack(key);
   };
 
+  /**
+   * List price comes from Paddle verbatim. When the signed-in visitor has a
+   * verified eligibility discount we show what they'll actually pay next to
+   * the struck-through list price — the real reduction is applied by Paddle at
+   * checkout, from a server-resolved discount.
+   */
   const PriceLine = ({ id, suffix }: { id: string; suffix: string }) => {
     if (pricesLoading) return <Skeleton className="h-10 w-32" />;
-    const formatted = priceFor(id);
-    if (!formatted) return <span className="text-sm text-muted-foreground">Price unavailable</span>;
+    const price = prices[id];
+    if (!price) return <span className="text-sm text-muted-foreground">Price unavailable</span>;
+
+    const discounted = discountPercent > 0 && price.subtotalMinor > 0
+      ? formatMinorAmount(
+          Math.round(price.subtotalMinor * (1 - discountPercent / 100)),
+          price.currencyCode,
+        )
+      : null;
+
     return (
       <div>
-        <span className="text-4xl font-bold text-foreground">{formatted}</span>
-        <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
+        {discounted ? (
+          <>
+            <span className="text-4xl font-bold text-foreground">{discounted}</span>
+            <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
+            <div className="mt-1 flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground line-through">{price.formattedTotal}</span>
+              <Badge variant="secondary" className="gap-1">
+                <BadgePercent className="h-3 w-3" aria-hidden="true" />
+                {discountPercent}% off applied
+              </Badge>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="text-4xl font-bold text-foreground">{price.formattedTotal}</span>
+            <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
+          </>
+        )}
       </div>
     );
   };
@@ -113,6 +151,47 @@ export default function Pricing() {
       </div>
 
       <PaymentsConfigBanner context="pricing" className="mx-auto max-w-3xl" />
+
+      {/* Eligibility discounts: advertised to everyone, confirmed for the verified. */}
+      {(discountPercent > 0 || topProgram) && (
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              {discountPercent > 0 ? (
+                <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
+              ) : (
+                <BadgePercent className="h-4 w-4 text-primary" aria-hidden="true" />
+              )}
+            </span>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {discountPercent > 0
+                  ? `Your ${discountPercent}% eligibility discount is active`
+                  : `Save up to ${Math.round(Number(topProgram?.percentage ?? 0))}% with an eligibility discount`}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {discountPercent > 0
+                  ? "It's applied automatically at checkout and on every renewal."
+                  : "Students, educators, military, first responders, healthcare and nonprofit teams qualify."}
+              </p>
+            </div>
+          </div>
+          {discountPercent > 0 ? (
+            <Button variant="ghost" size="sm" onClick={() => navigate("/settings#eligibility")}>
+              Manage
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => (user ? setVerifyOpen(true) : navigate("/auth?next=/pricing"))}
+            >
+              Check if you qualify
+            </Button>
+          )}
+        </div>
+      )}
+
+      <VerificationDialog open={verifyOpen} onOpenChange={setVerifyOpen} />
 
       {pricesError && (
         <p className="text-center text-sm text-destructive">

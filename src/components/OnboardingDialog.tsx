@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Sparkles } from "lucide-react";
+import { BadgePercent, Loader2, Sparkles } from "lucide-react";
+import { ONBOARDING_IDENTITIES } from "@/config/eligibility";
+import { VerificationDialog } from "@/components/VerificationDialog";
 
 const COUNTRIES = [
   { code: "us", label: "United States" },
@@ -33,6 +35,13 @@ export function OnboardingDialog({ open, onComplete }: Props) {
   const [salaryMin, setSalaryMin] = useState("");
   const [experience, setExperience] = useState<"entry" | "mid" | "senior" | "lead">("mid");
   const [saving, setSaving] = useState(false);
+  const [identity, setIdentity] = useState("");
+  const [verifyOpen, setVerifyOpen] = useState(false);
+
+  // Only identities tied to a verifiable category unlock the discount offer.
+  const eligibleIdentity = ONBOARDING_IDENTITIES.find(
+    (i) => i.value === identity && i.eligibilityType,
+  );
 
   const submit = async () => {
     if (!user || !role.trim()) return;
@@ -59,6 +68,8 @@ export function OnboardingDialog({ open, onComplete }: Props) {
       remoteOnly: remote === "remote",
       salaryMin: minSalary,
     });
+    // Offer verification once the essentials are saved, so setup never stalls.
+    if (eligibleIdentity) setVerifyOpen(true);
   };
 
   return (
@@ -74,6 +85,23 @@ export function OnboardingDialog({ open, onComplete }: Props) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label>What best describes you?</Label>
+            <Select value={identity} onValueChange={setIdentity}>
+              <SelectTrigger><SelectValue placeholder="Choose one" /></SelectTrigger>
+              <SelectContent>
+                {ONBOARDING_IDENTITIES.map((i) => (
+                  <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {eligibleIdentity && (
+              <p className="flex items-center gap-1.5 text-xs text-primary">
+                <BadgePercent className="h-3.5 w-3.5" aria-hidden="true" />
+                You may qualify for a verified discount — we'll offer it after setup.
+              </p>
+            )}
+          </div>
           <div className="grid gap-2">
             <Label htmlFor="role">Target role *</Label>
             <Input id="role" placeholder="e.g. Senior Product Designer" value={role} onChange={(e) => setRole(e.target.value)} />
@@ -128,6 +156,11 @@ export function OnboardingDialog({ open, onComplete }: Props) {
           </Button>
         </DialogFooter>
       </DialogContent>
+      <VerificationDialog
+        open={verifyOpen}
+        onOpenChange={setVerifyOpen}
+        defaultType={eligibleIdentity?.eligibilityType ?? null}
+      />
     </Dialog>
   );
 }

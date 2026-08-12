@@ -677,6 +677,188 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_redemptions: {
+        Row: {
+          created_at: string
+          currency: string | null
+          discount_amount: number | null
+          discount_rule_id: string | null
+          eligibility_type: string | null
+          environment: string
+          gross_amount: number | null
+          id: string
+          interval: string | null
+          net_amount: number | null
+          percentage: number
+          plan: string | null
+          subscription_id: string | null
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          discount_amount?: number | null
+          discount_rule_id?: string | null
+          eligibility_type?: string | null
+          environment?: string
+          gross_amount?: number | null
+          id?: string
+          interval?: string | null
+          net_amount?: number | null
+          percentage: number
+          plan?: string | null
+          subscription_id?: string | null
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          discount_amount?: number | null
+          discount_rule_id?: string | null
+          eligibility_type?: string | null
+          environment?: string
+          gross_amount?: number | null
+          id?: string
+          interval?: string | null
+          net_amount?: number | null
+          percentage?: number
+          plan?: string | null
+          subscription_id?: string | null
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_discount_rule_id_fkey"
+            columns: ["discount_rule_id"]
+            isOneToOne: false
+            referencedRelation: "discount_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_rules: {
+        Row: {
+          active: boolean
+          advertised: boolean
+          applicable_intervals: string[]
+          applicable_plans: string[]
+          created_at: string
+          created_by: string | null
+          eligibility_type: string | null
+          ends_at: string | null
+          id: string
+          kind: string
+          max_redemptions: number | null
+          name: string
+          organization_id: string | null
+          percentage: number
+          redemption_count: number
+          requires_verification: boolean
+          stackable: boolean
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          advertised?: boolean
+          applicable_intervals?: string[]
+          applicable_plans?: string[]
+          created_at?: string
+          created_by?: string | null
+          eligibility_type?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          max_redemptions?: number | null
+          name: string
+          organization_id?: string | null
+          percentage: number
+          redemption_count?: number
+          requires_verification?: boolean
+          stackable?: boolean
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          advertised?: boolean
+          applicable_intervals?: string[]
+          applicable_plans?: string[]
+          created_at?: string
+          created_by?: string | null
+          eligibility_type?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          max_redemptions?: number | null
+          name?: string
+          organization_id?: string | null
+          percentage?: number
+          redemption_count?: number
+          requires_verification?: boolean
+          stackable?: boolean
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_rules_eligibility_type_fkey"
+            columns: ["eligibility_type"]
+            isOneToOne: false
+            referencedRelation: "eligibility_categories"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "discount_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_settings: {
+        Row: {
+          affiliate_commission_basis: string
+          allow_stacking: boolean
+          created_at: string
+          expiry_reminder_days: number[]
+          id: number
+          notify_expired: boolean
+          notify_expiring: boolean
+          notify_failed: boolean
+          notify_verified: boolean
+          updated_at: string
+        }
+        Insert: {
+          affiliate_commission_basis?: string
+          allow_stacking?: boolean
+          created_at?: string
+          expiry_reminder_days?: number[]
+          id?: number
+          notify_expired?: boolean
+          notify_expiring?: boolean
+          notify_failed?: boolean
+          notify_verified?: boolean
+          updated_at?: string
+        }
+        Update: {
+          affiliate_commission_basis?: string
+          allow_stacking?: boolean
+          created_at?: string
+          expiry_reminder_days?: number[]
+          id?: number
+          notify_expired?: boolean
+          notify_expiring?: boolean
+          notify_failed?: boolean
+          notify_verified?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discovered_jobs: {
         Row: {
           company: string | null
@@ -736,6 +918,107 @@ export type Database = {
           url?: string
         }
         Relationships: []
+      }
+      eligibility_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          default_discount_percent: number
+          description: string | null
+          key: string
+          label: string
+          requires_verification: boolean
+          self_serve: boolean
+          sort_order: number
+          updated_at: string
+          verification_validity_days: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          default_discount_percent?: number
+          description?: string | null
+          key: string
+          label: string
+          requires_verification?: boolean
+          self_serve?: boolean
+          sort_order?: number
+          updated_at?: string
+          verification_validity_days?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          default_discount_percent?: number
+          description?: string | null
+          key?: string
+          label?: string
+          requires_verification?: boolean
+          self_serve?: boolean
+          sort_order?: number
+          updated_at?: string
+          verification_validity_days?: number
+        }
+        Relationships: []
+      }
+      eligibility_verifications: {
+        Row: {
+          created_at: string
+          eligibility_type: string
+          expires_at: string | null
+          failure_reason: string | null
+          id: string
+          last_checked_at: string | null
+          metadata: Json
+          provider: string
+          provider_reference_id: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          eligibility_type: string
+          expires_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          provider?: string
+          provider_reference_id?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          eligibility_type?: string
+          expires_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          provider?: string
+          provider_reference_id?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eligibility_verifications_eligibility_type_fkey"
+            columns: ["eligibility_type"]
+            isOneToOne: false
+            referencedRelation: "eligibility_categories"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       email_notification_log: {
         Row: {
@@ -1206,6 +1489,86 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          active: boolean
+          contact_email: string | null
+          created_at: string
+          created_by: string | null
+          discount_percent: number
+          email_domains: string[]
+          id: string
+          name: string
+          notes: string | null
+          org_type: string
+          seats: number | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          email_domains?: string[]
+          id?: string
+          name: string
+          notes?: string | null
+          org_type?: string
+          seats?: number | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          email_domains?: string[]
+          id?: string
+          name?: string
+          notes?: string | null
+          org_type?: string
+          seats?: number | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       paddle_customers: {
         Row: {
           created_at: string
@@ -1230,6 +1593,33 @@ export type Database = {
           environment?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      paddle_discounts: {
+        Row: {
+          created_at: string
+          environment: string
+          id: string
+          paddle_discount_id: string
+          percentage: number
+          recurring: boolean
+        }
+        Insert: {
+          created_at?: string
+          environment: string
+          id?: string
+          paddle_discount_id: string
+          percentage: number
+          recurring?: boolean
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          id?: string
+          paddle_discount_id?: string
+          percentage?: number
+          recurring?: boolean
         }
         Relationships: []
       }
@@ -1886,6 +2276,10 @@ export type Database = {
         Args: { _document_id: string }
         Returns: string
       }
+      admin_review_verification: {
+        Args: { _reason?: string; _status: string; _verification_id: string }
+        Returns: undefined
+      }
       admin_set_commission_status: {
         Args: {
           _commission_ids: string[]
@@ -1921,6 +2315,10 @@ export type Database = {
         Args: { _click_id?: string; _code: string }
         Returns: string
       }
+      best_discount_for: {
+        Args: { _interval?: string; _plan?: string; _user_id: string }
+        Returns: Json
+      }
       consume_entitlement: {
         Args: {
           _amount?: number
@@ -1946,6 +2344,7 @@ export type Database = {
         Returns: string
       }
       entitlement_snapshot: { Args: { _env?: string }; Returns: Json }
+      expire_stale_verifications: { Args: never; Returns: number }
       generate_affiliate_code: { Args: never; Returns: string }
       get_affiliate_public_settings: {
         Args: never
@@ -1989,6 +2388,7 @@ export type Database = {
         }[]
       }
       my_affiliate_overview: { Args: never; Returns: Json }
+      my_eligibility_state: { Args: never; Returns: Json }
       notify_admins: {
         Args: {
           _body?: string
@@ -2020,6 +2420,24 @@ export type Database = {
           _referred_user_id: string
           _source_amount: number
           _source_record_id?: string
+        }
+        Returns: string
+      }
+      record_discount_redemption: {
+        Args: {
+          _currency: string
+          _discount: number
+          _eligibility_type: string
+          _env: string
+          _gross: number
+          _interval: string
+          _net: number
+          _percentage: number
+          _plan: string
+          _rule_id: string
+          _subscription_id: string
+          _transaction_id: string
+          _user_id: string
         }
         Returns: string
       }
