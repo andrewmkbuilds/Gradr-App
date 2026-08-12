@@ -64,6 +64,8 @@ export default function ResumeEngine() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [showTailor, setShowTailor] = useState(false);
+  const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
+  const [versionsToken, setVersionsToken] = useState(0);
 
   const handleFileUpload = useCallback(async (selectedFile: File) => {
     if (!user) {
