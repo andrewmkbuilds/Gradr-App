@@ -87,6 +87,7 @@ import { Route as ApiPublicSearchConsoleRouteImport } from './routes/api/public/
 import { Route as ApiPublicSearchJobsRouteImport } from './routes/api/public/search-jobs'
 import { Route as ApiPublicSendNotificationRouteImport } from './routes/api/public/send-notification'
 import { Route as ApiPublicSeoMonitorRouteImport } from './routes/api/public/seo-monitor'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -487,6 +488,12 @@ const ApiPublicSeoMonitorRoute = ApiPublicSeoMonitorRouteImport.update({
   path: '/api/public/seo-monitor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -566,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/affiliate/': typeof AppAffiliateIndexRoute
   '/interview/': typeof AppInterviewIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
@@ -645,6 +653,7 @@ export interface FileRoutesByTo {
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/affiliate': typeof AppAffiliateIndexRoute
   '/interview': typeof AppInterviewIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -726,6 +735,7 @@ export interface FileRoutesById {
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/_app/affiliate/': typeof AppAffiliateIndexRoute
   '/_app/interview/': typeof AppInterviewIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -807,6 +817,7 @@ export interface FileRouteTypes {
     | '/api/public/seo-monitor'
     | '/affiliate/'
     | '/interview/'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/ats-resume-checker'
@@ -886,6 +897,7 @@ export interface FileRouteTypes {
     | '/api/public/seo-monitor'
     | '/affiliate'
     | '/interview'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/_app'
@@ -966,6 +978,7 @@ export interface FileRouteTypes {
     | '/api/public/seo-monitor'
     | '/_app/affiliate/'
     | '/_app/interview/'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1015,6 +1028,7 @@ export interface RootRouteChildren {
   ApiPublicSearchJobsRoute: typeof ApiPublicSearchJobsRoute
   ApiPublicSendNotificationRoute: typeof ApiPublicSendNotificationRoute
   ApiPublicSeoMonitorRoute: typeof ApiPublicSeoMonitorRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1565,6 +1579,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSeoMonitorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1687,6 +1708,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSearchJobsRoute: ApiPublicSearchJobsRoute,
   ApiPublicSendNotificationRoute: ApiPublicSendNotificationRoute,
   ApiPublicSeoMonitorRoute: ApiPublicSeoMonitorRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
