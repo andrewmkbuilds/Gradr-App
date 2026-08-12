@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CheckCircle } from "lucide-react";
+import {
+  authCallbackUrl,
+  consumeAuthCallbackError,
+  readNext,
+} from "@/lib/nextRedirect";
 import { toast } from "sonner";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const isGuest = user?.is_anonymous === true;
   const [isSignUp, setIsSignUp] = useState(
@@ -107,7 +113,7 @@ export default function Auth() {
       if (error) throw error;
       toast.success("Signed in as guest");
       // Guests stay allowed on /auth (so they can upgrade later), so navigate explicitly.
-      navigate(nextParam ?? "/", { replace: true });
+      navigate(nextTarget, { replace: true });
 
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Guest sign-in failed";
