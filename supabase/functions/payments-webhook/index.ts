@@ -309,8 +309,16 @@ Deno.serve(async (req) => {
       userId: eventUserId,
       env,
       source: "payments-webhook",
-      // deno-lint-ignore no-explicit-any
-      details: { event_id: (event as any)?.eventId ?? null, status: (event.data as any)?.status ?? null },
+      details: {
+        // deno-lint-ignore no-explicit-any
+        event_id: (event as any)?.eventId ?? null,
+        // deno-lint-ignore no-explicit-any
+        status: (event.data as any)?.status ?? null,
+        // deno-lint-ignore no-explicit-any
+        customer_id: (event.data as any)?.customerId ?? (event.data as any)?.id ?? null,
+        // deno-lint-ignore no-explicit-any
+        subscription_id: (event.data as any)?.subscriptionId ?? null,
+      },
     });
 
     switch (event.eventType) {
