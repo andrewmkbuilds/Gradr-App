@@ -624,11 +624,15 @@ export default function Landing() {
 
           <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
             {AUDIENCE.map((a, i) => (
-              <Reveal key={a.title} delay={i * 50} className="bg-card p-6">
-                <div id={a.id} className="scroll-mt-28" />
-                <a.icon className="h-5 w-5 text-primary" aria-hidden />
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+              <Reveal key={a.title} delay={i * 50} className="bg-card">
+                <Glare className="h-full p-6" radius="0px">
+                  <div>
+                    <div id={a.id} className="scroll-mt-28" />
+                    <a.icon className="h-5 w-5 text-primary" aria-hidden />
+                    <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+                  </div>
+                </Glare>
               </Reveal>
             ))}
             <Reveal delay={250} className="flex flex-col justify-center bg-card p-6">
