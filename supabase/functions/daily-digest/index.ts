@@ -43,13 +43,13 @@ function buildSubject(jobsCount: number, remindersCount: number) {
   if (jobsCount && remindersCount) return `${jobsCount} high-match jobs + ${remindersCount} follow-ups due`;
   if (jobsCount) return `${jobsCount} high-match jobs for you today`;
   if (remindersCount) return `${remindersCount} follow-ups need attention`;
-  return "Your CareerFlow digest is ready";
+  return "Your Gradr digest is ready";
 }
 
 function buildPreview(jobs: DigestJob[], reminders: DigestReminder[]) {
   return {
     subject: buildSubject(jobs.length, reminders.length),
-    preheader: "Your daily job-search snapshot from CareerFlow OS.",
+    preheader: "Your daily job-search snapshot from Gradr.",
     highMatchJobs: jobs.map((job) => ({
       title: job.title,
       company: job.company || "Unknown company",

@@ -1,0 +1,14 @@
+{
+  "name": "Gradr — AI Career Command Center",
+  "short_name": "Gradr",
+  "description": "Resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070d1a",
+  "theme_color": "#070d1a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
