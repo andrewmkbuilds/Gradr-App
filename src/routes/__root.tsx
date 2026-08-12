@@ -158,7 +158,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
-      { rel: "canonical", href: "https://gradr.me/" },
+      // No sitewide canonical here: RouteSeo emits a self-referencing
+      // canonical per route, and a root one would be inherited by every page.
+
       { rel: "preconnect", href: "https://xaeyjrekewnwjujnrqgu.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://xaeyjrekewnwjujnrqgu.supabase.co" },
     ],
