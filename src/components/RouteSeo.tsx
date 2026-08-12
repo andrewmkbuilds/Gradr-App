@@ -262,12 +262,6 @@ export function RouteSeo() {
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
 
-  // Article schema for editorial routes (guides + blog posts) so they can
-  // qualify for article rich results. The sitewide Organization/SoftwareApp
-  // schema in __root only describes the brand, not the content pieces.
-  const guideForLd = pathname.startsWith("/career-advice/")
-    ? GUIDES_BY_SLUG[pathname.slice(15)]
-    : null;
   const articleLd = isArticle
     ? {
         "@context": "https://schema.org",
@@ -326,9 +320,6 @@ export function RouteSeo() {
           {JSON.stringify(node)}
         </script>
       ))}
-      {articleLd ? (
-        <script type="application/ld+json">{JSON.stringify(articleLd)}</script>
-      ) : null}
     </Helmet>
   );
 }
