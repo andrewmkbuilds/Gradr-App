@@ -30,7 +30,7 @@ export function CompanyLogo({
   domain,
   size = 40,
   className,
-  rounded-sm = "lg",
+  rounded = "lg",
 }: CompanyLogoProps) {
   const query = domain || company;
   const [src, setSrc] = useState<string | null>(null);
@@ -53,7 +53,7 @@ export function CompanyLogo({
   }, [query, px]);
 
   const radius =
-    rounded-sm === "full" ? "rounded-full" : rounded-sm === "md" ? "rounded-md" : "rounded-lg";
+    rounded === "full" ? "rounded-full" : rounded === "md" ? "rounded-md" : "rounded-lg";
 
   return (
     <span
