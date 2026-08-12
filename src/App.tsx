@@ -44,6 +44,10 @@ import AdminPaddle from "@/pages/AdminPaddle";
 import AdminSearchConsole from "./pages/AdminSearchConsole";
 
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
+import CareerAdvice from "./pages/CareerAdvice";
+import GuideArticle from "./pages/GuideArticle";
+import JobSearchIndex from "./pages/JobSearchIndex";
+import JobLanding from "./pages/JobLanding";
 import OAuthConsent from "./pages/OAuthConsent";
 import Landing from "./pages/Landing";
 import { authPath, nextFromLocation, resolveNext } from "./lib/nextRedirect";
@@ -130,6 +134,10 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
         <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
+        <Route path="/career-advice" element={<AnimatedPage><CareerAdvice /></AnimatedPage>} />
+        <Route path="/career-advice/:slug" element={<AnimatedPage><GuideArticle /></AnimatedPage>} />
+        <Route path="/job-search" element={<AnimatedPage><JobSearchIndex /></AnimatedPage>} />
+        <Route path="/job-search/:slug" element={<AnimatedPage><JobLanding /></AnimatedPage>} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
         <Route path="/*" element={<ProtectedRoutes />} />
       </Routes>

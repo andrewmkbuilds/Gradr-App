@@ -90,14 +90,38 @@ const META: Record<string, { title: string; description: string }> = {
     title: "AI Resume Builder & ATS Guide",
     description: "How AI resume builders help candidates beat Applicant Tracking Systems — keyword matching, formatting rules, and AI-driven rewrites.",
   },
+  "/career-advice": {
+    title: "Career Advice",
+    description: "Free guides on resume optimization, cover letters, and interview preparation — practical advice for every stage of your job search.",
+  },
+  "/job-search": {
+    title: "Job Search by Role & Location",
+    description: "Browse job search pages by role, city, and remote preference, with the skills each role asks for and how to tailor your application.",
+  },
 };
+
+/** Resolve metadata for dynamic content routes (guides and job landing pages). */
+function resolveDynamicMeta(pathname: string): { title: string; description: string } | null {
+  const guideSlug = pathname.startsWith("/career-advice/") ? pathname.slice(15) : null;
+  if (guideSlug && GUIDES_BY_SLUG[guideSlug]) {
+    const guide = GUIDES_BY_SLUG[guideSlug];
+    return { title: guide.metaTitle, description: guide.description };
+  }
+  const jobSlug = pathname.startsWith("/job-search/") ? pathname.slice(12) : null;
+  if (jobSlug && JOB_LANDINGS_BY_SLUG[jobSlug]) {
+    const landing = JOB_LANDINGS_BY_SLUG[jobSlug];
+    return { title: landing.metaTitle, description: landing.description };
+  }
+  return null;
+}
 
 export function RouteSeo() {
   const { pathname } = useLocation();
-  const meta = META[pathname] ?? {
-    title: "Gradr",
-    description: "Gradr is the AI career command center for job seekers — resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
-  };
+  const meta = META[pathname] ??
+    resolveDynamicMeta(pathname) ?? {
+      title: "Gradr",
+      description: "Gradr is the AI career command center for job seekers — resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
+    };
   const fullTitle = pathname === "/" ? "Gradr | AI Career Command Center" : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   return (
