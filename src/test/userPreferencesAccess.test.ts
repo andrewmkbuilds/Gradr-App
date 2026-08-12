@@ -11,10 +11,21 @@ import { query, dbConfigured } from "../../scripts/securityBaseline.mjs";
  * Every case runs inside a transaction that is rolled back, so nothing is
  * persisted. Skipped when no database connection is configured.
  */
-const maybe = dbConfigured() ? describe : describe.skip;
-
 const OWNER = "11111111-1111-4111-8111-111111111111";
 const OTHER = "22222222-2222-4222-8222-222222222222";
+
+/** Impersonating `authenticated` needs role membership; local sandbox roles lack it. */
+function canImpersonate(): boolean {
+  if (!dbConfigured()) return false;
+  try {
+    query("begin; set local role authenticated; rollback;");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const maybe = canImpersonate() ? describe : describe.skip;
 
 /** Run SQL as `authenticated` with a synthetic JWT and return the last result rows. */
 function asUser(uid: string, isAnonymous: boolean, sql: string): string[][] {
