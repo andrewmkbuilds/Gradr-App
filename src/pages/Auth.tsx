@@ -432,6 +432,20 @@ export default function Auth() {
             </>
           )}
         </Button>
+
+        {isSignUp && (
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            By creating an account you agree to our{" "}
+            <Link to="/terms" className="text-primary underline underline-offset-2">
+              Terms &amp; Conditions
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy" className="text-primary underline underline-offset-2">
+              Privacy Notice
+            </Link>
+            .
+          </p>
+        )}
       </form>
 
       <Button

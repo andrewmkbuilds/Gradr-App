@@ -5,19 +5,21 @@ import { Link, useLocation } from "react-router-dom";
 interface LegalPageProps {
   title: string;
   intro: string;
+  /** Overrides the shared policy date (versioned documents pass their effective date). */
+  lastUpdated?: string;
   children: React.ReactNode;
 }
 
 /** Shared layout for the publicly accessible policy pages Paddle reviews. */
-export function LegalPage({ title, intro, children }: LegalPageProps) {
+export function LegalPage({ title, intro, lastUpdated, children }: LegalPageProps) {
   const { pathname } = useLocation();
   return (
     <PublicShell source={`legal:${pathname}`}>
-      <article className="mx-auto max-w-3xl">
+      <article className="mx-auto max-w-5xl">
         <header className="mb-8 space-y-3">
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{title}</h1>
           <p className="text-muted-foreground">{intro}</p>
-          <p className="text-xs text-muted-foreground">Last updated {POLICIES_UPDATED}</p>
+          <p className="text-xs text-muted-foreground">Last updated {lastUpdated || POLICIES_UPDATED}</p>
           <nav aria-label="Policies" className="flex flex-wrap gap-3 pt-1 text-sm">
             {LEGAL_PAGES.map((page) => (
               <Link

@@ -1030,6 +1030,101 @@ export type Database = {
           },
         ]
       }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          created_at: string
+          doc_type: string
+          document_id: string
+          id: string
+          ip_hash: string | null
+          user_agent: string | null
+          user_id: string
+          version: number
+        }
+        Insert: {
+          accepted_at?: string
+          created_at?: string
+          doc_type: string
+          document_id: string
+          id?: string
+          ip_hash?: string | null
+          user_agent?: string | null
+          user_id: string
+          version: number
+        }
+        Update: {
+          accepted_at?: string
+          created_at?: string
+          doc_type?: string
+          document_id?: string
+          id?: string
+          ip_hash?: string | null
+          user_agent?: string | null
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_acceptances_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_documents: {
+        Row: {
+          content: string | null
+          content_key: string | null
+          created_at: string
+          created_by: string | null
+          doc_type: string
+          effective_date: string
+          id: string
+          published_at: string | null
+          requires_acceptance: boolean
+          status: string
+          summary_of_changes: string | null
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content?: string | null
+          content_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type: string
+          effective_date?: string
+          id?: string
+          published_at?: string | null
+          requires_acceptance?: boolean
+          status?: string
+          summary_of_changes?: string | null
+          title: string
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          content?: string | null
+          content_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type?: string
+          effective_date?: string
+          id?: string
+          published_at?: string | null
+          requires_acceptance?: boolean
+          status?: string
+          summary_of_changes?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1674,6 +1769,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_legal_document: {
+        Args: { _document_id: string; _user_agent?: string }
+        Returns: string
+      }
       admin_audit_actors: {
         Args: never
         Returns: {
@@ -1692,6 +1791,25 @@ export type Database = {
         }
         Returns: string
       }
+      admin_legal_document_stats: {
+        Args: never
+        Returns: {
+          accepted_count: number
+          doc_type: string
+          document_id: string
+          status: string
+          total_users: number
+          version: number
+        }[]
+      }
+      admin_legal_pending_users: {
+        Args: { _document_id: string; _limit?: number }
+        Returns: {
+          display_name: string
+          joined_at: string
+          user_id: string
+        }[]
+      }
       admin_mark_payout_paid: {
         Args: {
           _payout_id: string
@@ -1699,6 +1817,10 @@ export type Database = {
           _reference?: string
         }
         Returns: undefined
+      }
+      admin_publish_legal_document: {
+        Args: { _document_id: string }
+        Returns: string
       }
       affiliate_click_is_valid: {
         Args: { _code: string; _profile_id: string }
@@ -1791,6 +1913,17 @@ export type Database = {
           _type: string
         }
         Returns: number
+      }
+      pending_legal_acceptances: {
+        Args: never
+        Returns: {
+          doc_type: string
+          document_id: string
+          effective_date: string
+          summary_of_changes: string
+          title: string
+          version: number
+        }[]
       }
       plan_allowance: {
         Args: { _feature: string; _tier: string }
