@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./shared/supabase";
 import { scoreResume, deterministicSuggestions } from "./shared/resumeScoring";
 import { consume, paymentRequired, refund, resolveEnv, type PaymentEnv } from "./shared/entitlements";
 import { logAiAuthorization } from "./shared/securityAudit";

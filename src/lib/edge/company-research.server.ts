@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./shared/supabase";
 import { getResearchProvider } from "./shared/research";
 import { FirecrawlError } from "./shared/firecrawl";
 

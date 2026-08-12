@@ -1,5 +1,5 @@
 import { corsHeaders } from "./shared/cors";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./shared/supabase";
 import { gatewayFetch, type PaddleEnv } from "./shared/paddle";
 import { logSecurityEvent } from "./shared/securityAudit";
 

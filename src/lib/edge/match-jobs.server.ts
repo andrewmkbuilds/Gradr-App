@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./shared/supabase";
 import { scoreJobAgainstResume } from "./shared/matching";
 
 const corsHeaders = {

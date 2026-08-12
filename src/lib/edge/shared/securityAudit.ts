@@ -6,7 +6,7 @@
  * authorization outcomes. Writes go through the service role and are never
  * allowed to break the request they describe.
  */
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./supabase";
 
 export type SecurityCategory =
   | "billing_webhook"

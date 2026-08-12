@@ -6,7 +6,7 @@
  * plan, spends their monthly allowance first, then falls back to purchased
  * credits, all inside one atomic database function.
  */
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./supabase";
 
 export type Feature = "resume" | "application" | "interview";
 export type PaymentEnv = "sandbox" | "live";

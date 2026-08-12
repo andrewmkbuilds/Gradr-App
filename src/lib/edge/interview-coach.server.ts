@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./shared/supabase";
 import { consume, paymentRequired, resolveEnv } from "./shared/entitlements";
 import { logAiAuthorization } from "./shared/securityAudit";
 

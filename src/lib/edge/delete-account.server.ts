@@ -5,7 +5,7 @@
  * their stored files and rows, then removes the auth user itself. The whole
  * action is written to the security audit log.
  */
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "./shared/supabase";
 import { logSecurityEvent } from "./shared/securityAudit";
 
 const corsHeaders = {
