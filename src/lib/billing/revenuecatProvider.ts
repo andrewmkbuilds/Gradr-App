@@ -72,22 +72,17 @@ async function findPackage(identifier: string) {
   throw new Error(`RevenueCat package "${identifier}" was not found in any offering.`);
 }
 
-/** Pushes the current RevenueCat entitlement state into our database. */
+/**
+ * Asks the server to re-sync entitlements. The edge function verifies the
+ * subscription directly with RevenueCat's API for the authenticated user, so
+ * no purchase state is sent (or trusted) from the client.
+ */
 async function pushEntitlements() {
   const purchases = await getPurchases();
-  const info = await purchases.getCustomerInfo();
-  const entitlement = info.entitlements.active[PRO_ENTITLEMENT];
-
-  await supabase.functions.invoke("revenuecat-sync", {
-    body: {
-      active: Boolean(entitlement),
-      productIdentifier: entitlement?.productIdentifier ?? null,
-      expiresDate: entitlement?.expirationDate ?? null,
-      willRenew: entitlement?.willRenew ?? false,
-      originalAppUserId: info.originalAppUserId,
-    },
-  });
+  await purchases.getCustomerInfo();
+  await supabase.functions.invoke("revenuecat-sync", { body: {} });
 }
+
 
 export const revenueCatBillingProvider: BillingProvider = {
   id: "revenuecat",
