@@ -40,6 +40,7 @@ import AdminAffiliates from "./pages/AdminAffiliates";
 import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminSecurityLog from "@/pages/AdminSecurityLog";
+import AdminPaddle from "@/pages/AdminPaddle";
 import AdminSearchConsole from "./pages/AdminSearchConsole";
 
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
