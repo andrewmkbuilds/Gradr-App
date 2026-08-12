@@ -308,6 +308,7 @@ export default function Pricing() {
                     )}
                   </Button>
                 </Card>
+                </DepthCard>
               );
             })}
           </div>
