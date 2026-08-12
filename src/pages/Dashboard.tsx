@@ -8,6 +8,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
+import { UsageBars } from "@/components/UsageBars";
+
 
 interface DashboardStats {
   resumeScore: number;
