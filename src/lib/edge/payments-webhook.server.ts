@@ -7,6 +7,11 @@ import {
   type PaddleEnv,
 } from "./shared/paddle";
 import { logSecurityEvent } from "./shared/securityAudit";
+import {
+  claimWebhookEvent,
+  markWebhookFailed,
+  markWebhookProcessed,
+} from "./shared/webhookDelivery";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
