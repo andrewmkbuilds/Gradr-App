@@ -30,6 +30,7 @@ import {
   HoverLift,
   AnimatedList,
 } from "@/components/motion";
+import { ConceptLoop, GlowFrame, Glare } from "@/components/reactbits";
 import { ProductDemos } from "@/components/landing/ProductDemos";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
