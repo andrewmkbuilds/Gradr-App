@@ -448,7 +448,7 @@ export default function Auth() {
         {isSignUp ? "Already have an account?" : "No account yet?"}{" "}
         <button
           type="button"
-          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); }}
+          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); }}
           className="text-primary hover:underline font-medium"
 
         >
