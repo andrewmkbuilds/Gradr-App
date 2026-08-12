@@ -608,6 +608,81 @@ export type Database = {
         }
         Relationships: []
       }
+      api_health_alerts: {
+        Row: {
+          endpoint: string
+          first_seen_at: string
+          id: string
+          kind: string
+          last_seen_at: string
+          message: string
+          occurrences: number
+          resolved: boolean
+          resolved_at: string | null
+        }
+        Insert: {
+          endpoint: string
+          first_seen_at?: string
+          id?: string
+          kind: string
+          last_seen_at?: string
+          message: string
+          occurrences?: number
+          resolved?: boolean
+          resolved_at?: string | null
+        }
+        Update: {
+          endpoint?: string
+          first_seen_at?: string
+          id?: string
+          kind?: string
+          last_seen_at?: string
+          message?: string
+          occurrences?: number
+          resolved?: boolean
+          resolved_at?: string | null
+        }
+        Relationships: []
+      }
+      api_health_events: {
+        Row: {
+          created_at: string
+          duration_ms: number
+          endpoint: string
+          environment: string | null
+          error_message: string | null
+          id: string
+          method: string
+          outcome: string
+          status_code: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number
+          endpoint: string
+          environment?: string | null
+          error_message?: string | null
+          id?: string
+          method: string
+          outcome: string
+          status_code: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number
+          endpoint?: string
+          environment?: string | null
+          error_message?: string | null
+          id?: string
+          method?: string
+          outcome?: string
+          status_code?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       company_research: {
         Row: {
           cache_key: string
@@ -2385,6 +2460,45 @@ export type Database = {
             referencedColumns: ["key"]
           },
         ]
+      }
+      webhook_deliveries: {
+        Row: {
+          attempts: number
+          created_at: string
+          environment: string | null
+          event_id: string
+          event_type: string | null
+          id: string
+          last_error: string | null
+          provider: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          environment?: string | null
+          event_id: string
+          event_type?: string | null
+          id?: string
+          last_error?: string | null
+          provider: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          environment?: string | null
+          event_id?: string
+          event_type?: string | null
+          id?: string
+          last_error?: string | null
+          provider?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
