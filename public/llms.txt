@@ -1,8 +1,8 @@
-# CareerFlow OS
+# Gradr
 
 > AI-powered career command center: resume analysis, job matching, application generation, and interview coaching in one platform.
 
-CareerFlow OS helps job seekers and professionals run their entire job search lifecycle through five AI engines — resume intelligence, job matching, application automation, interview coaching, and career growth.
+Gradr helps job seekers and professionals run their entire job search lifecycle through five AI engines — resume intelligence, job matching, application automation, interview coaching, and career growth.
 
 ## Pages
 

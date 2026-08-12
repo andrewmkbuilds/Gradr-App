@@ -50,13 +50,13 @@ export default function AffiliateProgram() {
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="text-center space-y-4 animate-slide-up">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-          <Sparkles className="h-3 w-3" /> CareerFlow OS Partner Program
+          <Sparkles className="h-3 w-3" /> Gradr Partner Program
         </div>
         <h1 className="text-4xl font-bold text-foreground tracking-tight">
           Earn {rateType === "percentage" ? `${rate}%` : `$${rate}`} for every paying customer you refer
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Share CareerFlow OS with your audience and earn recurring commissions on every subscription —
+          Share Gradr with your audience and earn recurring commissions on every subscription —
           backed by a {cookieDays}-day cookie window so you get credit for the full buying journey.
         </p>
         <div className="pt-4">{renderCta()}</div>
@@ -101,9 +101,9 @@ export default function AffiliateProgram() {
         <ul className="space-y-2 text-sm text-muted-foreground">
           {[
             "No self-referrals or incentivized fake signups.",
-            "No paid search on CareerFlow OS branded keywords.",
+            "No paid search on Gradr branded keywords.",
             "Commissions are reversed on refunds or chargebacks.",
-            "CareerFlow OS may revoke status for policy violations at any time.",
+            "Gradr may revoke status for policy violations at any time.",
           ].map((t) => (
             <li key={t} className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {t}</li>
           ))}

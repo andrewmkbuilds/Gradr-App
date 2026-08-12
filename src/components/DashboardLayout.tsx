@@ -10,7 +10,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AmbientBackground />
-      <div className="relative z-10 min-h-screen flex w-full">
+      <a
+        href="#main-content"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-50 focus-visible:rounded-md focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-medium focus-visible:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
+      <div className="relative z-10 min-h-dvh flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <PaymentTestModeBanner />
@@ -22,7 +28,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <NotificationsBell />
             </div>
           </header>
-          <main data-scroll-container className="flex-1 overflow-auto p-6">
+          <main id="main-content" data-scroll-container className="flex-1 overflow-auto p-6">
             {children}
           </main>
         </div>

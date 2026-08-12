@@ -10,8 +10,8 @@ function supabaseForUser(ctx: ToolContext) {
 
 export default defineTool({
   name: "get_profile",
-  title: "Get my CareerFlow profile",
-  description: "Return the signed-in user's CareerFlow profile: name, email, target role, and career preferences.",
+  title: "Get my Gradr profile",
+  description: "Return the signed-in user's Gradr profile: name, email, target role, and career preferences.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {

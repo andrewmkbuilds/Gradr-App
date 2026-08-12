@@ -116,7 +116,7 @@ export default function AffiliateApply() {
           </div>
         </div>
         <div>
-          <label className={labelCls}>How will you promote CareerFlow OS? *</label>
+          <label className={labelCls}>How will you promote Gradr? *</label>
           <textarea name="promotion_plan" required rows={4} className={inputCls} placeholder="Newsletter feature, YouTube review, course bonus, etc." />
         </div>
         <div>
@@ -125,7 +125,7 @@ export default function AffiliateApply() {
         </div>
         <label className="flex items-start gap-2 text-sm text-muted-foreground">
           <input type="checkbox" name="agreed_to_terms" required className="mt-1" />
-          <span>I agree to the CareerFlow OS affiliate terms, including no self-referrals, no brand-keyword paid search, and commission reversal on refunds.</span>
+          <span>I agree to the Gradr affiliate terms, including no self-referrals, no brand-keyword paid search, and commission reversal on refunds.</span>
         </label>
         <button type="submit" disabled={submitting} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition disabled:opacity-50">
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

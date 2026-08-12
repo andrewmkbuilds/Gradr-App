@@ -13,13 +13,13 @@
     "server": {
       "name": "careerflow-mcp",
       "version": "0.1.0",
-      "title": "CareerFlow OS"
+      "title": "Gradr"
     },
     "tools": [
       {
         "name": "get_profile",
-        "title": "Get my CareerFlow profile",
-        "description": "Return the signed-in user's CareerFlow profile: name, email, target role, and career preferences.",
+        "title": "Get my Gradr profile",
+        "description": "Return the signed-in user's Gradr profile: name, email, target role, and career preferences.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -83,7 +83,7 @@
       {
         "name": "list_tracked_jobs",
         "title": "List tracked jobs",
-        "description": "List jobs the signed-in user is tracking in their CareerFlow pipeline, optionally filtered by status.",
+        "description": "List jobs the signed-in user is tracking in their Gradr pipeline, optionally filtered by status.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -111,7 +111,7 @@
       {
         "name": "create_tracked_job",
         "title": "Add tracked job",
-        "description": "Add a job opportunity to the signed-in user's CareerFlow pipeline.",
+        "description": "Add a job opportunity to the signed-in user's Gradr pipeline.",
         "annotations": {
           "readOnlyHint": false,
           "destructiveHint": false,

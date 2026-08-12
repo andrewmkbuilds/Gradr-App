@@ -69,7 +69,7 @@ export const TIERS: Tier[] = [
 export const FREE_TIER = {
   name: "Free",
   key: "free" as const,
-  description: "Explore the basics of CareerFlow OS.",
+  description: "Explore the basics of Gradr.",
   features: [
     "3 resume analyses per month",
     "Basic ATS scoring",

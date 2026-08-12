@@ -44,7 +44,7 @@ export function ProGate({ children, feature = "This feature", description, credi
       <h3 className="text-lg font-semibold text-foreground mb-1.5">{feature} is a Pro feature</h3>
       <p className="text-sm text-muted-foreground max-w-md mx-auto mb-5">
         {description ??
-          "Upgrade to CareerFlow OS Pro for unlimited AI analysis, matching and interview coaching."}
+          "Upgrade to Gradr Pro for unlimited AI analysis, matching and interview coaching."}
       </p>
       <Button onClick={() => navigate("/pricing")} className="gap-2">
         <Sparkles className="h-4 w-4" />

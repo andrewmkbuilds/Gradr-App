@@ -42,10 +42,10 @@ export default function AiResumeOptimization() {
     "@type": "Article",
     headline: TITLE,
     description: DESCRIPTION,
-    author: { "@type": "Organization", name: "CareerFlow OS" },
+    author: { "@type": "Organization", name: "Gradr" },
     publisher: {
       "@type": "Organization",
-      name: "CareerFlow OS",
+      name: "Gradr",
       url: "https://careerflowos.lovable.app",
     },
     datePublished: PUBLISHED,
@@ -107,7 +107,7 @@ export default function AiResumeOptimization() {
         name: "How do I check my resume's ATS score for free?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Upload your resume and paste the target job description into an AI resume scanner like the CareerFlow OS Resume Engine. It parses the file the same way an ATS would, compares it to the posting, and returns a 0–100 match score plus the specific missing keywords and formatting issues to fix.",
+          text: "Upload your resume and paste the target job description into an AI resume scanner like the Gradr Resume Engine. It parses the file the same way an ATS would, compares it to the posting, and returns a 0–100 match score plus the specific missing keywords and formatting issues to fix.",
         },
       },
       {
@@ -141,7 +141,7 @@ export default function AiResumeOptimization() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{TITLE} — CareerFlow OS</title>
+        <title>{TITLE} — Gradr</title>
         <meta name="description" content={DESCRIPTION} />
         <link rel="canonical" href={URL} />
         <meta property="og:title" content={TITLE} />
@@ -159,7 +159,7 @@ export default function AiResumeOptimization() {
       <header className="border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
-            <ArrowLeft className="h-3.5 w-3.5" /> CareerFlow OS
+            <ArrowLeft className="h-3.5 w-3.5" /> Gradr
           </Link>
           <Link
             to={ctaHref("/auth", "header")}
@@ -364,7 +364,7 @@ export default function AiResumeOptimization() {
                 },
                 {
                   q: "How do I check my resume's ATS score for free?",
-                  a: "Upload your resume and paste the target job description into an AI resume scanner like the CareerFlow OS Resume Engine. You'll get a 0–100 match score plus the exact missing keywords and formatting fixes.",
+                  a: "Upload your resume and paste the target job description into an AI resume scanner like the Gradr Resume Engine. You'll get a 0–100 match score plus the exact missing keywords and formatting fixes.",
                 },
                 {
                   q: "How many keywords should I add to my resume for ATS?",
@@ -392,7 +392,7 @@ export default function AiResumeOptimization() {
               <BookOpen className="h-5 w-5 text-primary" /> Related guides
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Keep going with the CareerFlow OS Resume Intelligence and ATS optimization stack.
+              Keep going with the Gradr Resume Intelligence and ATS optimization stack.
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {[
@@ -423,7 +423,7 @@ export default function AiResumeOptimization() {
                 {
                   to: "/pricing",
                   title: "Pricing & plans",
-                  desc: "Compare free and premium tiers for the full CareerFlow OS suite.",
+                  desc: "Compare free and premium tiers for the full Gradr suite.",
                   location: "related_pricing",
                 },
                 {
@@ -452,7 +452,7 @@ export default function AiResumeOptimization() {
 
           <section className="glass-card p-6 mt-10">
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              Try the CareerFlow OS Resume Engine
+              Try the Gradr Resume Engine
             </h2>
             <p className="mt-2 text-muted-foreground leading-relaxed">
               Upload your resume, paste any job description, and see your ATS match score,
@@ -488,7 +488,7 @@ export default function AiResumeOptimization() {
 
       <footer className="border-t border-border mt-8">
         <div className="max-w-4xl mx-auto px-6 py-6 text-xs text-muted-foreground flex items-center justify-between flex-wrap gap-2">
-          <span>© {new Date().getFullYear()} CareerFlow OS</span>
+          <span>© {new Date().getFullYear()} Gradr</span>
           <div className="flex gap-4">
             <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
             <Link to="/affiliate" className="hover:text-foreground">Affiliate program</Link>

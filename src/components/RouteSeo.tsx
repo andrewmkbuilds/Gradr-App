@@ -1,30 +1,30 @@
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
-const SITE = "CareerFlow OS";
+const SITE = "Gradr";
 const ORIGIN = "https://careerflowos.lovable.app";
 const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
 const META: Record<string, { title: string; description: string }> = {
   "/": {
     title: "Dashboard",
-    description: "Your CareerFlow OS dashboard — pipeline overview, AI scores, reminders, and quick actions.",
+    description: "Your Gradr dashboard — pipeline overview, AI scores, reminders, and quick actions.",
   },
   "/landing": {
     title: "From resume to offer",
-    description: "CareerFlow OS brings resume intelligence, job matching, applications, and AI mock interviews into one workspace.",
+    description: "Gradr brings resume intelligence, job matching, applications, and AI mock interviews into one workspace.",
   },
   "/auth": {
     title: "Sign in",
-    description: "Sign in or create your CareerFlow OS account to access your AI career command center.",
+    description: "Sign in or create your Gradr account to access your AI career command center.",
   },
   "/forgot-password": {
     title: "Forgot password",
-    description: "Reset your CareerFlow OS password and get back to your career workflow.",
+    description: "Reset your Gradr password and get back to your career workflow.",
   },
   "/reset-password": {
     title: "Reset password",
-    description: "Choose a new password for your CareerFlow OS account.",
+    description: "Choose a new password for your Gradr account.",
   },
   "/resume": {
     title: "Resume Engine",
@@ -64,27 +64,27 @@ const META: Record<string, { title: string; description: string }> = {
   },
   "/billing": {
     title: "Billing",
-    description: "Manage your CareerFlow OS plan, invoices, credit packs, and payment method in one place.",
+    description: "Manage your Gradr plan, invoices, credit packs, and payment method in one place.",
   },
   "/settings": {
     title: "Settings",
-    description: "Manage your CareerFlow OS account, preferences, and digest settings.",
+    description: "Manage your Gradr account, preferences, and digest settings.",
   },
   "/affiliate": {
     title: "Affiliate Program",
-    description: "Earn recurring commission by referring job seekers to CareerFlow OS — transparent rates and monthly payouts.",
+    description: "Earn recurring commission by referring job seekers to Gradr — transparent rates and monthly payouts.",
   },
   "/affiliate/apply": {
     title: "Apply to the Affiliate Program",
-    description: "Tell us about your audience and apply to become a CareerFlow OS affiliate partner.",
+    description: "Tell us about your audience and apply to become a Gradr affiliate partner.",
   },
   "/affiliate/dashboard": {
     title: "Affiliate Dashboard",
-    description: "Track your referral clicks, conversions, commissions, and payouts as a CareerFlow OS affiliate.",
+    description: "Track your referral clicks, conversions, commissions, and payouts as a Gradr affiliate.",
   },
   "/affiliate/resources": {
     title: "Affiliate Resources",
-    description: "Campaign link builder, brand assets, and copy templates for CareerFlow OS affiliate partners.",
+    description: "Campaign link builder, brand assets, and copy templates for Gradr affiliate partners.",
   },
   "/blog/ai-resume-optimization": {
     title: "AI Resume Builder & ATS Guide",
@@ -95,10 +95,10 @@ const META: Record<string, { title: string; description: string }> = {
 export function RouteSeo() {
   const { pathname } = useLocation();
   const meta = META[pathname] ?? {
-    title: "CareerFlow OS",
-    description: "AI resume analysis, job matching, application generation, and interview coaching in one platform.",
+    title: "Gradr",
+    description: "Gradr is the AI career command center for job seekers — resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
   };
-  const fullTitle = pathname === "/" ? `${SITE} — AI Career Command Center` : `${meta.title} — ${SITE}`;
+  const fullTitle = pathname === "/" ? "Gradr | AI Career Command Center" : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   return (
     <Helmet>

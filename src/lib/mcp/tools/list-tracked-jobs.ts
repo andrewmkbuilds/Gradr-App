@@ -12,7 +12,7 @@ function supabaseForUser(ctx: ToolContext) {
 export default defineTool({
   name: "list_tracked_jobs",
   title: "List tracked jobs",
-  description: "List jobs the signed-in user is tracking in their CareerFlow pipeline, optionally filtered by status.",
+  description: "List jobs the signed-in user is tracking in their Gradr pipeline, optionally filtered by status.",
   inputSchema: {
     status: z.string().optional().describe("Filter by pipeline status (e.g. 'saved', 'applied', 'interview', 'offer', 'rejected')."),
     limit: z.number().int().min(1).max(100).optional().describe("Maximum jobs to return. Defaults to 50."),

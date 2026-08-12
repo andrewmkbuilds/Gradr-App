@@ -111,22 +111,22 @@ export default function OAuthConsent() {
             <Shield className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Connect {clientName} to CareerFlow</h2>
-            <p className="text-sm text-muted-foreground">This lets {clientName} use CareerFlow as you.</p>
+            <h2 className="text-xl font-semibold text-foreground">Connect {clientName} to Gradr</h2>
+            <p className="text-sm text-muted-foreground">This lets {clientName} use Gradr as you.</p>
           </div>
         </div>
 
         <div className="rounded-lg border border-border bg-secondary/40 p-4 space-y-3 text-sm">
           <div className="flex items-start gap-2">
             <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span className="text-foreground">Read your CareerFlow profile, resumes, job matches, and pipeline</span>
+            <span className="text-foreground">Read your Gradr profile, resumes, job matches, and pipeline</span>
           </div>
           <div className="flex items-start gap-2">
             <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <span className="text-foreground">Add jobs to your pipeline on your behalf</span>
           </div>
           <p className="text-xs text-muted-foreground pt-1">
-            This does not bypass CareerFlow's permissions. Row-level security still applies to every request.
+            This does not bypass Gradr's permissions. Row-level security still applies to every request.
           </p>
           {redirectHost && (
             <p className="text-xs text-muted-foreground">Redirects to <span className="font-mono">{redirectHost}</span></p>

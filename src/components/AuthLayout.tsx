@@ -14,7 +14,7 @@ const features = [
   { icon: Rocket, label: "Mock interviews with realtime coach" },
 ];
 
-const TITLE = "CareerFlow OS";
+const TITLE = "Gradr";
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (

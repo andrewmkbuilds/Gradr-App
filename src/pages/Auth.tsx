@@ -169,7 +169,7 @@ export default function Auth() {
 
       <div className="space-y-2">
         <h1 className="text-xl font-semibold text-foreground">
-          {isSignUp ? "Create your account" : "Sign in to CareerFlow OS"}
+          {isSignUp ? "Create your account" : "Sign in to Gradr"}
         </h1>
         <p className="text-sm text-muted-foreground">
           {isSignUp

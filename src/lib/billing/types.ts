@@ -59,4 +59,4 @@ export const PLAN_CATALOG: Record<
 };
 
 /** Entitlement identifier shared by both providers. */
-export const PRO_ENTITLEMENT = "CareerFlow OS Pro";
+export const PRO_ENTITLEMENT = "Gradr OS Pro";
