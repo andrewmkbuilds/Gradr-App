@@ -141,17 +141,8 @@ export default function AiResumeOptimization() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{TITLE} — Gradr</title>
-        <meta name="description" content={DESCRIPTION} />
-        <link rel="canonical" href={URL} />
-        <meta property="og:title" content={TITLE} />
-        <meta property="og:description" content={DESCRIPTION} />
-        <meta property="og:url" content={URL} />
         <meta property="og:type" content="article" />
         <meta property="article:published_time" content={PUBLISHED} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={TITLE} />
-        <meta name="twitter:description" content={DESCRIPTION} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(faqLd)}</script>
       </Helmet>
