@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-import { adminRpc } from "@/lib/adminRpc";
   PRIVACY_V1,
   PRIVACY_V1_EFFECTIVE,
   TERMS_V1,
   TERMS_V1_EFFECTIVE,
 } from "@/content/legalDocs";
+import { adminRpc } from "@/lib/adminRpc";
 
 export type LegalDocType = "terms" | "privacy";
 export type LegalStatus = "draft" | "published" | "archived";

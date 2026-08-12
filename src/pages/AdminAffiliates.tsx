@@ -10,7 +10,6 @@ import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
 import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
 import { AffiliateTiersPanel } from "@/components/admin/AffiliateTiersPanel";
 import {
-import { adminRpc } from "@/lib/adminRpc";
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -20,6 +19,7 @@ import { adminRpc } from "@/lib/adminRpc";
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { adminRpc } from "@/lib/adminRpc";
 
 type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "tiers" | "settings";
 
