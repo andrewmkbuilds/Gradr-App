@@ -8,6 +8,7 @@
 import { forwardRef, type ReactNode, useRef } from "react";
 import {
   motion,
+  useMotionTemplate,
   useMotionValue,
   useReducedMotion,
   useSpring,
@@ -180,6 +181,7 @@ export function TiltCard({
   const rotateY = useSpring(useTransform(px, [0, 1], [-intensity, intensity]), spring.soft);
   const glareX = useTransform(px, [0, 1], ["0%", "100%"]);
   const glareY = useTransform(py, [0, 1], ["0%", "100%"]);
+  const glareBg = useMotionTemplate`radial-gradient(40% 40% at ${glareX} ${glareY}, hsl(var(--primary) / 0.30), transparent 70%)`;
 
   if (reduce) return <div className={className}>{children}</div>;
 
@@ -204,11 +206,7 @@ export function TiltCard({
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-2xl opacity-40 mix-blend-soft-light"
-            style={{
-              background: `radial-gradient(45% 45% at ${glareX.get()}% ${glareY.get()}%, hsl(var(--primary) / 0.35), transparent 70%)`,
-              backgroundPositionX: glareX,
-              backgroundPositionY: glareY,
-            }}
+            style={{ background: glareBg }}
           />
         )}
       </motion.div>
