@@ -6,13 +6,33 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
-import { Mail, Lock, User, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import {
   authCallbackUrl,
   consumeAuthCallbackError,
   readNext,
 } from "@/lib/nextRedirect";
 import { toast } from "sonner";
+import { z } from "zod";
+
+/** Client-side field validation — mirrors the server rules, fails fast and inline. */
+const emailSchema = z
+  .string()
+  .trim()
+  .min(1, "Enter your email address.")
+  .email("Enter a valid email address.")
+  .max(255, "Email must be under 255 characters.");
+const passwordSchema = z
+  .string()
+  .min(6, "Password must be at least 6 characters.")
+  .max(72, "Password must be under 72 characters.");
+const nameSchema = z
+  .string()
+  .trim()
+  .min(1, "Enter your full name.")
+  .max(80, "Name must be under 80 characters.");
+
+type FieldErrors = { fullName?: string; email?: string; password?: string };
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -28,9 +48,11 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
 
   // Single source of truth for the post-auth destination (validated, loop-safe).
   const nextParam = readNext(location.search);
@@ -73,10 +95,59 @@ export default function Auth() {
     return raw;
   };
 
+  // Countdown for the "resend verification email" cooldown.
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  /** Validate the visible fields; returns the cleaned values or null. */
+  const validateForm = () => {
+    const errors: FieldErrors = {};
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) errors.email = emailResult.error.issues[0].message;
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) errors.password = passwordResult.error.issues[0].message;
+    let cleanName = "";
+    if (isSignUp) {
+      const nameResult = nameSchema.safeParse(fullName);
+      if (!nameResult.success) errors.fullName = nameResult.error.issues[0].message;
+      else cleanName = nameResult.data;
+    }
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return null;
+    return { email: emailResult.data!, password: passwordResult.data!, fullName: cleanName };
+  };
+
+  const handleResendVerification = async () => {
+    if (!pendingEmail || resending || resendIn > 0) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingEmail,
+        options: { emailRedirectTo: postAuthUrl },
+      });
+      if (error) throw error;
+      toast.success("Verification email sent again — check your inbox.");
+      setResendIn(60);
+    } catch (error: unknown) {
+      const raw = error instanceof Error ? error.message : "Could not resend the email.";
+      toast.error(friendlyAuthError(raw));
+      setResendIn(30);
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setFormError(null);
+    const valid = validateForm();
+    if (!valid) return;
+    const { email, password, fullName } = valid;
+    setLoading(true);
     try {
       if (isSignUp) {
         if (isGuest) {
@@ -175,6 +246,22 @@ export default function Auth() {
               </Button>
             )}
             <Button
+              variant="outline"
+              className="w-full h-11 gap-2"
+              onClick={handleResendVerification}
+              disabled={resending || resendIn > 0}
+            >
+              <RefreshCw className={resending ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
+              {resendIn > 0
+                ? `Resend verification email in ${resendIn}s`
+                : resending
+                  ? "Sending…"
+                  : "Resend verification email"}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              No email after a minute? Check your spam folder before resending.
+            </p>
+            <Button
               variant="ghost"
               className="w-full h-11 text-muted-foreground"
               onClick={() => setPendingEmail(null)}
@@ -249,43 +336,60 @@ export default function Auth() {
       </div>
 
       {/* Email form */}
-      <form onSubmit={handleEmailAuth} className="space-y-3.5">
+      <form onSubmit={handleEmailAuth} noValidate className="space-y-3.5">
         {isSignUp && (
+          <div className="space-y-1.5">
+            <div className="relative">
+              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Full name"
+                value={fullName}
+                onChange={(e) => { setFullName(e.target.value); setFieldErrors((p) => ({ ...p, fullName: undefined })); }}
+                aria-invalid={!!fieldErrors.fullName}
+                aria-describedby={fieldErrors.fullName ? "error-fullName" : undefined}
+                className="pl-10 h-11 bg-secondary border-border"
+              />
+            </div>
+            {fieldErrors.fullName && (
+              <p id="error-fullName" className="text-xs text-destructive">{fieldErrors.fullName}</p>
+            )}
+          </div>
+        )}
+        <div className="space-y-1.5">
           <div className="relative">
-            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Full name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }}
+              aria-invalid={!!fieldErrors.email || !!formError}
+              aria-describedby={fieldErrors.email ? "error-email" : undefined}
               className="pl-10 h-11 bg-secondary border-border"
             />
           </div>
-        )}
-        <div className="relative">
-          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
-            required
-            aria-invalid={!!formError}
-            className="pl-10 h-11 bg-secondary border-border"
+          {fieldErrors.email && (
+            <p id="error-email" className="text-xs text-destructive">{fieldErrors.email}</p>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }}
+              aria-invalid={!!fieldErrors.password}
+              aria-describedby={fieldErrors.password ? "error-password" : undefined}
+              className="pl-10 h-11 bg-secondary border-border"
+            />
+          </div>
+          {fieldErrors.password && (
+            <p id="error-password" className="text-xs text-destructive">{fieldErrors.password}</p>
+          )}
+        </div>
 
-          />
-        </div>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
-            required
-            minLength={6}
-            className="pl-10 h-11 bg-secondary border-border"
-          />
-        </div>
 
         {!isSignUp && (
           <div className="flex justify-end">
@@ -344,7 +448,7 @@ export default function Auth() {
         {isSignUp ? "Already have an account?" : "No account yet?"}{" "}
         <button
           type="button"
-          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); }}
+          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); }}
           className="text-primary hover:underline font-medium"
 
         >
