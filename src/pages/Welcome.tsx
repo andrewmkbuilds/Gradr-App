@@ -30,6 +30,7 @@ export default function Welcome() {
       <Seo
         title="Welcome to CareerFlow OS"
         description="Your purchase is confirmed — start using your new AI career tools."
+        path="/welcome"
       />
       <Card className="p-10 text-center space-y-6">
         <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
