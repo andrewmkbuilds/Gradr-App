@@ -30,7 +30,12 @@ import {
   HoverLift,
   AnimatedList,
 } from "@/components/motion";
-import { ConceptLoop, GlowFrame, Glare } from "@/components/reactbits";
+import {
+  ConceptLoop, GlowFrame, Glare, Dither, FadeContent, TestimonialRail, BentoGrid,
+  type Testimonial,
+} from "@/components/reactbits";
+import { ProofMetrics } from "@/components/landing/ProofMetrics";
+import { PricingSection, type Plan } from "@/components/landing/PricingSection";
 import { ProductDemos } from "@/components/landing/ProductDemos";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
