@@ -86,7 +86,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="stagger-children">
               {engines.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
@@ -96,14 +96,19 @@ export function AppSidebar() {
                         to={item.url}
                         end
                         aria-label={item.title}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        data-active={isActive}
+                        className={`nav-item interactive group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${
                           isActive
                             ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                            : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:translate-x-0.5"
                         }`}
                         activeClassName="bg-primary/10 text-primary"
                       >
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        <item.icon
+                          className={`h-4 w-4 shrink-0 transition-transform duration-200 ${
+                            isActive ? "scale-110" : "group-hover:scale-110"
+                          }`}
+                        />
                         {!collapsed && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
@@ -119,7 +124,7 @@ export function AppSidebar() {
         <button
           onClick={signOut}
           aria-label="Sign Out"
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors text-sm"
+          className="interactive press-scale flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-sm"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign Out</span>}
@@ -127,9 +132,9 @@ export function AppSidebar() {
         <button
           onClick={toggleSidebar}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="flex items-center justify-center w-full py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          className="interactive press-scale flex items-center justify-center w-full py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary"
         >
-          <ChevronLeft className={`h-4 w-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
+          <ChevronLeft className={`h-4 w-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
         </button>
       </SidebarFooter>
     </Sidebar>
