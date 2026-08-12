@@ -1,21 +1,21 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { type ReactNode } from "react";
+import { pageTransition, pageVariants, reducedPageVariants } from "@/lib/motion";
 
-/** Fast, premium page transition — fade + slight lift + micro-scale. */
-const pageVariants = {
-  initial: { opacity: 0, y: 10, scale: 0.995 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -6, scale: 0.997 },
-};
-
+/**
+ * Premium page transition — fade + lift + micro-scale + focus blur.
+ * Motion values come from the shared motion system (`@/lib/motion`) and
+ * collapse to a plain fade when the user prefers reduced motion.
+ */
 export function AnimatedPage({ children }: { children: ReactNode }) {
+  const reduce = useReducedMotion();
   return (
     <motion.div
-      variants={pageVariants}
+      variants={reduce ? reducedPageVariants : pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      transition={reduce ? { duration: 0.15 } : pageTransition}
       className="h-full"
     >
       {children}
