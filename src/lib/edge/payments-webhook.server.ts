@@ -435,11 +435,45 @@ export const handler = async (req: Request): Promise<Response> => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
   const env = (new URL(req.url).searchParams.get("env") || "sandbox") as PaddleEnv;
+  let eventId: string | null = null;
+
+  // 1) Signature verification — an unsigned/forged body never reaches any handler.
+  // deno-lint-ignore no-explicit-any
+  let event: any;
+  try {
+    event = await verifyWebhook(req, env);
+  } catch (e) {
+    await logSecurityEvent({
+      category: "billing_webhook",
+      event: "signature_verification_failed",
+      decision: "failed",
+      env,
+      source: "payments-webhook",
+      reason: e instanceof Error ? e.message : String(e),
+    });
+    // 400 = do not retry: a bad signature will never become valid.
+    return new Response("Invalid signature", { status: 400 });
+  }
 
   try {
-    const event = await verifyWebhook(req, env);
-    // deno-lint-ignore no-explicit-any
-    const eventUserId = ((event.data as any)?.customData?.userId ?? null) as string | null;
+    const eventUserId = (event.data?.customData?.userId ?? null) as string | null;
+    eventId = (event.eventId ?? event.notificationId ?? null) as string | null;
+
+    // 2) Idempotency — Paddle retries for days; each event is handled once.
+    if (eventId) {
+      const claim = await claimWebhookEvent({
+        provider: "paddle",
+        eventId,
+        eventType: String(event.eventType),
+        environment: env,
+      });
+      if (claim === "duplicate") {
+        return new Response(JSON.stringify({ received: true, duplicate: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
 
     await logSecurityEvent({
       category: "billing_webhook",
@@ -449,14 +483,10 @@ export const handler = async (req: Request): Promise<Response> => {
       env,
       source: "payments-webhook",
       details: {
-        // deno-lint-ignore no-explicit-any
-        event_id: (event as any)?.eventId ?? null,
-        // deno-lint-ignore no-explicit-any
-        status: (event.data as any)?.status ?? null,
-        // deno-lint-ignore no-explicit-any
-        customer_id: (event.data as any)?.customerId ?? (event.data as any)?.id ?? null,
-        // deno-lint-ignore no-explicit-any
-        subscription_id: (event.data as any)?.subscriptionId ?? null,
+        event_id: eventId,
+        status: event.data?.status ?? null,
+        customer_id: event.data?.customerId ?? event.data?.id ?? null,
+        subscription_id: event.data?.subscriptionId ?? null,
       },
     });
 
@@ -493,10 +523,11 @@ export const handler = async (req: Request): Promise<Response> => {
         await reverseAffiliateCommission(event.data, env, "refund_adjustment");
         break;
 
-
       default:
         console.log("Unhandled event:", event.eventType);
     }
+
+    if (eventId) await markWebhookProcessed("paddle", eventId);
     await logSecurityEvent({
       category: "billing_webhook",
       event: String(event.eventType),
@@ -504,6 +535,7 @@ export const handler = async (req: Request): Promise<Response> => {
       userId: eventUserId,
       env,
       source: "payments-webhook",
+      details: { event_id: eventId },
     });
 
     return new Response(JSON.stringify({ received: true }), {
@@ -511,15 +543,22 @@ export const handler = async (req: Request): Promise<Response> => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
+    const reason = e instanceof Error ? e.message : String(e);
     console.error("Webhook error:", e);
+    if (eventId) await markWebhookFailed("paddle", eventId, reason);
     await logSecurityEvent({
       category: "billing_webhook",
-      event: "verification_or_handler_error",
+      event: "handler_error",
       decision: "failed",
       env,
       source: "payments-webhook",
-      reason: e instanceof Error ? e.message : String(e),
+      reason,
     });
-    return new Response("Webhook error", { status: 400 });
+    // 500 = transient: the signature was valid, so ask Paddle to retry later.
+    return new Response(JSON.stringify({ error: "Webhook processing failed" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
+
