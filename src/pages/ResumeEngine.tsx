@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { extractResumeText } from "@/lib/extractResumeText";
+import { ResumeVersions } from "@/components/resume/ResumeVersions";
 
 interface Suggestion {
   type: string;
@@ -64,6 +65,8 @@ export default function ResumeEngine() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [showTailor, setShowTailor] = useState(false);
+  const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
+  const [versionsToken, setVersionsToken] = useState(0);
 
   const handleFileUpload = useCallback(async (selectedFile: File) => {
     if (!user) {
@@ -114,21 +117,33 @@ export default function ResumeEngine() {
 
       setAnalysis(analysisData);
 
-      await supabase.from("resumes").insert({
-        user_id: user.id,
-        file_name: selectedFile.name,
-        file_path: filePath,
-        file_type: selectedFile.type,
-        ats_score: analysisData.ats_score,
-        keyword_match: analysisData.keyword_match,
-        formatting_score: analysisData.formatting_score,
-        impact_score: analysisData.impact_score,
-        readability_score: analysisData.readability_score,
-        ai_suggestions: analysisData.suggestions,
-        parsed_text: text.substring(0, 10000),
-      });
+      const versionLabel = jobTitle.trim()
+        ? `${jobTitle.trim()} — ${selectedFile.name.replace(/\.[^.]+$/, "")}`
+        : selectedFile.name.replace(/\.[^.]+$/, "");
 
-      toast.success("Resume analyzed");
+      const { data: saved } = await supabase
+        .from("resumes")
+        .insert({
+          user_id: user.id,
+          file_name: selectedFile.name,
+          file_path: filePath,
+          file_type: selectedFile.type,
+          version_label: versionLabel,
+          ats_score: analysisData.ats_score,
+          keyword_match: analysisData.keyword_match,
+          formatting_score: analysisData.formatting_score,
+          impact_score: analysisData.impact_score,
+          readability_score: analysisData.readability_score,
+          ai_suggestions: analysisData.suggestions,
+          parsed_text: text.substring(0, 10000),
+        })
+        .select("id")
+        .maybeSingle();
+
+      setActiveVersionId(saved?.id ?? null);
+      setVersionsToken((t) => t + 1);
+
+      toast.success("Resume analyzed and saved as a version");
     } catch (error: any) {
       toast.error(error.message || "Failed to analyze resume");
       console.error(error);
@@ -211,6 +226,26 @@ export default function ResumeEngine() {
       </div>
 
       {!uploading && !analyzing && tailorPanel}
+
+      {!uploading && !analyzing && (
+        <ResumeVersions
+          key={versionsToken}
+          activeId={activeVersionId}
+          onSelect={(v) => {
+            setActiveVersionId(v.id);
+            setFileName(v.file_name);
+            setAnalysis({
+              ats_score: v.ats_score ?? 0,
+              keyword_match: v.keyword_match ?? 0,
+              formatting_score: v.formatting_score ?? 0,
+              impact_score: v.impact_score ?? 0,
+              readability_score: v.readability_score ?? 0,
+              suggestions: Array.isArray(v.ai_suggestions) ? (v.ai_suggestions as Suggestion[]) : [],
+              tailoredTo: v.version_label,
+            });
+          }}
+        />
+      )}
 
       {!analysis && !uploading && !analyzing ? (
         <label
