@@ -169,7 +169,7 @@ Questions about these terms: ${SELLER_CONTACT_EMAIL}. Payment, invoice and tax q
 
 export const PRIVACY_V1 = `## 1. Introduction
 
-This privacy notice explains how ${SELLER_LEGAL_NAME} (trading as ${SELLER_TRADING_NAME}, "we", "us") collects, uses, shares and protects personal data when you use the Gradr website and application (the "Services").
+This privacy notice explains how ${SELLER_LEGAL_NAME} (trading as ${SELLER_TRADING_NAME}, "we", "us") collects, uses, shares and protects personal data when you use the Gradr website at ${SELLER_WEBSITE_URL} and application (the "Services").
 
 We are the data controller for that personal data. If you have any question or want to exercise a privacy right, contact us at ${SELLER_CONTACT_EMAIL}.
 
