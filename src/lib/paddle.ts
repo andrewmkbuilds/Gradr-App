@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 /**
  * Paddle client bootstrap.
  *
- * Both the environment and the client-side token come from env vars and are
- * validated loudly — running the wrong environment against the wrong Paddle
- * account is worse than not running at all.
+ * Config is validated, but validation NEVER throws during module import or
+ * render — payments are an optional integration and a missing/mismatched env
+ * var must not take the whole app down. Reads (`getPaddleEnvironment`) degrade
+ * gracefully; only actions that genuinely need Paddle (`getPaddle`) throw, and
+ * they throw inside an event handler where the UI can show an error.
  *
  * Only the client-side token (`test_...` / `live_...`) ever reaches the
  * browser. The server-side API key lives exclusively in edge functions.
@@ -19,36 +21,81 @@ export type PaddleEnv = "sandbox" | "live";
 /** Internal sentinel for "we could not determine the country" — never sent to Paddle. */
 export const UNKNOWN_COUNTRY = "OTHERS";
 
-function assertConfig(): { token: string; env: PaddleEnv } {
+interface ConfigResult {
+  ok: boolean;
+  token?: string;
+  env?: PaddleEnv;
+  reason?: string;
+}
+
+function resolveConfig(): ConfigResult {
+  if (!clientToken) {
+    return { ok: false, reason: "VITE_PAYMENTS_CLIENT_TOKEN is not set." };
+  }
+  const tokenEnv: PaddleEnv = clientToken.startsWith("test_") ? "sandbox" : "live";
+
   if (!configuredEnv) {
-    throw new Error(
-      "VITE_PAYMENTS_ENVIRONMENT is not set. Set it to 'sandbox' or 'live' — the payment environment is never defaulted.",
-    );
+    return {
+      ok: false,
+      reason:
+        "VITE_PAYMENTS_ENVIRONMENT is not set. Set it to 'sandbox' or 'live' — the payment environment is never defaulted.",
+    };
   }
   if (configuredEnv !== "sandbox" && configuredEnv !== "live") {
-    throw new Error(`VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.`);
+    return { ok: false, reason: `VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.` };
   }
-  if (!clientToken) throw new Error("VITE_PAYMENTS_CLIENT_TOKEN is not set.");
-
-  const tokenEnv: PaddleEnv = clientToken.startsWith("test_") ? "sandbox" : "live";
   if (tokenEnv !== configuredEnv) {
-    throw new Error(
-      `Paddle config mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnv}' token.`,
-    );
+    return {
+      ok: false,
+      reason: `Paddle config mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnv}' token.`,
+    };
   }
-  return { token: clientToken, env: configuredEnv };
+  return { ok: true, token: clientToken, env: configuredEnv };
 }
 
-/** Single source of truth for the payment environment. */
-export function getPaddleEnvironment(): PaddleEnv {
-  return assertConfig().env;
+const config = resolveConfig();
+
+if (!config.ok) {
+  // Loud in the console, silent in the UI — checkout surfaces the error when used.
+  console.error(`[payments] disabled: ${config.reason}`);
 }
+
+/** True when payments are usable. Gate any payment UI on this. */
+export function isPaymentsConfigured(): boolean {
+  return config.ok;
+}
+
+/** Why payments are unavailable, or null when everything is configured. */
+export function getPaymentsConfigError(): string | null {
+  return config.ok ? null : (config.reason ?? "Payments are not configured.");
+}
+
+/**
+ * Environment used for entitlement/subscription reads. Never throws.
+ * With no valid config it falls back to the token prefix, then to 'live' —
+ * the safe default, since live is the stricter set of records to read.
+ */
+export function getPaddleEnvironment(): PaddleEnv {
+  if (config.ok && config.env) return config.env;
+  if (clientToken?.startsWith("test_")) return "sandbox";
+  if (configuredEnv === "sandbox" || configuredEnv === "live") return configuredEnv;
+  return "live";
+}
+
+/** Throws when payments are misconfigured — only call from user actions. */
+function requireConfig(): { token: string; env: PaddleEnv } {
+  if (!config.ok || !config.token || !config.env) {
+    throw new Error(`Payments are unavailable: ${config.reason ?? "not configured"}`);
+  }
+  return { token: config.token, env: config.env };
+}
+
 
 let paddlePromise: Promise<Paddle> | null = null;
 
 export async function getPaddle(): Promise<Paddle> {
   if (!paddlePromise) {
-    const { token, env } = assertConfig();
+    const { token, env } = requireConfig();
     paddlePromise = loadPaddle({
       environment: env === "sandbox" ? "sandbox" : "production",
       token,

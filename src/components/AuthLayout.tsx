@@ -60,34 +60,42 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative z-10 max-w-md px-12 space-y-8"
+          className="relative z-10 w-full max-w-md px-8 xl:px-12 space-y-8"
         >
           {/* Animated logo: conic-spin ring + center mark + stop-motion sparkle */}
           <div className="flex items-center gap-4">
-            <div className="relative h-14 w-14">
+            <div className="relative h-14 w-14 shrink-0">
               <div className="conic-spin absolute inset-0 rounded-2xl opacity-90" />
               <div className="absolute inset-[2px] rounded-2xl bg-background flex items-center justify-center">
                 <Zap className="h-6 w-6 text-primary" />
               </div>
               <Sparkles className="stop-motion absolute -top-2 -right-2 h-4 w-4 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight kinetic-text">CareerFlow OS — AI Career Command Center</h1>
+            {/* Brand mark, not a heading — each auth page owns the single page <h1>. */}
+            <div className="text-3xl font-bold tracking-tight kinetic-text">{TITLE}</div>
           </div>
 
-          {/* Expressive typography — letter reveal + kinetic gradient */}
-          <h2 className="text-4xl font-bold leading-[1.05] tracking-tight letter-reveal">
-            {"Your AI career".split("").map((c, i) => (
-              <span key={`a${i}`} style={{ animationDelay: `${i * 35}ms` }}>{c === " " ? "\u00A0" : c}</span>
-            ))}
-            <br />
-            <span className="kinetic-text">
-              {"command center.".split("").map((c, i) => (
-                <span key={`b${i}`} className="inline-block letter-reveal" style={{ display: "inline-block" }}>
-                  <span style={{ animationDelay: `${500 + i * 35}ms` }}>{c === " " ? "\u00A0" : c}</span>
+          {/* Expressive typography — letter reveal on line one, kinetic gradient on line two.
+              Line two is a single gradient element: nesting per-letter spans inside a
+              background-clip:text parent paints them transparent (the words disappear). */}
+          <p className="text-3xl xl:text-4xl font-bold leading-[1.15] tracking-tight break-words">
+            <span className="letter-reveal block">
+              {"Your AI career".split("").map((c, i) => (
+                <span key={`a${i}`} style={{ animationDelay: `${i * 35}ms` }}>
+                  {c === " " ? "\u00A0" : c}
                 </span>
               ))}
             </span>
-          </h2>
+            <motion.span
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
+              className="kinetic-text block"
+            >
+              command center.
+            </motion.span>
+          </p>
+
 
           <p className="text-muted-foreground leading-relaxed text-base">
             Resume analysis. Job matching. Application generation. Interview coaching. One platform, zero guesswork.
@@ -145,7 +153,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <Zap className="h-6 w-6 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold kinetic-text">CareerFlow OS — AI Career Command Center</h1>
+            <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
           </div>
 
           {children}

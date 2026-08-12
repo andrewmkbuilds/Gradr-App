@@ -67,7 +67,7 @@ export default function ResetPassword() {
   return (
     <AuthLayout>
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-foreground">Set a new password</h2>
+        <h1 className="text-xl font-semibold text-foreground">Set a new password</h1>
         <p className="text-sm text-muted-foreground">
           Choose a strong password for your account.
         </p>
