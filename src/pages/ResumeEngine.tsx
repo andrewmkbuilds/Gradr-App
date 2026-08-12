@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { extractResumeText } from "@/lib/extractResumeText";
+import { ResumeVersions } from "@/components/resume/ResumeVersions";
 
 interface Suggestion {
   type: string;
