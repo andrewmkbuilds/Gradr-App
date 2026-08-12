@@ -89,6 +89,8 @@ function ProtectedRoutes() {
          <Route path="/admin/blog-analytics" element={<AnimatedPage><AdminBlogAnalytics /></AnimatedPage>} />
          <Route path="/admin/security-log" element={<AnimatedPage><AdminSecurityLog /></AnimatedPage>} />
          <Route path="/admin/audit-log" element={<AnimatedPage><AdminAuditLog /></AnimatedPage>} />
+         <Route path="/admin/paddle" element={<AnimatedPage><AdminPaddle /></AnimatedPage>} />
+
          <Route path="/admin/search-console" element={<AnimatedPage><AdminSearchConsole /></AnimatedPage>} />
 
           <Route path="/pricing" element={<AnimatedPage><Pricing /></AnimatedPage>} />
