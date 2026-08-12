@@ -1,0 +1,32 @@
+{
+  "functions": [
+    { "name": "admin-rpc", "classification": "internal-only", "signal": "admin gateway re-verifying JWTs; called from admin hooks in src/", "outcome": "left" },
+    { "name": "affiliate-public", "classification": "webhook receiver", "signal": "public unauthenticated lookup endpoint with rate limiting; URL is load-bearing", "outcome": "left" },
+    { "name": "analyze-resume", "classification": "internal-only", "signal": "invoked from Resume Intelligence in src/", "outcome": "left" },
+    { "name": "calendar-sync", "classification": "internal-only", "signal": "invoked from src/", "outcome": "left" },
+    { "name": "company-research", "classification": "internal-only", "signal": "invoked from src/ (Perplexity/Firecrawl research)", "outcome": "left" },
+    { "name": "daily-digest", "classification": "cron target", "signal": "scheduled digest sender", "outcome": "left" },
+    { "name": "delete-account", "classification": "internal-only", "signal": "invoked from settings data-deletion panel", "outcome": "left" },
+    { "name": "generate-application", "classification": "internal-only", "signal": "invoked from application automation in src/", "outcome": "left" },
+    { "name": "get-paddle-price", "classification": "internal-only", "signal": "invoked from pricing page", "outcome": "left" },
+    { "name": "interview-coach", "classification": "internal-only", "signal": "invoked from Interview Studio", "outcome": "left" },
+    { "name": "interview-realtime-token", "classification": "internal-only", "signal": "mints Gemini Live tokens for Interview Studio", "outcome": "left" },
+    { "name": "interview-report", "classification": "internal-only", "signal": "invoked from session debrief", "outcome": "left" },
+    { "name": "interview-voice", "classification": "internal-only", "signal": "voice fallback for interviews", "outcome": "left" },
+    { "name": "jobs-apify", "classification": "internal-only", "signal": "job scraping helper invoked from src/", "outcome": "left" },
+    { "name": "match-jobs", "classification": "internal-only", "signal": "invoked from /match", "outcome": "left" },
+    { "name": "mcp", "classification": "MCP server", "signal": "JSON-RPC MCP handler with OAuth 2.1; external agent callers, fixed URL", "outcome": "left" },
+    { "name": "notify-policy-update", "classification": "internal-only", "signal": "invoked from admin legal management", "outcome": "left" },
+    { "name": "parse-job-url", "classification": "internal-only", "signal": "invoked from job pipeline", "outcome": "left" },
+    { "name": "payments-portal", "classification": "internal-only", "signal": "Paddle portal session creation from /billing", "outcome": "left" },
+    { "name": "payments-webhook", "classification": "webhook receiver", "signal": "verifies Paddle signature; fixed URL configured in Paddle dashboard", "outcome": "left" },
+    { "name": "practice-plan", "classification": "internal-only", "signal": "7-day follow-up plan generation", "outcome": "left" },
+    { "name": "recommend-jobs", "classification": "internal-only", "signal": "invoked from dashboard", "outcome": "left" },
+    { "name": "resolve-discount", "classification": "internal-only", "signal": "invoked from pricing eligibility flow", "outcome": "left" },
+    { "name": "revenuecat-sync", "classification": "webhook receiver", "signal": "external RevenueCat REST sync; fixed URL", "outcome": "left" },
+    { "name": "search-console", "classification": "internal-only", "signal": "admin Search Console dashboard backend", "outcome": "left" },
+    { "name": "search-jobs", "classification": "internal-only", "signal": "Adzuna search invoked from src/", "outcome": "left" },
+    { "name": "send-notification", "classification": "internal-only", "signal": "notification/email dispatch invoked from src/", "outcome": "left" },
+    { "name": "seo-monitor", "classification": "cron target", "signal": "scheduled SEO monitoring for /admin/seo-monitor", "outcome": "left" }
+  ]
+}
