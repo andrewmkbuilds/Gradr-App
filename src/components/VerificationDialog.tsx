@@ -62,7 +62,8 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
     try {
       const result = await start.mutateAsync({ eligibilityType: category.key });
       trackEvent("eligibility_verification_started", {
-        metadata: { eligibility_type: category.key, provider: result.provider },
+        eligibility_type: category.key,
+        provider: result.provider,
       });
 
       if (result.alreadyVerified) {
