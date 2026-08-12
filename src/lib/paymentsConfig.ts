@@ -83,27 +83,25 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
       ? configuredEnv
       : tokenEnvironment;
 
-  if (configuredEnv) {
-    if (configuredEnv !== "sandbox" && configuredEnv !== "live") {
-      issues.push({
-        variable: "VITE_PAYMENTS_ENVIRONMENT",
-        message: `VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.`,
-        fix: "Correct the value to exactly 'sandbox' or 'live' (lowercase), or remove it to derive from the token prefix.",
-      });
-    } else if (tokenEnvironment && tokenEnvironment !== configuredEnv) {
-      issues.push({
-        message: `Environment mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnvironment}' token.`,
-        fix: `Either switch VITE_PAYMENTS_ENVIRONMENT to '${tokenEnvironment}', or replace the token with a ${configuredEnv} one.`,
-      });
-    }
+  if (!configuredEnv) {
+    // Env var is optional; we derive from the token prefix. Still surface it in
+    // the missing list so the admin page shows it can be set explicitly.
+    missing.push("VITE_PAYMENTS_ENVIRONMENT");
+  } else if (configuredEnv !== "sandbox" && configuredEnv !== "live") {
+    issues.push({
+      variable: "VITE_PAYMENTS_ENVIRONMENT",
+      message: `VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.`,
+      fix: "Correct the value to exactly 'sandbox' or 'live' (lowercase), or remove it to derive from the token prefix.",
+    });
+  } else if (tokenEnvironment && tokenEnvironment !== configuredEnv) {
+    issues.push({
+      message: `Environment mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnvironment}' token.`,
+      fix: `Either switch VITE_PAYMENTS_ENVIRONMENT to '${tokenEnvironment}', or replace the token with a ${configuredEnv} one.`,
+    });
   }
 
   const ok = issues.length === 0 && tokenEnvironment !== undefined;
   const environment = ok ? (resolvedEnv as PaddleEnvName) : undefined;
-
-  if (!ok && tokenEnvironment) {
-    missing.push("VITE_PAYMENTS_ENVIRONMENT");
-  }
 
   return {
     ok,
