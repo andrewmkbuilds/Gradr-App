@@ -44,13 +44,6 @@ export function getPaddleEnvironment(): PaddleEnv {
   return assertConfig().env;
 }
 
-declare global {
-  interface Window {
-    // deno-lint-ignore no-explicit-any
-    Paddle: any;
-  }
-}
-
 let paddlePromise: Promise<Paddle> | null = null;
 
 export async function getPaddle(): Promise<Paddle> {
@@ -61,7 +54,6 @@ export async function getPaddle(): Promise<Paddle> {
       token,
     }).then((instance) => {
       if (!instance) throw new Error("Paddle.js failed to initialize");
-      window.Paddle = instance;
       return instance;
     });
   }
