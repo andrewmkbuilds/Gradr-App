@@ -697,7 +697,7 @@
   .display-xl {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(2.5rem, 5.4vw, 4.6rem);
+    font-size: clamp(2.35rem, 4.3vw, 3.85rem);
     line-height: 0.98;
     letter-spacing: -0.045em;
     text-wrap: balance;

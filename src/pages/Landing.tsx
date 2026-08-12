@@ -351,7 +351,7 @@ export default function Landing() {
           </div>
 
           <Section className="!pb-0 !pt-0">
-            <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.08fr] lg:gap-14">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.06fr_1fr] lg:gap-14">
               <Reveal className="space-y-7">
                 <Eyebrow>AI career operating system</Eyebrow>
 
