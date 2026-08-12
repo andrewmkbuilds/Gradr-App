@@ -33,6 +33,8 @@ const entries: SitemapEntry[] = [
   { path: "/terms", changefreq: "yearly", priority: "0.4" },
   { path: "/privacy", changefreq: "yearly", priority: "0.4" },
   { path: "/refund-policy", changefreq: "yearly", priority: "0.4" },
+  { path: "/cookie-policy", changefreq: "yearly", priority: "0.4" },
+  { path: "/dpa", changefreq: "yearly", priority: "0.4" },
   // Career advice guides — lastmod comes from each guide's own `updated` date.
   ...GUIDES.map((guide) => ({
     path: guidePath(guide.slug),

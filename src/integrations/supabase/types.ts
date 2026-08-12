@@ -2379,6 +2379,10 @@ export type Database = {
         }
         Returns: string
       }
+      log_admin_access_denied: {
+        Args: { _reason?: string; _route: string }
+        Returns: undefined
+      }
       lookup_affiliate_by_code: {
         Args: { _code: string }
         Returns: {

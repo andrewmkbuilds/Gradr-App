@@ -319,3 +319,51 @@ export function blogPostJsonLd(post: BlogPost): JsonLd[] {
     ]),
   ];
 }
+
+/* -------------------------------------------------------------------------- */
+/* Legal pages                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * WebPage JSON-LD for a policy page (/terms, /privacy, /cookie-policy, /dpa,
+ * /refund-policy). Google does not render a dedicated rich result for policy
+ * text, but the explicit WebPage + publisher + dateModified block is what lets
+ * it attribute the document to the Gradr entity and show accurate sitelinks.
+ */
+export function buildLegalWebPageLd(input: {
+  path: string;
+  name: string;
+  description: string;
+  lastUpdated: string;
+}): JsonLd {
+  const url = absoluteUrl(input.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: input.name,
+    description: input.description,
+    url,
+    dateModified: input.lastUpdated,
+    inLanguage: "en",
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_ORIGIN },
+    publisher,
+    about: { "@type": "Organization", name: SITE_NAME, url: SITE_ORIGIN },
+  };
+}
+
+/** Full JSON-LD payload for one legal page: WebPage + breadcrumb trail. */
+export function legalJsonLd(input: {
+  path: string;
+  name: string;
+  description: string;
+  lastUpdated: string;
+}): JsonLd[] {
+  return [
+    buildLegalWebPageLd(input),
+    buildBreadcrumbLd([
+      { name: "Home", path: "/" },
+      { name: "Legal", path: "/terms" },
+      { name: input.name, path: input.path },
+    ]),
+  ];
+}

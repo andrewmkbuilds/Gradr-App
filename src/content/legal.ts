@@ -21,5 +21,7 @@ export const POLICIES_UPDATED = "2026-08-12";
 export const LEGAL_PAGES = [
   { path: "/terms", label: "Terms" },
   { path: "/privacy", label: "Privacy" },
+  { path: "/cookie-policy", label: "Cookies" },
+  { path: "/dpa", label: "DPA" },
   { path: "/refund-policy", label: "Refunds" },
 ] as const;
