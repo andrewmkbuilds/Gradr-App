@@ -35,7 +35,7 @@ const DECISION_STYLE: Record<string, string> = {
 };
 
 export default function AdminSecurityLog() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [category, setCategory] = useState("all");
   const [decision, setDecision] = useState("all");
   const [days, setDays] = useState(30);
