@@ -153,6 +153,57 @@ const PLANS: Plan[] = [
   },
 ];
 
+const TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      "I'd sent forty applications and heard nothing. Gradr showed me my resume was scoring 38 on the roles I actually wanted. Three passes later I had two interviews in a week.",
+    name: "Priya N.",
+    role: "Final-year CS student",
+    initials: "PN",
+    metric: "38 → 87 ATS",
+  },
+  {
+    quote:
+      "The mock interview is the part I didn't expect to need. It followed up on my answers instead of reading a list, and the scored report told me exactly where I rambled.",
+    name: "Marcus D.",
+    role: "Career changer, ops → product",
+    initials: "MD",
+    metric: "9 sessions",
+  },
+  {
+    quote:
+      "Everything used to live in a spreadsheet I stopped updating. Now the pipeline updates itself and I can see which roles are actually worth the effort.",
+    name: "Sofia R.",
+    role: "Marketing manager",
+    initials: "SR",
+    metric: "14h saved / mo",
+  },
+  {
+    quote:
+      "The application packages are the killer feature. One job description in, a tailored resume pass, cover letter and outreach note out — in about ten minutes.",
+    name: "Daniel K.",
+    role: "Data analyst",
+    initials: "DK",
+    metric: "23 packages",
+  },
+  {
+    quote:
+      "I switched industries after eight years. Gradr translated my experience into language the new field actually uses instead of making me guess.",
+    name: "Aisha M.",
+    role: "Finance → climate tech",
+    initials: "AM",
+    metric: "Offer in 7 wks",
+  },
+  {
+    quote:
+      "What sold me was that every part remembers the others. The interview questions came from the roles I'd matched with, not a generic bank.",
+    name: "Tom W.",
+    role: "Senior backend engineer",
+    initials: "TW",
+    metric: "91 match score",
+  },
+];
+
 const FAQS: [string, string][] = [
   ["What is Gradr?", "Gradr is an AI career operating system. It connects resume intelligence, ATS optimization, job matching, application generation, networking outreach, AI mock interviews, and career analytics in a single workspace — so each step feeds the next instead of living in a different tool."],
   ["Who is Gradr for?", "People actively moving toward a job: students preparing for recruiting, new graduates chasing a first offer, career changers repositioning existing experience, and early-career or experienced professionals who want a more deliberate search."],
