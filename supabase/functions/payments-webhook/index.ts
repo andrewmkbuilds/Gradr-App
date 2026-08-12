@@ -181,9 +181,59 @@ async function updateSubscription(data: any, env: PaddleEnv) {
     .from("subscribers")
     .update(patch)
     .eq("stripe_subscription_id", data.id)
+    .eq("environment", env)
+    .select("user_id");
 
-    .eq("environment", env);
+  // Out-of-order delivery: an update can arrive before the created event.
+  // Rebuild the row from the event rather than dropping the entitlement.
+  if (!updated?.length && data?.customData?.userId) {
+    await upsertSubscription(data, env);
+  }
 }
+
+/** Dunning: a failed renewal marks the plan past_due and warns the customer. */
+// deno-lint-ignore no-explicit-any
+async function handlePaymentFailed(data: any, env: PaddleEnv) {
+  const subscriptionId = data?.subscriptionId ?? null;
+  const userId = data?.customData?.userId ?? null;
+
+  let query = db()
+    .from("subscribers")
+    .update({ subscription_status: "past_due" })
+    .eq("environment", env);
+  query = subscriptionId
+    ? query.eq("stripe_subscription_id", subscriptionId)
+    : userId
+      ? query.eq("user_id", userId)
+      : query.eq("user_id", "00000000-0000-0000-0000-000000000000");
+
+  const { data: rows } = await query.select("user_id");
+  const target = (rows?.[0]?.user_id as string | undefined) ?? userId;
+  if (!target) return;
+
+  await db().rpc("enqueue_notification", {
+    _user_id: target,
+    _type: "billing_payment_failed",
+    _title: "Your last payment failed",
+    _body: "Update your card to keep your plan active — we'll keep retrying in the meantime.",
+    _link: "/billing",
+    _metadata: { subscription_id: subscriptionId },
+  });
+}
+
+/** A completed payment clears a prior dunning state. */
+// deno-lint-ignore no-explicit-any
+async function clearPaymentIssue(data: any, env: PaddleEnv) {
+  const subscriptionId = data?.subscriptionId ?? null;
+  if (!subscriptionId) return;
+  await db()
+    .from("subscribers")
+    .update({ subscribed: true, subscription_status: "active" })
+    .eq("stripe_subscription_id", subscriptionId)
+    .eq("environment", env)
+    .eq("subscription_status", "past_due");
+}
+
 
 /** One-off credit packs are granted from completed transactions. */
 // deno-lint-ignore no-explicit-any
