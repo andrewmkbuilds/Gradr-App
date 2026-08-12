@@ -78,19 +78,28 @@ function InterviewEngineInner() {
     });
   }, []);
 
+  const metrics = useInterviewMetrics();
+
   /** Switches from Gemini Live to the text coach + premium voice, keeping the transcript. */
   const degradeToFallback = useCallback((reason: string) => {
     if (fallbackHandled.current) return;
     fallbackHandled.current = true;
+    metrics.markDropout(reason);
+    metrics.markFallback(reason);
     setEngine("fallback");
     setConnecting(false);
     toast.info(`${reason} Continuing with standard voice — your transcript is preserved.`);
-  }, []);
+  }, [metrics]);
 
   const realtime = useRealtimeInterview({
-    onTurn: appendTurn,
+    onTurn: (turn) => {
+      if (turn.role === "user") metrics.markUserTurnStart();
+      else metrics.markModelResponse();
+      appendTurn(turn);
+    },
     onFallback: degradeToFallback,
   });
+
 
 
 
