@@ -6,6 +6,7 @@ import {
   verifyWebhook,
   type PaddleEnv,
 } from "../_shared/paddle.ts";
+import { logSecurityEvent } from "../_shared/securityAudit.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
@@ -150,6 +151,20 @@ Deno.serve(async (req) => {
 
   try {
     const event = await verifyWebhook(req, env);
+    // deno-lint-ignore no-explicit-any
+    const eventUserId = ((event.data as any)?.customData?.userId ?? null) as string | null;
+
+    await logSecurityEvent({
+      category: "billing_webhook",
+      event: String(event.eventType),
+      decision: "received",
+      userId: eventUserId,
+      env,
+      source: "payments-webhook",
+      // deno-lint-ignore no-explicit-any
+      details: { event_id: (event as any)?.eventId ?? null, status: (event.data as any)?.status ?? null },
+    });
+
     switch (event.eventType) {
       case EventName.SubscriptionCreated:
         await upsertSubscription(event.data, env);
@@ -166,12 +181,29 @@ Deno.serve(async (req) => {
       default:
         console.log("Unhandled event:", event.eventType);
     }
+    await logSecurityEvent({
+      category: "billing_webhook",
+      event: String(event.eventType),
+      decision: "processed",
+      userId: eventUserId,
+      env,
+      source: "payments-webhook",
+    });
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Webhook error:", e);
+    await logSecurityEvent({
+      category: "billing_webhook",
+      event: "verification_or_handler_error",
+      decision: "failed",
+      env,
+      source: "payments-webhook",
+      reason: e instanceof Error ? e.message : String(e),
+    });
     return new Response("Webhook error", { status: 400 });
   }
 });
