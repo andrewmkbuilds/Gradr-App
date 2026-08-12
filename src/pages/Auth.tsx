@@ -297,8 +297,20 @@ export default function Auth() {
           </div>
         )}
 
+        {formError && (
+          <p
+            role="alert"
+            aria-live="polite"
+            className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{formError}</span>
+          </p>
+        )}
+
         <Button
           type="submit"
+
           className="w-full h-11 bg-primary text-primary-foreground font-medium gap-2"
           disabled={loading}
         >
