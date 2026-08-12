@@ -123,15 +123,85 @@
   </head>
 
   <body>
+    <style>
+      /* SEO shell: present in the DOM for crawlers, never visible to users. */
+      #seo-shell {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+      }
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        background: #070d1a;
+        color: #e6edf7;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        z-index: 2147483000;
+      }
+      html:not(.dark) #app-splash {
+        background: #f7f9fc;
+        color: #0d1526;
+      }
+      #app-splash img {
+        width: 120px;
+        height: auto;
+        opacity: 0.96;
+        animation: gradr-splash-pulse 1.8s ease-in-out infinite;
+      }
+      #app-splash .gradr-splash-bar {
+        width: 148px;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(120, 160, 220, 0.18);
+        overflow: hidden;
+      }
+      #app-splash .gradr-splash-bar span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #38bdf8, #6366f1);
+        animation: gradr-splash-slide 1.1s ease-in-out infinite;
+      }
+      @keyframes gradr-splash-pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+      @keyframes gradr-splash-slide {
+        0% { transform: translateX(-110%); }
+        100% { transform: translateX(310%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-splash img, #app-splash .gradr-splash-bar span { animation: none; }
+      }
+    </style>
+
+    <!-- Visible, branded loading state. Removed by the app once React mounts. -->
+    <div id="app-splash" role="status" aria-label="Loading Gradr">
+      <img src="/gradr-logo.png" alt="" />
+      <div class="gradr-splash-bar"><span></span></div>
+    </div>
+
     <!--
-      Static, crawlable description of Gradr. React (createRoot) replaces the
-      contents of #root on mount, so this is only ever visible for the first
-      paint — but it guarantees that crawlers and AI answer engines which do
-      not execute JavaScript still read what Gradr actually is, instead of an
-      empty document they have to guess about.
+      Static, crawlable description of Gradr. Visually hidden (never shown to
+      users) but present in the initial HTML so crawlers and AI answer engines
+      which do not execute JavaScript still read what Gradr actually is.
     -->
     <div id="root">
-      <main id="seo-shell" style="max-width: 46rem; margin: 0 auto; padding: 4rem 1.5rem; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; line-height: 1.6;">
+      <main id="seo-shell">
+
         <h1>Gradr — Your AI Career Command Center</h1>
         <p>
           Gradr is your AI career command center for resume analysis, job matching, applications,
