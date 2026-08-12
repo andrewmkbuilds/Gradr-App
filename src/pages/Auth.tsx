@@ -267,9 +267,11 @@ export default function Auth() {
             type="email"
             placeholder="Email address"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
             required
+            aria-invalid={!!formError}
             className="pl-10 h-11 bg-secondary border-border"
+
           />
         </div>
         <div className="relative">
