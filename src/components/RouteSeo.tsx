@@ -137,11 +137,13 @@ export function RouteSeo() {
   const { pathname } = useLocation();
   const meta = META[pathname] ??
     resolveDynamicMeta(pathname) ?? {
-      title: "Gradr",
+      title: "AI Career Command Center",
       description: "Gradr is the AI career command center for job seekers — resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
     };
   const fullTitle = pathname === "/" ? "Gradr | AI Career Command Center" : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
+  const isArticle =
+    pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
   return (
     <Helmet>
       <html lang="en" />
@@ -153,7 +155,8 @@ export function RouteSeo() {
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={meta.description} />
       <meta property="og:url" content={url} />
-      <meta property="og:type" content="website" />
+      <meta property="og:type" content={isArticle ? "article" : "website"} />
+
       <meta property="og:site_name" content={SITE} />
       <meta property="og:image" content={OG_IMAGE} />
       <meta name="twitter:card" content="summary_large_image" />
