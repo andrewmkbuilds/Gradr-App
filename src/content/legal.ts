@@ -13,6 +13,8 @@
 export const SELLER_LEGAL_NAME = "Gradr"; // TEMPORARY — replace at go-live
 export const SELLER_CONTACT_EMAIL = "support@gradr.me";
 export const SELLER_TRADING_NAME = "Gradr";
+export const SELLER_DOMAIN = "gradr.me";
+export const SELLER_WEBSITE_URL = "https://gradr.me";
 export const REFUND_WINDOW_DAYS = 30;
 export const POLICIES_UPDATED = "2026-08-12";
 
