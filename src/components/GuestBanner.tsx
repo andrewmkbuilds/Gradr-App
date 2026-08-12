@@ -9,9 +9,8 @@ export function GuestBanner() {
   const [dismissed, setDismissed] = useState(false);
   const location = useLocation();
   // Send guests back to the page they were on after they create an account.
-  const signUpHref = `${authPath(nextFromLocation(location))}${
-    nextFromLocation(location) ? "&" : "?"
-  }mode=signup`;
+  const next = nextFromLocation(location);
+  const signUpHref = `${authPath(next)}${next ? "&" : "?"}mode=signup`;
 
   // Anonymous users have is_anonymous flag set to true
   const isGuest = user?.is_anonymous === true;
