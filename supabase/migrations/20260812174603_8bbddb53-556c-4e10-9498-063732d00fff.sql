@@ -1,0 +1,1 @@
+REVOKE INSERT, DELETE, TRUNCATE, REFERENCES ON public.affiliate_settings FROM authenticated;

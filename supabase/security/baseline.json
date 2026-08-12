@@ -180,6 +180,19 @@
       "authenticated": [
         "SELECT"
       ]
+    },
+    "discovered_jobs": {
+      "anon": [],
+      "authenticated": [
+        "SELECT"
+      ]
+    },
+    "affiliate_settings": {
+      "anon": [],
+      "authenticated": [
+        "SELECT",
+        "UPDATE"
+      ]
     }
   },
   "auditTriggers": [
@@ -206,39 +219,18 @@
   ],
   "functionExecute": {
     "$comment": "SECURITY DEFINER functions in `public`. PUBLIC execute must never be granted. anon/authenticated execute is only allowed for the functions listed here.",
-    "anonAllowlist": [
-      "affiliate_click_is_valid",
-      "get_affiliate_public_settings",
-      "lookup_affiliate_by_code"
-    ],
+    "anonAllowlist": [],
     "authenticatedAllowlist": [
       "accept_legal_document",
-      "admin_audit_actors",
-      "admin_create_payout",
-      "admin_legal_document_stats",
-      "admin_mark_payout_paid",
-      "admin_publish_legal_document",
-      "admin_review_verification",
-      "admin_review_verification_request",
-      "admin_set_commission_status",
-      "admin_verification_requests",
-      "affiliate_click_is_valid",
       "affiliate_leaderboard",
-      "approve_affiliate_application",
       "attribute_signup_referral",
       "entitlement_snapshot",
-      "get_affiliate_public_settings",
-      "has_role",
       "is_admin",
-      "is_anonymous_session",
-      "log_admin_access",
       "log_admin_access_denied",
       "log_user_preferences_read",
-      "lookup_affiliate_by_code",
       "my_affiliate_overview",
       "my_eligibility_state",
       "pending_legal_acceptances",
-      "reject_affiliate_application",
       "request_institution",
       "submit_verification_request"
     ]

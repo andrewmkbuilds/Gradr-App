@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { adminRpc } from "@/lib/adminRpc";
 
 type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "tiers" | "settings";
 
@@ -76,13 +77,13 @@ function ApplicationsPanel() {
   });
 
   const approve = async (id: string) => {
-    const { error } = await supabase.rpc("approve_affiliate_application", { _application_id: id });
+    const { error } = await adminRpc("approve_affiliate_application", { _application_id: id });
     if (error) return toast.error(error.message);
     toast.success("Approved & affiliate profile created");
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
   const reject = async (id: string, reason: string) => {
-    const { error } = await supabase.rpc("reject_affiliate_application", {
+    const { error } = await adminRpc("reject_affiliate_application", {
       _application_id: id,
       _reason: reason.trim() || null,
     });
@@ -246,7 +247,7 @@ function CommissionsPanel() {
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
   const setStatus = async (id: string, status: "pending" | "approved" | "paid" | "reversed" | "canceled") => {
-    const { error } = await supabase.rpc("admin_set_commission_status", {
+    const { error } = await adminRpc("admin_set_commission_status", {
       _commission_ids: [id],
       _status: status,
     });
