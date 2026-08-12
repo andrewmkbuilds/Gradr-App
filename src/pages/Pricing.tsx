@@ -86,14 +86,44 @@ export default function Pricing() {
     void buyPack(key);
   };
 
+  /**
+   * List price comes from Paddle verbatim. When the signed-in visitor has a
+   * verified eligibility discount we show what they'll actually pay next to
+   * the struck-through list price — the real reduction is applied by Paddle at
+   * checkout, from a server-resolved discount.
+   */
   const PriceLine = ({ id, suffix }: { id: string; suffix: string }) => {
     if (pricesLoading) return <Skeleton className="h-10 w-32" />;
-    const formatted = priceFor(id);
-    if (!formatted) return <span className="text-sm text-muted-foreground">Price unavailable</span>;
+    const price = prices[id];
+    if (!price) return <span className="text-sm text-muted-foreground">Price unavailable</span>;
+
+    const discounted = discountPercent > 0 && price.subtotalMinor > 0
+      ? formatMinorAmount(
+          Math.round(price.subtotalMinor * (1 - discountPercent / 100)),
+          price.currencyCode,
+        )
+      : null;
+
     return (
       <div>
-        <span className="text-4xl font-bold text-foreground">{formatted}</span>
-        <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
+        {discounted ? (
+          <>
+            <span className="text-4xl font-bold text-foreground">{discounted}</span>
+            <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
+            <div className="mt-1 flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground line-through">{price.formattedTotal}</span>
+              <Badge variant="secondary" className="gap-1">
+                <BadgePercent className="h-3 w-3" aria-hidden="true" />
+                {discountPercent}% off applied
+              </Badge>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="text-4xl font-bold text-foreground">{price.formattedTotal}</span>
+            <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
+          </>
+        )}
       </div>
     );
   };
