@@ -333,8 +333,13 @@ Deno.serve(async (req) => {
         await mirrorCustomer(event.data, env);
         break;
       case EventName.TransactionCompleted:
+        await clearPaymentIssue(event.data, env);
         await grantPackCredits(event.data, env);
         break;
+      case EventName.TransactionPaymentFailed:
+        await handlePaymentFailed(event.data, env);
+        break;
+
       default:
         console.log("Unhandled event:", event.eventType);
     }
