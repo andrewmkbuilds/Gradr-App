@@ -75,18 +75,23 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
       : "live"
     : undefined;
 
+  // The environment is primarily derived from the client token prefix, which
+  // is the single source of truth after the build-time token swap. The explicit
+  // env var is an optional override/validation only.
+  const resolvedEnv: PaddleEnvName | undefined =
+    configuredEnv === "sandbox" || configuredEnv === "live"
+      ? configuredEnv
+      : tokenEnvironment;
+
   if (!configuredEnv) {
+    // Env var is optional; we derive from the token prefix. Still surface it in
+    // the missing list so the admin page shows it can be set explicitly.
     missing.push("VITE_PAYMENTS_ENVIRONMENT");
-    issues.push({
-      variable: "VITE_PAYMENTS_ENVIRONMENT",
-      message: "The payment environment is not set. It is never defaulted, so checkout stays disabled.",
-      fix: "Set VITE_PAYMENTS_ENVIRONMENT to 'sandbox' while testing, or 'live' once your Paddle account is approved.",
-    });
   } else if (configuredEnv !== "sandbox" && configuredEnv !== "live") {
     issues.push({
       variable: "VITE_PAYMENTS_ENVIRONMENT",
       message: `VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.`,
-      fix: "Correct the value to exactly 'sandbox' or 'live' (lowercase).",
+      fix: "Correct the value to exactly 'sandbox' or 'live' (lowercase), or remove it to derive from the token prefix.",
     });
   } else if (tokenEnvironment && tokenEnvironment !== configuredEnv) {
     issues.push({
@@ -95,8 +100,8 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
     });
   }
 
-  const ok = issues.length === 0;
-  const environment = ok ? (configuredEnv as PaddleEnvName) : undefined;
+  const ok = issues.length === 0 && tokenEnvironment !== undefined;
+  const environment = ok ? (resolvedEnv as PaddleEnvName) : undefined;
 
   return {
     ok,
