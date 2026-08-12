@@ -6,7 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
-import { Mail, Lock, User, ArrowRight, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 import {
   authCallbackUrl,
   consumeAuthCallbackError,
@@ -27,6 +27,8 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
 
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
@@ -52,9 +54,29 @@ export default function Auth() {
     }
   }, [user, nextTarget, navigate]);
 
+  // Map raw auth errors to short, human copy shown inline under the form.
+  const friendlyAuthError = (raw: string): string => {
+    const m = raw.toLowerCase();
+    if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already exists"))
+      return "That email already has an account. Try signing in instead.";
+    if (m.includes("email address") && m.includes("invalid")) return "Enter a valid email address.";
+    if (m.includes("password should be at least")) return "Password must be at least 6 characters.";
+    if (m.includes("weak password") || m.includes("pwned") || m.includes("compromised"))
+      return "That password is too weak. Pick something longer and less common.";
+    if (m.includes("invalid login credentials")) return "Incorrect email or password.";
+    if (m.includes("email not confirmed")) return "Confirm your email first — check your inbox for the link.";
+    if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Wait a minute and try again.";
+    if (m.includes("signups not allowed") || m.includes("signup is disabled"))
+      return "New signups are currently disabled.";
+    if (m.includes("failed to fetch") || m.includes("network"))
+      return "Network error — check your connection and try again.";
+    return raw;
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setFormError(null);
     try {
       if (isSignUp) {
         if (isGuest) {
@@ -90,12 +112,13 @@ export default function Auth() {
         navigate(nextTarget, { replace: true });
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "An error occurred";
-      toast.error(message);
+      const raw = error instanceof Error ? error.message : "Something went wrong. Please try again.";
+      setFormError(friendlyAuthError(raw));
     } finally {
       setLoading(false);
     }
   };
+
 
 
 
@@ -244,9 +267,11 @@ export default function Auth() {
             type="email"
             placeholder="Email address"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
             required
+            aria-invalid={!!formError}
             className="pl-10 h-11 bg-secondary border-border"
+
           />
         </div>
         <div className="relative">
@@ -255,7 +280,7 @@ export default function Auth() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
             required
             minLength={6}
             className="pl-10 h-11 bg-secondary border-border"
@@ -274,8 +299,20 @@ export default function Auth() {
           </div>
         )}
 
+        {formError && (
+          <p
+            role="alert"
+            aria-live="polite"
+            className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{formError}</span>
+          </p>
+        )}
+
         <Button
           type="submit"
+
           className="w-full h-11 bg-primary text-primary-foreground font-medium gap-2"
           disabled={loading}
         >
@@ -306,8 +343,10 @@ export default function Auth() {
       <p className="text-center text-sm text-muted-foreground">
         {isSignUp ? "Already have an account?" : "No account yet?"}{" "}
         <button
-          onClick={() => setIsSignUp(!isSignUp)}
+          type="button"
+          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); }}
           className="text-primary hover:underline font-medium"
+
         >
           {isSignUp ? "Sign in" : "Create one"}
         </button>
