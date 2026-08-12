@@ -372,7 +372,7 @@ export default function Pipeline() {
                         <p className="text-xs font-semibold text-foreground">Resume bullet rewrites</p>
                         <ul className="space-y-1.5 text-xs">
                           {selected.application_pack.bullet_rewrites.map((b, i) => (
-                            <li key={i} className="p-2 rounded bg-secondary/50 text-foreground">
+                            <li key={i} className="p-2 rounded-sm bg-secondary/50 text-foreground">
                               {b.rewritten}
                             </li>
                           ))}

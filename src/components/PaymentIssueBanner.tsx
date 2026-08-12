@@ -10,7 +10,7 @@ export function PaymentIssueBanner() {
   if (!hasPaymentIssue) return null;
 
   return (
-    <div className="rounded-xl border border-destructive/40 bg-destructive/10 backdrop-blur-sm p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+    <div className="rounded-xl border border-destructive/40 bg-destructive/10 backdrop-blur-xs p-4 flex flex-col sm:flex-row sm:items-center gap-3">
       <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
       <div className="flex-1">
         <p className="text-sm font-semibold text-foreground">

@@ -96,7 +96,7 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
               key={r.value}
               onClick={() => setRange(r.value)}
               className={`px-3 py-1 text-xs rounded-md transition ${
-                range === r.value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                range === r.value ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {r.label}

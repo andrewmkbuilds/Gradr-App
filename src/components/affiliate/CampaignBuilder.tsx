@@ -109,7 +109,7 @@ export function CampaignBuilder({ affiliateProfileId, affiliateCode }: Props) {
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const inputCls =
-    "w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary";
+    "w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm focus:outline-hidden focus:ring-1 focus:ring-primary";
   const labelCls = "text-xs font-medium text-muted-foreground block mb-1.5";
 
   return (

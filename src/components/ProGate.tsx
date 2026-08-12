@@ -37,7 +37,7 @@ export function ProGate({ children, feature = "This feature", description, credi
 
 
   return (
-    <Card className="p-8 text-center border-border/60 bg-card/60 backdrop-blur-sm">
+    <Card className="p-8 text-center border-border/60 bg-card/60 backdrop-blur-xs">
       <div className="mx-auto h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
         <Lock className="h-5 w-5 text-primary" />
       </div>
