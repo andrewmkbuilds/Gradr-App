@@ -8,6 +8,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
+import { UsageBars } from "@/components/UsageBars";
+
 
 interface DashboardStats {
   resumeScore: number;
@@ -149,6 +151,8 @@ export default function Dashboard() {
 
       <PaymentIssueBanner />
       <CreditsBalance />
+      <UsageBars />
+
 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

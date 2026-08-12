@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { consume, paymentRequired, resolveEnv } from "../_shared/entitlements.ts";
+import { logAiAuthorization } from "../_shared/securityAudit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,6 +42,7 @@ serve(async (req) => {
     );
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
+      void logAiAuthorization({ source: "interview-coach", decision: "denied", reason: "invalid_token" });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -74,6 +76,7 @@ serve(async (req) => {
     if (isSessionStart) {
       const paymentEnv = resolveEnv(environment);
       const entitlement = await consume(user.id, "interview", paymentEnv);
+      void logAiAuthorization({ source: "interview-coach", decision: entitlement.allowed ? "allowed" : "denied", userId: user.id, feature: "interview", env: paymentEnv, reason: entitlement.reason ?? entitlement.source ?? null, details: { tier: entitlement.tier, used: entitlement.used, allowance: entitlement.allowance } });
       if (!entitlement.allowed) return paymentRequired(entitlement, corsHeaders);
     }
 
