@@ -343,7 +343,7 @@ export default function Landing() {
             </div>
           </Section>
 
-          <div className="mx-auto mt-20 max-w-6xl px-5 sm:px-8">
+          <div className="mx-auto mt-14 max-w-6xl px-5 sm:px-8">
             <ChapterRule />
           </div>
         </div>

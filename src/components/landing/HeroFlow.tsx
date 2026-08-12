@@ -288,7 +288,7 @@ export function HeroFlow() {
       </DepthLayer>
 
       {/* floating satellites */}
-      <DepthLayer depth={1.5} className="pointer-events-none absolute -left-10 bottom-4 hidden w-44 xl:block">
+      <DepthLayer depth={1.5} className="pointer-events-none absolute -left-16 -bottom-10 hidden w-44 xl:block">
         <motion.div
           className="glass-panel rounded-xl bg-card/90 px-3 py-2.5 backdrop-blur-xl"
           animate={reduce ? undefined : { y: [0, -8, 0] }}
