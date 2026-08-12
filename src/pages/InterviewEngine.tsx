@@ -373,7 +373,7 @@ function InterviewEngineInner() {
         overall_score: Math.round(newReport.overallScore),
         duration_sec: elapsed,
       });
-
+      void metrics.finish("completed");
 
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
@@ -390,8 +390,20 @@ function InterviewEngineInner() {
           })
           .select("id")
           .maybeSingle();
-        if (saved?.id) setSessionId(saved.id);
+        if (saved?.id) {
+          setSessionId(saved.id);
+          void metrics.linkSession(saved.id);
+          // Follow-up nudge with the scorecard + practice plan.
+          void supabase.functions.invoke("send-notification", {
+            body: {
+              template: "interview_followup",
+              input: { role: targetRole || undefined, link: `/interview/history` },
+              idempotencyKey: `interview_followup:${saved.id}`,
+            },
+          });
+        }
       }
+
     } catch {
       toast.error("Couldn't generate your scorecard. Please try again.");
     } finally {
