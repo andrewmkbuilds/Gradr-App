@@ -8,7 +8,12 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
-export type SecurityCategory = "billing_webhook" | "entitlement_check" | "ai_authorization";
+export type SecurityCategory =
+  | "billing_webhook"
+  | "entitlement_check"
+  | "ai_authorization"
+  | "eligibility"
+  | "discount";
 export type SecurityDecision = "allowed" | "denied" | "received" | "processed" | "failed";
 
 export interface SecurityEvent {
