@@ -1,7 +1,5 @@
 import { LucideIcon } from "lucide-react";
-import { CountUp, SpotlightCard } from "@/components/motion";
-import { motion, useReducedMotion } from "framer-motion";
-import { spring } from "@/lib/motion";
+import { CountUp, SpotlightCard, DepthCard } from "@/components/motion";
 
 interface StatCardProps {
   title: string;
@@ -22,14 +20,13 @@ function parseMetric(value: string | number) {
 }
 
 export function StatCard({ title, value, subtitle, icon: Icon, glowing }: StatCardProps) {
-  const reduce = useReducedMotion();
   const metric = parseMetric(value);
 
   return (
-    <motion.div
-      whileHover={reduce ? undefined : { y: -3 }}
-      transition={spring.snappy}
-      className={`lume-border glass-panel overflow-hidden ${glowing ? "shadow-[var(--shadow-glow)]" : ""}`}
+    <DepthCard
+      tilt={4}
+      lift={5}
+      innerClassName={`lume-border glass-panel reflect overflow-hidden ${glowing ? "shadow-[var(--shadow-glow)]" : ""}`}
     >
       <SpotlightCard className="p-5">
         <div className="mb-3 flex items-start justify-between">
@@ -47,6 +44,6 @@ export function StatCard({ title, value, subtitle, icon: Icon, glowing }: StatCa
         <p className="mt-1 text-sm text-muted-foreground">{title}</p>
         {subtitle && <p className="mt-1 text-xs text-primary">{subtitle}</p>}
       </SpotlightCard>
-    </motion.div>
+    </DepthCard>
   );
 }
