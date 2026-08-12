@@ -13,7 +13,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
-import { AnimatedHeadline, TiltCard, MotionPressable, Magnetic, CountUp, Parallax, SpotlightCard } from "@/components/motion";
+import { AnimatedHeadline, TiltCard, MotionPressable, Magnetic, CountUp, SpotlightCard } from "@/components/motion";
 import { ProductDemos } from "@/components/landing/ProductDemos";
 import { AiDemoSequence } from "@/components/landing/AiDemoSequence";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
@@ -202,7 +202,7 @@ function Heading({
   children, className = "",
 }: { children: React.ReactNode; className?: string }) {
   return (
-    <h2 className={`text-balance text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-[2.75rem] ${className}`}>
+    <h2 className={`font-display text-balance text-3xl font-bold leading-[1.06] tracking-[-0.03em] sm:text-4xl lg:text-[2.9rem] ${className}`}>
       {children}
     </h2>
   );
@@ -476,13 +476,15 @@ export default function Landing() {
 
           <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
             {SYSTEM.map((s, i) => (
-              <Reveal as="li" key={s.n} delay={i * 50} className="group bg-card p-5 transition-colors hover:bg-secondary/40">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold tabular-nums tracking-widest text-primary">{s.n}</span>
-                  <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
-                </div>
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{s.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.copy}</p>
+              <Reveal as="li" key={s.n} delay={i * 50} className="bg-card">
+                <SpotlightCard className="group h-full p-5 transition-colors hover:bg-secondary/30">
+                  <div className="flex items-center justify-between">
+                    <span className="numeric text-xs font-semibold tracking-widest text-primary">{s.n}</span>
+                    <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
+                  </div>
+                  <h3 className="mt-4 font-display text-sm font-semibold text-foreground">{s.title}</h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.copy}</p>
+                </SpotlightCard>
               </Reveal>
             ))}
           </ol>
