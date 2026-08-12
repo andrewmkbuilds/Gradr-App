@@ -33,9 +33,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </main>
         </div>
       </div>
-
-        </div>
-      </div>
     </SidebarProvider>
   );
 }
