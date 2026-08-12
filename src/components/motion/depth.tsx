@@ -213,6 +213,7 @@ export function DepthCard({
   const sheenY = useTransform(py, [0, 1], ["0%", "100%"]);
   const sheenBg = useMotionTemplate`radial-gradient(55% 55% at ${sheenX} ${sheenY}, hsl(0 0% 100% / 0.14), transparent 70%)`;
   const sheenOpacity = useSpring(hover, spring.smooth);
+  const yLift = useTransform(z, (v) => -v);
 
   if (!enabled) return <div className={cn(className, innerClassName)}>{children}</div>;
 
@@ -220,7 +221,7 @@ export function DepthCard({
     <div className={cn("[perspective:1100px]", className)}>
       <motion.div
         className={cn("relative will-change-transform", innerClassName)}
-        style={{ rotateX, rotateY, y: useTransform(z, (v) => -v), transformStyle: "preserve-3d" }}
+        style={{ rotateX, rotateY, y: yLift, transformStyle: "preserve-3d" }}
         onPointerMove={(e) => {
           const r = e.currentTarget.getBoundingClientRect();
           px.set((e.clientX - r.left) / r.width);
