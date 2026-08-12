@@ -27,7 +27,7 @@ const trackCta = (location: string, destination: string) => () =>
 
 
 const URL = "https://careerflowos.lovable.app/blog/ai-resume-optimization";
-const TITLE = "AI Resume Builder & ATS Optimization: The 2026 Guide";
+const TITLE = "AI Resume Builder & ATS Guide";
 const DESCRIPTION =
   "How AI resume builders help candidates beat Applicant Tracking Systems (ATS). A technical, plain-English guide to keyword matching, formatting rules, and AI-driven rewrites.";
 const PUBLISHED = "2026-07-09";

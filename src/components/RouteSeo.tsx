@@ -87,7 +87,7 @@ const META: Record<string, { title: string; description: string }> = {
     description: "Campaign link builder, brand assets, and copy templates for CareerFlow OS affiliate partners.",
   },
   "/blog/ai-resume-optimization": {
-    title: "AI Resume Builder & ATS Optimization Guide",
+    title: "AI Resume Builder & ATS Guide",
     description: "How AI resume builders help candidates beat Applicant Tracking Systems — keyword matching, formatting rules, and AI-driven rewrites.",
   },
 };
