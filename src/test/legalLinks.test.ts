@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-// @ts-expect-error - plain JS check script shared with CI
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - plain JS check script shared with CI
 import { runLegalLinkCheck, CANONICAL_ORIGIN } from "../../scripts/check-legal-links.mjs";
 
 describe("legal links", () => {
