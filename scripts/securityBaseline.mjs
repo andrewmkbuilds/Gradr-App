@@ -149,10 +149,7 @@ export function runBaselineChecks(baseline = loadBaseline()) {
   // 5. Exact table grants for sensitive log tables.
   for (const [table, expected] of Object.entries(baseline.tableGrants)) {
     for (const [role, privs] of Object.entries(expected)) {
-      const actual = grants
-        .filter(([t, g]) => t === table && g === role)
-        .map(([, , p]) => p)
-        .sort();
+      const actual = [...(grants.get(table)?.[role] ?? [])].sort();
       const want = [...privs].sort();
       add(
         `grants: ${table} -> ${role}`,
