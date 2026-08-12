@@ -80,6 +80,9 @@ function record(name, ok, detail = "") {
   console.log(`${icon}  ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
+/** Noise that must not fail a smoke run: dev-only React warnings, asset 404s. */
+const IGNORED_CONSOLE = /favicon|net::ERR_|Failed to load resource|^Warning:|React Router Future Flag|Download the React DevTools/i;
+
 const ERROR_FALLBACK = /something broke on our side|application error|unexpected error/i;
 
 async function visit(page, route) {
@@ -128,7 +131,7 @@ async function main() {
   // ---- Public routes -------------------------------------------------
   for (const route of PUBLIC_ROUTES) {
     const { status, body, errors } = await visit(page, route);
-    const fatal = errors.filter((e) => !/favicon|net::ERR_|Failed to load resource/i.test(e));
+    const fatal = errors.filter((e) => !IGNORED_CONSOLE.test(e));
     const rendered = body.trim().length > 40;
     const crashed = ERROR_FALLBACK.test(body);
     const ok = status < 400 && rendered && !crashed && fatal.length === 0;
@@ -159,7 +162,7 @@ async function main() {
   // ---- Auth-gated routes must not crash ------------------------------
   for (const route of GATED_ROUTES) {
     const { body, errors, url } = await visit(page, route);
-    const fatal = errors.filter((e) => !/favicon|net::ERR_|Failed to load resource/i.test(e));
+    const fatal = errors.filter((e) => !IGNORED_CONSOLE.test(e));
     const crashed = ERROR_FALLBACK.test(body);
     const ok = !crashed && fatal.length === 0;
     record(`gated ${route}`, ok, ok ? `resolved to ${new URL(url).pathname}` : fatal.slice(0, 2).join(" | "));
