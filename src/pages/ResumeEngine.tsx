@@ -116,21 +116,33 @@ export default function ResumeEngine() {
 
       setAnalysis(analysisData);
 
-      await supabase.from("resumes").insert({
-        user_id: user.id,
-        file_name: selectedFile.name,
-        file_path: filePath,
-        file_type: selectedFile.type,
-        ats_score: analysisData.ats_score,
-        keyword_match: analysisData.keyword_match,
-        formatting_score: analysisData.formatting_score,
-        impact_score: analysisData.impact_score,
-        readability_score: analysisData.readability_score,
-        ai_suggestions: analysisData.suggestions,
-        parsed_text: text.substring(0, 10000),
-      });
+      const versionLabel = jobTitle.trim()
+        ? `${jobTitle.trim()} — ${selectedFile.name.replace(/\.[^.]+$/, "")}`
+        : selectedFile.name.replace(/\.[^.]+$/, "");
 
-      toast.success("Resume analyzed");
+      const { data: saved } = await supabase
+        .from("resumes")
+        .insert({
+          user_id: user.id,
+          file_name: selectedFile.name,
+          file_path: filePath,
+          file_type: selectedFile.type,
+          version_label: versionLabel,
+          ats_score: analysisData.ats_score,
+          keyword_match: analysisData.keyword_match,
+          formatting_score: analysisData.formatting_score,
+          impact_score: analysisData.impact_score,
+          readability_score: analysisData.readability_score,
+          ai_suggestions: analysisData.suggestions,
+          parsed_text: text.substring(0, 10000),
+        })
+        .select("id")
+        .maybeSingle();
+
+      setActiveVersionId(saved?.id ?? null);
+      setVersionsToken((t) => t + 1);
+
+      toast.success("Resume analyzed and saved as a version");
     } catch (error: any) {
       toast.error(error.message || "Failed to analyze resume");
       console.error(error);
