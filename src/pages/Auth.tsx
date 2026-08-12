@@ -265,7 +265,7 @@ export default function Auth() {
         {!isSignUp && (
           <div className="flex justify-end">
             <Link
-              to="/forgot-password"
+              to={nextParam ? `/forgot-password?next=${encodeURIComponent(nextParam)}` : "/forgot-password"}
               className="text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               Forgot password?

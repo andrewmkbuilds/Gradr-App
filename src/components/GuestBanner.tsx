@@ -1,11 +1,17 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Sparkles, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { authPath, nextFromLocation } from "@/lib/nextRedirect";
 
 export function GuestBanner() {
   const { user } = useAuth();
   const [dismissed, setDismissed] = useState(false);
+  const location = useLocation();
+  // Send guests back to the page they were on after they create an account.
+  const signUpHref = `${authPath(nextFromLocation(location))}${
+    nextFromLocation(location) ? "&" : "?"
+  }mode=signup`;
 
   // Anonymous users have is_anonymous flag set to true
   const isGuest = user?.is_anonymous === true;
@@ -21,7 +27,7 @@ export function GuestBanner() {
         <p className="text-sm text-foreground truncate">
           You're browsing as a guest.{" "}
           <Link
-            to="/auth?mode=signup"
+            to={signUpHref}
             className="font-semibold text-primary hover:underline"
           >
             Create a free account
