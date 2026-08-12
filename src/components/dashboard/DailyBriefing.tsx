@@ -1,7 +1,7 @@
 import { ArrowRight, Sparkles, Flame, AlertTriangle, Target } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "@/lib/router-compat";
-import { CountUp, MotionPressable, SpotlightCard } from "@/components/motion";
+import { CountUp, MotionPressable } from "@/components/motion";
 import { spring, stagger } from "@/lib/motion";
 import type { Briefing, NextAction } from "@/lib/careerBriefing";
 import { greeting } from "@/lib/careerBriefing";
@@ -147,7 +147,6 @@ export function DailyBriefing({ briefing, name }: { briefing: Briefing; name?: s
           </motion.ul>
         </div>
       </div>
-      <SpotlightCard className="pointer-events-none absolute inset-0" />
     </section>
   );
 }
