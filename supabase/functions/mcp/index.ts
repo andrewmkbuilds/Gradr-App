@@ -6,7 +6,7 @@
 import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.26.2";
 
 // src/lib/mcp/tools/list-resumes.ts
-import { createClient } from "npm:@supabase/supabase-js@^2.100.1";
+import { createClient } from "npm:@supabase/supabase-js@^2.112.3";
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.26.2";
 import { z } from "npm:zod@^3.25.76";
 function supabaseForUser(ctx) {
@@ -37,7 +37,7 @@ var list_resumes_default = defineTool({
 });
 
 // src/lib/mcp/tools/list-tracked-jobs.ts
-import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.100.1";
+import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.112.3";
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.26.2";
 import { z as z2 } from "npm:zod@^3.25.76";
 function supabaseForUser2(ctx) {
@@ -71,7 +71,7 @@ var list_tracked_jobs_default = defineTool2({
 });
 
 // src/lib/mcp/tools/create-tracked-job.ts
-import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.100.1";
+import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.112.3";
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.26.2";
 import { z as z3 } from "npm:zod@^3.25.76";
 function supabaseForUser3(ctx) {
@@ -123,7 +123,7 @@ var create_tracked_job_default = defineTool3({
 });
 
 // src/lib/mcp/tools/list-job-matches.ts
-import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.100.1";
+import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.112.3";
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.26.2";
 import { z as z4 } from "npm:zod@^3.25.76";
 function supabaseForUser4(ctx) {
@@ -154,7 +154,7 @@ var list_job_matches_default = defineTool4({
 });
 
 // src/lib/mcp/tools/get-profile.ts
-import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.100.1";
+import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.112.3";
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.2";
 function supabaseForUser5(ctx) {
   return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
