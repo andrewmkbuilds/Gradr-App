@@ -435,7 +435,7 @@ export default function JobsFeed() {
         </div>
         <div className="flex flex-wrap items-center gap-4 pt-1">
           <div className="flex items-center gap-2">
-            <Switch id="remote" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
+            <Switch id="remote" aria-label="Remote only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
             <Label htmlFor="remote" className="text-sm">Remote only</Label>
           </div>
           <Select value={sortBy} onValueChange={(v: "relevance" | "date" | "salary") => setSortBy(v)}>

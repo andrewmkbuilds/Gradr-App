@@ -206,7 +206,7 @@ export default function JobMatchingEngine() {
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            <Switch id="remote-only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
+            <Switch id="remote-only" aria-label="Remote only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
             <Label htmlFor="remote-only" className="text-xs text-muted-foreground">Remote only</Label>
           </div>
           {!hasResume && (
