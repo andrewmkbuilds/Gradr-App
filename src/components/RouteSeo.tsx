@@ -123,6 +123,10 @@ const META: Record<string, { title: string; description: string }> = {
     title: "AI Resume Builder & ATS Guide",
     description: "How AI resume builders help candidates beat Applicant Tracking Systems — keyword matching, formatting rules, and AI-driven rewrites.",
   },
+  "/ats-resume-checker": {
+    title: "ATS Resume Checker — Free Resume Scan & Score",
+    description: "Free ATS resume checker: score your resume against any job description, spot formatting a parser can't read, and get the exact missing keywords.",
+  },
   "/career-advice": {
     title: "Career Advice",
     description: "Free guides on resume optimization, cover letters, and interview preparation — practical advice for every stage of your job search.",

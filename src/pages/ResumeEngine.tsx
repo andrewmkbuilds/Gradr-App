@@ -223,6 +223,13 @@ export default function ResumeEngine() {
           <BookOpen className="h-3.5 w-3.5" />
           Guide: AI resume builders & ATS optimization
         </Link>
+        <Link
+          to="/ats-resume-checker?utm_source=app&utm_medium=internal_link&utm_campaign=ats_resume_checker&utm_content=resume_engine_header"
+          className="mt-2 ml-0 inline-flex items-center gap-2 text-xs text-primary hover:underline sm:ml-4"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          ATS resume checker: how scoring works
+        </Link>
       </div>
 
       {!uploading && !analyzing && tailorPanel}
