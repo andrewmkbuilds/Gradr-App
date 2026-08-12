@@ -1,4 +1,6 @@
-import logoAsset from "@/assets/gradr-logo.png.asset.json";
+/** Official Gradr mark. Lives in public/ so it also backs the favicon + PWA icons. */
+export const BRAND_LOGO_URL = "/gradr-logo.png";
+
 import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
@@ -16,7 +18,7 @@ type BrandLogoProps = {
 export function BrandLogo({ size = 32, className, decorative = true }: BrandLogoProps) {
   return (
     <img
-      src={logoAsset.url}
+      src={BRAND_LOGO_URL}
       width={size}
       height={size}
       style={{ width: size, height: size }}
@@ -29,4 +31,4 @@ export function BrandLogo({ size = 32, className, decorative = true }: BrandLogo
   );
 }
 
-export const BRAND_LOGO_URL = logoAsset.url;
+
