@@ -124,8 +124,8 @@ export function writeConsent(choices: ConsentChoices): StoredConsent {
   const serialised = JSON.stringify(record);
   // Always mirror to a first-party cookie so the choice survives even when
   // localStorage writes are blocked or silently dropped.
-  if (!safeLocalSet(serialised)) cookieSet(serialised);
-  else cookieSet(serialised);
+  safeLocalSet(serialised);
+  cookieSet(serialised);
   window.dispatchEvent(new CustomEvent<StoredConsent>("gradr:consent", { detail: record }));
   return record;
 }
