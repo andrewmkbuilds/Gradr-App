@@ -35,15 +35,26 @@ async function emailFor(userId: string, env: PaddleEnv): Promise<string> {
 
 /** ---- Paddle state mirror (customers + subscriptions) --------------------- */
 
+async function existingEmail(customerId: string): Promise<string | null> {
+  const { data } = await db()
+    .from("paddle_customers")
+    .select("email")
+    .eq("customer_id", customerId)
+    .maybeSingle();
+  return (data?.email as string | undefined) ?? null;
+}
+
 // deno-lint-ignore no-explicit-any
 async function mirrorCustomer(data: any, env: PaddleEnv, userId?: string | null) {
   if (!data?.id) return;
   const patch: Record<string, unknown> = {
     customer_id: data.id,
-    email: data.email ?? "unknown@gradr.local",
     environment: env,
     updated_at: new Date().toISOString(),
   };
+  // Never overwrite a known email with a placeholder.
+  if (data.email) patch.email = data.email;
+  else patch.email = (await existingEmail(data.id)) ?? "unknown@gradr.local";
   if (userId) patch.user_id = userId;
   // Idempotent: keyed on the Paddle customer id, safe for out-of-order retries.
   await db().from("paddle_customers").upsert(patch, { onConflict: "customer_id" });
