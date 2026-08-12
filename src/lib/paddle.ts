@@ -67,7 +67,7 @@ export function isPaymentsConfigured(): boolean {
 
 /** Why payments are unavailable, or null when everything is configured. */
 export function getPaymentsConfigError(): string | null {
-  return config.ok ? null : config.reason;
+  return config.ok ? null : (config.reason ?? "Payments are not configured.");
 }
 
 /**
@@ -76,7 +76,7 @@ export function getPaymentsConfigError(): string | null {
  * the safe default, since live is the stricter set of records to read.
  */
 export function getPaddleEnvironment(): PaddleEnv {
-  if (config.ok) return config.env;
+  if (config.ok && config.env) return config.env;
   if (clientToken?.startsWith("test_")) return "sandbox";
   if (configuredEnv === "sandbox" || configuredEnv === "live") return configuredEnv;
   return "live";
@@ -84,7 +84,9 @@ export function getPaddleEnvironment(): PaddleEnv {
 
 /** Throws when payments are misconfigured — only call from user actions. */
 function requireConfig(): { token: string; env: PaddleEnv } {
-  if (!config.ok) throw new Error(`Payments are unavailable: ${config.reason}`);
+  if (!config.ok || !config.token || !config.env) {
+    throw new Error(`Payments are unavailable: ${config.reason ?? "not configured"}`);
+  }
   return { token: config.token, env: config.env };
 }
 
@@ -93,7 +95,7 @@ let paddlePromise: Promise<Paddle> | null = null;
 
 export async function getPaddle(): Promise<Paddle> {
   if (!paddlePromise) {
-    const { token, env } = assertConfig();
+    const { token, env } = requireConfig();
     paddlePromise = loadPaddle({
       environment: env === "sandbox" ? "sandbox" : "production",
       token,
