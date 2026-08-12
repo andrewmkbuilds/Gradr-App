@@ -409,10 +409,16 @@ Deno.serve(async (req) => {
       case EventName.TransactionCompleted:
         await clearPaymentIssue(event.data, env);
         await grantPackCredits(event.data, env);
+        await recordAffiliateCommission(event.data, env);
         break;
       case EventName.TransactionPaymentFailed:
         await handlePaymentFailed(event.data, env);
         break;
+      case EventName.AdjustmentCreated:
+        // Refunds / chargebacks arrive as adjustments against a transaction.
+        await reverseAffiliateCommission(event.data, env, "refund_adjustment");
+        break;
+
 
       default:
         console.log("Unhandled event:", event.eventType);
