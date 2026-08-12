@@ -105,7 +105,7 @@ export async function attributeSignupReferral() {
     const clickId = getClickId();
     const { data } = await supabase.rpc("attribute_signup_referral", {
       _code: code,
-      _click_id: clickId,
+      _click_id: clickId ?? undefined,
     });
     if (data) {
       // Successfully attributed — clear cookie to prevent re-attribution

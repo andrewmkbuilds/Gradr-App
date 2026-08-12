@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronDown, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { cn } from "@/lib/utils";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShieldCheck, CreditCard, Gauge, Bot, Download, FileJson } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

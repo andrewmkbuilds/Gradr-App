@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
 import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";

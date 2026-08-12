@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Mail, ArrowLeft, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { authPath, readNext } from "@/lib/nextRedirect";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
 

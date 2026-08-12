@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import {
   Target, TrendingUp, MapPin, DollarSign, Loader2, Search, BookOpen,

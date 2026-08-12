@@ -2,7 +2,7 @@ import { FileText, Zap, Mic, Infinity as InfinityIcon, ArrowUpRight, Info } from
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { useCredits, useEntitlements } from "@/hooks/useSubscription";
 import { formatDistanceToNowStrict } from "date-fns";
 

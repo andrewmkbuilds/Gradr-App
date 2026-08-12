@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { cn } from "@/lib/utils";
 import { dashboardItem, navGroups } from "@/config/nav";
 import { trackMobileTab } from "@/lib/navAnalytics";

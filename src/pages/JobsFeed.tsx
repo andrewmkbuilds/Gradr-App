@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { formatDistanceToNow } from "date-fns";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { CompanyResearchDialog } from "@/components/research/CompanyResearchDialog";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { prefetchLogos } from "@/lib/logos";

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowRight, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

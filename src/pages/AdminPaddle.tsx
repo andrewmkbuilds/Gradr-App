@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2,
