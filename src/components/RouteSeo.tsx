@@ -261,28 +261,10 @@ export function RouteSeo() {
     : null;
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
+  // Article/BlogPosting JSON-LD is emitted by the editorial pages themselves
+  // (GuideArticle + blog posts via structuredData.ts), so nothing extra here.
 
-  const articleLd = isArticle
-    ? {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        headline: meta.title,
-        description: meta.description,
-        image: [ogImage],
-        mainEntityOfPage: { "@type": "WebPage", "@id": url },
-        inLanguage: "en",
-        ...(guideForLd?.updated
-          ? { datePublished: guideForLd.updated, dateModified: guideForLd.updated }
-          : {}),
-        author: { "@type": "Organization", name: SITE, url: `${ORIGIN}/` },
-        publisher: {
-          "@type": "Organization",
-          name: SITE,
-          url: `${ORIGIN}/`,
-          logo: { "@type": "ImageObject", url: `${ORIGIN}/gradr-logo.png` },
-        },
-      }
-    : null;
+
 
   return (
     <Helmet>
