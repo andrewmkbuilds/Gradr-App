@@ -36,7 +36,7 @@ export default function AffiliateResources() {
         <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Referral rules</h2>
         <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
           <li>No self-referrals.</li>
-          <li>No paid search on "CareerFlow", "Gradr", or related branded keywords.</li>
+          <li>No paid search on "Gradr", or related branded keywords.</li>
           <li>No spam, misleading claims, or coupon-site stuffing.</li>
           <li>No incentivized fake signups.</li>
         </ul>

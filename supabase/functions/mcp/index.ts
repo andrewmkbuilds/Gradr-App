@@ -49,7 +49,7 @@ function supabaseForUser2(ctx) {
 var list_tracked_jobs_default = defineTool2({
   name: "list_tracked_jobs",
   title: "List tracked jobs",
-  description: "List jobs the signed-in user is tracking in their CareerFlow pipeline, optionally filtered by status.",
+  description: "List jobs the signed-in user is tracking in their Gradr pipeline, optionally filtered by status.",
   inputSchema: {
     status: z2.string().optional().describe("Filter by pipeline status (e.g. 'saved', 'applied', 'interview', 'offer', 'rejected')."),
     limit: z2.number().int().min(1).max(100).optional().describe("Maximum jobs to return. Defaults to 50.")
@@ -83,7 +83,7 @@ function supabaseForUser3(ctx) {
 var create_tracked_job_default = defineTool3({
   name: "create_tracked_job",
   title: "Add tracked job",
-  description: "Add a job opportunity to the signed-in user's CareerFlow pipeline.",
+  description: "Add a job opportunity to the signed-in user's Gradr pipeline.",
   inputSchema: {
     title: z3.string().min(1).describe("Job title (e.g. 'Senior Frontend Engineer')."),
     company: z3.string().optional().describe("Company name."),
@@ -164,8 +164,8 @@ function supabaseForUser5(ctx) {
 }
 var get_profile_default = defineTool5({
   name: "get_profile",
-  title: "Get my CareerFlow profile",
-  description: "Return the signed-in user's CareerFlow profile: name, email, target role, and career preferences.",
+  title: "Get my Gradr profile",
+  description: "Return the signed-in user's Gradr profile: name, email, target role, and career preferences.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {
@@ -192,7 +192,7 @@ var mcp_default = defineMcp({
   name: "careerflow-mcp",
   title: "Gradr",
   version: "0.1.0",
-  instructions: "Tools for the signed-in CareerFlow user. Use `get_profile` for identity and career preferences, `list_resumes` and `list_job_matches` for AI resume + matching data, and `list_tracked_jobs` / `create_tracked_job` to read and write the user's job pipeline.",
+  instructions: "Tools for the signed-in Gradr user. Use `get_profile` for identity and career preferences, `list_resumes` and `list_job_matches` for AI resume + matching data, and `list_tracked_jobs` / `create_tracked_job` to read and write the user's job pipeline.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"

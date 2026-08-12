@@ -12,7 +12,7 @@ function supabaseForUser(ctx: ToolContext) {
 export default defineTool({
   name: "create_tracked_job",
   title: "Add tracked job",
-  description: "Add a job opportunity to the signed-in user's CareerFlow pipeline.",
+  description: "Add a job opportunity to the signed-in user's Gradr pipeline.",
   inputSchema: {
     title: z.string().min(1).describe("Job title (e.g. 'Senior Frontend Engineer')."),
     company: z.string().optional().describe("Company name."),
