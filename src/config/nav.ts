@@ -117,6 +117,7 @@ export const navGroups: NavGroup[] = [
     adminOnly: true,
     items: [
       { title: "Affiliate Admin", url: "/admin/affiliates", icon: Gift },
+      { title: "Verifications", url: "/admin/verifications", icon: ShieldCheck },
       { title: "Discounts", url: "/admin/discounts", icon: BadgePercent },
       { title: "Legal Documents", url: "/admin/legal", icon: ScrollText },
       { title: "Audit Log", url: "/admin/audit-log", icon: ScrollText },
