@@ -226,6 +226,26 @@ export default function ResumeEngine() {
 
       {!uploading && !analyzing && tailorPanel}
 
+      {!uploading && !analyzing && (
+        <ResumeVersions
+          key={versionsToken}
+          activeId={activeVersionId}
+          onSelect={(v) => {
+            setActiveVersionId(v.id);
+            setFileName(v.file_name);
+            setAnalysis({
+              ats_score: v.ats_score ?? 0,
+              keyword_match: v.keyword_match ?? 0,
+              formatting_score: v.formatting_score ?? 0,
+              impact_score: v.impact_score ?? 0,
+              readability_score: v.readability_score ?? 0,
+              suggestions: Array.isArray(v.ai_suggestions) ? (v.ai_suggestions as Suggestion[]) : [],
+              tailoredTo: v.version_label,
+            });
+          }}
+        />
+      )}
+
       {!analysis && !uploading && !analyzing ? (
         <label
           onDrop={handleDrop}
