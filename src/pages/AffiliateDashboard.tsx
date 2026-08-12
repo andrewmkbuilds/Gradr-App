@@ -1,22 +1,36 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, MousePointerClick, Users, DollarSign, TrendingUp, Loader2, Link2, BarChart3, Wrench, LayoutDashboard } from "lucide-react";
-import { toast } from "sonner";
+import {
+  MousePointerClick,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Loader2,
+  BarChart3,
+  Wrench,
+  LayoutDashboard,
+  Trophy,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useMyAffiliate } from "@/hooks/useAffiliate";
+import { useMyAffiliate, useAffiliateOverview, useAffiliateTiers } from "@/hooks/useAffiliate";
 import { StatCard } from "@/components/StatCard";
 import { format } from "date-fns";
 import { CampaignBuilder } from "@/components/affiliate/CampaignBuilder";
 import { AffiliateAnalytics } from "@/components/affiliate/AffiliateAnalytics";
+import { TierProgress, MilestoneBadges } from "@/components/affiliate/TierProgress";
+import { ShareCard } from "@/components/affiliate/ShareCard";
+import { ReferralLeaderboard } from "@/components/affiliate/ReferralLeaderboard";
+import { ActivityTimeline, type TimelineEvent } from "@/components/affiliate/ActivityTimeline";
 
-type Tab = "overview" | "analytics" | "campaigns";
+type Tab = "overview" | "rewards" | "analytics" | "campaigns";
 
 export default function AffiliateDashboard() {
   const navigate = useNavigate();
   const { data: my, isLoading: loadingMy } = useMyAffiliate();
+  const { data: overview, isLoading: loadingOverview } = useAffiliateOverview();
+  const { data: tiers } = useAffiliateTiers();
   const profile = my?.profile;
-  const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
 
   const link = useMemo(() => {
@@ -43,7 +57,45 @@ export default function AffiliateDashboard() {
     },
   });
 
-  if (loadingMy || isLoading) {
+  const timeline: TimelineEvent[] = useMemo(() => {
+    if (!data) return [];
+    const events: TimelineEvent[] = [
+      ...data.clicks.slice(0, 10).map((c) => ({
+        id: `click-${c.id}`,
+        at: c.clicked_at,
+        kind: "click" as const,
+        title: "Link click",
+        detail: [c.landing_page, c.utm_source].filter(Boolean).join(" · ") || undefined,
+      })),
+      ...data.referrals.map((r) => ({
+        id: `ref-${r.id}`,
+        at: r.signup_date || r.created_at,
+        kind: "referral" as const,
+        title: r.conversion_date ? "Referral converted" : "Referral signed up",
+        detail: `${r.conversion_type || "signup"} · ${r.attribution_status}`,
+      })),
+      ...data.commissions.map((c) => ({
+        id: `com-${c.id}`,
+        at: c.created_date,
+        kind: c.status === "reversed" ? ("reversal" as const) : ("commission" as const),
+        title:
+          c.status === "reversed"
+            ? `Commission reversed — $${Number(c.commission_amount).toFixed(2)}`
+            : `Commission ${c.status} — $${Number(c.commission_amount).toFixed(2)}`,
+        detail: c.source_amount ? `on $${Number(c.source_amount).toFixed(2)} order` : undefined,
+      })),
+      ...data.payouts.map((p) => ({
+        id: `pay-${p.id}`,
+        at: p.payout_date || p.created_at,
+        kind: "payout" as const,
+        title: `Payout ${p.status} — $${Number(p.amount).toFixed(2)}`,
+        detail: [p.payout_method, p.reference].filter(Boolean).join(" · ") || undefined,
+      })),
+    ];
+    return events.sort((a, b) => +new Date(b.at) - +new Date(a.at)).slice(0, 25);
+  }, [data]);
+
+  if (loadingMy || isLoading || loadingOverview) {
     return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
   if (!profile) {
@@ -51,30 +103,15 @@ export default function AffiliateDashboard() {
     return null;
   }
 
-  const totals = (() => {
-    const c = data?.commissions || [];
-    const sum = (status: string) => c.filter((x) => x.status === status).reduce((a, x) => a + Number(x.commission_amount || 0), 0);
-    const pending = sum("pending");
-    const approved = sum("approved");
-    const paid = sum("paid");
-    const reversed = sum("reversed");
-    return { pending, approved, paid, reversed, lifetime: pending + approved + paid, unpaid: pending + approved };
-  })();
-
-  const totalClicks = data?.clicks.length ?? 0;
-  const totalReferrals = data?.referrals.length ?? 0;
-  const conversions = (data?.referrals || []).filter((r) => r.conversion_date).length;
-  const convRate = totalClicks ? `${Math.round((conversions / totalClicks) * 100)}%` : "—";
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(link);
-    setCopied(true);
-    toast.success("Referral link copied");
-    setTimeout(() => setCopied(false), 1500);
-  };
+  const earnings = overview?.earnings;
+  const stats = overview?.stats;
+  const threshold = earnings?.payout_threshold ?? 0;
+  const unpaid = earnings?.unpaid ?? 0;
+  const payoutProgress = threshold > 0 ? Math.min(100, Math.round((unpaid / threshold) * 100)) : 100;
 
   const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "rewards", label: "Rewards", icon: Trophy },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "campaigns", label: "Campaign links", icon: Wrench },
   ];
@@ -83,22 +120,15 @@ export default function AffiliateDashboard() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Affiliate Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track clicks, referrals, and commissions.</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Gradr Referral Program</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Share Gradr, climb the levels, get paid. Everything below is live data from your account.
+          </p>
         </div>
         <button onClick={() => navigate("/affiliate/resources")} className="text-xs text-primary hover:underline">Resources & terms →</button>
       </div>
 
-      <div className="glass-card p-5 flex items-center gap-3 flex-wrap">
-        <Link2 className="h-5 w-5 text-primary shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="text-xs text-muted-foreground">Your referral link</div>
-          <div className="text-sm font-mono text-foreground truncate">{link}</div>
-        </div>
-        <button onClick={copy} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition">
-          <Copy className="h-3.5 w-3.5" /> {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
+      <ShareCard code={profile.affiliate_code} link={link} />
 
       <div className="flex gap-1 border-b border-border overflow-x-auto">
         {tabs.map((t) => (
@@ -117,43 +147,64 @@ export default function AffiliateDashboard() {
       {tab === "overview" && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={MousePointerClick} title="Clicks" value={String(totalClicks)} subtitle="recent" />
-            <StatCard icon={Users} title="Referrals" value={String(totalReferrals)} subtitle={`${conversions} converted`} />
-            <StatCard icon={TrendingUp} title="Conversion rate" value={convRate} subtitle="referrals / clicks" />
-            <StatCard icon={DollarSign} title="Unpaid balance" value={`$${totals.unpaid.toFixed(2)}`} subtitle={`$${totals.lifetime.toFixed(2)} lifetime`} glowing={totals.unpaid > 0} />
+            <StatCard icon={MousePointerClick} title="Clicks" value={String(stats?.clicks ?? 0)} subtitle="all time" />
+            <StatCard icon={Users} title="Referrals" value={String(stats?.referrals ?? 0)} subtitle={`${stats?.conversions ?? 0} converted`} />
+            <StatCard icon={TrendingUp} title="Conversion rate" value={`${stats?.conversion_rate ?? 0}%`} subtitle="conversions / clicks" />
+            <StatCard
+              icon={DollarSign}
+              title="Unpaid balance"
+              value={`$${unpaid.toFixed(2)}`}
+              subtitle={`$${(earnings?.lifetime ?? 0).toFixed(2)} lifetime`}
+              glowing={unpaid > 0}
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[
-              { label: "Pending", value: totals.pending },
-              { label: "Approved", value: totals.approved },
-              { label: "Paid", value: totals.paid },
-              { label: "Reversed", value: totals.reversed },
-            ].map((s) => (
-              <div key={s.label} className="glass-card p-4">
-                <div className="text-xs text-muted-foreground">{s.label}</div>
-                <div className="text-xl font-bold text-foreground mt-1">${s.value.toFixed(2)}</div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="glass-card p-6 lg:col-span-2">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <h3 className="font-semibold text-foreground">Payout progress</h3>
+                <span className="text-xs text-muted-foreground">
+                  ${unpaid.toFixed(2)} of ${threshold.toFixed(2)} minimum
+                </span>
               </div>
-            ))}
+              <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-primary to-success transition-all" style={{ width: `${payoutProgress}%` }} />
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                {unpaid >= threshold
+                  ? "You've cleared the minimum — your balance is queued for the next payout run."
+                  : `$${Math.max(threshold - unpaid, 0).toFixed(2)} more in approved commissions unlocks a payout.`}
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+                {[
+                  { label: "Pending", value: earnings?.pending ?? 0, tone: "text-warning" },
+                  { label: "Approved", value: earnings?.approved ?? 0, tone: "text-primary" },
+                  { label: "Paid", value: earnings?.paid ?? 0, tone: "text-success" },
+                  { label: "Reversed", value: earnings?.reversed ?? 0, tone: "text-destructive" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-xl bg-secondary/50 p-3">
+                    <div className="text-xs text-muted-foreground">{s.label}</div>
+                    <div className={`text-lg font-bold mt-1 ${s.tone}`}>${Number(s.value).toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card p-6">
+              <h3 className="text-sm font-semibold text-foreground mb-2">Earnings projection</h3>
+              <div className="text-3xl font-bold text-foreground">
+                ${(earnings?.projected_next_30d ?? 0).toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Estimated next 30 days, based on your actual conversion pace and average commission of $
+                {(earnings?.avg_commission ?? 0).toFixed(2)}.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="glass-card p-6">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Recent referrals</h3>
-              {data!.referrals.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-8 text-center">No referrals yet — share your link to start.</p>
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data!.referrals.slice(0, 8).map((r) => (
-                    <li key={r.id} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/50">
-                      <span className="text-foreground">{r.conversion_type || "signup"}</span>
-                      <span className="text-xs text-muted-foreground">{format(new Date(r.created_at), "MMM d")}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
+            <ActivityTimeline events={timeline} />
             <div className="glass-card p-6">
               <h3 className="text-sm font-semibold text-foreground mb-3">Payout history</h3>
               {data!.payouts.length === 0 ? (
@@ -166,11 +217,16 @@ export default function AffiliateDashboard() {
                         <div className="text-foreground">${Number(p.amount).toFixed(2)}</div>
                         <div className="text-xs text-muted-foreground">{p.payout_method || "—"} · {p.reference || "no ref"}</div>
                       </div>
-                      <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
-                        p.status === "paid" ? "bg-success/10 text-success"
-                        : p.status === "failed" ? "bg-destructive/10 text-destructive"
-                        : "bg-warning/10 text-warning"
-                      }`}>{p.status}</span>
+                      <div className="text-right">
+                        <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                          p.status === "paid" ? "bg-success/10 text-success"
+                          : p.status === "failed" ? "bg-destructive/10 text-destructive"
+                          : "bg-warning/10 text-warning"
+                        }`}>{p.status}</span>
+                        <div className="text-[11px] text-muted-foreground mt-1">
+                          {format(new Date(p.payout_date || p.created_at), "MMM d, yyyy")}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -178,6 +234,16 @@ export default function AffiliateDashboard() {
             </div>
           </div>
         </>
+      )}
+
+      {tab === "rewards" && overview && (
+        <div className="space-y-4">
+          <TierProgress overview={overview} tiers={(tiers as never[]) ?? []} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <MilestoneBadges overview={overview} />
+            <ReferralLeaderboard />
+          </div>
+        </div>
       )}
 
       {tab === "analytics" && <AffiliateAnalytics affiliateProfileId={profile.id} />}
