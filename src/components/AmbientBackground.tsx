@@ -14,7 +14,7 @@ export function AmbientBackground() {
           height: "42vw",
           top: "-12vw",
           left: "-8vw",
-          background: "hsl(var(--primary) / 0.32)",
+          background: "hsl(var(--primary) / 0.9)",
           animationDelay: "0s",
         }}
       />
@@ -25,7 +25,7 @@ export function AmbientBackground() {
           height: "38vw",
           bottom: "-14vw",
           right: "-10vw",
-          background: "hsl(265 90% 60% / 0.28)",
+          background: "hsl(var(--brand-secondary) / 0.9)",
           animationDelay: "-9s",
         }}
       />
@@ -36,7 +36,7 @@ export function AmbientBackground() {
           height: "30vw",
           top: "40%",
           left: "55%",
-          background: "hsl(210 100% 55% / 0.18)",
+          background: "hsl(var(--info) / 0.6)",
           animationDelay: "-17s",
         }}
       />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
@@ -289,6 +290,7 @@ export default function Landing() {
           </ul>
 
           <div className="hidden shrink-0 items-center gap-2 md:flex">
+            <ThemeToggle className="min-h-9 min-w-9" />
             {user ? (
               <Button size="sm" onClick={() => navigate("/")}>Open Gradr</Button>
             ) : (

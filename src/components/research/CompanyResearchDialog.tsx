@@ -44,8 +44,8 @@ interface Props {
 }
 
 const confidenceTone: Record<CompanyResearch["confidence"], string> = {
-  high: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  high: "bg-success/10 text-success border-success/30",
+  medium: "bg-warning/10 text-warning border-warning/30",
   low: "bg-muted text-muted-foreground border-border",
 };
 

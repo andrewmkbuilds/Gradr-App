@@ -3,6 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070d1a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)" />
+    <script>
+      // Paint the correct theme before first render so there is no flash.
+      (function () {
+        try {
+          var stored = localStorage.getItem("gradr-theme");
+          var dark =
+            stored === "dark" ||
+            ((stored === null || stored === "system") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://xaeyjrekewnwjujnrqgu.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://xaeyjrekewnwjujnrqgu.supabase.co" />
     <title>CareerFlow OS — AI Career Command Center</title>

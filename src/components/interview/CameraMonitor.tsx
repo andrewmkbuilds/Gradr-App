@@ -10,7 +10,7 @@ interface Props {
 
 const STATUS_COPY: Record<IntegritySnapshot["status"], { label: string; tone: string }> = {
   good: { label: "Great presence", tone: "text-primary" },
-  "looking-away": { label: "Look at the camera", tone: "text-amber-500" },
+  "looking-away": { label: "Look at the camera", tone: "text-warning" },
   "multiple-faces": { label: "Multiple faces detected", tone: "text-destructive" },
   absent: { label: "No face detected", tone: "text-muted-foreground" },
 };

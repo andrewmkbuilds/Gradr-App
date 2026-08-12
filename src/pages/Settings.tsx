@@ -1,5 +1,6 @@
+import { ThemeSegmentedControl } from "@/components/ThemeToggle";
 import { useState, useEffect } from "react";
-import { User, Save, Loader2, Bell, Send } from "lucide-react";
+import { Palette, User, Save, Loader2, Bell, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -134,6 +135,19 @@ export default function Settings() {
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Profile Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Set your career preferences to improve AI recommendations</p>
       </div>
+
+      <section aria-labelledby="appearance-heading" className="glass-card p-6 space-y-4 animate-slide-up">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Palette className="h-5 w-5 text-primary" aria-hidden="true" />
+          </div>
+          <div>
+            <h2 id="appearance-heading" className="text-h3 text-foreground">Appearance</h2>
+            <p className="text-xs text-muted-foreground">Choose your theme. System follows your device setting.</p>
+          </div>
+        </div>
+        <ThemeSegmentedControl />
+      </section>
 
       <div className="glass-card p-6 space-y-5 animate-slide-up">
         <div className="flex items-center gap-3 mb-2">
