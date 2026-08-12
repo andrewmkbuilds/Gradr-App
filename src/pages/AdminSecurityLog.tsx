@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, CreditCard, Gauge, Bot } from "lucide-react";
+import { Loader2, ShieldCheck, CreditCard, Gauge, Bot, Download, FileJson } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { downloadCsv, downloadJson } from "@/lib/exportFile";
+import { toast } from "sonner";
+
 
 interface SecurityEvent {
   id: string;
@@ -34,11 +38,29 @@ const DECISION_STYLE: Record<string, string> = {
   failed: "bg-destructive/10 text-destructive",
 };
 
+const EXPORT_COLUMNS: (keyof SecurityEvent)[] = [
+  "created_at",
+  "category",
+  "event",
+  "decision",
+  "user_id",
+  "feature",
+  "environment",
+  "reason",
+  "source",
+  "details",
+  "id",
+];
+
+const isoDay = (d: Date) => format(d, "yyyy-MM-dd");
+
 export default function AdminSecurityLog() {
   const { user, loading: authLoading } = useAuth();
   const [category, setCategory] = useState("all");
   const [decision, setDecision] = useState("all");
-  const [days, setDays] = useState(30);
+  const [from, setFrom] = useState(() => isoDay(new Date(Date.now() - 30 * 86_400_000)));
+  const [to, setTo] = useState(() => isoDay(new Date()));
+  const [exporting, setExporting] = useState<"csv" | "json" | null>(null);
 
   const { data: isAdmin, isLoading: roleLoading } = useQuery({
     queryKey: ["is-admin", user?.id],
@@ -49,24 +71,78 @@ export default function AdminSecurityLog() {
     },
   });
 
+  // Inclusive range: from 00:00 on `from` to 23:59:59.999 on `to`, local time.
+  const rangeBounds = () => ({
+    since: new Date(`${from}T00:00:00`).toISOString(),
+    until: new Date(`${to}T23:59:59.999`).toISOString(),
+  });
+
+  const buildQuery = (limit: number, offset = 0) => {
+    const { since, until } = rangeBounds();
+    let q = (supabase as any)
+      .from("security_audit_log")
+      .select("*")
+      .gte("created_at", since)
+      .lte("created_at", until)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (category !== "all") q = q.eq("category", category);
+    if (decision !== "all") q = q.eq("decision", decision);
+    return q;
+  };
+
   const { data: events, isLoading } = useQuery({
-    queryKey: ["security-audit", category, decision, days],
+    queryKey: ["security-audit", category, decision, from, to],
     enabled: Boolean(isAdmin),
     queryFn: async (): Promise<SecurityEvent[]> => {
-      const since = new Date(Date.now() - days * 86_400_000).toISOString();
-      let q = (supabase as any)
-        .from("security_audit_log")
-        .select("*")
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(300);
-      if (category !== "all") q = q.eq("category", category);
-      if (decision !== "all") q = q.eq("decision", decision);
-      const { data, error } = await q;
+      const { data, error } = await buildQuery(300);
       if (error) throw error;
       return (data ?? []) as SecurityEvent[];
     },
   });
+
+  /** Page through the full selected range rather than exporting only what's on screen. */
+  const fetchAll = async (): Promise<SecurityEvent[]> => {
+    const pageSize = 1000;
+    const all: SecurityEvent[] = [];
+    for (let offset = 0; offset < 50_000; offset += pageSize) {
+      const { data, error } = await buildQuery(pageSize, offset);
+      if (error) throw error;
+      const batch = (data ?? []) as SecurityEvent[];
+      all.push(...batch);
+      if (batch.length < pageSize) break;
+    }
+    return all;
+  };
+
+  const handleExport = async (fmt: "csv" | "json") => {
+    setExporting(fmt);
+    try {
+      const all = await fetchAll();
+      if (all.length === 0) {
+        toast.info("No events in that date range.");
+        return;
+      }
+      const name = `security-audit_${from}_to_${to}`;
+      if (fmt === "csv") {
+        downloadCsv(`${name}.csv`, all as unknown as Record<string, unknown>[], EXPORT_COLUMNS as string[]);
+      } else {
+        downloadJson(`${name}.json`, {
+          exported_at: new Date().toISOString(),
+          filters: { from, to, category, decision },
+          count: all.length,
+          events: all,
+        });
+      }
+      toast.success(`Exported ${all.length} event${all.length === 1 ? "" : "s"}.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Export failed");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+
 
   if (authLoading || roleLoading) {
     return (
@@ -117,12 +193,57 @@ export default function AdminSecurityLog() {
           <option value="processed">Processed</option>
           <option value="failed">Failed</option>
         </select>
-        <select value={days} onChange={(e) => setDays(Number(e.target.value))} className={selectCls} aria-label="Time range">
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-        </select>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          From
+          <input
+            type="date"
+            value={from}
+            max={to}
+            onChange={(e) => setFrom(e.target.value)}
+            className={selectCls}
+            aria-label="Start date"
+          />
+        </label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          To
+          <input
+            type="date"
+            value={to}
+            min={from}
+            max={isoDay(new Date())}
+            onChange={(e) => setTo(e.target.value)}
+            className={selectCls}
+            aria-label="End date"
+          />
+        </label>
+
+        <div className="flex gap-2 ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={exporting !== null}
+            onClick={() => handleExport("csv")}
+          >
+            {exporting === "csv" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            Export CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={exporting !== null}
+            onClick={() => handleExport("json")}
+          >
+            {exporting === "json" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileJson className="h-3.5 w-3.5" />}
+            Export JSON
+          </Button>
+        </div>
       </div>
+      <p className="text-xs text-muted-foreground -mt-3">
+        Exports include every event in the selected date range and filters — not just the 300 rows shown below.
+      </p>
+
 
       <div className="glass-card overflow-x-auto">
         <table className="w-full text-sm">
