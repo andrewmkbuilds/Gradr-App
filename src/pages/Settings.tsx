@@ -248,6 +248,8 @@ export default function Settings() {
       <IntegrationsPanel />
 
       <AccountDataPanel />
+
+      <LegalLinksPanel />
     </div>
   );
 }
