@@ -13,6 +13,26 @@ import {
   readNext,
 } from "@/lib/nextRedirect";
 import { toast } from "sonner";
+import { z } from "zod";
+
+/** Client-side field validation — mirrors the server rules, fails fast and inline. */
+const emailSchema = z
+  .string()
+  .trim()
+  .min(1, "Enter your email address.")
+  .email("Enter a valid email address.")
+  .max(255, "Email must be under 255 characters.");
+const passwordSchema = z
+  .string()
+  .min(6, "Password must be at least 6 characters.")
+  .max(72, "Password must be under 72 characters.");
+const nameSchema = z
+  .string()
+  .trim()
+  .min(1, "Enter your full name.")
+  .max(80, "Name must be under 80 characters.");
+
+type FieldErrors = { fullName?: string; email?: string; password?: string };
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -28,9 +48,11 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
 
   // Single source of truth for the post-auth destination (validated, loop-safe).
   const nextParam = readNext(location.search);
