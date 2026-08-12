@@ -13,15 +13,23 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
+import { SiteNav } from "@/components/landing/SiteNav";
+import { HeroFlow } from "@/components/landing/HeroFlow";
+import { Aurora, DotGrid, GridScan, Grainient, SoftAurora, Threads, ChapterRule } from "@/components/backgrounds";
 import {
   AnimatedHeadline,
   MotionPressable,
   Magnetic,
   CountUp,
   SpotlightCard,
-  DepthScene,
-  DepthLayer,
-  FloatingPanel,
+  MaskedHeading,
+  BlurText,
+  GradientText,
+  ShinyText,
+  MagicBento,
+  GlareCard,
+  HoverLift,
+  AnimatedList,
 } from "@/components/motion";
 import { ProductDemos } from "@/components/landing/ProductDemos";
 import { AiDemoSequence } from "@/components/landing/AiDemoSequence";
@@ -226,21 +234,7 @@ function Lede({ children }: { children: React.ReactNode }) {
 export default function Landing() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
 
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
