@@ -49,7 +49,7 @@ export function AccountDataPanel() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `careerflow-data-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `gradr-data-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success("Your data export has been downloaded.");

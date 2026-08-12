@@ -77,7 +77,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const siteOrigin: string = typeof body.siteUrl === "string" && body.siteUrl
       ? body.siteUrl
-      : "https://careerflowos.lovable.app/";
+      : "https://gradr.me/";
     const selected: string | undefined =
       typeof body.selectedSiteUrl === "string" ? body.selectedSiteUrl : undefined;
 
