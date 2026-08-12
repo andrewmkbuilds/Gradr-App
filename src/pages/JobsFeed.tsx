@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logPreferencesRead } from "@/lib/preferencesAudit";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -110,6 +111,7 @@ export default function JobsFeed() {
   const initialize = async () => {
     if (!user) return;
     const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
+    void logPreferencesRead("jobs_feed", Boolean(data));
     if (!data || !data.onboarded) {
       setShowOnboarding(true);
       return;

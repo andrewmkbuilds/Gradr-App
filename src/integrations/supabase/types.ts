@@ -2420,6 +2420,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_anonymous_session: { Args: never; Returns: boolean }
       log_admin_access: {
         Args: {
           _action: string
@@ -2432,6 +2433,10 @@ export type Database = {
       }
       log_admin_access_denied: {
         Args: { _reason?: string; _route: string }
+        Returns: undefined
+      }
+      log_user_preferences_read: {
+        Args: { _found?: boolean; _source?: string }
         Returns: undefined
       }
       lookup_affiliate_by_code: {

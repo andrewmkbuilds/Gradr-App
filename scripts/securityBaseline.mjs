@@ -40,7 +40,8 @@ const q = {
   rls: `select c.relname, c.relrowsecurity from pg_class c
         join pg_namespace n on n.oid = c.relnamespace
         where n.nspname = 'public' and c.relkind = 'r'`,
-  policies: `select tablename, policyname, cmd, array_to_string(roles, ',')
+  policies: `select tablename, policyname, cmd, array_to_string(roles, ','),
+             coalesce(qual, '') || ' ' || coalesce(with_check, '')
              from pg_policies where schemaname = 'public'`,
   // Read grants straight from pg_class.relacl: information_schema only shows
   // grants visible to the connecting role, which hides them from a read-only CI role.
@@ -88,10 +89,11 @@ export function runBaselineChecks(baseline = loadBaseline()) {
   const add = (name, ok, detail = "") => results.push({ name, ok, detail });
 
   const rls = new Map(q_rows(q.rls).map(([t, on]) => [t, on === "t"]));
-  const policies = q_rows(q.policies).map(([table, name, cmd, roles]) => ({
+  const policies = q_rows(q.policies).map(([table, name, cmd, roles, predicate]) => ({
     table,
     name,
     cmd,
+    predicate: predicate || "",
     roles: (roles || "").split(",").filter(Boolean),
   }));
   const grants = new Map(q_rows(q.grants).map(([t, acl]) => [t, tablePrivileges(acl || "")]));
@@ -196,6 +198,60 @@ export function runBaselineChecks(baseline = loadBaseline()) {
   const secdefNames = new Set(funcs.filter((f) => f.securityDefiner).map((f) => f.name));
   for (const name of new Set([...anonAllowlist, ...authenticatedAllowlist])) {
     add(`allowlist entry still exists: ${name}`, secdefNames.has(name), "stale baseline entry");
+  }
+
+  // 9. Regression guards for previously reported security findings. Each guard is
+  //    tied to a scanner `internal_id`; a failure here means the finding reappeared.
+  for (const guard of baseline.findingGuards ?? []) {
+    const label = `finding guard [${guard.internalId}]`;
+
+    if (guard.table) {
+      const tablePolicies = policies.filter((p) => p.table === guard.table);
+      for (const cmd of guard.requiredCmds ?? []) {
+        const matching = tablePolicies.filter((p) => p.cmd === cmd || p.cmd === "ALL");
+        add(
+          `${label}: ${guard.table} ${cmd} policy exists`,
+          matching.length > 0,
+          "policy missing — anonymous access may be unguarded",
+        );
+        for (const p of matching) {
+          const badRoles = p.roles.filter(
+            (r) => !(guard.policyRoles ?? ["authenticated"]).includes(r),
+          );
+          add(
+            `${label}: ${guard.table}.${p.name} role scope`,
+            badRoles.length === 0,
+            `unexpected roles [${badRoles}]`,
+          );
+          for (const needle of guard.predicateMustContain ?? []) {
+            add(
+              `${label}: ${guard.table}.${p.name} predicate contains "${needle}"`,
+              p.predicate.includes(needle),
+              `predicate: ${p.predicate || "(none)"}`,
+            );
+          }
+        }
+      }
+    }
+
+    if (guard.functionExecuteRole) {
+      const role = guard.functionExecuteRole;
+      const allow = role === "anon" ? anonAllowlist : authenticatedAllowlist;
+      const leaked = funcs.filter(
+        (f) => f.securityDefiner && f.grantees.includes(role) && !allow.includes(f.name),
+      );
+      const publicLeaks = funcs.filter((f) => f.securityDefiner && f.grantees.includes("PUBLIC"));
+      add(
+        `${label}: no un-allowlisted ${role} EXECUTE on SECURITY DEFINER functions`,
+        leaked.length === 0,
+        leaked.map((f) => f.name).join(", "),
+      );
+      add(
+        `${label}: no PUBLIC EXECUTE on SECURITY DEFINER functions`,
+        publicLeaks.length === 0,
+        publicLeaks.map((f) => f.name).join(", "),
+      );
+    }
   }
 
   return results;

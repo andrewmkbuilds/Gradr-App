@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { logPreferencesRead } from "@/lib/preferencesAudit";
 import {
   Target, TrendingUp, MapPin, DollarSign, Loader2, Search, BookOpen,
   ExternalLink, BadgeCheck, Info, Bookmark,
@@ -85,6 +86,9 @@ export default function JobMatchingEngine() {
         supabase.from("profiles").select("target_job_title").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_preferences").select("country, locations").eq("user_id", user.id).maybeSingle(),
       ]);
+
+      void logPreferencesRead("job_matching", Boolean(prefs));
+
 
       const resumeText = resumes?.[0]?.parsed_text || "";
       if (!resumeText) {

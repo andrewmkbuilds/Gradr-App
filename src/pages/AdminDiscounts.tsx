@@ -19,6 +19,9 @@ import {
 import { BadgePercent, Check, Loader2, Plus, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { STATUS_COPY, type VerificationStatus } from "@/config/eligibility";
+import type { TablesUpdate } from "@/integrations/supabase/types";
+
+type DiscountSettingsPatch = TablesUpdate<"discount_settings">;
 
 const money = (n: number | null) => (n == null ? "—" : `$${Number(n).toFixed(2)}`);
 const date = (iso: string | null) =>
@@ -128,7 +131,7 @@ export default function AdminDiscounts() {
   });
 
   const saveSettings = useMutation({
-    mutationFn: async (patch: Record<string, unknown>) => {
+    mutationFn: async (patch: DiscountSettingsPatch) => {
       const { error } = await supabase.from("discount_settings").update(patch).eq("id", 1);
       if (error) throw error;
     },
