@@ -748,16 +748,8 @@ export default function Landing() {
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {PLANS.map((p, i) => {
               const price = p[billing];
-              return (
-                <Reveal
-                  key={p.name}
-                  delay={i * 70}
-                  className={`flex flex-col rounded-2xl border p-6 ${
-                    p.highlight
-                      ? "border-primary/40 bg-primary/[0.05] shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
-                      : "border-border bg-card"
-                  }`}
-                >
+              const body = (
+                <div className="flex h-full flex-col p-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
                     {p.highlight && (
