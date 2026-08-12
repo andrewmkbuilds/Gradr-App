@@ -246,14 +246,15 @@ function CommissionsPanel() {
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
   const setStatus = async (id: string, status: string) => {
-    const patch: Record<string, unknown> = { status };
-    if (status === "approved") patch.approved_date = new Date().toISOString();
-    if (status === "paid") patch.paid_date = new Date().toISOString();
-    if (status === "reversed") patch.reversed_date = new Date().toISOString();
-    await supabase.from("affiliate_commissions").update(patch).eq("id", id);
+    const { error } = await supabase.rpc("admin_set_commission_status", {
+      _commission_ids: [id],
+      _status: status,
+    });
+    if (error) return toast.error(error.message);
     toast.success(`Marked ${status}`);
     qc.invalidateQueries({ queryKey: ["adminCommissions"] });
   };
+
 
   return (
     <div className="glass-card overflow-x-auto">
