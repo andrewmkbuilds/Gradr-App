@@ -62,8 +62,10 @@ function ProtectedRoutes() {
 
   if (!user) {
     if (location.pathname === "/") return <Landing />;
-    return <Navigate to={`/auth?next=${encodeURIComponent(location.pathname)}`} replace />;
+    // Preserve query + hash so deep links (e.g. /match?job=123) survive the bounce.
+    return <Navigate to={authPath(nextFromLocation(location))} replace />;
   }
+
 
   return (
     <DashboardLayout>
