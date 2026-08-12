@@ -4,8 +4,8 @@
  * All of them share the project easing/spring tokens in `@/lib/motion` and
  * degrade to plain static text under `prefers-reduced-motion`.
  */
-import { Children, useMemo, type ReactNode } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { Children, useMemo, useRef, type ReactNode } from "react";
+import { motion, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ease, spring } from "@/lib/motion";
 
 /* ------------------------------- split text ------------------------------- */
@@ -23,21 +23,23 @@ type SplitProps = {
 /** Word-by-word rise from behind a mask. The signature Gradr headline reveal. */
 export function MaskedHeading({ text, className = "", delay = 0, step = 0.055, as = "h2", immediate = false }: SplitProps) {
   const reduce = useReducedMotion();
+  const ref = useRef<HTMLElement | null>(null);
+  const inView = useInView(ref, { once: true, amount: 0.15 });
   const Tag = motion[as];
   const words = useMemo(() => text.split(" "), [text]);
 
   if (reduce) return <Tag className={className}>{text}</Tag>;
 
+  const show = immediate || inView;
+
   return (
-    <Tag className={className} aria-label={text}>
+    <Tag ref={ref as never} className={className} aria-label={text}>
       {words.map((word, i) => (
         <span key={`${word}-${i}`} className="inline-block overflow-hidden py-[0.06em] align-bottom" aria-hidden>
           <motion.span
             className="inline-block"
             initial={{ y: "110%" }}
-            {...(immediate
-              ? { animate: { y: "0%" } }
-              : { whileInView: { y: "0%" }, viewport: { once: true, margin: "0px 0px -12% 0px" } })}
+            animate={show ? { y: "0%" } : { y: "110%" }}
             transition={{ delay: delay + i * step, duration: 0.75, ease: ease.entrance }}
           >
             {word}
