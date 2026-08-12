@@ -1,5 +1,4 @@
 import { Outlet } from "@tanstack/react-router";
-import { BrandLogo } from "@/components/BrandLogo";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useLocation } from "@/lib/router-compat";
@@ -18,10 +17,10 @@ export function ProtectedRoutes() {
   const location = useLocation();
 
   if (loading) {
+    // The boot splash (rendered in __root) already covers this state with the
+    // same branded visual, so render nothing extra and avoid a double repaint.
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-5">
-        <BrandLogo size={64} className="animate-pulse" />
-        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background" aria-busy="true">
         <span className="sr-only">Loading Gradr</span>
       </div>
     );

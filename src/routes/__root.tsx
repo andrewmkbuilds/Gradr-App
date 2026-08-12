@@ -28,6 +28,7 @@ import { captureReferralFromUrl } from "@/lib/affiliateTracking";
 import { useLocation } from "@/lib/router-compat";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 import NotFound from "@/pages/NotFound";
+import { AppSplash } from "@/components/AppSplash";
 
 const SITE_TITLE = "Gradr | Your AI Career Command Center";
 const SITE_DESCRIPTION =
@@ -228,6 +229,7 @@ function RootComponent() {
                 <TelemetryRouteTracker />
                 <AuthProvider>
                   <RouteSeo />
+                  <AppSplash />
                   <Outlet />
                   <CookieConsent />
                 </AuthProvider>
