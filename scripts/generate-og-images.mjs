@@ -112,7 +112,10 @@ async function main() {
     logoDataUri = `data:image/png;base64,${readFileSync(logo).toString("base64")}`;
   }
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    channel: process.env.OG_CHROMIUM_CHANNEL || undefined,
+    executablePath: process.env.OG_CHROMIUM_PATH || undefined,
+  });
   const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
   for (const t of targets) {
     await page.setContent(cardHtml(t, logoDataUri), { waitUntil: "networkidle" });
