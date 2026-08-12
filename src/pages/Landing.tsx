@@ -277,7 +277,7 @@ export default function Landing() {
                 </BlurText>
 
                 <h1 className="display-xl text-balance text-foreground">
-                  <MaskedHeading as="span" text="Your career," className="block" />
+                  <MaskedHeading as="span" text="Your career," className="block" immediate />
                   <span className="block overflow-hidden">
                     <motion.span
                       className="inline-block"

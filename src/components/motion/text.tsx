@@ -16,10 +16,12 @@ type SplitProps = {
   delay?: number;
   step?: number;
   as?: "span" | "h1" | "h2" | "h3" | "p";
+  /** Play on mount instead of on scroll — for above-the-fold headlines. */
+  immediate?: boolean;
 };
 
 /** Word-by-word rise from behind a mask. The signature Gradr headline reveal. */
-export function MaskedHeading({ text, className = "", delay = 0, step = 0.055, as = "h2" }: SplitProps) {
+export function MaskedHeading({ text, className = "", delay = 0, step = 0.055, as = "h2", immediate = false }: SplitProps) {
   const reduce = useReducedMotion();
   const Tag = motion[as];
   const words = useMemo(() => text.split(" "), [text]);
@@ -33,8 +35,9 @@ export function MaskedHeading({ text, className = "", delay = 0, step = 0.055, a
           <motion.span
             className="inline-block"
             initial={{ y: "110%" }}
-            whileInView={{ y: "0%" }}
-            viewport={{ once: true, margin: "-12%" }}
+            {...(immediate
+              ? { animate: { y: "0%" } }
+              : { whileInView: { y: "0%" }, viewport: { once: true, margin: "-12%" } })}
             transition={{ delay: delay + i * step, duration: 0.75, ease: ease.entrance }}
           >
             {word}
