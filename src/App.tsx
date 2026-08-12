@@ -72,6 +72,16 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 const queryClient = new QueryClient();
 
+/** Lightweight placeholder shown while a route chunk streams in. */
+function RouteFallback() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center" role="status" aria-live="polite">
+      <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <span className="sr-only">Loading page</span>
+    </div>
+  );
+}
+
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -240,7 +250,9 @@ const App = () => (
           <TelemetryRouteTracker />
           <AuthProvider>
             <RouteSeo />
-            <AppRoutes />
+            <Suspense fallback={<RouteFallback />}>
+              <AppRoutes />
+            </Suspense>
             <CookieConsent />
           </AuthProvider>
         </BrowserRouter>
