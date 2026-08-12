@@ -180,9 +180,13 @@ async function main() {
   if (configured) {
     record("paddle checkout entrypoint enabled", true, "no misconfiguration banner on /pricing");
     // Paddle.js should be reachable and the CTA must be interactive.
-    const cta = page.getByRole("button", { name: /get |upgrade|choose|start/i }).first();
+    const cta = page.getByRole("button", { name: /subscribe to|buy pack|current plan/i }).first();
     const ctaOk = await cta.isEnabled().catch(() => false);
-    record("pricing CTA is interactive", ctaOk, ctaOk ? "checkout button enabled" : "no enabled CTA found");
+    record(
+      "pricing CTA is interactive",
+      ctaOk,
+      ctaOk ? "checkout button enabled" : "no enabled subscribe CTA — prices failed to resolve",
+    );
   } else {
     record(
       "paddle checkout entrypoint enabled",
