@@ -156,7 +156,7 @@ const FOOTER = [
     title: "Company",
     links: [
       ["About", "#product"],
-      ["Contact", "mailto:hello@gradr.app"],
+      ["Contact", "mailto:hello@gradr.me"],
       ["Careers", "#product"],
     ],
   },
@@ -164,9 +164,9 @@ const FOOTER = [
     title: "Resources",
     links: [
       ["Help Center", "#faq"],
-      ["Privacy", "#faq"],
-      ["Terms", "#faq"],
-      ["Security", "#faq"],
+      ["Privacy", "/privacy"],
+      ["Terms", "/terms"],
+      ["Refund Policy", "/refund-policy"],
     ],
   },
 ];
