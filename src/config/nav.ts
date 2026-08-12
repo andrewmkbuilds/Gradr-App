@@ -129,6 +129,7 @@ export const navGroups: NavGroup[] = [
       { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
       { title: "Paddle Customers", url: "/admin/paddle", icon: Wallet },
       { title: "Payments Status", url: "/admin/payments-status", icon: Activity },
+      { title: "API Health", url: "/admin/api-health", icon: Activity },
     ],
   },
 ];
