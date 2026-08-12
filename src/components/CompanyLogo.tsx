@@ -73,6 +73,8 @@ export function CompanyLogo({
           height={size}
           loading="lazy"
           decoding="async"
+          loading="lazy"
+          decoding="async"
           className="h-full w-full object-contain"
           onError={(e) => {
             // one silent retry (transient network / cold CDN edge)
