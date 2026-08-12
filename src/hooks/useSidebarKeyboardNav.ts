@@ -174,3 +174,84 @@ export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open:
 
 }
 
+
+/**
+ * Containment for the open mobile drawer: a hard focus trap plus scroll lock.
+ *
+ * Radix already does both, but the drawer renders a long, dynamically expanding
+ * nav tree — groups open and close while the drawer is up — and focus can land
+ * outside the trap when the element that had focus is unmounted mid-interaction.
+ * This layer re-cycles Tab/Shift+Tab across the *current* tabbable set on every
+ * keypress and pins the body so iOS Safari does not rubber-band the page behind
+ * the sheet.
+ */
+export function useMobileDrawerContainment(
+  containerRef: RefObject<HTMLElement>,
+  open: boolean,
+  enabled: boolean,
+) {
+  useEffect(() => {
+    if (!enabled || !open) return;
+
+    const body = document.body;
+    const scrollY = window.scrollY;
+    const prev = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+
+    // Pin rather than `overflow:hidden` alone — iOS ignores the latter.
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+
+    const TABBABLE =
+      'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+    const tabbables = () => {
+      const root = containerRef.current?.closest<HTMLElement>('[role="dialog"]') ?? containerRef.current;
+      if (!root) return [] as HTMLElement[];
+      return Array.from(root.querySelectorAll<HTMLElement>(TABBABLE)).filter(
+        (el) => el.offsetParent !== null || el === document.activeElement,
+      );
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const items = tabbables();
+      if (items.length === 0) return;
+
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      // Focus escaped the drawer (element unmounted) — pull it back in.
+      if (!active || !items.includes(active)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus({ preventScroll: true });
+        return;
+      }
+      if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus({ preventScroll: true });
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus({ preventScroll: true });
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown, true);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      body.style.position = prev.position;
+      body.style.top = prev.top;
+      body.style.width = prev.width;
+      body.style.overflow = prev.overflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, [containerRef, open, enabled]);
+}

@@ -1,7 +1,16 @@
 import { cn } from "@/lib/utils";
 
-/** Official Gradr mark. Lives in public/ so it also backs the favicon + PWA icons. */
+/**
+ * Official Gradr mark. Lives in public/ so the same files back the favicon,
+ * apple-touch-icon and PWA icons.
+ *
+ * The supplied logo is a dark navy mark, which disappears against the dark
+ * theme — so a second asset places the identical mark on the light brand plate.
+ * Both are rendered and swapped with CSS (`dark:`) rather than JS, so the right
+ * one paints on the very first frame with no flash.
+ */
 export const BRAND_LOGO_URL = "/gradr-logo.png";
+export const BRAND_LOGO_DARK_URL = "/gradr-logo-dark.png";
 
 type BrandLogoProps = {
   /** Rendered box size in px. The source is square, so width === height. */
@@ -9,26 +18,40 @@ type BrandLogoProps = {
   className?: string;
   /** Set false when the logo sits next to a visible "Gradr" wordmark. */
   decorative?: boolean;
+  /** Above-the-fold marks (header, auth hero) should not lazy-load. */
+  priority?: boolean;
 };
 
-/**
- * The single source of truth for the Gradr app mark.
- * Uses the official logo exactly as supplied — square, never stretched.
- */
-export function BrandLogo({ size = 32, className, decorative = true }: BrandLogoProps) {
+export function BrandLogo({ size = 32, className, decorative = true, priority = true }: BrandLogoProps) {
+  const shared = {
+    width: size,
+    height: size,
+    style: { width: size, height: size },
+    alt: decorative ? "" : "Gradr",
+    "aria-hidden": decorative || undefined,
+    draggable: false,
+    decoding: "async" as const,
+    loading: (priority ? "eager" : "lazy") as "eager" | "lazy",
+  };
+
   return (
-    <img
-      src={BRAND_LOGO_URL}
-      width={size}
-      height={size}
+    <span
+      className={cn("relative inline-flex shrink-0", className)}
       style={{ width: size, height: size }}
-      className={cn("shrink-0 select-none rounded-[22%] object-contain", className)}
-      alt={decorative ? "" : "Gradr"}
-      aria-hidden={decorative || undefined}
-      draggable={false}
-      decoding="async"
-    />
+      data-brand-logo=""
+    >
+      <img
+        {...shared}
+        src={BRAND_LOGO_URL}
+        className="block rounded-[22%] object-contain dark:hidden"
+      />
+      <img
+        {...shared}
+        src={BRAND_LOGO_DARK_URL}
+        alt=""
+        aria-hidden
+        className="hidden rounded-[22%] object-contain dark:block"
+      />
+    </span>
   );
 }
-
-

@@ -1,14 +1,27 @@
 {
+  "id": "/",
   "name": "Gradr — AI Career Command Center",
   "short_name": "Gradr",
   "description": "Resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "education", "business"],
   "background_color": "#070d1a",
   "theme_color": "#070d1a",
   "icons": [
+    { "src": "/favicon.png", "sizes": "64x64", "type": "image/png", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/gradr-logo-dark.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "AI Mock Interview", "url": "/interview" },
+    { "name": "Resume Engine", "url": "/resume" },
+    { "name": "Pipeline", "url": "/pipeline" }
   ]
 }

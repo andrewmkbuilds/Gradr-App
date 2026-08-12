@@ -167,6 +167,8 @@ const FOOTER = [
       ["Privacy", "/privacy"],
       ["Terms", "/terms"],
       ["Refund Policy", "/refund-policy"],
+      ["Cookie Policy", "/cookie-policy"],
+      ["DPA", "/dpa"],
     ],
   },
 ];

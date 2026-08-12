@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
+import { CookieConsent } from "@/components/CookieConsent";
 import { PublicShell } from "@/components/PublicShell";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { AnimatePresence } from "framer-motion";
@@ -42,6 +43,7 @@ import AdminAffiliates from "./pages/AdminAffiliates";
 import AdminBlogAnalytics from "./pages/AdminBlogAnalytics";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminSecurityLog from "@/pages/AdminSecurityLog";
+import AdminNavAnalytics from "@/pages/AdminNavAnalytics";
 import AdminPaddle from "@/pages/AdminPaddle";
 import AdminLegal from "@/pages/AdminLegal";
 import AdminDiscounts from "@/pages/AdminDiscounts";
@@ -50,6 +52,8 @@ import AdminPaymentsStatus from "@/pages/AdminPaymentsStatus";
 import Privacy from "./pages/legal/Privacy";
 import Terms from "./pages/legal/Terms";
 import RefundPolicy from "./pages/legal/RefundPolicy";
+import CookiePolicy from "./pages/legal/CookiePolicy";
+import Dpa from "./pages/legal/Dpa";
 
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 import CareerAdvice from "./pages/CareerAdvice";
@@ -112,6 +116,7 @@ function ProtectedRoutes() {
           <Route path="/admin/affiliates" element={<RequireAdmin><AnimatedPage><AdminAffiliates /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/blog-analytics" element={<RequireAdmin><AnimatedPage><AdminBlogAnalytics /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/security-log" element={<RequireAdmin><AnimatedPage><AdminSecurityLog /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/nav-analytics" element={<RequireAdmin><AnimatedPage><AdminNavAnalytics /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/audit-log" element={<RequireAdmin><AnimatedPage><AdminAuditLog /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/legal" element={<RequireAdmin><AnimatedPage><AdminLegal /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/discounts" element={<RequireAdmin><AnimatedPage><AdminDiscounts /></AnimatedPage></RequireAdmin>} />
@@ -183,6 +188,8 @@ function AppRoutes() {
         <Route path="/privacy" element={<AnimatedPage><Privacy /></AnimatedPage>} />
         <Route path="/terms" element={<AnimatedPage><Terms /></AnimatedPage>} />
         <Route path="/refund-policy" element={<AnimatedPage><RefundPolicy /></AnimatedPage>} />
+        <Route path="/cookie-policy" element={<AnimatedPage><CookiePolicy /></AnimatedPage>} />
+        <Route path="/dpa" element={<AnimatedPage><Dpa /></AnimatedPage>} />
         <Route path="/job-search" element={<AnimatedPage><JobSearchIndex /></AnimatedPage>} />
         <Route path="/job-search/:slug" element={<AnimatedPage><JobLanding /></AnimatedPage>} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
@@ -231,6 +238,7 @@ const App = () => (
           <AuthProvider>
             <RouteSeo />
             <AppRoutes />
+            <CookieConsent />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

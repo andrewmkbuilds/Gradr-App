@@ -7,7 +7,11 @@ import { useIsAdmin } from "@/hooks/useAffiliate";
 import { cn } from "@/lib/utils";
 import { dashboardItem, navGroups, type NavGroup, type NavItem } from "@/config/nav";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useSidebarKeyboardNav, useMobileDrawerFocus } from "@/hooks/useSidebarKeyboardNav";
+import {
+  useSidebarKeyboardNav,
+  useMobileDrawerFocus,
+  useMobileDrawerContainment,
+} from "@/hooks/useSidebarKeyboardNav";
 import { trackDashboardClick, trackNavGroupToggle, trackNavItemClick } from "@/lib/navAnalytics";
 import {
   Sidebar,
@@ -72,6 +76,7 @@ export function AppSidebar() {
     isGroupOpen: (id) => openGroups.includes(id),
   });
   useMobileDrawerFocus(navRef, openMobile, isMobile);
+  useMobileDrawerContainment(navRef, openMobile, isMobile);
 
   const surface = isMobile ? "mobile_drawer" : collapsed ? "sidebar_rail" : "sidebar";
   const closeMobile = () => isMobile && setOpenMobile(false);

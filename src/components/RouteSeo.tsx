@@ -2,6 +2,9 @@ import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
 import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
+import { legalJsonLd } from "@/lib/structuredData";
+import { POLICIES_UPDATED } from "@/content/legal";
+import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
 
 const SITE = "Gradr";
 const ORIGIN = "https://gradr.me";
@@ -43,6 +46,14 @@ const META: Record<string, { title: string; description: string }> = {
   "/refund-policy": {
     title: "Refund Policy",
     description: "Gradr's refund window, eligibility rules, and how to request a refund for a subscription or credit purchase billed through Paddle.",
+  },
+  "/cookie-policy": {
+    title: "Cookie Policy",
+    description: "Every cookie and storage key Gradr sets, grouped by category, plus how to accept, reject, or fine-tune analytics, attribution, and functional cookies.",
+  },
+  "/dpa": {
+    title: "Data Processing Addendum",
+    description: "Gradr's DPA for universities, bootcamps, and employers — processing roles, sub-processors, security measures, international transfers, and deletion terms.",
   },
   "/resume": {
     title: "Resume Engine",
@@ -142,6 +153,21 @@ export function RouteSeo() {
     };
   const fullTitle = pathname === "/" ? "Gradr | AI Career Command Center" : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
+  const legalUpdated: Record<string, string> = {
+    "/terms": POLICIES_UPDATED,
+    "/privacy": POLICIES_UPDATED,
+    "/refund-policy": POLICIES_UPDATED,
+    "/cookie-policy": COOKIE_POLICY_EFFECTIVE,
+    "/dpa": DPA_EFFECTIVE,
+  };
+  const legalLd = legalUpdated[pathname]
+    ? legalJsonLd({
+        path: pathname,
+        name: meta.title,
+        description: meta.description,
+        lastUpdated: legalUpdated[pathname],
+      })
+    : null;
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
   return (
@@ -163,6 +189,11 @@ export function RouteSeo() {
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={meta.description} />
       <meta name="twitter:image" content={OG_IMAGE} />
+      {legalLd?.map((node, i) => (
+        <script key={`legal-ld-${i}`} type="application/ld+json">
+          {JSON.stringify(node)}
+        </script>
+      ))}
     </Helmet>
   );
 }

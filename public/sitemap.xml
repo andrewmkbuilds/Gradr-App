@@ -91,6 +91,16 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://gradr.me/cookie-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://gradr.me/dpa</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://gradr.me/career-advice/cover-letter-guide</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
