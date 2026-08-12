@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Navigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
+import { Link } from "@/lib/router-compat";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

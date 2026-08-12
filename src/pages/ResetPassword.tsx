@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import { resolveNext } from "@/lib/nextRedirect";
 
 export default function ResetPassword() {

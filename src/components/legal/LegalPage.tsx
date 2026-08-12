@@ -1,6 +1,6 @@
 import { PublicShell } from "@/components/PublicShell";
 import { LEGAL_PAGES, POLICIES_UPDATED } from "@/content/legal";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 
 interface LegalPageProps {
   title: string;

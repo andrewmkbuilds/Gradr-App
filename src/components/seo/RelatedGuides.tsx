@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { GUIDES_BY_SLUG, guidePath } from "@/content/guides";
 import { trackEvent, withUtm } from "@/lib/analytics";

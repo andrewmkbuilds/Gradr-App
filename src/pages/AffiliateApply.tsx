@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { z } from "zod";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";

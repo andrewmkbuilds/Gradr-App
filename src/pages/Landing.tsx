@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import {
   ArrowRight, Check, FileText, Target, Mic, LineChart, Briefcase, Users,
   GraduationCap, Rocket, Compass, Award, Menu, X, Sparkles, ShieldCheck,
