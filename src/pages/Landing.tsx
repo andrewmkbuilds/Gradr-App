@@ -714,96 +714,59 @@ export default function Landing() {
           </div>
         </Section>
 
+        {/* --------------------------- proof / metrics -------------------------- */}
+        <Section id="proof" className="relative border-t border-border/60">
+          <SoftAurora />
+          <FadeContent className="max-w-3xl space-y-5">
+            <Eyebrow>Proof</Eyebrow>
+            <Heading>What changes when the whole search runs as one system.</Heading>
+            <Lede>
+              Pick the situation closest to yours. These are the movements Gradr users see across their first
+              six weeks — match quality, time reclaimed, and interview readiness measured the same way every session.
+            </Lede>
+          </FadeContent>
+          <FadeContent delay={120} className="mt-10 block">
+            <ProofMetrics />
+          </FadeContent>
+        </Section>
+
+        {/* ------------------------------ testimonials -------------------------- */}
+        <Section id="testimonials" className="border-t border-border/60 bg-card/30">
+          <FadeContent className="max-w-3xl space-y-5">
+            <Eyebrow>In their words</Eyebrow>
+            <Heading>People who stopped guessing.</Heading>
+            <Lede>
+              Every one of them started with the same thing you have: a resume, a deadline, and too many tabs.
+            </Lede>
+          </FadeContent>
+          <FadeContent delay={100} className="mt-10 block">
+            <TestimonialRail items={TESTIMONIALS} />
+          </FadeContent>
+        </Section>
+
         {/* --------------------------------- pricing ---------------------------- */}
-        <Section id="pricing" className="border-t border-border/60 bg-card/30">
-          <Reveal className="space-y-5">
+        <Section id="pricing" className="relative border-t border-border/60">
+          <GridScan intensity={0.7} />
+          <FadeContent className="space-y-5">
             <Eyebrow>Pricing</Eyebrow>
             <Heading>Start free. Upgrade when it's working.</Heading>
             <Lede>No trials that expire without warning, no countdown timers. Cancel any time.</Lede>
-          </Reveal>
+          </FadeContent>
 
-          <Reveal delay={60} className="mt-8">
-            <div
-              role="group"
-              aria-label="Billing interval"
-              className="inline-flex rounded-xl border border-border bg-secondary/40 p-1"
-            >
-              {(["monthly", "annual"] as const).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  aria-pressed={billing === k}
-                  onClick={() => setBilling(k)}
-                  className={`min-h-10 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
-                    billing === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {k === "monthly" ? "Monthly" : "Annual"}
-                  {k === "annual" && <span className="ml-2 text-[11px] opacity-80">save up to 26%</span>}
-                </button>
-              ))}
-            </div>
-          </Reveal>
-
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            {PLANS.map((p, i) => {
-              const price = p[billing];
-              const body = (
-                <div className="flex h-full flex-col p-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
-                    {p.highlight && (
-                      <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                        Most complete
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{p.tagline}</p>
-
-                  <div className="mt-6 flex items-baseline gap-2">
-                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{price.price}</span>
-                    <span className="text-sm text-muted-foreground">{price.note}</span>
-                  </div>
-
-                  <ul className="mt-6 flex-1 space-y-2.5">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex gap-2.5 text-sm text-muted-foreground">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    className="mt-6 h-11 w-full"
-                    variant={p.highlight ? "default" : "outline"}
-                    onClick={() => (p.name === "Free" ? start() : navigate(user ? "/pricing" : "/auth"))}
-                  >
-                    {p.cta}
-                  </Button>
-                </div>
-              );
-              return (
-                <Reveal key={p.name} delay={i * 70} className="h-full">
-                  {p.highlight ? (
-                    <GlowFrame className="h-full" radius={16}>
-                      {body}
-                    </GlowFrame>
-                  ) : (
-                    <Glare
-                      className="h-full"
-                      radius="16px"
-                      background="hsl(var(--card))"
-                      borderColor="hsl(var(--border))"
-                    >
-                      {body}
-                    </Glare>
-                  )}
-                </Reveal>
-              );
-            })}
-          </div>
+          <FadeContent delay={80} className="mt-10 block">
+            <PricingSection
+              plans={PLANS}
+              onSelect={(plan) => {
+                if (plan.name === "Free") {
+                  start();
+                  return;
+                }
+                navigate(user ? "/pricing" : "/auth?next=/pricing");
+              }}
+            />
+          </FadeContent>
         </Section>
+
 
         {/* ----------------------------------- faq ------------------------------ */}
         <Section id="faq" className="border-t border-border/60">
