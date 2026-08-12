@@ -13,7 +13,8 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
-import { AnimatedHeadline, TiltCard, MotionPressable } from "@/components/motion";
+import { AnimatedHeadline, TiltCard, MotionPressable, Magnetic, CountUp, SpotlightCard } from "@/components/motion";
+import { ProductDemos } from "@/components/landing/ProductDemos";
 import { AiDemoSequence } from "@/components/landing/AiDemoSequence";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
@@ -201,7 +202,7 @@ function Heading({
   children, className = "",
 }: { children: React.ReactNode; className?: string }) {
   return (
-    <h2 className={`text-balance text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-[2.75rem] ${className}`}>
+    <h2 className={`font-display text-balance text-3xl font-bold leading-[1.06] tracking-[-0.03em] sm:text-4xl lg:text-[2.9rem] ${className}`}>
       {children}
     </h2>
   );
@@ -333,62 +334,83 @@ export default function Landing() {
 
       {/* -------------------------------- hero -------------------------------- */}
       <main id="hero">
-        <div className="relative pt-28 sm:pt-32">
+        <div className="grain relative overflow-hidden pt-28 sm:pt-32">
+          {/* Atmospheric backdrop: dot field + two soft light sources. */}
           <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
-            <div className="absolute inset-0 grid-lines opacity-40" />
-            <div className="absolute left-1/2 top-[-12rem] h-[28rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
+            <div className="absolute inset-0 dot-field opacity-70" />
+            <motion.div
+              className="absolute left-1/2 top-[-16rem] h-[34rem] w-[54rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[140px]"
+              animate={reduceMotion ? undefined : { opacity: [0.55, 0.85, 0.55], scale: [1, 1.06, 1] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute right-[-10rem] top-[6rem] h-[26rem] w-[26rem] rounded-full bg-brand-secondary/10 blur-[130px]"
+              animate={reduceMotion ? undefined : { opacity: [0.4, 0.7, 0.4] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+            />
           </div>
 
           <Section className="!pb-0 !pt-0">
-            <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_1.1fr] lg:gap-14">
-              <Reveal className="space-y-6">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.06fr_1fr] lg:gap-14">
+              <Reveal className="space-y-7">
                 <Eyebrow>AI career operating system</Eyebrow>
-                <AnimatedHeadline
-                  text="From resume to offer."
-                  className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
-                />
-                <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                  Gradr is your AI career operating system. Build a stronger resume, find better-fit jobs, prepare for
-                  interviews, and make smarter career moves — in one connected workspace.
-                </p>
 
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <MotionPressable className="sm:inline-flex">
-                    <Button size="lg" className="h-12 w-full px-6 text-base sm:w-auto" onClick={start}>
-                      Get started free
-                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-                    </Button>
-                  </MotionPressable>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-12 px-6 text-base"
-                    onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+                <div className="space-y-1">
+                  <motion.p
+                    initial={{ opacity: 0, letterSpacing: "0.6em" }}
+                    animate={{ opacity: 1, letterSpacing: "0.34em" }}
+                    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                    className="font-display text-sm font-semibold uppercase text-primary"
                   >
-                    See how Gradr works
-                  </Button>
+                    Gradr
+                  </motion.p>
+                  <AnimatedHeadline
+                    text="Your AI career command center."
+                    className="display-xl text-foreground"
+                  />
                 </div>
 
-                <p className="text-sm text-muted-foreground">
-                  One workspace for the entire job search. No card required to start.
+                <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  One workspace that reads your resume like an ATS, scores every role against your real profile,
+                  runs live mock interviews, and maps the moves that get you promoted.
                 </p>
 
-                <ul className="flex flex-wrap gap-x-5 gap-y-2 pt-2">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <Magnetic>
+                    <MotionPressable>
+                      <Button size="lg" className="h-12 w-full px-7 text-base sm:w-auto" onClick={start}>
+                        Get started free
+                        <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                      </Button>
+                    </MotionPressable>
+                  </Magnetic>
+                  <Magnetic strength={0.18}>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="h-12 px-6 text-base"
+                      onClick={() => document.getElementById("demos")?.scrollIntoView({ behavior: "smooth" })}
+                    >
+                      See it working
+                    </Button>
+                  </Magnetic>
+                </div>
+
+                {/* Live proof strip — numbers animate on entry. */}
+                <dl className="grid max-w-lg grid-cols-3 gap-4 border-t border-border/60 pt-6">
                   {[
-                    [FileText, "Resume + ATS"],
-                    [Target, "Job matching"],
-                    [Mic, "AI interviews"],
-                    [LineChart, "Career analytics"],
-                  ].map(([Icon, label]) => {
-                    const I = Icon as typeof FileText;
-                    return (
-                      <li key={label as string} className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <I className="h-3.5 w-3.5 text-primary" aria-hidden />
-                        {label as string}
-                      </li>
-                    );
-                  })}
-                </ul>
+                    { v: 86, suffix: "", label: "Avg. ATS score after rewrite" },
+                    { v: 4.2, suffix: "x", label: "More interview invites", decimals: 1 },
+                    { v: 12, suffix: "min", label: "To a full application pack" },
+                  ].map((s2) => (
+                    <div key={s2.label}>
+                      <dd className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+                        <CountUp value={s2.v} decimals={s2.decimals ?? 0} suffix={s2.suffix} />
+                      </dd>
+                      <dt className="mt-1 text-[11px] leading-snug text-muted-foreground">{s2.label}</dt>
+                    </div>
+                  ))}
+                </dl>
               </Reveal>
 
               <Reveal delay={120} className="lg:pl-4">
@@ -454,16 +476,34 @@ export default function Landing() {
 
           <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
             {SYSTEM.map((s, i) => (
-              <Reveal as="li" key={s.n} delay={i * 50} className="group bg-card p-5 transition-colors hover:bg-secondary/40">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold tabular-nums tracking-widest text-primary">{s.n}</span>
-                  <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
-                </div>
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{s.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.copy}</p>
+              <Reveal as="li" key={s.n} delay={i * 50} className="bg-card">
+                <SpotlightCard className="group h-full p-5 transition-colors hover:bg-secondary/30">
+                  <div className="flex items-center justify-between">
+                    <span className="numeric text-xs font-semibold tracking-widest text-primary">{s.n}</span>
+                    <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
+                  </div>
+                  <h3 className="mt-4 font-display text-sm font-semibold text-foreground">{s.title}</h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.copy}</p>
+                </SpotlightCard>
               </Reveal>
             ))}
           </ol>
+        </Section>
+
+        {/* ------------------------- interactive product demos ------------------- */}
+        <Section id="demos" className="grain relative border-t border-border/60">
+          <div className="pointer-events-none absolute inset-0 -z-10 atmos opacity-60" aria-hidden />
+          <Reveal className="max-w-3xl space-y-5">
+            <Eyebrow>See it working</Eyebrow>
+            <Heading className="display-lg">Not screenshots. The product, running.</Heading>
+            <Lede>
+              Four live surfaces from inside Gradr. Switch between them and watch the same profile move through
+              analysis, matching, interview practice, and career planning.
+            </Lede>
+          </Reveal>
+          <div className="mt-12">
+            <ProductDemos />
+          </div>
         </Section>
 
         {/* --------------------------- resume intelligence ---------------------- */}
