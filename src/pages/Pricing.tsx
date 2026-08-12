@@ -10,6 +10,8 @@ import { CREDIT_PACKS, FREE_TIER, TIERS, type Tier } from "@/config/tiers";
 import { previewPrices, type PreviewedPrice } from "@/lib/paddle";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
 
 const TIER_ICONS: Record<string, typeof Sparkles> = {
   Starter: Zap,
@@ -109,6 +111,8 @@ export default function Pricing() {
           ))}
         </div>
       </div>
+
+      <PaymentsConfigBanner context="pricing" className="mx-auto max-w-3xl" />
 
       {pricesError && (
         <p className="text-center text-sm text-destructive">
@@ -259,9 +263,23 @@ export default function Pricing() {
         </div>
       )}
 
-      <p className="text-center text-xs text-muted-foreground">
-        Prices shown in your local currency, billed securely by Paddle. Cancel anytime from your billing page.
-      </p>
+      <div className="space-y-2 text-center text-xs text-muted-foreground">
+        <p>
+          Prices shown in your local currency. Orders are processed by Paddle.com, our Merchant of
+          Record. Cancel anytime from your billing page.
+        </p>
+        <p className="flex flex-wrap items-center justify-center gap-3">
+          <Link to="/terms" className="underline hover:text-foreground">
+            Terms &amp; Conditions
+          </Link>
+          <Link to="/refund-policy" className="underline hover:text-foreground">
+            Refund Policy
+          </Link>
+          <Link to="/privacy" className="underline hover:text-foreground">
+            Privacy Notice
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

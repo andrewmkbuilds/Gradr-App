@@ -42,6 +42,10 @@ import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminSecurityLog from "@/pages/AdminSecurityLog";
 import AdminPaddle from "@/pages/AdminPaddle";
 import AdminSearchConsole from "./pages/AdminSearchConsole";
+import AdminPaymentsStatus from "@/pages/AdminPaymentsStatus";
+import Privacy from "./pages/legal/Privacy";
+import Terms from "./pages/legal/Terms";
+import RefundPolicy from "./pages/legal/RefundPolicy";
 
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 import CareerAdvice from "./pages/CareerAdvice";
@@ -94,6 +98,7 @@ function ProtectedRoutes() {
          <Route path="/admin/security-log" element={<AnimatedPage><AdminSecurityLog /></AnimatedPage>} />
          <Route path="/admin/audit-log" element={<AnimatedPage><AdminAuditLog /></AnimatedPage>} />
          <Route path="/admin/paddle" element={<AnimatedPage><AdminPaddle /></AnimatedPage>} />
+         <Route path="/admin/payments-status" element={<AnimatedPage><AdminPaymentsStatus /></AnimatedPage>} />
 
          <Route path="/admin/search-console" element={<AnimatedPage><AdminSearchConsole /></AnimatedPage>} />
 
@@ -136,6 +141,9 @@ function AppRoutes() {
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
         <Route path="/career-advice" element={<AnimatedPage><CareerAdvice /></AnimatedPage>} />
         <Route path="/career-advice/:slug" element={<AnimatedPage><GuideArticle /></AnimatedPage>} />
+        <Route path="/privacy" element={<AnimatedPage><Privacy /></AnimatedPage>} />
+        <Route path="/terms" element={<AnimatedPage><Terms /></AnimatedPage>} />
+        <Route path="/refund-policy" element={<AnimatedPage><RefundPolicy /></AnimatedPage>} />
         <Route path="/job-search" element={<AnimatedPage><JobSearchIndex /></AnimatedPage>} />
         <Route path="/job-search/:slug" element={<AnimatedPage><JobLanding /></AnimatedPage>} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
