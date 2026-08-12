@@ -44,8 +44,16 @@ function applyTheme(resolved: ResolvedTheme, animate: boolean) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemePreference>(readStoredTheme);
-  const [systemPref, setSystemPref] = useState<ResolvedTheme>(systemTheme);
+  // Hydration safety: the first client render must match the server output, so
+  // it always starts from the neutral defaults. The stored preference and the
+  // OS setting are adopted in an effect, right after hydration commits.
+  const [theme, setThemeState] = useState<ThemePreference>("system");
+  const [systemPref, setSystemPref] = useState<ResolvedTheme>("dark");
+
+  useEffect(() => {
+    setThemeState(readStoredTheme());
+    setSystemPref(systemTheme());
+  }, []);
 
   // Track the OS preference so "system" stays live without a refresh.
   useEffect(() => {
