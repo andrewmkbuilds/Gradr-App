@@ -54,10 +54,53 @@ export function hasGlobalPrivacyControl(): boolean {
   return (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true;
 }
 
+function safeLocalGet(): string | null {
+  try {
+    return window.localStorage.getItem(CONSENT_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function safeLocalSet(value: string): boolean {
+  try {
+    window.localStorage.setItem(CONSENT_STORAGE_KEY, value);
+    return window.localStorage.getItem(CONSENT_STORAGE_KEY) === value;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Cookie fallback for environments where localStorage is unavailable or
+ * partitioned (embedded previews, Safari ITP, private windows). The consent
+ * record itself is strictly necessary, so storing it needs no consent.
+ */
+function cookieGet(): string | null {
+  try {
+    const match = document.cookie.match(
+      new RegExp(`(?:^|; )${CONSENT_STORAGE_KEY}=([^;]*)`),
+    );
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function cookieSet(value: string): void {
+  try {
+    const maxAge = Math.floor(CONSENT_MAX_AGE_MS / 1000);
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${CONSENT_STORAGE_KEY}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
+  } catch {
+    /* nothing else to fall back to */
+  }
+}
+
 export function readConsent(): StoredConsent | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(CONSENT_STORAGE_KEY);
+    const raw = safeLocalGet() ?? cookieGet();
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredConsent;
     if (parsed?.version !== CONSENT_VERSION || !parsed.choices) return null;
@@ -78,11 +121,11 @@ export function writeConsent(choices: ConsentChoices): StoredConsent {
     decidedAt: new Date().toISOString(),
     choices,
   };
-  try {
-    window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(record));
-  } catch {
-    /* private mode — the banner simply reappears next visit */
-  }
+  const serialised = JSON.stringify(record);
+  // Always mirror to a first-party cookie so the choice survives even when
+  // localStorage writes are blocked or silently dropped.
+  if (!safeLocalSet(serialised)) cookieSet(serialised);
+  else cookieSet(serialised);
   window.dispatchEvent(new CustomEvent<StoredConsent>("gradr:consent", { detail: record }));
   return record;
 }
