@@ -1,4 +1,4 @@
-import { Zap, Sparkles, Target, Brain, Rocket } from "lucide-react";
+import { Sparkles, Target, Brain, Rocket } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { motion } from "framer-motion";
 import { type ReactNode } from "react";
@@ -92,7 +92,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
-              className="kinetic-text block"
+              className="kinetic-text block pb-1"
             >
               command center.
             </motion.span>
