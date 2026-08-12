@@ -65,6 +65,21 @@ function aclGrantees(acl) {
     .map((e) => e.split("=")[0] || "PUBLIC");
 }
 
+const PRIV_LETTERS = { r: "SELECT", a: "INSERT", w: "UPDATE", d: "DELETE" };
+
+/** Parse a relacl string into `{ role: ["SELECT", ...] }` for anon/authenticated/PUBLIC. */
+function tablePrivileges(acl) {
+  const out = {};
+  for (const entry of acl.split(",").filter(Boolean)) {
+    const [rawRole, rest] = entry.split("=");
+    const role = rawRole || "PUBLIC";
+    if (!["anon", "authenticated", "PUBLIC"].includes(role)) continue;
+    const letters = (rest ?? "").split("/")[0];
+    out[role] = [...new Set([...letters].map((l) => PRIV_LETTERS[l]).filter(Boolean))];
+  }
+  return out;
+}
+
 /**
  * @returns {{name: string, ok: boolean, detail: string}[]}
  */
