@@ -183,7 +183,7 @@ export default function Pricing() {
                     <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon className="h-4 w-4 text-primary" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground">{tier.name}</h3>
+                    <h2 className="text-lg font-semibold text-foreground">{tier.name}</h2>
                   </div>
 
                   <div className="mb-1">
@@ -232,7 +232,7 @@ export default function Pricing() {
                 <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
-                <h3 className="text-sm font-semibold text-foreground">{pack.label}</h3>
+                <h2 className="text-sm font-semibold text-foreground">{pack.label}</h2>
                 <p className="text-xs text-muted-foreground mt-1 mb-4 flex-1">{pack.blurb}</p>
                 <div className="text-2xl font-bold text-foreground mb-4">{pack.price}</div>
                 <Button

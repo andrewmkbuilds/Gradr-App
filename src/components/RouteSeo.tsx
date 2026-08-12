@@ -3,11 +3,16 @@ import { Helmet } from "react-helmet-async";
 
 const SITE = "CareerFlow OS";
 const ORIGIN = "https://careerflowos.lovable.app";
+const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
 const META: Record<string, { title: string; description: string }> = {
   "/": {
     title: "Dashboard",
     description: "Your CareerFlow OS dashboard — pipeline overview, AI scores, reminders, and quick actions.",
+  },
+  "/landing": {
+    title: "From resume to offer",
+    description: "CareerFlow OS brings resume intelligence, job matching, applications, and AI mock interviews into one workspace.",
   },
   "/auth": {
     title: "Sign in",
@@ -45,6 +50,10 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Interview Engine",
     description: "Practice realtime AI mock interviews with instant feedback and coaching.",
   },
+  "/interview/history": {
+    title: "Interview History",
+    description: "Review past AI mock interviews, track score trends, and revisit every scorecard and transcript.",
+  },
   "/growth": {
     title: "Growth Engine",
     description: "AI skill gap analysis and a personalized roadmap to your next role.",
@@ -53,9 +62,29 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Pricing",
     description: "Simple plans for every job seeker — start free, upgrade when you need more AI power.",
   },
+  "/billing": {
+    title: "Billing",
+    description: "Manage your CareerFlow OS plan, invoices, credit packs, and payment method in one place.",
+  },
   "/settings": {
     title: "Settings",
     description: "Manage your CareerFlow OS account, preferences, and digest settings.",
+  },
+  "/affiliate": {
+    title: "Affiliate Program",
+    description: "Earn recurring commission by referring job seekers to CareerFlow OS — transparent rates and monthly payouts.",
+  },
+  "/affiliate/apply": {
+    title: "Apply to the Affiliate Program",
+    description: "Tell us about your audience and apply to become a CareerFlow OS affiliate partner.",
+  },
+  "/affiliate/dashboard": {
+    title: "Affiliate Dashboard",
+    description: "Track your referral clicks, conversions, commissions, and payouts as a CareerFlow OS affiliate.",
+  },
+  "/affiliate/resources": {
+    title: "Affiliate Resources",
+    description: "Campaign link builder, brand assets, and copy templates for CareerFlow OS affiliate partners.",
   },
   "/blog/ai-resume-optimization": {
     title: "AI Resume Builder & ATS Optimization Guide",
@@ -84,8 +113,12 @@ export function RouteSeo() {
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={SITE} />
+      <meta property="og:image" content={OG_IMAGE} />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={meta.description} />
+      <meta name="twitter:image" content={OG_IMAGE} />
     </Helmet>
   );
 }
+
