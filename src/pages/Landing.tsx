@@ -475,15 +475,18 @@ export default function Landing() {
             </BlurText>
           </div>
 
-          <MagicBento
-            className="mt-12 lg:grid-cols-4"
-            items={SYSTEM.map((m) => ({
+          <BentoGrid
+            className="mt-12"
+            items={SYSTEM.map((m, i) => ({
               title: m.title,
               copy: m.copy,
+              // First and sixth tiles carry the story, so they get the weight.
+              span: i === 0 ? ("wide" as const) : i === 5 ? ("wide" as const) : ("default" as const),
               icon: <m.icon className="h-5 w-5" aria-hidden />,
               footer: <span className="numeric text-[11px] font-semibold tracking-widest text-primary">{m.n}</span>,
             }))}
           />
+
         </Section>
 
         {/* ------------------------- interactive product demos ------------------- */}
