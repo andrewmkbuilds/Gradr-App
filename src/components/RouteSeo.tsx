@@ -161,16 +161,54 @@ function resolveOgImage(pathname: string): string {
   return OG_IMAGE;
 }
 
+/**
+ * Routes that must never enter a search index: authenticated product surfaces,
+ * account/credential flows, admin tooling and affiliate back-office. They hold
+ * no public content and only dilute how search engines understand Gradr.
+ */
+const NOINDEX_EXACT = new Set([
+  "/auth",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/welcome",
+  "/settings",
+  "/billing",
+  "/resume",
+  "/jobs",
+  "/match",
+  "/pipeline",
+  "/apply",
+  "/interview",
+  "/interview/history",
+  "/growth",
+  "/affiliate/apply",
+  "/affiliate/dashboard",
+  "/affiliate/resources",
+]);
+
+const NOINDEX_PREFIXES = ["/admin", "/interview/", "/oauth", "/mcp"];
+
+function isNoIndex(pathname: string): boolean {
+  if (NOINDEX_EXACT.has(pathname)) return true;
+  return NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export function RouteSeo() {
   const { pathname } = useLocation();
   const meta = META[pathname] ??
     resolveDynamicMeta(pathname) ?? {
-      title: "AI Career Command Center",
-      description: "Gradr is the AI career command center for job seekers — resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
+      title: "Your AI Career Command Center",
+      description:
+        "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
     };
-  const fullTitle = pathname === "/" ? "Gradr | AI Career Command Center" : `${meta.title} — ${SITE}`;
+  const fullTitle =
+    pathname === "/" || pathname === "/landing"
+      ? "Gradr | Your AI Career Command Center"
+      : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
+  const noindex = isNoIndex(pathname);
 
   const legalUpdated: Record<string, string> = {
     "/terms": POLICIES_UPDATED,
@@ -194,9 +232,18 @@ export function RouteSeo() {
       <html lang="en" />
       <title>{fullTitle}</title>
       <meta name="description" content={meta.description} />
+      <meta
+        name="robots"
+        content={
+          noindex
+            ? "noindex, nofollow"
+            : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        }
+      />
       <link rel="canonical" href={url} />
       <link rel="alternate" hrefLang="en" href={url} />
       <link rel="alternate" hrefLang="x-default" href={url} />
+
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={meta.description} />
       <meta property="og:url" content={url} />
