@@ -123,7 +123,48 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <!--
+      Static, crawlable description of Gradr. React (createRoot) replaces the
+      contents of #root on mount, so this is only ever visible for the first
+      paint — but it guarantees that crawlers and AI answer engines which do
+      not execute JavaScript still read what Gradr actually is, instead of an
+      empty document they have to guess about.
+    -->
+    <div id="root">
+      <main id="seo-shell" style="max-width: 46rem; margin: 0 auto; padding: 4rem 1.5rem; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; line-height: 1.6;">
+        <h1>Gradr — Your AI Career Command Center</h1>
+        <p>
+          Gradr is your AI career command center for resume analysis, job matching, applications,
+          and interview coaching. It is a career platform for job seekers, students, graduates and
+          career changers — not a grading, marking or test-score tool.
+        </p>
+        <h2>What Gradr does</h2>
+        <ul>
+          <li>
+            <strong>Resume analysis and ATS optimization</strong> — upload a resume and get an ATS
+            compatibility score, keyword gaps, and AI rewrite suggestions.
+          </li>
+          <li>
+            <strong>AI job matching</strong> — score your profile against live job openings and see
+            exactly how to close the gap for each role.
+          </li>
+          <li>
+            <strong>Job applications</strong> — generate tailored cover letters and recruiter
+            outreach, then track every application through an offer pipeline.
+          </li>
+          <li>
+            <strong>AI mock interviews and interview coaching</strong> — practise realtime voice
+            interviews and get a scored debrief with concrete coaching feedback.
+          </li>
+          <li>
+            <strong>Career development</strong> — skill gap analysis and a personalised roadmap to
+            your next role.
+          </li>
+        </ul>
+        <p><a href="/pricing">Pricing</a> · <a href="/career-advice">Career advice guides</a> · <a href="/job-search">Job search by role</a> · <a href="/auth">Sign in</a></p>
+        <p>Loading the Gradr app…</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
