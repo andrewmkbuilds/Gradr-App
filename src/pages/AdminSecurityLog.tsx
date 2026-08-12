@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, CreditCard, Gauge, Bot } from "lucide-react";
+import { Loader2, ShieldCheck, CreditCard, Gauge, Bot, Download, FileJson } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { downloadCsv, downloadJson } from "@/lib/exportFile";
+import { toast } from "sonner";
+
 
 interface SecurityEvent {
   id: string;
