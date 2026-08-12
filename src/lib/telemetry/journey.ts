@@ -72,8 +72,17 @@ function sanitize(props: JourneyProps): Record<string, unknown> {
 }
 
 export function initTelemetry() {
-  initSentry();
-  initPostHog();
+  // Telemetry must never be able to block app bootstrap.
+  try {
+    initSentry();
+  } catch (err) {
+    console.warn("Sentry init failed", err);
+  }
+  try {
+    initPostHog();
+  } catch (err) {
+    console.warn("PostHog init failed", err);
+  }
 }
 
 export function telemetryStatus() {
