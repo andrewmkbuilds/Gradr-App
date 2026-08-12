@@ -13,6 +13,9 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
+import { AnimatedHeadline, TiltCard, MotionPressable } from "@/components/motion";
+import { AiDemoSequence } from "@/components/landing/AiDemoSequence";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
   HeroWorkspace, ResumeVisual, MatchVisual, ApplicationVisual,
   InterviewVisual, AssistantVisual, AnalyticsVisual,
@@ -229,6 +232,11 @@ export default function Landing() {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  const reduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 600], [0, -48]);
+  const heroParallax = !reduceMotion;
+
   const start = () => navigate(user ? "/" : "/auth");
   const login = () => navigate(user ? "/" : "/auth");
 
@@ -335,19 +343,22 @@ export default function Landing() {
             <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_1.1fr] lg:gap-14">
               <Reveal className="space-y-6">
                 <Eyebrow>AI career operating system</Eyebrow>
-                <h1 className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-                  From resume<br className="hidden sm:block" /> to offer.
-                </h1>
+                <AnimatedHeadline
+                  text="From resume to offer."
+                  className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
+                />
                 <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                   Gradr is your AI career operating system. Build a stronger resume, find better-fit jobs, prepare for
                   interviews, and make smarter career moves — in one connected workspace.
                 </p>
 
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button size="lg" className="h-12 px-6 text-base" onClick={start}>
-                    Get started free
-                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-                  </Button>
+                  <MotionPressable className="sm:inline-flex">
+                    <Button size="lg" className="h-12 w-full px-6 text-base sm:w-auto" onClick={start}>
+                      Get started free
+                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                    </Button>
+                  </MotionPressable>
                   <Button
                     size="lg"
                     variant="outline"
@@ -381,7 +392,12 @@ export default function Landing() {
               </Reveal>
 
               <Reveal delay={120} className="lg:pl-4">
-                <HeroWorkspace />
+                <motion.div style={heroParallax ? { y: heroY } : undefined} className="space-y-4">
+                  <TiltCard intensity={7}>
+                    <HeroWorkspace />
+                  </TiltCard>
+                  <AiDemoSequence />
+                </motion.div>
               </Reveal>
             </div>
           </Section>
