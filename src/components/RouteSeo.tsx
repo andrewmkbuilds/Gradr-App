@@ -211,15 +211,24 @@ export function RouteSeo() {
   const ogImage = resolveOgImage(pathname);
   const noindex = isNoIndex(pathname);
 
-  // index.html ships a static canonical + robots tag so non-JS crawlers always
-  // see one. Helmet dedupes <meta name="robots"> but NOT <link rel="canonical">,
-  // so drop the static tags once the app has mounted to avoid two conflicting
-  // canonicals on every non-home route.
+  // index.html ships a full static SEO head so crawlers that never execute
+  // JavaScript still read correct Gradr metadata. react-helmet-async only
+  // dedupes tags it owns (marked with data-rh), so once the app has mounted
+  // those static tags would sit alongside Helmet's per-route ones and give
+  // crawlers two conflicting canonicals/descriptions. Drop the static copies.
   useEffect(() => {
-    document
-      .querySelectorAll('link[rel="canonical"]:not([data-rh]), meta[name="robots"]:not([data-rh])')
-      .forEach((node) => node.remove());
+    const STATIC_SEO_SELECTOR = [
+      'link[rel="canonical"]',
+      'meta[name="robots"]',
+      'meta[name="description"]',
+      'meta[name^="twitter:"]',
+      'meta[property^="og:"]',
+    ]
+      .map((selector) => `${selector}:not([data-rh])`)
+      .join(", ");
+    document.head.querySelectorAll(STATIC_SEO_SELECTOR).forEach((node) => node.remove());
   }, []);
+
 
 
   const legalUpdated: Record<string, string> = {
