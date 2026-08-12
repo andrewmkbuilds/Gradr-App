@@ -625,7 +625,7 @@ export default function Landing() {
           <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
             {AUDIENCE.map((a, i) => (
               <Reveal key={a.title} delay={i * 50} className="bg-card">
-                <Glare className="h-full p-6" radius="0px">
+                <Glare className="h-full p-6" radius="0px" background="hsl(var(--card))">
                   <div>
                     <div id={a.id} className="scroll-mt-28" />
                     <a.icon className="h-5 w-5 text-primary" aria-hidden />
@@ -790,7 +790,12 @@ export default function Landing() {
                       {body}
                     </GlowFrame>
                   ) : (
-                    <Glare className="h-full rounded-2xl border border-border bg-card" radius="16px">
+                    <Glare
+                      className="h-full"
+                      radius="16px"
+                      background="hsl(var(--card))"
+                      borderColor="hsl(var(--border))"
+                    >
                       {body}
                     </Glare>
                   )}
