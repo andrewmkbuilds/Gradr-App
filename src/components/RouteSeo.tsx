@@ -12,9 +12,12 @@ const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
 const META: Record<string, { title: string; description: string }> = {
+  // "/" renders the public Gradr landing page for signed-out visitors (and the
+  // dashboard once authenticated), so its metadata must describe the product.
   "/": {
-    title: "Dashboard",
-    description: "Your Gradr dashboard — pipeline overview, AI scores, reminders, and quick actions.",
+    title: "Your AI Career Command Center",
+    description:
+      "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
   },
   "/landing": {
     title: "From resume to offer",
