@@ -158,7 +158,7 @@ export default function Pipeline() {
     if (!job || job.status === newStatus) return;
 
     setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, status: newStatus } : j)));
-    const updates: Record<string, unknown> = { status: newStatus };
+    const updates: { status: Status; applied_at?: string } = { status: newStatus };
     if (newStatus === "applied" && !job.applied_at) updates.applied_at = new Date().toISOString();
     const { error } = await supabase.from("tracked_jobs").update(updates).eq("id", id);
     if (error) {

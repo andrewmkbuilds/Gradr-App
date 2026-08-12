@@ -11,6 +11,7 @@ import { LegalLinksPanel } from "@/components/legal/LegalLinksPanel";
 import { AccountDataPanel } from "@/components/settings/AccountDataPanel";
 import { EligibilityPanel } from "@/components/settings/EligibilityPanel";
 import { UsageBars } from "@/components/UsageBars";
+import { logPreferencesRead } from "@/lib/preferencesAudit";
 
 
 export default function Settings() {
@@ -54,6 +55,8 @@ export default function Settings() {
       .select("digest_enabled, digest_send_time, digest_timezone")
       .eq("user_id", user!.id)
       .maybeSingle();
+
+    void logPreferencesRead("settings", Boolean(prefs));
 
     if (prefs) {
       setDigestEnabled(prefs.digest_enabled ?? true);

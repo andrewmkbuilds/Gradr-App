@@ -29,7 +29,15 @@ jobs:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: node scripts/security-baseline.mjs
 
+      - name: Fail on regression of resolved security findings
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: node scripts/security-findings-guard.mjs
+
       - name: RLS and policy regression tests
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: bunx vitest run src/test/securityBaseline.test.ts
+        run: bunx vitest run src/test/securityBaseline.test.ts src/test/userPreferencesAccess.test.ts
+
+      - name: Dependency vulnerabilities (high/critical)
+        run: bun audit --audit-level=high

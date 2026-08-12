@@ -198,6 +198,10 @@
     {
       "table": "analytics_events",
       "trigger": "audit_analytics_events_write"
+    },
+    {
+      "table": "user_preferences",
+      "trigger": "audit_user_preferences_write"
     }
   ],
   "functionExecute": {
@@ -224,13 +228,45 @@
       "get_affiliate_public_settings",
       "has_role",
       "is_admin",
+      "is_anonymous_session",
       "log_admin_access",
       "log_admin_access_denied",
+      "log_user_preferences_read",
       "lookup_affiliate_by_code",
       "my_affiliate_overview",
       "my_eligibility_state",
       "pending_legal_acceptances",
       "reject_affiliate_application"
     ]
-  }
+  },
+  "findingGuards": [
+    {
+      "internalId": "SUPA_auth_allow_anonymous_sign_ins",
+      "description": "Anonymous (guest) sessions must not be able to read or write user_preferences.",
+      "table": "user_preferences",
+      "policyRoles": [
+        "authenticated"
+      ],
+      "requiredCmds": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "predicateMustContain": [
+        "is_anonymous",
+        "auth.uid()"
+      ]
+    },
+    {
+      "internalId": "SUPA_anon_security_definer_function_executable",
+      "description": "Only allowlisted SECURITY DEFINER functions may be executable by anon; never by PUBLIC.",
+      "functionExecuteRole": "anon"
+    },
+    {
+      "internalId": "SUPA_authenticated_security_definer_function_executable",
+      "description": "Only allowlisted SECURITY DEFINER functions may be executable by authenticated.",
+      "functionExecuteRole": "authenticated"
+    }
+  ]
 }
