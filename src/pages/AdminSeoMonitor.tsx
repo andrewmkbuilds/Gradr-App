@@ -15,7 +15,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { Button } from "@/components/ui/button";
-import { Seo } from "@/components/Seo";
 import { toast } from "sonner";
 
 type Level = "error" | "warning" | "info";
@@ -152,8 +151,6 @@ export default function AdminSeoMonitor() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6">
-      <Seo title="SEO Monitor" description="Search Console and Lighthouse health for gradr.me, with change alerts." noIndex />
-
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-foreground">
