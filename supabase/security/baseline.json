@@ -219,7 +219,9 @@
       "admin_mark_payout_paid",
       "admin_publish_legal_document",
       "admin_review_verification",
+      "admin_review_verification_request",
       "admin_set_commission_status",
+      "admin_verification_requests",
       "affiliate_click_is_valid",
       "affiliate_leaderboard",
       "approve_affiliate_application",
@@ -236,7 +238,9 @@
       "my_affiliate_overview",
       "my_eligibility_state",
       "pending_legal_acceptances",
-      "reject_affiliate_application"
+      "reject_affiliate_application",
+      "request_institution",
+      "submit_verification_request"
     ]
   },
   "findingGuards": [
