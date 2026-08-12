@@ -68,7 +68,7 @@ export function CompanyLogo({
       {src && !failed ? (
         <img
           src={src}
-          alt={company ? `${company} logo` : "Company logo"}
+          alt={company ? `${company} logo` : ""}
           width={size}
           height={size}
           loading="lazy"
