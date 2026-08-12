@@ -182,7 +182,11 @@ export default function AdminPaddle() {
             Local mirror of Paddle customers and subscriptions, kept in sync by the billing webhook. Open a
             customer to see their most recent webhook events.
           </p>
+          <a href="/admin/payments-status" className="mt-1 inline-block text-sm text-primary underline">
+            Check payments configuration status
+          </a>
         </div>
+
         <div className="flex gap-2">
           <Button
             variant="outline"

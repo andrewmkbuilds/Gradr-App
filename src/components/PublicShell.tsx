@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackEvent } from "@/lib/analytics";
+import { LEGAL_PAGES } from "@/content/legal";
 
 interface PublicShellProps {
   children: React.ReactNode;
@@ -59,6 +60,11 @@ export function PublicShell({ children, source }: PublicShellProps) {
             {NAV.map((item) => (
               <Link key={item.to} to={item.to} className="hover:text-foreground">
                 {item.label}
+              </Link>
+            ))}
+            {LEGAL_PAGES.map((page) => (
+              <Link key={page.path} to={page.path} className="hover:text-foreground">
+                {page.label}
               </Link>
             ))}
             <Link to="/auth" className="hover:text-foreground">

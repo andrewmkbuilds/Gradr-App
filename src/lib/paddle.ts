@@ -1,5 +1,6 @@
 import { initializePaddle as loadPaddle, type Paddle } from "@paddle/paddle-js";
 import { supabase } from "@/integrations/supabase/client";
+import { currentPaymentsDiagnostics } from "@/lib/paymentsConfig";
 
 /**
  * Paddle client bootstrap.
@@ -21,39 +22,13 @@ export type PaddleEnv = "sandbox" | "live";
 /** Internal sentinel for "we could not determine the country" — never sent to Paddle. */
 export const UNKNOWN_COUNTRY = "OTHERS";
 
-interface ConfigResult {
-  ok: boolean;
-  token?: string;
-  env?: PaddleEnv;
-  reason?: string;
-}
-
-function resolveConfig(): ConfigResult {
-  if (!clientToken) {
-    return { ok: false, reason: "VITE_PAYMENTS_CLIENT_TOKEN is not set." };
-  }
-  const tokenEnv: PaddleEnv = clientToken.startsWith("test_") ? "sandbox" : "live";
-
-  if (!configuredEnv) {
-    return {
-      ok: false,
-      reason:
-        "VITE_PAYMENTS_ENVIRONMENT is not set. Set it to 'sandbox' or 'live' — the payment environment is never defaulted.",
-    };
-  }
-  if (configuredEnv !== "sandbox" && configuredEnv !== "live") {
-    return { ok: false, reason: `VITE_PAYMENTS_ENVIRONMENT must be 'sandbox' or 'live', got '${configuredEnv}'.` };
-  }
-  if (tokenEnv !== configuredEnv) {
-    return {
-      ok: false,
-      reason: `Paddle config mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnv}' token.`,
-    };
-  }
-  return { ok: true, token: clientToken, env: configuredEnv };
-}
-
-const config = resolveConfig();
+const diagnostics = currentPaymentsDiagnostics();
+const config = {
+  ok: diagnostics.ok,
+  token: diagnostics.ok ? clientToken : undefined,
+  env: diagnostics.environment,
+  reason: diagnostics.reason ?? undefined,
+};
 
 if (!config.ok) {
   // Loud in the console, silent in the UI — checkout surfaces the error when used.

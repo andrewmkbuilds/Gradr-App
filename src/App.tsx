@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
+import { PublicShell } from "@/components/PublicShell";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { AnimatePresence } from "framer-motion";
 import { captureReferralFromUrl } from "@/lib/affiliateTracking";
@@ -42,6 +43,10 @@ import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminSecurityLog from "@/pages/AdminSecurityLog";
 import AdminPaddle from "@/pages/AdminPaddle";
 import AdminSearchConsole from "./pages/AdminSearchConsole";
+import AdminPaymentsStatus from "@/pages/AdminPaymentsStatus";
+import Privacy from "./pages/legal/Privacy";
+import Terms from "./pages/legal/Terms";
+import RefundPolicy from "./pages/legal/RefundPolicy";
 
 import AiResumeOptimization from "./pages/blog/AiResumeOptimization";
 import CareerAdvice from "./pages/CareerAdvice";
@@ -94,10 +99,10 @@ function ProtectedRoutes() {
          <Route path="/admin/security-log" element={<AnimatedPage><AdminSecurityLog /></AnimatedPage>} />
          <Route path="/admin/audit-log" element={<AnimatedPage><AdminAuditLog /></AnimatedPage>} />
          <Route path="/admin/paddle" element={<AnimatedPage><AdminPaddle /></AnimatedPage>} />
+         <Route path="/admin/payments-status" element={<AnimatedPage><AdminPaymentsStatus /></AnimatedPage>} />
 
          <Route path="/admin/search-console" element={<AnimatedPage><AdminSearchConsole /></AnimatedPage>} />
 
-          <Route path="/pricing" element={<AnimatedPage><Pricing /></AnimatedPage>} />
           <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
           <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
@@ -108,6 +113,26 @@ function ProtectedRoutes() {
         </Routes>
       </AnimatePresence>
     </DashboardLayout>
+  );
+}
+
+/** Pricing is publicly indexable: guests get the public shell, members the app chrome. */
+function PricingRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) {
+    return (
+      <DashboardLayout>
+        <AnimatedPage>
+          <Pricing />
+        </AnimatedPage>
+      </DashboardLayout>
+    );
+  }
+  return (
+    <PublicShell source="pricing">
+      <Pricing />
+    </PublicShell>
   );
 }
 
@@ -136,6 +161,10 @@ function AppRoutes() {
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
         <Route path="/career-advice" element={<AnimatedPage><CareerAdvice /></AnimatedPage>} />
         <Route path="/career-advice/:slug" element={<AnimatedPage><GuideArticle /></AnimatedPage>} />
+        <Route path="/pricing" element={<PricingRoute />} />
+        <Route path="/privacy" element={<AnimatedPage><Privacy /></AnimatedPage>} />
+        <Route path="/terms" element={<AnimatedPage><Terms /></AnimatedPage>} />
+        <Route path="/refund-policy" element={<AnimatedPage><RefundPolicy /></AnimatedPage>} />
         <Route path="/job-search" element={<AnimatedPage><JobSearchIndex /></AnimatedPage>} />
         <Route path="/job-search/:slug" element={<AnimatedPage><JobLanding /></AnimatedPage>} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />

@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import { useBillingActions, useCredits, usePurchases, useSubscription } from "@/hooks/useSubscription";
 import { Seo } from "@/components/Seo";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
+import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
+import { Link } from "react-router-dom";
 
 function formatMoney(cents: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() })
@@ -112,6 +114,10 @@ export default function Billing() {
       </div>
 
       <PaymentIssueBanner />
+
+      <PaymentsConfigBanner context="billing" />
+
+
 
 
 
@@ -251,6 +257,13 @@ export default function Billing() {
       <Button variant="ghost" className="w-full" onClick={() => navigate("/pricing")}>
         Browse plans and pay-per-use packs
       </Button>
+
+      <p className="flex flex-wrap items-center justify-center gap-3 pb-4 text-xs text-muted-foreground">
+        <span>Payments processed by Paddle.com, our Merchant of Record.</span>
+        <Link to="/terms" className="underline hover:text-foreground">Terms</Link>
+        <Link to="/refund-policy" className="underline hover:text-foreground">Refunds</Link>
+        <Link to="/privacy" className="underline hover:text-foreground">Privacy</Link>
+      </p>
     </div>
   );
 }
