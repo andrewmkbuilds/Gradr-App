@@ -2276,6 +2276,10 @@ export type Database = {
         Args: { _document_id: string }
         Returns: string
       }
+      admin_review_verification: {
+        Args: { _reason?: string; _status: string; _verification_id: string }
+        Returns: undefined
+      }
       admin_set_commission_status: {
         Args: {
           _commission_ids: string[]
@@ -2311,6 +2315,10 @@ export type Database = {
         Args: { _click_id?: string; _code: string }
         Returns: string
       }
+      best_discount_for: {
+        Args: { _interval?: string; _plan?: string; _user_id: string }
+        Returns: Json
+      }
       consume_entitlement: {
         Args: {
           _amount?: number
@@ -2336,6 +2344,7 @@ export type Database = {
         Returns: string
       }
       entitlement_snapshot: { Args: { _env?: string }; Returns: Json }
+      expire_stale_verifications: { Args: never; Returns: number }
       generate_affiliate_code: { Args: never; Returns: string }
       get_affiliate_public_settings: {
         Args: never
@@ -2379,6 +2388,7 @@ export type Database = {
         }[]
       }
       my_affiliate_overview: { Args: never; Returns: Json }
+      my_eligibility_state: { Args: never; Returns: Json }
       notify_admins: {
         Args: {
           _body?: string
@@ -2410,6 +2420,24 @@ export type Database = {
           _referred_user_id: string
           _source_amount: number
           _source_record_id?: string
+        }
+        Returns: string
+      }
+      record_discount_redemption: {
+        Args: {
+          _currency: string
+          _discount: number
+          _eligibility_type: string
+          _env: string
+          _gross: number
+          _interval: string
+          _net: number
+          _percentage: number
+          _plan: string
+          _rule_id: string
+          _subscription_id: string
+          _transaction_id: string
+          _user_id: string
         }
         Returns: string
       }
