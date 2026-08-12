@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronDown, LogOut } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +7,8 @@ import { useIsAdmin } from "@/hooks/useAffiliate";
 import { cn } from "@/lib/utils";
 import { dashboardItem, navGroups, type NavGroup, type NavItem } from "@/config/nav";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useSidebarKeyboardNav, useMobileDrawerFocus } from "@/hooks/useSidebarKeyboardNav";
+import { trackDashboardClick, trackNavGroupToggle, trackNavItemClick } from "@/lib/navAnalytics";
 import {
   Sidebar,
   SidebarContent,
@@ -38,15 +39,20 @@ const idleRow = "text-muted-foreground hover:bg-secondary hover:text-foreground"
 const activeRow = "bg-primary/10 text-primary";
 
 export function AppSidebar() {
-  const { state, toggleSidebar, isMobile, setOpenMobile } = useSidebar();
+  const { state, toggleSidebar, isMobile, setOpenMobile, openMobile } = useSidebar();
   const collapsed = state === "collapsed" && !isMobile;
   const { pathname } = useLocation();
   const { signOut } = useAuth();
   const { data: isAdmin } = useIsAdmin();
+  const navRef = useRef<HTMLDivElement>(null);
 
-  const groups = navGroups.filter((g) => !g.adminOnly || isAdmin);
+  // Admin links are only rendered for verified admins. This is presentation
+  // only — every admin route is additionally wrapped in <RequireAdmin> and
+  // every admin table/RPC enforces has_role() server-side.
+  const groups = useMemo(() => navGroups.filter((g) => !g.adminOnly || isAdmin), [isAdmin]);
+
   const [openGroups, setOpenGroups] = useState<string[]>(() =>
-    groups.filter((g) => isGroupActive(g, pathname)).map((g) => g.id),
+    navGroups.filter((g) => isGroupActive(g, pathname)).map((g) => g.id),
   );
 
   // Keep the group containing the active route expanded on navigation.
@@ -55,6 +61,19 @@ export function AppSidebar() {
     if (active) setOpenGroups((prev) => (prev.includes(active.id) ? prev : [...prev, active.id]));
   }, [pathname]);
 
+  const setGroupOpen = (groupId: string, open: boolean) => {
+    const group = navGroups.find((g) => g.id === groupId);
+    setOpenGroups((prev) => (open ? [...new Set([...prev, groupId])] : prev.filter((id) => id !== groupId)));
+    if (group) trackNavGroupToggle(group, open, isMobile ? "mobile_drawer" : "sidebar");
+  };
+
+  useSidebarKeyboardNav(navRef, {
+    setGroupOpen: (id, open) => setGroupOpen(id, open),
+    isGroupOpen: (id) => openGroups.includes(id),
+  });
+  useMobileDrawerFocus(navRef, openMobile, isMobile);
+
+  const surface = isMobile ? "mobile_drawer" : collapsed ? "sidebar_rail" : "sidebar";
   const closeMobile = () => isMobile && setOpenMobile(false);
 
   return (
@@ -78,106 +97,131 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
-              {/* Dashboard */}
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink
-                    to={dashboardItem.url}
-                    end
-                    onClick={closeMobile}
-                    aria-label={dashboardItem.title}
-                    className={cn(baseRow, pathname === "/" ? activeRow : idleRow)}
-                  >
-                    <dashboardItem.icon className="h-4 w-4 shrink-0" />
-                    {!collapsed && <span className="truncate">{dashboardItem.title}</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+            {/* Arrow-key roving navigation is wired to this container. */}
+            <nav ref={navRef} aria-label="Main navigation">
+              <SidebarMenu className="gap-0.5">
+                {/* Dashboard */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to={dashboardItem.url}
+                      data-nav-focusable=""
+                      onClick={() => {
+                        trackDashboardClick(surface);
+                        closeMobile();
+                      }}
+                      aria-current={pathname === "/" ? "page" : undefined}
+                      className={cn(baseRow, pathname === "/" ? activeRow : idleRow)}
+                    >
+                      <dashboardItem.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {collapsed ? (
+                        <span className="sr-only">{dashboardItem.title}</span>
+                      ) : (
+                        <span className="truncate">{dashboardItem.title}</span>
+                      )}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
-              {groups.map((group) => {
-                const groupActive = isGroupActive(group, pathname);
-                const open = openGroups.includes(group.id);
+                {groups.map((group) => {
+                  const groupActive = isGroupActive(group, pathname);
+                  const open = openGroups.includes(group.id);
 
-                // Collapsed rail: group icon links to its primary route.
-                if (collapsed) {
+                  // Collapsed rail: group icon links to its primary route.
+                  if (collapsed) {
+                    return (
+                      <SidebarMenuItem key={group.id}>
+                        <SidebarMenuButton asChild tooltip={group.title}>
+                          <Link
+                            to={group.url}
+                            data-nav-focusable=""
+                            onClick={() => trackNavGroupToggle(group, true, "sidebar_rail")}
+                            aria-current={groupActive ? "page" : undefined}
+                            className={cn(baseRow, "justify-center px-0", groupActive ? activeRow : idleRow)}
+                          >
+                            <group.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                            <span className="sr-only">{group.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  }
+
+                  const panelId = `nav-group-${group.id}`;
+
                   return (
-                    <SidebarMenuItem key={group.id}>
-                      <SidebarMenuButton asChild tooltip={group.title}>
-                        <Link
-                          to={group.url}
-                          aria-label={group.title}
-                          className={cn(baseRow, "justify-center px-0", groupActive ? activeRow : idleRow)}
-                        >
-                          <group.icon className="h-4 w-4 shrink-0" />
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                }
-
-                return (
-                  <Collapsible
-                    key={group.id}
-                    open={open}
-                    onOpenChange={(next) =>
-                      setOpenGroups((prev) =>
-                        next ? [...new Set([...prev, group.id])] : prev.filter((id) => id !== group.id),
-                      )
-                    }
-                  >
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <button
-                          type="button"
-                          className={cn(
-                            baseRow,
-                            "press-scale",
-                            groupActive && !open ? activeRow : "text-foreground/90 hover:bg-secondary",
-                          )}
-                          aria-label={group.title}
-                        >
-                          <group.icon className="h-4 w-4 shrink-0" />
-                          <span className="flex-1 text-left font-medium">{group.title}</span>
-                          <ChevronDown
+                    <Collapsible key={group.id} open={open} onOpenChange={(next) => setGroupOpen(group.id, next)}>
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <button
+                            type="button"
+                            data-nav-focusable=""
+                            data-nav-group={group.id}
+                            aria-expanded={open}
+                            aria-controls={panelId}
                             className={cn(
-                              "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
-                              open && "rotate-180",
+                              baseRow,
+                              "press-scale",
+                              groupActive && !open ? activeRow : "text-foreground/90 hover:bg-secondary",
                             )}
-                          />
-                        </button>
-                      </CollapsibleTrigger>
+                          >
+                            <group.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                            <span className="flex-1 text-left font-medium">{group.title}</span>
+                            {groupActive && (
+                              <span className="sr-only">(contains the current page)</span>
+                            )}
+                            <ChevronDown
+                              aria-hidden="true"
+                              className={cn(
+                                "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+                                open && "rotate-180",
+                              )}
+                            />
+                          </button>
+                        </CollapsibleTrigger>
 
-                      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                        <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-border/60 pl-2">
-                          {group.items.map((item) => {
-                            const active = isItemActive(item, pathname);
-                            return (
-                              <li key={item.url}>
-                                <NavLink
-                                  to={item.url}
-                                  onClick={closeMobile}
-                                  aria-label={item.title}
-                                  className={cn(
-                                    "interactive flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
-                                    active
-                                      ? "bg-primary/10 font-medium text-primary"
-                                      : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-                                  )}
-                                >
-                                  <item.icon className="h-3.5 w-3.5 shrink-0" />
-                                  <span className="truncate">{item.title}</span>
-                                </NavLink>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                );
-              })}
-            </SidebarMenu>
+                        <CollapsibleContent
+                          id={panelId}
+                          className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+                        >
+                          <ul
+                            aria-label={`${group.title} pages`}
+                            className="ml-4 mt-0.5 space-y-0.5 border-l border-border/60 pl-2"
+                          >
+                            {group.items.map((item) => {
+                              const active = isItemActive(item, pathname);
+                              return (
+                                <li key={item.url}>
+                                  <Link
+                                    to={item.url}
+                                    data-nav-focusable=""
+                                    data-nav-parent={group.id}
+                                    onClick={() => {
+                                      trackNavItemClick(item, group, surface);
+                                      closeMobile();
+                                    }}
+                                    aria-current={active ? "page" : undefined}
+                                    className={cn(
+                                      "interactive flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
+                                      active
+                                        ? "bg-primary/10 font-medium text-primary"
+                                        : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                                    )}
+                                  >
+                                    <item.icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                    <span className="truncate">{item.title}</span>
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                })}
+              </SidebarMenu>
+            </nav>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -185,19 +229,23 @@ export function AppSidebar() {
       <SidebarFooter className="p-3 space-y-1">
         <button
           onClick={signOut}
-          aria-label="Sign Out"
+          aria-label="Sign out"
           className="interactive press-scale flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
         >
-          <LogOut className="h-4 w-4 shrink-0" />
+          <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
           {!collapsed && <span>Sign Out</span>}
         </button>
         {!isMobile && (
           <button
             onClick={toggleSidebar}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!collapsed}
             className="interactive press-scale flex w-full items-center justify-center rounded-lg py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
           >
-            <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", collapsed && "rotate-180")} />
+            <ChevronLeft
+              aria-hidden="true"
+              className={cn("h-4 w-4 transition-transform duration-300", collapsed && "rotate-180")}
+            />
           </button>
         )}
       </SidebarFooter>
