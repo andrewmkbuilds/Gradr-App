@@ -110,8 +110,22 @@ export function useSidebarKeyboardNav(
  * currently are rather than at the top of a long list.
  */
 export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open: boolean, enabled: boolean) {
+  const openerRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
-    if (!enabled || !open) return;
+    if (!enabled) return;
+
+    if (!open) {
+      // Drawer closed: hand focus back to whatever opened it (the sidebar trigger).
+      const opener = openerRef.current;
+      openerRef.current = null;
+      if (opener && document.contains(opener) && document.activeElement === document.body) {
+        opener.focus({ preventScroll: true });
+      }
+      return;
+    }
+
+    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     // The drawer mounts its content asynchronously and Radix moves focus to the
     // first tabbable element on open, so poll briefly and claim focus after it.
@@ -140,5 +154,6 @@ export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open:
       window.clearTimeout(timer);
     };
   }, [containerRef, open, enabled]);
+
 }
 
