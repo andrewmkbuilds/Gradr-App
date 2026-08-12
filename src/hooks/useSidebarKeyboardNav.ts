@@ -1,4 +1,4 @@
-import { useCallback, useEffect, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 
 /**
  * Keyboard navigation for the sidebar tree.
