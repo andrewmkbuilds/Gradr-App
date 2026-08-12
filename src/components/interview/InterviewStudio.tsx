@@ -149,7 +149,7 @@ export function InterviewStudio(props: Props) {
             open
             retrying={connecting}
             onRetry={onReconnect}
-            onDismiss={onDismissConnectionError}
+            onDismiss={onDismissConnectionError ?? (() => {})}
           />
         )}
         {/* ---------- Header ---------- */}

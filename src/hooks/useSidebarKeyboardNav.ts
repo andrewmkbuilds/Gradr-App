@@ -15,7 +15,7 @@ import { useCallback, useEffect, useRef, type RefObject } from "react";
  * and children add `data-nav-parent="<groupId>"`.
  */
 export function useSidebarKeyboardNav(
-  containerRef: RefObject<HTMLElement>,
+  containerRef: RefObject<HTMLElement | null>,
   handlers: {
     setGroupOpen: (groupId: string, open: boolean) => void;
     isGroupOpen: (groupId: string) => boolean;
