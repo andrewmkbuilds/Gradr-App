@@ -64,7 +64,47 @@ function clampRange(from: unknown, to: unknown) {
   };
 }
 
+
+/**
+ * Record an admin touching auth-email material. Auth emails contain the exact
+ * links that sign a user in, so *reading* a preview or the link audit trail is
+ * itself a privileged act and is logged with the actor, not just the write.
+ * Best-effort: a logging failure must never mask the response.
+ */
+async function auditAdminAccess(
+  admin: { from: (t: string) => { insert: (v: unknown) => Promise<{ error: { message: string } | null }> } },
+  actorId: string,
+  action: "view" | "export",
+  resourceType: string,
+  recordCount: number,
+  details: Record<string, unknown>,
+) {
+  try {
+    const { error } = await admin.from("admin_audit_log").insert({
+      actor_id: actorId,
+      action,
+      resource_type: resourceType,
+      record_count: recordCount,
+      details,
+    });
+    if (error) console.warn("[admin-email-ops] audit insert failed", error.message);
+  } catch (error) {
+    console.warn("[admin-email-ops] audit insert threw", error);
+  }
+}
+
+/** RFC 4180-ish CSV: quote everything, double interior quotes. */
+function toCsv(rows: Record<string, unknown>[], columns: string[]): string {
+  const cell = (v: unknown) =>
+    `"${String(v ?? "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+  return [
+    columns.map(cell).join(","),
+    ...rows.map((row) => columns.map((c) => cell(row[c])).join(",")),
+  ].join("\r\n");
+}
+
 export const handler = async (req: Request): Promise<Response> => {
+
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
