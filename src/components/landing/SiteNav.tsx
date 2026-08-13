@@ -297,10 +297,12 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
         {open && (
           <motion.div
             key="mobile-menu"
-            initial={{ opacity: 0, y: -8 }}
+            id="mobile-menu"
+            data-mobile-menu
+            initial={reduce ? false : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: ease.standard }}
+            exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -8 }}
+            transition={reduce ? { duration: 0 } : { duration: 0.25, ease: ease.standard }}
             className="glass-float elev-4 mx-auto mt-2 w-full max-w-6xl overflow-hidden rounded-2xl border border-border p-3 lg:hidden"
           >
             <ul>
@@ -309,15 +311,21 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
                   key={n.label}
                   initial={reduce ? false : { opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.04 * i, duration: 0.3, ease: ease.entrance }}
+                  transition={reduce ? { duration: 0 } : { delay: 0.04 * i, duration: 0.3, ease: ease.entrance }}
                 >
                   <a
                     href={n.href}
+                    data-nav-item={n.href}
+                    data-active={active === n.href ? "true" : "false"}
                     aria-current={active === n.href ? "true" : undefined}
                     onClick={(e) => {
-                      setOpen(false);
-                      if (goTo(n.href)) e.preventDefault();
+                      // One call owns both the active state and the close, so
+                      // there is no ordering race between them.
+                      if (goTo(n.href, { closeMenu: true })) e.preventDefault();
+                      else setOpen(false);
                     }}
+                    onKeyDown={(e) => onItemKeyDown(e, n.href, true)}
+
                     className={`flex min-h-12 items-center rounded-xl px-3 text-[15px] transition-colors hover:bg-secondary/60 hover:text-foreground ${
                       active === n.href ? "bg-secondary/50 text-foreground" : "text-muted-foreground"
                     }`}
