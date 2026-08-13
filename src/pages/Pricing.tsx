@@ -2,6 +2,7 @@ import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { TiltCard } from "@/components/motion";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
@@ -256,9 +257,9 @@ export default function Pricing() {
               const pendingKey = `${tier.key}-${interval}`;
               const current = currentPlan === tier.key && billingInterval === interval;
               return (
+                <TiltCard key={tier.name} className="group h-full rounded-xl" tilt={4}>
                 <Card
-                  key={tier.name}
-                  className={`relative p-6 flex flex-col ${
+                  className={`relative h-full p-6 flex flex-col ${
                     tier.highlighted ? "border-primary shadow-lg shadow-primary/10 xl:scale-[1.02]" : "border-border"
                   }`}
                 >
@@ -307,6 +308,7 @@ export default function Pricing() {
                     )}
                   </Button>
                 </Card>
+                </TiltCard>
               );
             })}
           </div>

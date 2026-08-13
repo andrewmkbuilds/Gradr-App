@@ -509,7 +509,7 @@ export default function Landing() {
 
           <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
             {SYSTEM.map((s, i) => (
-              <Reveal as="li" key={s.n} delay={i * 50} className="group bg-card p-5 transition-colors hover:bg-secondary/40">
+              <Reveal as="li" key={s.n} delay={i * 50} className="group depth-surface depth-hover bg-card p-5 transition-colors hover:bg-secondary/40">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold tabular-nums tracking-widest text-primary">{s.n}</span>
                   <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
@@ -620,7 +620,7 @@ export default function Landing() {
               { icon: Mic, title: "Real conversation", copy: "Speak naturally, interrupt mid-question, and get a contextual follow-up instead of a scripted next prompt." },
               { icon: LineChart, title: "Scored report", copy: "Every session ends with strengths, specific improvements, a full transcript, and the questions to practice next." },
             ].map((f, i) => (
-              <Reveal key={f.title} delay={i * 60} className="bg-card p-6">
+              <Reveal key={f.title} delay={i * 60} className="depth-surface depth-hover bg-card p-6">
                 <f.icon className="h-5 w-5 text-primary" aria-hidden />
                 <h3 className="mt-4 text-sm font-semibold text-foreground">{f.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.copy}</p>
@@ -820,10 +820,10 @@ export default function Landing() {
             {PLANS.map((p, i) => {
               const price = p[billing];
               return (
+                <TiltCard key={p.name} className="group h-full rounded-2xl" tilt={4}>
                 <Reveal
-                  key={p.name}
                   delay={i * 70}
-                  className={`flex flex-col rounded-2xl border p-6 ${
+                  className={`flex h-full flex-col rounded-2xl border p-6 ${
                     p.highlight
                       ? "border-primary/40 bg-primary/[0.05] shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
                       : "border-border bg-card"
@@ -861,6 +861,7 @@ export default function Landing() {
                     {p.cta}
                   </Button>
                 </Reveal>
+                </TiltCard>
               );
             })}
           </div>
