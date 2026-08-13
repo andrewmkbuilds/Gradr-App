@@ -9,6 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 import { UsageBars } from "@/components/UsageBars";
+import { Surface, SurfaceHeader } from "@/components/ui/surface";
+import { CareerReadiness, type ReadinessPillar } from "@/components/dashboard/CareerReadiness";
+import { ActivityChart, PipelineFunnelChart, type ActivityPoint } from "@/components/dashboard/DashboardCharts";
+import { CountUp } from "@/components/motion";
 
 
 interface DashboardStats {
@@ -63,7 +67,7 @@ export default function Dashboard() {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const now = new Date();
 
-    const [resumeRes, matchRes, trackedRes, remindersRes] = await Promise.all([
+    const [resumeRes, matchRes, trackedRes, remindersRes, interviewRes] = await Promise.all([
       supabase
         .from("resumes")
         .select("ats_score, keyword_match, formatting_score, impact_score")
@@ -78,7 +82,7 @@ export default function Dashboard() {
         .limit(10),
       supabase
         .from("tracked_jobs")
-        .select("status, applied_at")
+        .select("status, applied_at, created_at")
         .eq("user_id", user!.id),
       supabase
         .from("job_reminders")
@@ -86,6 +90,11 @@ export default function Dashboard() {
         .eq("user_id", user!.id)
         .eq("done", false)
         .order("due_at", { ascending: true })
+        .limit(20),
+      supabase
+        .from("interview_sessions")
+        .select("created_at, overall_score")
+        .order("created_at", { ascending: false })
         .limit(20),
     ]);
 
@@ -117,13 +126,41 @@ export default function Dashboard() {
       appliedThisWeek,
     };
 
+    // Eight-week momentum series from tracked jobs + interview sessions.
+    const sessions = (interviewRes.data || []) as { created_at: string; overall_score: number | null }[];
+    const weeks: ActivityPoint[] = [];
+    for (let i = 7; i >= 0; i--) {
+      const end = new Date(now);
+      end.setDate(end.getDate() - i * 7);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 7);
+      weeks.push({
+        label: `${start.getMonth() + 1}/${start.getDate()}`,
+        applications: tracked.filter((t) => t.applied_at && inRange(t.applied_at, start, end)).length,
+        interviews: sessions.filter((x) => inRange(x.created_at, start, end)).length,
+      });
+    }
+
+    const scored = sessions.filter((x) => typeof x.overall_score === "number");
+    const interviewAvg = scored.length
+      ? Math.round(scored.reduce((a, x) => a + (x.overall_score ?? 0), 0) / scored.length)
+      : 0;
+
     return {
       stats,
+      activity: weeks,
+      interviewCount: sessions.length,
+      interviewAvg,
       stages: stageCounts,
       reminders: allReminders.slice(0, 5),
       overdueCount: overdue,
       jobMatches: matches.slice(0, 4),
     };
+  }
+
+  function inRange(iso: string, start: Date, end: Date) {
+    const d = new Date(iso).getTime();
+    return d >= start.getTime() && d < end.getTime();
   }
 
   if (loading) {
@@ -140,7 +177,42 @@ export default function Dashboard() {
   const overdueCount = data!.overdueCount;
   const jobMatches = data!.jobMatches;
   const s = stats;
+  const activity = data!.activity;
   const totalTracked = stages.saved + stages.applied + stages.interview + stages.offer + stages.rejected;
+  const activeStages = stages.applied + stages.interview + stages.offer;
+
+  // Composite readiness: resume quality, match strength, activity, practice.
+  const pillars: ReadinessPillar[] = [
+    {
+      key: "resume", label: "Resume strength", weight: 3, value: s.resumeScore,
+      hint: s.resumeScore > 0 ? "Latest ATS score across your resumes." : "Upload a resume to unlock this pillar.",
+    },
+    {
+      key: "matching", label: "Match quality", weight: 2,
+      value: s.totalMatches ? (s.highConfidence / s.totalMatches) * 100 : 0,
+      hint: `${s.highConfidence} of ${s.totalMatches || 0} matches above 85%.`,
+    },
+    {
+      key: "activity", label: "Application activity", weight: 2,
+      value: Math.min(100, (s.appliedThisWeek / 5) * 100),
+      hint: `${s.appliedThisWeek} applied this week — 5 a week keeps momentum.`,
+    },
+    {
+      key: "practice", label: "Interview practice", weight: 3,
+      value: data!.interviewAvg || Math.min(60, data!.interviewCount * 20),
+      hint: data!.interviewCount
+        ? `${data!.interviewCount} mock sessions, avg score ${data!.interviewAvg || "—"}.`
+        : "Run a mock interview to score this pillar.",
+    },
+  ];
+
+  const funnel = [
+    { label: "Saved", value: stages.saved, chart: 5 },
+    { label: "Applied", value: stages.applied, chart: 1 },
+    { label: "Interview", value: stages.interview, chart: 3 },
+    { label: "Offer", value: stages.offer, chart: 6 },
+    { label: "Rejected", value: stages.rejected, chart: 2 },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -155,40 +227,54 @@ export default function Dashboard() {
 
 
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={FileText} title="Resume Score" value={s.resumeScore > 0 ? String(s.resumeScore) : "—"} subtitle={s.resumeScore > 0 ? "Latest ATS score" : "Upload a resume"} glowing={s.resumeScore > 0} />
         <StatCard icon={Send} title="Applied This Week" value={String(s.appliedThisWeek)} subtitle={`${stages.applied} total in pipeline`} />
-        <StatCard icon={Briefcase} title="Pipeline" value={String(totalTracked)} subtitle={`${stages.interview} in interview`} />
+        <StatCard icon={Briefcase} title="Pipeline" value={String(totalTracked)} subtitle={`${activeStages} active`} />
         <StatCard icon={TrendingUp} title="Match Rate" value={s.interviewRate} subtitle="High-confidence ratio" />
       </div>
 
+      {/* Level 3: the headline signal of the whole product. */}
+      <CareerReadiness pillars={pillars} />
+
+      {/* Level 2: supporting analytics. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ActivityChart data={activity} />
+        <PipelineFunnelChart data={funnel} />
+      </div>
+
       {/* Pipeline stage breakdown */}
-      <div className="glass-card p-6 animate-slide-up">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-foreground">Pipeline by Stage</h3>
-          <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
-            View pipeline →
-          </button>
-        </div>
+      <Surface level={2}>
+        <SurfaceHeader
+          title="Pipeline by Stage"
+          icon={Briefcase}
+          action={
+            <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
+              View pipeline →
+            </button>
+          }
+        />
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {STAGE_META.map((stage) => (
             <button
               key={stage.key}
               onClick={() => navigate("/pipeline")}
-              className="flex flex-col items-start p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-left"
+              className="elev-1 elev-interactive flex flex-col items-start rounded-lg p-4 text-left"
             >
               <stage.icon className={`h-4 w-4 ${stage.color} mb-2`} />
-              <span className="text-2xl font-bold text-foreground">{stages[stage.key]}</span>
-              <span className="text-xs text-muted-foreground mt-0.5">{stage.label}</span>
+              <span className="stat-value text-foreground">
+                <CountUp to={stages[stage.key]} duration={0.9} />
+              </span>
+              <span className="mt-0.5 text-xs text-muted-foreground">{stage.label}</span>
             </button>
           ))}
         </div>
-      </div>
+      </Surface>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Resume Health */}
-        <div className="glass-card p-6 animate-slide-up">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Resume Health</h3>
+        <Surface level={2}>
+          <SurfaceHeader title="Resume Health" icon={FileText} />
           <div className="flex items-center justify-center py-4">
             <ScoreRing score={s.resumeScore} size={140} label="ATS Score" />
           </div>
@@ -203,7 +289,7 @@ export default function Dashboard() {
                   <span className="text-muted-foreground">{item.label}</span>
                   <span className="text-foreground">{item.value}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-secondary">
+                <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-1000"
                     style={{ width: `${item.value}%` }}
@@ -212,16 +298,16 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </Surface>
 
         {/* Upcoming Reminders */}
-        <div className="glass-card p-6 animate-slide-up lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+        <Surface level={2} className="lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Bell className="h-4 w-4 text-primary" />
               Upcoming Reminders
               {overdueCount > 0 && (
-                <span className="inline-flex items-center gap-1 text-xs text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">
                   <AlertCircle className="h-3 w-3" /> {overdueCount} overdue
                 </span>
               )}
@@ -241,7 +327,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    className="elev-1 elev-interactive flex items-center justify-between rounded-lg p-3"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground truncate">{r.title}</p>
@@ -258,12 +344,12 @@ export default function Dashboard() {
               })}
             </div>
           )}
-        </div>
+        </Surface>
       </div>
 
       {/* Recent Job Matches */}
-      <div className="glass-card p-6 animate-slide-up">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Recent Job Matches</h3>
+      <Surface level={2}>
+        <SurfaceHeader title="Recent Job Matches" icon={Target} />
         {jobMatches.length === 0 ? (
           <p className="text-sm text-muted-foreground py-8 text-center">No job matches yet. Use the Job Feed to find opportunities.</p>
         ) : (
@@ -271,9 +357,9 @@ export default function Dashboard() {
             {jobMatches.map((match) => (
               <div
                 key={match.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                className="elev-1 elev-interactive flex items-center justify-between rounded-lg p-3"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <span className="text-xs font-bold text-primary">{(match.company || "?")[0]}</span>
                   </div>
@@ -289,11 +375,11 @@ export default function Dashboard() {
             ))}
           </div>
         )}
-      </div>
+      </Surface>
 
       {/* Quick Actions */}
-      <div className="glass-card p-6 animate-slide-up">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Quick Actions</h3>
+      <Surface level={2}>
+        <SurfaceHeader title="Quick Actions" icon={Zap} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { icon: FileText, label: "Optimize Resume", desc: "Improve your ATS score", path: "/resume" },
@@ -304,15 +390,15 @@ export default function Dashboard() {
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className="flex flex-col items-start p-4 rounded-lg bg-secondary/50 hover:bg-secondary hover:glow-border transition-all text-left group"
+              className="elev-1 elev-interactive group flex flex-col items-start rounded-lg p-4 text-left"
             >
-              <action.icon className="h-5 w-5 text-primary mb-3 group-hover:animate-pulse-glow" />
+              <action.icon className="mb-3 h-5 w-5 text-primary transition-transform duration-200 group-hover:scale-110" />
               <span className="text-sm font-medium text-foreground">{action.label}</span>
-              <span className="text-xs text-muted-foreground mt-0.5">{action.desc}</span>
+              <span className="mt-0.5 text-xs text-muted-foreground">{action.desc}</span>
             </button>
           ))}
         </div>
-      </div>
+      </Surface>
     </div>
   );
 }

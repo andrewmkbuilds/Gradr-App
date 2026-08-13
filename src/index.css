@@ -115,6 +115,21 @@
     --shadow-elevated: 0 2px 4px hsl(197 34% 16% / 0.05), 0 18px 40px -24px hsl(197 34% 16% / 0.26);
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.1);
     --shadow-hover: 0 12px 28px -18px hsl(197 34% 16% / 0.32);
+
+    /* ---------- Elevation system (light) ----------
+       L1 page canvas, L2 resting cards, L3 focus/feature panels, L4 floating. */
+    --elev-1-bg: 22 16% 97%;
+    --elev-2-bg: 0 0% 100%;
+    --elev-3-bg: 0 0% 100%;
+    --elev-4-bg: 0 0% 100%;
+    --elev-1-border: 197 14% 88%;
+    --elev-2-border: 197 14% 90%;
+    --elev-3-border: 195 22% 84%;
+    --elev-4-border: 195 22% 82%;
+    --elev-1-shadow: none;
+    --elev-2-shadow: 0 1px 2px hsl(197 34% 16% / 0.05), 0 8px 24px -18px hsl(197 34% 16% / 0.2);
+    --elev-3-shadow: 0 2px 6px hsl(197 34% 16% / 0.06), 0 20px 44px -26px hsl(197 34% 16% / 0.3);
+    --elev-4-shadow: 0 6px 14px hsl(197 34% 16% / 0.08), 0 34px 70px -30px hsl(197 34% 16% / 0.38);
     --ambient-opacity: 0.13;
     --decor-strength: 0.45;
     --sheen-strength: 0.09;
@@ -204,6 +219,21 @@
     --shadow-elevated: 0 24px 60px -30px hsl(198 60% 2% / 0.85);
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.14);
     --shadow-hover: 0 18px 40px -22px hsl(198 60% 2% / 0.8);
+
+    /* ---------- Elevation system (dark) ----------
+       Depth reads through lightness first, shadow second. */
+    --elev-1-bg: 198 38% 8%;
+    --elev-2-bg: 198 34% 11%;
+    --elev-3-bg: 198 30% 14%;
+    --elev-4-bg: 198 26% 17%;
+    --elev-1-border: 198 24% 16%;
+    --elev-2-border: 198 22% 19%;
+    --elev-3-border: 197 22% 23%;
+    --elev-4-border: 196 22% 27%;
+    --elev-1-shadow: none;
+    --elev-2-shadow: 0 4px 20px hsl(198 60% 2% / 0.42);
+    --elev-3-shadow: 0 12px 34px -14px hsl(198 60% 2% / 0.6);
+    --elev-4-shadow: 0 28px 66px -26px hsl(198 60% 2% / 0.85);
     --ambient-opacity: 0.28;
     --decor-strength: 1;
     --sheen-strength: 0.14;
@@ -291,6 +321,43 @@
   .surface-secondary { background: hsl(var(--surface-secondary)); }
   .surface-elevated { background: hsl(var(--surface-elevated)); box-shadow: var(--shadow-elevated); }
   .divider { border-color: hsl(var(--border-subtle)); }
+
+  /* ---------- Elevation levels ----------
+     Level 1 = canvas, 2 = resting card, 3 = feature panel, 4 = floating/overlay. */
+  .elev-1 {
+    background: hsl(var(--elev-1-bg));
+    border: 1px solid hsl(var(--elev-1-border));
+    box-shadow: var(--elev-1-shadow);
+  }
+  .elev-2 {
+    background: hsl(var(--elev-2-bg));
+    border: 1px solid hsl(var(--elev-2-border));
+    box-shadow: var(--elev-2-shadow);
+  }
+  .elev-3 {
+    background: hsl(var(--elev-3-bg));
+    border: 1px solid hsl(var(--elev-3-border));
+    box-shadow: var(--elev-3-shadow);
+  }
+  .elev-4 {
+    background: hsl(var(--elev-4-bg));
+    border: 1px solid hsl(var(--elev-4-border));
+    box-shadow: var(--elev-4-shadow);
+  }
+  /* Interactive lift: a resting surface rises one level on hover. */
+  .elev-interactive {
+    transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 220ms ease, border-color 220ms ease;
+  }
+  .elev-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-3-shadow);
+    border-color: hsl(var(--primary) / 0.28);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .elev-interactive:hover { transform: none; }
+  }
 
   .glass-card {
     @apply bg-card border border-border rounded-xl;
