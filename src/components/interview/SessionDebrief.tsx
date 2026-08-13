@@ -25,7 +25,7 @@ function fallbackQuestions(report: InterviewReport) {
 
 const columns = [
   { key: "strengths", title: "Strengths", icon: Sparkles, tone: "text-primary" },
-  { key: "improvements", title: "Improvements", icon: TrendingUp, tone: "text-warning" },
+  { key: "improvements", title: "Improvements", icon: TrendingUp, tone: "text-mahogany" },
 ] as const;
 
 /** End-of-session debrief: what went well, what to fix, and what to practise next. */
@@ -104,14 +104,14 @@ export function SessionDebrief({ report, messages, targetRole, durationSec, onPr
       {questions.length > 0 && (
         <div>
           <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <HelpCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+            <HelpCircle className="h-4 w-4 text-mahogany" aria-hidden="true" />
             Next recommended questions
           </h3>
           <ul className="mt-3 space-y-2">
             {questions.map((q, i) => (
               <li
                 key={i}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card/60 px-3.5 py-2.5"
+                className="accent-card flex flex-wrap items-center justify-between gap-2 rounded-lg px-3.5 py-2.5"
               >
                 <span className="min-w-0 flex-1 text-sm leading-relaxed text-foreground">{q}</span>
                 {onPractiseQuestion && (
