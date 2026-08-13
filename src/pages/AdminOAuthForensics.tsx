@@ -162,6 +162,19 @@ export default function AdminOAuthForensics() {
     },
   });
 
+  const csp = useQuery({
+    queryKey: ["oauth-forensics", "csp"],
+    queryFn: async () => {
+      const { data, error } = await invokeFunction<CspSummary>("oauth-forensics", {
+        body: { action: "csp", days: 7, limit: 200 },
+      });
+      if (error) throw error;
+      return data!;
+    },
+  });
+
+
+
   const runHeaderCheck = useMutation({
     mutationFn: async () => {
       const { data, error } = await invokeFunction<HeaderReport>("oauth-forensics", {
