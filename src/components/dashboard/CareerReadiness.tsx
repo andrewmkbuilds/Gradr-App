@@ -53,6 +53,7 @@ export function CareerReadiness({
 }) {
   const reduced = useReducedMotionPref();
   const [explain, setExplain] = useState(false);
+  const [active, setActive] = useState<ReadinessPillar | null>(null);
   const score = computeReadiness(pillars);
   const totalWeight = pillars.reduce((a, p) => a + p.weight, 0) || 1;
   const state = band(score);
