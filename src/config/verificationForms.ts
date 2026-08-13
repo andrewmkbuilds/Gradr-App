@@ -286,7 +286,7 @@ export const REQUEST_STATUS_COPY: Record<
   pending: {
     label: "Pending review",
     tone: "text-muted-foreground border-border bg-muted/40",
-    hint: "A Gradr reviewer is checking your details. We'll notify you when there's a decision.",
+    hint: "A Gradr reviewer is checking your details. You'll get an in-app notification when there's a decision.",
   },
   approved: {
     label: "Approved",

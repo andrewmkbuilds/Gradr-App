@@ -229,7 +229,8 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
                   Verification request submitted
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  We'll review your information and notify you when a decision is made.
+                  A Gradr reviewer checks it by hand. You'll get an in-app notification (bell icon)
+                  when there's a decision — you can also re-check the status here at any time.
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm">
@@ -303,7 +304,10 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
                 <ul className="space-y-1 text-xs text-muted-foreground">
                   <li>{form.storageNote}</li>
                   <li>Only Gradr reviewers can see your request. It is never sold or shared.</li>
-                  <li>Any document you upload is stored privately and deleted after review.</li>
+                  <li>
+                    Any file you upload goes to Gradr's private storage bucket — no third party sees
+                    it. You can ask us to delete it at any time from Settings.
+                  </li>
                 </ul>
               </div>
 
