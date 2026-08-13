@@ -66,6 +66,7 @@ import { Route as ApiPublicAdminRpcRouteImport } from './routes/api/public/admin
 import { Route as ApiPublicAffiliatePublicRouteImport } from './routes/api/public/affiliate-public'
 import { Route as ApiPublicAnalyzeResumeRouteImport } from './routes/api/public/analyze-resume'
 import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
+import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/career-plan'
 import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
 import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
 import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
@@ -377,6 +378,11 @@ const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
   path: '/api/public/calendar-sync',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCareerPlanRoute = ApiPublicCareerPlanRouteImport.update({
+  id: '/api/public/career-plan',
+  path: '/api/public/career-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCompanyResearchRoute =
   ApiPublicCompanyResearchRouteImport.update({
     id: '/api/public/company-research',
@@ -562,6 +568,7 @@ export interface FileRoutesByFullPath {
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -644,6 +651,7 @@ export interface FileRoutesByTo {
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -728,6 +736,7 @@ export interface FileRoutesById {
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -812,6 +821,7 @@ export interface FileRouteTypes {
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
+    | '/api/public/career-plan'
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -894,6 +904,7 @@ export interface FileRouteTypes {
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
+    | '/api/public/career-plan'
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -977,6 +988,7 @@ export interface FileRouteTypes {
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
+    | '/api/public/career-plan'
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -1030,6 +1042,7 @@ export interface RootRouteChildren {
   ApiPublicAffiliatePublicRoute: typeof ApiPublicAffiliatePublicRoute
   ApiPublicAnalyzeResumeRoute: typeof ApiPublicAnalyzeResumeRoute
   ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
+  ApiPublicCareerPlanRoute: typeof ApiPublicCareerPlanRoute
   ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
   ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
   ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
@@ -1457,6 +1470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCalendarSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/career-plan': {
+      id: '/api/public/career-plan'
+      path: '/api/public/career-plan'
+      fullPath: '/api/public/career-plan'
+      preLoaderRoute: typeof ApiPublicCareerPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/company-research': {
       id: '/api/public/company-research'
       path: '/api/public/company-research'
@@ -1727,6 +1747,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAffiliatePublicRoute: ApiPublicAffiliatePublicRoute,
   ApiPublicAnalyzeResumeRoute: ApiPublicAnalyzeResumeRoute,
   ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
+  ApiPublicCareerPlanRoute: ApiPublicCareerPlanRoute,
   ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
   ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
   ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,
