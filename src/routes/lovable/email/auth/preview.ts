@@ -26,34 +26,40 @@ const ROOT_DOMAIN = "gradr.me"
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://gradr-app.lovable.app"
+const SAMPLE_PROJECT_URL = "https://gradr.me"
+// Sample only: shaped like a real auth action link (token + type + redirect_to).
+const sampleActionUrl = (type: string, next = "/dashboard") =>
+  `https://gradr.me/auth/callback?token_hash=SAMPLE_TOKEN_HASH&type=${type}&redirect_to=${encodeURIComponent(`https://gradr.me${next}`)}`
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
     siteName: SITE_NAME,
     siteUrl: SAMPLE_PROJECT_URL,
     recipient: SAMPLE_EMAIL,
-    confirmationUrl: SAMPLE_PROJECT_URL,
+    confirmationUrl: sampleActionUrl("signup", "/welcome"),
   },
   magiclink: {
     siteName: SITE_NAME,
-    confirmationUrl: SAMPLE_PROJECT_URL,
+    confirmationUrl: sampleActionUrl("magiclink"),
+    magicLinkUrl: sampleActionUrl("magiclink"),
   },
   recovery: {
     siteName: SITE_NAME,
-    confirmationUrl: SAMPLE_PROJECT_URL,
+    confirmationUrl: sampleActionUrl("recovery", "/reset-password"),
+    recoveryUrl: sampleActionUrl("recovery", "/reset-password"),
   },
   invite: {
     siteName: SITE_NAME,
     siteUrl: SAMPLE_PROJECT_URL,
-    confirmationUrl: SAMPLE_PROJECT_URL,
+    confirmationUrl: sampleActionUrl("invite", "/welcome"),
+    inviteUrl: sampleActionUrl("invite", "/welcome"),
   },
   email_change: {
     siteName: SITE_NAME,
     oldEmail: SAMPLE_EMAIL,
     email: SAMPLE_EMAIL,
     newEmail: SAMPLE_EMAIL,
-    confirmationUrl: SAMPLE_PROJECT_URL,
+    confirmationUrl: sampleActionUrl("email_change", "/settings"),
   },
   reauthentication: {
     token: '123456',
