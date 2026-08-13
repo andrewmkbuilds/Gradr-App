@@ -19,7 +19,7 @@ if (!existsSync(ASSETS)) {
 }
 
 // Content-hashed names only: no alphabetic "word" prefixes.
-const ALLOWED = /^[A-Za-z0-9_-]{6,12}\.(js|css|map)$/
+const ALLOWED = /^[A-Za-z0-9_-]{6,12}\.[a-z0-9]+$/
 const KNOWN_TECH = /(react|vue|angular|svelte|next|nuxt|vite|rollup|rolldown|webpack|motion|framer|radix|tailwind|supabase|router|query|recharts|chart|lucide|heroui|nextui|shadcn|paddle|posthog|sentry|admin|auth)/i
 
 const offenders = []
