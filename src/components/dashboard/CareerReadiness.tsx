@@ -6,7 +6,8 @@ import { Surface } from "@/components/ui/surface";
 import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { ChevronDown, Info } from "lucide-react";
+import { ChevronDown, ChevronRight, Info } from "lucide-react";
+import { PillarDrilldown } from "./PillarDrilldown";
 
 export interface ReadinessPillar {
   key: string;
