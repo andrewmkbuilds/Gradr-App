@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { CountUp } from "@/components/motion";
 import { easeOut } from "@/lib/motion/tokens";
 import { Surface } from "@/components/ui/surface";
+import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { cn } from "@/lib/utils";
 
 export interface ReadinessPillar {
@@ -56,6 +57,7 @@ export function CareerReadiness({
   const arcLength = circumference * arcSpan;
 
   return (
+    <DepthStage className="rounded-2xl" tilt={4} sheen={false}>
     <Surface level={3} className={cn("relative overflow-hidden", className)}>
       <div
         aria-hidden
@@ -69,7 +71,7 @@ export function CareerReadiness({
       <p className="text-xs text-muted-foreground">Weighted across resume, matching, activity and practice.</p>
 
       <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-        <div className="relative shrink-0" style={{ width: size, height: size * 0.86 }}>
+        <DepthLayer z={40} className="relative shrink-0" style={{ width: size, height: size * 0.86 }}>
           <svg
             width={size}
             height={size}
@@ -112,9 +114,9 @@ export function CareerReadiness({
               readiness
             </span>
           </div>
-        </div>
+        </DepthLayer>
 
-        <ul className="w-full space-y-3">
+        <DepthLayer as="ul" z={18} className="w-full space-y-3">
           {pillars.map((p, i) => {
             const v = clamp(p.value);
             return (
@@ -139,8 +141,9 @@ export function CareerReadiness({
               </li>
             );
           })}
-        </ul>
+        </DepthLayer>
       </div>
     </Surface>
+    </DepthStage>
   );
 }
