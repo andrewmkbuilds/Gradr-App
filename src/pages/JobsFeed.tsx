@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
+import { useCareerPreferences } from "@/hooks/useCareerPreferences";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +55,9 @@ const COUNTRIES = [
 export default function JobsFeed() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  // Shared targeting cache: onboarding writes to it, so a change there
+  // re-ranks this feed immediately instead of waiting for a reload.
+  const { preferences, isLoading: prefsLoading } = useCareerPreferences();
   const [what, setWhat] = useState("");
   const [where, setWhere] = useState("");
   const [country, setCountry] = useState("us");
@@ -70,14 +75,38 @@ export default function JobsFeed() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasResume, setHasResume] = useState<boolean | null>(null);
   const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
+  const targetingRef = useRef<string>("");
 
   useEffect(() => {
     if (user) {
-      void initialize();
       void loadTracked();
       void checkResume();
     }
   }, [user]);
+
+  // Apply saved targeting to the search controls and re-run the search whenever
+  // it changes (first load, or right after onboarding saves new roles).
+  useEffect(() => {
+    if (!user || prefsLoading) return;
+    void logPreferencesRead("jobs_feed", preferences.onboarded);
+    if (!preferences.onboarded) {
+      setShowOnboarding(true);
+      return;
+    }
+    const role = preferences.targetRoles[0] ?? "";
+    const loc = preferences.locations[0] ?? "";
+    const ctry = preferences.country ?? "us";
+    const remote = preferences.remotePreference === "remote";
+    const signature = JSON.stringify([role, loc, ctry, remote, preferences.industries, preferences.salaryMin]);
+    if (signature === targetingRef.current) return;
+    targetingRef.current = signature;
+    setWhat(role);
+    setWhere(loc);
+    setCountry(ctry);
+    setRemoteOnly(remote);
+    if (role) void runSearch(role, loc, ctry, remote);
+  }, [user, prefsLoading, preferences]);
+
 
   const checkResume = async () => {
     if (!user) return;
@@ -109,19 +138,8 @@ export default function JobsFeed() {
     return () => window.clearInterval(id);
   }, [user, noResumeScoringAttempted, jobs]);
 
-  const initialize = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
-    void logPreferencesRead("jobs_feed", Boolean(data));
-    if (!data || !data.onboarded) {
-      setShowOnboarding(true);
-      return;
-    }
-    setWhat(data.target_role || "");
-    setWhere(data.locations?.[0] || "");
-    setCountry(data.country || "us");
-    if (data.remote_preference === "remote") setRemoteOnly(true);
-  };
+
+
 
   const handleOnboardingComplete = (prefs: { what: string; where: string; country: string; remoteOnly: boolean; salaryMin: number | null }) => {
     setShowOnboarding(false);

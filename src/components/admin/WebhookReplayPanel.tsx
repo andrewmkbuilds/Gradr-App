@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FlaskConical, Loader2, Play, RefreshCw, Webhook } from "lucide-react";
+import { FlaskConical, Loader2, Play, RefreshCw, ShieldCheck, Webhook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,16 @@ interface DryRunResult {
   error?: string;
 }
 
+interface IdempotencyResult {
+  resent: boolean;
+  idempotent: boolean;
+  claim: string;
+  state?: string;
+  ack?: { status: number; body: Record<string, unknown> };
+  notes?: string[];
+}
+
+
 const ENDPOINT = "/api/public/admin-webhook-replay";
 
 async function callReplayApi<T>(body: Record<string, unknown>): Promise<T> {
@@ -78,6 +88,8 @@ export default function WebhookReplayPanel() {
   const [selected, setSelected] = useState<DeliveryRow | null>(null);
   const [draft, setDraft] = useState("");
   const [dryRun, setDryRun] = useState<DryRunResult | null>(null);
+  const [probe, setProbe] = useState<IdempotencyResult | null>(null);
+
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   const deliveries = useQuery({
@@ -97,6 +109,8 @@ export default function WebhookReplayPanel() {
     onSuccess: (delivery) => {
       setSelected(delivery);
       setDryRun(null);
+      setProbe(null);
+
       setJsonError(null);
       setDraft(JSON.stringify(delivery.payload ?? {}, null, 2));
     },
@@ -137,6 +151,25 @@ export default function WebhookReplayPanel() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  // Re-sends the untouched stored body through the endpoint's claim step and
+  // reports the ack the provider would get. Safe to run on processed events.
+  const idempotency = useMutation({
+    mutationFn: async () => {
+      if (!selected) throw new Error("No delivery selected");
+      return callReplayApi<IdempotencyResult>({
+        action: "idempotency",
+        deliveryId: selected.id,
+      });
+    },
+    onSuccess: (result) => {
+      setProbe(result);
+      if (result.idempotent) toast.success("Duplicate acked — idempotency holds");
+      else if (result.resent) toast.error("Idempotency did not hold");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   return (
     <Card className="p-4">
@@ -266,12 +299,48 @@ export default function WebhookReplayPanel() {
               </Alert>
             )}
 
+            {probe && (
+              <Alert variant={probe.resent && !probe.idempotent ? "destructive" : "default"}>
+                <AlertDescription className="space-y-1 text-xs">
+                  <p className="font-medium">
+                    {probe.idempotent
+                      ? "Idempotency confirmed — duplicate acked"
+                      : probe.resent
+                        ? "Idempotency failed"
+                        : "Not a duplicate yet"}
+                  </p>
+                  <p className="font-mono">
+                    claim: {probe.claim} · ack: HTTP {probe.ack?.status ?? 200}{" "}
+                    {JSON.stringify(probe.ack?.body ?? {})}
+                  </p>
+                  <ul className="list-disc pl-4">
+                    {(probe.notes ?? []).map((n) => (
+                      <li key={n}>{n}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => idempotency.mutate()}
+                disabled={idempotency.isPending || replay.isPending}
+              >
+                {idempotency.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                )}
+                Re-send &amp; check idempotency
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => replay.mutate("dry_run")}
                 disabled={replay.isPending}
               >
+
                 {replay.isPending && replay.variables === "dry_run" ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
