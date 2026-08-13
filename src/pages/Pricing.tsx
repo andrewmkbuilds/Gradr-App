@@ -9,6 +9,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBillingActions, useSubscription } from "@/hooks/useSubscription";
 import { CREDIT_PACKS, FREE_TIER, TIERS, type Tier } from "@/config/tiers";
+import {
+  ANNUAL_SAVINGS_MESSAGE,
+  annualListPrice,
+  annualSavingsPercent,
+  formatUsd,
+  planAmount,
+  planPriceLabel,
+  type PlanId,
+} from "@/config/pricing";
 import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
@@ -302,7 +311,7 @@ export default function Pricing() {
                   </div>
 
                   <div className="mb-4">
-                    <PriceLine id={priceId} suffix={interval === "annual" ? "year" : "month"} />
+                    <PriceLine id={priceId} plan={tier.key as PlanId} suffix={interval === "annual" ? "year" : "month"} />
                   </div>
 
                   <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
@@ -320,7 +329,7 @@ export default function Pricing() {
                     onClick={() => (current ? navigate("/billing") : handleSelect(tier))}
                     variant={tier.highlighted ? "default" : "outline"}
                     className="w-full"
-                    disabled={pending === pendingKey || pricesLoading || !priceFor(priceId)}
+                    disabled={pending === pendingKey}
                   >
                     {current ? (
                       "Current plan"
