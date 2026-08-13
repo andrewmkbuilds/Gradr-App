@@ -132,3 +132,119 @@ export async function dispatchAlert(
 
   return errors.length > 0 ? errors.join("; ") : null;
 }
+
+/* ------------------------------------------------------- OAuth flow alerts -- */
+
+export interface OAuthAlertNotice {
+  /** "flow-check" (daily headless run) or "deviation" (redirect chain drifted). */
+  kind: "flow-check" | "deviation";
+  runId: string;
+  source: string;
+  /** Short human summary, e.g. "2 of 3 accounts failed". */
+  headline: string;
+  /** One line per failing account / deviating hop chain. */
+  details: string[];
+  expectedFinalUrl: string;
+  dashboardUrl?: string;
+}
+
+const OAUTH_ALERT_TITLE: Record<OAuthAlertNotice["kind"], string> = {
+  "flow-check": "Daily OAuth flow check failed",
+  deviation: "OAuth redirect-chain deviation detected",
+};
+
+async function postOAuthSlack(notice: OAuthAlertNotice): Promise<void> {
+  const url = process.env['ALERT_SLACK_WEBHOOK_URL'];
+  if (!url) return;
+  const title = OAUTH_ALERT_TITLE[notice.kind];
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: `:rotating_light: Gradr — ${title}`,
+      blocks: [
+        { type: "header", text: { type: "plain_text", text: `Gradr — ${title}` } },
+        {
+          type: "section",
+          fields: [
+            { type: "mrkdwn", text: `*Run*\n\`${notice.runId}\`` },
+            { type: "mrkdwn", text: `*Source*\n${notice.source}` },
+            { type: "mrkdwn", text: `*Expected landing*\n${notice.expectedFinalUrl}` },
+            { type: "mrkdwn", text: `*Summary*\n${notice.headline}` },
+          ],
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*Findings*\n\`\`\`${notice.details.slice(0, 20).join("\n").slice(0, 2500) || "see dashboard"}\`\`\``,
+          },
+        },
+        ...(notice.dashboardUrl
+          ? [{ type: "context", elements: [{ type: "mrkdwn", text: `<${notice.dashboardUrl}|Open OAuth forensics>` }] }]
+          : []),
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`Slack responded ${res.status}`);
+}
+
+async function sendOAuthEmail(notice: OAuthAlertNotice): Promise<void> {
+  const to = process.env['ALERT_EMAIL_TO'];
+  const apiKey = process.env['LOVABLE_API_KEY'];
+  const from = process.env['ALERT_EMAIL_FROM'] ?? 'alerts@notify.gradr.me';
+  if (!to) return;
+  if (!apiKey) throw new Error('LOVABLE_API_KEY is not configured');
+
+  const title = OAUTH_ALERT_TITLE[notice.kind];
+  const subject = `[Gradr] ${title} — ${notice.headline}`;
+  const escaped = (value: string) => value.replace(/</g, "&lt;");
+
+  await sendLovableEmail({
+    to,
+    from,
+    subject,
+    text: `${subject}\n\nRun: ${notice.runId}\nSource: ${notice.source}\nExpected landing: ${notice.expectedFinalUrl}\n\n${notice.details.join("\n")}\n\n${notice.dashboardUrl ?? ""}`,
+    html: `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:600px">
+        <h2 style="margin:0 0 4px;color:#245F73">${title}</h2>
+        <p style="color:#555;margin:0 0 16px">${escaped(notice.headline)}</p>
+        <table style="border-collapse:collapse;width:100%;font-size:14px">
+          <tr><td style="padding:6px 0;color:#777">Run</td><td><code>${escaped(notice.runId)}</code></td></tr>
+          <tr><td style="padding:6px 0;color:#777">Source</td><td>${escaped(notice.source)}</td></tr>
+          <tr><td style="padding:6px 0;color:#777">Expected landing</td><td>${escaped(notice.expectedFinalUrl)}</td></tr>
+        </table>
+        <pre style="background:#F2F0EF;padding:12px;border-radius:8px;font-size:12px;white-space:pre-wrap">${
+          escaped(notice.details.join("\n").slice(0, 3000))
+        }</pre>
+        ${
+          notice.dashboardUrl
+            ? `<p style="font-size:13px"><a href="${notice.dashboardUrl}" style="color:#733E24">Open OAuth forensics</a></p>`
+            : ""
+        }
+      </div>
+    `,
+  }, { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] });
+}
+
+/**
+ * Announces an OAuth flow-check failure or redirect-chain deviation on every
+ * configured channel. Best-effort: never throws into the caller's request.
+ */
+export async function dispatchOAuthAlert(notice: OAuthAlertNotice): Promise<string | null> {
+  const targets = alertingTargets();
+  if (!targets.slack && !targets.email) return "no alert channel configured";
+
+  const errors: string[] = [];
+  const results = await Promise.allSettled([
+    targets.slack ? postOAuthSlack(notice) : Promise.resolve(),
+    targets.email ? sendOAuthEmail(notice) : Promise.resolve(),
+  ]);
+  ["slack", "email"].forEach((label, i) => {
+    const r = results[i];
+    if (r && r.status === "rejected") {
+      errors.push(`${label}: ${r.reason instanceof Error ? r.reason.message : String(r.reason)}`);
+    }
+  });
+  return errors.length > 0 ? errors.join("; ") : null;
+}
