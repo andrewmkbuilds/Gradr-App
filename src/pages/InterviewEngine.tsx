@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { useNavigate, Link } from "@/lib/router-compat";
@@ -42,6 +43,14 @@ function InterviewEngineInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [targetRole, setTargetRole] = useState("");
   const [started, setStarted] = useState(false);
+  useSeoOverride(
+    targetRole.trim()
+      ? {
+          title: `Interview Engine — mock interview for ${targetRole.trim()}`,
+          description: `Realtime AI mock interview and scorecard for the ${targetRole.trim()} role.`,
+        }
+      : null,
+  );
   const [stage, setStage] = useState<"setup" | "preflight">("setup");
   const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);

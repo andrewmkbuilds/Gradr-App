@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { Zap, FileText, Mail, MessageSquare, Loader2, Copy, Check } from "lucide-react";
@@ -24,6 +25,14 @@ function ApplicationEngineInner() {
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  useSeoOverride(
+    jobTitle.trim()
+      ? {
+          title: `Application Engine — ${jobTitle.trim()}${company.trim() ? ` at ${company.trim()}` : ""}`,
+          description: `Generate a tailored cover letter and recruiter outreach for the ${jobTitle.trim()} role.`,
+        }
+      : null,
+  );
   const [loading, setLoading] = useState(false);
   const [activeType, setActiveType] = useState<GenerationType | null>(null);
   const [result, setResult] = useState<GeneratedContent | null>(null);
