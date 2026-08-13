@@ -1060,3 +1060,146 @@ html[data-reduce-motion="true"] [data-depth-layer],
 html[data-reduce-motion="true"] [data-magnetic] {
   transform: none !important;
 }
+
+/* ---------------------------------------------------------------------------
+   Spatial system v2 — the shared 3D language
+   Applied through the shared primitives (card, button, overlays, fields, nav)
+   so every page inherits the same depth instead of one-off effects.
+   All of it is transform/opacity/shadow work: no layout, no paint storms.
+--------------------------------------------------------------------------- */
+@layer utilities {
+  /* Elevation ladder. Higher = further off the page. */
+  .elev-1 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 6px 16px -12px hsl(220 60% 2% / 0.6); }
+  .elev-2 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 14px 30px -18px hsl(220 60% 2% / 0.7); }
+  .elev-3 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 26px 50px -28px hsl(220 60% 2% / 0.85); }
+  .elev-4 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 38px 70px -34px hsl(220 60% 2% / 0.92); }
+
+  /* Cursor-following tilt. Vars come from SpatialField; with no pointer the
+     element sits perfectly flat, so touch and SSR render unchanged. */
+  .tilt-3d {
+    --tilt-max: 5deg;
+    --tx: 0;
+    --ty: 0;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transform:
+      perspective(1200px)
+      rotateX(calc(var(--ty) * var(--tilt-max) * -1))
+      rotateY(calc(var(--tx) * var(--tilt-max)))
+      translate3d(0, 0, 0);
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .tilt-3d[data-tilt-active="true"] {
+    transform:
+      perspective(1200px)
+      rotateX(calc(var(--ty) * var(--tilt-max) * -1))
+      rotateY(calc(var(--tx) * var(--tilt-max)))
+      translate3d(0, -4px, 0);
+    transition: transform 120ms linear;
+  }
+  /* Specular highlight that tracks the cursor across the surface. */
+  .tilt-3d::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 320ms var(--ease-out-soft);
+    background: radial-gradient(
+      420px circle at var(--px, 50%) var(--py, 50%),
+      hsl(var(--primary) / 0.12),
+      transparent 60%
+    );
+  }
+  .tilt-3d[data-tilt-active="true"]::before { opacity: 1; }
+  /* Children can be pushed forward in Z for real parallax inside a card. */
+  .tilt-layer { transform: translateZ(28px); }
+
+  /* Floating chrome: navbars, sidebars, tab bars. Reads as glass hovering
+     above the page rather than a bar welded to it. */
+  .glass-float {
+    background: linear-gradient(180deg, hsl(var(--surface) / 0.88), hsl(var(--surface) / 0.72));
+    backdrop-filter: blur(20px) saturate(160%);
+    border-color: hsl(var(--border) / 0.7);
+    box-shadow:
+      0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset,
+      0 18px 40px -30px hsl(220 60% 2% / 0.9);
+  }
+
+  /* Overlay surfaces arrive from behind the page plane. */
+  .depth-pop {
+    transform-origin: var(--radix-popper-transform-origin, center);
+  }
+  .depth-pop[data-state="open"] { animation: depth-pop-in 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .depth-pop[data-state="closed"] { animation: depth-pop-out 130ms cubic-bezier(0.4, 0, 1, 1); }
+
+  /* Fields look milled into the surface instead of drawn on top of it. */
+  .inset-depth {
+    background: linear-gradient(180deg, hsl(var(--surface-secondary) / 0.55), hsl(var(--surface) / 0.35));
+    box-shadow:
+      inset 0 1px 2px hsl(220 60% 2% / 0.16),
+      0 1px 0 0 hsl(0 0% 100% / calc(var(--sheen-strength) * 0.8));
+    transition: box-shadow 220ms var(--ease-out-soft), border-color 220ms var(--ease-out-soft);
+  }
+  .inset-depth:focus-visible,
+  .inset-depth:focus-within {
+    border-color: hsl(var(--primary) / 0.55);
+    box-shadow:
+      inset 0 1px 2px hsl(220 60% 2% / 0.1),
+      0 0 0 3px hsl(var(--primary) / 0.16),
+      0 8px 20px -16px hsl(var(--primary) / 0.7);
+  }
+
+  /* Icon chips with a soft extruded face. */
+  .extrude {
+    background: linear-gradient(160deg, hsl(var(--primary) / 0.16), hsl(var(--primary) / 0.06));
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.22),
+      inset 0 -1px 0 hsl(220 60% 2% / 0.18),
+      0 8px 18px -14px hsl(var(--primary) / 0.8);
+  }
+
+  /* Sections gently rise out of depth as they enter the viewport. */
+  .rise-in {
+    animation: rise-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 22%;
+  }
+
+  /* Coarse pointers get elevation and light, never tilt. */
+  @media not all and (hover: hover) {
+    .tilt-3d,
+    .tilt-3d[data-tilt-active="true"] { transform: none; }
+    .tilt-layer { transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tilt-3d,
+    .tilt-3d[data-tilt-active="true"] { transform: none; transition: none; }
+    .tilt-3d::before { display: none; }
+    .rise-in { animation: none; }
+    .depth-pop[data-state="open"],
+    .depth-pop[data-state="closed"] { animation: none; }
+  }
+}
+
+@keyframes depth-pop-in {
+  from { opacity: 0; transform: perspective(1000px) translateZ(-40px) translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: perspective(1000px) translateZ(0) translateY(0) scale(1); }
+}
+@keyframes depth-pop-out {
+  from { opacity: 1; transform: perspective(1000px) translateZ(0) scale(1); }
+  to   { opacity: 0; transform: perspective(1000px) translateZ(-30px) scale(0.98); }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: perspective(1200px) translate3d(0, 26px, -60px) rotateX(3deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* The in-app motion toggle switches the whole spatial layer off, not just
+   the ambient decoration. */
+html[data-reduce-motion="true"] .tilt-3d,
+html[data-reduce-motion="true"] .tilt-3d[data-tilt-active="true"],
+html[data-reduce-motion="true"] .tilt-layer { transform: none !important; }
+html[data-reduce-motion="true"] .tilt-3d::before { display: none !important; }
