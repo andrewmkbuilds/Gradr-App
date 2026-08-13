@@ -158,3 +158,154 @@ export function linksMatchActionUrl(inspection: AuthEmailLinkInspection, actionU
   if (inspection.buttonHref !== actionUrl) return false;
   return inspection.fallbackLinks.every((link) => link === actionUrl);
 }
+
+/* ------------------------------------------------------------------ *
+ * Redirect allowlist
+ * ------------------------------------------------------------------ */
+
+/**
+ * Hosts allowed to *issue* an auth action link. Supabase Auth signs the link on
+ * its own project origin; gradr.me serves the callback route. Anything else in
+ * an email we send is either a misconfiguration or a rewritten link.
+ */
+export const ALLOWED_ACTION_HOSTS = [
+  "gradr.me",
+  "www.gradr.me",
+  /^[a-z0-9-]+\.supabase\.co$/,
+] as const;
+
+/** Paths an auth action link may point at on an allowed host. */
+export const ALLOWED_ACTION_PATHS = [
+  "/auth/v1/verify",
+  "/auth/v1/callback",
+  "/auth/callback",
+  "/auth/confirm",
+] as const;
+
+/**
+ * Where the user may be sent *after* the token is verified. This is the open
+ * redirect surface: Supabase will bounce the browser to `redirect_to` verbatim,
+ * so an attacker-supplied value turns our own signed link into a phishing hop.
+ */
+export const ALLOWED_REDIRECT_HOSTS = ["gradr.me", "www.gradr.me"] as const;
+
+/** Path prefixes a post-verification redirect may land on. */
+export const ALLOWED_REDIRECT_PATH_PREFIXES = [
+  "/",
+  "/auth",
+  "/auth/callback",
+  "/dashboard",
+  "/welcome",
+  "/onboarding",
+  "/reset-password",
+  "/billing",
+  "/account",
+] as const;
+
+export interface RedirectAllowlistVerdict {
+  allowed: boolean;
+  /** Human-readable reasons, shown verbatim in the admin preview. */
+  reasons: string[];
+  actionHost: string | null;
+  actionPath: string | null;
+  redirectHost: string | null;
+  redirectPath: string | null;
+}
+
+function hostAllowed(host: string, patterns: readonly (string | RegExp)[]): boolean {
+  return patterns.some((p) => (typeof p === "string" ? p === host : p.test(host)));
+}
+
+/**
+ * Validate an auth action URL and its `redirect_to` target against the
+ * allowlist. Returns *why* a link fails, not just that it did, so the admin
+ * preview can explain the problem instead of showing a red badge.
+ */
+export function validateAuthRedirect(url: unknown): RedirectAllowlistVerdict {
+  const fail = (reason: string): RedirectAllowlistVerdict => ({
+    allowed: false,
+    reasons: [reason],
+    actionHost: null,
+    actionPath: null,
+    redirectHost: null,
+    redirectPath: null,
+  });
+
+  if (typeof url !== "string" || !url.trim()) return fail("No action URL present to validate.");
+
+  let action: URL;
+  try {
+    action = new URL(url);
+  } catch {
+    return fail("Action URL is not a parseable absolute URL.");
+  }
+
+  const reasons: string[] = [];
+
+  if (action.protocol !== "https:") {
+    reasons.push(`Action link uses ${action.protocol}// — auth links must be https.`);
+  }
+  if (!hostAllowed(action.hostname, ALLOWED_ACTION_HOSTS)) {
+    reasons.push(
+      `Action host "${action.hostname}" is not allowlisted (expected gradr.me or a *.supabase.co project origin).`,
+    );
+  }
+  if (!ALLOWED_ACTION_PATHS.some((p) => action.pathname === p)) {
+    reasons.push(
+      `Action path "${action.pathname}" is not an allowlisted verification path (${ALLOWED_ACTION_PATHS.join(", ")}).`,
+    );
+  }
+
+  const redirectRaw = action.searchParams.get("redirect_to");
+  let redirectHost: string | null = null;
+  let redirectPath: string | null = null;
+
+  if (redirectRaw) {
+    let redirect: URL | null = null;
+    try {
+      redirect = new URL(redirectRaw);
+    } catch {
+      reasons.push(`redirect_to "${redirectRaw}" is not an absolute URL.`);
+    }
+
+    if (redirect) {
+      redirectHost = redirect.hostname;
+      redirectPath = redirect.pathname;
+
+      if (redirect.protocol !== "https:") {
+        reasons.push(`redirect_to uses ${redirect.protocol}// — the landing page must be https.`);
+      }
+      if (!hostAllowed(redirect.hostname, ALLOWED_REDIRECT_HOSTS)) {
+        reasons.push(
+          `redirect_to host "${redirect.hostname}" is off-site — the user would leave gradr.me after verifying.`,
+        );
+      }
+      // Protocol-relative and userinfo tricks ("https://gradr.me@evil.test").
+      if (/[@\\]/.test(redirectRaw.replace(/^https?:\/\//i, "").split("?")[0] ?? "")) {
+        reasons.push("redirect_to contains userinfo or backslash characters — a known spoofing trick.");
+      }
+      const prefixOk = ALLOWED_REDIRECT_PATH_PREFIXES.some(
+        (prefix) => redirect!.pathname === prefix || redirect!.pathname.startsWith(`${prefix}/`),
+      );
+      if (!prefixOk) {
+        reasons.push(`redirect_to path "${redirect.pathname}" is not an allowlisted landing path.`);
+      }
+    }
+  }
+
+  for (const needle of FORBIDDEN_EMAIL_STRINGS) {
+    if (url.toLowerCase().includes(needle)) {
+      reasons.push(`Action URL contains forbidden host fragment "${needle}".`);
+    }
+  }
+
+  return {
+    allowed: reasons.length === 0,
+    reasons,
+    actionHost: action.hostname,
+    actionPath: action.pathname,
+    redirectHost,
+    redirectPath,
+  };
+}
+

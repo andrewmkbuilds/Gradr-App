@@ -14,7 +14,7 @@
  */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Check, Link2, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Check, Download, Link2, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +46,15 @@ async function callApi<T>(body: Record<string, unknown>): Promise<T> {
   return payload;
 }
 
+interface AllowlistVerdict {
+  allowed: boolean;
+  reasons: string[];
+  actionHost: string | null;
+  actionPath: string | null;
+  redirectHost: string | null;
+  redirectPath: string | null;
+}
+
 interface PreviewResponse {
   templates: { key: string; label: string }[];
   template: string;
@@ -54,6 +63,7 @@ interface PreviewResponse {
   html: string;
   text: string;
   actionUrl: string | null;
+  allowlist: AllowlistVerdict;
   links: {
     buttonHref: string | null;
     fallbackLinks: string[];
@@ -78,6 +88,10 @@ interface AuditRow {
   token_digest: string | null;
   url_digest: string | null;
   link_valid: boolean;
+  allowlist_ok: boolean | null;
+  allowlist_reasons: string[] | null;
+  redirect_sanitized: boolean | null;
+  blocked: boolean | null;
   run_id: string | null;
   message_id: string | null;
 }
@@ -91,10 +105,19 @@ function Verdict({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
+/** Default export window: the trailing 30 days, as yyyy-mm-dd for <input type=date>. */
+function isoDay(offsetDays = 0): string {
+  return new Date(Date.now() - offsetDays * 864e5).toISOString().slice(0, 10);
+}
+
 export default function AdminAuthEmailPreview() {
   const [template, setTemplate] = useState("signup");
   const [actionUrlDraft, setActionUrlDraft] = useState("");
   const [actionUrl, setActionUrl] = useState("");
+  const [from, setFrom] = useState(isoDay(30));
+  const [to, setTo] = useState(isoDay(0));
+  const [exporting, setExporting] = useState<"json" | "csv" | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const preview = useQuery({
     queryKey: ["auth-email-preview", template, actionUrl],
@@ -103,12 +126,61 @@ export default function AdminAuthEmailPreview() {
   });
 
   const audit = useQuery({
-    queryKey: ["auth-email-link-audit"],
-    queryFn: () => callApi<{ rows: AuditRow[] }>({ action: "auth-link-audit" }),
+    queryKey: ["auth-email-link-audit", from, to],
+    queryFn: () =>
+      callApi<{ rows: AuditRow[] }>({
+        action: "auth-link-audit",
+        from: new Date(`${from}T00:00:00Z`).toISOString(),
+        to: new Date(`${to}T23:59:59Z`).toISOString(),
+      }),
   });
 
+  /**
+   * Download the rendered email plus the audit entries for the selected range.
+   * The endpoint streams a file, so this bypasses `callApi` (which parses JSON)
+   * and turns the response into a blob.
+   */
+  async function download(format: "json" | "csv") {
+    setExporting(format);
+    setExportError(null);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Your session expired — sign in again.");
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          action: "auth-preview-export",
+          format,
+          template,
+          actionUrl,
+          from: new Date(`${from}T00:00:00Z`).toISOString(),
+          to: new Date(`${to}T23:59:59Z`).toISOString(),
+        }),
+      });
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(payload.error ?? `Export failed (${res.status})`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `gradr-auth-email-${template}-${from}_${to}.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : "Export failed");
+    } finally {
+      setExporting(null);
+    }
+  }
+
   const links = preview.data?.links;
+  const allowlist = preview.data?.allowlist;
   const resolvedActionUrl = preview.data?.actionUrl ?? null;
+
 
   return (
     <div className="space-y-6">
@@ -171,7 +243,25 @@ export default function AdminAuthEmailPreview() {
               )}
               <Verdict ok={(links?.forbidden ?? []).length === 0} label="No forbidden hosts" />
               <Verdict ok={(links?.externalHrefs ?? []).length === 0} label="No unexpected external links" />
+              {resolvedActionUrl && (
+                <Verdict ok={allowlist?.allowed === true} label="Redirect target allowlisted" />
+              )}
             </div>
+
+            {resolvedActionUrl && allowlist && !allowlist.allowed && (
+              <div className="space-y-1 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs">
+                <p className="font-medium text-destructive">
+                  This link would be rewritten or blocked before sending:
+                </p>
+                <ul className="list-disc space-y-0.5 pl-4 text-destructive">
+                  {allowlist.reasons.map((reason, i) => (
+                    <li key={i}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+
 
             <dl className="grid gap-2 text-xs sm:grid-cols-[10rem_1fr]">
               <dt className="text-muted-foreground">Action URL</dt>
@@ -230,6 +320,49 @@ export default function AdminAuthEmailPreview() {
           Which dynamic action URL each authentication email was built with. Tokens are stored only
           as one-way fingerprints, so this record can never be used to sign in as someone.
         </p>
+
+        <div className="mb-4 flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="audit-from">From</Label>
+            <Input
+              id="audit-from"
+              type="date"
+              value={from}
+              max={to}
+              onChange={(e) => setFrom(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="audit-to">To</Label>
+            <Input
+              id="audit-to"
+              type="date"
+              value={to}
+              min={from}
+              onChange={(e) => setTo(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <Button variant="secondary" disabled={exporting !== null} onClick={() => download("json")}>
+            {exporting === "json" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Export JSON (email + audit)
+          </Button>
+          <Button variant="outline" disabled={exporting !== null} onClick={() => download("csv")}>
+            {exporting === "csv" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Export CSV (audit)
+          </Button>
+        </div>
+        {exportError && <p className="mb-3 text-sm text-destructive">{exportError}</p>}
+
         {(audit.data?.rows ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">No auth emails recorded in this window.</p>
         ) : (
@@ -243,6 +376,7 @@ export default function AdminAuthEmailPreview() {
                   <th className="py-2 pr-3">Link origin</th>
                   <th className="py-2 pr-3">Path</th>
                   <th className="py-2 pr-3">Redirect</th>
+                  <th className="py-2 pr-3">Allowlist</th>
                   <th className="py-2 pr-3">URL fingerprint</th>
                 </tr>
               </thead>
@@ -259,6 +393,18 @@ export default function AdminAuthEmailPreview() {
                     <td className="py-2 pr-3">{r.link_origin ?? "—"}</td>
                     <td className="py-2 pr-3">{r.link_path ?? "—"}</td>
                     <td className="py-2 pr-3 max-w-[16rem] truncate">{r.redirect_to ?? "—"}</td>
+                    <td className="py-2 pr-3">
+                      {r.allowlist_ok === false ? (
+                        <span
+                          className="text-destructive"
+                          title={(r.allowlist_reasons ?? []).join(" · ")}
+                        >
+                          {r.redirect_sanitized ? "Rewritten" : "Failed"}
+                        </span>
+                      ) : (
+                        <span className="text-success">Pass</span>
+                      )}
+                    </td>
                     <td className="py-2 pr-3 font-mono">{r.url_digest?.slice(0, 12) ?? "—"}</td>
                   </tr>
                 ))}
@@ -267,6 +413,7 @@ export default function AdminAuthEmailPreview() {
           </div>
         )}
       </Card>
+
     </div>
   );
 }
