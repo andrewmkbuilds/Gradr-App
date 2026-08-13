@@ -263,8 +263,8 @@ function Section({
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-      <span className="h-px w-6 bg-primary/50" aria-hidden />
+    <span className="accent-text inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+      <span className="h-px w-6 bg-mahogany/70" aria-hidden />
       {children}
     </span>
   );
@@ -369,7 +369,7 @@ export default function Landing() {
                   <Magnetic strength={0.18}>
                     <Button
                       size="lg"
-                      variant="outline"
+                      variant="accentOutline"
                       className="h-12 px-6 text-base"
                       onClick={() => document.getElementById("demos")?.scrollIntoView({ behavior: "smooth" })}
                     >
