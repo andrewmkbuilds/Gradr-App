@@ -73,6 +73,7 @@
     "jspdf": "^4.2.1",
     "lucide-react": "^0.462.0",
     "mammoth": "^1.12.0",
+    "motion": "^13.1.0",
     "next-themes": "^0.3.0",
     "pdfjs-dist": "^6.2.108",
     "posthog-js": "^1.415.1",

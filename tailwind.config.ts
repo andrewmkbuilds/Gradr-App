@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"Geist"', '"Inter var"', "Inter", "system-ui", "sans-serif"],
+        display: ['"Bricolage Grotesque"', '"Geist"', "system-ui", "sans-serif"],
+      },
       colors: {
         border: {
           DEFAULT: "hsl(var(--border))",
