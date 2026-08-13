@@ -35,10 +35,13 @@ export const Surface = forwardRef<HTMLDivElement, SurfaceProps>(
     <div
       ref={ref}
       className={cn(
+        // `depth-surface` gives every app panel its lighting, reflective edge
+        // and 3D transform context — the spatial layer is opt-out, not opt-in.
+        "depth-surface",
         LEVEL_CLASS[level],
         RADIUS[level],
         !flush && "p-5",
-        interactive && "elev-interactive",
+        interactive && "elev-interactive depth-hover",
         className,
       )}
       {...props}
