@@ -48,6 +48,8 @@ export function BrandLogo({ size = 32, className, decorative = true, priority = 
       <img
         {...shared}
         src={BRAND_LOGO_URL}
+        alt={decorative ? "" : "Gradr"}
+        aria-hidden={decorative || undefined}
         className="block rounded-[22%] object-contain dark:hidden"
       />
       <img
