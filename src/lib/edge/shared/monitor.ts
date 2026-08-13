@@ -10,6 +10,7 @@
  * best-effort and swallowed on error.
  */
 import { createClient } from "./supabase";
+import { dispatchAlert, shouldEscalate } from "./alerting";
 
 export type HealthOutcome =
   | "success"
@@ -40,28 +41,78 @@ function outcomeFor(status: number): HealthOutcome {
 
 const ALERTING_OUTCOMES: HealthOutcome[] = ["auth_rejected", "rate_limited", "server_error"];
 
+async function notify(
+  alertId: string,
+  endpoint: string,
+  kind: HealthOutcome,
+  message: string,
+  occurrences: number,
+  firstSeenAt: string,
+  isEscalation: boolean,
+) {
+  // Best-effort: a dead Slack webhook must never turn into a failed request.
+  const error = await dispatchAlert(
+    { endpoint, kind, message, occurrences, firstSeenAt },
+    isEscalation,
+  ).catch((err) => (err instanceof Error ? err.message : String(err)));
+
+  await db()
+    .from("api_health_alerts")
+    .update({ notified_at: new Date().toISOString(), notify_error: error })
+    .eq("id", alertId);
+}
+
 async function raiseAlert(endpoint: string, kind: HealthOutcome, message: string) {
   const { data: open } = await db()
     .from("api_health_alerts")
-    .select("id, occurrences")
+    .select("id, occurrences, first_seen_at")
     .eq("endpoint", endpoint)
     .eq("kind", kind)
     .eq("resolved", false)
     .maybeSingle();
 
   if (open?.id) {
+    const occurrences = Number(open.occurrences ?? 0) + 1;
     await db()
       .from("api_health_alerts")
       .update({
-        occurrences: Number(open.occurrences ?? 0) + 1,
+        occurrences,
         last_seen_at: new Date().toISOString(),
         message,
       })
       .eq("id", open.id);
+
+    if (shouldEscalate(occurrences)) {
+      await notify(
+        String(open.id),
+        endpoint,
+        kind,
+        message,
+        occurrences,
+        String(open.first_seen_at ?? new Date().toISOString()),
+        true,
+      );
+    }
     return;
   }
 
-  await db().from("api_health_alerts").insert({ endpoint, kind, message });
+  const { data: created } = await db()
+    .from("api_health_alerts")
+    .insert({ endpoint, kind, message })
+    .select("id, first_seen_at")
+    .maybeSingle();
+
+  if (created?.id) {
+    await notify(
+      String(created.id),
+      endpoint,
+      kind,
+      message,
+      1,
+      String(created.first_seen_at ?? new Date().toISOString()),
+      false,
+    );
+  }
 }
 
 export async function recordApiHealth(params: {
