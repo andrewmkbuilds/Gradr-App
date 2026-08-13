@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Loader2,
+  Download,
   RefreshCw,
   ShieldAlert,
 } from "lucide-react";
@@ -14,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import WebhookReplayPanel from "@/components/admin/WebhookReplayPanel";
+import WebhookSimulator from "@/components/admin/WebhookSimulator";
+import { downloadCsv } from "@/lib/exportFile";
 
 interface HealthEvent {
   id: string;
@@ -143,6 +146,56 @@ export default function AdminApiHealth() {
     .filter((e) => e.outcome === "server_error" || e.outcome === "auth_rejected")
     .slice(0, 20);
 
+  /** Audit export: health events + webhook deliveries as CSV. */
+  const exportEvents = () => {
+    const list = events.data ?? [];
+    if (list.length === 0) {
+      toast.error("No health events in this window to export");
+      return;
+    }
+    downloadCsv(
+      `api-health-events-${new Date().toISOString().slice(0, 10)}.csv`,
+      list as unknown as Record<string, unknown>[],
+      ["created_at", "endpoint", "method", "status_code", "outcome", "duration_ms", "error_message"],
+    );
+  };
+
+  const exportDeliveries = async () => {
+    const { data, error } = await supabase
+      .from("webhook_deliveries")
+      .select(
+        "created_at, provider, event_id, event_type, environment, state, attempts, replays, replay_of, signature_verified, processed_at, last_error",
+      )
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (!data || data.length === 0) {
+      toast.error("No webhook deliveries to export");
+      return;
+    }
+    downloadCsv(
+      `webhook-deliveries-${new Date().toISOString().slice(0, 10)}.csv`,
+      data as unknown as Record<string, unknown>[],
+      [
+        "created_at",
+        "provider",
+        "event_id",
+        "event_type",
+        "environment",
+        "state",
+        "attempts",
+        "replays",
+        "replay_of",
+        "signature_verified",
+        "processed_at",
+        "last_error",
+      ],
+    );
+  };
+
   const refreshAll = async () => {
     setRefreshing(true);
     await Promise.all([events.refetch(), alerts.refetch()]);
@@ -167,6 +220,15 @@ export default function AdminApiHealth() {
             Live status of every in-app endpoint over the last {WINDOW_HOURS} hours.
           </p>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <Button variant="outline" onClick={exportEvents}>
+          <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+          Health CSV
+        </Button>
+        <Button variant="outline" onClick={() => void exportDeliveries()}>
+          <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+          Webhook CSV
+        </Button>
         <Button variant="outline" onClick={refreshAll} disabled={refreshing}>
           {refreshing ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -175,6 +237,7 @@ export default function AdminApiHealth() {
           )}
           Refresh
         </Button>
+        </div>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -282,6 +345,8 @@ export default function AdminApiHealth() {
           </ul>
         )}
       </Card>
+
+      <WebhookSimulator />
 
       <WebhookReplayPanel />
     </div>

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { IntegrationsPanel } from "@/components/settings/IntegrationsPanel";
+import { MotionPanel } from "@/components/settings/MotionPanel";
 import { LegalLinksPanel } from "@/components/legal/LegalLinksPanel";
 import { AccountDataPanel } from "@/components/settings/AccountDataPanel";
 import { EligibilityPanel } from "@/components/settings/EligibilityPanel";
@@ -250,6 +251,8 @@ export default function Settings() {
       </div>
 
       <UsageBars />
+
+      <MotionPanel />
 
       <IntegrationsPanel />
 

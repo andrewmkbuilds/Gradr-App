@@ -30,6 +30,8 @@ import { useLocation } from "@/lib/router-compat";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 import NotFound from "@/pages/NotFound";
 import { AppSplash } from "@/components/AppSplash";
+import { MotionPrefsProvider } from "@/hooks/useMotionPrefs";
+import { PerfDiagnostics } from "@/components/motion/PerfDiagnostics";
 
 
 // Paint the correct theme before first render so there is no flash.
@@ -46,6 +48,22 @@ const themeBootstrap = `(function () {
   } catch (e) {
     document.documentElement.classList.add("dark");
   }
+})();`;
+
+// Apply saved motion preferences before first paint so CSS animations never
+// flash at full strength for a reduced-motion user.
+const motionBootstrap = `(function () {
+  try {
+    var raw = localStorage.getItem("gradr-motion-prefs");
+    var p = raw ? JSON.parse(raw) : {};
+    var mode = p.mode || "system";
+    var sys = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var reduced = mode === "reduced" || (mode === "system" && sys);
+    document.documentElement.dataset.reduceMotion = reduced ? "true" : "false";
+    document.documentElement.dataset.depth = reduced
+      ? "0.00"
+      : (typeof p.depth === "number" ? p.depth : 1).toFixed(2);
+  } catch (e) {}
 })();`;
 
 // Ported from the pre-migration index.html JSON-LD block.
@@ -161,6 +179,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       { children: themeBootstrap },
+      { children: motionBootstrap },
       { type: "application/ld+json", children: structuredData },
     ],
   }),
@@ -224,6 +243,7 @@ function RootComponent() {
       >
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
+            <MotionPrefsProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -236,9 +256,11 @@ function RootComponent() {
                   <AppSplash />
                   <Outlet />
                   <CookieConsent />
+                  <PerfDiagnostics />
                 </AuthProvider>
               </HelmetProvider>
             </TooltipProvider>
+            </MotionPrefsProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </SentryErrorBoundary>

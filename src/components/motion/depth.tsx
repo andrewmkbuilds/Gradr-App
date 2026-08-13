@@ -31,31 +31,48 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { spring } from "@/lib/motion";
+import { useMotionPrefs } from "@/hooks/useMotionPrefs";
 import { cn } from "@/lib/utils";
 
 /* ----------------------------- capability gate ---------------------------- */
 
 /**
- * True when the device can afford spatial effects.
- * SSR and the first client frame return `false` so nothing renders tilted
- * before hydration decides.
+ * True when the device can afford spatial effects AND the user hasn't turned
+ * them down. SSR and the first client frame return `false` so nothing renders
+ * tilted before hydration decides.
  */
 export function useDepthEnabled() {
   const reduce = useReducedMotion();
+  const { reduceMotion: userReduce, effectiveDepth } = useMotionPrefs();
   const [capable, setCapable] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    const nav = navigator as Navigator & { deviceMemory?: number };
+    const nav = navigator as Navigator & {
+      deviceMemory?: number;
+      connection?: { saveData?: boolean };
+    };
     const lowPower =
       (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4) ||
-      (nav.deviceMemory !== undefined && nav.deviceMemory <= 4);
+      (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
+      nav.connection?.saveData === true;
     setCapable(finePointer && !lowPower);
   }, []);
 
-  return capable && !reduce;
+  return capable && !reduce && !userReduce && effectiveDepth > 0;
 }
+
+/**
+ * 0..1 multiplier every depth primitive scales its travel/tilt by.
+ * Returns 0 whenever depth is disabled, so callers can multiply blindly.
+ */
+export function useDepthIntensity() {
+  const enabled = useDepthEnabled();
+  const { effectiveDepth } = useMotionPrefs();
+  return enabled ? effectiveDepth : 0;
+}
+
 
 /* -------------------------------- the scene -------------------------------- */
 
