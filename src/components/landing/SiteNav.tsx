@@ -32,7 +32,11 @@ type Props = {
 };
 
 export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
-  const reduce = useReducedMotion();
+  const systemReduce = useReducedMotion();
+  const { reduceMotion } = useMotionPrefs();
+  // OS `prefers-reduced-motion` OR the in-app toggle: either one means every
+  // nav interaction resolves instantly — no smooth scroll, no deferred spy.
+  const reduce = Boolean(systemReduce) || reduceMotion;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
@@ -48,24 +52,46 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
    */
   const lockRef = useRef<string | null>(null);
   const releaseRef = useRef<(() => void) | null>(null);
+  const reduceRef = useRef(reduce);
+  reduceRef.current = reduce;
 
   useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 16));
 
-  const goTo = (href: string) => {
+  const goTo = useCallback((href: string, opts?: { closeMenu?: boolean }) => {
     if (!href.startsWith("#")) return false;
     const el = document.getElementById(href.slice(1));
     if (!el) return false;
+    const instant = reduceRef.current;
 
     // Paint the active state on the same frame as the click — never wait for
-    // the scroll animation to finish.
+    // the scroll animation to finish, and never for the menu exit animation.
     setActive(href);
     lockRef.current = href;
     releaseRef.current?.();
 
-    // Deferred a frame so the mobile menu's `overflow: hidden` lock is lifted
-    // before the scroll starts, otherwise the jump is swallowed.
-    requestAnimationFrame(() => el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }));
+    if (opts?.closeMenu) {
+      setOpen(false);
+      // Release the scroll lock imperatively instead of waiting for the
+      // `open` effect to flush: otherwise `overflow: hidden` is still on the
+      // body when we scroll and the jump is swallowed. This removes the
+      // frame-timing race between closing the menu and scrolling.
+      document.body.style.overflow = "";
+    }
+
+    el.scrollIntoView({ behavior: instant ? "auto" : "smooth", block: "start" });
     history.replaceState(null, "", href);
+
+    // Move focus to the section so keyboard users land where they navigated;
+    // `tabindex=-1` keeps it out of the tab order afterwards.
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+    el.focus({ preventScroll: true });
+
+    // Reduced motion means the scroll already completed synchronously, so the
+    // spy can never fight us — drop the lock immediately.
+    if (instant) {
+      lockRef.current = null;
+      return true;
+    }
 
     // The lock lifts on the next *user-initiated* scroll rather than on a
     // timer, so the programmatic scroll can never hand the indicator back to a
@@ -81,7 +107,36 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
       window.addEventListener(evt, release, { passive: true, once: true });
     }
     return true;
-  };
+  }, []);
+
+  /**
+   * Keyboard navigation for the nav list: Enter/Space activate (matching the
+   * click path exactly, so the active state syncs identically), arrows move
+   * between items, Home/End jump to the ends. Tab order is untouched.
+   */
+  const onItemKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLAnchorElement>, href: string, closeMenu?: boolean) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        if (goTo(href, { closeMenu })) e.preventDefault();
+        return;
+      }
+      if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+      const list = e.currentTarget.closest("ul");
+      if (!list) return;
+      const links = Array.from(list.querySelectorAll<HTMLAnchorElement>("a[data-nav-item]"));
+      const i = links.indexOf(e.currentTarget);
+      if (i < 0) return;
+      e.preventDefault();
+      const next =
+        e.key === "Home" ? 0
+        : e.key === "End" ? links.length - 1
+        : e.key === "ArrowRight" || e.key === "ArrowDown" ? (i + 1) % links.length
+        : (i - 1 + links.length) % links.length;
+      links[next]?.focus();
+    },
+    [goTo],
+  );
+
 
 
   /**
