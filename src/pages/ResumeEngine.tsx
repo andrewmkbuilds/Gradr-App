@@ -5,7 +5,15 @@ import {
   Target, Gauge, ChevronRight, XCircle,
 } from "lucide-react";
 
-import { ScoreRing } from "@/components/ScoreRing";
+import { motion, AnimatePresence } from "motion/react";
+
+import { PageHeader } from "@/components/app/PageHeader";
+import { MetricBar } from "@/components/app/MetricBar";
+import { ScoreDial } from "@/components/app/ScoreDial";
+import { Surface } from "@/components/ui/surface";
+import { Magnetic } from "@/components/motion";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { duration as motionDuration, easeOut, springSnappy } from "@/lib/motion/tokens";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -57,6 +65,7 @@ const typeStyles: Record<string, { icon: typeof CheckCircle; color: string }> = 
 
 export default function ResumeEngine() {
   const { user } = useAuth();
+  const reduced = useReducedMotionPref();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -170,67 +179,97 @@ export default function ResumeEngine() {
     if (selectedFile) handleFileUpload(selectedFile);
   };
 
+  const stagger = (index: number) =>
+    reduced
+      ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.14 } }
+      : {
+          initial: { opacity: 0, y: 16 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: motionDuration.base, ease: easeOut, delay: index * 0.05 },
+        };
+
   const tailorPanel = (
-    <div className="glass-card p-5 animate-slide-up">
+    <Surface level={2} flush className="overflow-hidden">
       <button
         type="button"
         onClick={() => setShowTailor((v) => !v)}
-        className="flex w-full items-center justify-between text-left"
+        aria-expanded={showTailor}
+        className="interactive flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-surface-secondary/60"
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Target className="h-4 w-4 text-primary" />
+          <Target className="h-4 w-4 text-primary" aria-hidden="true" />
           Tailor to a specific job
           {jobDescription.trim().length > 40 && (
-            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">Active</span>
+            <span className="rounded-full bg-brand-secondary/12 px-2 py-0.5 text-[10px] font-medium text-brand-secondary">
+              Active
+            </span>
           )}
         </span>
-        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showTailor ? "rotate-90" : ""}`} />
+        <motion.span animate={{ rotate: showTailor ? 90 : 0 }} transition={reduced ? { duration: 0 } : springSnappy}>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        </motion.span>
       </button>
-      {showTailor && (
-        <div className="mt-4 space-y-3">
-          <Input
-            placeholder="Job title (optional)"
-            value={jobTitle}
-            onChange={(e) => setJobTitle(e.target.value)}
-            className="bg-secondary/40"
-          />
-          <Textarea
-            placeholder="Paste the full job description to score keyword coverage against this exact role…"
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            rows={6}
-            className="bg-secondary/40 resize-y"
-          />
-          <p className="text-xs text-muted-foreground">
-            With a job description, keyword match is measured against the posting instead of a general skill lexicon.
-          </p>
-        </div>
-      )}
-    </div>
+      <AnimatePresence initial={false}>
+        {showTailor && (
+          <motion.div
+            initial={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            animate={reduced ? { opacity: 1 } : { height: "auto", opacity: 1 }}
+            exit={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={reduced ? { duration: 0.12 } : { duration: motionDuration.fast, ease: easeOut }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 border-t border-border px-5 py-4">
+              <Input
+                placeholder="Job title (optional)"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                className="bg-surface-secondary"
+              />
+              <Textarea
+                placeholder="Paste the full job description to score keyword coverage against this exact role…"
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                rows={6}
+                className="resize-y bg-surface-secondary"
+              />
+              <p className="text-xs text-muted-foreground">
+                With a job description, keyword match is measured against the posting instead of a general skill lexicon.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Surface>
+  );
+
+  const guideLinks = (
+    <>
+      <Link
+        to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=resume_engine_header"
+        className="story-link inline-flex items-center gap-1.5 text-xs text-primary"
+      >
+        <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+        AI resume builders &amp; ATS optimization
+      </Link>
+      <Link
+        to="/ats-resume-checker?utm_source=app&utm_medium=internal_link&utm_campaign=ats_resume_checker&utm_content=resume_engine_header"
+        className="story-link inline-flex items-center gap-1.5 text-xs text-primary"
+      >
+        <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+        How ATS scoring works
+      </Link>
+    </>
   );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Resume Intelligence</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Deterministic ATS scoring, keyword overlap and readability analysis — every number computed from your actual text.
-        </p>
-        <Link
-          to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=resume_engine_header"
-          className="mt-3 inline-flex items-center gap-2 text-xs text-primary hover:underline"
-        >
-          <BookOpen className="h-3.5 w-3.5" />
-          Guide: AI resume builders & ATS optimization
-        </Link>
-        <Link
-          to="/ats-resume-checker?utm_source=app&utm_medium=internal_link&utm_campaign=ats_resume_checker&utm_content=resume_engine_header"
-          className="mt-2 ml-0 inline-flex items-center gap-2 text-xs text-primary hover:underline sm:ml-4"
-        >
-          <BookOpen className="h-3.5 w-3.5" />
-          ATS resume checker: how scoring works
-        </Link>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHeader
+        eyebrow="Resume Intelligence"
+        icon={<Gauge className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Score what recruiters and parsers actually read"
+        description="Deterministic ATS scoring, keyword overlap and readability analysis — every number computed from your actual resume text."
+        meta={guideLinks}
+      />
 
       {!uploading && !analyzing && tailorPanel}
 
@@ -254,184 +293,255 @@ export default function ResumeEngine() {
         />
       )}
 
-      {!analysis && !uploading && !analyzing ? (
-        <label
-          onDrop={handleDrop}
-          onDragOver={(e) => e.preventDefault()}
-          className="glass-card p-12 flex flex-col items-center justify-center cursor-pointer hover:glow-border transition-all group animate-slide-up"
-        >
-          <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={handleInputChange} />
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-            <Upload className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-1">Upload Your Resume</h3>
-          <p className="text-sm text-muted-foreground mb-4">PDF, DOCX, or TXT • Max 10MB</p>
-          <div className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
-            Click to upload or drag & drop
-          </div>
-        </label>
-      ) : (uploading || analyzing) ? (
-        <div className="glass-card p-12 flex flex-col items-center justify-center animate-slide-up">
-          <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-1">
-            {uploading ? "Uploading resume..." : "Scoring your resume..."}
-          </h3>
-          <p className="text-sm text-muted-foreground">This may take a moment</p>
-        </div>
-      ) : analysis ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up">
-          {/* Score Panel */}
-          <div className="glass-card p-6 flex flex-col items-center">
-            <h3 className="text-sm font-semibold text-foreground mb-6 self-start">ATS Score</h3>
-            <ScoreRing score={analysis.ats_score} size={160} />
-            <p className="text-sm text-muted-foreground mt-4 text-center">
-              {analysis.ats_score >= 80
-                ? "Great — your resume is well-optimized for ATS parsing."
-                : analysis.ats_score >= 60
-                ? "Solid base, but keyword and impact gaps will cost you screens."
-                : "Significant structural and keyword work needed."}
-            </p>
-            {analysis.tailoredTo && (
-              <p className="mt-2 text-xs text-primary text-center">Scored against {analysis.tailoredTo}</p>
-            )}
-            <div className="w-full mt-6 space-y-2">
-              {[
-                { label: "Keyword Match", value: analysis.keyword_match },
-                { label: "Formatting", value: analysis.formatting_score },
-                { label: "Impact Score", value: analysis.impact_score },
-                { label: "Readability", value: analysis.readability_score },
-              ].map((m) => (
-                <div key={m.label}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-muted-foreground">{m.label}</span>
-                    <span className="text-foreground">{m.value}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${m.value}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Suggestions */}
-          <div className="glass-card p-6 lg:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Fix list</h3>
-              <span className="text-xs text-muted-foreground">{analysis.suggestions.length} items</span>
-            </div>
-            <div className="space-y-3">
-              {analysis.suggestions.map((s, i) => {
-                const style = typeStyles[s.type] || typeStyles.improvement;
-                const Icon = style.icon;
-                return (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50">
-                    <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${style.color}`} />
-                    <p className="text-sm text-foreground/90">{s.text}</p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex flex-wrap gap-3 mt-6">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleRescan}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Re-scan
-              </Button>
-              <label>
+      <AnimatePresence mode="wait">
+        {!analysis && !uploading && !analyzing ? (
+          <motion.div key="dropzone" {...stagger(0)} exit={{ opacity: 0 }}>
+            <Magnetic strength={10}>
+              <label
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+                className="elev-3 elev-interactive group flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-primary/25 px-6 py-14 text-center"
+              >
                 <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={handleInputChange} />
-                <Button variant="outline" className="border-border text-foreground hover:bg-secondary" asChild>
-                  <span>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload New
-                  </span>
-                </Button>
+                <motion.span
+                  className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+                  whileHover={reduced ? undefined : { scale: 1.06, rotate: -4 }}
+                  transition={springSnappy}
+                >
+                  <Upload className="h-7 w-7" aria-hidden="true" />
+                </motion.span>
+                <h3 className="font-display text-lg text-foreground">Drop your resume in</h3>
+                <p className="mt-1 text-sm text-muted-foreground">PDF, DOCX or TXT · max 10MB</p>
+                <span className="mt-5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm">
+                  Choose a file
+                </span>
               </label>
-            </div>
-          </div>
-
-          {/* Evidence */}
-          {analysis.evidence?.length ? (
-            <div className="glass-card p-6 lg:col-span-2">
-              <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Gauge className="h-4 w-4 text-primary" />
-                How these scores were calculated
-              </h3>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {analysis.evidence.map((e) => (
-                  <div key={e.label} className="flex items-start gap-2.5 rounded-lg bg-secondary/40 p-3">
-                    {e.ok ? (
-                      <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                    ) : (
-                      <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground">{e.label}</p>
-                      <p className="break-words text-xs text-muted-foreground">{e.detail}</p>
-                    </div>
-                  </div>
-                ))}
+            </Magnetic>
+          </motion.div>
+        ) : uploading || analyzing ? (
+          <motion.div key="working" {...stagger(0)} exit={{ opacity: 0 }}>
+            <Surface level={3} className="flex flex-col items-center justify-center gap-4 py-14 text-center">
+              <div className="relative flex h-16 w-16 items-center justify-center">
+                <motion.span
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-full border border-primary/25"
+                  animate={reduced ? undefined : { scale: [1, 1.25, 1], opacity: [0.7, 0, 0.7] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
               </div>
-            </div>
-          ) : null}
-
-          {/* Keyword gaps */}
-          {analysis.metrics?.missingSkills?.length ? (
-            <div className="glass-card p-6">
-              <h3 className="mb-3 text-sm font-semibold text-foreground">Missing job keywords</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {analysis.metrics.missingSkills.slice(0, 20).map((s) => (
-                  <span key={s} className="rounded-md bg-destructive/10 px-2 py-1 text-xs text-destructive">{s}</span>
-                ))}
-              </div>
-              {analysis.metrics.matchedKeywords?.length ? (
-                <>
-                  <h4 className="mb-2 mt-5 text-xs font-medium text-muted-foreground">Already covered</h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {analysis.metrics.matchedKeywords.slice(0, 20).map((s) => (
-                      <span key={s} className="rounded-md bg-success/10 px-2 py-1 text-xs text-success">{s}</span>
-                    ))}
-                  </div>
-                </>
-              ) : null}
-            </div>
-          ) : null}
-
-          {/* Rewrites */}
-          {analysis.rewrites?.length ? (
-            <div className="glass-card p-6 lg:col-span-3">
-              <h3 className="mb-4 text-sm font-semibold text-foreground">Suggested bullet rewrites</h3>
-              <div className="space-y-3">
-                {analysis.rewrites.map((r, i) => (
-                  <div key={i} className="grid gap-2 rounded-lg bg-secondary/40 p-4 sm:grid-cols-2">
-                    <div>
-                      <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Before</p>
-                      <p className="text-sm text-muted-foreground line-through decoration-destructive/40">{r.before}</p>
-                    </div>
-                    <div>
-                      <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-primary">After</p>
-                      <p className="text-sm text-foreground">{r.after}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {/* Resume Preview */}
-          <div className="glass-card p-6 lg:col-span-3">
-            <h3 className="text-sm font-semibold text-foreground mb-4">Uploaded Resume</h3>
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50">
-              <FileText className="h-5 w-5 text-primary" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">{fileName}</p>
-                <p className="text-xs text-muted-foreground">
-                  {analysis.metrics ? `${analysis.metrics.wordCount} words • ${analysis.metrics.actionVerbCount} action verbs • Flesch ${analysis.metrics.fleschReadingEase}` : "Analyzed just now"}
+              <div>
+                <h3 className="font-display text-lg text-foreground" role="status">
+                  {uploading ? "Uploading your resume" : "Scoring your resume"}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {uploading ? "Encrypting and storing the file…" : "Parsing structure, keywords, impact and readability…"}
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+            </Surface>
+          </motion.div>
+        ) : analysis ? (
+          <motion.div key="analysis" className="grid grid-cols-1 gap-5 lg:grid-cols-3" {...stagger(0)}>
+            {/* Score */}
+            <motion.div {...stagger(0)} className="lg:row-span-2">
+              <Surface level={3} className="flex h-full flex-col items-center gap-6 p-6 lg:sticky lg:top-6">
+                <div className="w-full text-left">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                    Overall
+                  </p>
+                  <h3 className="font-display text-lg text-foreground">ATS readiness</h3>
+                </div>
+                <ScoreDial
+                  score={analysis.ats_score}
+                  label="ATS"
+                  caption={
+                    analysis.ats_score >= 80
+                      ? "Well-optimized for parsers. Focus on impact language next."
+                      : analysis.ats_score >= 60
+                      ? "Solid base — keyword and impact gaps will cost you screens."
+                      : "Significant structural and keyword work needed."
+                  }
+                />
+                {analysis.tailoredTo && (
+                  <p className="rounded-full bg-brand-secondary/10 px-3 py-1 text-center text-xs text-brand-secondary">
+                    Scored against {analysis.tailoredTo}
+                  </p>
+                )}
+                <div className="w-full space-y-4">
+                  {[
+                    { label: "Keyword match", value: analysis.keyword_match },
+                    { label: "Formatting", value: analysis.formatting_score },
+                    { label: "Impact", value: analysis.impact_score },
+                    { label: "Readability", value: analysis.readability_score },
+                  ].map((m, i) => (
+                    <MetricBar key={m.label} label={m.label} value={m.value} delay={i * 0.08} />
+                  ))}
+                </div>
+              </Surface>
+            </motion.div>
+
+            {/* Fix list */}
+            <motion.div {...stagger(1)} className="lg:col-span-2">
+              <Surface level={2} className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="font-display text-lg text-foreground">Fix list</h3>
+                  <span className="rounded-full bg-surface-secondary px-2.5 py-1 text-xs tabular-nums text-muted-foreground">
+                    {analysis.suggestions.length} items
+                  </span>
+                </div>
+                <ul className="space-y-2.5">
+                  {analysis.suggestions.map((s, i) => {
+                    const style = typeStyles[s.type] || typeStyles.improvement;
+                    const Icon = style.icon;
+                    return (
+                      <motion.li
+                        key={i}
+                        initial={reduced ? { opacity: 0 } : { opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={reduced ? { duration: 0.12 } : { duration: motionDuration.fast, ease: easeOut, delay: 0.04 * i }}
+                        className="flex items-start gap-3 rounded-xl bg-surface-secondary p-3.5 transition-colors hover:bg-surface-secondary/70"
+                      >
+                        <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${style.color}`} aria-hidden="true" />
+                        <p className="text-sm leading-relaxed text-foreground/90">{s.text}</p>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button className="interactive press-scale" onClick={handleRescan}>
+                    <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Re-scan
+                  </Button>
+                  <label>
+                    <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={handleInputChange} />
+                    <Button variant="outline" className="interactive press-scale" asChild>
+                      <span>
+                        <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                        Upload new version
+                      </span>
+                    </Button>
+                  </label>
+                </div>
+              </Surface>
+            </motion.div>
+
+            {/* Evidence */}
+            {analysis.evidence?.length ? (
+              <motion.div {...stagger(2)} className="lg:col-span-2">
+                <Surface level={2} className="p-6">
+                  <h3 className="mb-4 flex items-center gap-2 font-display text-lg text-foreground">
+                    <Gauge className="h-4 w-4 text-primary" aria-hidden="true" />
+                    How these scores were calculated
+                  </h3>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {analysis.evidence.map((e, i) => (
+                      <motion.div
+                        key={e.label}
+                        initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.4 }}
+                        transition={reduced ? { duration: 0.12 } : { duration: motionDuration.fast, ease: easeOut, delay: i * 0.03 }}
+                        className="flex items-start gap-2.5 rounded-xl bg-surface-secondary p-3"
+                      >
+                        {e.ok ? (
+                          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+                        ) : (
+                          <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-foreground">{e.label}</p>
+                          <p className="break-words text-xs text-muted-foreground">{e.detail}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </Surface>
+              </motion.div>
+            ) : null}
+
+            {/* Keyword gaps */}
+            {analysis.metrics?.missingSkills?.length ? (
+              <motion.div {...stagger(3)}>
+                <Surface level={2} className="p-6">
+                  <h3 className="mb-3 font-display text-base text-foreground">Missing job keywords</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {analysis.metrics.missingSkills.slice(0, 20).map((s, i) => (
+                      <motion.span
+                        key={s}
+                        initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.86 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={reduced ? { duration: 0.1 } : { ...springSnappy, delay: i * 0.02 }}
+                        className="rounded-md bg-destructive/10 px-2 py-1 text-xs text-destructive"
+                      >
+                        {s}
+                      </motion.span>
+                    ))}
+                  </div>
+                  {analysis.metrics.matchedKeywords?.length ? (
+                    <>
+                      <h4 className="mb-2 mt-5 text-xs font-medium text-muted-foreground">Already covered</h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {analysis.metrics.matchedKeywords.slice(0, 20).map((s) => (
+                          <span key={s} className="rounded-md bg-success/10 px-2 py-1 text-xs text-success">{s}</span>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+                </Surface>
+              </motion.div>
+            ) : null}
+
+            {/* Rewrites */}
+            {analysis.rewrites?.length ? (
+              <motion.div {...stagger(4)} className="lg:col-span-3">
+                <Surface level={2} className="p-6">
+                  <h3 className="mb-4 font-display text-lg text-foreground">Suggested bullet rewrites</h3>
+                  <div className="space-y-3">
+                    {analysis.rewrites.map((r, i) => (
+                      <motion.div
+                        key={i}
+                        initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={reduced ? { duration: 0.12 } : { duration: motionDuration.fast, ease: easeOut, delay: i * 0.04 }}
+                        className="grid gap-4 rounded-xl bg-surface-secondary p-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center"
+                      >
+                        <div>
+                          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Before</p>
+                          <p className="text-sm text-muted-foreground line-through decoration-destructive/40">{r.before}</p>
+                        </div>
+                        <ChevronRight className="hidden h-4 w-4 text-brand-secondary sm:block" aria-hidden="true" />
+                        <div>
+                          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-secondary">After</p>
+                          <p className="text-sm text-foreground">{r.after}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </Surface>
+              </motion.div>
+            ) : null}
+
+            {/* Source file */}
+            <motion.div {...stagger(5)} className="lg:col-span-3">
+              <Surface level={1} className="flex items-center gap-3 p-4">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <FileText className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-foreground">{fileName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {analysis.metrics
+                      ? `${analysis.metrics.wordCount} words · ${analysis.metrics.actionVerbCount} action verbs · Flesch ${analysis.metrics.fleschReadingEase}`
+                      : "Analyzed just now"}
+                  </p>
+                </div>
+              </Surface>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
