@@ -1,5 +1,6 @@
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Trophy, Sparkles, Flame, Lock, Check } from "lucide-react";
 import type { AffiliateOverview } from "@/hooks/useAffiliate";
 import { DEFAULT_TIER_COLOR } from "@/lib/design/yachtClub";
@@ -16,7 +17,7 @@ type Tier = {
 
 /** Lightweight, dependency-free celebration burst (respects reduced motion). */
 function Celebration({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPref();
   if (!active || reduce) return null;
   const pieces = Array.from({ length: 24 });
   return (

@@ -1,5 +1,6 @@
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX,
   Square, Radio, Hand, Zap, Captions, WifiOff, Search, X, ChevronUp, ChevronDown,
@@ -96,7 +97,7 @@ export function InterviewStudio(props: Props) {
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const [elapsed, setElapsed] = useState(0);
   const [captionsOn, setCaptionsOn] = useState(true);
   const [query, setQuery] = useState("");

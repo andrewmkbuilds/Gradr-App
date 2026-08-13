@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -25,7 +26,7 @@ const C = 2 * Math.PI * R;
  * destructive on overtime, so the time pressure is felt without reading digits.
  */
 export function SessionTimerRing({ elapsed, limitMinutes, className }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const cap = limitMinutes ? limitMinutes * 60 : null;
   const progress = cap ? Math.min(1, elapsed / cap) : 0;
   const overtime = cap ? elapsed > cap : false;

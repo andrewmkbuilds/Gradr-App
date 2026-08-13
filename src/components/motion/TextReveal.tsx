@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion } from "motion/react";
 import { type ElementType } from "react";
 import { stagger, viewportOnce, wordVariants } from "@/lib/motion/tokens";
 
@@ -31,7 +32,7 @@ export function TextReveal({
   accentWords = [],
   accentClassName = "text-brand-secondary",
 }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const Tag = motion.create(as as ElementType);
   const words = text.split(" ");
 

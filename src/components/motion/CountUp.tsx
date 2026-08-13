@@ -1,4 +1,5 @@
-import { animate, useInView, useReducedMotion } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { animate, useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -25,7 +26,7 @@ export function CountUp({
   className = "",
   immediate = false,
 }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
   const [value, setValue] = useState(reduced ? to : from);
