@@ -1,0 +1,30 @@
+﻿# Fails the build when an auth email template introduces a disallowed action
+# link, a hardcoded static URL, or a redirect target outside the allowlist.
+#
+# These are the emails that sign a user in. A link that points anywhere other
+# than the dynamic Supabase action URL is either a broken sign-in or a phishing
+# vector, so this runs on every change to templates, the audit helpers, or the
+# webhook that renders them.
+name: Email template guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  templates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Auth email forbidden-host and allowlist assertions
+        run: bun run test:email-templates
