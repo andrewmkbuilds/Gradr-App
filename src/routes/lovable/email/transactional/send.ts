@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 import { logEmailEvent, readEmailFlags } from '@/lib/email/events.server'
+import { authorizeSend } from '@/lib/email/authorize.server'
+
 import { injectOpenPixel, rewriteLinksForTracking, toPlainText } from '@/lib/email/tracking'
 
 
