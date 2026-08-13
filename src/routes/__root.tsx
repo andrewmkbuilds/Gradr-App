@@ -30,9 +30,9 @@ import { reportLovableError } from "@/lib/lovable-error-reporting";
 import NotFound from "@/pages/NotFound";
 import { AppSplash } from "@/components/AppSplash";
 
-const SITE_TITLE = "Gradr | Your AI Career Command Center";
+const SITE_TITLE = "Gradr | AI Resume Builder, Job Matching & Interview Coach";
 const SITE_DESCRIPTION =
-  "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.";
+  "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.";
 
 // Paint the correct theme before first render so there is no flash.
 // Ported from the pre-migration index.html head script.
@@ -84,7 +84,7 @@ const structuredData = JSON.stringify({
       browserRequirements: "Requires JavaScript and a modern web browser",
       publisher: { "@id": "https://gradr.me/#organization" },
       description:
-        "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching. It scores resumes against ATS rules, matches you to live job openings, drafts tailored applications, and runs realtime AI mock interviews with coaching feedback.",
+        "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews. It scores resumes against ATS rules, matches you to live job openings, drafts tailored applications, and runs realtime AI mock interviews with coaching feedback.",
       featureList: [
         "AI resume analysis and ATS optimization scoring",
         "AI job matching against live job openings",
@@ -140,7 +140,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://gradr.me/og-image.jpg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "Gradr — AI career command center" },
+      { property: "og:image:alt", content: "Gradr — AI Resume Builder, Job Matching & Interview Coach" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SITE_TITLE },
       { name: "twitter:description", content: SITE_DESCRIPTION },
