@@ -41,7 +41,10 @@ export default function Pricing() {
   const [pricesError, setPricesError] = useState<string | null>(null);
 
   // Localized prices come straight from Paddle — no client-side math, no
-  // re-formatting of the strings Paddle returns.
+  // re-formatting of the strings Paddle returns. When Paddle (or our price
+  // resolver) is down the page still renders every plan and feature list; only
+  // the amounts degrade to an "unavailable" state with a retry.
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let cancelled = false;
     const ids = [
@@ -57,13 +60,14 @@ export default function Pricing() {
       })
       .catch((err) => {
         if (cancelled) return;
+        setPrices({});
         setPricesError(err instanceof Error ? err.message : "Couldn't load prices");
       })
       .finally(() => !cancelled && setPricesLoading(false));
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   const priceFor = (id: string) => prices[id]?.formattedTotal;
 
