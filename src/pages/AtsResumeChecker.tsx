@@ -304,11 +304,18 @@ export default function AtsResumeChecker() {
               location: "related_job_search",
             },
             {
+              to: "/ai-interview-coach",
+              title: "AI Interview Coach",
+              desc: "Once your resume lands the interview, practise it with a realtime AI mock interview.",
+              location: "related_interview_coach",
+            },
+            {
               to: "/career-advice",
               title: "Career Advice Guides",
               desc: "Free guides on resumes, cover letters, and interview preparation.",
               location: "related_advice",
             },
+
           ].map((item) => (
             <Link
               key={item.to}

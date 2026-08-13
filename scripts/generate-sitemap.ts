@@ -23,6 +23,8 @@ const entries: SitemapEntry[] = [
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
   { path: "/affiliate", changefreq: "monthly", priority: "0.6" },
   { path: "/ats-resume-checker", changefreq: "monthly", priority: "0.9" },
+  { path: "/ai-interview-coach", changefreq: "monthly", priority: "0.9" },
+
   { path: "/blog/ai-resume-optimization", changefreq: "monthly", priority: "0.8" },
   { path: "/career-advice", changefreq: "weekly", priority: "0.9" },
   { path: "/job-search", changefreq: "weekly", priority: "0.9" },
