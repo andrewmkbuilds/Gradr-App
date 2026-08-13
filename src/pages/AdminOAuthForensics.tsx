@@ -133,7 +133,6 @@ interface CspSummary {
 }
 
 function HopChain({ hops }: { hops: Hop[] | null }) {
-
   if (!hops?.length) return <p className="text-sm text-muted-foreground">No hops recorded.</p>;
   return (
     <ol className="space-y-2">
@@ -143,7 +142,8 @@ function HopChain({ hops }: { hops: Hop[] | null }) {
             {hop.order}
           </span>
           <div className="min-w-0">
-            <p className="break-all font-mono text-xs text-foreground">{hop.url}</p>
+            {/* Defence in depth: the server already redacts, we never render raw. */}
+            <p className="break-all font-mono text-xs text-foreground">{redactOAuthUrl(hop.url)}</p>
             <p className="text-xs text-muted-foreground">
               {hop.kind}
               {hop.note ? ` · ${hop.note}` : ""} · {when(hop.at)}
@@ -155,6 +155,155 @@ function HopChain({ hops }: { hops: Hop[] | null }) {
   );
 }
 
+/* ------------------------------------------------------------- filters --- */
+
+interface Filters {
+  from: string;
+  to: string;
+  userId: string;
+  accountKind: string;
+  outcome: string;
+  deviation: string;
+  stateNonce: string;
+  q: string;
+}
+
+const EMPTY_FILTERS: Filters = {
+  from: "",
+  to: "",
+  userId: "",
+  accountKind: "all",
+  outcome: "all",
+  deviation: "all",
+  stateNonce: "all",
+  q: "",
+};
+
+const isFiltered = (f: Filters) =>
+  Object.entries(f).some(([key, value]) => value !== EMPTY_FILTERS[key as keyof Filters]);
+
+const selectClass =
+  "h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+function FilterBar({
+  value,
+  onChange,
+  onReset,
+  onApply,
+}: {
+  value: Filters;
+  onChange: (next: Filters) => void;
+  onReset: () => void;
+  onApply: () => void;
+}) {
+  const set = <K extends keyof Filters>(key: K, next: Filters[K]) => onChange({ ...value, [key]: next });
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="space-y-1">
+          <Label htmlFor="f-from" className="text-xs text-muted-foreground">From</Label>
+          <Input id="f-from" type="date" value={value.from} onChange={(e) => set("from", e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-to" className="text-xs text-muted-foreground">To</Label>
+          <Input id="f-to" type="date" value={value.to} onChange={(e) => set("to", e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-user" className="text-xs text-muted-foreground">User ID</Label>
+          <Input
+            id="f-user"
+            placeholder="uuid"
+            value={value.userId}
+            onChange={(e) => set("userId", e.target.value.trim())}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-kind" className="text-xs text-muted-foreground">Google account type</Label>
+          <select
+            id="f-kind"
+            className={selectClass}
+            value={value.accountKind}
+            onChange={(e) => set("accountKind", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="consumer">Consumer (gmail.com)</option>
+            <option value="workspace">Workspace</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-outcome" className="text-xs text-muted-foreground">Outcome</Label>
+          <select
+            id="f-outcome"
+            className={selectClass}
+            value={value.outcome}
+            onChange={(e) => set("outcome", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="success">Success</option>
+            <option value="error">Error</option>
+            <option value="abandoned">Abandoned</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-dev" className="text-xs text-muted-foreground">Deviation</Label>
+          <select
+            id="f-dev"
+            className={selectClass}
+            value={value.deviation}
+            onChange={(e) => set("deviation", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="only">Deviations only</option>
+            <option value="none">Clean chains only</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-state" className="text-xs text-muted-foreground">State / nonce</Label>
+          <select
+            id="f-state"
+            className={selectClass}
+            value={value.stateNonce}
+            onChange={(e) => set("stateNonce", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="failed">Failed validation</option>
+            <option value="valid">Both valid</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-q" className="text-xs text-muted-foreground">Search</Label>
+          <Input
+            id="f-q"
+            placeholder="request id, domain, error"
+            value={value.q}
+            onChange={(e) => set("q", e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onApply();
+            }}
+          />
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button size="sm" onClick={onApply}>
+          <Search className="mr-2 h-4 w-4" />
+          Apply filters
+        </Button>
+        {isFiltered(value) && (
+          <Button size="sm" variant="ghost" onClick={onReset}>
+            <X className="mr-2 h-4 w-4" />
+            Clear
+          </Button>
+        )}
+        <span className="text-xs text-muted-foreground">
+          Credentials, tokens, state and nonce values are redacted everywhere, including exports.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminOAuthForensics() {
   useSeoOverride({
     title: "OAuth Forensics | Gradr Admin",
@@ -163,6 +312,9 @@ export default function AdminOAuthForensics() {
 
   const [expanded, setExpanded] = useState<string | null>(null);
   const [headerReport, setHeaderReport] = useState<HeaderReport | null>(null);
+  const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+
 
   const traces = useQuery({
     queryKey: ["oauth-forensics", "traces"],
