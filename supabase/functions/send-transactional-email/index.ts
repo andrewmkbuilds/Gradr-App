@@ -130,10 +130,36 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Enforce the trust model described at the top of this file.
+  const claims = decodeJwtClaims(
+    (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
+  )
+  const callerRole = String(claims?.role ?? '')
+  const isService = callerRole === 'service_role'
+
+  if (!isService) {
+    if (!USER_SENDABLE.has(templateName)) {
+      console.warn('Blocked user-initiated send of a privileged template', { templateName })
+      return new Response(JSON.stringify({ error: 'Not permitted for this template' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const callerEmail = typeof claims?.email === 'string' ? claims.email : ''
+    if (!callerEmail) {
+      return new Response(JSON.stringify({ error: 'Authenticated email required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    // Users can only mail themselves.
+    recipientEmail = callerEmail
+  }
+
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
   // to always send to a fixed address (e.g., site owner from env var).
-  const effectiveRecipient = template.to || recipientEmail
+  const effectiveRecipient = isService ? template.to || recipientEmail : recipientEmail
 
   if (!effectiveRecipient) {
     return new Response(
