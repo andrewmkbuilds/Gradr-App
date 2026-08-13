@@ -68,7 +68,7 @@ export function ShareCard({ code, link }: { code: string; link: string }) {
 
     ctx.font = "500 44px system-ui, -apple-system, Segoe UI, sans-serif";
     ctx.fillStyle = "#cbd5e1";
-    ctx.fillText("Your AI career command center", 80, 220);
+    ctx.fillText("AI Resume Builder, Job Matching & Interview Coach", 80, 220);
 
     ctx.font = "bold 92px system-ui, -apple-system, Segoe UI, sans-serif";
     ctx.fillStyle = "#22d3ee";

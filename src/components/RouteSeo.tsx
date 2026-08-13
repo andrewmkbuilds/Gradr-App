@@ -15,9 +15,9 @@ const META: Record<string, { title: string; description: string }> = {
   // "/" renders the public Gradr landing page for signed-out visitors (and the
   // dashboard once authenticated), so its metadata must describe the product.
   "/": {
-    title: "Your AI Career Command Center",
+    title: "AI Resume Builder, Job Matching & Interview Coach",
     description:
-      "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
+      "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.",
   },
   "/landing": {
     title: "From resume to offer in one workspace",
@@ -26,7 +26,7 @@ const META: Record<string, { title: string; description: string }> = {
   },
   "/auth": {
     title: "Sign in",
-    description: "Sign in or create your Gradr account to access your AI career command center.",
+    description: "Sign in or create your Gradr account to access your AI career platform.",
   },
   "/forgot-password": {
     title: "Forgot password",
@@ -215,15 +215,15 @@ export function RouteSeo() {
   const { pathname } = useLocation();
   const meta = META[pathname] ??
     resolveDynamicMeta(pathname) ?? {
-      title: "Your AI Career Command Center",
+      title: "AI Resume Builder, Job Matching & Interview Coach",
       description:
-        "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
+        "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.",
     };
   // "/" keeps the brand-first title; every other route (including /landing)
   // gets its own distinct title so no two public URLs duplicate one another.
   const fullTitle =
     pathname === "/"
-      ? "Gradr | Your AI Career Command Center"
+      ? "Gradr | AI Resume Builder, Job Matching & Interview Coach"
       : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
