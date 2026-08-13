@@ -138,6 +138,35 @@ const softwareLd = {
   inLanguage: "en",
 };
 
+/**
+ * The scorecard table is the page's most-quoted answer block, so it also ships
+ * as an ItemList of DefinedTerms. Rich Results validates this cleanly (a bare
+ * schema.org Table has no supported rich result) and it gives AI answer
+ * engines an unambiguous list of the four scoring dimensions.
+ */
+const scoringLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Gradr AI mock interview scoring dimensions",
+  description: "The four dimensions every answer in a Gradr AI mock interview is scored against.",
+  itemListOrder: "https://schema.org/ItemListUnordered",
+  numberOfItems: FEEDBACK.length,
+  itemListElement: FEEDBACK.map((row, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "DefinedTerm",
+      name: row.label,
+      description: row.meaning,
+      inDefinedTermSet: {
+        "@type": "DefinedTermSet",
+        name: "Gradr interview scorecard",
+        url: absoluteUrl(`${PATH}#feedback`),
+      },
+    },
+  })),
+};
+
 export default function AiInterviewCoach() {
   useEffect(() => {
     trackEvent("interview_coach_page_view", { path: PATH });
