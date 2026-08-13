@@ -18,7 +18,7 @@
  */
 import { corsHeaders } from "./shared/cors";
 import { createClient } from "./shared/supabase";
-import { recordWebhookReplay } from "./shared/webhookDelivery";
+import { claimWebhookEvent, recordWebhookReplay } from "./shared/webhookDelivery";
 import { logSecurityEvent } from "./shared/securityAudit";
 
 const json = (body: unknown, status = 200) =>
