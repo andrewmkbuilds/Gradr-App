@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX,
   Square, Radio, Hand, Zap, Captions, WifiOff, Search, X, ChevronUp, ChevronDown,
@@ -11,6 +12,9 @@ import { cn } from "@/lib/utils";
 import { CameraMonitor } from "@/components/interview/CameraMonitor";
 import { InterviewerOrb, type InterviewerState } from "@/components/interview/InterviewerOrb";
 import { ConnectionErrorOverlay } from "@/components/interview/ConnectionErrorOverlay";
+import { Surface } from "@/components/ui/surface";
+import { SessionTimerRing } from "@/components/interview/SessionTimerRing";
+import { springSmooth, springSnappy, easeOut } from "@/lib/motion/tokens";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 
 export type Msg = { role: "user" | "assistant"; content: string };
@@ -92,6 +96,7 @@ export function InterviewStudio(props: Props) {
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
+  const reduced = useReducedMotion();
   const [elapsed, setElapsed] = useState(0);
   const [captionsOn, setCaptionsOn] = useState(true);
   const [query, setQuery] = useState("");
@@ -153,45 +158,47 @@ export function InterviewStudio(props: Props) {
           />
         )}
         {/* ---------- Header ---------- */}
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="truncate text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-              {targetRole || "Mock interview"}
-            </h1>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              {connecting ? (
-                <Badge variant="outline" className="gap-1.5 font-medium">
-                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                  Connecting
-                </Badge>
-              ) : realtime ? (
-                <Badge variant="outline" className="gap-1.5 border-primary/50 font-medium text-primary">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 motion-safe:animate-ping" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                  </span>
-                  Realtime voice
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="gap-1.5 font-medium">
-                  <WifiOff className="h-3 w-3" aria-hidden="true" />
-                  Standard voice
-                </Badge>
-              )}
-              <span
-                className={cn(
-                  "font-mono text-sm tabular-nums",
-                  overtime ? "text-destructive" : "text-muted-foreground",
+        <motion.header
+          initial={reduced ? false : { opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: easeOut }}
+          className="flex flex-wrap items-center justify-between gap-4"
+        >
+          <div className="flex min-w-0 items-center gap-4">
+            <SessionTimerRing elapsed={elapsed} limitMinutes={limits?.maxSessionMinutes} className="shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                Live session
+              </p>
+              <h1 className="truncate font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                {targetRole || "Mock interview"}
+              </h1>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                {connecting ? (
+                  <Badge variant="outline" className="gap-1.5 font-medium">
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    Connecting
+                  </Badge>
+                ) : realtime ? (
+                  <Badge variant="outline" className="gap-1.5 border-primary/50 font-medium text-primary">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                    </span>
+                    Realtime voice
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="gap-1.5 font-medium">
+                    <WifiOff className="h-3 w-3" aria-hidden="true" />
+                    Standard voice
+                  </Badge>
                 )}
-                aria-label={`Elapsed time ${formatClock(elapsed)}`}
-              >
-                {formatClock(elapsed)}
-              </span>
-              {limits && (
-                <span className="hidden text-xs text-muted-foreground sm:inline">
-                  / {limits.maxSessionMinutes} min limit
-                </span>
-              )}
+                {limits && (
+                  <span className={cn("text-xs", overtime ? "text-destructive" : "text-muted-foreground")}>
+                    {overtime ? "Over the " : ""}{limits.maxSessionMinutes} min limit
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -220,43 +227,78 @@ export function InterviewStudio(props: Props) {
               <TooltipContent>Restart interview</TooltipContent>
             </Tooltip>
           </div>
-        </header>
+        </motion.header>
 
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           {/* ---------- Stage + transcript ---------- */}
           <div className="flex min-w-0 flex-col gap-4">
-            <section className="glass-card relative overflow-hidden px-5 py-8 sm:px-8 sm:py-10">
+            <Surface
+              level={3}
+              flush
+              className="relative overflow-hidden px-5 py-8 sm:px-8 sm:py-10"
+              aria-label="Interviewer stage"
+            >
+              {/* Stage atmosphere: a grid floor and a soft top light, both static and cheap. */}
               <div
-                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+                className="pointer-events-none absolute inset-0 opacity-[0.35] [mask-image:radial-gradient(ellipse_at_50%_0%,#000,transparent_72%)]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to right, hsl(var(--border)/0.5) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)/0.5) 1px, transparent 1px)",
+                  backgroundSize: "44px 44px",
+                }}
                 aria-hidden="true"
               />
-              <InterviewerOrb state={interviewerState} />
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent"
+                aria-hidden="true"
+              />
 
-              {currentQuestion && (
-                <div className="mx-auto mt-8 max-w-2xl text-center">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                    Current question
-                  </p>
-                  <p className="mt-2 text-base leading-relaxed text-foreground sm:text-lg">
-                    {currentQuestion}
-                  </p>
-                </div>
-              )}
+              <div className="relative">
+                <InterviewerOrb state={interviewerState} />
 
-              {captionsOn && liveCaption && (
-                <p className="mx-auto mt-6 max-w-2xl rounded-lg bg-background/70 px-4 py-2 text-center text-sm text-foreground">
-                  {liveCaption}
-                </p>
-              )}
+                <AnimatePresence mode="wait" initial={false}>
+                  {currentQuestion && (
+                    <motion.div
+                      key={currentQuestion.slice(0, 64)}
+                      initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(6px)" }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      exit={reduced ? undefined : { opacity: 0, y: -10, filter: "blur(6px)" }}
+                      transition={{ duration: 0.45, ease: easeOut }}
+                      className="mx-auto mt-8 max-w-2xl text-center"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                        Current question
+                      </p>
+                      <p className="mt-2 font-display text-lg leading-snug text-foreground sm:text-xl">
+                        {currentQuestion}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                  {captionsOn && liveCaption && (
+                    <motion.p
+                      initial={reduced ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={reduced ? undefined : { opacity: 0, y: 4 }}
+                      transition={springSmooth}
+                      className="mx-auto mt-6 max-w-2xl rounded-xl border border-border/60 bg-background/70 px-4 py-2 text-center text-sm text-foreground backdrop-blur-md"
+                    >
+                      {liveCaption}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Screen-reader live region: always announces, independent of visual captions */}
               <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
                 {liveCaption}
               </p>
-            </section>
+            </Surface>
 
             {/* Transcript */}
-            <section className="glass-card flex min-h-[220px] flex-col p-4 sm:p-5" aria-label="Interview transcript">
+            <Surface level={2} flush className="flex min-h-[220px] flex-col p-4 sm:p-5" aria-label="Interview transcript">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Transcript
@@ -385,9 +427,12 @@ export function InterviewStudio(props: Props) {
                   </p>
                 )}
                 {messages.map((msg, i) => (
-                  <div
+                  <motion.div
                     key={i}
                     ref={(el) => { matchRefs.current[i] = el; }}
+                    initial={reduced ? false : { opacity: 0, y: 10, scale: 0.985 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={springSmooth}
                     className={cn("flex gap-3", msg.role === "user" && "justify-end")}
                   >
                     {msg.role === "assistant" && (
@@ -424,7 +469,7 @@ export function InterviewStudio(props: Props) {
                         <User className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                       </div>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
                 {thinking && (
                   <div className="flex gap-3">
@@ -443,18 +488,31 @@ export function InterviewStudio(props: Props) {
                     </div>
                   </div>
                 )}
-                {partialUser && (
-                  <div className="flex justify-end">
-                    <div className="max-w-[85%] rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2.5 text-sm italic text-muted-foreground">
-                      {partialUser}
-                    </div>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {partialUser && (
+                    <motion.div
+                      initial={reduced ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={reduced ? undefined : { opacity: 0 }}
+                      transition={springSnappy}
+                      className="flex justify-end"
+                    >
+                      <div className="max-w-[85%] rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2.5 text-sm italic text-muted-foreground">
+                        {partialUser}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </section>
+            </Surface>
 
             {/* ---------- Control dock ---------- */}
-            <div className="glass-card sticky bottom-4 flex flex-wrap items-center gap-2 p-3">
+            <motion.div
+              initial={reduced ? false : { opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...springSmooth, delay: 0.1 }}
+              className="elev-4 sticky bottom-4 z-10 flex flex-wrap items-center gap-2 rounded-2xl p-3 backdrop-blur-xl"
+            >
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -529,7 +587,7 @@ export function InterviewStudio(props: Props) {
               >
                 <Send className="h-4 w-4" aria-hidden="true" />
               </Button>
-            </div>
+            </motion.div>
           </div>
 
           {/* ---------- Side rail ---------- */}
@@ -537,7 +595,7 @@ export function InterviewStudio(props: Props) {
             <CameraMonitor active onSnapshot={onSnapshot} />
 
             {limits && (
-              <div className="glass-card space-y-1.5 p-4">
+              <Surface level={2} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold capitalize text-foreground">{limits.tier} plan</p>
                   <Radio className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -548,11 +606,11 @@ export function InterviewStudio(props: Props) {
                     : `${limits.sessionsRemaining} of ${limits.sessionsPerMonth} interviews left this month`}
                 </p>
                 <p className="text-xs text-muted-foreground">Up to {limits.maxSessionMinutes} minutes per session</p>
-              </div>
+              </Surface>
             )}
 
-            <div className="glass-card space-y-2 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <Surface level={2} className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
                 Session tips
               </p>
               {realtime && (
@@ -566,7 +624,7 @@ export function InterviewStudio(props: Props) {
               <p className="text-xs leading-relaxed text-muted-foreground">
                 Aim for 60–120 seconds per behavioural answer.
               </p>
-            </div>
+            </Surface>
           </aside>
         </div>
       </div>
