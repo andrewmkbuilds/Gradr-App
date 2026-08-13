@@ -1,0 +1,52 @@
+name: Nav active-state tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: nav-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nav:
+    name: Playwright nav suite (active state, a11y, visual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      # Active-state sync, mobile menu, keyboard, reduced motion.
+      - name: Nav active-state tests
+        run: bunx playwright test tests/nav-active-state.spec.ts
+
+      # ARIA roles/attributes, focus order, body-overflow restoration.
+      - name: Nav accessibility & scroll-lock tests
+        run: bunx playwright test tests/nav-a11y-overflow.spec.ts
+
+      # Lightweight visual regression on the nav chrome only.
+      # Snapshots are created on first run; commit them to enforce the baseline.
+      - name: Nav visual regression
+        run: bunx playwright test tests/nav-visual.spec.ts --update-snapshots=missing
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nav-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

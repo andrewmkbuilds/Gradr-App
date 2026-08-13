@@ -300,7 +300,10 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
           <motion.div
             key="mobile-menu"
             id="mobile-menu"
+            role="navigation"
+            aria-label="Mobile"
             data-mobile-menu
+
             initial={reduce ? false : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -8 }}
