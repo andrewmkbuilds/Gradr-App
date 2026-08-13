@@ -3108,12 +3108,15 @@ export type Database = {
       security_scan_runs: {
         Row: {
           branch: string | null
+          commit_ref: string | null
           commit_sha: string | null
           commit_url: string | null
           counts_by_level: Json
           created_at: string
+          created_by: string | null
           finding_count: number
           findings: Json
+          finished_at: string | null
           id: string
           internal_ids: string[]
           notes: string | null
@@ -3121,15 +3124,21 @@ export type Database = {
           pr_url: string | null
           scanned_at: string
           source: string
+          started_at: string
+          totals: Json
+          trigger: string
         }
         Insert: {
           branch?: string | null
+          commit_ref?: string | null
           commit_sha?: string | null
           commit_url?: string | null
           counts_by_level?: Json
           created_at?: string
+          created_by?: string | null
           finding_count?: number
           findings?: Json
+          finished_at?: string | null
           id?: string
           internal_ids?: string[]
           notes?: string | null
@@ -3137,15 +3146,21 @@ export type Database = {
           pr_url?: string | null
           scanned_at?: string
           source?: string
+          started_at?: string
+          totals?: Json
+          trigger?: string
         }
         Update: {
           branch?: string | null
+          commit_ref?: string | null
           commit_sha?: string | null
           commit_url?: string | null
           counts_by_level?: Json
           created_at?: string
+          created_by?: string | null
           finding_count?: number
           findings?: Json
+          finished_at?: string | null
           id?: string
           internal_ids?: string[]
           notes?: string | null
@@ -3153,6 +3168,9 @@ export type Database = {
           pr_url?: string | null
           scanned_at?: string
           source?: string
+          started_at?: string
+          totals?: Json
+          trigger?: string
         }
         Relationships: []
       }
