@@ -12,8 +12,11 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
 const INSPECT_PATHS = [
   "/",
   "/pricing",
-  "/interview",
-  "/resume",
+  "/ai-resume-builder",
+  "/ats-resume-checker",
+  "/ai-interview-coach",
+  "/career-advice",
+  "/job-search",
   "/blog/ai-resume-optimization",
 ];
 
@@ -112,7 +115,14 @@ export const handler = async (req: Request): Promise<Response> => {
       dimensions: ["query"],
       rowLimit: 10,
     };
-    const [perfRes, pagesRes, sitemapsRes] = await Promise.all([
+    // 90-day daily series powers the SEO performance dashboard trend charts.
+    const seriesBody = {
+      startDate: isoDaysAgo(93),
+      endDate: isoDaysAgo(3),
+      dimensions: ["date"],
+      rowLimit: 200,
+    };
+    const [perfRes, pagesRes, sitemapsRes, seriesRes] = await Promise.all([
       fetch(`${GATEWAY}/webmasters/v3/sites/${enc}/searchAnalytics/query`, {
         method: "POST",
         headers,
@@ -124,11 +134,26 @@ export const handler = async (req: Request): Promise<Response> => {
         body: JSON.stringify({ ...perfBody, dimensions: ["page"] }),
       }),
       fetch(`${GATEWAY}/webmasters/v3/sites/${enc}/sitemaps`, { headers }),
+      fetch(`${GATEWAY}/webmasters/v3/sites/${enc}/searchAnalytics/query`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(seriesBody),
+      }),
     ]);
 
     const perf = perfRes.ok ? await perfRes.json() : null;
     const pages = pagesRes.ok ? await pagesRes.json() : null;
     const sitemapsJson = sitemapsRes.ok ? await sitemapsRes.json() : null;
+    const series = seriesRes.ok ? await seriesRes.json() : null;
+    const timeseries = ((series?.rows ?? []) as { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }[])
+      .map((r) => ({
+        date: r.keys?.[0] ?? "",
+        clicks: r.clicks ?? 0,
+        impressions: r.impressions ?? 0,
+        ctr: r.ctr ?? 0,
+        position: r.position ?? null,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
 
     const rows = (perf?.rows ?? []) as { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }[];
     const pageRows = (pages?.rows ?? []) as typeof rows;
@@ -269,6 +294,18 @@ export const handler = async (req: Request): Promise<Response> => {
         position: r.position,
       })),
       sitemaps,
+      timeseries,
+      seriesRange: { start: seriesBody.startDate, end: seriesBody.endDate },
+      coverage: inspections.reduce(
+        (acc, i) => {
+          if ("error" in i && i.error) acc.unknown += 1;
+          else if ((i as { verdict?: string }).verdict === "PASS") acc.indexed += 1;
+          else if ((i as { verdict?: string }).verdict === "FAIL") acc.notIndexed += 1;
+          else acc.issues += 1;
+          return acc;
+        },
+        { indexed: 0, notIndexed: 0, issues: 0, unknown: 0 },
+      ),
       inspections,
       alerts,
       refreshedAt: new Date().toISOString(),
