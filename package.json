@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "bun run scripts/generate-sitemap.ts",
     "dev": "vite dev",
-    "prebuild": "bun run scripts/generate-sitemap.ts",
+    "prebuild": "bun run scripts/generate-sitemap.ts && node scripts/brand-scan.mjs",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
@@ -25,7 +25,12 @@
     "seo:validate": "node scripts/validate-seo-html.mjs",
     "check:email-images": "bun run scripts/email-image-check.tsx",
     "perf:baseline": "node scripts/perf-regression.mjs --save",
-    "perf:check": "node scripts/perf-regression.mjs"
+    "perf:check": "node scripts/perf-regression.mjs",
+    "brand:scan": "node scripts/brand-scan.mjs",
+    "brand:scan:dist": "node scripts/brand-scan.mjs --dist",
+    "brand:verify": "node scripts/brand-metadata-ci.mjs",
+    "brand:og": "node scripts/og-image-verify.mjs",
+    "brand:ci": "node scripts/brand-scan.mjs --dist && node scripts/brand-metadata-ci.mjs && node scripts/og-image-verify.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

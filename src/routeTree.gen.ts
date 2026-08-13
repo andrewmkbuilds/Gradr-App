@@ -51,6 +51,7 @@ import { Route as AppAdminApiHealthRouteImport } from './routes/_app/admin/api-h
 import { Route as AppAdminAuditLogRouteImport } from './routes/_app/admin/audit-log'
 import { Route as AppAdminAuthEmailPreviewRouteImport } from './routes/_app/admin/auth-email-preview'
 import { Route as AppAdminBlogAnalyticsRouteImport } from './routes/_app/admin/blog-analytics'
+import { Route as AppAdminBrandMetadataRouteImport } from './routes/_app/admin/brand-metadata'
 import { Route as AppAdminDigestPreviewRouteImport } from './routes/_app/admin/digest-preview'
 import { Route as AppAdminDiscountsRouteImport } from './routes/_app/admin/discounts'
 import { Route as AppAdminEmailOpsRouteImport } from './routes/_app/admin/email-ops'
@@ -77,6 +78,7 @@ import { Route as ApiPublicAdminWebhookReplayRouteImport } from './routes/api/pu
 import { Route as ApiPublicAdminWebhookSimulateRouteImport } from './routes/api/public/admin-webhook-simulate'
 import { Route as ApiPublicAffiliatePublicRouteImport } from './routes/api/public/affiliate-public'
 import { Route as ApiPublicAnalyzeResumeRouteImport } from './routes/api/public/analyze-resume'
+import { Route as ApiPublicBrandMetadataRouteImport } from './routes/api/public/brand-metadata'
 import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
 import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/career-plan'
 import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
@@ -325,6 +327,11 @@ const AppAdminBlogAnalyticsRoute = AppAdminBlogAnalyticsRouteImport.update({
   path: '/admin/blog-analytics',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminBrandMetadataRoute = AppAdminBrandMetadataRouteImport.update({
+  id: '/admin/brand-metadata',
+  path: '/admin/brand-metadata',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminDigestPreviewRoute = AppAdminDigestPreviewRouteImport.update({
   id: '/admin/digest-preview',
   path: '/admin/digest-preview',
@@ -457,6 +464,11 @@ const ApiPublicAffiliatePublicRoute =
 const ApiPublicAnalyzeResumeRoute = ApiPublicAnalyzeResumeRouteImport.update({
   id: '/api/public/analyze-resume',
   path: '/api/public/analyze-resume',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicBrandMetadataRoute = ApiPublicBrandMetadataRouteImport.update({
+  id: '/api/public/brand-metadata',
+  path: '/api/public/brand-metadata',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
@@ -693,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit-log': typeof AppAdminAuditLogRoute
   '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
+  '/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
   '/admin/email-ops': typeof AppAdminEmailOpsRoute
@@ -717,6 +730,7 @@ export interface FileRoutesByFullPath {
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
+  '/api/public/brand-metadata': typeof ApiPublicBrandMetadataRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
@@ -798,6 +812,7 @@ export interface FileRoutesByTo {
   '/admin/audit-log': typeof AppAdminAuditLogRoute
   '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
+  '/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
   '/admin/email-ops': typeof AppAdminEmailOpsRoute
@@ -822,6 +837,7 @@ export interface FileRoutesByTo {
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
+  '/api/public/brand-metadata': typeof ApiPublicBrandMetadataRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
@@ -905,6 +921,7 @@ export interface FileRoutesById {
   '/_app/admin/audit-log': typeof AppAdminAuditLogRoute
   '/_app/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/_app/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
+  '/_app/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/_app/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/_app/admin/discounts': typeof AppAdminDiscountsRoute
   '/_app/admin/email-ops': typeof AppAdminEmailOpsRoute
@@ -929,6 +946,7 @@ export interface FileRoutesById {
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
+  '/api/public/brand-metadata': typeof ApiPublicBrandMetadataRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
@@ -1012,6 +1030,7 @@ export interface FileRouteTypes {
     | '/admin/audit-log'
     | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
+    | '/admin/brand-metadata'
     | '/admin/digest-preview'
     | '/admin/discounts'
     | '/admin/email-ops'
@@ -1036,6 +1055,7 @@ export interface FileRouteTypes {
     | '/api/public/admin-webhook-simulate'
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
+    | '/api/public/brand-metadata'
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
@@ -1117,6 +1137,7 @@ export interface FileRouteTypes {
     | '/admin/audit-log'
     | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
+    | '/admin/brand-metadata'
     | '/admin/digest-preview'
     | '/admin/discounts'
     | '/admin/email-ops'
@@ -1141,6 +1162,7 @@ export interface FileRouteTypes {
     | '/api/public/admin-webhook-simulate'
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
+    | '/api/public/brand-metadata'
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
@@ -1223,6 +1245,7 @@ export interface FileRouteTypes {
     | '/_app/admin/audit-log'
     | '/_app/admin/auth-email-preview'
     | '/_app/admin/blog-analytics'
+    | '/_app/admin/brand-metadata'
     | '/_app/admin/digest-preview'
     | '/_app/admin/discounts'
     | '/_app/admin/email-ops'
@@ -1247,6 +1270,7 @@ export interface FileRouteTypes {
     | '/api/public/admin-webhook-simulate'
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
+    | '/api/public/brand-metadata'
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
@@ -1318,6 +1342,7 @@ export interface RootRouteChildren {
   ApiPublicAdminWebhookSimulateRoute: typeof ApiPublicAdminWebhookSimulateRoute
   ApiPublicAffiliatePublicRoute: typeof ApiPublicAffiliatePublicRoute
   ApiPublicAnalyzeResumeRoute: typeof ApiPublicAnalyzeResumeRoute
+  ApiPublicBrandMetadataRoute: typeof ApiPublicBrandMetadataRoute
   ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
   ApiPublicCareerPlanRoute: typeof ApiPublicCareerPlanRoute
   ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
@@ -1652,6 +1677,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminBlogAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/brand-metadata': {
+      id: '/_app/admin/brand-metadata'
+      path: '/admin/brand-metadata'
+      fullPath: '/admin/brand-metadata'
+      preLoaderRoute: typeof AppAdminBrandMetadataRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/digest-preview': {
       id: '/_app/admin/digest-preview'
       path: '/admin/digest-preview'
@@ -1832,6 +1864,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/analyze-resume'
       fullPath: '/api/public/analyze-resume'
       preLoaderRoute: typeof ApiPublicAnalyzeResumeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/brand-metadata': {
+      id: '/api/public/brand-metadata'
+      path: '/api/public/brand-metadata'
+      fullPath: '/api/public/brand-metadata'
+      preLoaderRoute: typeof ApiPublicBrandMetadataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/calendar-sync': {
@@ -2109,6 +2148,7 @@ interface AppRouteChildren {
   AppAdminAuditLogRoute: typeof AppAdminAuditLogRoute
   AppAdminAuthEmailPreviewRoute: typeof AppAdminAuthEmailPreviewRoute
   AppAdminBlogAnalyticsRoute: typeof AppAdminBlogAnalyticsRoute
+  AppAdminBrandMetadataRoute: typeof AppAdminBrandMetadataRoute
   AppAdminDigestPreviewRoute: typeof AppAdminDigestPreviewRoute
   AppAdminDiscountsRoute: typeof AppAdminDiscountsRoute
   AppAdminEmailOpsRoute: typeof AppAdminEmailOpsRoute
@@ -2150,6 +2190,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminAuditLogRoute: AppAdminAuditLogRoute,
   AppAdminAuthEmailPreviewRoute: AppAdminAuthEmailPreviewRoute,
   AppAdminBlogAnalyticsRoute: AppAdminBlogAnalyticsRoute,
+  AppAdminBrandMetadataRoute: AppAdminBrandMetadataRoute,
   AppAdminDigestPreviewRoute: AppAdminDigestPreviewRoute,
   AppAdminDiscountsRoute: AppAdminDiscountsRoute,
   AppAdminEmailOpsRoute: AppAdminEmailOpsRoute,
@@ -2204,6 +2245,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAdminWebhookSimulateRoute: ApiPublicAdminWebhookSimulateRoute,
   ApiPublicAffiliatePublicRoute: ApiPublicAffiliatePublicRoute,
   ApiPublicAnalyzeResumeRoute: ApiPublicAnalyzeResumeRoute,
+  ApiPublicBrandMetadataRoute: ApiPublicBrandMetadataRoute,
   ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
   ApiPublicCareerPlanRoute: ApiPublicCareerPlanRoute,
   ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
