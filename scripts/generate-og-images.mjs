@@ -45,6 +45,14 @@ function parseEntries(file, kind) {
  */
 const PAGE_TARGETS = [
   {
+    kind: "site",
+    slug: "gradr",
+    title: "AI Career Copilot for Resumes, Jobs & Interviews",
+    description:
+      "Score your resume against ATS rules, match live job openings, draft tailored applications, and practice realtime AI mock interviews.",
+    eyebrow: "gradr.me",
+  },
+  {
     kind: "page",
     slug: "ai-interview-coach",
     title: "AI Interview Coach — free voice mock interviews",
@@ -70,27 +78,30 @@ const esc = (s) =>
 function cardHtml({ title, description, eyebrow }, logoDataUri) {
   return `<!doctype html><html><head><meta charset="utf-8"/>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Inter:wght@400;500;600&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
   body{width:1200px;height:630px;font-family:Inter,system-ui,sans-serif;
-    background:radial-gradient(900px 520px at 82% -12%, #1b4f6b 0%, transparent 60%),
-               radial-gradient(700px 480px at -8% 108%, #123a52 0%, transparent 62%),
-               #060d16;color:#eaf4ff;display:flex;flex-direction:column;
-    justify-content:space-between;padding:68px 72px;position:relative;overflow:hidden}
-  .glow{position:absolute;inset:auto -140px -220px auto;width:520px;height:520px;border-radius:50%;
-    background:conic-gradient(from 210deg,#22d3ee,#38bdf8,#0ea5e9,#22d3ee);filter:blur(120px);opacity:.32}
+    background:radial-gradient(880px 520px at 84% -14%, #2d6f85 0%, transparent 62%),
+               radial-gradient(620px 460px at -6% 112%, #733E24 0%, transparent 58%),
+               #0b1c22;color:#F2F0EF;display:flex;flex-direction:column;
+    justify-content:space-between;padding:66px 72px;position:relative;overflow:hidden}
+  .rule{position:absolute;left:0;right:0;top:0;height:8px;
+    background:linear-gradient(90deg,#245F73 0%,#245F73 62%,#733E24 62%,#733E24 100%)}
+  .grid{position:absolute;inset:0;opacity:.06;
+    background-image:linear-gradient(#F2F0EF 1px,transparent 1px),linear-gradient(90deg,#F2F0EF 1px,transparent 1px);
+    background-size:64px 64px}
   .top{display:flex;align-items:center;gap:16px;z-index:1}
-  .top img{height:52px;width:auto}
-  .brand{font-weight:800;font-size:30px;letter-spacing:-.02em}
-  .eyebrow{margin-left:auto;font-size:19px;font-weight:600;color:#7fe3f5;
-    border:1px solid rgba(127,227,245,.35);border-radius:999px;padding:8px 20px;background:rgba(34,211,238,.08)}
-  h1{z-index:1;font-size:64px;line-height:1.06;font-weight:800;letter-spacing:-.03em;max-width:1010px}
-  p{z-index:1;font-size:27px;line-height:1.42;color:#a9c4da;max-width:960px;
+  .top img{height:56px;width:auto;border-radius:14px}
+  .brand{font-family:'Bricolage Grotesque',Inter,sans-serif;font-weight:800;font-size:32px;letter-spacing:-.02em;color:#F2F0EF}
+  .eyebrow{margin-left:auto;font-size:19px;font-weight:600;color:#F2F0EF;
+    border:1px solid rgba(242,240,239,.28);border-radius:999px;padding:9px 22px;background:rgba(115,62,36,.55)}
+  h1{z-index:1;font-family:'Bricolage Grotesque',Inter,sans-serif;font-size:64px;line-height:1.06;font-weight:800;letter-spacing:-.03em;max-width:1010px}
+  p{z-index:1;font-size:27px;line-height:1.42;color:#BBBDBC;max-width:960px;
     display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .foot{z-index:1;display:flex;align-items:center;gap:14px;font-size:22px;color:#8fb0c8}
-  .dot{width:9px;height:9px;border-radius:50%;background:#22d3ee}
+  .foot{z-index:1;display:flex;align-items:center;gap:14px;font-size:22px;color:#BBBDBC}
+  .dot{width:10px;height:10px;border-radius:50%;background:#733E24}
 </style></head><body>
-<div class="glow"></div>
+<div class="grid"></div><div class="rule"></div>
 <div class="top">
   ${logoDataUri ? `<img src="${logoDataUri}" alt=""/>` : ""}
   <span class="brand">Gradr</span>
