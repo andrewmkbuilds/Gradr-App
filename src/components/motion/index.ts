@@ -6,4 +6,6 @@ export { Parallax } from "./Parallax";
 export { ScrollProgress } from "./ScrollProgress";
 export { TiltCard } from "./TiltCard";
 export { Atmosphere } from "./Atmosphere";
+export { DepthStage, DepthLayer, FloatPanel, ScrollDepth } from "./Depth";
+export { useDepthCapability, useSpatialPointer } from "@/hooks/useDepthCapability";
 export * from "@/lib/motion/tokens";

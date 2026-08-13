@@ -1,5 +1,5 @@
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
 import { Activity, Bot, Check, FileText, Mic, Sparkles, Target } from "lucide-react";
 import { CountUp } from "@/components/motion";
@@ -53,7 +53,7 @@ function Waveform() {
 /* --------------------------------- panels --------------------------------- */
 
 const cardBase =
-  "glass-panel rounded-2xl p-4 will-change-transform";
+  "glass-panel depth-surface rounded-2xl p-4 will-change-transform";
 
 function ScorePanel() {
   return (
@@ -184,14 +184,30 @@ export function HeroCommandCenter() {
   const rotateY = useTransform(mx, [-1, 1], [8, -8]);
   const rotateX = useTransform(my, [-1, 1], [-6, 6]);
   // Three parallax depths. Hooks are declared flat so the order never varies.
-  const near = { x: useTransform(mx, [-1, 1], [-18, 18]), y: useTransform(my, [-1, 1], [-11, 11]) };
-  const mid = { x: useTransform(mx, [-1, 1], [-10, 10]), y: useTransform(my, [-1, 1], [-6, 6]) };
-  const far = { x: useTransform(mx, [-1, 1], [-4, 4]), y: useTransform(my, [-1, 1], [-2.5, 2.5]) };
+  const near = {
+    x: useTransform(mx, [-1, 1], [-22, 22]),
+    y: useTransform(my, [-1, 1], [-13, 13]),
+    z: 90,
+  };
+  const mid = {
+    x: useTransform(mx, [-1, 1], [-12, 12]),
+    y: useTransform(my, [-1, 1], [-7, 7]),
+    z: 55,
+  };
+  const far = {
+    x: useTransform(mx, [-1, 1], [-4, 4]),
+    y: useTransform(my, [-1, 1], [-2.5, 2.5]),
+    z: 0,
+  };
+  // Cast shadow follows the tilt so the stack looks physically lit.
+  const shadowX = useTransform(mx, [-1, 1], [34, -34]);
+  const shadowY = useTransform(my, [-1, 1], [-10, 40]);
+  const frameShadow = useMotionTemplate`${shadowX}px ${shadowY}px 90px -40px hsl(var(--foreground) / 0.55)`;
 
   return (
     <div
       ref={ref}
-      className="relative mx-auto w-full max-w-[560px]"
+      className="relative mx-auto w-full max-w-[560px] [perspective:1400px] [perspective-origin:50%_40%]"
       onPointerMove={(e) => {
         if (reduced || e.pointerType !== "mouse") return;
         const rect = ref.current?.getBoundingClientRect();
@@ -221,8 +237,8 @@ export function HeroCommandCenter() {
           initial={{ opacity: 0, y: 26, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ ...springSoft, delay: 0.15 }}
-          style={reduced ? undefined : far}
-          className="overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/80 p-4 shadow-[var(--shadow-elevated)] backdrop-blur-xl"
+          style={reduced ? undefined : { ...far, boxShadow: frameShadow, transformStyle: "preserve-3d" }}
+          className="depth-surface overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/80 p-4 shadow-[var(--shadow-elevated)] backdrop-blur-xl"
         >
           <div className="flex items-center justify-between border-b border-border/60 pb-3">
             <span className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] text-muted-foreground">
@@ -235,9 +251,13 @@ export function HeroCommandCenter() {
             </span>
           </div>
 
-          <div className="mt-4 grid gap-3">
-            <ScorePanel />
-            <InterviewPanel />
+          <div className="mt-4 grid gap-3 [transform-style:preserve-3d]">
+            <div className="depth-content-sm">
+              <ScorePanel />
+            </div>
+            <div className="depth-content">
+              <InterviewPanel />
+            </div>
           </div>
 
           <motion.div

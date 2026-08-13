@@ -2,6 +2,8 @@ import {
   FileText, Target, Mic, LineChart, Check, Circle, Sparkles, MapPin,
   Building2, Send, MessageSquare, Camera, Waves, Clock, ArrowRight, Bot,
 } from "lucide-react";
+import { DepthStage, DepthLayer, FloatPanel } from "@/components/motion/Depth";
+import { CountUp } from "@/components/motion/CountUp";
 
 /* ------------------------------ shared shell ------------------------------ */
 
@@ -9,27 +11,59 @@ export function AppFrame({
   title,
   children,
   className = "",
+  overlay,
 }: {
   title: string;
   children: React.ReactNode;
   className?: string;
+  /** Panels that float in front of the frame on their own depth plane. */
+  overlay?: React.ReactNode;
 }) {
   return (
-    <div
-      className={`overflow-hidden rounded-2xl border border-border bg-card shadow-[0_28px_80px_-30px_hsl(0_0%_0%/0.75)] ${className}`}
-      role="img"
-      aria-label={`Gradr product interface: ${title}`}
-    >
-      <div className="flex items-center gap-2 border-b border-border bg-secondary/40 px-3.5 py-2.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
-        <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
-        <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
-        <span className="ml-2 truncate text-[11px] font-medium tracking-wide text-muted-foreground">
-          {title}
-        </span>
+    <DepthStage className="rounded-2xl" tilt={5}>
+      <div
+        className={`depth-surface overflow-hidden rounded-2xl border border-border bg-card shadow-[0_28px_80px_-30px_hsl(0_0%_0%/0.75)] ${className}`}
+        role="img"
+        aria-label={`Gradr product interface: ${title}`}
+      >
+        <div className="flex items-center gap-2 border-b border-border bg-secondary/40 px-3.5 py-2.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
+          <span className="ml-2 truncate text-[11px] font-medium tracking-wide text-muted-foreground">
+            {title}
+          </span>
+        </div>
+        <DepthLayer z={18} className="p-3.5 sm:p-5">
+          {children}
+        </DepthLayer>
       </div>
-      <div className="p-3.5 sm:p-5">{children}</div>
-    </div>
+      {overlay}
+    </DepthStage>
+  );
+}
+
+/**
+ * A small readout that floats in front of a product frame on its own plane.
+ * Used to lift scores and insights out of the flat UI.
+ */
+export function FloatingReadout({
+  className = "",
+  z = 70,
+  delay = 0,
+  children,
+}: {
+  className?: string;
+  z?: number;
+  delay?: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <DepthLayer z={z} className={`pointer-events-none absolute hidden sm:block ${className}`}>
+      <FloatPanel distance={7} delay={delay}>
+        <div className="depth-surface glass-panel rounded-2xl px-3.5 py-2.5">{children}</div>
+      </FloatPanel>
+    </DepthLayer>
   );
 }
 
@@ -141,7 +175,25 @@ export function HeroWorkspace() {
 
 export function ResumeVisual() {
   return (
-    <AppFrame title="gradr — resume intelligence">
+    <AppFrame
+      title="gradr — resume intelligence"
+      overlay={
+        <>
+          <FloatingReadout className="-right-5 -top-7 lg:-right-10" z={80}>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">ATS score</p>
+            <p className="font-display text-2xl font-bold tabular-nums text-foreground">
+              <CountUp to={86} duration={1.4} />
+            </p>
+          </FloatingReadout>
+          <FloatingReadout className="-bottom-6 -left-5 lg:-left-10" z={58} delay={1.2}>
+            <p className="flex items-center gap-2 text-[11px] font-medium text-foreground">
+              <Sparkles className="h-3.5 w-3.5 text-brand-secondary" />
+              4 keyword gaps found
+            </p>
+          </FloatingReadout>
+        </>
+      }
+    >
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-secondary/30 p-3">
           <div className="mb-3 flex items-center gap-2">
@@ -216,7 +268,25 @@ const MATCHES = [
 
 export function MatchVisual() {
   return (
-    <AppFrame title="gradr — job matching">
+    <AppFrame
+      title="gradr — job matching"
+      overlay={
+        <>
+          <FloatingReadout className="-left-6 top-10 lg:-left-12" z={78}>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Top match</p>
+            <p className="font-display text-2xl font-bold tabular-nums text-primary">
+              <CountUp to={92} suffix="%" duration={1.4} />
+            </p>
+          </FloatingReadout>
+          <FloatingReadout className="-bottom-6 right-4" z={54} delay={0.9}>
+            <p className="flex items-center gap-2 text-[11px] font-medium text-foreground">
+              <Target className="h-3.5 w-3.5 text-primary" />
+              18 live roles scored today
+            </p>
+          </FloatingReadout>
+        </>
+      }
+    >
       <ul className="space-y-2.5">
         {MATCHES.map((m) => (
           <li key={m.role} className="rounded-xl border border-border bg-secondary/30 p-3">
@@ -299,7 +369,25 @@ export function ApplicationVisual() {
 
 export function InterviewVisual() {
   return (
-    <AppFrame title="gradr — ai mock interview">
+    <AppFrame
+      title="gradr — ai mock interview"
+      overlay={
+        <>
+          <FloatingReadout className="-right-5 top-8 lg:-right-12" z={82}>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Session score</p>
+            <p className="font-display text-2xl font-bold tabular-nums text-foreground">
+              <CountUp to={78} suffix="/100" duration={1.5} />
+            </p>
+          </FloatingReadout>
+          <FloatingReadout className="-bottom-6 left-6" z={56} delay={1.1}>
+            <p className="flex items-center gap-2 text-[11px] font-medium text-foreground">
+              <Waves className="h-3.5 w-3.5 text-primary" />
+              Live transcript · captions on
+            </p>
+          </FloatingReadout>
+        </>
+      }
+    >
       <div className="grid gap-3 lg:grid-cols-5">
         <div className="space-y-3 lg:col-span-3">
           <div className="relative overflow-hidden rounded-xl border border-primary/25 bg-background/60 p-5">
@@ -407,7 +495,15 @@ export function AssistantVisual() {
 export function AnalyticsVisual() {
   const bars = [38, 46, 42, 58, 55, 67, 72, 78];
   return (
-    <AppFrame title="gradr — career analytics">
+    <AppFrame
+      title="gradr — career analytics"
+      overlay={
+        <FloatingReadout className="-right-5 -top-6 lg:-right-10" z={76}>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Next milestone</p>
+          <p className="text-[11px] font-medium text-foreground">3 skills to Senior Analyst</p>
+        </FloatingReadout>
+      }
+    >
       <div className="grid gap-3 sm:grid-cols-3">
         {[
           ["ATS health", "86", "+8 this month"],

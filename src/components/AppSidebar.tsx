@@ -38,9 +38,10 @@ function isGroupActive(group: NavGroup, pathname: string) {
 }
 
 const baseRow =
-  "nav-item interactive group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors";
+  "nav-item interactive depth-press group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors";
 const idleRow = "text-muted-foreground hover:bg-secondary hover:text-foreground";
-const activeRow = "bg-primary/10 text-primary";
+const activeRow =
+  "bg-primary/10 text-primary shadow-[0_6px_18px_-12px_hsl(var(--primary)/0.85),inset_0_1px_0_hsl(0_0%_100%/0.12)]";
 
 export function AppSidebar() {
   const { state, toggleSidebar, isMobile, setOpenMobile, openMobile } = useSidebar();

@@ -9,27 +9,30 @@ import { cn } from "@/lib/utils";
  * `warning` asks for attention. Radius and shadow are fixed by the token
  * system so no card can drift into a different design language.
  */
-const cardVariants = cva("rounded-xl text-card-foreground transition-[box-shadow,transform,border-color] duration-200", {
-  variants: {
-    tone: {
-      /** Resting neutral surface — the default for most content. */
-      default: "elev-2",
-      /** Clean data surface: flatter, for tables and dense readouts. */
-      data: "elev-1",
-      /** The one card on the page that should dominate. Deep ocean teal. */
-      insight:
-        "border border-primary/25 bg-primary text-primary-foreground shadow-[0_18px_40px_-24px_hsl(var(--primary)/0.7)] [&_.text-muted-foreground]:text-primary-foreground/75",
-      /** Brand moment — mahogany hairline and wash. */
-      highlight: "border border-brand-secondary/30 bg-brand-secondary-soft/60",
-      /** Needs attention, without shouting. */
-      warning: "border border-warning/35 bg-warning-soft/60",
-      /** Something went wrong. */
-      danger: "border border-destructive/35 bg-destructive-soft/50",
+const cardVariants = cva(
+  "depth-surface rounded-xl text-card-foreground transition-[box-shadow,transform,border-color] duration-200",
+  {
+    variants: {
+      tone: {
+        /** Resting neutral surface — the default for most content. */
+        default: "elev-2",
+        /** Clean data surface: flatter, for tables and dense readouts. */
+        data: "elev-1",
+        /** The one card on the page that should dominate. Deep ocean teal. */
+        insight:
+          "border border-primary/25 bg-primary text-primary-foreground shadow-[0_18px_40px_-24px_hsl(var(--primary)/0.7)] [&_.text-muted-foreground]:text-primary-foreground/75",
+        /** Brand moment — mahogany hairline and wash. */
+        highlight: "border border-brand-secondary/30 bg-brand-secondary-soft/60",
+        /** Needs attention, without shouting. */
+        warning: "border border-warning/35 bg-warning-soft/60",
+        /** Something went wrong. */
+        danger: "border border-destructive/35 bg-destructive-soft/50",
+      },
+      interactive: { true: "elev-interactive depth-hover cursor-pointer", false: "" },
     },
-    interactive: { true: "elev-interactive cursor-pointer", false: "" },
+    defaultVariants: { tone: "default", interactive: false },
   },
-  defaultVariants: { tone: "default", interactive: false },
-});
+);
 
 export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,

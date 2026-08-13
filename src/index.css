@@ -359,6 +359,85 @@
     .elev-interactive:hover { transform: none; }
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Spatial depth layer                                                 */
+  /* Pure CSS half of the 3D system: perspective containers, depth-based */
+  /* lighting, reflective top edges and hover elevation. GPU-only        */
+  /* properties (transform / opacity) so nothing triggers layout.        */
+  /* ------------------------------------------------------------------ */
+
+  /* Perspective root for any spatially composed group. */
+  .depth-scene {
+    perspective: 1400px;
+    perspective-origin: 50% 40%;
+    transform-style: preserve-3d;
+  }
+
+  /* A surface that reads as a physical panel: soft lighting from above,
+     a reflective top hairline and a grounded shadow. */
+  .depth-surface {
+    position: relative;
+    transform-style: preserve-3d;
+    background-image: linear-gradient(
+      to bottom,
+      hsl(var(--foreground) / 0.035),
+      transparent 34%,
+      hsl(var(--foreground) / 0.02)
+    );
+    transition: box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 260ms ease;
+  }
+  /* Reflection / border highlight along the leading edge. */
+  .depth-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      160deg,
+      hsl(0 0% 100% / 0.16),
+      transparent 38%
+    );
+    opacity: 0.7;
+  }
+  .dark .depth-surface::before {
+    background: linear-gradient(160deg, hsl(0 0% 100% / 0.07), transparent 42%);
+  }
+
+  /* Hover elevation: rises toward the viewer with a deeper cast shadow. */
+  .depth-hover:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: var(--elev-4-shadow), 0 0 0 1px hsl(var(--primary) / 0.16);
+    border-color: hsl(var(--primary) / 0.3);
+  }
+
+  /* Content that should sit above its own surface inside a 3D stage. */
+  .depth-content { transform: translateZ(18px); transform-style: preserve-3d; }
+  .depth-content-sm { transform: translateZ(10px); }
+  .depth-content-lg { transform: translateZ(34px); }
+
+  /* Buttons and CTAs: a real press into the surface. */
+  .depth-press {
+    transform-style: preserve-3d;
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .depth-press:hover { transform: translate3d(0, -1px, 0); }
+  .depth-press:active { transform: translate3d(0, 1px, 0) scale(0.985); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .depth-hover:hover,
+    .depth-press:hover,
+    .depth-press:active { transform: none; }
+    .depth-content,
+    .depth-content-sm,
+    .depth-content-lg { transform: none; }
+  }
+
+
+
   .stat-value { @apply text-3xl font-bold tracking-tight; font-variant-numeric: tabular-nums; }
 
   .glassmorphic {
@@ -813,7 +892,14 @@ html[data-motion="reduced"] .nav-item::before,
 html[data-motion="reduced"] .nav-underline::after { transition: none !important; }
 html[data-motion="reduced"] .lift-card:hover,
 html[data-motion="reduced"] .elev-interactive:hover,
+html[data-motion="reduced"] .depth-hover:hover,
+html[data-motion="reduced"] .depth-press:hover,
+html[data-motion="reduced"] .depth-press:active,
+html[data-motion="reduced"] .depth-content,
+html[data-motion="reduced"] .depth-content-sm,
+html[data-motion="reduced"] .depth-content-lg,
 html[data-motion="reduced"] .press-scale:active { transform: none !important; }
+html[data-motion="reduced"] .depth-scene { perspective: none; }
 html[data-motion="reduced"].theme-transition,
 html[data-motion="reduced"].theme-transition * { transition: none !important; }
 html[data-motion="reduced"] *,
