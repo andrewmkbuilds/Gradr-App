@@ -20,6 +20,8 @@
     "test:visual": "node scripts/auth-hero-visual.mjs",
     "test:visual:logo": "node scripts/logo-visual.mjs",
     "test:a11y": "node scripts/a11y-nav.mjs",
+    "test:nav": "playwright test tests/nav-active-state.spec.ts tests/nav-a11y-overflow.spec.ts tests/nav-visual.spec.ts",
+
     "audit:deps": "node scripts/dependency-audit.mjs",
     "format": "prettier --write .",
     "seo:validate": "node scripts/validate-seo-html.mjs",
