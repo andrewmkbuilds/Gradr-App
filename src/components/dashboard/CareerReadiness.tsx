@@ -116,7 +116,7 @@ export function CareerReadiness({
           </div>
         </DepthLayer>
 
-        <DepthLayer as="ul" z={18} className="w-full space-y-3">
+        <DepthLayer z={18} className="w-full space-y-3">
           {pillars.map((p, i) => {
             const v = clamp(p.value);
             return (

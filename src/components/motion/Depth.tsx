@@ -150,6 +150,8 @@ export function DepthStage({
 type LayerProps = {
   children: ReactNode;
   className?: string;
+  /** Extra static styles (sizing etc.) merged with the depth transform. */
+  style?: CSSProperties;
   /** How far forward the layer sits, in px of translateZ. */
   z?: number;
   /** Pointer parallax travel in px. Defaults to a fraction of `z`. */
@@ -160,7 +162,7 @@ type LayerProps = {
  * A single plane inside a `DepthStage`. Pushed forward on the Z axis and
  * drifting slightly faster than the layers behind it.
  */
-export function DepthLayer({ children, className, z = 24, parallax }: LayerProps) {
+export function DepthLayer({ children, className, z = 24, parallax, style }: LayerProps) {
   const stage = useContext(StageContext);
   const travel = parallax ?? z * 0.55;
   const fallbackX = useMotionValue(0);
@@ -169,13 +171,17 @@ export function DepthLayer({ children, className, z = 24, parallax }: LayerProps
   const y = useTransform(stage?.my ?? fallbackY, [-1, 1], [-travel * 0.6, travel * 0.6]);
 
   if (!stage?.active) {
-    return <div className={className}>{children}</div>;
+    return (
+      <div className={className} style={style}>
+        {children}
+      </div>
+    );
   }
 
   return (
     <motion.div
       className={cn("will-change-transform [transform-style:preserve-3d]", className)}
-      style={{ x, y, z }}
+      style={{ ...style, x, y, z }}
     >
       {children}
     </motion.div>
