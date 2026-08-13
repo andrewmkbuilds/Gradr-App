@@ -58,6 +58,20 @@
     --brand-secondary-foreground: 20 25% 97%;
     --brand-secondary-soft: 22 48% 93%;
 
+    /* ---------- Mahogany accent scale (secondary identity) ----------
+       Teal owns the product; mahogany carries emphasis: active nav,
+       selected tabs, insight highlights, recommended actions. */
+    --mahogany: 20 52% 30%;
+    --mahogany-hover: 20 56% 24%;
+    --mahogany-foreground: 20 25% 97%;
+    --mahogany-strong: 20 56% 22%;
+    --mahogany-muted: 20 34% 42%;
+    --mahogany-soft: 22 48% 93%;
+    --mahogany-tint: 24 46% 96%;
+    --mahogany-border: 22 34% 82%;
+    --mahogany-ring: 20 52% 40%;
+
+
     /* ---------- Neutral interactive (shadcn semantics) ---------- */
     --secondary: 22 14% 94%;
     --secondary-foreground: 197 30% 20%;
