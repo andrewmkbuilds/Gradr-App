@@ -158,7 +158,7 @@ export default function AtsResumeChecker() {
       />
 
       <section className="mx-auto max-w-3xl text-center">
-        <p className="text-xs font-medium uppercase tracking-wider text-primary">
+        <p className="accent-text text-xs font-semibold uppercase tracking-wider">
           Free tool · Resume Intelligence
         </p>
         <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
@@ -218,7 +218,7 @@ export default function AtsResumeChecker() {
 
       <section className="mt-16" aria-labelledby="common-issues">
         <h2 id="common-issues" className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground">
-          <ShieldAlert className="h-5 w-5 text-primary" aria-hidden="true" />
+          <ShieldAlert className="accent-text h-5 w-5" aria-hidden="true" />
           Common ATS issues Gradr catches
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">

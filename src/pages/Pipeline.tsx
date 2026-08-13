@@ -98,7 +98,7 @@ function JobCard({ job, onClick }: { job: TrackedJob; onClick: () => void }) {
       <p className="text-xs text-muted-foreground mt-1">{job.company || "Unknown"}</p>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {typeof job.match_score === "number" && (
-          <Badge className="text-[10px] bg-primary/15 text-primary border-primary/30">
+          <Badge variant="accentSoft" className="text-[10px]">
             <Sparkles className="h-2.5 w-2.5 mr-0.5" />{job.match_score}%
           </Badge>
         )}
@@ -382,7 +382,7 @@ export default function Pipeline() {
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline">{selected.status}</Badge>
                   {typeof selected.match_score === "number" && (
-                    <Badge className="bg-primary/15 text-primary border-primary/30">{selected.match_score}% match</Badge>
+                    <Badge variant="accentSoft">{selected.match_score}% match</Badge>
                   )}
                   {selected.applied_at && <Badge variant="secondary">Applied {formatDistanceToNow(new Date(selected.applied_at), { addSuffix: true })}</Badge>}
                 </div>
@@ -395,8 +395,8 @@ export default function Pipeline() {
                 {selected.application_pack && (
                   <div className="space-y-3 pt-2 border-t border-border max-h-[300px] overflow-y-auto">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      <Label className="text-xs uppercase tracking-wider text-primary">AI Application Pack</Label>
+                      <Sparkles className="accent-text h-4 w-4" />
+                      <Label className="accent-text text-xs uppercase tracking-wider">AI Application Pack</Label>
                     </div>
                     {selected.application_pack.cover_letter && (
                       <div className="space-y-1">

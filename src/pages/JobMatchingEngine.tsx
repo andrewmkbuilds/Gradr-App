@@ -168,7 +168,7 @@ export default function JobMatchingEngine() {
             </span>
             <Link
               to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=match_engine_header"
-              className="inline-flex items-center gap-2 text-xs text-primary hover:underline"
+              className="accent-link inline-flex items-center gap-2 text-xs"
             >
               <BookOpen className="h-3.5 w-3.5" />
               Guide: boost your ATS match score
@@ -235,7 +235,7 @@ export default function JobMatchingEngine() {
               </div>
               <div className="glass-card p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <TrendingUp className="accent-text h-4 w-4" />
                   <span className="text-xs text-muted-foreground">Avg match score</span>
                 </div>
                 <p className="stat-value text-foreground">{avgScore}%</p>
@@ -283,7 +283,7 @@ export default function JobMatchingEngine() {
                         </div>
                         <div className="flex flex-wrap items-center gap-1.5">
                           {job.match.matchedSkills.slice(0, 3).map((s) => (
-                            <span key={s} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{s}</span>
+                            <span key={s} className="accent-chip px-2 py-0.5 text-xs font-medium">{s}</span>
                           ))}
                         </div>
                       </div>
