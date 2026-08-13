@@ -13,6 +13,12 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import {
+  Atmosphere, CountUp, Magnetic, Parallax, ScrollProgress, TextReveal, TiltCard,
+  easeOut, viewportOnce, springSnappy,
+} from "@/components/motion";
+import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
 import {
   HeroWorkspace, ResumeVisual, MatchVisual, ApplicationVisual,
   InterviewVisual, AssistantVisual, AnalyticsVisual,
