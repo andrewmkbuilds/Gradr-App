@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { MotionPreferenceProvider } from "@/hooks/useMotionPreference";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -50,6 +51,7 @@ const AdminAffiliates = lazy(() => import("./pages/AdminAffiliates"));
 const AdminBlogAnalytics = lazy(() => import("./pages/AdminBlogAnalytics"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminSecurityLog = lazy(() => import("@/pages/AdminSecurityLog"));
+const MotionPlayground = lazy(() => import("@/pages/MotionPlayground"));
 const AdminSecurityFindings = lazy(() => import("@/pages/AdminSecurityFindings"));
 const AdminNavAnalytics = lazy(() => import("@/pages/AdminNavAnalytics"));
 const AdminSeoMonitor = lazy(() => import("@/pages/AdminSeoMonitor"));
@@ -133,6 +135,7 @@ function ProtectedRoutes() {
           <Route path="/admin/affiliates" element={<RequireAdmin><AnimatedPage><AdminAffiliates /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/blog-analytics" element={<RequireAdmin><AnimatedPage><AdminBlogAnalytics /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/security-findings" element={<RequireAdmin><AnimatedPage><AdminSecurityFindings /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/motion-playground" element={<RequireAdmin><AnimatedPage><MotionPlayground /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/security-log" element={<RequireAdmin><AnimatedPage><AdminSecurityLog /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/seo-monitor" element={<RequireAdmin><AnimatedPage><AdminSeoMonitor /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/nav-analytics" element={<RequireAdmin><AnimatedPage><AdminNavAnalytics /></AnimatedPage></RequireAdmin>} />
@@ -249,6 +252,7 @@ const App = () => (
   >
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+      <MotionPreferenceProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -265,6 +269,7 @@ const App = () => (
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
+      </MotionPreferenceProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </SentryErrorBoundary>

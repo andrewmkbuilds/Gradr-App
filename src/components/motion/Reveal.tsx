@@ -1,4 +1,5 @@
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion, type Variants } from "motion/react";
 import { type ElementType, type ReactNode } from "react";
 import { duration, easeOut, viewportOnce } from "@/lib/motion/tokens";
 
@@ -35,7 +36,7 @@ export function Reveal({
   as = "div",
   lift = false,
 }: RevealProps) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const Tag = motion.create(as as ElementType);
 
   const variants: Variants = reduced

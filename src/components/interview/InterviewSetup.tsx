@@ -1,5 +1,6 @@
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
   const [tier, setTier] = useState<string | null>(null);
 
   const ent = entitlementFor(tier);
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
 
 
   // Auto-fill from the user's saved profile and most recent parsed resume.

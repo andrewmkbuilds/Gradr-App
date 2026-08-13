@@ -1,3 +1,4 @@
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +14,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import {
   Atmosphere, CountUp, Magnetic, Parallax, ScrollProgress, TextReveal, TiltCard,
   easeOut, viewportOnce, springSnappy,
@@ -237,7 +238,7 @@ export default function Landing() {
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
 
   // Hero scroll choreography: the composition lifts and dissolves as you scroll away.
-  const heroReduced = useReducedMotion();
+  const heroReduced = useReducedMotionPref();
   const { scrollY } = useScroll();
   const heroLift = useTransform(scrollY, [0, 600], [0, -60]);
   const heroOpacity = useTransform(scrollY, [0, 520], [1, 0.35]);

@@ -1,4 +1,5 @@
-import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion, useMotionTemplate, useMotionValue, useSpring } from "motion/react";
 import { useRef, type ReactNode } from "react";
 import { springPointer } from "@/lib/motion/tokens";
 
@@ -16,7 +17,7 @@ type Props = {
  * sheen tracking the cursor. Mouse only; static for touch/reduced motion.
  */
 export function TiltCard({ children, className = "", tilt = 6, sheen = true }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const ref = useRef<HTMLDivElement>(null);
   const rx = useSpring(useMotionValue(0), springPointer);
   const ry = useSpring(useMotionValue(0), springPointer);

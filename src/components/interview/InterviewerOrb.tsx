@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { springSmooth, springSoft } from "@/lib/motion/tokens";
 
@@ -45,7 +46,7 @@ interface Props {
  * label-legible state under `prefers-reduced-motion`.
  */
 export function InterviewerOrb({ state, name = "AI Interviewer", className }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const tuning = STATE_TUNING[state];
   const bars = ENVELOPE[state];
   const active = state === "speaking" || state === "listening";

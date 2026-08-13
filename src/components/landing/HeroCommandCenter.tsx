@@ -1,4 +1,5 @@
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
 import { Activity, Bot, Check, FileText, Mic, Sparkles, Target } from "lucide-react";
 import { CountUp } from "@/components/motion";
@@ -27,7 +28,7 @@ function Bar({ label, value, delay }: { label: string; value: number; delay: num
 }
 
 function Waveform() {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const bars = Array.from({ length: 22 });
   return (
     <div className="flex h-8 items-center gap-[3px]" aria-hidden>
@@ -175,7 +176,7 @@ function InsightChip() {
  * at a different rate so it reads as a real 3D command center.
  */
 export function HeroCommandCenter() {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const ref = useRef<HTMLDivElement>(null);
   const mx = useSpring(useMotionValue(0), springPointer);
   const my = useSpring(useMotionValue(0), springPointer);

@@ -1,4 +1,5 @@
 import { ThemeSegmentedControl } from "@/components/ThemeToggle";
+import { MotionSegmentedControl } from "@/components/MotionToggle";
 import { useState, useEffect } from "react";
 import { Palette, User, Save, Loader2, Bell, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -152,6 +153,15 @@ export default function Settings() {
           </div>
         </div>
         <ThemeSegmentedControl />
+
+        <div className="border-t border-border pt-4 space-y-2">
+          <h3 className="text-sm font-medium text-foreground">Motion</h3>
+          <p className="text-xs text-muted-foreground">
+            Reduce animation, parallax and background effects across Gradr. System follows your device
+            accessibility setting.
+          </p>
+          <MotionSegmentedControl />
+        </div>
       </section>
 
       <div className="glass-card p-6 space-y-5 animate-slide-up">

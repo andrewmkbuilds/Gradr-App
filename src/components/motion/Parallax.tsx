@@ -1,4 +1,5 @@
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef, type ReactNode } from "react";
 
 type Props = {
@@ -10,7 +11,7 @@ type Props = {
 
 /** Scroll parallax on a single transform channel — cheap and GPU friendly. */
 export function Parallax({ children, className = "", distance = -60 }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useSpring(useTransform(scrollYProgress, [0, 1], [-distance / 2, distance / 2]), {

@@ -796,3 +796,51 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------------------
+   In-app reduced-motion override.
+   Mirrors the prefers-reduced-motion block above, but keyed off the
+   <html data-motion="reduced"> attribute set by MotionPreferenceProvider so
+   the user can opt in/out regardless of their OS setting.
+   ------------------------------------------------------------------------ */
+html[data-motion="reduced"] .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+html[data-motion="reduced"] .aurora-bg,
+html[data-motion="reduced"] .float-slow,
+html[data-motion="reduced"] .float-mid,
+html[data-motion="reduced"] .liquid-blob,
+html[data-motion="reduced"] .marquee,
+html[data-motion="reduced"] .conic-spin,
+html[data-motion="reduced"] .shimmer,
+html[data-motion="reduced"] .ambient-orb,
+html[data-motion="reduced"] .ambient-grid,
+html[data-motion="reduced"] .enter-up,
+html[data-motion="reduced"] .stagger-children > *,
+html[data-motion="reduced"] .skeleton-sheen::after { animation: none !important; }
+html[data-motion="reduced"] .interactive,
+html[data-motion="reduced"] .lift-card,
+html[data-motion="reduced"] .field-motion,
+html[data-motion="reduced"] .sheen::after,
+html[data-motion="reduced"] .nav-item::before,
+html[data-motion="reduced"] .nav-underline::after { transition: none !important; }
+html[data-motion="reduced"] .lift-card:hover,
+html[data-motion="reduced"] .elev-interactive:hover,
+html[data-motion="reduced"] .press-scale:active { transform: none !important; }
+html[data-motion="reduced"].theme-transition,
+html[data-motion="reduced"].theme-transition * { transition: none !important; }
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* When the user explicitly asks for full motion, ignore the OS media query. */
+html[data-motion="full"] *,
+html[data-motion="full"] *::before,
+html[data-motion="full"] *::after {
+  animation-duration: revert-layer;
+  animation-iteration-count: revert-layer;
+  transition-duration: revert-layer;
+}

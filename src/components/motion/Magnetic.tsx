@@ -1,4 +1,5 @@
-import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion, useMotionValue, useSpring } from "motion/react";
 import { useRef, type ReactNode } from "react";
 import { springPointer } from "@/lib/motion/tokens";
 
@@ -14,7 +15,7 @@ type Props = {
  * springs home on exit. Disabled for touch and reduced-motion users.
  */
 export function Magnetic({ children, className = "", strength = 10 }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const ref = useRef<HTMLSpanElement>(null);
   const x = useSpring(useMotionValue(0), springPointer);
   const y = useSpring(useMotionValue(0), springPointer);

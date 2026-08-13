@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion } from "motion/react";
 
 /**
  * Ambient backdrop for marketing surfaces: engineering grid, two slow drifting
@@ -14,7 +15,7 @@ export function Atmosphere({
   beam?: boolean;
   grain?: boolean;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
 
   return (
     <div className={`pointer-events-none absolute inset-0 -z-10 overflow-hidden ${className}`} aria-hidden>

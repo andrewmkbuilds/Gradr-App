@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { motion } from "motion/react";
 import { CountUp } from "@/components/motion";
 import { easeOut } from "@/lib/motion/tokens";
 import { Surface } from "@/components/ui/surface";
@@ -42,7 +43,7 @@ export function CareerReadiness({
   pillars: ReadinessPillar[];
   className?: string;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionPref();
   const score = computeReadiness(pillars);
   const state = band(score);
 
