@@ -22,6 +22,8 @@ import { corsHeaders } from "./shared/cors";
 import { createClient } from "./shared/supabase";
 import {
   CONTENT_SECURITY_POLICY,
+  CONTENT_SECURITY_POLICY_REPORT_ONLY,
+
   OAUTH_SENSITIVE_PATHS,
   REFERRER_POLICY,
   STRICT_TRANSPORT_SECURITY,
