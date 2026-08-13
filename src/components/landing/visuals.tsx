@@ -2,6 +2,8 @@ import {
   FileText, Target, Mic, LineChart, Check, Circle, Sparkles, MapPin,
   Building2, Send, MessageSquare, Camera, Waves, Clock, ArrowRight, Bot,
 } from "lucide-react";
+import { DepthStage, DepthLayer, FloatPanel } from "@/components/motion/Depth";
+import { CountUp } from "@/components/motion/CountUp";
 
 /* ------------------------------ shared shell ------------------------------ */
 
@@ -9,27 +11,59 @@ export function AppFrame({
   title,
   children,
   className = "",
+  overlay,
 }: {
   title: string;
   children: React.ReactNode;
   className?: string;
+  /** Panels that float in front of the frame on their own depth plane. */
+  overlay?: React.ReactNode;
 }) {
   return (
-    <div
-      className={`overflow-hidden rounded-2xl border border-border bg-card shadow-[0_28px_80px_-30px_hsl(0_0%_0%/0.75)] ${className}`}
-      role="img"
-      aria-label={`Gradr product interface: ${title}`}
-    >
-      <div className="flex items-center gap-2 border-b border-border bg-secondary/40 px-3.5 py-2.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
-        <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
-        <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
-        <span className="ml-2 truncate text-[11px] font-medium tracking-wide text-muted-foreground">
-          {title}
-        </span>
+    <DepthStage className="rounded-2xl" tilt={5}>
+      <div
+        className={`depth-surface overflow-hidden rounded-2xl border border-border bg-card shadow-[0_28px_80px_-30px_hsl(0_0%_0%/0.75)] ${className}`}
+        role="img"
+        aria-label={`Gradr product interface: ${title}`}
+      >
+        <div className="flex items-center gap-2 border-b border-border bg-secondary/40 px-3.5 py-2.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
+          <span className="ml-2 truncate text-[11px] font-medium tracking-wide text-muted-foreground">
+            {title}
+          </span>
+        </div>
+        <DepthLayer z={18} className="p-3.5 sm:p-5">
+          {children}
+        </DepthLayer>
       </div>
-      <div className="p-3.5 sm:p-5">{children}</div>
-    </div>
+      {overlay}
+    </DepthStage>
+  );
+}
+
+/**
+ * A small readout that floats in front of a product frame on its own plane.
+ * Used to lift scores and insights out of the flat UI.
+ */
+export function FloatingReadout({
+  className = "",
+  z = 70,
+  delay = 0,
+  children,
+}: {
+  className?: string;
+  z?: number;
+  delay?: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <DepthLayer z={z} className={`pointer-events-none absolute hidden sm:block ${className}`}>
+      <FloatPanel distance={7} delay={delay}>
+        <div className="depth-surface glass-panel rounded-2xl px-3.5 py-2.5">{children}</div>
+      </FloatPanel>
+    </DepthLayer>
   );
 }
 
