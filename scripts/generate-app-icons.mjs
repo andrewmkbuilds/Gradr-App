@@ -132,11 +132,13 @@ async function main() {
         continue;
       }
       const dim = pngSize(abs);
+      const w = t.width ?? t.size;
+      const h = t.height ?? t.size;
       if (!dim) {
         failures.push(`not a readable PNG: public/${t.file}`);
-      } else if (dim.width !== t.width || dim.height !== t.height) {
+      } else if (dim.width !== w || dim.height !== h) {
         failures.push(
-          `size mismatch public/${t.file}: declared ${t.width}x${t.height}, actual ${dim.width}x${dim.height}`,
+          `size mismatch public/${t.file}: declared ${w}x${h}, actual ${dim.width}x${dim.height}`,
         );
       }
     }
