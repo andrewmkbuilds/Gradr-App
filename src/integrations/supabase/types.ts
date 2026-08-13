@@ -2097,6 +2097,183 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_flow_checks: {
+        Row: {
+          account_label: string
+          console_errors: Json
+          created_at: string
+          duration_ms: number | null
+          expected_final_url: string | null
+          failures: Json
+          final_domain: string | null
+          final_url: string | null
+          header_checks: Json
+          hops: Json
+          id: string
+          redirect_uri: string | null
+          run_id: string
+          source: string
+          status: string
+        }
+        Insert: {
+          account_label: string
+          console_errors?: Json
+          created_at?: string
+          duration_ms?: number | null
+          expected_final_url?: string | null
+          failures?: Json
+          final_domain?: string | null
+          final_url?: string | null
+          header_checks?: Json
+          hops?: Json
+          id?: string
+          redirect_uri?: string | null
+          run_id: string
+          source?: string
+          status?: string
+        }
+        Update: {
+          account_label?: string
+          console_errors?: Json
+          created_at?: string
+          duration_ms?: number | null
+          expected_final_url?: string | null
+          failures?: Json
+          final_domain?: string | null
+          final_url?: string | null
+          header_checks?: Json
+          hops?: Json
+          id?: string
+          redirect_uri?: string | null
+          run_id?: string
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      oauth_header_checks: {
+        Row: {
+          created_at: string
+          headers: Json
+          id: string
+          ok: boolean
+          path: string
+          problems: Json
+          run_id: string
+          source: string
+          status: number | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          headers?: Json
+          id?: string
+          ok?: boolean
+          path: string
+          problems?: Json
+          run_id: string
+          source?: string
+          status?: number | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          headers?: Json
+          id?: string
+          ok?: boolean
+          path?: string
+          problems?: Json
+          run_id?: string
+          source?: string
+          status?: number | null
+          url?: string
+        }
+        Relationships: []
+      }
+      oauth_signin_traces: {
+        Row: {
+          account_kind: string | null
+          completed_at: string | null
+          created_at: string
+          deviation: boolean
+          duration_ms: number | null
+          error_code: string | null
+          error_message: string | null
+          expected_redirect_uri: string | null
+          final_domain: string | null
+          final_url: string | null
+          hops: Json
+          id: string
+          ip_hash: string | null
+          nonce_present: boolean
+          nonce_valid: boolean | null
+          outcome: string
+          provider: string
+          request_id: string
+          stage: string
+          start_url: string | null
+          started_at: string | null
+          state_present: boolean
+          state_valid: boolean | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_kind?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deviation?: boolean
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          expected_redirect_uri?: string | null
+          final_domain?: string | null
+          final_url?: string | null
+          hops?: Json
+          id?: string
+          ip_hash?: string | null
+          nonce_present?: boolean
+          nonce_valid?: boolean | null
+          outcome?: string
+          provider?: string
+          request_id: string
+          stage?: string
+          start_url?: string | null
+          started_at?: string | null
+          state_present?: boolean
+          state_valid?: boolean | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_kind?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deviation?: boolean
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          expected_redirect_uri?: string | null
+          final_domain?: string | null
+          final_url?: string | null
+          hops?: Json
+          id?: string
+          ip_hash?: string | null
+          nonce_present?: boolean
+          nonce_valid?: boolean | null
+          outcome?: string
+          provider?: string
+          request_id?: string
+          stage?: string
+          start_url?: string | null
+          started_at?: string | null
+          state_present?: boolean
+          state_valid?: boolean | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       organization_members: {
         Row: {
           created_at: string
