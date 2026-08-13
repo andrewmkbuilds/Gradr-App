@@ -30,6 +30,7 @@ import { Route as AppGrowthRouteImport } from './routes/_app/growth'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
 import { Route as AppManageSubscriptionRouteImport } from './routes/_app/manage-subscription'
 import { Route as AppMatchRouteImport } from './routes/_app/match'
+import { Route as AppMotionPlaygroundRouteImport } from './routes/_app/motion-playground'
 import { Route as AppOnboardingRouteImport } from './routes/_app/onboarding'
 import { Route as AppPipelineRouteImport } from './routes/_app/pipeline'
 import { Route as AppResumeRouteImport } from './routes/_app/resume'
@@ -195,6 +196,11 @@ const AppManageSubscriptionRoute = AppManageSubscriptionRouteImport.update({
 const AppMatchRoute = AppMatchRouteImport.update({
   id: '/match',
   path: '/match',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMotionPlaygroundRoute = AppMotionPlaygroundRouteImport.update({
+  id: '/motion-playground',
+  path: '/motion-playground',
   getParentRoute: () => AppRoute,
 } as any)
 const AppOnboardingRoute = AppOnboardingRouteImport.update({
@@ -541,6 +547,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof AppJobsRoute
   '/manage-subscription': typeof AppManageSubscriptionRoute
   '/match': typeof AppMatchRoute
+  '/motion-playground': typeof AppMotionPlaygroundRoute
   '/onboarding': typeof AppOnboardingRoute
   '/pipeline': typeof AppPipelineRoute
   '/resume': typeof AppResumeRoute
@@ -624,6 +631,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof AppJobsRoute
   '/manage-subscription': typeof AppManageSubscriptionRoute
   '/match': typeof AppMatchRoute
+  '/motion-playground': typeof AppMotionPlaygroundRoute
   '/onboarding': typeof AppOnboardingRoute
   '/pipeline': typeof AppPipelineRoute
   '/resume': typeof AppResumeRoute
@@ -710,6 +718,7 @@ export interface FileRoutesById {
   '/_app/jobs': typeof AppJobsRoute
   '/_app/manage-subscription': typeof AppManageSubscriptionRoute
   '/_app/match': typeof AppMatchRoute
+  '/_app/motion-playground': typeof AppMotionPlaygroundRoute
   '/_app/onboarding': typeof AppOnboardingRoute
   '/_app/pipeline': typeof AppPipelineRoute
   '/_app/resume': typeof AppResumeRoute
@@ -797,6 +806,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/manage-subscription'
     | '/match'
+    | '/motion-playground'
     | '/onboarding'
     | '/pipeline'
     | '/resume'
@@ -880,6 +890,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/manage-subscription'
     | '/match'
+    | '/motion-playground'
     | '/onboarding'
     | '/pipeline'
     | '/resume'
@@ -965,6 +976,7 @@ export interface FileRouteTypes {
     | '/_app/jobs'
     | '/_app/manage-subscription'
     | '/_app/match'
+    | '/_app/motion-playground'
     | '/_app/onboarding'
     | '/_app/pipeline'
     | '/_app/resume'
@@ -1230,6 +1242,13 @@ declare module '@tanstack/react-router' {
       path: '/match'
       fullPath: '/match'
       preLoaderRoute: typeof AppMatchRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/motion-playground': {
+      id: '/_app/motion-playground'
+      path: '/motion-playground'
+      fullPath: '/motion-playground'
+      preLoaderRoute: typeof AppMotionPlaygroundRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/onboarding': {
@@ -1677,6 +1696,7 @@ interface AppRouteChildren {
   AppJobsRoute: typeof AppJobsRoute
   AppManageSubscriptionRoute: typeof AppManageSubscriptionRoute
   AppMatchRoute: typeof AppMatchRoute
+  AppMotionPlaygroundRoute: typeof AppMotionPlaygroundRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
   AppPipelineRoute: typeof AppPipelineRoute
   AppResumeRoute: typeof AppResumeRoute
@@ -1713,6 +1733,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppJobsRoute: AppJobsRoute,
   AppManageSubscriptionRoute: AppManageSubscriptionRoute,
   AppMatchRoute: AppMatchRoute,
+  AppMotionPlaygroundRoute: AppMotionPlaygroundRoute,
   AppOnboardingRoute: AppOnboardingRoute,
   AppPipelineRoute: AppPipelineRoute,
   AppResumeRoute: AppResumeRoute,
