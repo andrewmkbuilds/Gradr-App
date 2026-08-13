@@ -26,7 +26,8 @@ const ROUTES = [
 const FORBIDDEN = ["id=\"seo-shell\"", "id=\"app-splash\"", "data-seo-fallback"];
 
 const checks = [
-  ["<title>", (h) => /<title>[^<]{10,}<\/title>/i.test(h)],
+  // Helmet renders <title data-rh="true">, so attributes must be tolerated.
+  ["<title>", (h) => /<title[^>]*>[^<]{10,}<\/title>/i.test(h)],
   ["meta description", (h) => /<meta[^>]+name="description"[^>]+content="[^"]{40,}"/i.test(h)],
   ["canonical", (h) => /<link[^>]+rel="canonical"[^>]+href="https?:\/\/[^"]+"/i.test(h)],
   ["og:title", (h) => /property="og:title"/i.test(h)],

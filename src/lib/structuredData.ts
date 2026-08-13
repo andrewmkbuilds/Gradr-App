@@ -301,12 +301,27 @@ export function validateJsonLd(node: JsonLd, label = "jsonld"): string[] {
       });
       break;
     }
-    case "SoftwareApplication": {
+    case "SoftwareApplication":
+    case "WebApplication":
+    case "WebPage": {
       requireText(node.name, ".name");
       requireText(node.description, ".description");
       requireAbsoluteUrl(node.url, ".url");
       break;
     }
+    case "Product": {
+      requireText(node.name, ".name");
+      requireText(node.description, ".description");
+      requireAbsoluteUrl(node.url, ".url");
+      const offers = node.offers as JsonLd | undefined;
+      if (!offers || typeof offers["@type"] !== "string") {
+        errors.push(`${at(".offers")}: missing offers`);
+      } else if (offers["priceCurrency"] !== "USD") {
+        errors.push(`${at(".offers.priceCurrency")}: must be USD`);
+      }
+      break;
+    }
+
     default:
       break;
   }
@@ -441,4 +456,118 @@ export function buildSoftwareAppLd(input: {
     offers: { "@type": "Offer", price: input.price ?? "0", priceCurrency: "USD" },
     inLanguage: "en",
   };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Key pages: home, pricing, product/engine surfaces                           */
+/* -------------------------------------------------------------------------- */
+
+/** Generic WebPage node, self-referencing and attributed to the Gradr entity. */
+export function buildWebPageLd(input: {
+  path: string;
+  name: string;
+  description: string;
+  primaryImage?: string;
+}): JsonLd {
+  const url = absoluteUrl(input.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: input.name,
+    description: input.description,
+    url,
+    inLanguage: "en",
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_ORIGIN },
+    about: { "@type": "Organization", name: SITE_NAME, url: SITE_ORIGIN },
+    publisher,
+    primaryImageOfPage: {
+      "@type": "ImageObject",
+      url: input.primaryImage ?? OG_IMAGE,
+    },
+  };
+}
+
+/** WebPage + breadcrumb for the home page (Organization/WebSite live in the root head). */
+export function homeJsonLd(input: { name: string; description: string }): JsonLd[] {
+  return [
+    buildWebPageLd({ path: "/", name: input.name, description: input.description }),
+    buildBreadcrumbLd([{ name: "Home", path: "/" }]),
+  ];
+}
+
+/**
+ * Pricing page: an offer catalog so Google can surface plan pricing in rich
+ * results. Amounts are resolved at runtime by Paddle, so the catalog advertises
+ * the plan structure and currency rather than hard-coded prices.
+ */
+export function pricingJsonLd(input: {
+  name: string;
+  description: string;
+  tiers: { name: string; description: string }[];
+}): JsonLd[] {
+  return [
+    buildWebPageLd({ path: "/pricing", name: input.name, description: input.description }),
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: `${SITE_NAME} Pro plans`,
+      description: input.description,
+      url: absoluteUrl("/pricing"),
+      image: [OG_IMAGE],
+      brand: { "@type": "Brand", name: SITE_NAME },
+      offers: {
+        "@type": "AggregateOffer",
+        priceCurrency: "USD",
+        offerCount: input.tiers.length,
+        availability: "https://schema.org/InStock",
+        url: absoluteUrl("/pricing"),
+        offers: input.tiers.map((tier) => ({
+          "@type": "Offer",
+          name: tier.name,
+          description: tier.description,
+          priceCurrency: "USD",
+          availability: "https://schema.org/InStock",
+          url: absoluteUrl("/pricing"),
+        })),
+      },
+    },
+    buildBreadcrumbLd([
+      { name: "Home", path: "/" },
+      { name: "Pricing", path: "/pricing" },
+    ]),
+  ];
+}
+
+/**
+ * Product/engine surface (resume intelligence, job matching, interview studio…).
+ * Emitted as WebApplication + breadcrumb so the feature vocabulary is attached
+ * to the Gradr entity even where the surface itself sits behind sign-in.
+ */
+export function enginePageJsonLd(input: {
+  path: string;
+  name: string;
+  description: string;
+  features?: string[];
+}): JsonLd[] {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: input.name,
+      description: input.description,
+      url: absoluteUrl(input.path),
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web browser",
+      browserRequirements: "Requires JavaScript and a modern web browser",
+      publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_ORIGIN },
+      isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_ORIGIN },
+      inLanguage: "en",
+      ...(input.features?.length ? { featureList: input.features } : {}),
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+    buildBreadcrumbLd([
+      { name: "Home", path: "/" },
+      { name: input.name, path: input.path },
+    ]),
+  ];
 }

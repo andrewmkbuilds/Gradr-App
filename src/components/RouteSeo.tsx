@@ -3,7 +3,14 @@ import { useLocation } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
 import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
-import { legalJsonLd } from "@/lib/structuredData";
+import {
+  legalJsonLd,
+  homeJsonLd,
+  pricingJsonLd,
+  enginePageJsonLd,
+} from "@/lib/structuredData";
+import { TIERS } from "@/config/tiers";
+
 import { useSeoOverrideValue } from "@/lib/seoOverride";
 import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
@@ -214,6 +221,42 @@ function resolveOgImage(pathname: string): string {
  * account/credential flows, admin tooling and affiliate back-office. They hold
  * no public content and only dilute how search engines understand Gradr.
  */
+/**
+ * Product/engine surfaces that get a WebApplication JSON-LD block. These sit
+ * behind sign-in and stay noindexed, but the structured data still attaches
+ * their feature vocabulary to the Gradr entity for search and AI crawlers.
+ */
+const ENGINE_LD: Record<string, { name: string; features: string[] }> = {
+  "/resume": {
+    name: "Resume Intelligence",
+    features: ["ATS scoring", "Keyword gap analysis", "AI rewrite suggestions", "Resume version comparison"],
+  },
+  "/match": {
+    name: "Job Matching Engine",
+    features: ["Live job matching", "Resume-to-role fit scoring", "Skill gap breakdown"],
+  },
+  "/jobs": {
+    name: "Job Feed",
+    features: ["Live job discovery", "Personalized recommendations", "One-click tracking"],
+  },
+  "/apply": {
+    name: "Application Engine",
+    features: ["Tailored cover letters", "Application package generation", "Company research"],
+  },
+  "/pipeline": {
+    name: "Application Pipeline",
+    features: ["Application tracking", "Interview scheduling", "Pipeline insights"],
+  },
+  "/interview": {
+    name: "AI Interview Studio",
+    features: ["Realtime AI mock interviews", "Voice and camera coaching", "Scorecard PDF export"],
+  },
+  "/growth": {
+    name: "Growth Engine",
+    features: ["Personalized practice plans", "Skill development tracking", "Career planning"],
+  },
+};
+
 const NOINDEX_EXACT = new Set([
   "/auth",
   "/forgot-password",
@@ -317,10 +360,33 @@ export function RouteSeo() {
         lastUpdated: legalUpdated[pathname],
       })
     : null;
+  // JSON-LD for the key non-editorial surfaces: home, pricing and the product
+  // engines. Editorial pages (guides, blog, job landings) and the tool landing
+  // pages emit their own richer payloads, so they are skipped here to avoid
+  // shipping two competing blocks for one URL.
+  const engine = ENGINE_LD[pathname];
+  const routeLd =
+    pathname === "/"
+      ? homeJsonLd({ name: SITE_TITLE, description: meta.description })
+      : pathname === "/pricing"
+        ? pricingJsonLd({
+            name: meta.title,
+            description: meta.description,
+            tiers: TIERS.map((t) => ({ name: t.name, description: t.description })),
+          })
+        : engine
+          ? enginePageJsonLd({
+              path: pathname,
+              name: engine.name,
+              description: meta.description,
+              features: engine.features,
+            })
+          : null;
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
   // Article/BlogPosting JSON-LD is emitted by the editorial pages themselves
   // (GuideArticle + blog posts via structuredData.ts), so nothing extra here.
+
 
 
 
@@ -355,6 +421,11 @@ export function RouteSeo() {
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={meta.description} />
       <meta name="twitter:image" content={ogImage} />
+      {routeLd?.map((node, i) => (
+        <script key={`route-ld-${i}`} type="application/ld+json">
+          {JSON.stringify(node)}
+        </script>
+      ))}
       {legalLd?.map((node, i) => (
         <script key={`legal-ld-${i}`} type="application/ld+json">
           {JSON.stringify(node)}
