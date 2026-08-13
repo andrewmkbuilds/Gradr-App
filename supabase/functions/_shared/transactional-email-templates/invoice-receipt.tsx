@@ -66,9 +66,9 @@ export const template = {
     issuedAt: '13 Aug 2026',
     planName: 'Pro',
     interval: 'annual',
-    subtotal: '$168.00',
+    subtotal: '$160.00',
     tax: '$0.00',
-    total: '$168.00',
+    total: '$160.00',
     billingEmail: 'andrew@example.com',
   },
 } satisfies TemplateEntry

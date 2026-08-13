@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddle, getPaddleEnvironment, getPaddlePriceId } from "@/lib/paddle";
 import { resolveCheckoutDiscount } from "@/hooks/useEligibility";
+import { PAID_PLAN_IDS, PLAN_PRICING } from "@/config/pricing";
 import type {
   BillingProvider,
   CheckoutRequest,
@@ -8,15 +9,20 @@ import type {
   PackCheckoutRequest,
 } from "./types";
 
-/** Human-readable price IDs in the payments catalog. */
-const PLAN_PRICE_IDS: Record<string, string> = {
-  "starter-monthly": "starter_monthly",
-  "starter-annual": "starter_annual",
-  "pro-monthly": "pro_monthly",
-  "pro-annual": "pro_annual",
-  "advanced-monthly": "advanced_monthly",
-  "advanced-annual": "advanced_annual",
-};
+/**
+ * Human-readable price IDs in the payments catalog, derived from the single
+ * pricing source of truth so checkout can never drift from the displayed price.
+ */
+const PLAN_PRICE_IDS: Record<string, string> = Object.fromEntries(
+  PAID_PLAN_IDS.flatMap((id) => {
+    const ids = PLAN_PRICING[id].priceId!;
+    return [
+      [`${id}-monthly`, ids.monthly],
+      [`${id}-annual`, ids.annual],
+    ];
+  }),
+);
+
 
 /** Opens the Paddle overlay for one human-readable price ID. */
 export async function openPaddleCheckout(

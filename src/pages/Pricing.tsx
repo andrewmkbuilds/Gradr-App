@@ -9,6 +9,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBillingActions, useSubscription } from "@/hooks/useSubscription";
 import { CREDIT_PACKS, FREE_TIER, TIERS, type Tier } from "@/config/tiers";
+import {
+  ANNUAL_SAVINGS_MESSAGE,
+  annualListPrice,
+  annualSavingsPercent,
+  formatUsd,
+  planAmount,
+  planPriceLabel,
+  type PlanId,
+} from "@/config/pricing";
 import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
@@ -93,17 +102,31 @@ export default function Pricing() {
    * the struck-through list price — the real reduction is applied by Paddle at
    * checkout, from a server-resolved discount.
    */
-  const PriceLine = ({ id, suffix }: { id: string; suffix: string }) => {
-    if (pricesLoading) return <Skeleton className="h-10 w-32" />;
+  const PriceLine = ({
+    id,
+    plan,
+    suffix,
+  }: {
+    id: string;
+    plan: PlanId;
+    suffix: string;
+  }) => {
+    // Source of truth for the amount; Paddle only localizes the presentation.
+    const fallback = planPriceLabel(plan, interval);
     const price = prices[id];
-    if (!price) return <span className="text-sm text-muted-foreground">Price unavailable</span>;
+    if (pricesLoading && !price) return <Skeleton className="h-10 w-32" />;
 
-    const discounted = discountPercent > 0 && price.subtotalMinor > 0
+    const listLabel = price?.formattedTotal ?? fallback;
+    const subtotalMinor = price?.subtotalMinor ?? planAmount(plan, interval);
+
+    const discounted = discountPercent > 0 && subtotalMinor > 0
       ? formatMinorAmount(
-          Math.round(price.subtotalMinor * (1 - discountPercent / 100)),
-          price.currencyCode,
+          Math.round(subtotalMinor * (1 - discountPercent / 100)),
+          price?.currencyCode ?? "USD",
         )
       : null;
+
+    const yearlySavings = interval === "annual" ? annualSavingsPercent(plan) : 0;
 
     return (
       <div>
@@ -112,7 +135,7 @@ export default function Pricing() {
             <span className="text-4xl font-bold text-foreground">{discounted}</span>
             <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
             <div className="mt-1 flex items-center gap-2 text-xs">
-              <span className="text-muted-foreground line-through">{price.formattedTotal}</span>
+              <span className="text-muted-foreground line-through">{listLabel}</span>
               <Badge variant="secondary" className="gap-1">
                 <BadgePercent className="h-3 w-3" aria-hidden="true" />
                 {discountPercent}% off applied
@@ -121,13 +144,24 @@ export default function Pricing() {
           </>
         ) : (
           <>
-            <span className="text-4xl font-bold text-foreground">{price.formattedTotal}</span>
+            <span className="text-4xl font-bold text-foreground">{listLabel}</span>
             <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
           </>
+        )}
+        {yearlySavings > 0 && (
+          <div className="mt-2 flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground line-through tabular-nums">
+              {formatUsd(annualListPrice(plan))}
+            </span>
+            <Badge className="bg-mahogany text-mahogany-foreground hover:bg-mahogany">
+              Save {yearlySavings}%
+            </Badge>
+          </div>
         )}
       </div>
     );
   };
+
 
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-10">
@@ -202,8 +236,12 @@ export default function Pricing() {
 
       {tab === "plans" ? (
         <div className="space-y-8">
-          <div className="flex justify-center">
-            <div className="inline-flex items-center rounded-full border border-border bg-card/60 p-1">
+          <div className="flex flex-col items-center gap-3">
+            <div
+              role="group"
+              aria-label="Billing interval"
+              className="inline-flex items-center rounded-full border border-border bg-card/60 p-1"
+            >
               {(["monthly", "annual"] as const).map((i) => (
                 <button
                   key={i}
@@ -219,7 +257,12 @@ export default function Pricing() {
                 </button>
               ))}
             </div>
+            <p className="inline-flex items-center gap-2 rounded-full border border-mahogany-border bg-mahogany/10 px-3 py-1 text-xs font-medium text-mahogany">
+              <BadgePercent className="h-3.5 w-3.5" aria-hidden="true" />
+              {ANNUAL_SAVINGS_MESSAGE}
+            </p>
           </div>
+
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
             <Card className="relative p-6 flex flex-col border-border">
@@ -277,7 +320,7 @@ export default function Pricing() {
                   </div>
 
                   <div className="mb-4">
-                    <PriceLine id={priceId} suffix={interval === "annual" ? "year" : "month"} />
+                    <PriceLine id={priceId} plan={tier.key as PlanId} suffix={interval === "annual" ? "year" : "month"} />
                   </div>
 
                   <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
@@ -295,7 +338,7 @@ export default function Pricing() {
                     onClick={() => (current ? navigate("/billing") : handleSelect(tier))}
                     variant={tier.highlighted ? "default" : "outline"}
                     className="w-full"
-                    disabled={pending === pendingKey || pricesLoading || !priceFor(priceId)}
+                    disabled={pending === pendingKey}
                   >
                     {current ? (
                       "Current plan"

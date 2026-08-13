@@ -8,6 +8,13 @@ import {
   GraduationCap, Rocket, Compass, Award, Menu, X, Sparkles, ShieldCheck,
   Layers, Bot, Search, Send, RefreshCw, BarChart3, Minus,
 } from "lucide-react";
+import {
+  ANNUAL_SAVINGS_MESSAGE,
+  annualListPrice,
+  annualSavingsPercent,
+  formatUsd,
+  planPriceLabel,
+} from "@/config/pricing";
 import { Button } from "@/components/ui/button";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -92,12 +99,12 @@ const NEW_WAY = [
   "One system that remembers your history",
 ];
 
+/** Prices are read from the single source of truth in @/config/pricing. */
 const PLANS = [
   {
+    id: "free" as const,
     name: "Free",
     tagline: "Enough to feel the whole system.",
-    monthly: { price: "$0", note: "forever" },
-    annual: { price: "$0", note: "forever" },
     features: [
       "Resume upload and ATS scoring",
       "Job discovery and matching",
@@ -108,10 +115,9 @@ const PLANS = [
     cta: "Get started free",
   },
   {
+    id: "starter" as const,
     name: "Starter",
     tagline: "For an active job search.",
-    monthly: { price: "$9", note: "per month" },
-    annual: { price: "$84", note: "per year · save $24" },
     features: [
       "Everything in Free",
       "Expanded resume and ATS passes",
@@ -123,10 +129,9 @@ const PLANS = [
     cta: "Start with Starter",
   },
   {
+    id: "pro" as const,
     name: "Pro",
     tagline: "The complete Gradr experience.",
-    monthly: { price: "$19", note: "per month" },
-    annual: { price: "$168", note: "per year · $14/month" },
     highlight: true,
     features: [
       "Everything in Starter",
@@ -139,7 +144,22 @@ const PLANS = [
     ],
     cta: "Go Pro",
   },
+  {
+    id: "advanced" as const,
+    name: "Advanced",
+    tagline: "Maximum firepower for a high-stakes search.",
+    features: [
+      "Everything in Pro",
+      "Extended realtime interview sessions",
+      "Deep company and interviewer research",
+      "Personalized practice plans",
+      "Priority AI queue",
+      "Concierge onboarding",
+    ],
+    cta: "Go Advanced",
+  },
 ];
+
 
 const FAQS: [string, string][] = [
   ["What is Gradr?", "Gradr is an AI career operating system. It connects resume intelligence, ATS optimization, job matching, application generation, networking outreach, AI mock interviews, and career analytics in a single workspace — so each step feeds the next instead of living in a different tool."],
@@ -869,16 +889,21 @@ export default function Landing() {
                     billing === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {k === "monthly" ? "Monthly" : "Annual"}
-                  {k === "annual" && <span className="ml-2 text-[11px] opacity-80">save up to 26%</span>}
+                  {k === "monthly" ? "Monthly" : "Yearly"}
                 </button>
               ))}
             </div>
+            <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-mahogany-border bg-mahogany/10 px-3 py-1 text-xs font-medium text-mahogany">
+              {ANNUAL_SAVINGS_MESSAGE}
+            </p>
           </Reveal>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {PLANS.map((p, i) => {
-              const price = p[billing];
+              const priceLabel = planPriceLabel(p.id, billing);
+              const periodNote =
+                p.id === "free" ? "forever" : billing === "annual" ? "per year" : "per month";
+              const savings = billing === "annual" ? annualSavingsPercent(p.id) : 0;
               return (
                 <Reveal key={p.name} delay={i * 70} className="h-full">
                 <SpotlightCard
@@ -900,9 +925,19 @@ export default function Landing() {
                   <p className="mt-2 text-sm text-muted-foreground">{p.tagline}</p>
 
                   <div className="mt-6 flex items-baseline gap-2">
-                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{price.price}</span>
-                    <span className="text-sm text-muted-foreground">{price.note}</span>
+                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{priceLabel}</span>
+                    <span className="text-sm text-muted-foreground">{periodNote}</span>
                   </div>
+                  {savings > 0 && (
+                    <div className="mt-2 flex items-center gap-2 text-xs">
+                      <span className="tabular-nums text-muted-foreground line-through">
+                        {formatUsd(annualListPrice(p.id))}
+                      </span>
+                      <span className="rounded-full bg-mahogany px-2 py-0.5 font-semibold text-mahogany-foreground">
+                        Save {savings}%
+                      </span>
+                    </div>
+                  )}
 
                   <ul className="mt-6 flex-1 space-y-2.5">
                     {p.features.map((f) => (

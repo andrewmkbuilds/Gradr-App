@@ -1,3 +1,5 @@
+import { PLAN_PRICING } from "@/config/pricing";
+
 /** Provider-agnostic billing contracts. The app only talks to these types. */
 
 export type PlanInterval = "monthly" | "annual";
@@ -53,9 +55,9 @@ export const PLAN_CATALOG: Record<
   Exclude<PlanKey, "free">,
   { label: string; monthly: number; annual: number }
 > = {
-  starter: { label: "Starter", monthly: 900, annual: 8400 },
-  pro: { label: "Pro", monthly: 1900, annual: 16800 },
-  advanced: { label: "Advanced", monthly: 2900, annual: 26400 },
+  starter: { label: PLAN_PRICING.starter.name, monthly: PLAN_PRICING.starter.monthly, annual: PLAN_PRICING.starter.annual },
+  pro: { label: PLAN_PRICING.pro.name, monthly: PLAN_PRICING.pro.monthly, annual: PLAN_PRICING.pro.annual },
+  advanced: { label: PLAN_PRICING.advanced.name, monthly: PLAN_PRICING.advanced.monthly, annual: PLAN_PRICING.advanced.annual },
 };
 
 /** Entitlement identifier shared by both providers. */
