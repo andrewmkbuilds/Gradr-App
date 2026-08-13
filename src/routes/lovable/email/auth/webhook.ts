@@ -131,20 +131,63 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           )
         }
 
+        // Allowlist gate. Supabase hands us `payload.data.url` verbatim, and its
+        // `redirect_to` is where the browser is bounced *after* the token is
+        // verified — an attacker-supplied value would turn our own signed link
+        // into a phishing hop. Two outcomes:
+        //   - off-allowlist landing path/host  → rewrite to a safe default
+        //   - off-allowlist action host/scheme → refuse to send at all
+        const { validateAuthRedirect } = await import('@/lib/email/authLinkAudit')
+        const allowlist = validateAuthRedirect(payload.data.url)
+        let actionUrl: string = payload.data.url
+        let redirectSanitized = false
+
+        if (!allowlist.allowed) {
+          const hostProblem = allowlist.reasons.some(
+            (reason) => reason.includes('Action host') || reason.includes('Action link uses'),
+          )
+          if (hostProblem) {
+            console.error('Blocked auth email: action link is not allowlisted', {
+              emailType,
+              run_id,
+              reasons: allowlist.reasons,
+            })
+            return Response.json(
+              { error: 'Auth action link failed allowlist validation', reasons: allowlist.reasons },
+              { status: 400 }
+            )
+          }
+          // Redirect-only problem: keep the sign-in working, drop the target.
+          try {
+            const safe = new URL(actionUrl)
+            safe.searchParams.set('redirect_to', `https://${ROOT_DOMAIN}/auth`)
+            actionUrl = safe.toString()
+            redirectSanitized = true
+            console.warn('Rewrote non-allowlisted auth redirect target', {
+              emailType,
+              run_id,
+              reasons: allowlist.reasons,
+            })
+          } catch {
+            /* unparseable URLs were already rejected above */
+          }
+        }
+
         // Build template props from payload.data (HookData structure)
         const templateProps = {
           siteName: SITE_NAME,
           siteUrl: `https://${ROOT_DOMAIN}`,
           recipient: payload.data.email,
-          confirmationUrl: payload.data.url,
-          magicLinkUrl: payload.data.url,
-          recoveryUrl: payload.data.url,
-          inviteUrl: payload.data.url,
+          confirmationUrl: actionUrl,
+          magicLinkUrl: actionUrl,
+          recoveryUrl: actionUrl,
+          inviteUrl: actionUrl,
           token: payload.data.token,
           email: payload.data.email,
           oldEmail: payload.data.old_email,
           newEmail: payload.data.new_email,
         }
+
 
         // Render React Email to HTML and plain text
         const element = React.createElement(EmailTemplate, templateProps)
