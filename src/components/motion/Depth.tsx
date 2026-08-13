@@ -97,7 +97,7 @@ export function DepthStage({
   const value = useMemo<StageValue>(() => ({ mx, my, active: depth === "full" }), [mx, my, depth]);
 
   if (depth === "off") {
-    return <div className={className}>{children}</div>;
+    return <div className={cn("relative", className)}>{children}</div>;
   }
 
   if (depth === "lite") {
