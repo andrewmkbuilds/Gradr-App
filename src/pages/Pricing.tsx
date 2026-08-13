@@ -260,7 +260,7 @@ export default function Pricing() {
                 <TiltCard key={tier.name} className="group h-full rounded-xl" tilt={4}>
                 <Card
                   className={`relative h-full p-6 flex flex-col ${
-                    tier.highlighted ? "border-primary shadow-lg shadow-primary/10 xl:scale-[1.02]" : "border-border"
+                    tier.highlighted ? "accent-card border-mahogany-border shadow-lg shadow-mahogany/10 xl:scale-[1.02]" : "border-border"
                   }`}
                 >
                   {tier.highlighted && (

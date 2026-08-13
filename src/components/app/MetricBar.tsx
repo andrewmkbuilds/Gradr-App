@@ -4,11 +4,11 @@ import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { springSoft } from "@/lib/motion/tokens";
 import { cn } from "@/lib/utils";
 
-type Tone = "auto" | "primary" | "secondary";
+type Tone = "auto" | "primary" | "secondary" | "accent";
 
 function toneClass(value: number, tone: Tone) {
   if (tone === "primary") return "bg-primary";
-  if (tone === "secondary") return "bg-brand-secondary";
+  if (tone === "secondary" || tone === "accent") return "bg-mahogany";
   if (value >= 80) return "bg-success";
   if (value >= 55) return "bg-primary";
   return "bg-warning";

@@ -203,7 +203,7 @@ export function FollowUpReminders() {
                     }
                     className={cn(
                       "min-h-9 rounded-full border px-3 text-xs transition-colors",
-                      on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40",
+                      on ? "border-mahogany-border bg-mahogany-soft text-mahogany-strong" : "border-border text-muted-foreground hover:border-mahogany/40",
                     )}
                   >
                     {s.label}

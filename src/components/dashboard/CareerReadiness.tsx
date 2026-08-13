@@ -156,7 +156,7 @@ export function CareerReadiness({
           onClick={() => setExplain((v) => !v)}
           aria-expanded={explain}
           aria-controls="readiness-explainer"
-          className="flex min-h-11 w-full items-center justify-between gap-2 text-left text-xs font-medium text-primary"
+          className="flex min-h-11 w-full items-center justify-between gap-2 text-left text-xs font-medium text-mahogany hover:text-mahogany-hover"
         >
           <span className="inline-flex items-center gap-1.5">
             <Info className="h-3.5 w-3.5" aria-hidden="true" /> Why this score?
@@ -175,7 +175,7 @@ export function CareerReadiness({
                 const v = clamp(p.value);
                 const contribution = Math.round((v * p.weight) / totalWeight);
                 return (
-                  <li key={p.key} className="elev-1 rounded-lg p-3">
+                  <li key={p.key} className="accent-panel rounded-lg p-3">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <span className="text-xs font-medium text-foreground">{p.label}</span>
                       <span className="text-[11px] tabular-nums text-muted-foreground">

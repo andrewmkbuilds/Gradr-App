@@ -203,7 +203,7 @@ export function ThreeDayPlan() {
                                 "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors",
                                 step.done
                                   ? "border-success bg-success text-success-foreground"
-                                  : "border-border text-transparent hover:border-primary",
+                                  : "border-border text-transparent hover:border-mahogany hover:bg-mahogany-soft/60",
                               )}
                             >
                               <Check className="h-3.5 w-3.5" aria-hidden="true" />
@@ -211,7 +211,7 @@ export function ThreeDayPlan() {
 
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                                <span className="accent-chip">
                                   <Icon className="h-3 w-3" aria-hidden="true" /> {meta.label}
                                 </span>
                                 <span className="text-[11px] text-muted-foreground">{step.minutes} min</span>
