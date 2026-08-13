@@ -19,6 +19,10 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-[0_8px_22px_-14px_hsl(0_0%_0%/0.9)]",
         ghost: "hover:bg-accent hover:text-accent-foreground",
+        accent:
+          "sheen bg-mahogany text-mahogany-foreground hover:bg-mahogany-hover hover:shadow-[0_10px_28px_-12px_hsl(var(--mahogany)/0.7)]",
+        accentOutline:
+          "border border-mahogany-border bg-mahogany-tint text-mahogany-ink hover:bg-mahogany-soft hover:border-mahogany",
         link: "nav-underline text-primary underline-offset-4",
       },
       size: {
