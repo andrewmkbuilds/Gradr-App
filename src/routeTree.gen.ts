@@ -109,6 +109,7 @@ import { Route as ApiPublicResolveDiscountRouteImport } from './routes/api/publi
 import { Route as ApiPublicRevenuecatSyncRouteImport } from './routes/api/public/revenuecat-sync'
 import { Route as ApiPublicSearchConsoleRouteImport } from './routes/api/public/search-console'
 import { Route as ApiPublicSearchJobsRouteImport } from './routes/api/public/search-jobs'
+import { Route as ApiPublicSecurityDigestRouteImport } from './routes/api/public/security-digest'
 import { Route as ApiPublicSendNotificationRouteImport } from './routes/api/public/send-notification'
 import { Route as ApiPublicSeoMonitorRouteImport } from './routes/api/public/seo-monitor'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -632,6 +633,11 @@ const ApiPublicSearchJobsRoute = ApiPublicSearchJobsRouteImport.update({
   path: '/api/public/search-jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSecurityDigestRoute = ApiPublicSecurityDigestRouteImport.update({
+  id: '/api/public/security-digest',
+  path: '/api/public/security-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSendNotificationRoute =
   ApiPublicSendNotificationRouteImport.update({
     id: '/api/public/send-notification',
@@ -785,6 +791,7 @@ export interface FileRoutesByFullPath {
   '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
   '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
+  '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -896,6 +903,7 @@ export interface FileRoutesByTo {
   '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
   '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
+  '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -1009,6 +1017,7 @@ export interface FileRoutesById {
   '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
   '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
+  '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -1122,6 +1131,7 @@ export interface FileRouteTypes {
     | '/api/public/revenuecat-sync'
     | '/api/public/search-console'
     | '/api/public/search-jobs'
+    | '/api/public/security-digest'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
     | '/lovable/email/suppression'
@@ -1233,6 +1243,7 @@ export interface FileRouteTypes {
     | '/api/public/revenuecat-sync'
     | '/api/public/search-console'
     | '/api/public/search-jobs'
+    | '/api/public/security-digest'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
     | '/lovable/email/suppression'
@@ -1345,6 +1356,7 @@ export interface FileRouteTypes {
     | '/api/public/revenuecat-sync'
     | '/api/public/search-console'
     | '/api/public/search-jobs'
+    | '/api/public/security-digest'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
     | '/lovable/email/suppression'
@@ -1420,6 +1432,7 @@ export interface RootRouteChildren {
   ApiPublicRevenuecatSyncRoute: typeof ApiPublicRevenuecatSyncRoute
   ApiPublicSearchConsoleRoute: typeof ApiPublicSearchConsoleRoute
   ApiPublicSearchJobsRoute: typeof ApiPublicSearchJobsRoute
+  ApiPublicSecurityDigestRoute: typeof ApiPublicSecurityDigestRoute
   ApiPublicSendNotificationRoute: typeof ApiPublicSendNotificationRoute
   ApiPublicSeoMonitorRoute: typeof ApiPublicSeoMonitorRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -2134,6 +2147,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSearchJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/security-digest': {
+      id: '/api/public/security-digest'
+      path: '/api/public/security-digest'
+      fullPath: '/api/public/security-digest'
+      preLoaderRoute: typeof ApiPublicSecurityDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/send-notification': {
       id: '/api/public/send-notification'
       path: '/api/public/send-notification'
@@ -2356,6 +2376,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRevenuecatSyncRoute: ApiPublicRevenuecatSyncRoute,
   ApiPublicSearchConsoleRoute: ApiPublicSearchConsoleRoute,
   ApiPublicSearchJobsRoute: ApiPublicSearchJobsRoute,
+  ApiPublicSecurityDigestRoute: ApiPublicSecurityDigestRoute,
   ApiPublicSendNotificationRoute: ApiPublicSendNotificationRoute,
   ApiPublicSeoMonitorRoute: ApiPublicSeoMonitorRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

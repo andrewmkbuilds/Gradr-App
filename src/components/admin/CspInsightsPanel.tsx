@@ -41,7 +41,9 @@ interface Combo {
   samplePath: string | null;
   surfaces: string[];
   multiple?: number;
+  severity?: "critical" | "warning" | "info";
 }
+
 
 interface Bucket {
   date: string;
@@ -84,7 +86,9 @@ interface IncidentBundle {
   build: Record<string, string | null>;
   policy: { enforced: boolean; mode: string; candidate: string };
   readiness: { ready: boolean; cleanDays: number; requiredCleanDays: number; summary: string };
-  totals: { reports: number; recent: number; combos: number };
+  totals: { reports: number; recent: number; combos: number; filteredOut?: number };
+  window?: { from: string; to: string | null; explicit: boolean; severity: string };
+
   combos: Combo[];
   spikes: Combo[];
   newCombos: Combo[];
@@ -97,11 +101,27 @@ const when = (iso: string | null | undefined) =>
 const shortDay = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 
+type Severity = "all" | "warning" | "critical";
+
+/** Digest emails deep-link here with the audit window pre-filled. */
+function initialWindow() {
+  if (typeof window === "undefined") return { from: "", to: "", severity: "all" as Severity };
+  const params = new URLSearchParams(window.location.search);
+  const severity = params.get("severity");
+  return {
+    from: params.get("from") ?? "",
+    to: params.get("to") ?? "",
+    severity: (severity === "warning" || severity === "critical" ? severity : "all") as Severity,
+  };
+}
+
 export default function CspInsightsPanel() {
   const [days, setDays] = useState(14);
   const [selected, setSelected] = useState<Combo | null>(null);
   const [ticket, setTicket] = useState({ prUrl: "", commit: "", note: "" });
   const [exporting, setExporting] = useState<"json" | "csv" | null>(null);
+  const [range, setRange] = useState(initialWindow);
+
 
   const series = useQuery({
     queryKey: ["csp-timeseries", days],
@@ -148,17 +168,25 @@ export default function CspInsightsPanel() {
 
   async function fetchIncident(): Promise<IncidentBundle> {
     const { data, error } = await invokeFunction<IncidentBundle>("csp-alerts", {
-      body: { action: "incident", days },
+      body: {
+        action: "incident",
+        days,
+        from: range.from || undefined,
+        to: range.to || undefined,
+        severity: range.severity,
+      },
     });
     if (error) throw error;
     return data!;
   }
+
 
   async function exportIncident(format: "json" | "csv") {
     setExporting(format);
     try {
       const bundle = await fetchIncident();
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+      const scope = `${range.severity}${range.from || range.to ? `-${range.from || "start"}_${range.to || "now"}` : ""}`;
       const build: Record<string, string | null> = { ...bundle.build };
       const meta = {
         ...build,
@@ -167,13 +195,14 @@ export default function CspInsightsPanel() {
         analystNote: ticket.note || null,
       };
       if (format === "json") {
-        downloadJson(`csp-incident-${stamp}.json`, { ...bundle, ticket: meta });
+        downloadJson(`csp-incident-${scope}-${stamp}.json`, { ...bundle, ticket: meta });
       } else {
         // One row per combo, with the build/ticket provenance repeated so the
         // CSV stands alone when it is pasted into a tracker.
         const rows = bundle.combos.map((c) => ({
           directive: c.directive,
           blocked_origin: c.blockedOrigin,
+          severity: c.severity ?? "",
           reports_window: String(c.recent),
           reports_total: String(c.total),
           baseline_rate: String(c.baselineRate),
@@ -183,6 +212,9 @@ export default function CspInsightsPanel() {
           sample_path: c.samplePath ?? "",
           first_seen: c.firstSeen,
           last_seen: c.lastSeen,
+          window_from: bundle.window?.from ?? "",
+          window_to: bundle.window?.to ?? "",
+
           policy_mode: bundle.policy.mode,
           readiness: bundle.readiness.summary,
           generated_at: bundle.generatedAt,
@@ -195,7 +227,7 @@ export default function CspInsightsPanel() {
           analyst_note: meta.analystNote ?? "",
         }));
         const columns = Object.keys(rows[0] ?? {}) as (keyof (typeof rows)[number])[];
-        downloadCsv(`csp-incident-${stamp}.csv`, rows, columns);
+        downloadCsv(`csp-incident-${scope}-${stamp}.csv`, rows, columns);
       }
       toast.success(`Incident report exported as ${format.toUpperCase()}`);
     } catch (error) {
@@ -414,6 +446,44 @@ export default function CspInsightsPanel() {
           commit reference and it travels with the export into your tracker.
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label className="text-xs">From</Label>
+            <Input
+              type="date"
+              value={range.from}
+              onChange={(e) => setRange({ ...range, from: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label className="text-xs">To</Label>
+            <Input
+              type="date"
+              value={range.to}
+              onChange={(e) => setRange({ ...range, to: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Minimum severity</Label>
+            <div className="mt-1 flex gap-1">
+              {(["all", "warning", "critical"] as Severity[]).map((level) => (
+                <Button
+                  key={level}
+                  size="sm"
+                  variant={range.severity === level ? "default" : "outline"}
+                  onClick={() => setRange({ ...range, severity: level })}
+                >
+                  {level}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Leave the dates empty to export the last {days} days. “warning” keeps spiking and
+          brand-new pairs; “critical” keeps only auth, backend and PWA breakage.
+        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+
           <div>
             <Label className="text-xs">PR / ticket URL</Label>
             <Input

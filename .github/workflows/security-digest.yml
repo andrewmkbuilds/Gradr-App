@@ -1,0 +1,76 @@
+name: Weekly security digest
+
+# Every Monday morning: capture the live metadata fingerprint, store it as the
+# week's snapshot, then send the CSP + fingerprint digest to Slack/email with
+# direct links to the artifacts and pre-filtered incident exports.
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build the digest without delivering it
+        type: boolean
+        default: false
+
+concurrency:
+  group: security-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Preflight configuration check
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN }}
+        run: node scripts/ci-preflight.mjs csp
+
+      - name: Capture production fingerprint snapshot
+        env:
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
+        run: node scripts/fingerprint-snapshot.mjs "$GRADR_ORIGIN" --out /tmp/head.json
+
+      - name: Upload snapshot artifact
+        id: artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-digest-fingerprint
+          path: /tmp/head.json
+
+      - name: Store snapshot for the digest
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
+        run: |
+          node scripts/security-digest.mjs --ingest /tmp/head.json \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --artifact-url "${{ steps.artifacts.outputs.artifact-url }}"
+
+      - name: Send weekly digest
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
+        run: |
+          node scripts/security-digest.mjs --send \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            | tee /tmp/security-digest.txt
+
+      - name: Link evidence in the summary
+        if: always()
+        run: |
+          {
+            echo "### Weekly security digest"
+            echo ""
+            sed 's/^/    /' /tmp/security-digest.txt 2>/dev/null || echo "digest did not run"
+            echo ""
+            echo "- [Download fingerprint snapshot (\`security-digest-fingerprint\`)](${{ steps.artifacts.outputs.artifact-url }})"
+            echo "- [Full workflow run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo "- [Admin CSP monitor](https://gradr.me/admin/oauth-forensics?tab=csp)"
+          } >> "$GITHUB_STEP_SUMMARY"
