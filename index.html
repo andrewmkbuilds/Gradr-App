@@ -171,19 +171,17 @@
         #app-splash img, #app-splash .splash-track span { animation: none; }
         #app-splash { transition: none; }
       }
-      /* SEO shell stays in the DOM for non-JS crawlers but is never visible. */
-      #seo-shell {
-        position: absolute !important;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        clip-path: inset(50%);
-        white-space: nowrap;
-        border: 0;
+      /* Fallback content for non-JS crawlers lives in <noscript>; nothing is
+         hidden from users with CSS (no cloaking / hidden-text patterns). */
+      noscript .no-js-shell {
+        max-width: 44rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem;
+        font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: #1a2b31;
+        line-height: 1.6;
       }
+
     </style>
   </head>
 
@@ -194,13 +192,12 @@
       <span class="splash-track"><span></span></span>
     </div>
     <!--
-      Static, crawlable description of Gradr for crawlers and AI answer engines
-      that do not execute JavaScript. Visually hidden (see #seo-shell above) and
-      replaced by React on mount, so users never see it.
+      Fallback copy for crawlers and clients without JavaScript. Rendered only
+      when scripting is unavailable, so the same content is always visible to
+      whoever receives it — no hidden text, no cloaking.
     -->
-    <div id="root">
-      <main id="seo-shell">
-
+    <noscript>
+      <main class="no-js-shell">
         <h1>Gradr — Your AI Career Command Center</h1>
         <p>
           Gradr is your AI career command center for resume analysis, job matching, applications,
@@ -231,9 +228,10 @@
           </li>
         </ul>
         <p><a href="/pricing">Pricing</a> · <a href="/career-advice">Career advice guides</a> · <a href="/job-search">Job search by role</a> · <a href="/auth">Sign in</a></p>
-        
       </main>
-    </div>
+    </noscript>
+    <div id="root"></div>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
