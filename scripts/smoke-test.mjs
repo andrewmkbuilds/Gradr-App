@@ -83,7 +83,17 @@ function record(name, ok, detail = "") {
 /** Noise that must not fail a smoke run: dev-only React warnings, asset 404s. */
 const IGNORED_CONSOLE = /favicon|net::ERR_|Failed to load resource|^Warning:|React Router Future Flag|Download the React DevTools/i;
 
-const ERROR_FALLBACK = /something broke on our side|application error|unexpected error/i;
+const ERROR_FALLBACK = /something broke on our side|application error|unexpected error|something went wrong/i;
+
+/** Describe why a rendered page counts as blank, or "" when it rendered fine. */
+function blankReason(blank) {
+  if (!blank) return "could not inspect the DOM";
+  if (blank.rootMissing) return "#root is missing";
+  if (blank.rootEmpty) return "#root rendered no elements";
+  if (blank.splashStuck) return "splash screen never dismissed";
+  if (blank.visibleChars < 40) return `only ${blank.visibleChars} visible characters inside #root`;
+  return "";
+}
 
 async function visit(page, route) {
   const errors = [];
@@ -101,7 +111,21 @@ async function visit(page, route) {
     await page.waitForTimeout(1200);
     const status = response?.status() ?? 0;
     const body = (await page.locator("body").innerText().catch(() => "")) ?? "";
-    return { status, body, errors, url: page.url() };
+    // Blank-screen detection: an empty React root, a stuck splash, or the
+    // hidden SEO shell being the only thing on screen all mean "blank page".
+    const blank = await page.evaluate(() => {
+      const root = document.getElementById("root");
+      const splash = document.getElementById("app-splash");
+      const visibleText = (root?.innerText ?? "").trim();
+      return {
+        rootMissing: !root,
+        rootEmpty: !root || root.childElementCount === 0,
+        splashStuck: Boolean(splash && splash.offsetParent !== null),
+        visibleChars: visibleText.length,
+        errorScreen: Boolean(document.querySelector("[data-app-error-screen]")),
+      };
+    }).catch(() => null);
+    return { status, body, errors, url: page.url(), blank };
   } finally {
     page.off("pageerror", onPageError);
     page.off("console", onConsole);
@@ -142,15 +166,17 @@ async function main() {
 
   // ---- Public routes -------------------------------------------------
   for (const route of PUBLIC_ROUTES) {
-    const { status, body, errors } = await visit(page, route);
+    const { status, body, errors, blank } = await visit(page, route);
     const fatal = errors.filter((e) => !IGNORED_CONSOLE.test(e));
-    const rendered = body.trim().length > 40;
-    const crashed = ERROR_FALLBACK.test(body);
-    const ok = status < 400 && rendered && !crashed && fatal.length === 0;
+    const reason = blankReason(blank);
+    const crashed = ERROR_FALLBACK.test(body) || Boolean(blank?.errorScreen);
+    const ok = status < 400 && !reason && !crashed && fatal.length === 0;
     record(
       `route ${route}`,
       ok,
-      ok ? `HTTP ${status}` : `status=${status} crashed=${crashed} errors=${fatal.slice(0, 2).join(" | ")}`,
+      ok
+        ? `HTTP ${status}`
+        : `status=${status} blank=${reason || "no"} crashed=${crashed} errors=${fatal.slice(0, 2).join(" | ")}`,
     );
   }
 
@@ -224,11 +250,16 @@ async function main() {
 
   // ---- Auth-gated routes must not crash ------------------------------
   for (const route of GATED_ROUTES) {
-    const { body, errors, url } = await visit(page, route);
+    const { body, errors, url, blank } = await visit(page, route);
     const fatal = errors.filter((e) => !IGNORED_CONSOLE.test(e));
-    const crashed = ERROR_FALLBACK.test(body);
-    const ok = !crashed && fatal.length === 0;
-    record(`gated ${route}`, ok, ok ? `resolved to ${new URL(url).pathname}` : fatal.slice(0, 2).join(" | "));
+    const reason = blankReason(blank);
+    const crashed = ERROR_FALLBACK.test(body) || Boolean(blank?.errorScreen);
+    const ok = !crashed && !reason && fatal.length === 0;
+    record(
+      `gated ${route}`,
+      ok,
+      ok ? `resolved to ${new URL(url).pathname}` : [reason, ...fatal.slice(0, 2)].filter(Boolean).join(" | "),
+    );
   }
 
   // ---- Paddle checkout entrypoint ------------------------------------
