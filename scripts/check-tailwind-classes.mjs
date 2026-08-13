@@ -65,7 +65,8 @@ function collectCandidates() {
     const src = readFileSync(file, "utf8");
     if (!CLASS_ATTR.test(src) && !file.endsWith(".html")) continue;
     for (const [, literal] of src.matchAll(STRING_LITERAL)) {
-      if (!/^[\w\s:\-/[\].%#()]+$/.test(literal)) continue;
+      // Reject prose: real class lists are lowercase and punctuation-free.
+      if (!/^[a-z0-9\s:\-/[\].%#()!]+$/.test(literal)) continue;
       for (const raw of literal.split(/\s+/)) {
         const cls = raw.trim();
         if (!cls || IGNORE.some((re) => re.test(cls))) continue;
@@ -104,12 +105,15 @@ function escapeClass(cls) {
 const candidates = collectCandidates();
 const css = await compileCss();
 
+/** Every class selector present in the compiled stylesheet. */
+const emitted = new Set();
+for (const [, sel] of css.matchAll(/\.((?:\\.|[\w-])+)/g)) {
+  emitted.add(sel.replace(/\\(.)/g, "$1"));
+}
+
 const unknown = [];
 for (const [cls, files] of candidates) {
-  const selector = `.${escapeClass(cls)}`;
-  if (css.includes(`${selector}{`) || css.includes(`${selector} `) || css.includes(`${selector},`) || css.includes(`${selector}:`) || css.includes(`${selector}>`)) {
-    continue;
-  }
+  if (emitted.has(cls)) continue;
   unknown.push({ cls, files: [...files].slice(0, 3) });
 }
 
