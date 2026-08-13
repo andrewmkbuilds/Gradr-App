@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
+import { ArrowRight, Sparkles, Target, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Surface } from "@/components/ui/surface";
+import { GetStartedState, SkeletonList } from "@/components/states";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -115,27 +117,26 @@ export default function GrowthEngine() {
       </div>
 
       {loading ? (
-        <div className="elev-2 rounded-xl flex items-center gap-2 p-8 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Reading your resume and match history…
-        </div>
+        <SkeletonList rows={2} />
       ) : !hasData ? (
-        <div id="skill-gaps" className="elev-2 rounded-xl p-6 sm:p-8">
-          <h2 className="text-sm font-semibold text-foreground">Nothing to analyse yet</h2>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Growth &amp; Proof is built entirely from your own data. Analyse a resume and match it against a few live
-            roles, and your ranked skill gaps will appear here.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <Button asChild className="min-h-11">
-              <Link to="/match">
-                Match against live jobs <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="min-h-11">
-              <Link to="/resume">Analyse your resume</Link>
-            </Button>
-          </div>
-        </div>
+        <Surface id="skill-gaps" level={2}>
+          <GetStartedState
+            title="Nothing to analyse yet"
+            description="Growth & Proof is built entirely from your own data. Analyse a resume and match it against a few live roles, and your ranked skill gaps appear here."
+            action={
+              <>
+                <Button asChild className="min-h-11">
+                  <Link to="/match">
+                    Match against live jobs <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="min-h-11">
+                  <Link to="/resume">Analyse your resume</Link>
+                </Button>
+              </>
+            }
+          />
+        </Surface>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div id="skill-gaps" className="elev-2 rounded-xl p-6 scroll-mt-20 lg:col-span-2">
