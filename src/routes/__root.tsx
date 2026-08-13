@@ -77,9 +77,18 @@ const structuredData = JSON.stringify({
       name: "Gradr",
       alternateName: "Gradr AI Career Command Center",
       url: "https://gradr.me/",
-      logo: "https://gradr.me/icon-512.png",
+      logo: {
+        "@type": "ImageObject",
+        "@id": "https://gradr.me/#logo",
+        url: "https://gradr.me/icon-512.png",
+        contentUrl: "https://gradr.me/icon-512.png",
+        width: 512,
+        height: 512,
+        caption: "Gradr",
+      },
+      image: { "@id": "https://gradr.me/#logo" },
         description:
-          "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.",
+          "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
     },
     {
       "@type": "WebSite",

@@ -40,6 +40,9 @@ jobs:
           bunx vite preview --port 8080 &
           for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:8080/ && break; sleep 1; done
 
+      - name: Home page SEO + Open Graph tags
+        run: node scripts/check-home-seo.mjs http://localhost:8080
+
       - name: Auth hero visual regression (Chrome, Firefox, Safari engines)
         env:
           AUTH_HERO_BROWSERS: chromium,firefox,webkit
