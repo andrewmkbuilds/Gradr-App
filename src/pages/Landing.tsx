@@ -1,4 +1,5 @@
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -255,24 +256,8 @@ export default function Landing() {
   const heroLift = useTransform(scrollY, [0, 600], [0, -60]);
   const heroOpacity = useTransform(scrollY, [0, 520], [1, 0.35]);
 
-  // Scroll spy drives the animated nav indicator.
-  const [activeHash, setActiveHash] = useState<string>("");
-  useEffect(() => {
-    const ids = NAV.map((n) => n.href.slice(1));
-    const nodes = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
-    if (!nodes.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActiveHash(`#${visible.target.id}`);
-      },
-      { rootMargin: "-45% 0px -50% 0px", threshold: [0, 0.25, 0.6] },
-    );
-    nodes.forEach((n) => io.observe(n));
-    return () => io.disconnect();
-  }, []);
+  // Scroll spy drives the animated nav indicator (click = instant active state).
+  const { activeHash, onNavClick } = useScrollSpy(NAV.map((n) => n.href), 72);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -322,6 +307,7 @@ export default function Landing() {
                 <li key={n.label} className="relative">
                   <a
                     href={n.href}
+                    onClick={onNavClick(n.href)}
                     aria-current={active ? "true" : undefined}
                     className={`relative z-10 inline-flex min-h-9 items-center rounded-full px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
@@ -386,7 +372,7 @@ export default function Landing() {
                 >
                   <a
                     href={n.href}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={(e) => { setMenuOpen(false); onNavClick(n.href)(e); }}
                     className={`flex min-h-11 items-center rounded-lg px-2 text-sm transition-colors hover:bg-secondary/50 hover:text-foreground ${
                       activeHash === n.href ? "bg-primary/10 text-foreground" : "text-muted-foreground"
                     }`}
