@@ -692,6 +692,9 @@ export type Database = {
       auth_email_link_audit: {
         Row: {
           action_type: string
+          allowlist_ok: boolean
+          allowlist_reasons: string[]
+          blocked: boolean
           created_at: string
           id: string
           link_origin: string | null
@@ -700,6 +703,7 @@ export type Database = {
           link_valid: boolean
           message_id: string | null
           recipient_redacted: string | null
+          redirect_sanitized: boolean
           redirect_to: string | null
           run_id: string | null
           template_key: string | null
@@ -709,6 +713,9 @@ export type Database = {
         }
         Insert: {
           action_type: string
+          allowlist_ok?: boolean
+          allowlist_reasons?: string[]
+          blocked?: boolean
           created_at?: string
           id?: string
           link_origin?: string | null
@@ -717,6 +724,7 @@ export type Database = {
           link_valid?: boolean
           message_id?: string | null
           recipient_redacted?: string | null
+          redirect_sanitized?: boolean
           redirect_to?: string | null
           run_id?: string | null
           template_key?: string | null
@@ -726,6 +734,9 @@ export type Database = {
         }
         Update: {
           action_type?: string
+          allowlist_ok?: boolean
+          allowlist_reasons?: string[]
+          blocked?: boolean
           created_at?: string
           id?: string
           link_origin?: string | null
@@ -734,6 +745,7 @@ export type Database = {
           link_valid?: boolean
           message_id?: string | null
           recipient_redacted?: string | null
+          redirect_sanitized?: boolean
           redirect_to?: string | null
           run_id?: string | null
           template_key?: string | null
