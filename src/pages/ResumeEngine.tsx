@@ -308,7 +308,9 @@ export default function ResumeEngine() {
 
       {!uploading && !analyzing && <ResumeVersionDiff key={`diff-${versionsToken}`} />}
 
-      {/* Live analysis progress: cancel while it runs, retry if it fails. */}
+      {/* Live analysis progress: cancel while it runs, retry if it fails.
+          Once the scorecard below is final, the rail retires itself. */}
+      {analysisStream.status !== "done" && (
       <GenerationStream
         status={analysisStream.status}
         progress={analysisStream.progress}
@@ -320,6 +322,7 @@ export default function ResumeEngine() {
         onCancel={analysisStream.cancel}
         onRetry={analysisStream.retry}
       />
+      )}
 
       <AnimatePresence mode="wait">
         {!analysis && !uploading && !analyzing ? (
