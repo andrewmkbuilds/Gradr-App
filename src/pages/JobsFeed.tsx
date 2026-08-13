@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { formatDistanceToNow } from "date-fns";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { CompanyResearchDialog } from "@/components/research/CompanyResearchDialog";
 import { CompanyLogo } from "@/components/CompanyLogo";
@@ -122,8 +123,11 @@ export default function JobsFeed() {
     if (data.remote_preference === "remote") setRemoteOnly(true);
   };
 
+  const queryClient = useQueryClient();
+
   const handleOnboardingComplete = (prefs: { what: string; where: string; country: string; remoteOnly: boolean; salaryMin: number | null }) => {
     setShowOnboarding(false);
+    void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     setWhat(prefs.what);
     setWhere(prefs.where);
     setCountry(prefs.country);
