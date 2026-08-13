@@ -509,7 +509,7 @@ function InterviewEngineInner() {
           </p>
           <Link
             to="/ai-interview-coach?utm_source=app&utm_medium=internal_link&utm_campaign=ai_interview_coach&utm_content=interview_engine_header"
-            className="mt-3 inline-flex items-center gap-2 text-xs text-primary hover:underline"
+            className="accent-link mt-3 inline-flex items-center gap-2 text-xs"
           >
             How the AI interview coach scores your answers
           </Link>

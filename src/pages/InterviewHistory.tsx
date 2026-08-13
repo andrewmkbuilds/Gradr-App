@@ -188,7 +188,7 @@ export default function InterviewHistory() {
                     {row.practice_plan && (
                       <div className="pt-2">
                         <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-                          <CalendarDays className="h-4 w-4 text-primary" /> Saved practice plan
+                          <CalendarDays className="accent-text h-4 w-4" /> Saved practice plan
                         </p>
                         <PracticePlanView plan={row.practice_plan} />
                       </div>
@@ -211,7 +211,7 @@ function Feedback({ title, items }: { title: string; items: string[] }) {
       <ul className="space-y-1.5">
         {(items ?? []).map((item, i) => (
           <li key={i} className="text-sm text-muted-foreground flex gap-2">
-            <span className="text-primary">•</span>
+            <span className="accent-text">•</span>
             <span>{item}</span>
           </li>
         ))}
