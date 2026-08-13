@@ -682,27 +682,32 @@
     letter-spacing: -0.005em;
   }
 
-  /* --- In-app scale (see src/lib/design/typography.ts) --- */
+  /* --- In-app scale (see src/lib/design/typography.ts) ---
+     Every clamp is anchored on a 375px floor first: the small-screen minimum
+     is the designed size, not a shrunken desktop size. Widths use `vw` so the
+     scale keeps stepping up smoothly to the 1440px ceiling. */
   .type-h1 {
     @apply font-display;
-    font-size: clamp(1.5rem, 2.4vw, 1.875rem);
+    font-size: clamp(1.375rem, 1.05rem + 1.4vw, 1.875rem);
     font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    line-height: 1.18;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
   }
   .type-h2 {
     @apply font-display;
-    font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+    font-size: clamp(1.1875rem, 1rem + 0.8vw, 1.5rem);
     font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+    line-height: 1.22;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
   }
   .type-h3 {
     @apply font-display;
-    font-size: 1.0625rem;
+    font-size: clamp(1rem, 0.95rem + 0.22vw, 1.0625rem);
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.015em;
+    line-height: 1.32;
+    letter-spacing: -0.014em;
   }
   .type-h4 {
     font-size: 0.9375rem;
@@ -711,18 +716,18 @@
     letter-spacing: -0.01em;
   }
   .type-overline {
-    font-size: 0.6875rem;
+    font-size: clamp(0.625rem, 0.6rem + 0.12vw, 0.6875rem);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.14em;
   }
   .type-body {
-    font-size: 0.9375rem;
-    line-height: 1.6;
+    font-size: clamp(0.9375rem, 0.92rem + 0.1vw, 1rem);
+    line-height: 1.62;
   }
   .type-body-sm {
     font-size: 0.875rem;
-    line-height: 1.55;
+    line-height: 1.58;
   }
   .type-caption {
     font-size: 0.75rem;
@@ -730,14 +735,14 @@
   }
   .type-metric {
     @apply font-display tabular-nums;
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-size: clamp(2rem, 1.5rem + 2.2vw, 2.5rem);
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.03em;
   }
   .type-metric-sm {
     @apply font-display tabular-nums;
-    font-size: 1.375rem;
+    font-size: clamp(1.25rem, 1.15rem + 0.4vw, 1.375rem);
     font-weight: 700;
     line-height: 1.05;
     letter-spacing: -0.02em;
@@ -747,7 +752,52 @@
     font-size: 0.8125rem;
     letter-spacing: -0.01em;
   }
+
+  /* ---------- Line length ----------
+     Long-form text stops at a comfortable measure instead of running the
+     full width of a wide surface. */
+  .measure {
+    max-width: 62ch;
+  }
+  .measure-wide {
+    max-width: 76ch;
+  }
+  .measure-narrow {
+    max-width: 46ch;
+  }
+
+  /* ---------- Mobile rhythm ----------
+     One shell for every routed page so gutters, max width and vertical
+     rhythm are identical across the app and tighten on small screens. */
+  .page-shell {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: clamp(0.875rem, 0.4rem + 2vw, 1.5rem);
+  }
+  .page-stack > * + * {
+    margin-top: clamp(1rem, 0.75rem + 1.1vw, 1.5rem);
+  }
+  /* Panel padding that never wastes a phone's narrow gutter. */
+  .pad-panel {
+    padding: clamp(1rem, 0.75rem + 1.2vw, 1.5rem);
+  }
 }
+
+/* Small screens: tighten tracking on display type and stop tap targets
+   from collapsing below the 44px accessibility floor. */
+@media (max-width: 640px) {
+  @layer utilities {
+    .type-hero,
+    .type-section {
+      letter-spacing: -0.03em;
+      text-wrap: balance;
+    }
+    .type-lede {
+      line-height: 1.6;
+    }
+  }
+}
+
 
 
 
