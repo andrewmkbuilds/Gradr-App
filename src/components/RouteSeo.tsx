@@ -8,6 +8,7 @@ import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
 
 const SITE = "Gradr";
+const SITE_TITLE = "Gradr | AI Career Copilot for Resumes, Jobs & Interviews";
 const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
@@ -15,9 +16,9 @@ const META: Record<string, { title: string; description: string }> = {
   // "/" renders the public Gradr landing page for signed-out visitors (and the
   // dashboard once authenticated), so its metadata must describe the product.
   "/": {
-    title: "AI Resume Builder, Job Matching & Interview Coach",
+    title: "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
     description:
-      "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.",
+      "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
   },
   "/landing": {
     title: "From resume to offer in one workspace",
@@ -239,16 +240,16 @@ export function RouteSeo() {
   const meta = META[pathname] ??
 
     resolveDynamicMeta(pathname) ?? {
-      title: "AI Resume Builder, Job Matching & Interview Coach",
+      title: "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
       description:
-        "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.",
+        "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
     };
   // "/" keeps the brand-first title; every other route (including /landing)
   // gets its own distinct title so no two public URLs duplicate one another.
   const fullTitle =
     pathname === "/"
-      ? "Gradr | AI Resume Builder, Job Matching & Interview Coach"
-      : `${meta.title} — ${SITE}`;
+      ? SITE_TITLE
+      : `${meta.title} — ${SITE_TITLE}`;
   const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
   const noindex = isNoIndex(pathname);

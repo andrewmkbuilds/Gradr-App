@@ -78,7 +78,7 @@ const structuredData = JSON.stringify({
       url: "https://gradr.me/",
       logo: "https://gradr.me/icon-512.png",
       description:
-        "Gradr is an AI career platform for job seekers, covering resume analysis, ATS optimization, job matching, job applications, and AI mock interview coaching.",
+        "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
     },
     {
       "@type": "WebSite",
@@ -100,7 +100,7 @@ const structuredData = JSON.stringify({
       browserRequirements: "Requires JavaScript and a modern web browser",
       publisher: { "@id": "https://gradr.me/#organization" },
       description:
-        "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews. It scores resumes against ATS rules, matches you to live job openings, drafts tailored applications, and runs realtime AI mock interviews with coaching feedback.",
+        "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
       featureList: [
         "AI resume analysis and ATS optimization scoring",
         "AI job matching against live job openings",
