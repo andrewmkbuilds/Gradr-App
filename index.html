@@ -117,18 +117,90 @@
         ]
       }
     </script>
+    <style>
+      /* Splash screen: painted before any JS bundle so there is never a flash
+         of unstyled SEO markup. Removed by src/main.tsx once React mounts. */
+      html, body { margin: 0; background: #faf8f6; }
+      html.dark, html.dark body { background: #0b1c22; }
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        background: #faf8f6;
+        color: #245f73;
+        font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+        transition: opacity 260ms ease;
+      }
+      html.dark #app-splash { background: #0b1c22; color: #f2f0ef; }
+      #app-splash[data-hiding="true"] { opacity: 0; pointer-events: none; }
+      #app-splash img { width: 56px; height: 56px; animation: splash-pulse 1.8s ease-in-out infinite; }
+      #app-splash .splash-word {
+        font-family: "Bricolage Grotesque", Georgia, serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        letter-spacing: -0.02em;
+      }
+      #app-splash .splash-track {
+        width: 128px;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(36, 95, 115, 0.16);
+        overflow: hidden;
+      }
+      html.dark #app-splash .splash-track { background: rgba(242, 240, 239, 0.16); }
+      #app-splash .splash-track span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 999px;
+        background: #245f73;
+        animation: splash-slide 1.15s ease-in-out infinite;
+      }
+      html.dark #app-splash .splash-track span { background: #f2f0ef; }
+      @keyframes splash-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+      @keyframes splash-slide {
+        0% { transform: translateX(-110%); }
+        100% { transform: translateX(320%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-splash img, #app-splash .splash-track span { animation: none; }
+        #app-splash { transition: none; }
+      }
+      /* SEO shell stays in the DOM for non-JS crawlers but is never visible. */
+      #seo-shell {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
   </head>
 
   <body>
+    <div id="app-splash" role="status" aria-live="polite" aria-label="Loading Gradr">
+      <img src="/gradr-logo.png" alt="" width="56" height="56" />
+      <span class="splash-word">Gradr</span>
+      <span class="splash-track"><span></span></span>
+    </div>
     <!--
-      Static, crawlable description of Gradr. React (createRoot) replaces the
-      contents of #root on mount, so this is only ever visible for the first
-      paint — but it guarantees that crawlers and AI answer engines which do
-      not execute JavaScript still read what Gradr actually is, instead of an
-      empty document they have to guess about.
+      Static, crawlable description of Gradr for crawlers and AI answer engines
+      that do not execute JavaScript. Visually hidden (see #seo-shell above) and
+      replaced by React on mount, so users never see it.
     -->
     <div id="root">
-      <main id="seo-shell" style="max-width: 46rem; margin: 0 auto; padding: 4rem 1.5rem; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; line-height: 1.6;">
+      <main id="seo-shell">
+
         <h1>Gradr — Your AI Career Command Center</h1>
         <p>
           Gradr is your AI career command center for resume analysis, job matching, applications,
