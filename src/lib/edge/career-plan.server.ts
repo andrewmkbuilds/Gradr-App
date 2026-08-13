@@ -32,6 +32,20 @@ interface PlanStep {
   done: boolean;
 }
 
+interface TrackedRow {
+  title: string;
+  company: string | null;
+  status: string;
+  applied_at: string | null;
+  last_touch_at: string | null;
+  match_score: number | null;
+}
+
+interface ReminderRow {
+  title: string;
+  due_at: string;
+}
+
 const ROUTE_FOR: Record<string, string> = {
   apply: "/jobs",
   tailor: "/resume",
@@ -110,7 +124,7 @@ export const handler = async (req: Request): Promise<Response> => {
             impact: resume.impact_score,
           }
         : null,
-      pipeline: tracked.map((t) => ({
+      pipeline: (tracked as TrackedRow[]).map((t) => ({
         title: t.title,
         company: t.company,
         status: t.status,
@@ -118,7 +132,7 @@ export const handler = async (req: Request): Promise<Response> => {
         lastTouchAt: t.last_touch_at,
         matchScore: t.match_score,
       })),
-      openReminders: reminders.map((r) => ({ title: r.title, dueAt: r.due_at })),
+      openReminders: (reminders as ReminderRow[]).map((r) => ({ title: r.title, dueAt: r.due_at })),
       mockInterviewsThisWeek: sessionsThisWeek,
     };
 
