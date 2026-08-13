@@ -34,7 +34,7 @@ describe("sitemap", () => {
 
   it("every entry resolves to a real route", () => {
     const missing = parseSitemapPaths(committed).filter((path) => {
-      if (routePaths.has(path)) return true ? false : false;
+      if (routePaths.has(path)) return false;
       // Dynamic content pages resolve through their $slug route.
       if (path.startsWith("/career-advice/")) return !routePaths.has("/career-advice/$slug");
       if (path.startsWith("/job-search/")) return !routePaths.has("/job-search/$slug");
