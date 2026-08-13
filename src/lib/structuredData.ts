@@ -301,12 +301,27 @@ export function validateJsonLd(node: JsonLd, label = "jsonld"): string[] {
       });
       break;
     }
-    case "SoftwareApplication": {
+    case "SoftwareApplication":
+    case "WebApplication":
+    case "WebPage": {
       requireText(node.name, ".name");
       requireText(node.description, ".description");
       requireAbsoluteUrl(node.url, ".url");
       break;
     }
+    case "Product": {
+      requireText(node.name, ".name");
+      requireText(node.description, ".description");
+      requireAbsoluteUrl(node.url, ".url");
+      const offers = node.offers as JsonLd | undefined;
+      if (!offers || typeof offers["@type"] !== "string") {
+        errors.push(`${at(".offers")}: missing offers`);
+      } else if (offers["priceCurrency"] !== "USD") {
+        errors.push(`${at(".offers.priceCurrency")}: must be USD`);
+      }
+      break;
+    }
+
     default:
       break;
   }
