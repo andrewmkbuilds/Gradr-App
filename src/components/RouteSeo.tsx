@@ -19,9 +19,17 @@ const META: Record<string, { title: string; description: string }> = {
     description:
       "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
   },
+  // Product tour page. Must not reuse the homepage title/description or search
+  // engines and social platforms treat it as a duplicate of "/".
   "/landing": {
-    title: "From resume to offer",
-    description: "Gradr brings resume intelligence, job matching, applications, and AI mock interviews into one workspace.",
+    title: "Product Tour: How Gradr Takes You From Resume to Offer",
+    description:
+      "See how Gradr works end to end: ATS resume scoring, job matching, application tracking, and AI mock interviews — with a walkthrough of every module.",
+  },
+  "/manage-subscription": {
+    title: "Manage Your Subscription",
+    description:
+      "View your Gradr plan, update payment details, change between monthly and annual billing, or cancel your subscription at any time.",
   },
   "/auth": {
     title: "Sign in",
@@ -210,10 +218,10 @@ export function RouteSeo() {
       description:
         "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
     };
+  // Only the homepage uses the brand-first title; every other route (including
+  // /landing) gets its own distinct title so titles and og:title never collide.
   const fullTitle =
-    pathname === "/" || pathname === "/landing"
-      ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews"
-      : `${meta.title} — ${SITE}`;
+    pathname === "/" ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews" : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
   const noindex = isNoIndex(pathname);
