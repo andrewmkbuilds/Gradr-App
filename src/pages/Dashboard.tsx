@@ -194,6 +194,12 @@ export default function Dashboard() {
         { label: "Formatting", value: `${s.formattingScore}%` },
         { label: "Impact statements", value: `${s.impactScore}%` },
       ],
+      actions: s.resumeScore > 0
+        ? [
+            { label: "Fix the weakest resume section", detail: weakestResumeArea(s), to: "/resume" },
+            { label: "Generate a tailored version", detail: "Rewrite for a specific role before applying.", to: "/apply" },
+          ]
+        : [{ label: "Upload your resume", detail: "Get an ATS score and section-level fixes in seconds.", to: "/resume" }],
     },
     {
       key: "matching", label: "Match quality", weight: 2,
@@ -203,6 +209,10 @@ export default function Dashboard() {
         { label: "Scored matches", value: String(s.totalMatches) },
         { label: "Above 85% match", value: String(s.highConfidence) },
         { label: "High-confidence ratio", value: s.interviewRate },
+      ],
+      actions: [
+        { label: "Refine your job search filters", detail: "Tighter titles and locations raise match scores.", to: "/jobs" },
+        { label: "Re-score matches with your latest resume", detail: "Match quality follows resume quality.", to: "/match" },
       ],
     },
     {
@@ -214,6 +224,15 @@ export default function Dashboard() {
         { label: "Active pipeline", value: String(activeStages) },
         { label: "Overdue follow-ups", value: String(overdueCount) },
       ],
+      actions: [
+        ...(s.appliedThisWeek < 5
+          ? [{ label: `Send ${5 - s.appliedThisWeek} more application${5 - s.appliedThisWeek === 1 ? "" : "s"} this week`, detail: "Quick Apply builds the pack for you.", to: "/apply" }]
+          : []),
+        ...(overdueCount > 0
+          ? [{ label: `Clear ${overdueCount} overdue follow-up${overdueCount === 1 ? "" : "s"}`, detail: "Follow-ups convert far better than new applications.", to: "/pipeline" }]
+          : []),
+        { label: "Review your pipeline", detail: "Move stale saved jobs forward or archive them.", to: "/pipeline" },
+      ],
     },
     {
       key: "practice", label: "Interview practice", weight: 3,
@@ -224,6 +243,10 @@ export default function Dashboard() {
       signals: [
         { label: "Mock sessions", value: String(data!.interviewCount) },
         { label: "Average score", value: data!.interviewAvg ? `${data!.interviewAvg}/100` : "not scored yet" },
+      ],
+      actions: [
+        { label: data!.interviewCount ? "Run another mock interview" : "Run your first mock interview", detail: "Live AI interviewer with a scored debrief.", to: "/interview" },
+        ...(data!.interviewCount ? [{ label: "Review your last scorecard", detail: "Work the lowest-scoring competency first.", to: "/interview" }] : []),
       ],
     },
   ];
