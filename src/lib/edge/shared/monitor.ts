@@ -11,14 +11,15 @@
  */
 import { createClient } from "./supabase";
 import { dispatchAlert, shouldEscalate } from "./alerting";
+import { alertThreshold, policyFor } from "./endpointPolicy";
 import {
-  DEFAULT_RULE,
   callerKey,
   checkRateLimit,
   rateLimitHeaders,
   tooManyRequests,
   type RateLimitRule,
 } from "./rateLimit";
+
 
 
 export type HealthOutcome =
