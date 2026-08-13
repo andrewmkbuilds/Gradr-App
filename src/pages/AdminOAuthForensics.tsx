@@ -412,7 +412,74 @@ export default function AdminOAuthForensics() {
             ))
           )}
         </TabsContent>
+
+        <TabsContent value="csp" className="mt-6 space-y-4">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-sm font-medium">Content-Security-Policy — report-only</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              The candidate policy runs alongside the enforced one. Browsers report what it{" "}
+              <em>would</em> have blocked, so auth, checkout, analytics and PWA features can be
+              verified before enforcement. An empty list over a full week means it is safe to enforce.
+            </p>
+            {csp.data?.candidatePolicy && (
+              <pre className="mt-3 max-h-40 overflow-auto rounded-lg bg-muted p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                {csp.data.candidatePolicy.split("; ").join(";\n")}
+              </pre>
+            )}
+          </div>
+
+          {csp.isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading violation reports…</p>
+          ) : (csp.data?.total ?? 0) === 0 ? (
+            <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              No violations reported in the last {csp.data?.days ?? 7} days. The candidate policy is
+              a clean match for real traffic.
+            </p>
+          ) : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Stat label="Reports" value={String(csp.data?.total ?? 0)} tone="bad" />
+                <Stat label="Distinct causes" value={String(csp.data?.groups.length ?? 0)} />
+                <Stat label="Window" value={`${csp.data?.days ?? 7} days`} />
+              </div>
+              <div className="overflow-hidden rounded-xl border border-border">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-2 font-medium">Directive</th>
+                      <th className="px-4 py-2 font-medium">Blocked origin</th>
+                      <th className="px-4 py-2 font-medium">Page</th>
+                      <th className="px-4 py-2 font-medium">Count</th>
+                      <th className="px-4 py-2 font-medium">Last seen</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(csp.data?.groups ?? []).map((group) => (
+                      <tr
+                        key={`${group.directive}-${group.blockedOrigin}`}
+                        className="border-t border-border"
+                      >
+                        <td className="px-4 py-2 font-mono text-xs">{group.directive}</td>
+                        <td className="px-4 py-2 break-all font-mono text-xs">
+                          {group.blockedOrigin}
+                        </td>
+                        <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                          {group.samplePath ?? "—"}
+                        </td>
+                        <td className="px-4 py-2 tabular-nums">{group.count}</td>
+                        <td className="px-4 py-2 text-xs text-muted-foreground">
+                          {when(group.lastSeen)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </TabsContent>
       </Tabs>
+
     </div>
   );
 }
