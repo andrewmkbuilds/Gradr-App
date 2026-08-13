@@ -244,7 +244,10 @@ export default function ResumeEngine() {
         </Link>
       </div>
 
+      <NextActionBar surface="resume" />
+
       {!uploading && !analyzing && tailorPanel}
+
 
       {!uploading && !analyzing && (
         <ResumeVersions
