@@ -27,13 +27,13 @@ export function Aurora({ className = "", intensity = 1 }: BgProps) {
       />
       <motion.div
         className="absolute right-[-14rem] top-[6rem] h-[34rem] w-[34rem] rounded-full blur-[140px]"
-        style={{ background: `radial-gradient(closest-side, hsl(221 83% 55% / ${o(0.16)}), transparent 70%)` }}
+        style={{ background: `radial-gradient(closest-side, hsl(195 52% 34% / ${o(0.16)}), transparent 70%)` }}
         animate={reduce ? undefined : { opacity: [0.55, 0.9, 0.55], y: [0, -24, 0] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       />
       <motion.div
         className="absolute bottom-[-16rem] left-[-10rem] h-[30rem] w-[30rem] rounded-full blur-[150px]"
-        style={{ background: `radial-gradient(closest-side, hsl(266 70% 60% / ${o(0.12)}), transparent 70%)` }}
+        style={{ background: `radial-gradient(closest-side, hsl(20 52% 32% / ${o(0.12)}), transparent 70%)` }}
         animate={reduce ? undefined : { opacity: [0.4, 0.7, 0.4], x: [0, 26, 0] }}
         transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 5 }}
       />

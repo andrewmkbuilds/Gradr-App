@@ -77,7 +77,7 @@ export function GlowFrame({
       fillOpacity={0.18}
       glowColor="190 95% 55%"
       backgroundColor="hsl(var(--card))"
-      colors={["hsl(190 95% 55%)", "hsl(210 90% 62%)", "hsl(266 70% 68%)"]}
+      colors={["hsl(195 52% 40%)", "hsl(197 28% 62%)", "hsl(20 52% 34%)"]}
     >
       {children}
     </BorderGlowBase>
