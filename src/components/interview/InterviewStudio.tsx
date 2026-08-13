@@ -14,6 +14,7 @@ import { CameraMonitor } from "@/components/interview/CameraMonitor";
 import { InterviewerOrb, type InterviewerState } from "@/components/interview/InterviewerOrb";
 import { ConnectionErrorOverlay } from "@/components/interview/ConnectionErrorOverlay";
 import { Surface } from "@/components/ui/surface";
+import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { SessionTimerRing } from "@/components/interview/SessionTimerRing";
 import { springSmooth, springSnappy, easeOut } from "@/lib/motion/tokens";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
@@ -233,6 +234,7 @@ export function InterviewStudio(props: Props) {
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           {/* ---------- Stage + transcript ---------- */}
           <div className="flex min-w-0 flex-col gap-4">
+            <DepthStage className="rounded-2xl" tilt={3} sheen={false}>
             <Surface
               level={3}
               flush
@@ -254,7 +256,7 @@ export function InterviewStudio(props: Props) {
                 aria-hidden="true"
               />
 
-              <div className="relative">
+              <DepthLayer z={46} className="relative">
                 <InterviewerOrb state={interviewerState} />
 
                 <AnimatePresence mode="wait" initial={false}>
@@ -290,13 +292,14 @@ export function InterviewStudio(props: Props) {
                     </motion.p>
                   )}
                 </AnimatePresence>
-              </div>
+              </DepthLayer>
 
               {/* Screen-reader live region: always announces, independent of visual captions */}
               <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
                 {liveCaption}
               </p>
             </Surface>
+            </DepthStage>
 
             {/* Transcript */}
             <Surface level={2} flush className="flex min-h-[220px] flex-col p-4 sm:p-5" aria-label="Interview transcript">
