@@ -56,6 +56,16 @@ export default {
           "secondary-foreground": "hsl(var(--brand-secondary-foreground))",
           "secondary-soft": "hsl(var(--brand-secondary-soft))",
         },
+        mahogany: {
+          DEFAULT: "hsl(var(--mahogany))",
+          foreground: "hsl(var(--mahogany-foreground))",
+          hover: "hsl(var(--mahogany-hover))",
+          strong: "hsl(var(--mahogany-strong))",
+          muted: "hsl(var(--mahogany-muted))",
+          soft: "hsl(var(--mahogany-soft))",
+          tint: "hsl(var(--mahogany-tint))",
+          border: "hsl(var(--mahogany-border))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

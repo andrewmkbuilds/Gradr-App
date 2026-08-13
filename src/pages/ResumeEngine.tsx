@@ -247,14 +247,14 @@ export default function ResumeEngine() {
     <>
       <Link
         to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=resume_engine_header"
-        className="story-link inline-flex items-center gap-1.5 text-xs text-primary"
+        className="story-link inline-flex items-center gap-1.5 text-xs text-mahogany"
       >
         <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
         AI resume builders &amp; ATS optimization
       </Link>
       <Link
         to="/ats-resume-checker?utm_source=app&utm_medium=internal_link&utm_campaign=ats_resume_checker&utm_content=resume_engine_header"
-        className="story-link inline-flex items-center gap-1.5 text-xs text-primary"
+        className="story-link inline-flex items-center gap-1.5 text-xs text-mahogany"
       >
         <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
         How ATS scoring works
@@ -433,7 +433,7 @@ export default function ResumeEngine() {
               <motion.div {...stagger(2)} className="lg:col-span-2">
                 <Surface level={2} className="p-6">
                   <h3 className="mb-4 flex items-center gap-2 font-display text-lg text-foreground">
-                    <Gauge className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <Gauge className="h-4 w-4 text-mahogany" aria-hidden="true" />
                     How these scores were calculated
                   </h3>
                   <div className="grid gap-2 sm:grid-cols-2">

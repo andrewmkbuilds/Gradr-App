@@ -260,11 +260,11 @@ export default function Pricing() {
                 <TiltCard key={tier.name} className="group h-full rounded-xl" tilt={4}>
                 <Card
                   className={`relative h-full p-6 flex flex-col ${
-                    tier.highlighted ? "border-primary shadow-lg shadow-primary/10 xl:scale-[1.02]" : "border-border"
+                    tier.highlighted ? "accent-card border-mahogany-border shadow-lg shadow-mahogany/10 xl:scale-[1.02]" : "border-border"
                   }`}
                 >
                   {tier.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-mahogany text-mahogany-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-[0_8px_20px_-12px_hsl(var(--mahogany))]">
                       Most popular
                     </div>
                   )}
