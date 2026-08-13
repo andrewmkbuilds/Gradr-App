@@ -18,6 +18,8 @@ export interface ReadinessPillar {
   hint: string;
   /** Raw data signals behind the number, shown in the "why this score" panel. */
   signals?: { label: string; value: string }[];
+  /** Concrete next actions surfaced in the pillar drill-down. */
+  actions?: { label: string; detail?: string; to?: string }[];
 }
 
 export function computeReadiness(pillars: ReadinessPillar[]) {
