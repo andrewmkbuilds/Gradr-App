@@ -145,7 +145,7 @@ export default function Settings() {
 
       <section aria-labelledby="appearance-heading" className="glass-card p-6 space-y-4 animate-slide-up">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
             <Palette className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
           <div>
@@ -158,7 +158,7 @@ export default function Settings() {
 
       <div className="glass-card p-6 space-y-5 animate-slide-up">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
             <User className="h-5 w-5 text-primary" />
           </div>
           <div>
@@ -208,7 +208,7 @@ export default function Settings() {
 
       <div className="glass-card p-6 space-y-5 animate-slide-up">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
             <Bell className="h-5 w-5 text-primary" />
           </div>
           <div>

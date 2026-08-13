@@ -157,7 +157,7 @@ export default function Pricing() {
       {(discountPercent > 0 || topProgram) && (
         <div className="accent-card mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl px-5 py-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center extrude rounded-lg bg-primary/10">
               {discountPercent > 0 ? (
                 <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
               ) : (
@@ -225,7 +225,7 @@ export default function Pricing() {
             <DepthCard tilt={3.5} lift={6} className="h-full">
             <Card className="relative flex h-full flex-col p-6 border-border">
               <div className="flex items-center gap-2 mb-4">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="h-9 w-9 extrude rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <h2 className="text-lg font-semibold text-foreground">{FREE_TIER.name}</h2>
@@ -274,7 +274,7 @@ export default function Pricing() {
                   )}
 
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="h-9 w-9 extrude rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon className="h-4 w-4 text-primary" />
                     </div>
                     <h2 className="text-lg font-semibold text-foreground">{tier.name}</h2>
@@ -321,7 +321,7 @@ export default function Pricing() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CREDIT_PACKS.map((pack) => (
             <Card key={pack.priceId} className="p-5 flex flex-col">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+              <div className="h-9 w-9 extrude rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <h2 className="text-sm font-semibold text-foreground">{pack.label}</h2>

@@ -136,7 +136,7 @@ function ApplicationEngineInner() {
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="glass-card p-6 animate-slide-up group hover:glow-border transition-all">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+          <div className="h-12 w-12 extrude rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
             <Mail className="h-6 w-6 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-1">Cover Letter</h3>

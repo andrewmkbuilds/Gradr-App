@@ -41,7 +41,7 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
           <li key={d.day} className="glass-card p-5 space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center">
+                <span className="h-8 w-8 shrink-0 extrude rounded-lg bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center">
                   {d.day}
                 </span>
                 <div>

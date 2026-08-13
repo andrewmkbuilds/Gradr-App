@@ -350,7 +350,7 @@ function MatchDemo() {
           className="lume-border rounded-xl border border-border/70 bg-background/60 p-3"
         >
           <div className="flex items-start gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+            <div className="grid h-9 w-9 shrink-0 place-items-center extrude rounded-lg bg-primary/10 text-xs font-bold text-primary">
               {j.co[0]}
             </div>
             <div className="min-w-0 flex-1">

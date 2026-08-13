@@ -31,6 +31,7 @@ import { reportLovableError } from "@/lib/lovable-error-reporting";
 import NotFound from "@/pages/NotFound";
 import { AppSplash } from "@/components/AppSplash";
 import { MotionPrefsProvider } from "@/hooks/useMotionPrefs";
+import { SpatialField } from "@/components/motion/SpatialField";
 import { PerfDiagnostics } from "@/components/motion/PerfDiagnostics";
 
 
@@ -247,6 +248,7 @@ function RootComponent() {
           <ThemeProvider>
             <MotionPrefsProvider>
             <TooltipProvider>
+              <SpatialField />
               <Toaster />
               <Sonner />
               <HelmetProvider>

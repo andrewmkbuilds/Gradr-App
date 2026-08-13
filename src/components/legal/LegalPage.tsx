@@ -28,7 +28,7 @@ export function LegalPage({ title, intro, lastUpdated, children }: LegalPageProp
                 aria-current={pathname === page.path ? "page" : undefined}
                 className={
                   pathname === page.path
-                    ? "rounded-md bg-primary/10 px-3 py-1 font-medium text-primary"
+                    ? "extrude rounded-md bg-primary/10 px-3 py-1 font-medium text-primary"
                     : "rounded-md px-3 py-1 text-muted-foreground transition-colors hover:text-foreground"
                 }
               >

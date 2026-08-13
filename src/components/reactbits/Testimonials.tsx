@@ -58,7 +58,7 @@ function Card({ t, index, children }: { t: Testimonial; index: number; children?
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/10 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 extrude rounded-full bg-primary/10 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
       />
       <div className="relative">
         <Quote className="h-5 w-5 text-primary/70" aria-hidden />
