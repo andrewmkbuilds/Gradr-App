@@ -37,6 +37,10 @@ const DEFAULTS: StoredPrefs = { mode: "system", depth: 1, diagnostics: false };
 interface MotionPrefsValue extends StoredPrefs {
   /** OS-level `prefers-reduced-motion: reduce`. */
   systemReduced: boolean;
+  /** Weak device / data-saver / sustained low FPS detected. */
+  lowPower: boolean;
+  /** Why low-power kicked in, for the settings UI. */
+  lowPowerReason: string | null;
   /** Final answer every component should branch on. */
   reduceMotion: boolean;
   /** Depth intensity after applying reduced-motion (0 when reduced). */
@@ -47,6 +51,27 @@ interface MotionPrefsValue extends StoredPrefs {
 }
 
 const MotionPrefsContext = createContext<MotionPrefsValue | null>(null);
+
+/** Static device hints: data saver, low RAM, few cores. */
+function detectWeakDevice(): string | null {
+  if (typeof navigator === "undefined") return null;
+  const nav = navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string };
+    deviceMemory?: number;
+  };
+  if (nav.connection?.saveData) return "Data saver is on";
+  if (nav.connection?.effectiveType && /2g/.test(nav.connection.effectiveType)) {
+    return "Slow network detected";
+  }
+  if (typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 && nav.deviceMemory <= 2) {
+    return "Low device memory";
+  }
+  if (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency <= 2) {
+    return "Limited CPU cores";
+  }
+  return null;
+}
+
 
 function readStored(): StoredPrefs {
   if (typeof window === "undefined") return DEFAULTS;
@@ -74,9 +99,12 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
   // SSR-safe: start from defaults, hydrate from storage after mount.
   const [prefs, setPrefs] = useState<StoredPrefs>(DEFAULTS);
   const [systemReduced, setSystemReduced] = useState(false);
+  const [weakDeviceReason, setWeakDeviceReason] = useState<string | null>(null);
+  const [fpsLow, setFpsLow] = useState(false);
 
   useEffect(() => {
     setPrefs(readStored());
+    setWeakDeviceReason(detectWeakDevice());
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setSystemReduced(mq.matches);
     sync();
@@ -84,9 +112,36 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // Runtime fallback: if the device can't hold ~30fps for a sustained window,
+  // treat it as low-power even when static hints looked fine.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let frames = 0;
+    let windowStart = performance.now();
+    let lowStreaks = 0;
+    let raf = 0;
+    const tick = (now: number) => {
+      frames += 1;
+      if (now - windowStart >= 2000) {
+        const fps = (frames * 1000) / (now - windowStart);
+        lowStreaks = fps < 30 ? lowStreaks + 1 : 0;
+        if (lowStreaks >= 3) setFpsLow(true);
+        frames = 0;
+        windowStart = now;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const lowPower = weakDeviceReason !== null || fpsLow;
+  const lowPowerReason = weakDeviceReason ?? (fpsLow ? "Sustained low frame rate" : null);
+
   const reduceMotion =
     prefs.mode === "reduced" || (prefs.mode === "system" && systemReduced);
-  const effectiveDepth = reduceMotion ? 0 : prefs.depth;
+  // Low-power devices keep motion but halve depth so heavy 3D stays affordable.
+  const effectiveDepth = reduceMotion ? 0 : lowPower ? Math.min(prefs.depth, 0.4) : prefs.depth;
 
   // Persist + mirror to the document so CSS can react instantly.
   useEffect(() => {
@@ -99,7 +154,8 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.dataset['reduceMotion'] = reduceMotion ? "true" : "false";
     root.dataset['depth'] = effectiveDepth.toFixed(2);
-  }, [prefs, reduceMotion, effectiveDepth]);
+    root.dataset['lowPower'] = lowPower ? "true" : "false";
+  }, [prefs, reduceMotion, effectiveDepth, lowPower]);
 
   const update = useCallback(
     (patch: Partial<StoredPrefs>) => setPrefs((p) => ({ ...p, ...patch })),
@@ -110,13 +166,15 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
     () => ({
       ...prefs,
       systemReduced,
+      lowPower,
+      lowPowerReason,
       reduceMotion,
       effectiveDepth,
       setMode: (mode) => update({ mode }),
       setDepth: (depth) => update({ depth: Math.min(1, Math.max(0, depth)) }),
       setDiagnostics: (diagnostics) => update({ diagnostics }),
     }),
-    [prefs, systemReduced, reduceMotion, effectiveDepth, update],
+    [prefs, systemReduced, lowPower, lowPowerReason, reduceMotion, effectiveDepth, update],
   );
 
   return <MotionPrefsContext.Provider value={value}>{children}</MotionPrefsContext.Provider>;
@@ -132,6 +190,8 @@ export function useMotionPrefs(): MotionPrefsValue {
   return {
     ...DEFAULTS,
     systemReduced: false,
+    lowPower: false,
+    lowPowerReason: null,
     reduceMotion: false,
     effectiveDepth: 1,
     setMode: () => {},

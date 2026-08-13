@@ -31,6 +31,8 @@ export function MotionPanel() {
     setDiagnostics,
     systemReduced,
     reduceMotion,
+    lowPower,
+    lowPowerReason,
   } = useMotionPrefs();
 
   return (
@@ -75,6 +77,13 @@ export function MotionPanel() {
           <Badge variant="secondary" className="text-[10px]">
             {systemReduced ? "reduced motion" : "full motion"}
           </Badge>
+        </p>
+      )}
+
+      {lowPower && !reduceMotion && (
+        <p className="accent-chip w-fit text-xs">
+          Low-power mode active{lowPowerReason ? ` — ${lowPowerReason}` : ""}. Depth is capped at
+          40% to keep this device smooth.
         </p>
       )}
 

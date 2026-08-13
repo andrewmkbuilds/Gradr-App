@@ -11,6 +11,15 @@
  */
 import { createClient } from "./supabase";
 import { dispatchAlert, shouldEscalate } from "./alerting";
+import {
+  DEFAULT_RULE,
+  callerKey,
+  checkRateLimit,
+  rateLimitHeaders,
+  tooManyRequests,
+  type RateLimitRule,
+} from "./rateLimit";
+
 
 export type HealthOutcome =
   | "success"
@@ -149,10 +158,15 @@ export async function recordApiHealth(params: {
   }
 }
 
-/** Wraps a handler with health recording and a safe 500 fallback. */
+/**
+ * Wraps a handler with per-endpoint rate limiting, health recording and a safe
+ * 500 fallback. Rate-limited calls short-circuit before the handler runs but
+ * are still recorded (as `rate_limited`) so abuse shows up on the dashboard.
+ */
 export function withMonitoring(
   endpoint: string,
   handler: (req: Request) => Promise<Response>,
+  options?: { rateLimit?: RateLimitRule | false },
 ): (req: Request) => Promise<Response> {
   return async (req: Request) => {
     if (req.method === "OPTIONS") return handler(req);
@@ -161,15 +175,34 @@ export function withMonitoring(
     let response: Response;
     let errorMessage: string | null = null;
 
-    try {
-      response = await handler(req);
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : String(err);
-      console.error(`[api] ${endpoint} threw`, err);
-      response = new Response(JSON.stringify({ error: "Internal server error" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+    const rule = options?.rateLimit === false ? null : (options?.rateLimit ?? DEFAULT_RULE);
+    const verdict = rule ? checkRateLimit(endpoint, callerKey(req), rule) : null;
+
+    if (verdict && !verdict.allowed) {
+      response = tooManyRequests(verdict);
+      errorMessage = `Rate limit exceeded (retry in ${verdict.retryAfter}s)`;
+    } else {
+      try {
+        response = await handler(req);
+      } catch (err) {
+        errorMessage = err instanceof Error ? err.message : String(err);
+        console.error(`[api] ${endpoint} threw`, err);
+        response = new Response(JSON.stringify({ error: "Internal server error" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (verdict) {
+        // Surface budget headers without disturbing the handler's own response.
+        const headers = new Headers(response.headers);
+        for (const [k, v] of Object.entries(rateLimitHeaders(verdict))) headers.set(k, v);
+        response = new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+      }
     }
 
     if (!errorMessage && response.status >= 400) {
@@ -193,3 +226,4 @@ export function withMonitoring(
     return response;
   };
 }
+
