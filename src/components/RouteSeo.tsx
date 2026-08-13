@@ -174,6 +174,8 @@ function resolveOgImage(pathname: string): string {
   if (pathname === "/landing") return `${ORIGIN}/og/landing.png`;
   // Keyword landing pages ship their own card so social previews match intent.
   if (pathname === "/ai-interview-coach") return `${ORIGIN}/og/ai-interview-coach.png`;
+  // The blog index uses a dedicated card so it never shares the homepage image.
+  if (pathname === "/blog") return `${ORIGIN}/og/blog.png`;
   if (pathname.startsWith("/blog/")) {
     const slug = pathname.slice(6);
     if (slug) return `${ORIGIN}/og/blog-${slug}.png`;
