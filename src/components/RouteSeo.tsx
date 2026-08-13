@@ -120,6 +120,11 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Affiliate Resources",
     description: "Campaign link builder, brand assets, and copy templates for Gradr affiliate partners.",
   },
+  "/blog": {
+    title: "Career Guides & Job Search Blog",
+    description:
+      "Practical guides on resumes, ATS scoring, job applications, and interview prep from the Gradr career team.",
+  },
   "/blog/ai-resume-optimization": {
     title: "AI Resume Builder & ATS Guide",
     description: "How AI resume builders help candidates beat Applicant Tracking Systems — keyword matching, formatting rules, and AI-driven rewrites.",

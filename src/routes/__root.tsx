@@ -30,9 +30,6 @@ import { reportLovableError } from "@/lib/lovable-error-reporting";
 import NotFound from "@/pages/NotFound";
 import { AppSplash } from "@/components/AppSplash";
 
-const SITE_TITLE = "Gradr | AI Resume Builder, Job Matching & Interview Coach";
-const SITE_DESCRIPTION =
-  "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.";
 
 // Paint the correct theme before first render so there is no flash.
 // Ported from the pre-migration index.html head script.
@@ -113,13 +110,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "UTF-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-      { title: SITE_TITLE },
-      { name: "description", content: SITE_DESCRIPTION },
+      // Title, description, robots, canonical, og:* and twitter:* are owned by
+      // <RouteSeo /> so every route renders exactly one of each.
       { name: "author", content: "Gradr" },
-      {
-        name: "robots",
-        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-      },
       {
         name: "keywords",
         content:
@@ -131,20 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#f7f9fc", media: "(prefers-color-scheme: light)" },
       { name: "google-site-verification", content: "N0LjBnLEMo8ZqJ1lwaVLoswy8UkfIXMwgdfk35YEY-s" },
       { name: "google-site-verification", content: "KJgcSDDga9hUzoDhgnCK8yWa_MU6PJX_kW27pzKLbAo" },
-      { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Gradr" },
       { property: "og:locale", content: "en_US" },
-      { property: "og:title", content: SITE_TITLE },
-      { property: "og:description", content: SITE_DESCRIPTION },
-      { property: "og:url", content: "https://gradr.me/" },
-      { property: "og:image", content: "https://gradr.me/og-image.jpg" },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "Gradr | AI Resume Builder, Job Matching & Interview Coach" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: SITE_TITLE },
-      { name: "twitter:description", content: SITE_DESCRIPTION },
-      { name: "twitter:image", content: "https://gradr.me/og-image.jpg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
