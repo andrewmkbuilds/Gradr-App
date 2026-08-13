@@ -1199,3 +1199,51 @@ html[data-reduce-motion="true"] .tilt-3d,
 html[data-reduce-motion="true"] .tilt-3d[data-tilt-active="true"],
 html[data-reduce-motion="true"] .tilt-layer { transform: none !important; }
 html[data-reduce-motion="true"] .tilt-3d::before { display: none !important; }
+
+/* Ambient depth planes used by <AmbientBackground /> */
+@layer utilities {
+  /* Far floor: a perspective plane that recedes to a horizon line. */
+  .ambient-floor {
+    position: absolute;
+    inset-inline: -40%;
+    bottom: -10%;
+    height: 65%;
+    transform: perspective(760px) rotateX(72deg);
+    transform-origin: bottom center;
+    background-image:
+      linear-gradient(to right, hsl(var(--primary) / 0.16) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--primary) / 0.16) 1px, transparent 1px);
+    background-size: 90px 90px;
+    mask-image: linear-gradient(to top, #000, transparent 78%);
+    opacity: calc(var(--ambient-opacity) * 1.6);
+    animation: floor-travel 22s linear infinite;
+  }
+  @keyframes floor-travel {
+    from { background-position: 0 0; }
+    to   { background-position: 0 90px; }
+  }
+
+  /* Near plane: sparse motes drifting through the light. */
+  .ambient-motes { position: absolute; inset: 0; }
+  .ambient-mote {
+    position: absolute;
+    border-radius: 9999px;
+    background: hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.45);
+    opacity: 0;
+    animation-name: mote-float;
+    animation-timing-function: var(--ease-in-out-soft);
+    animation-iteration-count: infinite;
+  }
+  @keyframes mote-float {
+    0%   { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.7); }
+    25%  { opacity: 0.7; }
+    60%  { opacity: 0.45; transform: translate3d(10px, -26px, 0) scale(1); }
+    100% { opacity: 0; transform: translate3d(-6px, -52px, 0) scale(0.8); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ambient-floor, .ambient-mote { animation: none; }
+    .ambient-mote { opacity: 0.35; }
+  }
+}

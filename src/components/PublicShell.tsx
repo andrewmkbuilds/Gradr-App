@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { trackEvent } from "@/lib/analytics";
 import { LEGAL_PAGES } from "@/content/legal";
+import { AmbientBackground } from "@/components/AmbientBackground";
 
 interface PublicShellProps {
   children: React.ReactNode;
@@ -21,7 +22,8 @@ const NAV = [
 /** Chrome for public, indexable pages (guides + job landing pages). */
 export function PublicShell({ children, source }: PublicShellProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen bg-background">
+      <AmbientBackground />
       <header className="glass-float sticky top-0 z-40 border-b border-border/60">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
           <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
