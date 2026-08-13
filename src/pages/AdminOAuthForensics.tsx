@@ -448,13 +448,21 @@ export default function AdminOAuthForensics() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
+          <Button variant="outline" onClick={() => exportIncident.mutate("csv")} disabled={exportIncident.isPending}>
+            <Table2 className="mr-2 h-4 w-4" />
+            CSV
+          </Button>
+          <Button variant="outline" onClick={() => exportIncident.mutate("pdf")} disabled={exportIncident.isPending}>
+            <Printer className="mr-2 h-4 w-4" />
+            PDF
+          </Button>
           <Button variant="secondary" onClick={() => exportIncident.mutate("json")} disabled={exportIncident.isPending}>
             {exportIncident.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Download className="mr-2 h-4 w-4" />
             )}
-            Export JSON
+            JSON
           </Button>
           <Button onClick={() => exportIncident.mutate("md")} disabled={exportIncident.isPending}>
             <FileText className="mr-2 h-4 w-4" />
@@ -463,12 +471,23 @@ export default function AdminOAuthForensics() {
         </div>
       </header>
 
+      <FilterBar
+        value={draft}
+        onChange={setDraft}
+        onApply={() => setFilters(draft)}
+        onReset={() => {
+          setDraft(EMPTY_FILTERS);
+          setFilters(EMPTY_FILTERS);
+        }}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Sign-ins traced" value={rows.length} />
         <Stat label="Domain deviations" value={deviations} tone={deviations ? "bad" : "ok"} />
         <Stat label="State/nonce failures" value={stateFailures} tone={stateFailures ? "bad" : "ok"} />
         <Stat label="Failed daily checks" value={failedChecks} tone={failedChecks ? "bad" : "ok"} />
       </div>
+
 
       <Tabs defaultValue="traces">
         <TabsList>
