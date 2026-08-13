@@ -49,6 +49,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as AppAdminAffiliatesRouteImport } from './routes/_app/admin/affiliates'
 import { Route as AppAdminApiHealthRouteImport } from './routes/_app/admin/api-health'
 import { Route as AppAdminAuditLogRouteImport } from './routes/_app/admin/audit-log'
+import { Route as AppAdminAuthEmailPreviewRouteImport } from './routes/_app/admin/auth-email-preview'
 import { Route as AppAdminBlogAnalyticsRouteImport } from './routes/_app/admin/blog-analytics'
 import { Route as AppAdminDigestPreviewRouteImport } from './routes/_app/admin/digest-preview'
 import { Route as AppAdminDiscountsRouteImport } from './routes/_app/admin/discounts'
@@ -311,6 +312,12 @@ const AppAdminAuditLogRoute = AppAdminAuditLogRouteImport.update({
   path: '/admin/audit-log',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminAuthEmailPreviewRoute =
+  AppAdminAuthEmailPreviewRouteImport.update({
+    id: '/admin/auth-email-preview',
+    path: '/admin/auth-email-preview',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppAdminBlogAnalyticsRoute = AppAdminBlogAnalyticsRouteImport.update({
   id: '/admin/blog-analytics',
   path: '/admin/blog-analytics',
@@ -672,6 +679,7 @@ export interface FileRoutesByFullPath {
   '/admin/affiliates': typeof AppAdminAffiliatesRoute
   '/admin/api-health': typeof AppAdminApiHealthRoute
   '/admin/audit-log': typeof AppAdminAuditLogRoute
+  '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
@@ -774,6 +782,7 @@ export interface FileRoutesByTo {
   '/admin/affiliates': typeof AppAdminAffiliatesRoute
   '/admin/api-health': typeof AppAdminApiHealthRoute
   '/admin/audit-log': typeof AppAdminAuditLogRoute
+  '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
@@ -878,6 +887,7 @@ export interface FileRoutesById {
   '/_app/admin/affiliates': typeof AppAdminAffiliatesRoute
   '/_app/admin/api-health': typeof AppAdminApiHealthRoute
   '/_app/admin/audit-log': typeof AppAdminAuditLogRoute
+  '/_app/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/_app/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
   '/_app/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/_app/admin/discounts': typeof AppAdminDiscountsRoute
@@ -982,6 +992,7 @@ export interface FileRouteTypes {
     | '/admin/affiliates'
     | '/admin/api-health'
     | '/admin/audit-log'
+    | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
     | '/admin/digest-preview'
     | '/admin/discounts'
@@ -1084,6 +1095,7 @@ export interface FileRouteTypes {
     | '/admin/affiliates'
     | '/admin/api-health'
     | '/admin/audit-log'
+    | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
     | '/admin/digest-preview'
     | '/admin/discounts'
@@ -1187,6 +1199,7 @@ export interface FileRouteTypes {
     | '/_app/admin/affiliates'
     | '/_app/admin/api-health'
     | '/_app/admin/audit-log'
+    | '/_app/admin/auth-email-preview'
     | '/_app/admin/blog-analytics'
     | '/_app/admin/digest-preview'
     | '/_app/admin/discounts'
@@ -1597,6 +1610,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/audit-log'
       fullPath: '/admin/audit-log'
       preLoaderRoute: typeof AppAdminAuditLogRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/auth-email-preview': {
+      id: '/_app/admin/auth-email-preview'
+      path: '/admin/auth-email-preview'
+      fullPath: '/admin/auth-email-preview'
+      preLoaderRoute: typeof AppAdminAuthEmailPreviewRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/blog-analytics': {
@@ -2047,6 +2067,7 @@ interface AppRouteChildren {
   AppAdminAffiliatesRoute: typeof AppAdminAffiliatesRoute
   AppAdminApiHealthRoute: typeof AppAdminApiHealthRoute
   AppAdminAuditLogRoute: typeof AppAdminAuditLogRoute
+  AppAdminAuthEmailPreviewRoute: typeof AppAdminAuthEmailPreviewRoute
   AppAdminBlogAnalyticsRoute: typeof AppAdminBlogAnalyticsRoute
   AppAdminDigestPreviewRoute: typeof AppAdminDigestPreviewRoute
   AppAdminDiscountsRoute: typeof AppAdminDiscountsRoute
@@ -2087,6 +2108,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminAffiliatesRoute: AppAdminAffiliatesRoute,
   AppAdminApiHealthRoute: AppAdminApiHealthRoute,
   AppAdminAuditLogRoute: AppAdminAuditLogRoute,
+  AppAdminAuthEmailPreviewRoute: AppAdminAuthEmailPreviewRoute,
   AppAdminBlogAnalyticsRoute: AppAdminBlogAnalyticsRoute,
   AppAdminDigestPreviewRoute: AppAdminDigestPreviewRoute,
   AppAdminDiscountsRoute: AppAdminDiscountsRoute,

@@ -689,6 +689,60 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_email_link_audit: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          link_origin: string | null
+          link_path: string | null
+          link_type: string | null
+          link_valid: boolean
+          message_id: string | null
+          recipient_redacted: string | null
+          redirect_to: string | null
+          run_id: string | null
+          template_key: string | null
+          token_digest: string | null
+          token_param: string | null
+          url_digest: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          link_origin?: string | null
+          link_path?: string | null
+          link_type?: string | null
+          link_valid?: boolean
+          message_id?: string | null
+          recipient_redacted?: string | null
+          redirect_to?: string | null
+          run_id?: string | null
+          template_key?: string | null
+          token_digest?: string | null
+          token_param?: string | null
+          url_digest?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          link_origin?: string | null
+          link_path?: string | null
+          link_type?: string | null
+          link_valid?: boolean
+          message_id?: string | null
+          recipient_redacted?: string | null
+          redirect_to?: string | null
+          run_id?: string | null
+          template_key?: string | null
+          token_digest?: string | null
+          token_param?: string | null
+          url_digest?: string | null
+        }
+        Relationships: []
+      }
       career_plans: {
         Row: {
           created_at: string

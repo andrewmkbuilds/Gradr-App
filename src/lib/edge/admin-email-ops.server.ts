@@ -244,9 +244,13 @@ export const handler = async (req: Request): Promise<Response> => {
   /* ----------------------------- auth-preview -------------------------- */
   // Branded preview of the six Supabase auth emails, rendered from the exact
   // components the auth webhook uses, plus a live reachability audit of every
-  // image so a broken logo is caught before a user ever sees it.
+  // image so a broken logo is caught before a user ever sees it, plus a link
+  // inspection so an admin can confirm the CTA href and the copy/paste fallback
+  // both equal the dynamic action URL before anything is published.
   if (action === "auth-preview") {
-    const { AUTH_TEMPLATES, authTemplate } = await import("@/lib/email-templates/authSamples");
+    const { AUTH_TEMPLATES, authTemplate, authUrlPropFor } = await import(
+      "@/lib/email-templates/authSamples"
+    );
     const list = AUTH_TEMPLATES.map((t) => ({ key: t.key, label: t.displayName }));
     const key = typeof body["template"] === "string" ? (body["template"] as string) : "";
     if (!key) return json({ templates: list });
@@ -254,9 +258,18 @@ export const handler = async (req: Request): Promise<Response> => {
     const entry = authTemplate(key);
     if (!entry) return json({ error: "Unknown auth template" }, 404);
 
+    // Optional: render against an admin-supplied action URL (e.g. one copied
+    // from a real Supabase link) to verify the template passes it through
+    // untouched. Must be http(s); anything else falls back to the sample.
+    const supplied = typeof body["actionUrl"] === "string" ? (body["actionUrl"] as string).trim() : "";
+    const urlProp = authUrlPropFor(key);
+    const props: Record<string, unknown> = { ...(entry.props as Record<string, unknown>) };
+    if (supplied && /^https?:\/\//i.test(supplied) && urlProp) props[urlProp] = supplied;
+    const actionUrl = urlProp ? (props[urlProp] as string | undefined) ?? null : null;
+
     const { render } = await import("@react-email/render");
     const React = (await import("react")).default;
-    const element = React.createElement(entry.component, entry.props as Record<string, unknown>);
+    const element = React.createElement(entry.component, props);
     const html = await render(element);
     const text = await render(element, { plainText: true });
 
@@ -266,6 +279,9 @@ export const handler = async (req: Request): Promise<Response> => {
       images = await auditHtmlImages(html);
     }
 
+    const { inspectAuthEmailHtml, linksMatchActionUrl } = await import("@/lib/email/authLinkAudit");
+    const inspection = inspectAuthEmailHtml(html);
+
     return json({
       templates: list,
       template: key,
@@ -274,8 +290,36 @@ export const handler = async (req: Request): Promise<Response> => {
       html,
       text,
       images,
+      actionUrl,
+      links: {
+        ...inspection,
+        // reauthentication carries a code, not a link — nothing to match.
+        matchesActionUrl: actionUrl ? linksMatchActionUrl(inspection, actionUrl) : null,
+        textContainsActionUrl: actionUrl ? text.includes(actionUrl) : null,
+      },
     });
   }
+
+  /* --------------------------- auth-link-audit -------------------------- */
+  // Which dynamic action URL was used for each auth email we sent. Sanitized at
+  // write time: digests only, no tokens, no full URLs, no credentials.
+  if (action === "auth-link-audit") {
+    let query = admin
+      .from("auth_email_link_audit")
+      .select(
+        "id, run_id, message_id, action_type, template_key, recipient_redacted, link_origin, link_path, link_type, redirect_to, token_param, token_digest, url_digest, link_valid, created_at",
+      )
+      .gte("created_at", start)
+      .lte("created_at", end)
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (template) query = query.eq("action_type", template);
+
+    const { data, error } = await query;
+    if (error) return json({ error: error.message }, 500);
+    return json({ range: { start, end }, rows: data ?? [] });
+  }
+
 
   /* ------------------------------- replay ------------------------------ */
   if (action === "replay") {

@@ -448,8 +448,13 @@ export default function AdminEmailOps() {
           <Card className="space-y-3 p-4">
             <p className="text-sm text-muted-foreground">
               The exact components the auth webhook renders, with sample tokens. Every image is
-              fetched live so a broken logo shows up here, not in someone's inbox.
+              fetched live so a broken logo shows up here, not in someone's inbox.{" "}
+              <a href="/admin/auth-email-preview" className="text-primary underline">
+                Open the full link inspector
+              </a>{" "}
+              to verify button hrefs, fallback links and the sent-link audit trail.
             </p>
+
             <div className="min-w-[16rem] max-w-sm space-y-1">
               <Label>Auth template</Label>
               <Select value={authTemplate} onValueChange={setAuthTemplate}>
