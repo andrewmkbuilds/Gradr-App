@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { SkeletonList } from "@/components/states";
 import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
