@@ -32,6 +32,9 @@ jobs:
       - name: Unit and guardrail tests
         run: bunx vitest run src/test/structuredData.test.ts src/test/legalReadiness.test.ts src/test/authHeroLayout.test.ts
 
+      - name: App icon, manifest and splash verification
+        run: node scripts/generate-app-icons.mjs --check
+
       - name: Legal readiness (pre-deploy gate)
         run: node scripts/check-legal-readiness.mjs
 
