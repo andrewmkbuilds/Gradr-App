@@ -109,3 +109,20 @@ export const AUTH_TEMPLATES: AuthTemplateEntry[] = [
 export function authTemplate(key: string): AuthTemplateEntry | undefined {
   return AUTH_TEMPLATES.find((t) => t.key === key);
 }
+
+/**
+ * Which prop carries the dynamic auth action URL for each template.
+ * `reauthentication` is code-only and intentionally has no link.
+ */
+const AUTH_URL_PROP: Record<string, string | null> = {
+  signup: "confirmationUrl",
+  magiclink: "magicLinkUrl",
+  recovery: "recoveryUrl",
+  invite: "inviteUrl",
+  email_change: "confirmationUrl",
+  reauthentication: null,
+};
+
+export function authUrlPropFor(key: string): string | null {
+  return AUTH_URL_PROP[key] ?? null;
+}

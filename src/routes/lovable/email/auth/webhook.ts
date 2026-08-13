@@ -174,6 +174,38 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           status: 'pending',
         })
 
+        // Audit trail: record WHICH dynamic action URL this email was built with.
+        // Only a sanitized description is persisted (origin, path, type, redirect
+        // target, SHA-256 digests) — never the single-use token, never the full
+        // URL, and never any Supabase credential. Best-effort: an audit failure
+        // must never block a user's sign-in email.
+        try {
+          const { describeAuthActionUrl } = await import('@/lib/email/authLinkAudit')
+          const link = await describeAuthActionUrl(payload.data.url)
+          const { error: auditError } = await supabase.from('auth_email_link_audit').insert({
+            run_id,
+            message_id: messageId,
+            action_type: emailType,
+            template_key: emailType,
+            recipient_redacted: redactEmail(payload.data.email),
+            link_origin: link.origin,
+            link_path: link.path,
+            link_type: link.linkType,
+            redirect_to: link.redirectTo,
+            token_param: link.tokenParam,
+            token_digest: link.tokenDigest,
+            url_digest: link.urlDigest,
+            link_valid: link.valid,
+          })
+          if (auditError) {
+            console.error('Failed to write auth link audit', { error: auditError.message, run_id })
+          }
+        } catch (error) {
+          console.error('Auth link audit threw', { error, run_id })
+        }
+
+
+
         const { error: enqueueError } = await supabase.rpc('enqueue_email', {
           queue_name: 'auth_emails',
           payload: {
