@@ -154,6 +154,98 @@ serve(async (req) => {
 
     const userContent = `Resume:\n${resumeText.substring(0, 5000)}\n\nTarget Position: ${jobTitle || "Not specified"} at ${company || "Not specified"}\n${jobDescription ? `Job Description:\n${jobDescription.substring(0, 4000)}` : ""}\nApplicant Name: ${userName || "Not specified"}`;
 
+    // ------------------------- streamed generation ------------------------
+    // The client renders tokens as they arrive and can cancel mid-flight.
+    if (wantsStream) {
+      const chargedUserId = meteredUserId;
+      meteredUserId = null; // ownership moves into the stream handler
+      const isProse = type === "cover_letter" || type === "recruiter_message";
+
+      return sseResponse(corsHeaders, async (writer, signal) => {
+        writer.stage("prepare", "Reading your resume and the role", 0.08);
+
+        const gatewayBody: Record<string, unknown> = isProse
+          ? {
+              model: "google/gemini-3-flash-preview",
+              messages: [
+                {
+                  role: "system",
+                  content: `${systemPrompt}\n\nOutput format: the first line must be "Subject: <subject line>", then a blank line, then the full text. No markdown, no preamble, no commentary.`,
+                },
+                { role: "user", content: userContent },
+              ],
+            }
+          : {
+              model: "google/gemini-3-flash-preview",
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userContent },
+              ],
+              tools: [{ type: "function", function: { name: toolName, description: `Generate a ${type.replace(/_/g, " ")}`, parameters: toolParams } }],
+              tool_choice: { type: "function", function: { name: toolName } },
+            };
+
+        writer.stage("generating", isProse ? "Writing your draft" : "Assembling your application pack", 0.18);
+
+        // Expected output length, used to turn token flow into real progress.
+        const expected = type === "recruiter_message" ? 900 : type === "cover_letter" ? 2400 : 3600;
+        let lastProgress = 0.18;
+        const report = (chars: number) => {
+          const next = Math.min(0.95, 0.18 + (chars / expected) * 0.72);
+          if (next - lastProgress >= 0.02) {
+            lastProgress = next;
+            writer.stage("generating", isProse ? "Writing your draft" : "Assembling your application pack", next);
+          }
+        };
+
+        const streamed = await streamGatewayChat({
+          apiKey: LOVABLE_API_KEY,
+          body: gatewayBody,
+          signal,
+          onText: (delta, all) => {
+            writer.delta(delta);
+            report(all.length);
+          },
+          onToolArgs: (_name, _delta, all) => report(all.length),
+        });
+
+        if (!streamed.ok) {
+          if (chargedUserId) await refund(chargedUserId, "application", paymentEnv);
+          writer.send("error", { message: streamed.error ?? "AI generation failed", status: streamed.status });
+          return;
+        }
+
+        let result: Record<string, unknown> | null = null;
+        if (isProse) {
+          const raw = streamed.text.trim();
+          const match = raw.match(/^\s*subject\s*:\s*(.+)$/im);
+          const subject = match?.[1]?.trim() || `${jobTitle || "Application"}${company ? ` — ${company}` : ""}`;
+          const body = match ? raw.slice(raw.indexOf(match[0]) + match[0].length).trim() : raw;
+          if (body) result = { subject, body };
+        } else {
+          const args = streamed.toolArgs[toolName] ?? Object.values(streamed.toolArgs)[0];
+          if (args) {
+            try {
+              result = JSON.parse(args);
+            } catch {
+              result = null;
+            }
+          }
+        }
+
+        if (!result) {
+          if (chargedUserId) await refund(chargedUserId, "application", paymentEnv);
+          writer.send("error", { message: "The model returned an empty draft. Please retry.", status: 502 });
+          return;
+        }
+
+        writer.stage("done", "Draft ready", 1);
+        writer.send("result", result);
+      });
+    }
+
+
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
