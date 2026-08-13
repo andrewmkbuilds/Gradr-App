@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-// @ts-expect-error - plain ESM helper shared with the CI script
+// Plain ESM helper shared with the CI script.
 import { ROUTES, checkRoute } from "../../scripts/lib/securityHeaders.mjs";
 
 /**
