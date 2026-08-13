@@ -487,6 +487,51 @@ export const handler = async (req: Request): Promise<Response> => {
     }
     case "headers":
       return runHeaderCheck("admin", str(body["origin"], 200) ?? SITE_ORIGIN);
+    case "csp": {
+      // Report-only CSP monitor: recent violations plus a grouped breakdown so
+      // an admin can tell "one stray inline style" from "checkout is broken".
+      const days = Math.min(90, Math.max(1, Number(body["days"]) || 7));
+      const since = new Date(Date.now() - days * 86_400_000).toISOString();
+      const { data, error } = await db()
+        .from("csp_violation_reports")
+        .select("*")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) return json({ error: error.message }, 500);
+
+      const rows = data ?? [];
+      const groups = new Map<
+        string,
+        { directive: string; blockedOrigin: string; count: number; lastSeen: string; samplePath: string | null }
+      >();
+      for (const row of rows) {
+        const directive = (row["effective_directive"] as string | null) ?? "unknown";
+        const blockedOrigin = (row["blocked_origin"] as string | null) ?? "unknown";
+        const key = `${directive}|${blockedOrigin}`;
+        const existing = groups.get(key);
+        if (existing) existing.count += 1;
+        else {
+          groups.set(key, {
+            directive,
+            blockedOrigin,
+            count: 1,
+            lastSeen: row["created_at"] as string,
+            samplePath: (row["document_path"] as string | null) ?? null,
+          });
+        }
+      }
+
+      return json({
+        days,
+        total: rows.length,
+        reports: rows,
+        groups: [...groups.values()].sort((a, b) => b.count - a.count),
+        candidatePolicy: CONTENT_SECURITY_POLICY_REPORT_ONLY,
+        enforcedPolicy: CONTENT_SECURITY_POLICY,
+      });
+    }
+
     case "export": {
       const days = Math.min(90, Math.max(1, Number(body["days"]) || 14));
       const report = await buildIncidentReport(days, limit);

@@ -51,8 +51,10 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 function harden(response: Response, request?: Request): Response {
   const headers = new Headers(response.headers);
-  const secure = request ? new URL(request.url).protocol === "https:" : true;
-  applySecurityHeaders(headers, { secure });
+  const url = request ? new URL(request.url) : undefined;
+  const secure = url ? url.protocol === "https:" : true;
+  applySecurityHeaders(headers, { secure, origin: url?.origin });
+
 
   // 101/204/205/304 must stay body-less; everything else reuses the original stream.
   const nullBody = [101, 204, 205, 304].includes(response.status);
