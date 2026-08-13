@@ -409,7 +409,7 @@ export function InterviewStudio(props: Props) {
                           part.match ? (
                             <mark
                               key={pi}
-                              className="rounded-sm bg-primary/30 px-0.5 text-foreground"
+                              className="rounded bg-primary/30 px-0.5 text-foreground"
                             >
                               {part.text}
                             </mark>

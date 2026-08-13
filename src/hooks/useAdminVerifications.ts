@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { adminRpc } from "@/lib/adminRpc";
 
 export interface AdminVerificationRequest {
   id: string;
@@ -30,7 +29,7 @@ export function useAdminVerificationRequests(status: string | null) {
   return useQuery({
     queryKey: ["admin-verification-requests", status],
     queryFn: async (): Promise<AdminVerificationRequest[]> => {
-      const { data, error } = await adminRpc<AdminVerificationRequest[]>("admin_verification_requests", {
+      const { data, error } = await supabase.rpc("admin_verification_requests", {
         _status: status,
         _limit: 200,
       });
@@ -49,7 +48,7 @@ export function useReviewVerificationRequest() {
       notes?: string | null;
       discountPercentage?: number | null;
     }) => {
-      const { error } = await adminRpc("admin_review_verification_request", {
+      const { error } = await supabase.rpc("admin_review_verification_request", {
         _request_id: input.requestId,
         _decision: input.decision,
         _notes: input.notes ?? null,

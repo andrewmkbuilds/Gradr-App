@@ -143,8 +143,8 @@ export function useAffiliateSettings() {
     queryKey: ["affiliateSettings"],
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data } = await supabase.functions.invoke("affiliate-public", { body: {} });
-      return data?.settings ?? null;
+      const { data } = await supabase.rpc("get_affiliate_public_settings");
+      return Array.isArray(data) ? data[0] ?? null : data;
     },
   });
 }

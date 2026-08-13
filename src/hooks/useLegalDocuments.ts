@@ -6,7 +6,6 @@ import {
   TERMS_V1,
   TERMS_V1_EFFECTIVE,
 } from "@/content/legalDocs";
-import { adminRpc } from "@/lib/adminRpc";
 
 export type LegalDocType = "terms" | "privacy";
 export type LegalStatus = "draft" | "published" | "archived";
@@ -164,7 +163,7 @@ export function useAdminLegalDocuments(enabled: boolean) {
     setLoading(true);
     const [docs, stat] = await Promise.all([
       supabase.from("legal_documents").select("*").order("doc_type").order("version", { ascending: false }),
-      adminRpc<LegalStat[]>("admin_legal_document_stats"),
+      supabase.rpc("admin_legal_document_stats"),
     ]);
     if (!docs.error) setDocuments((docs.data ?? []) as LegalDocument[]);
     if (!stat.error) setStats((stat.data ?? []) as LegalStat[]);

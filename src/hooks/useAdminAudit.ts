@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { adminRpc } from "@/lib/adminRpc";
 
 export type AuditResource = "affiliate_clicks" | "analytics_events";
 
@@ -24,7 +23,7 @@ export interface AuditEntry {
  * every mount without flooding the log.
  */
 export async function logAdminView(resource: AuditResource, recordCount: number) {
-  const { error } = await adminRpc("log_admin_access", {
+  const { error } = await supabase.rpc("log_admin_access", {
     _action: "view",
     _resource_type: resource,
     _record_count: recordCount,
@@ -33,7 +32,7 @@ export async function logAdminView(resource: AuditResource, recordCount: number)
 }
 
 export async function logAdminExport(resource: AuditResource, recordCount: number) {
-  const { error } = await adminRpc("log_admin_access", {
+  const { error } = await supabase.rpc("log_admin_access", {
     _action: "export",
     _resource_type: resource,
     _record_count: recordCount,
@@ -89,7 +88,7 @@ export function useAuditActors() {
     queryKey: ["adminAuditActors"],
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await adminRpc<{ user_id: string; display_name: string | null }[]>("admin_audit_actors");
+      const { data, error } = await supabase.rpc("admin_audit_actors");
       if (error) return [] as { user_id: string; display_name: string | null }[];
       return (data || []) as { user_id: string; display_name: string | null }[];
     },

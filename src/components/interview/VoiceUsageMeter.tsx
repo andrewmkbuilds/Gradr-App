@@ -106,7 +106,7 @@ export function VoiceUsageMeter({ compact = false }: { compact?: boolean }) {
             <span className="text-muted-foreground">Voice minutes</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span tabIndex={0} className="font-medium tabular-nums cursor-help rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
+                <span tabIndex={0} className="font-medium tabular-nums cursor-help rounded outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {minutes.toFixed(1)} / {maxMinutes}
                 </span>
               </TooltipTrigger>
@@ -133,7 +133,7 @@ export function VoiceUsageMeter({ compact = false }: { compact?: boolean }) {
             <span className="text-muted-foreground">Interview sessions</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span tabIndex={0} className="font-medium tabular-nums cursor-help rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
+                <span tabIndex={0} className="font-medium tabular-nums cursor-help rounded outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {sessions?.allowance == null
                     ? `${sessions?.used ?? 0} / unlimited`
                     : `${sessions.used} / ${sessions.allowance}`}

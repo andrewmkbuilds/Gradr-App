@@ -21,7 +21,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { adminRpc } from "@/lib/adminRpc";
 
 const TYPES: { id: LegalDocType; label: string }[] = [
   { id: "privacy", label: "Privacy Notice" },
@@ -95,7 +94,7 @@ export default function AdminLegal() {
 
   const publish = async (doc: LegalDocument) => {
     setBusy(true);
-    const { error } = await adminRpc("admin_publish_legal_document", { _document_id: doc.id });
+    const { error } = await supabase.rpc("admin_publish_legal_document", { _document_id: doc.id });
     setBusy(false);
     if (error) {
       toast.error(error.message);

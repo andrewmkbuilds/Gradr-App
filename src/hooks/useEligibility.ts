@@ -101,12 +101,34 @@ export function useMyEligibility() {
   };
 }
 
-/**
- * Verifications are submitted through `useSubmitVerificationRequest` and
- * decided by a Gradr reviewer — there is no external verification vendor and
- * nothing is ever approved automatically.
- */
+/** Kicks off (or refreshes) a verification. All decisions happen server-side. */
+export function useStartVerification() {
+  const queryClient = useQueryClient();
 
+  return useMutation({
+    mutationFn: async (input: { eligibilityType: string; action?: "start" | "refresh" }) => {
+      const { data, error } = await supabase.functions.invoke("verify-eligibility", {
+        body: {
+          action: input.action ?? "start",
+          eligibilityType: input.eligibilityType,
+          locale: navigator.language,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as {
+        verificationId?: string;
+        status: VerificationStatus;
+        provider?: string;
+        verificationUrl?: string | null;
+        alreadyVerified?: boolean;
+      };
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["my-eligibility"] });
+    },
+  });
+}
 
 export interface ResolvedDiscount {
   percentage: number;

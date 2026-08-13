@@ -20,7 +20,6 @@ import { BadgePercent, Check, Loader2, Plus, ShieldCheck, X } from "lucide-react
 import { toast } from "sonner";
 import { STATUS_COPY, type VerificationStatus } from "@/config/eligibility";
 import type { TablesUpdate } from "@/integrations/supabase/types";
-import { adminRpc } from "@/lib/adminRpc";
 
 type DiscountSettingsPatch = TablesUpdate<"discount_settings">;
 
@@ -117,7 +116,7 @@ export default function AdminDiscounts() {
 
   const review = useMutation({
     mutationFn: async (input: { id: string; status: VerificationStatus; reason?: string }) => {
-      const { error } = await adminRpc("admin_review_verification", {
+      const { error } = await supabase.rpc("admin_review_verification", {
         _verification_id: input.id,
         _status: input.status,
         _reason: input.reason ?? null,

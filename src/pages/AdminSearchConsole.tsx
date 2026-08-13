@@ -239,7 +239,7 @@ export default function AdminSearchConsole() {
                     <tr key={i.url} className="border-t border-border">
                       <td className="p-3 text-foreground break-all">{i.url}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-sm text-xs ${verdictBadge(i.verdict)}`}>
+                        <span className={`px-2 py-0.5 rounded text-xs ${verdictBadge(i.verdict)}`}>
                           {i.error ? "ERROR" : i.verdict ?? "—"}
                         </span>
                       </td>

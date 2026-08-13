@@ -209,7 +209,7 @@ export function CompanyResearchDialog({ open, onOpenChange, company, role }: Pro
                             href={s.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                           >
                             <ExternalLink className="h-3 w-3" aria-hidden="true" />
                             <span className="truncate max-w-[28rem]">{s.title || s.url}</span>
