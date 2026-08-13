@@ -76,7 +76,7 @@ export default function DigestPreview() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Digest Email Preview</h1>
+          <h1 className="type-h1">Digest Email Preview</h1>
           <p className="text-sm text-muted-foreground mt-1">Sample template for high-match jobs and overdue reminders.</p>
         </div>
         <Button onClick={prepareLivePreview} disabled={previewing} className="gap-2">
@@ -98,7 +98,7 @@ export default function DigestPreview() {
           <div className="max-w-2xl mx-auto rounded-xl border border-border bg-card p-6 space-y-6 shadow-lg">
             <div>
               <p className="text-xs uppercase tracking-wide text-primary font-semibold">Gradr</p>
-              <h2 className="text-2xl font-bold text-foreground mt-2">Your daily career digest</h2>
+              <h2 className="type-h1 text-foreground mt-2">Your daily career digest</h2>
               <p className="text-sm text-muted-foreground mt-2">Fresh opportunities and follow-ups that need attention today.</p>
             </div>
 

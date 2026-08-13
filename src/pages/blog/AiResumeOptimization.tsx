@@ -353,7 +353,7 @@ export default function AiResumeOptimization() {
           </section>
 
           <section className="elev-2 rounded-xl p-6 mt-10">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            <h2 className="type-h2 text-foreground">
               Try the Gradr Resume Engine
             </h2>
             <p className="mt-2 text-muted-foreground leading-relaxed">

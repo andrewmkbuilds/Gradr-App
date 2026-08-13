@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { MetricBar } from "@/components/app/MetricBar";
 import { StatTile } from "@/components/app/StatTile";
+import { SkeletonList } from "@/components/states";
 import { Surface } from "@/components/ui/surface";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { duration as motionDuration, easeOut, springSnappy } from "@/lib/motion/tokens";
@@ -403,19 +404,7 @@ export default function JobMatchingEngine() {
           )}
         </AnimatePresence>
 
-        {loading && matches.length === 0 && (
-          <div className="space-y-3">
-            {[0, 1, 2].map((i) => (
-              <Surface key={i} level={2} className="flex items-center gap-4">
-                <div className="h-14 w-14 shrink-0 animate-pulse rounded-xl bg-surface-secondary" />
-                <div className="w-full space-y-2">
-                  <div className="h-3.5 w-2/5 animate-pulse rounded bg-surface-secondary" />
-                  <div className="h-3 w-1/4 animate-pulse rounded bg-surface-secondary" />
-                </div>
-              </Surface>
-            ))}
-          </div>
-        )}
+        {loading && matches.length === 0 && <SkeletonList rows={3} />}
 
         {!loading && matches.length === 0 && (
           <motion.div

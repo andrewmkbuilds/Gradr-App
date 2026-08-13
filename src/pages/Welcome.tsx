@@ -37,7 +37,7 @@ export default function Welcome() {
           <CheckCircle2 className="h-8 w-8 text-primary" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="type-h1 text-foreground">
             {isPack ? "Credits added" : "You're all set"}
           </h1>
           <p className="text-muted-foreground">

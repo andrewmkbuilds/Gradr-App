@@ -1,33 +1,18 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { type ReactNode } from "react";
-import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { useMotionVariants } from "@/hooks/useMotionVariants";
+import { pageTransition } from "@/lib/motion/tokens";
 
-/** Fast, premium page transition — fade + slight lift + micro-scale. */
-const pageVariants = {
-  initial: { opacity: 0, y: 10, scale: 0.995 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -6, scale: 0.997 },
-};
-
-/** Reduced-motion fallback: a short cross-fade, no movement or scaling. */
-const reducedVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-};
-
+/**
+ * Route-level transition. Timing and easing come from the shared motion
+ * tokens, and the whole thing collapses to a short cross-fade whenever the
+ * user has reduced motion enabled.
+ */
 export function AnimatedPage({ children }: { children: ReactNode }) {
-  const reduced = useReducedMotionPref();
+  const variants = useMotionVariants(pageTransition);
 
   return (
-    <motion.div
-      variants={reduced ? reducedVariants : pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      transition={reduced ? { duration: 0.12 } : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="h-full"
-    >
+    <motion.div variants={variants} initial="initial" animate="animate" exit="exit" className="h-full">
       {children}
     </motion.div>
   );

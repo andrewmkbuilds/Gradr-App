@@ -130,7 +130,7 @@ export function EmptyState({
       <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Icon className="h-6 w-6" aria-hidden="true" />
       </div>
-      <h3 className="font-display text-lg tracking-tight text-foreground">{title}</h3>
+      <h3 className="type-h3 text-foreground">{title}</h3>
       {description && <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{description}</p>}
       {action && <div className="mt-2 flex flex-wrap items-center justify-center gap-2">{action}</div>}
       {hint && <p className="max-w-xs text-xs text-muted-foreground/80">{hint}</p>}
@@ -165,7 +165,7 @@ export function ErrorState({
       <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
         <AlertTriangle className="h-6 w-6" aria-hidden="true" />
       </div>
-      <h3 className="font-display text-lg tracking-tight text-foreground" role="alert">
+      <h3 className="type-h3 text-foreground" role="alert">
         {title}
       </h3>
       <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{description}</p>

@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { duration, easeOut, springSmooth } from "@/lib/motion/tokens";
+import { typography } from "@/lib/design/typography";
 import { cn } from "@/lib/utils";
 
 export interface PageHeaderProps {
@@ -50,16 +51,16 @@ export function PageHeader({
       >
         <div className="min-w-0 space-y-2">
           {eyebrow && (
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-mahogany">
+            <p className={cn(typography.overline, "flex items-center gap-2 tracking-[0.2em] text-mahogany")}>
               {icon}
               {eyebrow}
             </p>
           )}
-          <h1 className="font-display text-2xl leading-tight tracking-tight text-foreground sm:text-3xl">
+          <h1 className={cn(typography.pageTitle, "text-foreground")}>
             {title}
           </h1>
           {description && (
-            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{description}</p>
+            <p className={cn(typography.bodyMuted, "max-w-2xl")}>{description}</p>
           )}
           {meta && <div className="flex flex-wrap items-center gap-3 pt-1">{meta}</div>}
         </div>

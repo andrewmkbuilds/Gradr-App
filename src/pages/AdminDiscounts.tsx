@@ -187,7 +187,7 @@ export default function AdminDiscounts() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 py-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Discounts &amp; eligibility</h1>
+        <h1 className="type-h1 text-foreground">Discounts &amp; eligibility</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Manage verified-group pricing, campaigns and manual reviews.
         </p>

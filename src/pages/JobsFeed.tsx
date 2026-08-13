@@ -5,6 +5,7 @@ import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -407,7 +408,7 @@ export default function JobsFeed() {
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Job Feed</h1>
+        <h1 className="type-h1">Job Feed</h1>
         <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
       </div>
 
@@ -503,10 +504,11 @@ export default function JobsFeed() {
 
       <div className="space-y-3">
         {filtered.length === 0 && !loading && (
-          <Card className="p-12 text-center text-sm text-muted-foreground">
-            <Briefcase className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-            Search above to see live job listings.
-          </Card>
+          <EmptyState
+            icon={Briefcase}
+            title="No listings yet"
+            description="Search a role and location above to pull live openings, then let Gradr score them against your resume."
+          />
         )}
         {filtered.map((job) => (
           <Card key={`${job.source}-${job.external_id}`} className="p-4 hover:border-primary/50 transition-colors">

@@ -104,7 +104,7 @@ export default function Billing() {
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Billing</h1>
+          <h1 className="type-h1 text-foreground">Billing</h1>
           <p className="text-sm text-muted-foreground">Manage your plan, credits and payment history.</p>
         </div>
         <Button variant="outline" size="sm" className="gap-2" onClick={() => void restorePurchases()} disabled={pending === "restore"}>
@@ -129,7 +129,7 @@ export default function Billing() {
               <h2 className="text-sm font-semibold text-foreground">Current plan</h2>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-foreground">
+              <span className="type-h1 text-foreground">
                 {sub.isSubscribed
                   ? `Gradr ${sub.isPro ? "Pro" : "Starter"} (${sub.billingInterval === "annual" ? "Annual" : "Monthly"})`
                   : "Free plan"}
@@ -175,14 +175,14 @@ export default function Billing() {
             <Zap className="h-4 w-4 text-primary" />
             <span className="text-sm text-muted-foreground">Application credits</span>
           </div>
-          <div className="text-3xl font-bold text-foreground">{credits?.application_credits ?? 0}</div>
+          <div className="type-h1 text-foreground">{credits?.application_credits ?? 0}</div>
         </Card>
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-2">
             <Mic className="h-4 w-4 text-mahogany" />
             <span className="text-sm text-muted-foreground">Interview prep credits</span>
           </div>
-          <div className="text-3xl font-bold text-foreground">{credits?.interview_credits ?? 0}</div>
+          <div className="type-h1 text-foreground">{credits?.interview_credits ?? 0}</div>
         </Card>
       </div>
 

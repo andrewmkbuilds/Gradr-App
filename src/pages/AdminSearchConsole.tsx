@@ -104,7 +104,7 @@ export default function AdminSearchConsole() {
 
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="type-h1 flex items-center gap-2">
             <Search className="h-5 w-5 text-primary" />
             Search Console health
           </h1>
@@ -178,7 +178,7 @@ export default function AdminSearchConsole() {
             ].map((s) => (
               <div key={s.label} className="rounded-lg border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground">{s.label}</div>
-                <div className="text-2xl font-bold text-foreground mt-1">{s.value}</div>
+                <div className="type-h1 text-foreground mt-1">{s.value}</div>
               </div>
             ))}
             <p className="col-span-full text-xs text-muted-foreground">

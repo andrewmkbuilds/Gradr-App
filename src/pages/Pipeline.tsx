@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { SkeletonList } from "@/components/states";
 import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -233,14 +234,14 @@ export default function Pipeline() {
   const activeJob = activeId ? jobs.find((j) => j.id === activeId) : null;
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+    return <SkeletonList rows={3} className="max-w-[1400px] mx-auto" />;
   }
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Application Pipeline</h1>
+          <h1 className="type-h1">Application Pipeline</h1>
           <p className="text-sm text-muted-foreground mt-1">Drag jobs across stages. Track every opportunity.</p>
         </div>
         <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>

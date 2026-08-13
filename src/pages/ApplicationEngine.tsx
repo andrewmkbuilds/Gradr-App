@@ -93,7 +93,7 @@ function ApplicationEngineInner() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Application Engine</h1>
+        <h1 className="type-h1 text-foreground tracking-tight">Application Engine</h1>
         <p className="text-sm text-muted-foreground mt-1">AI-powered cover letters & recruiter outreach</p>
       </div>
       <CreditsBalance only="application" compact />

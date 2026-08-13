@@ -15,7 +15,7 @@ import { CANONICAL_ALIASES } from "@/lib/seo/canonical";
 import { CookieConsent } from "@/components/CookieConsent";
 import { PublicShell } from "@/components/PublicShell";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { captureReferralFromUrl } from "@/lib/affiliateTracking";
 import { SentryErrorBoundary, addBreadcrumb } from "@/lib/telemetry/sentry";
 import { phPageview } from "@/lib/telemetry/posthog";

@@ -168,7 +168,7 @@ export default function AdminPaymentsStatus() {
     <div className="mx-auto max-w-4xl space-y-6 py-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Payments status</h1>
+          <h1 className="type-h1 text-foreground">Payments status</h1>
           <p className="text-muted-foreground">
             Runtime verification of the Paddle configuration for this build.
           </p>

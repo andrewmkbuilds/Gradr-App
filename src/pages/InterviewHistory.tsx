@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, FileDown, CalendarDays, ArrowLeft, Trash2, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { EmptyState, SkeletonList } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -73,9 +74,7 @@ export default function InterviewHistory() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <SkeletonList rows={3} className="max-w-4xl mx-auto" />
     );
   }
 
@@ -83,7 +82,7 @@ export default function InterviewHistory() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Interview history</h1>
+          <h1 className="type-h1 text-foreground tracking-tight">Interview history</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Review past sessions, compare scores and revisit key feedback.
           </p>
@@ -95,15 +94,12 @@ export default function InterviewHistory() {
       </div>
 
       {rows.length === 0 && (
-        <div className="elev-2 rounded-xl p-10 flex flex-col items-center text-center">
-          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-            <Mic className="h-7 w-7 text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground max-w-sm mb-5">
-            No sessions yet. Run a mock interview and your scorecards will appear here as a timeline.
-          </p>
-          <Button onClick={() => navigate("/interview")}>Start a mock interview</Button>
-        </div>
+        <EmptyState
+          icon={Mic}
+          title="No interview sessions yet"
+          description="Run a mock interview and your scorecards will appear here as a timeline you can compare over time."
+          action={<Button onClick={() => navigate("/interview")}>Start a mock interview</Button>}
+        />
       )}
 
       {rows.length > 1 && (

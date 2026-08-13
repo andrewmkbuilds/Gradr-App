@@ -163,5 +163,5 @@ const Icon = ({ children, tone }: { children: React.ReactNode; tone: "primary" |
 );
 
 const Heading = ({ children }: { children: React.ReactNode }) => (
-  <h1 className="text-2xl font-bold tracking-tight text-foreground">{children}</h1>
+  <h1 className="type-h1 text-foreground">{children}</h1>
 );

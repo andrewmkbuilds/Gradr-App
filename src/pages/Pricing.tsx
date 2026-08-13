@@ -369,7 +369,7 @@ export default function Pricing() {
                 {pricesLoading ? (
                   <Skeleton className="h-8 w-24" />
                 ) : (
-                  <span className="text-2xl font-bold text-foreground">
+                  <span className="type-h1 text-foreground">
                     {priceFor(pack.priceId) ?? "—"}
                   </span>
                 )}

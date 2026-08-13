@@ -81,7 +81,7 @@ export default function AdminAuditLog() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Audit Log</h1>
+        <h1 className="type-h1 text-foreground tracking-tight">Audit Log</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Every admin view, modification, and deletion of affiliate click and analytics event
           records. Entries are append-only and cannot be edited or removed by anyone.
@@ -247,7 +247,7 @@ function StatTile({
         <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
-      <div className="text-2xl font-bold text-foreground mt-1">{value}</div>
+      <div className="type-h1 text-foreground mt-1">{value}</div>
     </div>
   );
 }

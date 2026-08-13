@@ -122,7 +122,7 @@ export default function AdminLegal() {
       <header className="space-y-1">
         <div className="flex items-center gap-2">
           <ScrollText className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-bold tracking-tight">Legal documents</h1>
+          <h1 className="type-h1">Legal documents</h1>
         </div>
         <p className="text-sm text-muted-foreground">
           Draft, preview, publish and track acceptance of the Terms & Conditions and Privacy Notice.

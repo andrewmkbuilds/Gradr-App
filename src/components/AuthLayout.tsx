@@ -1,6 +1,6 @@
 import { Sparkles, Target, Brain, Rocket } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { type ReactNode } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
