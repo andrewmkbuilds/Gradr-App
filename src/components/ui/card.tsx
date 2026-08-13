@@ -13,8 +13,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, tilt = tr
     ref={ref}
     {...(tilt ? { "data-tilt": "" } : {})}
     className={cn(
-      "depth-surface reflect elev-1 relative rounded-lg border bg-card text-card-foreground",
-      tilt && "tilt-3d",
+      "reflect elev-1 relative rounded-lg border bg-card text-card-foreground",
+      tilt ? "tilt-3d" : "depth-surface",
       className,
     )}
     {...props}
