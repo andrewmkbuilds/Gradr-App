@@ -46,6 +46,15 @@ async function callApi<T>(body: Record<string, unknown>): Promise<T> {
   return payload;
 }
 
+interface AllowlistVerdict {
+  allowed: boolean;
+  reasons: string[];
+  actionHost: string | null;
+  actionPath: string | null;
+  redirectHost: string | null;
+  redirectPath: string | null;
+}
+
 interface PreviewResponse {
   templates: { key: string; label: string }[];
   template: string;
@@ -54,6 +63,7 @@ interface PreviewResponse {
   html: string;
   text: string;
   actionUrl: string | null;
+  allowlist: AllowlistVerdict;
   links: {
     buttonHref: string | null;
     fallbackLinks: string[];
@@ -78,6 +88,10 @@ interface AuditRow {
   token_digest: string | null;
   url_digest: string | null;
   link_valid: boolean;
+  allowlist_ok: boolean | null;
+  allowlist_reasons: string[] | null;
+  redirect_sanitized: boolean | null;
+  blocked: boolean | null;
   run_id: string | null;
   message_id: string | null;
 }
@@ -91,10 +105,19 @@ function Verdict({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
+/** Default export window: the trailing 30 days, as yyyy-mm-dd for <input type=date>. */
+function isoDay(offsetDays = 0): string {
+  return new Date(Date.now() - offsetDays * 864e5).toISOString().slice(0, 10);
+}
+
 export default function AdminAuthEmailPreview() {
   const [template, setTemplate] = useState("signup");
   const [actionUrlDraft, setActionUrlDraft] = useState("");
   const [actionUrl, setActionUrl] = useState("");
+  const [from, setFrom] = useState(isoDay(30));
+  const [to, setTo] = useState(isoDay(0));
+  const [exporting, setExporting] = useState<"json" | "csv" | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const preview = useQuery({
     queryKey: ["auth-email-preview", template, actionUrl],
@@ -103,12 +126,61 @@ export default function AdminAuthEmailPreview() {
   });
 
   const audit = useQuery({
-    queryKey: ["auth-email-link-audit"],
-    queryFn: () => callApi<{ rows: AuditRow[] }>({ action: "auth-link-audit" }),
+    queryKey: ["auth-email-link-audit", from, to],
+    queryFn: () =>
+      callApi<{ rows: AuditRow[] }>({
+        action: "auth-link-audit",
+        from: new Date(`${from}T00:00:00Z`).toISOString(),
+        to: new Date(`${to}T23:59:59Z`).toISOString(),
+      }),
   });
 
+  /**
+   * Download the rendered email plus the audit entries for the selected range.
+   * The endpoint streams a file, so this bypasses `callApi` (which parses JSON)
+   * and turns the response into a blob.
+   */
+  async function download(format: "json" | "csv") {
+    setExporting(format);
+    setExportError(null);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Your session expired — sign in again.");
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          action: "auth-preview-export",
+          format,
+          template,
+          actionUrl,
+          from: new Date(`${from}T00:00:00Z`).toISOString(),
+          to: new Date(`${to}T23:59:59Z`).toISOString(),
+        }),
+      });
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(payload.error ?? `Export failed (${res.status})`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `gradr-auth-email-${template}-${from}_${to}.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : "Export failed");
+    } finally {
+      setExporting(null);
+    }
+  }
+
   const links = preview.data?.links;
+  const allowlist = preview.data?.allowlist;
   const resolvedActionUrl = preview.data?.actionUrl ?? null;
+
 
   return (
     <div className="space-y-6">
