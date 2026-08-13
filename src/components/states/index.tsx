@@ -1,4 +1,4 @@
-import { AlertTriangle, Inbox, RefreshCw } from "lucide-react";
+import { AlertTriangle, Compass, Inbox, RefreshCw, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,26 @@ export function SkeletonList({ rows = 3, className }: { rows?: number; className
 
 /* ---------------------------- state surfaces ---------------------------- */
 
+/**
+ * Abstract maritime motif: concentric bearing rings behind the state icon.
+ * Purely decorative, drawn from tokens so it themes with everything else.
+ */
+function BearingRings({ tone = "primary" }: { tone?: "primary" | "destructive" }) {
+  const color = tone === "destructive" ? "hsl(var(--destructive))" : "hsl(var(--primary))";
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 120 120"
+      className="pointer-events-none absolute left-1/2 top-0 h-[120px] w-[120px] -translate-x-1/2 opacity-[0.18]"
+    >
+      <circle cx="60" cy="60" r="58" fill="none" stroke={color} strokeWidth="0.75" />
+      <circle cx="60" cy="60" r="42" fill="none" stroke={color} strokeWidth="0.75" strokeDasharray="3 5" />
+      <circle cx="60" cy="60" r="26" fill="none" stroke={color} strokeWidth="0.75" />
+      <path d="M60 2v116M2 60h116" stroke={color} strokeWidth="0.5" strokeDasharray="2 6" />
+    </svg>
+  );
+}
+
 function StateShell({ children, className }: { children: ReactNode; className?: string }) {
   const reduced = useReducedMotionPref();
   return (
@@ -73,64 +93,97 @@ function StateShell({ children, className }: { children: ReactNode; className?: 
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduced ? 0.15 : duration.base, ease: easeOut }}
-      className={cn("flex flex-col items-center justify-center gap-3 px-6 py-12 text-center", className)}
+      className={cn("relative flex flex-col items-center justify-center gap-3 px-6 py-14 text-center", className)}
     >
       {children}
     </motion.div>
   );
 }
 
+export interface EmptyStateProps {
+  /** What is empty. */
+  title: string;
+  /** Why it matters — one calm sentence. */
+  description?: string;
+  /** What the user can do next, rendered as a hint under the action. */
+  hint?: string;
+  icon?: typeof Inbox;
+  action?: ReactNode;
+  className?: string;
+}
+
+/**
+ * The house empty state: names what's missing, says why it matters, and
+ * offers the next move. Never a bare "No data".
+ */
 export function EmptyState({
   title,
   description,
+  hint,
   icon: Icon = Inbox,
   action,
   className,
+}: EmptyStateProps) {
+  return (
+    <StateShell className={className}>
+      <BearingRings />
+      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <Icon className="h-6 w-6" aria-hidden="true" />
+      </div>
+      <h3 className="font-display text-lg tracking-tight text-foreground">{title}</h3>
+      {description && <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{description}</p>}
+      {action && <div className="mt-2 flex flex-wrap items-center justify-center gap-2">{action}</div>}
+      {hint && <p className="max-w-xs text-xs text-muted-foreground/80">{hint}</p>}
+    </StateShell>
+  );
+}
+
+/** Empty state for surfaces that need the user to chart a course first. */
+export function GetStartedState(props: Omit<EmptyStateProps, "icon">) {
+  return <EmptyState {...props} icon={Compass} />;
+}
+
+export function ErrorState({
+  title = "We couldn't load this",
+  description = "The request didn't come back. This is on our side, not yours.",
+  /** Reassurance about the user's data — shown unless explicitly disabled. */
+  reassurance = "Nothing was lost — your saved work is untouched.",
+  onRetry,
+  action,
+  className,
 }: {
-  title: string;
+  title?: string;
   description?: string;
-  icon?: typeof Inbox;
+  reassurance?: string | false;
+  onRetry?: () => void;
   action?: ReactNode;
   className?: string;
 }) {
   return (
     <StateShell className={className}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" aria-hidden="true" />
+      <BearingRings tone="destructive" />
+      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+        <AlertTriangle className="h-6 w-6" aria-hidden="true" />
       </div>
-      <h3 className="text-h3 text-foreground">{title}</h3>
-      {description && <p className="max-w-sm text-sm text-muted-foreground">{description}</p>}
-      {action}
-    </StateShell>
-  );
-}
-
-export function ErrorState({
-  title = "Something went wrong",
-  description = "We couldn't load this right now. Try again in a moment.",
-  onRetry,
-  className,
-}: {
-  title?: string;
-  description?: string;
-  onRetry?: () => void;
-  className?: string;
-}) {
-  return (
-    <StateShell className={className}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
-        <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-      </div>
-      <h3 className="text-h3 text-foreground" role="alert">
+      <h3 className="font-display text-lg tracking-tight text-foreground" role="alert">
         {title}
       </h3>
-      <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
-      {onRetry && (
-        <Button variant="outline" onClick={onRetry} className="interactive press-scale mt-1 gap-2">
-          <RefreshCw className="h-4 w-4" aria-hidden="true" />
-          Try again
-        </Button>
+      <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{description}</p>
+      {reassurance && (
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-3 py-1 text-xs text-success">
+          <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+          {reassurance}
+        </p>
       )}
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+        {onRetry && (
+          <Button variant="outline" onClick={onRetry} className="gap-2">
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            Try again
+          </Button>
+        )}
+        {action}
+      </div>
     </StateShell>
   );
 }
