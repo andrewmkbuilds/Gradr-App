@@ -81,9 +81,34 @@ export function InterviewSetup({ initial, onContinue }: Props) {
   const [resumeLabel, setResumeLabel] = useState<string | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
   const [tier, setTier] = useState<string | null>(null);
+  const [touched, setTouched] = useState<Partial<Record<SetupField, boolean>>>({});
+  const [attempted, setAttempted] = useState(false);
 
   const ent = entitlementFor(tier);
   const reduced = useReducedMotionPref();
+
+  const validation = useMemo(
+    () => validateSetup({ targetRole, company, jobDescription }),
+    [targetRole, company, jobDescription],
+  );
+
+  // Only surface a field's message once the user has left it, or once they've
+  // tried to continue — typing "S" for "Senior" shouldn't read as an error.
+  const showIssues: Record<SetupField, boolean> = {
+    targetRole: Boolean(touched.targetRole) || attempted,
+    company: Boolean(touched.company) || attempted,
+    jobDescription: Boolean(touched.jobDescription) || attempted,
+  };
+
+  const touch = (field: SetupField) => setTouched((prev) => ({ ...prev, [field]: true }));
+
+  const describedBy = (id: string, field: SetupField) => {
+    if (!showIssues[field]) return undefined;
+    if (validation.errors[field]) return `${id}-error`;
+    if (validation.warnings[field]) return `${id}-warning`;
+    return undefined;
+  };
+
 
 
   // Auto-fill from the user's saved profile and most recent parsed resume.
