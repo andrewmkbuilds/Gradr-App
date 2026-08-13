@@ -19,6 +19,7 @@ import {
   absoluteUrl,
   buildBreadcrumbLd,
   buildFaqLd,
+  buildHowToLd,
 } from "@/lib/structuredData";
 
 const PATH = "/ai-interview-coach";
@@ -178,6 +179,14 @@ export default function AiInterviewCoach() {
         nodes={[
           softwareLd,
           scoringLd,
+          buildHowToLd({
+            name: "How to practise for an interview with an AI coach",
+            description:
+              "Four steps to run a realtime AI mock interview built from a real job description and leave with a scored practice plan.",
+            path: PATH,
+            totalTime: "PT30M",
+            steps: STEPS.map((s) => ({ name: s.title, text: s.body })),
+          }),
           buildFaqLd(FAQS),
           buildBreadcrumbLd([
             { name: "Gradr", path: "/" },
