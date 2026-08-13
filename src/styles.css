@@ -395,7 +395,6 @@
   .overlay-scrim {
     background: hsl(var(--overlay) / var(--overlay-opacity));
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
   }
 
   /* ---------- Surfaces ---------- */
@@ -479,7 +478,6 @@
   .glassmorphic {
     background: hsl(var(--surface) / 0.72);
     backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
     border: 1px solid hsl(var(--border));
     box-shadow: var(--shadow-elevated);
   }
@@ -751,14 +749,12 @@
   .glass-panel {
     background: hsl(var(--surface) / 0.82);
     backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
     border: 1px solid hsl(var(--border));
     box-shadow: var(--shadow-elevated);
   }
   .glass-bar {
     background: hsl(var(--background) / 0.78);
     backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
   }
 
   /* ---------- Loading / feedback ---------- */
