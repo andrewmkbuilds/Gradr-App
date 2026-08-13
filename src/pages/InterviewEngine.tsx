@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { toast } from "sonner";
+import { useAiStream } from "@/hooks/useAiStream";
+import { GenerationStream } from "@/components/ai/GenerationStream";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { ProGate } from "@/components/ProGate";
 import { CreditsBalance } from "@/components/CreditsBalance";
@@ -53,6 +55,13 @@ function InterviewEngineInner() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [plan, setPlan] = useState<PracticePlan | null>(null);
   const [planLoading, setPlanLoading] = useState(false);
+
+  // Streamed 7-day plan: real milestones from the edge function, plus a
+  // cancel/retry pair instead of an indeterminate spinner.
+  const planStream = useAiStream<{ plan: PracticePlan }>({
+    fn: "practice-plan",
+    initialLabel: "Reading your scorecard",
+  });
   const [exporting, setExporting] = useState(false);
   const [durationSec, setDurationSec] = useState(0);
   const startedAt = useRef<number>(0);
