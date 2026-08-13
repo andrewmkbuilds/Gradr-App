@@ -3,6 +3,7 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
+  redirect,
   Scripts,
   useRouter,
   type ErrorComponentProps,
@@ -17,7 +18,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/hooks/useAuth";
-import { RouteSeo } from "@/components/RouteSeo";
+import { RouteSeo, normalizeSeoPath } from "@/components/RouteSeo";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import RootErrorBoundary from "@/components/RootErrorBoundary";
@@ -106,6 +107,20 @@ const structuredData = JSON.stringify({
 });
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // TanStack Router matches paths case-insensitively, so `/AI-Interview-Coach`
+  // would otherwise serve a second, indexable copy of `/ai-interview-coach`.
+  // Permanently redirect any non-normalised variant to the canonical path.
+  beforeLoad: ({ location }) => {
+    const canonical = normalizeSeoPath(location.pathname);
+    if (canonical !== location.pathname && !location.pathname.startsWith("/api/")) {
+      throw redirect({
+        href: `${canonical}${location.searchStr ?? ""}`,
+        statusCode: 301,
+        throw: true,
+      });
+    }
+  },
+
   head: () => ({
     meta: [
       { charSet: "UTF-8" },

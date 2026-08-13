@@ -39,12 +39,24 @@ export interface NextAction {
   weight: number;
 }
 
+export interface ReadinessSignal {
+  /** The exact data point that fed the component. */
+  label: string;
+  value: string;
+}
+
 export interface ReadinessBreakdown {
   key: string;
   label: string;
   value: number;
   weight: number;
   hint: string;
+  /** Plain-English description of how the component is calculated. */
+  formula: string;
+  /** The raw signals behind the number, for the "why this score" panel. */
+  signals: ReadinessSignal[];
+  /** What the user can do to move this component. */
+  lever: { label: string; to: string };
 }
 
 export interface Briefing {
@@ -81,10 +93,71 @@ export function buildBriefing(input: BriefingInput): Briefing {
   const interviewPrep = clamp(Math.min(input.interviewSessions, 4) * 25);
 
   const breakdown: ReadinessBreakdown[] = [
-    { key: "resume", label: "Resume health", value: resumeHealth, weight: 0.35, hint: "Latest ATS score" },
-    { key: "targeting", label: "Job targeting", value: targeting, weight: 0.25, hint: "Share of strong matches" },
-    { key: "momentum", label: "Weekly momentum", value: momentum, weight: 0.2, hint: `${input.appliedThisWeek}/${WEEKLY_TARGET} applications` },
-    { key: "prep", label: "Interview prep", value: interviewPrep, weight: 0.2, hint: `${input.interviewSessions} mock sessions` },
+    {
+      key: "resume",
+      label: "Resume health",
+      value: resumeHealth,
+      weight: 0.35,
+      hint: "Latest ATS score",
+      formula: "The ATS score of your most recently analysed resume, taken as-is.",
+      signals: [
+        { label: "Resumes analysed", value: String(input.totalResumes) },
+        { label: "Latest ATS score", value: input.totalResumes > 0 ? `${clamp(input.resumeScore)}/100` : "no resume yet" },
+        { label: "Keyword coverage", value: `${clamp(input.keywordMatch)}%` },
+        { label: "Formatting", value: `${clamp(input.formattingScore)}%` },
+        { label: "Impact statements", value: `${clamp(input.impactScore)}%` },
+      ],
+      lever: { label: input.totalResumes === 0 ? "Upload a resume" : "Optimise your resume", to: "/resume" },
+    },
+    {
+      key: "targeting",
+      label: "Job targeting",
+      value: targeting,
+      weight: 0.25,
+      hint: "Share of strong matches",
+      formula: "Matches scoring 85%+ against your resume, divided by all matches found.",
+      signals: [
+        { label: "Matches found", value: String(input.totalMatches) },
+        { label: "Strong matches (85%+)", value: String(input.highConfidence) },
+        {
+          label: "Strong share",
+          value: input.totalMatches === 0 ? "no matches yet" : `${targeting}%`,
+        },
+      ],
+      lever: { label: "Refine your targeting", to: "/onboarding" },
+    },
+    {
+      key: "momentum",
+      label: "Weekly momentum",
+      value: momentum,
+      weight: 0.2,
+      hint: `${input.appliedThisWeek}/${WEEKLY_TARGET} applications`,
+      formula: `Applications sent in the last 7 days against a weekly target of ${WEEKLY_TARGET}, capped at 100%.`,
+      signals: [
+        { label: "Applied in last 7 days", value: String(input.appliedThisWeek) },
+        { label: "Weekly target", value: String(WEEKLY_TARGET) },
+        { label: "Open follow-ups overdue", value: String(input.overdueCount) },
+        { label: "Roles in pipeline", value: String(pipelineActive) },
+      ],
+      lever: { label: "Find roles to apply to", to: "/jobs" },
+    },
+    {
+      key: "prep",
+      label: "Interview prep",
+      value: interviewPrep,
+      weight: 0.2,
+      hint: `${input.interviewSessions} mock sessions`,
+      formula: "25 points per completed mock interview, capped at 4 sessions.",
+      signals: [
+        { label: "Mock sessions completed", value: String(input.interviewSessions) },
+        {
+          label: "Last session",
+          value: input.lastInterviewAt ? new Date(input.lastInterviewAt).toLocaleDateString() : "never",
+        },
+        { label: "Roles at interview stage", value: String(stages.interview) },
+      ],
+      lever: { label: "Run a mock interview", to: "/interview" },
+    },
   ];
 
   const readiness = clamp(breakdown.reduce((sum, b) => sum + b.value * b.weight, 0));

@@ -30,6 +30,7 @@ import { Route as AppGrowthRouteImport } from './routes/_app/growth'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
 import { Route as AppManageSubscriptionRouteImport } from './routes/_app/manage-subscription'
 import { Route as AppMatchRouteImport } from './routes/_app/match'
+import { Route as AppOnboardingRouteImport } from './routes/_app/onboarding'
 import { Route as AppPipelineRouteImport } from './routes/_app/pipeline'
 import { Route as AppResumeRouteImport } from './routes/_app/resume'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
@@ -65,6 +66,7 @@ import { Route as ApiPublicAdminRpcRouteImport } from './routes/api/public/admin
 import { Route as ApiPublicAffiliatePublicRouteImport } from './routes/api/public/affiliate-public'
 import { Route as ApiPublicAnalyzeResumeRouteImport } from './routes/api/public/analyze-resume'
 import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
+import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/career-plan'
 import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
 import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
 import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
@@ -192,6 +194,11 @@ const AppManageSubscriptionRoute = AppManageSubscriptionRouteImport.update({
 const AppMatchRoute = AppMatchRouteImport.update({
   id: '/match',
   path: '/match',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOnboardingRoute = AppOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPipelineRoute = AppPipelineRouteImport.update({
@@ -371,6 +378,11 @@ const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
   path: '/api/public/calendar-sync',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCareerPlanRoute = ApiPublicCareerPlanRouteImport.update({
+  id: '/api/public/career-plan',
+  path: '/api/public/career-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCompanyResearchRoute =
   ApiPublicCompanyResearchRouteImport.update({
     id: '/api/public/company-research',
@@ -522,6 +534,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof AppJobsRoute
   '/manage-subscription': typeof AppManageSubscriptionRoute
   '/match': typeof AppMatchRoute
+  '/onboarding': typeof AppOnboardingRoute
   '/pipeline': typeof AppPipelineRoute
   '/resume': typeof AppResumeRoute
   '/settings': typeof AppSettingsRoute
@@ -555,6 +568,7 @@ export interface FileRoutesByFullPath {
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -602,6 +616,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof AppJobsRoute
   '/manage-subscription': typeof AppManageSubscriptionRoute
   '/match': typeof AppMatchRoute
+  '/onboarding': typeof AppOnboardingRoute
   '/pipeline': typeof AppPipelineRoute
   '/resume': typeof AppResumeRoute
   '/settings': typeof AppSettingsRoute
@@ -636,6 +651,7 @@ export interface FileRoutesByTo {
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -685,6 +701,7 @@ export interface FileRoutesById {
   '/_app/jobs': typeof AppJobsRoute
   '/_app/manage-subscription': typeof AppManageSubscriptionRoute
   '/_app/match': typeof AppMatchRoute
+  '/_app/onboarding': typeof AppOnboardingRoute
   '/_app/pipeline': typeof AppPipelineRoute
   '/_app/resume': typeof AppResumeRoute
   '/_app/settings': typeof AppSettingsRoute
@@ -719,6 +736,7 @@ export interface FileRoutesById {
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
+  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -769,6 +787,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/manage-subscription'
     | '/match'
+    | '/onboarding'
     | '/pipeline'
     | '/resume'
     | '/settings'
@@ -802,6 +821,7 @@ export interface FileRouteTypes {
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
+    | '/api/public/career-plan'
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -849,6 +869,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/manage-subscription'
     | '/match'
+    | '/onboarding'
     | '/pipeline'
     | '/resume'
     | '/settings'
@@ -883,6 +904,7 @@ export interface FileRouteTypes {
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
+    | '/api/public/career-plan'
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -931,6 +953,7 @@ export interface FileRouteTypes {
     | '/_app/jobs'
     | '/_app/manage-subscription'
     | '/_app/match'
+    | '/_app/onboarding'
     | '/_app/pipeline'
     | '/_app/resume'
     | '/_app/settings'
@@ -965,6 +988,7 @@ export interface FileRouteTypes {
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
+    | '/api/public/career-plan'
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -1018,6 +1042,7 @@ export interface RootRouteChildren {
   ApiPublicAffiliatePublicRoute: typeof ApiPublicAffiliatePublicRoute
   ApiPublicAnalyzeResumeRoute: typeof ApiPublicAnalyzeResumeRoute
   ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
+  ApiPublicCareerPlanRoute: typeof ApiPublicCareerPlanRoute
   ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
   ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
   ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
@@ -1191,6 +1216,13 @@ declare module '@tanstack/react-router' {
       path: '/match'
       fullPath: '/match'
       preLoaderRoute: typeof AppMatchRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/onboarding': {
+      id: '/_app/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AppOnboardingRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/pipeline': {
@@ -1438,6 +1470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCalendarSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/career-plan': {
+      id: '/api/public/career-plan'
+      path: '/api/public/career-plan'
+      fullPath: '/api/public/career-plan'
+      preLoaderRoute: typeof ApiPublicCareerPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/company-research': {
       id: '/api/public/company-research'
       path: '/api/public/company-research'
@@ -1617,6 +1656,7 @@ interface AppRouteChildren {
   AppJobsRoute: typeof AppJobsRoute
   AppManageSubscriptionRoute: typeof AppManageSubscriptionRoute
   AppMatchRoute: typeof AppMatchRoute
+  AppOnboardingRoute: typeof AppOnboardingRoute
   AppPipelineRoute: typeof AppPipelineRoute
   AppResumeRoute: typeof AppResumeRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -1652,6 +1692,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppJobsRoute: AppJobsRoute,
   AppManageSubscriptionRoute: AppManageSubscriptionRoute,
   AppMatchRoute: AppMatchRoute,
+  AppOnboardingRoute: AppOnboardingRoute,
   AppPipelineRoute: AppPipelineRoute,
   AppResumeRoute: AppResumeRoute,
   AppSettingsRoute: AppSettingsRoute,
@@ -1706,6 +1747,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAffiliatePublicRoute: ApiPublicAffiliatePublicRoute,
   ApiPublicAnalyzeResumeRoute: ApiPublicAnalyzeResumeRoute,
   ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
+  ApiPublicCareerPlanRoute: ApiPublicCareerPlanRoute,
   ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
   ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
   ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,

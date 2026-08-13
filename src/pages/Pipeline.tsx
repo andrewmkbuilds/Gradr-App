@@ -22,7 +22,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy, Clock, CheckCircle2, AlarmClock } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { handleAiFunctionError } from "@/lib/aiErrors";
@@ -48,6 +50,19 @@ interface TrackedJob {
   created_at: string;
   notes: string | null;
   application_pack: ApplicationPack | null;
+  follow_up_enabled: boolean;
+  follow_up_days: number;
+  last_touch_at: string | null;
+}
+
+/** When the next nudge is due for an auto follow-up job, or null if it's off. */
+function followUpDueAt(job: TrackedJob): Date | null {
+  if (!job.follow_up_enabled) return null;
+  const anchor = job.last_touch_at ?? job.applied_at ?? job.created_at;
+  if (!anchor) return null;
+  const due = new Date(anchor);
+  due.setDate(due.getDate() + (job.follow_up_days || 5));
+  return due;
 }
 
 interface Reminder {
@@ -87,6 +102,20 @@ function JobCard({ job, onClick }: { job: TrackedJob; onClick: () => void }) {
           </Badge>
         )}
         {job.remote && <Badge variant="secondary" className="text-[10px]">Remote</Badge>}
+        {(() => {
+          const due = followUpDueAt(job);
+          if (!due) return null;
+          const overdue = due.getTime() <= Date.now();
+          return (
+            <Badge
+              variant="secondary"
+              className={`text-[10px] ${overdue ? "bg-warning/20 text-warning" : ""}`}
+            >
+              <Clock className="h-2.5 w-2.5 mr-0.5" />
+              {overdue ? "Follow up now" : `Follow up ${formatDistanceToNow(due, { addSuffix: true })}`}
+            </Badge>
+          );
+        })()}
       </div>
     </div>
   );
@@ -193,6 +222,24 @@ export default function Pipeline() {
   const completeReminder = async (id: string) => {
     setReminders((r) => r.filter((x) => x.id !== id));
     await supabase.from("job_reminders").update({ done: true }).eq("id", id);
+  };
+
+  const patchJob = async (id: string, updates: Partial<TrackedJob>) => {
+    setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...updates } : j)));
+    setSelected((cur) => (cur && cur.id === id ? { ...cur, ...updates } : cur));
+    const { error } = await supabase
+      .from("tracked_jobs")
+      .update(updates as never)
+      .eq("id", id);
+    if (error) {
+      toast.error("Couldn't save follow-up settings");
+      load();
+    }
+  };
+
+  const markTouched = async (job: TrackedJob) => {
+    await patchJob(job.id, { last_touch_at: new Date().toISOString() });
+    toast.success("Follow-up clock reset");
   };
 
   const addFromUrl = async () => {
@@ -405,6 +452,57 @@ export default function Pipeline() {
                     )}
                   </div>
                 )}
+
+                <div className="space-y-3 pt-2 border-t border-border">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <Label htmlFor="followup-toggle" className="text-xs uppercase tracking-wider text-muted-foreground">
+                        Automatic follow-up
+                      </Label>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Gradr nudges you on your dashboard when this one goes quiet.
+                      </p>
+                    </div>
+                    <Switch
+                      id="followup-toggle"
+                      checked={selected.follow_up_enabled}
+                      onCheckedChange={(v) => patchJob(selected.id, { follow_up_enabled: v })}
+                    />
+                  </div>
+
+                  {selected.follow_up_enabled && (
+                    <div className="space-y-2 rounded-lg bg-secondary/40 p-3">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground shrink-0">Nudge me after</Label>
+                        <Select
+                          value={String(selected.follow_up_days || 5)}
+                          onValueChange={(v) => patchJob(selected.id, { follow_up_days: Number(v) })}
+                        >
+                          <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[3, 5, 7, 10, 14, 21].map((d) => (
+                              <SelectItem key={d} value={String(d)}>{d} days</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {(() => {
+                        const due = followUpDueAt(selected);
+                        if (!due) return null;
+                        const overdue = due.getTime() <= Date.now();
+                        return (
+                          <p className={`flex items-center gap-1.5 text-xs ${overdue ? "text-warning" : "text-muted-foreground"}`}>
+                            <AlarmClock className="h-3 w-3" />
+                            {overdue ? "Due now" : `Next nudge ${formatDistanceToNow(due, { addSuffix: true })}`}
+                          </p>
+                        );
+                      })()}
+                      <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => markTouched(selected)}>
+                        <CheckCircle2 className="h-3.5 w-3.5" /> I followed up today
+                      </Button>
+                    </div>
+                  )}
+                </div>
 
                 <div className="space-y-2 pt-2 border-t border-border">
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground">Add reminder</Label>
