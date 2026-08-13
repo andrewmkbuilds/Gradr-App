@@ -182,14 +182,10 @@ export function HeroCommandCenter() {
 
   const rotateY = useTransform(mx, [-1, 1], [8, -8]);
   const rotateX = useTransform(my, [-1, 1], [-6, 6]);
-  const layer = (depth: number) => ({
-    x: useTransform(mx, [-1, 1], [-depth, depth]),
-    y: useTransform(my, [-1, 1], [-depth * 0.6, depth * 0.6]),
-  });
-
-  const near = layer(18);
-  const mid = layer(10);
-  const far = layer(4);
+  // Three parallax depths. Hooks are declared flat so the order never varies.
+  const near = { x: useTransform(mx, [-1, 1], [-18, 18]), y: useTransform(my, [-1, 1], [-11, 11]) };
+  const mid = { x: useTransform(mx, [-1, 1], [-10, 10]), y: useTransform(my, [-1, 1], [-6, 6]) };
+  const far = { x: useTransform(mx, [-1, 1], [-4, 4]), y: useTransform(my, [-1, 1], [-2.5, 2.5]) };
 
   return (
     <div
