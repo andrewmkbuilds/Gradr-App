@@ -236,8 +236,12 @@ export default function Pricing() {
 
       {tab === "plans" ? (
         <div className="space-y-8">
-          <div className="flex justify-center">
-            <div className="inline-flex items-center rounded-full border border-border bg-card/60 p-1">
+          <div className="flex flex-col items-center gap-3">
+            <div
+              role="group"
+              aria-label="Billing interval"
+              className="inline-flex items-center rounded-full border border-border bg-card/60 p-1"
+            >
               {(["monthly", "annual"] as const).map((i) => (
                 <button
                   key={i}
@@ -253,7 +257,12 @@ export default function Pricing() {
                 </button>
               ))}
             </div>
+            <p className="inline-flex items-center gap-2 rounded-full border border-mahogany-border bg-mahogany/10 px-3 py-1 text-xs font-medium text-mahogany">
+              <BadgePercent className="h-3.5 w-3.5" aria-hidden="true" />
+              {ANNUAL_SAVINGS_MESSAGE}
+            </p>
           </div>
+
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
             <Card className="relative p-6 flex flex-col border-border">
