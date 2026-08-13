@@ -200,7 +200,7 @@ export function JobMatchingDemo() {
         <AppFrame
           title="gradr — job matching"
           overlay={
-            <FloatingReadout className="-left-6 bottom-10" z={60} delay={0.35}>
+            <FloatingReadout className="-left-8 -bottom-7" z={60} delay={0.35}>
               <p className="type-overline text-muted-foreground">Live roles scored</p>
               <p className="type-metric-sm text-accent">
                 <CountUp to={1284} duration={1.8} />
@@ -298,7 +298,7 @@ export function InterviewCoachDemo() {
         <AppFrame
           title="gradr — interview studio"
           overlay={
-            <FloatingReadout className="-right-6 bottom-12" z={65} delay={0.25}>
+            <FloatingReadout className="right-4 -bottom-8" z={65} delay={0.25}>
               <p className="type-overline text-muted-foreground">Live coaching</p>
               <p className="type-caption font-medium text-foreground">Add a metric to that answer</p>
             </FloatingReadout>
