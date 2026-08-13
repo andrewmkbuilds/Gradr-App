@@ -1,3 +1,5 @@
+import { NextActionBar } from "@/components/NextActionBar";
+import { IssueTriage } from "@/components/resume/IssueTriage";
 import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useCallback } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";

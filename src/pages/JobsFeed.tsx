@@ -1,3 +1,4 @@
+import { NextActionBar } from "@/components/NextActionBar";
 import { useSeoOverride } from "@/lib/seoOverride";
 import { useEffect, useRef, useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";

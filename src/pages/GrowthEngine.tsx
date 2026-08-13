@@ -1,3 +1,4 @@
+import { NextActionBar } from "@/components/NextActionBar";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
