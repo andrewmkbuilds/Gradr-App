@@ -36,7 +36,7 @@ export function shouldEscalate(occurrences: number): boolean {
 export function alertingTargets(): { slack: boolean; email: boolean } {
   return {
     slack: Boolean(process.env['ALERT_SLACK_WEBHOOK_URL']),
-    email: Boolean(process.env['ALERT_EMAIL_TO']),
+    email: Boolean(process.env['ALERT_EMAIL_TO'] && process.env['LOVABLE_API_KEY']),
   };
 }
 
@@ -74,7 +74,10 @@ async function postToSlack(notice: AlertNotice, isEscalation: boolean): Promise<
 
 async function sendAlertEmail(notice: AlertNotice, isEscalation: boolean): Promise<void> {
   const to = process.env['ALERT_EMAIL_TO'];
+  const apiKey = process.env['LOVABLE_API_KEY'];
+  const from = process.env['ALERT_EMAIL_FROM'] ?? 'alerts@notify.gradr.me';
   if (!to) return;
+  if (!apiKey) throw new Error('LOVABLE_API_KEY is not configured');
 
   const subject = isEscalation
     ? `[Gradr] Escalating: ${notice.endpoint} (${notice.occurrences} failures)`
@@ -82,7 +85,9 @@ async function sendAlertEmail(notice: AlertNotice, isEscalation: boolean): Promi
 
   await sendLovableEmail({
     to,
+    from,
     subject,
+    text: `${subject}\n\nEndpoint: ${notice.endpoint}\nType: ${notice.kind}\nOccurrences: ${notice.occurrences}\nFirst seen: ${notice.firstSeenAt}\n\n${notice.message.slice(0, 800)}`,
     html: `
       <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:560px">
         <h2 style="margin:0 0 4px">${isEscalation ? "Incident escalating" : "New API alert"}</h2>
@@ -99,7 +104,7 @@ async function sendAlertEmail(notice: AlertNotice, isEscalation: boolean): Promi
         <p style="font-size:13px;color:#777">Open the API health dashboard in Gradr admin to triage or replay affected webhooks.</p>
       </div>
     `,
-  });
+  }, { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] });
 }
 
 /**
