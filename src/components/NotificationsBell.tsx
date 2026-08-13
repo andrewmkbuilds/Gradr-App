@@ -23,7 +23,7 @@ export function NotificationsBell() {
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary ring-2 ring-background" />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-mahogany ring-2 ring-background" />
           )}
         </button>
       </PopoverTrigger>
@@ -32,7 +32,7 @@ export function NotificationsBell() {
           <div className="text-sm font-semibold text-foreground">
             Notifications
             {unreadCount > 0 && (
-              <span className="ml-2 text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+              <span className="accent-chip ml-2 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
                 {unreadCount} new
               </span>
             )}
@@ -40,7 +40,7 @@ export function NotificationsBell() {
           {unreadCount > 0 && (
             <button
               onClick={() => markAllRead.mutate()}
-              className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+              className="accent-link text-xs inline-flex items-center gap-1"
             >
               <Check className="h-3 w-3" /> Mark all read
             </button>
