@@ -237,9 +237,51 @@ async function ingestFlowCheck(body: Record<string, unknown>): Promise<Response>
 
   const { error } = await db().from("oauth_flow_checks").insert(rows);
   if (error) return json({ error: error.message }, 500);
+
   const failed = rows.filter((row) => row.status !== "pass");
-  return json({ ingested: rows.length, runId, failed: failed.length });
+  // A deviation is worse than a plain failure: the flow ended somewhere other
+  // than the one URL we tell Google is our only OAuth landing page.
+  const deviated = rows.filter(
+    (row) =>
+      row.final_url &&
+      row.expected_final_url &&
+      !row.final_url.startsWith(row.expected_final_url),
+  );
+
+  let alerted: string | null = null;
+  if (failed.length || deviated.length) {
+    const details = [
+      ...deviated.map(
+        (row) =>
+          `DEVIATION · ${row.account_label}: landed on ${redactOAuthUrl(row.final_url)} (expected ${row.expected_final_url})`,
+      ),
+      ...failed.map(
+        (row) =>
+          `FAIL · ${row.account_label}: ${(row.failures as string[] | null)?.join("; ") || row.status}`,
+      ),
+    ];
+    alerted = await dispatchOAuthAlert({
+      kind: deviated.length ? "deviation" : "flow-check",
+      runId,
+      source: rows[0]?.source ?? "ci",
+      headline: `${failed.length} of ${rows.length} account check(s) failed${
+        deviated.length ? `, ${deviated.length} with a redirect-chain deviation` : ""
+      }`,
+      details,
+      expectedFinalUrl: EXPECTED_FINAL_URL,
+      dashboardUrl: `${SITE_ORIGIN}/admin/oauth-forensics`,
+    }).catch((err: unknown) => (err instanceof Error ? err.message : String(err)));
+  }
+
+  return json({
+    ingested: rows.length,
+    runId,
+    failed: failed.length,
+    deviations: deviated.length,
+    alertError: alerted,
+  });
 }
+
 
 /* -------------------------------------------------------------- export --- */
 
