@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AiInterviewCoachRouteImport } from './routes/ai-interview-coach'
+import { Route as AiResumeBuilderRouteImport } from './routes/ai-resume-builder'
 import { Route as AtsResumeCheckerRouteImport } from './routes/ats-resume-checker'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
@@ -58,6 +59,7 @@ import { Route as AppAdminPaymentsStatusRouteImport } from './routes/_app/admin/
 import { Route as AppAdminSearchConsoleRouteImport } from './routes/_app/admin/search-console'
 import { Route as AppAdminSecurityLogRouteImport } from './routes/_app/admin/security-log'
 import { Route as AppAdminSeoMonitorRouteImport } from './routes/_app/admin/seo-monitor'
+import { Route as AppAdminSeoPerformanceRouteImport } from './routes/_app/admin/seo-performance'
 import { Route as AppAdminVerificationsRouteImport } from './routes/_app/admin/verifications'
 import { Route as AppAffiliateIndexRouteImport } from './routes/_app/affiliate/index'
 import { Route as AppAffiliateApplyRouteImport } from './routes/_app/affiliate/apply'
@@ -109,6 +111,11 @@ const AppRoute = AppRouteImport.update({
 const AiInterviewCoachRoute = AiInterviewCoachRouteImport.update({
   id: '/ai-interview-coach',
   path: '/ai-interview-coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiResumeBuilderRoute = AiResumeBuilderRouteImport.update({
+  id: '/ai-resume-builder',
+  path: '/ai-resume-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtsResumeCheckerRoute = AtsResumeCheckerRouteImport.update({
@@ -347,6 +354,11 @@ const AppAdminSeoMonitorRoute = AppAdminSeoMonitorRouteImport.update({
   path: '/admin/seo-monitor',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminSeoPerformanceRoute = AppAdminSeoPerformanceRouteImport.update({
+  id: '/admin/seo-performance',
+  path: '/admin/seo-performance',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminVerificationsRoute = AppAdminVerificationsRouteImport.update({
   id: '/admin/verifications',
   path: '/admin/verifications',
@@ -580,6 +592,7 @@ const LovableEmailTransactionalSendRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/ai-interview-coach': typeof AiInterviewCoachRoute
+  '/ai-resume-builder': typeof AiResumeBuilderRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -626,6 +639,7 @@ export interface FileRoutesByFullPath {
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
+  '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
   '/affiliate/apply': typeof AppAffiliateApplyRoute
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
@@ -672,6 +686,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/ai-interview-coach': typeof AiInterviewCoachRoute
+  '/ai-resume-builder': typeof AiResumeBuilderRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -719,6 +734,7 @@ export interface FileRoutesByTo {
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
+  '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
   '/affiliate/apply': typeof AppAffiliateApplyRoute
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
@@ -767,6 +783,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/ai-interview-coach': typeof AiInterviewCoachRoute
+  '/ai-resume-builder': typeof AiResumeBuilderRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -814,6 +831,7 @@ export interface FileRoutesById {
   '/_app/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/_app/admin/security-log': typeof AppAdminSecurityLogRoute
   '/_app/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
+  '/_app/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/_app/admin/verifications': typeof AppAdminVerificationsRoute
   '/_app/affiliate/apply': typeof AppAffiliateApplyRoute
   '/_app/affiliate/dashboard': typeof AppAffiliateDashboardRoute
@@ -863,6 +881,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/ai-interview-coach'
+    | '/ai-resume-builder'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -909,6 +928,7 @@ export interface FileRouteTypes {
     | '/admin/search-console'
     | '/admin/security-log'
     | '/admin/seo-monitor'
+    | '/admin/seo-performance'
     | '/admin/verifications'
     | '/affiliate/apply'
     | '/affiliate/dashboard'
@@ -955,6 +975,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/ai-interview-coach'
+    | '/ai-resume-builder'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -1002,6 +1023,7 @@ export interface FileRouteTypes {
     | '/admin/search-console'
     | '/admin/security-log'
     | '/admin/seo-monitor'
+    | '/admin/seo-performance'
     | '/admin/verifications'
     | '/affiliate/apply'
     | '/affiliate/dashboard'
@@ -1049,6 +1071,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_app'
     | '/ai-interview-coach'
+    | '/ai-resume-builder'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -1096,6 +1119,7 @@ export interface FileRouteTypes {
     | '/_app/admin/search-console'
     | '/_app/admin/security-log'
     | '/_app/admin/seo-monitor'
+    | '/_app/admin/seo-performance'
     | '/_app/admin/verifications'
     | '/_app/affiliate/apply'
     | '/_app/affiliate/dashboard'
@@ -1144,6 +1168,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AiInterviewCoachRoute: typeof AiInterviewCoachRoute
+  AiResumeBuilderRoute: typeof AiResumeBuilderRoute
   AtsResumeCheckerRoute: typeof AtsResumeCheckerRoute
   AuthRoute: typeof AuthRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
@@ -1216,6 +1241,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-interview-coach'
       fullPath: '/ai-interview-coach'
       preLoaderRoute: typeof AiInterviewCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-resume-builder': {
+      id: '/ai-resume-builder'
+      path: '/ai-resume-builder'
+      fullPath: '/ai-resume-builder'
+      preLoaderRoute: typeof AiResumeBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ats-resume-checker': {
@@ -1545,6 +1577,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/seo-monitor'
       fullPath: '/admin/seo-monitor'
       preLoaderRoute: typeof AppAdminSeoMonitorRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/seo-performance': {
+      id: '/_app/admin/seo-performance'
+      path: '/admin/seo-performance'
+      fullPath: '/admin/seo-performance'
+      preLoaderRoute: typeof AppAdminSeoPerformanceRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/verifications': {
@@ -1879,6 +1918,7 @@ interface AppRouteChildren {
   AppAdminSearchConsoleRoute: typeof AppAdminSearchConsoleRoute
   AppAdminSecurityLogRoute: typeof AppAdminSecurityLogRoute
   AppAdminSeoMonitorRoute: typeof AppAdminSeoMonitorRoute
+  AppAdminSeoPerformanceRoute: typeof AppAdminSeoPerformanceRoute
   AppAdminVerificationsRoute: typeof AppAdminVerificationsRoute
   AppAffiliateApplyRoute: typeof AppAffiliateApplyRoute
   AppAffiliateDashboardRoute: typeof AppAffiliateDashboardRoute
@@ -1916,6 +1956,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminSearchConsoleRoute: AppAdminSearchConsoleRoute,
   AppAdminSecurityLogRoute: AppAdminSecurityLogRoute,
   AppAdminSeoMonitorRoute: AppAdminSeoMonitorRoute,
+  AppAdminSeoPerformanceRoute: AppAdminSeoPerformanceRoute,
   AppAdminVerificationsRoute: AppAdminVerificationsRoute,
   AppAffiliateApplyRoute: AppAffiliateApplyRoute,
   AppAffiliateDashboardRoute: AppAffiliateDashboardRoute,
@@ -1930,6 +1971,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AiInterviewCoachRoute: AiInterviewCoachRoute,
+  AiResumeBuilderRoute: AiResumeBuilderRoute,
   AtsResumeCheckerRoute: AtsResumeCheckerRoute,
   AuthRoute: AuthRoute,
   CookiePolicyRoute: CookiePolicyRoute,

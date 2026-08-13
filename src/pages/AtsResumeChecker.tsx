@@ -19,6 +19,7 @@ import {
   absoluteUrl,
   buildBreadcrumbLd,
   buildFaqLd,
+  buildHowToLd,
 } from "@/lib/structuredData";
 
 const PATH = "/ats-resume-checker";
@@ -148,6 +149,14 @@ export default function AtsResumeChecker() {
       <JsonLd
         nodes={[
           softwareLd,
+          buildHowToLd({
+            name: "How to check your resume against an ATS",
+            description:
+              "Four steps to score an existing resume against a specific job description and fix what an Applicant Tracking System cannot read.",
+            path: PATH,
+            totalTime: "PT10M",
+            steps: STEPS.map((s) => ({ name: s.title, text: s.body })),
+          }),
           buildFaqLd(FAQS),
           buildBreadcrumbLd([
             { name: "Gradr", path: "/" },
@@ -179,11 +188,11 @@ export default function AtsResumeChecker() {
             Check my resume free
           </Link>
           <Link
-            to={ctaHref("/blog/ai-resume-optimization", "hero_secondary")}
-            onClick={trackCta("hero_secondary", "/blog/ai-resume-optimization")}
+            to={ctaHref("/ai-resume-builder", "hero_secondary")}
+            onClick={trackCta("hero_secondary", "/ai-resume-builder")}
             className="inline-flex h-11 items-center gap-2 rounded-xl border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
-            Read the ATS optimization guide
+            Build a resume with AI
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>

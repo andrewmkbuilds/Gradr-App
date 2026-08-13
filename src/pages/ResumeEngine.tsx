@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useCallback } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { Link } from "@/lib/router-compat";
@@ -64,6 +65,14 @@ export default function ResumeEngine() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [fileName, setFileName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
+  useSeoOverride(
+    jobTitle.trim()
+      ? {
+          title: `Resume Engine — tailoring for ${jobTitle.trim()}`,
+          description: `ATS scoring and AI rewrites for your resume against the ${jobTitle.trim()} role.`,
+        }
+      : null,
+  );
   const [jobDescription, setJobDescription] = useState("");
   const [showTailor, setShowTailor] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);

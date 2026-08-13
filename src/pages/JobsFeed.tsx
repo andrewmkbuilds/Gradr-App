@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useEffect, useRef, useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,6 +61,14 @@ export default function JobsFeed() {
   const { preferences, isLoading: prefsLoading } = useCareerPreferences();
   const [what, setWhat] = useState("");
   const [where, setWhere] = useState("");
+  useSeoOverride(
+    what.trim()
+      ? {
+          title: `Job Feed — ${what.trim()}${where.trim() ? ` in ${where.trim()}` : ""}`,
+          description: `AI-ranked ${what.trim()} openings matched to your resume and career preferences.`,
+        }
+      : null,
+  );
   const [country, setCountry] = useState("us");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [sortBy, setSortBy] = useState<"relevance" | "date" | "salary">("relevance");

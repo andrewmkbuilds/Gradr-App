@@ -123,6 +123,7 @@ export const navGroups: NavGroup[] = [
       { title: "Audit Log", url: "/admin/audit-log", icon: ScrollText },
       { title: "Security Log", url: "/admin/security-log", icon: ShieldCheck },
       { title: "Search Console", url: "/admin/search-console", icon: Search },
+      { title: "SEO Performance", url: "/admin/seo-performance", icon: BarChart3 },
       { title: "Blog Analytics", url: "/admin/blog-analytics", icon: BarChart3 },
       { title: "Nav Analytics", url: "/admin/nav-analytics", icon: BarChart3 },
       { title: "SEO Monitor", url: "/admin/seo-monitor", icon: BarChart3 },

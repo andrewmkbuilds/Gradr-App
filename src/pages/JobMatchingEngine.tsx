@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { Link } from "@/lib/router-compat";
@@ -59,6 +60,14 @@ export default function JobMatchingEngine() {
   const [searched, setSearched] = useState(false);
   const [targetRole, setTargetRole] = useState("");
   const [location, setLocation] = useState("");
+  useSeoOverride(
+    targetRole.trim()
+      ? {
+          title: `Job Matching — ${targetRole.trim()}${location.trim() ? ` in ${location.trim()}` : ""}`,
+          description: `Live match scores between your resume and ${targetRole.trim()} roles, with the gap to close on each posting.`,
+        }
+      : null,
+  );
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [hasResume, setHasResume] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);

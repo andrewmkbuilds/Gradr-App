@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
 import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
 import { legalJsonLd } from "@/lib/structuredData";
+import { useSeoOverrideValue } from "@/lib/seoOverride";
 import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
 
@@ -140,6 +141,10 @@ const META: Record<string, { title: string; description: string }> = {
     title: "ATS Resume Checker — Free Resume Scan & Score",
     description: "Free ATS resume checker: score your resume against any job description, spot formatting a parser can't read, and get the exact missing keywords.",
   },
+  "/ai-resume-builder": {
+    title: "AI Resume Builder — Free ATS-Ready Resume Maker",
+    description: "Free AI resume builder: turn your real experience into an ATS-ready resume, rewrite bullet points against any job description, and export a clean PDF or DOCX.",
+  },
   "/ai-interview-coach": {
     title: "AI Interview Coach — Free AI Mock Interviews",
     description: "Practise with an AI interview coach: realtime voice mock interviews built from the job description, scored answers, and a personalised practice plan.",
@@ -181,6 +186,8 @@ function resolveOgImage(pathname: string): string {
   if (pathname === "/landing") return `${ORIGIN}/og/landing.png`;
   // Keyword landing pages ship their own card so social previews match intent.
   if (pathname === "/ai-interview-coach") return `${ORIGIN}/og/ai-interview-coach.png`;
+  if (pathname === "/ats-resume-checker") return `${ORIGIN}/og/ats-resume-checker.png`;
+  if (pathname === "/ai-resume-builder") return `${ORIGIN}/og/ai-resume-builder.png`;
   // The blog index uses a dedicated card so it never shares the homepage image.
   if (pathname === "/blog") return `${ORIGIN}/og/blog.png`;
   if (pathname.startsWith("/blog/")) {
@@ -243,18 +250,27 @@ export function normalizeSeoPath(pathname: string): string {
 export function RouteSeo() {
   const location = useLocation();
   const pathname = normalizeSeoPath(location.pathname);
-  const meta = META[pathname] ??
+  const override = useSeoOverrideValue();
+  const baseMeta = META[pathname] ??
     resolveDynamicMeta(pathname) ?? {
       title: SITE_TITLE,
       description: SITE_DESCRIPTION,
     };
+  // Product surfaces (resume, matching, interview…) push a live title through
+  // useSeoOverride so the tab and canonical reflect what's on screen, without
+  // rendering a competing Helmet block.
+  const meta = {
+    title: override?.title ?? baseMeta.title,
+    description: override?.description ?? baseMeta.description,
+  };
   // "/" keeps the brand-first title; every other route (including /landing)
   // gets its own distinct title so no two public URLs duplicate one another.
   const fullTitle =
     pathname === "/"
       ? SITE_TITLE
       : `${meta.title} — ${SITE}`;
-  const url = `${ORIGIN}${pathname}`;
+  const canonicalPath = override?.path ?? pathname;
+  const url = `${ORIGIN}${canonicalPath}`;
   const ogImage = resolveOgImage(pathname);
   const noindex = isNoIndex(pathname);
 

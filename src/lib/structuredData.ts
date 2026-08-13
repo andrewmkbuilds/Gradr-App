@@ -284,6 +284,29 @@ export function validateJsonLd(node: JsonLd, label = "jsonld"): string[] {
       requireAbsoluteUrl(node.url, ".url");
       break;
     }
+    case "HowTo": {
+      requireText(node.name, ".name");
+      requireText(node.description, ".description");
+      requireAbsoluteUrl(node.url, ".url");
+      const steps = node.step;
+      if (!Array.isArray(steps) || steps.length < 2) {
+        errors.push(`${at(".step")}: needs at least 2 steps`);
+        break;
+      }
+      steps.forEach((raw, i) => {
+        const step = raw as JsonLd;
+        if (step["@type"] !== "HowToStep") errors.push(`${at(`.step[${i}]`)}: @type must be HowToStep`);
+        requireText(step.name, `.step[${i}].name`);
+        requireText(step.text, `.step[${i}].text`);
+      });
+      break;
+    }
+    case "SoftwareApplication": {
+      requireText(node.name, ".name");
+      requireText(node.description, ".description");
+      requireAbsoluteUrl(node.url, ".url");
+      break;
+    }
     default:
       break;
   }
@@ -366,4 +389,56 @@ export function legalJsonLd(input: {
       { name: input.name, path: input.path },
     ]),
   ];
+}
+
+/**
+ * HowTo schema for the step-by-step "how it works" blocks on the public
+ * tool landing pages. Google surfaces these as rich results for
+ * task-oriented queries ("how to check my resume against an ATS").
+ */
+export function buildHowToLd(input: {
+  name: string;
+  description: string;
+  path: string;
+  totalTime?: string;
+  steps: { name: string; text: string }[];
+}): JsonLd {
+  const url = absoluteUrl(input.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: input.name,
+    description: input.description,
+    url,
+    ...(input.totalTime ? { totalTime: input.totalTime } : {}),
+    step: input.steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+      url: `${url}#step-${i + 1}`,
+    })),
+    inLanguage: "en",
+  };
+}
+
+/** SoftwareApplication schema for a free public Gradr tool page. */
+export function buildSoftwareAppLd(input: {
+  name: string;
+  description: string;
+  path: string;
+  price?: string;
+}): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: input.name,
+    url: absoluteUrl(input.path),
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    description: input.description,
+    publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_ORIGIN },
+    offers: { "@type": "Offer", price: input.price ?? "0", priceCurrency: "USD" },
+    inLanguage: "en",
+  };
 }
