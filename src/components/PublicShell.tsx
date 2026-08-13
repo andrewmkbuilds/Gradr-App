@@ -2,6 +2,7 @@ import { Link } from "@/lib/router-compat";
 import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { trackEvent } from "@/lib/analytics";
 import { LEGAL_PAGES } from "@/content/legal";
 
@@ -39,6 +40,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
             ))}
           </nav>
           <div className="flex items-center gap-2">
+            <MotionQuickToggle />
             <ThemeToggle />
             <Link
               to="/auth?mode=signup"

@@ -3,6 +3,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { motion } from "framer-motion";
 import { type ReactNode } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -20,7 +21,8 @@ const TITLE = "Gradr";
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-screen flex aurora-bg overflow-hidden relative">
-      <div className="absolute right-4 top-4 z-20">
+      <div className="absolute right-4 top-4 z-20 flex items-center gap-1">
+        <MotionQuickToggle />
         <ThemeToggle />
       </div>
       {/* Ambient background motion — liquid blobs across the whole screen */}

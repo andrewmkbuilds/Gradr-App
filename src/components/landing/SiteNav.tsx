@@ -11,6 +11,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { Magnetic } from "@/components/motion";
 import { ease, spring } from "@/lib/motion";
 
@@ -106,6 +107,7 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
         </ul>
 
         <div className="hidden shrink-0 items-center gap-2 md:flex">
+          <MotionQuickToggle className="min-h-9 min-w-9" />
           <ThemeToggle className="min-h-9 min-w-9" />
           {authed ? (
             <Magnetic><Button size="sm" onClick={onOpenApp}>Open Gradr</Button></Magnetic>

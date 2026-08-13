@@ -21,6 +21,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
@@ -158,6 +159,11 @@ const RefundPolicyRoute = RefundPolicyRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -584,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/$': typeof AppSplatRoute
   '/apply': typeof AppApplyRoute
@@ -675,6 +682,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/$': typeof AppSplatRoute
   '/apply': typeof AppApplyRoute
@@ -769,6 +777,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/_app/$': typeof AppSplatRoute
   '/_app/apply': typeof AppApplyRoute
@@ -864,6 +873,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refund-policy'
     | '/reset-password'
+    | '/status'
     | '/terms'
     | '/$'
     | '/apply'
@@ -955,6 +965,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refund-policy'
     | '/reset-password'
+    | '/status'
     | '/terms'
     | '/$'
     | '/apply'
@@ -1048,6 +1059,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refund-policy'
     | '/reset-password'
+    | '/status'
     | '/terms'
     | '/_app/$'
     | '/_app/apply'
@@ -1142,6 +1154,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   BlogAiResumeOptimizationRoute: typeof BlogAiResumeOptimizationRoute
   CareerAdviceSlugRoute: typeof CareerAdviceSlugRoute
@@ -1273,6 +1286,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -1920,6 +1940,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   BlogAiResumeOptimizationRoute: BlogAiResumeOptimizationRoute,
   CareerAdviceSlugRoute: CareerAdviceSlugRoute,
