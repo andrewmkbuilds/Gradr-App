@@ -11,7 +11,7 @@ import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
 const SITE = "Gradr";
 const SITE_TITLE = "Gradr | AI Career Copilot for Resumes, Jobs & Interviews";
 const SITE_DESCRIPTION =
-  "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.";
+  "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.";
 const ORIGIN = "https://gradr.me";
 /**
  * Bumped whenever the social cards are re-rendered. Crawlers (WhatsApp,
