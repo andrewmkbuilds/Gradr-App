@@ -502,7 +502,7 @@ function InterviewEngineInner() {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">AI Mock Interview</h1>
+          <h1 className="type-h1 text-foreground tracking-tight">AI Mock Interview</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Realtime voice interview with live presence coaching and a scored report at the end
           </p>

@@ -100,7 +100,7 @@ export default function AdminBlogAnalytics() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Blog Analytics</h1>
+          <h1 className="type-h1 text-foreground tracking-tight">Blog Analytics</h1>
           <p className="text-sm text-muted-foreground mt-1">
             CTA performance for <code className="text-xs">/blog/ai-resume-optimization</code>
           </p>

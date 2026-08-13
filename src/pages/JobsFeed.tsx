@@ -407,7 +407,7 @@ export default function JobsFeed() {
       <OnboardingDialog open={showOnboarding} onComplete={handleOnboardingComplete} />
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Job Feed</h1>
+        <h1 className="type-h1">Job Feed</h1>
         <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
       </div>
 

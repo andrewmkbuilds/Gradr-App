@@ -117,7 +117,7 @@ export default function AdminSecurityFindings() {
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Security Findings</h1>
+          <h1 className="type-h1 text-foreground">Security Findings</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Immutable scan history for Gradr's database access rules. Exports are delivered through signed,
             single-use links and every privileged action is CSRF-protected and audit logged.

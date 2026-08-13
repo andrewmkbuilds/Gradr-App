@@ -177,7 +177,7 @@ export default function AdminPaddle() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Paddle customers</h1>
+          <h1 className="type-h1 text-foreground tracking-tight">Paddle customers</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Local mirror of Paddle customers and subscriptions, kept in sync by the billing webhook. Open a
             customer to see their most recent webhook events.

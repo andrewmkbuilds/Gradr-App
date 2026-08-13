@@ -120,7 +120,7 @@ export default function AffiliateDashboard() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Gradr Referral Program</h1>
+          <h1 className="type-h1 text-foreground tracking-tight">Gradr Referral Program</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Share Gradr, climb the levels, get paid. Everything below is live data from your account.
           </p>
@@ -193,7 +193,7 @@ export default function AffiliateDashboard() {
 
             <div className="elev-2 rounded-xl p-6">
               <h3 className="text-sm font-semibold text-foreground mb-2">Earnings projection</h3>
-              <div className="text-3xl font-bold text-foreground">
+              <div className="type-h1 text-foreground">
                 ${(earnings?.projected_next_30d ?? 0).toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground mt-2">

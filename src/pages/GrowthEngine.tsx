@@ -108,7 +108,7 @@ export default function GrowthEngine() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Growth &amp; Proof</h1>
+        <h1 className="type-h1 text-foreground">Growth &amp; Proof</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Skill gaps computed from your real resume scores and the jobs you have matched against — no generic advice.
         </p>

@@ -240,7 +240,7 @@ export default function Pipeline() {
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Application Pipeline</h1>
+          <h1 className="type-h1">Application Pipeline</h1>
           <p className="text-sm text-muted-foreground mt-1">Drag jobs across stages. Track every opportunity.</p>
         </div>
         <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
