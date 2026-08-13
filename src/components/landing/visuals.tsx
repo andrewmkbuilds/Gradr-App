@@ -175,7 +175,25 @@ export function HeroWorkspace() {
 
 export function ResumeVisual() {
   return (
-    <AppFrame title="gradr — resume intelligence">
+    <AppFrame
+      title="gradr — resume intelligence"
+      overlay={
+        <>
+          <FloatingReadout className="-right-5 -top-7 lg:-right-10" z={80}>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">ATS score</p>
+            <p className="font-display text-2xl font-bold tabular-nums text-foreground">
+              <CountUp to={86} duration={1.4} />
+            </p>
+          </FloatingReadout>
+          <FloatingReadout className="-bottom-6 -left-5 lg:-left-10" z={58} delay={1.2}>
+            <p className="flex items-center gap-2 text-[11px] font-medium text-foreground">
+              <Sparkles className="h-3.5 w-3.5 text-brand-secondary" />
+              4 keyword gaps found
+            </p>
+          </FloatingReadout>
+        </>
+      }
+    >
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-secondary/30 p-3">
           <div className="mb-3 flex items-center gap-2">
@@ -250,7 +268,25 @@ const MATCHES = [
 
 export function MatchVisual() {
   return (
-    <AppFrame title="gradr — job matching">
+    <AppFrame
+      title="gradr — job matching"
+      overlay={
+        <>
+          <FloatingReadout className="-left-6 top-10 lg:-left-12" z={78}>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Top match</p>
+            <p className="font-display text-2xl font-bold tabular-nums text-primary">
+              <CountUp to={92} suffix="%" duration={1.4} />
+            </p>
+          </FloatingReadout>
+          <FloatingReadout className="-bottom-6 right-4" z={54} delay={0.9}>
+            <p className="flex items-center gap-2 text-[11px] font-medium text-foreground">
+              <Target className="h-3.5 w-3.5 text-primary" />
+              18 live roles scored today
+            </p>
+          </FloatingReadout>
+        </>
+      }
+    >
       <ul className="space-y-2.5">
         {MATCHES.map((m) => (
           <li key={m.role} className="rounded-xl border border-border bg-secondary/30 p-3">
@@ -333,7 +369,25 @@ export function ApplicationVisual() {
 
 export function InterviewVisual() {
   return (
-    <AppFrame title="gradr — ai mock interview">
+    <AppFrame
+      title="gradr — ai mock interview"
+      overlay={
+        <>
+          <FloatingReadout className="-right-5 top-8 lg:-right-12" z={82}>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Session score</p>
+            <p className="font-display text-2xl font-bold tabular-nums text-foreground">
+              <CountUp to={78} suffix="/100" duration={1.5} />
+            </p>
+          </FloatingReadout>
+          <FloatingReadout className="-bottom-6 left-6" z={56} delay={1.1}>
+            <p className="flex items-center gap-2 text-[11px] font-medium text-foreground">
+              <Waves className="h-3.5 w-3.5 text-primary" />
+              Live transcript · captions on
+            </p>
+          </FloatingReadout>
+        </>
+      }
+    >
       <div className="grid gap-3 lg:grid-cols-5">
         <div className="space-y-3 lg:col-span-3">
           <div className="relative overflow-hidden rounded-xl border border-primary/25 bg-background/60 p-5">
@@ -441,7 +495,15 @@ export function AssistantVisual() {
 export function AnalyticsVisual() {
   const bars = [38, 46, 42, 58, 55, 67, 72, 78];
   return (
-    <AppFrame title="gradr — career analytics">
+    <AppFrame
+      title="gradr — career analytics"
+      overlay={
+        <FloatingReadout className="-right-5 -top-6 lg:-right-10" z={76}>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Next milestone</p>
+          <p className="text-[11px] font-medium text-foreground">3 skills to Senior Analyst</p>
+        </FloatingReadout>
+      }
+    >
       <div className="grid gap-3 sm:grid-cols-3">
         {[
           ["ATS health", "86", "+8 this month"],
