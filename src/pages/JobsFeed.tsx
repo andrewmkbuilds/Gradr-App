@@ -138,19 +138,8 @@ export default function JobsFeed() {
     return () => window.clearInterval(id);
   }, [user, noResumeScoringAttempted, jobs]);
 
-  const initialize = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
-    void logPreferencesRead("jobs_feed", Boolean(data));
-    if (!data || !data.onboarded) {
-      setShowOnboarding(true);
-      return;
-    }
-    setWhat(data.target_role || "");
-    setWhere(data.locations?.[0] || "");
-    setCountry(data.country || "us");
-    if (data.remote_preference === "remote") setRemoteOnly(true);
-  };
+
+
 
   const handleOnboardingComplete = (prefs: { what: string; where: string; country: string; remoteOnly: boolean; salaryMin: number | null }) => {
     setShowOnboarding(false);
