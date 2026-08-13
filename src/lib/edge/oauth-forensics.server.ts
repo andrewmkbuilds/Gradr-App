@@ -717,25 +717,61 @@ export const handler = async (req: Request): Promise<Response> => {
 
   const limit = Math.min(200, Math.max(1, Number(body["limit"]) || 50));
 
+  // Shared filter payload for the traces/checks tables.
+  const filters = (body["filters"] ?? {}) as Record<string, unknown>;
+  const fFrom = str(filters["from"], 40);
+  const fTo = str(filters["to"], 40);
+  const fUser = str(filters["userId"], 80);
+  const fAccountKind = str(filters["accountKind"], 40);
+  const fOutcome = str(filters["outcome"], 40);
+  const fDeviation = str(filters["deviation"], 20); // "only" | "none"
+  const fStateNonce = str(filters["stateNonce"], 20); // "failed" | "valid"
+  const fQuery = str(filters["q"], 200);
+
   switch (action) {
     case "traces": {
-      const { data, error } = await db()
+      let q = db()
         .from("oauth_signin_traces")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(limit);
+
+      if (fFrom) q = q.gte("created_at", new Date(fFrom).toISOString());
+      // Inclusive end-of-day when the UI sends a bare date.
+      if (fTo) q = q.lte("created_at", new Date(fTo.length <= 10 ? `${fTo}T23:59:59.999Z` : fTo).toISOString());
+      if (fUser) q = q.eq("user_id", fUser);
+      if (fAccountKind && fAccountKind !== "all") q = q.eq("account_kind", fAccountKind);
+      if (fOutcome && fOutcome !== "all") q = q.eq("outcome", fOutcome);
+      if (fDeviation === "only") q = q.eq("deviation", true);
+      if (fDeviation === "none") q = q.eq("deviation", false);
+      if (fStateNonce === "failed") q = q.or("state_valid.is.false,nonce_valid.is.false");
+      if (fStateNonce === "valid") q = q.eq("state_valid", true).eq("nonce_valid", true);
+      if (fQuery) q = q.or(`request_id.ilike.%${fQuery}%,final_domain.ilike.%${fQuery}%,error_code.ilike.%${fQuery}%`);
+
+      const { data, error } = await q;
       if (error) return json({ error: error.message }, 500);
-      return json({ traces: data ?? [], expectedFinalUrl: EXPECTED_FINAL_URL });
+      return json({
+        traces: (data ?? []).map((row) => redactTraceRow(row)),
+        expectedFinalUrl: EXPECTED_FINAL_URL,
+      });
     }
     case "checks": {
-      const { data, error } = await db()
+      let q = db()
         .from("oauth_flow_checks")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(limit);
+
+      if (fFrom) q = q.gte("created_at", new Date(fFrom).toISOString());
+      if (fTo) q = q.lte("created_at", new Date(fTo.length <= 10 ? `${fTo}T23:59:59.999Z` : fTo).toISOString());
+      if (fOutcome && fOutcome !== "all") q = q.eq("status", fOutcome);
+      if (fQuery) q = q.or(`run_id.ilike.%${fQuery}%,account_label.ilike.%${fQuery}%`);
+
+      const { data, error } = await q;
       if (error) return json({ error: error.message }, 500);
-      return json({ checks: data ?? [] });
+      return json({ checks: (data ?? []).map((row) => redactTraceRow(row)) });
     }
+
     case "headers":
       return runHeaderCheck("admin", str(body["origin"], 200) ?? SITE_ORIGIN);
     case "csp": {
