@@ -65,6 +65,7 @@ import { Route as AppInterviewIndexRouteImport } from './routes/_app/interview/i
 import { Route as AppInterviewHistoryRouteImport } from './routes/_app/interview/history'
 import { Route as ApiPublicAdminRpcRouteImport } from './routes/api/public/admin-rpc'
 import { Route as ApiPublicAdminWebhookReplayRouteImport } from './routes/api/public/admin-webhook-replay'
+import { Route as ApiPublicAdminWebhookSimulateRouteImport } from './routes/api/public/admin-webhook-simulate'
 import { Route as ApiPublicAffiliatePublicRouteImport } from './routes/api/public/affiliate-public'
 import { Route as ApiPublicAnalyzeResumeRouteImport } from './routes/api/public/analyze-resume'
 import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
@@ -375,6 +376,12 @@ const ApiPublicAdminWebhookReplayRoute =
     path: '/api/public/admin-webhook-replay',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAdminWebhookSimulateRoute =
+  ApiPublicAdminWebhookSimulateRouteImport.update({
+    id: '/api/public/admin-webhook-simulate',
+    path: '/api/public/admin-webhook-simulate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAffiliatePublicRoute =
   ApiPublicAffiliatePublicRouteImport.update({
     id: '/api/public/affiliate-public',
@@ -580,6 +587,7 @@ export interface FileRoutesByFullPath {
   '/interview/history': typeof AppInterviewHistoryRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
+  '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
@@ -665,6 +673,7 @@ export interface FileRoutesByTo {
   '/interview/history': typeof AppInterviewHistoryRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
+  '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
@@ -752,6 +761,7 @@ export interface FileRoutesById {
   '/_app/interview/history': typeof AppInterviewHistoryRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
+  '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
   '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
   '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
@@ -839,6 +849,7 @@ export interface FileRouteTypes {
     | '/interview/history'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
+    | '/api/public/admin-webhook-simulate'
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
@@ -924,6 +935,7 @@ export interface FileRouteTypes {
     | '/interview/history'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
+    | '/api/public/admin-webhook-simulate'
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
@@ -1010,6 +1022,7 @@ export interface FileRouteTypes {
     | '/_app/interview/history'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
+    | '/api/public/admin-webhook-simulate'
     | '/api/public/affiliate-public'
     | '/api/public/analyze-resume'
     | '/api/public/calendar-sync'
@@ -1065,6 +1078,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicAdminRpcRoute: typeof ApiPublicAdminRpcRoute
   ApiPublicAdminWebhookReplayRoute: typeof ApiPublicAdminWebhookReplayRoute
+  ApiPublicAdminWebhookSimulateRoute: typeof ApiPublicAdminWebhookSimulateRoute
   ApiPublicAffiliatePublicRoute: typeof ApiPublicAffiliatePublicRoute
   ApiPublicAnalyzeResumeRoute: typeof ApiPublicAnalyzeResumeRoute
   ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
@@ -1489,6 +1503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAdminWebhookReplayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/admin-webhook-simulate': {
+      id: '/api/public/admin-webhook-simulate'
+      path: '/api/public/admin-webhook-simulate'
+      fullPath: '/api/public/admin-webhook-simulate'
+      preLoaderRoute: typeof ApiPublicAdminWebhookSimulateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/affiliate-public': {
       id: '/api/public/affiliate-public'
       path: '/api/public/affiliate-public'
@@ -1787,6 +1808,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicAdminRpcRoute: ApiPublicAdminRpcRoute,
   ApiPublicAdminWebhookReplayRoute: ApiPublicAdminWebhookReplayRoute,
+  ApiPublicAdminWebhookSimulateRoute: ApiPublicAdminWebhookSimulateRoute,
   ApiPublicAffiliatePublicRoute: ApiPublicAffiliatePublicRoute,
   ApiPublicAnalyzeResumeRoute: ApiPublicAnalyzeResumeRoute,
   ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
