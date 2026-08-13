@@ -94,8 +94,9 @@ function harden(response: Response): Response {
     headers.set("cross-origin-opener-policy", "same-origin-allow-popups");
   }
 
-  // Response bodies are streams; reuse the original body rather than buffering.
-  return new Response(response.body, {
+  // 101/204/205/304 must stay body-less; everything else reuses the original stream.
+  const nullBody = [101, 204, 205, 304].includes(response.status);
+  return new Response(nullBody ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
