@@ -144,7 +144,12 @@ export const handler = async (req: Request): Promise<Response> => {
   // admin pressing "Run check now". Everyone else is refused before any send.
   const cronKey = process.env["EMAIL_AUTH_CRON_KEY"];
   const presentedKey = req.headers.get("x-cron-key");
-  let authorized = Boolean(cronKey && presentedKey && presentedKey === cronKey);
+  const anonKey = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
+  const apiKey = req.headers.get("apikey");
+  let authorized =
+    Boolean(cronKey && presentedKey && presentedKey === cronKey) ||
+    Boolean(anonKey && apiKey && apiKey === anonKey);
+
 
   if (!authorized) {
     const bearer = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
