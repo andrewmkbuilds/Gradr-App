@@ -32,6 +32,16 @@
   --color-brand-secondary: hsl(var(--brand-secondary));
   --color-brand-secondary-soft: hsl(var(--brand-secondary-soft));
 
+  /* Mahogany #733E24 — premium secondary accent scale */
+  --color-mahogany: hsl(var(--mahogany));
+  --color-mahogany-foreground: hsl(var(--mahogany-foreground));
+  --color-mahogany-hover: hsl(var(--mahogany-hover));
+  --color-mahogany-soft: hsl(var(--mahogany-soft));
+  --color-mahogany-tint: hsl(var(--mahogany-tint));
+  --color-mahogany-border: hsl(var(--mahogany-border));
+  --color-mahogany-ink: hsl(var(--mahogany-ink));
+
+
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-primary-hover: hsl(var(--primary-hover));
