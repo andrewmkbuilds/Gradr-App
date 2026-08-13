@@ -1820,6 +1820,63 @@ export type Database = {
         }
         Relationships: []
       }
+      fingerprint_snapshots: {
+        Row: {
+          added: Json
+          artifact_url: string | null
+          branch: string | null
+          captured_at: string
+          changed: Json
+          commit_sha: string | null
+          created_at: string
+          id: string
+          origin: string
+          removed: Json
+          run_id: string | null
+          run_url: string | null
+          severity: string
+          signal_count: number
+          signals: Json
+          source: string
+        }
+        Insert: {
+          added?: Json
+          artifact_url?: string | null
+          branch?: string | null
+          captured_at?: string
+          changed?: Json
+          commit_sha?: string | null
+          created_at?: string
+          id?: string
+          origin?: string
+          removed?: Json
+          run_id?: string | null
+          run_url?: string | null
+          severity?: string
+          signal_count?: number
+          signals?: Json
+          source?: string
+        }
+        Update: {
+          added?: Json
+          artifact_url?: string | null
+          branch?: string | null
+          captured_at?: string
+          changed?: Json
+          commit_sha?: string | null
+          created_at?: string
+          id?: string
+          origin?: string
+          removed?: Json
+          run_id?: string | null
+          run_url?: string | null
+          severity?: string
+          signal_count?: number
+          signals?: Json
+          source?: string
+        }
+        Relationships: []
+      }
       interview_session_metrics: {
         Row: {
           avg_latency_ms: number | null
@@ -2822,6 +2879,42 @@ export type Database = {
           reason?: string | null
           source?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      security_digest_runs: {
+        Row: {
+          channels: string[]
+          created_at: string
+          delivery_error: string | null
+          dry_run: boolean
+          id: string
+          period_end: string
+          period_start: string
+          summary: Json
+          triggered_by: string
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          delivery_error?: string | null
+          dry_run?: boolean
+          id?: string
+          period_end: string
+          period_start: string
+          summary?: Json
+          triggered_by?: string
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          delivery_error?: string | null
+          dry_run?: boolean
+          id?: string
+          period_end?: string
+          period_start?: string
+          summary?: Json
+          triggered_by?: string
         }
         Relationships: []
       }

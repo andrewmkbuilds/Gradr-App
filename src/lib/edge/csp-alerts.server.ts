@@ -53,24 +53,65 @@ function hasCronKey(req: Request): boolean {
   return Boolean(secret && presented && presented === secret);
 }
 
-async function isAdmin(req: Request): Promise<boolean> {
+/** Resolves the caller's admin identity, or null when they are not an admin. */
+async function adminUserId(req: Request): Promise<string | null> {
   const bearer = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
-  if (!bearer) return false;
+  if (!bearer) return null;
   const { data } = await db().auth.getUser(bearer);
   const user = data?.user;
-  if (!user || user.is_anonymous) return false;
+  if (!user || user.is_anonymous) return null;
   const { data: ok } = await db().rpc("has_role", { _user_id: user.id, _role: "admin" });
-  return ok === true;
+  return ok === true ? user.id : null;
 }
 
-async function loadReports(days: number): Promise<CspViolationRow[]> {
-  const since = new Date(Date.now() - days * 86_400_000).toISOString();
-  const { data, error } = await db()
+/** Audit trail for every admin read of violation payloads / incident exports. */
+async function logAdminAccess(
+  actor: string,
+  action: string,
+  recordCount: number,
+  details: Record<string, unknown>,
+): Promise<void> {
+  await db()
+    .rpc("log_admin_access", {
+      _action: action,
+      _resource_type: "csp_violation_reports",
+      _record_count: recordCount,
+      _resource_id: null,
+      _details: { actor, ...details },
+    })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
+}
+
+/** Explicit audit window: `from`/`to` when supplied, otherwise the last N days. */
+export interface AuditWindow {
+  fromIso: string;
+  toIso: string | null;
+  days: number;
+  explicit: boolean;
+}
+
+function auditWindow(from: string | null, to: string | null, days: number): AuditWindow {
+  const explicit = Boolean(from || to);
+  const toIso = to ? new Date(to.length <= 10 ? `${to}T23:59:59.999Z` : to).toISOString() : null;
+  const fromIso = from
+    ? new Date(from.length <= 10 ? `${from}T00:00:00.000Z` : from).toISOString()
+    : new Date((toIso ? Date.parse(toIso) : Date.now()) - days * 86_400_000).toISOString();
+  return { fromIso, toIso, days, explicit };
+}
+
+async function loadReports(days: number, window?: AuditWindow): Promise<CspViolationRow[]> {
+  const w = window ?? auditWindow(null, null, days);
+  let q = db()
     .from("csp_violation_reports")
     .select("created_at, effective_directive, violated_directive, blocked_origin, blocked_uri, document_path, document_uri")
-    .gte("created_at", since)
+    .gte("created_at", w.fromIso)
     .order("created_at", { ascending: false })
     .limit(5000);
+  if (w.toIso) q = q.lte("created_at", w.toIso);
+  const { data, error } = await q;
   if (error) throw new Error(error.message);
   return (data ?? []) as CspViolationRow[];
 }
@@ -87,19 +128,42 @@ interface CspDetailRow extends CspViolationRow {
   user_agent?: string | null;
 }
 
-async function loadDetailedReports(days: number, limit = 5000): Promise<CspDetailRow[]> {
-  const since = new Date(Date.now() - days * 86_400_000).toISOString();
-  const { data, error } = await db()
+async function loadDetailedReports(days: number, limit = 5000, window?: AuditWindow): Promise<CspDetailRow[]> {
+  const w = window ?? auditWindow(null, null, days);
+  let q = db()
     .from("csp_violation_reports")
     .select(
       "id, created_at, effective_directive, violated_directive, blocked_origin, blocked_uri, document_path, document_uri, source_file, line_number, column_number, status_code, disposition, script_sample, user_agent",
     )
-    .gte("created_at", since)
+    .gte("created_at", w.fromIso)
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (w.toIso) q = q.lte("created_at", w.toIso);
+  const { data, error } = await q;
   if (error) throw new Error(error.message);
   return (data ?? []) as CspDetailRow[];
 }
+
+/**
+ * Severity of a directive/origin pair, used by the export filter.
+ *  - `critical` breaks auth / Supabase / the PWA
+ *  - `warning`  is spiking or brand new
+ *  - `info`     is background noise
+ */
+export type CspSeverity = "critical" | "warning" | "info";
+
+export function comboSeverity(
+  combo: { key: string; surfaces: readonly string[] },
+  spikeKeys: Set<string>,
+  newKeys: Set<string>,
+): CspSeverity {
+  if (combo.surfaces.length > 0) return "critical";
+  if (spikeKeys.has(combo.key) || newKeys.has(combo.key)) return "warning";
+  return "info";
+}
+
+const SEVERITY_RANK: Record<CspSeverity, number> = { info: 0, warning: 1, critical: 2 };
+
 
 /**
  * Deployment provenance for incident exports.
@@ -285,7 +349,24 @@ export const handler = async (req: Request): Promise<Response> => {
   const action = String(body["action"] ?? url.searchParams.get("action") ?? "readiness").slice(0, 40);
   const days = Math.min(90, Math.max(1, Number(body["days"] ?? url.searchParams.get("days")) || CSP_DEFAULTS.baselineDays));
 
-  if (!hasCronKey(req) && !(await isAdmin(req))) {
+  const str = (value: unknown, max = 40): string | null =>
+    typeof value === "string" && value.trim() ? value.trim().slice(0, max) : null;
+  const window = auditWindow(
+    str(body["from"] ?? url.searchParams.get("from")),
+    str(body["to"] ?? url.searchParams.get("to")),
+    days,
+  );
+  const severity = (str(body["severity"] ?? url.searchParams.get("severity"), 12) ?? "all").toLowerCase();
+  const minRank = severity in SEVERITY_RANK ? SEVERITY_RANK[severity as CspSeverity] : 0;
+
+  /**
+   * Only the unattended jobs (`check`, `readiness`) may authenticate with the
+   * cron key. Everything that returns violation payloads — status, trends,
+   * drill-downs and incident exports — is admin-session only, and audited.
+   */
+  const CRON_ACTIONS = new Set(["check", "readiness"]);
+  const actor = await adminUserId(req);
+  if (!actor && !(CRON_ACTIONS.has(action) && hasCronKey(req))) {
     return json({ error: "Admin access required" }, 403);
   }
 
@@ -328,20 +409,53 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!comboKey.includes("|")) return json({ error: "A combo key is required" }, 400);
         const rows = await loadDetailedReports(days);
         const matches = reportsForCombo(rows, comboKey).slice(0, 200);
+        if (actor) await logAdminAccess(actor, "csp_combo_drilldown", matches.length, { key: comboKey, days });
         return json({ key: comboKey, days, total: matches.length, reports: matches });
       }
-      /** One-click incident bundle for auditing and ticket creation. */
+      /**
+       * One-click incident bundle for auditing and ticket creation.
+       * Honours an explicit `from`/`to` audit window plus a severity floor so
+       * an auditor can pull exactly the period and the impact class they need.
+       */
       case "incident": {
-        const rows = await loadDetailedReports(days, 2000);
+        const rows = await loadDetailedReports(days, 2000, window);
         const analysis = analyzeCsp(rows, { baselineDays: days });
+        const spikeKeys = new Set(analysis.spikes.map((s) => s.key));
+        const newKeys = new Set(analysis.newCombos.map((c) => c.key));
+
+        const withSeverity = analysis.combos.map((combo) => ({
+          ...combo,
+          severity: comboSeverity(combo, spikeKeys, newKeys),
+        }));
+        const combos = withSeverity.filter((c) => SEVERITY_RANK[c.severity] >= minRank);
+        const keptKeys = new Set(combos.map((c) => c.key));
+        const reports = rows
+          .filter((row) => {
+            if (minRank === 0) return true;
+            const key = `${row.effective_directive ?? "unknown"}|${row.blocked_origin ?? "unknown"}`;
+            return keptKeys.has(key);
+          })
+          .slice(0, 1000);
+
         const { data: notices } = await db()
           .from("csp_alert_notices")
           .select("*")
           .order("last_alerted_at", { ascending: false })
           .limit(100);
+
+        if (actor) {
+          await logAdminAccess(actor, "csp_incident_export", reports.length, {
+            from: window.fromIso,
+            to: window.toIso,
+            severity,
+            days,
+          });
+        }
+
         return json({
           generatedAt: analysis.now,
           days,
+          window: { from: window.fromIso, to: window.toIso, explicit: window.explicit, severity },
           build: buildMetadata(),
           policy: {
             enforced: cspEnforcementEnabled(),
@@ -349,15 +463,21 @@ export const handler = async (req: Request): Promise<Response> => {
             candidate: CONTENT_SECURITY_POLICY_REPORT_ONLY,
           },
           readiness: analysis.readiness,
-          totals: { reports: analysis.total, recent: analysis.recentTotal, combos: analysis.combos.length },
+          totals: {
+            reports: analysis.total,
+            recent: analysis.recentTotal,
+            combos: combos.length,
+            filteredOut: withSeverity.length - combos.length,
+          },
           buckets: bucketCspReports(rows, { days }),
-          combos: analysis.combos,
-          spikes: analysis.spikes,
-          newCombos: analysis.newCombos,
+          combos,
+          spikes: analysis.spikes.filter((s) => keptKeys.has(s.key)),
+          newCombos: analysis.newCombos.filter((c) => keptKeys.has(c.key)),
           notices: notices ?? [],
-          reports: rows.slice(0, 1000),
+          reports,
         });
       }
+
       default:
         return json({ error: `Unknown action "${action}"` }, 400);
     }

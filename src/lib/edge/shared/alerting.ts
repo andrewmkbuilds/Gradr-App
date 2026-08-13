@@ -356,3 +356,124 @@ export async function dispatchCspAlert(notice: CspAlertNotice): Promise<string |
   });
   return errors.length > 0 ? errors.join("; ") : null;
 }
+
+/* ------------------------------------------------- weekly security digest -- */
+
+export interface SecurityDigestNotice {
+  headline: string;
+  period: { start: string; end: string };
+  csp: {
+    reports: { current: number; previous: number; pct: string };
+    criticalReports: { current: number; previous: number; pct: string };
+    newCombos: { directive: string; blockedOrigin: string; recent: number; surfaces: string[] }[];
+    readiness: { ready: boolean; cleanDays: number; requiredCleanDays: number; summary: string };
+    enforced: boolean;
+  };
+  fingerprint: { added: string[]; removed: string[]; changed: string[] };
+  links: { label: string; url: string }[];
+}
+
+function digestLines(notice: SecurityDigestNotice): string[] {
+  const { csp, fingerprint } = notice;
+  const lines = [
+    `CSP reports:      ${csp.reports.current} (was ${csp.reports.previous}, ${csp.reports.pct})`,
+    `Critical-surface: ${csp.criticalReports.current} (was ${csp.criticalReports.previous}, ${csp.criticalReports.pct})`,
+    `Policy mode:      ${csp.enforced ? "enforced" : "report-only"} — ${csp.readiness.summary}`,
+    "",
+    `New directive/origin pairs (${csp.newCombos.length}):`,
+    ...(csp.newCombos.length
+      ? csp.newCombos.slice(0, 10).map(
+          (c) => `  • ${c.directive} → ${c.blockedOrigin} — ${c.recent} reports${c.surfaces.length ? ` [${c.surfaces.join(", ")}]` : ""}`,
+        )
+      : ["  • none"]),
+    "",
+    `Fingerprint changes (${fingerprint.added.length} added / ${fingerprint.removed.length} removed / ${fingerprint.changed.length} changed):`,
+    ...[...fingerprint.added.map((s) => `  + ${s}`), ...fingerprint.removed.map((s) => `  - ${s}`), ...fingerprint.changed.map((s) => `  ~ ${s}`)]
+      .slice(0, 15),
+  ];
+  if (!fingerprint.added.length && !fingerprint.removed.length && !fingerprint.changed.length) {
+    lines.push("  • none");
+  }
+  return lines;
+}
+
+async function postDigestSlack(notice: SecurityDigestNotice): Promise<void> {
+  const url = process.env['ALERT_SLACK_WEBHOOK_URL'];
+  if (!url) return;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: `:calendar: Gradr — weekly security digest`,
+      blocks: [
+        { type: "header", text: { type: "plain_text", text: "Gradr — weekly security digest" } },
+        {
+          type: "section",
+          fields: [
+            { type: "mrkdwn", text: `*Window*\n${notice.period.start.slice(0, 10)} → ${notice.period.end.slice(0, 10)}` },
+            { type: "mrkdwn", text: `*Summary*\n${notice.headline}` },
+          ],
+        },
+        { type: "section", text: { type: "mrkdwn", text: `\`\`\`${digestLines(notice).join("\n").slice(0, 2800)}\`\`\`` } },
+        ...(notice.links.length
+          ? [{
+              type: "context",
+              elements: [{ type: "mrkdwn", text: notice.links.map((l) => `<${l.url}|${l.label}>`).join(" · ") }],
+            }]
+          : []),
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`Slack responded ${res.status}`);
+}
+
+async function sendDigestEmail(notice: SecurityDigestNotice): Promise<void> {
+  const to = process.env['ALERT_EMAIL_TO'];
+  const apiKey = process.env['LOVABLE_API_KEY'];
+  const from = process.env['ALERT_EMAIL_FROM'] ?? 'alerts@notify.gradr.me';
+  if (!to) return;
+  if (!apiKey) throw new Error('LOVABLE_API_KEY is not configured');
+
+  const escaped = (value: string) => value.replace(/</g, "&lt;");
+  const body = digestLines(notice).join("\n");
+  const subject = `[Gradr] Weekly security digest — ${notice.headline}`;
+
+  await sendLovableEmail({
+    to,
+    from,
+    subject,
+    text: `${subject}\n\n${notice.period.start.slice(0, 10)} → ${notice.period.end.slice(0, 10)}\n\n${body}\n\n${notice.links
+      .map((l) => `${l.label}: ${l.url}`)
+      .join("\n")}`,
+    html: `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:640px">
+        <h2 style="margin:0 0 4px;color:#245F73">Weekly security digest</h2>
+        <p style="color:#555;margin:0 0 4px">${escaped(notice.headline)}</p>
+        <p style="font-size:13px;color:#777;margin:0 0 16px">${notice.period.start.slice(0, 10)} → ${notice.period.end.slice(0, 10)}</p>
+        <pre style="background:#F2F0EF;padding:12px;border-radius:8px;font-size:12px;white-space:pre-wrap">${escaped(body.slice(0, 4000))}</pre>
+        <p style="font-size:13px;line-height:1.9">
+          ${notice.links.map((l) => `<a href="${l.url}" style="color:#733E24">${escaped(l.label)}</a>`).join("<br/>")}
+        </p>
+      </div>
+    `,
+  }, { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] });
+}
+
+/** Delivers the weekly CSP + fingerprint digest. Best-effort, like the others. */
+export async function dispatchSecurityDigest(notice: SecurityDigestNotice): Promise<string | null> {
+  const targets = alertingTargets();
+  if (!targets.slack && !targets.email) return "no alert channel configured";
+
+  const errors: string[] = [];
+  const results = await Promise.allSettled([
+    targets.slack ? postDigestSlack(notice) : Promise.resolve(),
+    targets.email ? sendDigestEmail(notice) : Promise.resolve(),
+  ]);
+  ["slack", "email"].forEach((label, i) => {
+    const r = results[i];
+    if (r && r.status === "rejected") {
+      errors.push(`${label}: ${r.reason instanceof Error ? r.reason.message : String(r.reason)}`);
+    }
+  });
+  return errors.length > 0 ? errors.join("; ") : null;
+}
