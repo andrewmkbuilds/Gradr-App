@@ -165,7 +165,7 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
           paddingBottom: scrolled ? 6 : 10,
         }}
         transition={reduce ? { duration: 0 } : { duration: 0.35, ease: ease.standard }}
-        className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-2xl border px-3 backdrop-blur-2xl sm:px-4"
+        className="glass-float elev-3 mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-2xl border px-3 sm:px-4"
       >
         <a
           href="#hero"
@@ -236,7 +236,7 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25, ease: ease.standard }}
-            className="mx-auto mt-2 w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-card/95 p-3 backdrop-blur-2xl lg:hidden"
+            className="glass-float elev-4 mx-auto mt-2 w-full max-w-6xl overflow-hidden rounded-2xl border border-border p-3 lg:hidden"
           >
             <ul>
               {items.map((n, i) => (
