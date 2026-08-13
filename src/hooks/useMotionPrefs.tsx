@@ -154,7 +154,8 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.dataset['reduceMotion'] = reduceMotion ? "true" : "false";
     root.dataset['depth'] = effectiveDepth.toFixed(2);
-  }, [prefs, reduceMotion, effectiveDepth]);
+    root.dataset['lowPower'] = lowPower ? "true" : "false";
+  }, [prefs, reduceMotion, effectiveDepth, lowPower]);
 
   const update = useCallback(
     (patch: Partial<StoredPrefs>) => setPrefs((p) => ({ ...p, ...patch })),
