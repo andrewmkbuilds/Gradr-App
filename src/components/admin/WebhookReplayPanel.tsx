@@ -138,6 +138,25 @@ export default function WebhookReplayPanel() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Re-sends the untouched stored body through the endpoint's claim step and
+  // reports the ack the provider would get. Safe to run on processed events.
+  const idempotency = useMutation({
+    mutationFn: async () => {
+      if (!selected) throw new Error("No delivery selected");
+      return callReplayApi<IdempotencyResult>({
+        action: "idempotency",
+        deliveryId: selected.id,
+      });
+    },
+    onSuccess: (result) => {
+      setProbe(result);
+      if (result.idempotent) toast.success("Duplicate acked — idempotency holds");
+      else if (result.resent) toast.error("Idempotency did not hold");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   return (
     <Card className="p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
