@@ -276,7 +276,7 @@ export default function Dashboard() {
           title="Pipeline by Stage"
           icon={Briefcase}
           action={
-            <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
+            <button onClick={() => navigate("/pipeline")} className="link-accent text-xs font-medium">
               View pipeline →
             </button>
           }
@@ -331,7 +331,7 @@ export default function Dashboard() {
         <Surface level={2} className="lg:col-span-2">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Bell className="h-4 w-4 text-primary" />
+              <Bell className="h-4 w-4 text-mahogany" />
               Upcoming Reminders
               {overdueCount > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">
@@ -339,7 +339,7 @@ export default function Dashboard() {
                 </span>
               )}
             </h3>
-            <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
+            <button onClick={() => navigate("/pipeline")} className="link-accent text-xs font-medium">
               Manage →
             </button>
           </div>
@@ -396,7 +396,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-muted-foreground">{match.match_score ?? 0}% match</span>
+                  <span className="accent-chip tabular-nums">{match.match_score ?? 0}% match</span>
                 </div>
               </div>
             ))}
@@ -417,7 +417,7 @@ export default function Dashboard() {
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className="elev-1 elev-interactive group flex flex-col items-start rounded-lg p-4 text-left"
+              className="elev-1 elev-interactive accent-hover group flex flex-col items-start rounded-lg p-4 text-left"
             >
               <action.icon className="mb-3 h-5 w-5 text-primary transition-transform duration-200 group-hover:scale-110" />
               <span className="text-sm font-medium text-foreground">{action.label}</span>
