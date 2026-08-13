@@ -44,9 +44,33 @@ export const typography = {
   mono: "type-mono",
 } as const;
 
+/**
+ * Line-length caps. Reading text should never span a wide desktop surface.
+ * Pair with a typography token: `cn(t("body"), measure.default)`.
+ */
+export const measure = {
+  /** Paragraphs and long-form copy. */
+  default: "measure",
+  /** Streamed output, transcripts, generated documents. */
+  wide: "measure-wide",
+  /** Captions and side-panel copy. */
+  narrow: "measure-narrow",
+} as const;
+
+/** Mobile-first layout rhythm shared by every routed page. */
+export const layout = {
+  /** Page gutters + centered max width. */
+  shell: "page-shell",
+  /** Consistent vertical rhythm between page blocks. */
+  stack: "page-stack",
+  /** Panel padding that adapts from phone to desktop. */
+  panel: "pad-panel",
+} as const;
+
 export type TypographyToken = keyof typeof typography;
 
 /** `t("h3")` reads better than the object lookup inside JSX className strings. */
 export function t(token: TypographyToken): string {
   return typography[token];
 }
+
