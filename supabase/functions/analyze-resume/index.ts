@@ -63,7 +63,9 @@ serve(async (req) => {
       );
     }
 
-    const { resumeText, targetRole, jobDescription, jobTitle, environment } = await req.json();
+    const { resumeText, targetRole, jobDescription, jobTitle, environment, stream } = await req.json();
+    const wantsStream = stream === true;
+
     if (!resumeText) {
       return new Response(JSON.stringify({ error: "resumeText is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
