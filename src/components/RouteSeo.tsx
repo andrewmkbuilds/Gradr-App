@@ -3,7 +3,14 @@ import { useLocation } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
 import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
-import { legalJsonLd } from "@/lib/structuredData";
+import {
+  legalJsonLd,
+  homeJsonLd,
+  pricingJsonLd,
+  enginePageJsonLd,
+} from "@/lib/structuredData";
+import { TIERS } from "@/config/tiers";
+
 import { useSeoOverrideValue } from "@/lib/seoOverride";
 import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
