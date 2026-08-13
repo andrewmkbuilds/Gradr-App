@@ -224,7 +224,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
         // must never block a user's sign-in email.
         try {
           const { describeAuthActionUrl } = await import('@/lib/email/authLinkAudit')
-          const link = await describeAuthActionUrl(payload.data.url)
+          const link = await describeAuthActionUrl(actionUrl)
           const { error: auditError } = await supabase.from('auth_email_link_audit').insert({
             run_id,
             message_id: messageId,
@@ -239,7 +239,12 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
             token_digest: link.tokenDigest,
             url_digest: link.urlDigest,
             link_valid: link.valid,
+            allowlist_ok: allowlist.allowed,
+            allowlist_reasons: allowlist.reasons,
+            redirect_sanitized: redirectSanitized,
+            blocked: false,
           })
+
           if (auditError) {
             console.error('Failed to write auth link audit', { error: auditError.message, run_id })
           }
