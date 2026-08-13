@@ -16,10 +16,14 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { Reveal } from "@/components/landing/Reveal";
 import { motion, useScroll, useTransform } from "motion/react";
 import {
-  Atmosphere, CountUp, Magnetic, Parallax, ScrollProgress, TextReveal, TiltCard,
+  Atmosphere, CountUp, Magnetic, Parallax, ScrollProgress,
   DepthStage, DepthLayer, ScrollDepth, FloatPanel,
   easeOut, viewportOnce, springSnappy,
 } from "@/components/motion";
+import {
+  AnimatedHeading, BlurText, GradientText, TextLoop, SpotlightCard,
+  MagneticButton, SceneBackground, ScrollFloat, MagicBento,
+} from "@/components/effects";
 import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
 import {
   ResumeVisual, MatchVisual, ApplicationVisual,
@@ -219,13 +223,20 @@ function Heading({
   children, className = "",
 }: { children: React.ReactNode; className?: string }) {
   if (typeof children === "string") {
-    return <TextReveal as="h2" text={children} className={`type-section text-balance ${className}`} />;
+    return (
+      <AnimatedHeading
+        as="h2"
+        variant="mask"
+        text={children}
+        className={`type-section text-balance ${className}`}
+      />
+    );
   }
   return <h2 className={`type-section text-balance ${className}`}>{children}</h2>;
 }
 
 function Lede({ children }: { children: React.ReactNode }) {
-  return <p className="type-lede max-w-2xl text-muted-foreground">{children}</p>;
+  return <BlurText className="type-lede max-w-2xl text-muted-foreground">{children}</BlurText>;
 }
 
 
@@ -243,6 +254,25 @@ export default function Landing() {
   const { scrollY } = useScroll();
   const heroLift = useTransform(scrollY, [0, 600], [0, -60]);
   const heroOpacity = useTransform(scrollY, [0, 520], [1, 0.35]);
+
+  // Scroll spy drives the animated nav indicator.
+  const [activeHash, setActiveHash] = useState<string>("");
+  useEffect(() => {
+    const ids = NAV.map((n) => n.href.slice(1));
+    const nodes = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    if (!nodes.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveHash(`#${visible.target.id}`);
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: [0, 0.25, 0.6] },
+    );
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -285,17 +315,31 @@ export default function Landing() {
             <span className="text-base font-bold tracking-[0.24em]">GRADR</span>
           </a>
 
-          <ul className="hidden items-center gap-6 lg:flex">
-            {NAV.map((n) => (
-              <li key={n.label}>
-                <a
-                  href={n.href}
-                  className="rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {n.label}
-                </a>
-              </li>
-            ))}
+          <ul className="hidden items-center gap-1 lg:flex">
+            {NAV.map((n) => {
+              const active = activeHash === n.href;
+              return (
+                <li key={n.label} className="relative">
+                  <a
+                    href={n.href}
+                    aria-current={active ? "true" : undefined}
+                    className={`relative z-10 inline-flex min-h-9 items-center rounded-full px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {n.label}
+                  </a>
+                  {active && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      aria-hidden
+                      className="absolute inset-0 rounded-full border border-primary/25 bg-primary/10"
+                      transition={springSnappy}
+                    />
+                  )}
+                </li>
+              );
+            })}
           </ul>
 
           <div className="hidden shrink-0 items-center gap-2 md:flex">
@@ -305,7 +349,7 @@ export default function Landing() {
             ) : (
               <>
                 <Button variant="ghost" size="sm" onClick={login}>Log in</Button>
-                <Button size="sm" onClick={start}>Get started</Button>
+                <MagneticButton size="sm" strength={6} onClick={start}>Get started</MagneticButton>
               </>
             )}
           </div>
@@ -322,20 +366,36 @@ export default function Landing() {
         </nav>
 
         {menuOpen && (
-          <div className="max-h-[calc(100vh-3.5rem)] overflow-y-auto border-t border-border bg-background/98 px-5 py-4 backdrop-blur-xl lg:hidden">
-            <ul className="space-y-1">
+          <motion.div
+            initial={heroReduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: easeOut }}
+            className="max-h-[calc(100vh-3.5rem)] overflow-y-auto border-t border-border bg-background/98 px-5 py-4 backdrop-blur-xl lg:hidden"
+          >
+            <motion.ul
+              className="space-y-1"
+              initial="hidden"
+              animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: heroReduced ? 0 : 0.045 } } }}
+            >
               {NAV.map((n) => (
-                <li key={n.label}>
+                <motion.li
+                  key={n.label}
+                  variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }}
+                  transition={{ duration: 0.3, ease: easeOut }}
+                >
                   <a
                     href={n.href}
                     onClick={() => setMenuOpen(false)}
-                    className="flex min-h-11 items-center rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-secondary/50 hover:text-foreground"
+                    className={`flex min-h-11 items-center rounded-lg px-2 text-sm transition-colors hover:bg-secondary/50 hover:text-foreground ${
+                      activeHash === n.href ? "bg-primary/10 text-foreground" : "text-muted-foreground"
+                    }`}
                   >
                     {n.label}
                   </a>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
             <div className="mt-3 flex gap-2">
               {user ? (
                 <Button className="flex-1" onClick={() => navigate("/")}>Open Gradr</Button>
@@ -346,7 +406,7 @@ export default function Landing() {
                 </>
               )}
             </div>
-          </div>
+          </motion.div>
         )}
       </header>
 
@@ -357,6 +417,7 @@ export default function Landing() {
         <ScrollDepth rotate={4} scale={0.96} fade={0.45}>
         <motion.div className="relative pt-28 sm:pt-32" style={heroReduced ? undefined : { opacity: heroOpacity }}>
           <Atmosphere />
+          <SceneBackground variant="rays" intensity={0.5} fadeBottom={false} />
 
           <Section className="!pb-0 !pt-0">
             <motion.div
@@ -370,20 +431,34 @@ export default function Landing() {
                   transition={{ duration: 0.6, ease: easeOut }}
                   className="type-eyebrow inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface/60 px-3 py-1.5 text-brand-secondary backdrop-blur"
                 >
-                  <Sparkles className="h-3 w-3" aria-hidden />
-                  AI career operating system
+                  <Sparkles className="h-3 w-3 text-primary" aria-hidden />
+                  <GradientText variant="shine">AI career operating system</GradientText>
                 </motion.span>
 
                 <h1 className="type-hero text-balance">
-                  <TextReveal as="span" text="Your AI career" className="block" immediate delay={0.1} />
-                  <TextReveal
+                  <AnimatedHeading as="span" variant="mask" text="Your AI career" className="block" immediate delay={0.08} />
+                  <AnimatedHeading
                     as="span"
+                    variant="split"
                     text="command center."
                     className="block animated-gradient-text"
                     immediate
-                    delay={0.28}
+                    delay={0.26}
                   />
                 </h1>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: easeOut, delay: 0.42 }}
+                  className="flex items-baseline gap-2 text-sm text-muted-foreground"
+                >
+                  <span className="text-xs uppercase tracking-[0.22em] text-brand-secondary">Running now</span>
+                  <TextLoop
+                    className="font-medium text-foreground"
+                    items={["Resume Intelligence", "Job Matching", "Interview Coaching", "Career Intelligence"]}
+                  />
+                </motion.p>
 
                 <motion.p
                   initial={{ opacity: 0, y: 14 }}
@@ -402,17 +477,13 @@ export default function Landing() {
                   transition={{ duration: 0.7, ease: easeOut, delay: 0.62 }}
                   className="flex flex-col gap-3 sm:flex-row"
                 >
-                  <Magnetic strength={8}>
-                    <Button asChild size="lg" className="group h-12 px-6 text-base">
-                      <motion.button type="button" onClick={start} whileTap={{ scale: 0.97 }} transition={springSnappy}>
-                        Get started free
-                        <ArrowRight
-                          className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
-                          aria-hidden
-                        />
-                      </motion.button>
-                    </Button>
-                  </Magnetic>
+                  <MagneticButton size="lg" className="group h-12 px-6 text-base" onClick={start}>
+                    Get started free
+                    <ArrowRight
+                      className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                      aria-hidden
+                    />
+                  </MagneticButton>
                   <Magnetic strength={6}>
                     <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base">
                       <motion.button
@@ -497,7 +568,8 @@ export default function Landing() {
         </Section>
 
         {/* ---------------------------- the gradr system ------------------------ */}
-        <Section className="border-t border-border/60 bg-card/30">
+        <Section className="relative border-t border-border/60 bg-card/30">
+          <SceneBackground variant="dots" intensity={0.35} />
           <Reveal className="space-y-5">
             <Eyebrow>The Gradr system</Eyebrow>
             <Heading>Eight modules. One continuous loop.</Heading>
@@ -507,18 +579,17 @@ export default function Landing() {
             </Lede>
           </Reveal>
 
-          <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-            {SYSTEM.map((s, i) => (
-              <Reveal as="li" key={s.n} delay={i * 50} className="group depth-surface depth-hover bg-card p-5 transition-colors hover:bg-secondary/40">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold tabular-nums tracking-widest text-primary">{s.n}</span>
-                  <s.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden />
-                </div>
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{s.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.copy}</p>
-              </Reveal>
-            ))}
-          </ol>
+          <MagicBento
+            className="mt-12"
+            columns={4}
+            items={SYSTEM.map((sItem) => ({
+              key: sItem.n,
+              marker: sItem.n,
+              title: sItem.title,
+              copy: sItem.copy,
+              icon: sItem.icon,
+            }))}
+          />
         </Section>
 
         {/* --------------------------- resume intelligence ---------------------- */}
@@ -544,15 +615,16 @@ export default function Landing() {
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
             </Reveal>
-            <Reveal delay={100}><ResumeVisual /></Reveal>
+            <Reveal delay={100}><ScrollFloat><ResumeVisual /></ScrollFloat></Reveal>
           </div>
         </Section>
 
         {/* ------------------------------ job matching -------------------------- */}
-        <Section id="matching" className="border-t border-border/60 bg-card/30">
+        <Section id="matching" className="relative border-t border-border/60 bg-card/30">
+          <SceneBackground variant="threads" intensity={0.4} />
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
             <Reveal delay={100} className="lg:order-2 lg:pl-4">
-              <MatchVisual />
+              <ScrollFloat><MatchVisual /></ScrollFloat>
             </Reveal>
             <Reveal className="space-y-5 lg:order-1">
               <Eyebrow>02 — Job matching</Eyebrow>
@@ -596,13 +668,13 @@ export default function Landing() {
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
             </Reveal>
-            <Reveal delay={100}><ApplicationVisual /></Reveal>
+            <Reveal delay={100}><ScrollFloat><ApplicationVisual /></ScrollFloat></Reveal>
           </div>
         </Section>
 
         {/* -------------------------- flagship: interview ----------------------- */}
         <Section id="interview" className="relative border-t border-border/60 bg-card/40">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64 bg-gradient-to-b from-primary/[0.07] to-transparent" aria-hidden />
+          <SceneBackground variant="beams" intensity={0.45} />
           <Reveal className="max-w-3xl space-y-5">
             <Eyebrow>Flagship — AI mock interview</Eyebrow>
             <Heading>Practice the interview before the interview.</Heading>
@@ -612,21 +684,17 @@ export default function Landing() {
             </Lede>
           </Reveal>
 
-          <Reveal delay={100} className="mt-10"><InterviewVisual /></Reveal>
+          <Reveal delay={100} className="mt-10"><ScrollFloat distance={60}><InterviewVisual /></ScrollFloat></Reveal>
 
-          <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { icon: Bot, title: "Adaptive interviewer", copy: "The session adapts to role, company, industry, seniority, difficulty, and how you're performing in the moment." },
-              { icon: Mic, title: "Real conversation", copy: "Speak naturally, interrupt mid-question, and get a contextual follow-up instead of a scripted next prompt." },
-              { icon: LineChart, title: "Scored report", copy: "Every session ends with strengths, specific improvements, a full transcript, and the questions to practice next." },
-            ].map((f, i) => (
-              <Reveal key={f.title} delay={i * 60} className="depth-surface depth-hover bg-card p-6">
-                <f.icon className="h-5 w-5 text-primary" aria-hidden />
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{f.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.copy}</p>
-              </Reveal>
-            ))}
-          </div>
+          <MagicBento
+            className="mt-10"
+            columns={3}
+            items={[
+              { key: "adaptive", icon: Bot, title: "Adaptive interviewer", copy: "The session adapts to role, company, industry, seniority, difficulty, and how you're performing in the moment." },
+              { key: "real", icon: Mic, title: "Real conversation", copy: "Speak naturally, interrupt mid-question, and get a contextual follow-up instead of a scripted next prompt." },
+              { key: "scored", icon: LineChart, title: "Scored report", copy: "Every session ends with strengths, specific improvements, a full transcript, and the questions to practice next." },
+            ]}
+          />
 
           <Reveal delay={80} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" className="h-12 px-6" onClick={start}>
@@ -642,7 +710,7 @@ export default function Landing() {
         {/* ---------------------------- career assistant ------------------------ */}
         <Section id="assistant" className="border-t border-border/60">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-            <Reveal delay={100} className="lg:order-2"><AssistantVisual /></Reveal>
+            <Reveal delay={100} className="lg:order-2"><ScrollFloat><AssistantVisual /></ScrollFloat></Reveal>
             <Reveal className="space-y-5 lg:order-1">
               <Eyebrow>04 — Career assistant</Eyebrow>
               <Heading>Your career strategist, whenever you need it.</Heading>
@@ -686,7 +754,7 @@ export default function Landing() {
                 ))}
               </ul>
             </Reveal>
-            <Reveal delay={100}><AnalyticsVisual /></Reveal>
+            <Reveal delay={100}><ScrollFloat><AnalyticsVisual /></ScrollFloat></Reveal>
           </div>
         </Section>
 
@@ -697,16 +765,18 @@ export default function Landing() {
             <Heading>Built for people actively moving toward a job.</Heading>
           </Reveal>
 
-          <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {AUDIENCE.map((a, i) => (
-              <Reveal key={a.title} delay={i * 50} className="bg-card p-6">
-                <div id={a.id} className="scroll-mt-28" />
-                <a.icon className="h-5 w-5 text-primary" aria-hidden />
-                <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+              <Reveal key={a.title} delay={i * 50}>
+                <SpotlightCard className="h-full p-6">
+                  <div id={a.id} className="scroll-mt-28" />
+                  <a.icon className="h-5 w-5 text-primary" aria-hidden />
+                  <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+                </SpotlightCard>
               </Reveal>
             ))}
-            <Reveal delay={250} className="flex flex-col justify-center bg-card p-6">
+            <Reveal delay={250} className="flex flex-col justify-center rounded-2xl border border-border bg-card p-6">
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Not sure where you fit? Start free — Gradr adapts to the stage you're actually at.
               </p>
@@ -718,7 +788,8 @@ export default function Landing() {
         </Section>
 
         {/* ------------------------------ how it works -------------------------- */}
-        <Section id="how-it-works" className="border-t border-border/60 bg-card/30">
+        <Section id="how-it-works" className="relative border-t border-border/60 bg-card/30">
+          <SceneBackground variant="gridscan" intensity={0.35} />
           <Reveal className="space-y-5">
             <Eyebrow>How it works</Eyebrow>
             <Heading>Seven steps, one system.</Heading>
@@ -786,7 +857,8 @@ export default function Landing() {
         </Section>
 
         {/* --------------------------------- pricing ---------------------------- */}
-        <Section id="pricing" className="border-t border-border/60 bg-card/30">
+        <Section id="pricing" className="relative border-t border-border/60 bg-card/30">
+          <SceneBackground variant="aurora" intensity={0.35} />
           <Reveal className="space-y-5">
             <Eyebrow>Pricing</Eyebrow>
             <Heading>Start free. Upgrade when it's working.</Heading>
@@ -820,20 +892,20 @@ export default function Landing() {
             {PLANS.map((p, i) => {
               const price = p[billing];
               return (
-                <TiltCard key={p.name} className="group h-full rounded-2xl" tilt={4}>
-                <Reveal
-                  delay={i * 70}
-                  className={`flex h-full flex-col rounded-2xl border p-6 ${
+                <Reveal key={p.name} delay={i * 70} className="h-full">
+                <SpotlightCard
+                  tilt
+                  className={`flex h-full flex-col p-6 ${
                     p.highlight
                       ? "border-primary/40 bg-primary/[0.05] shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
-                      : "border-border bg-card"
+                      : ""
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
                     {p.highlight && (
                       <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                        Most complete
+                        <GradientText variant="shine">Most complete</GradientText>
                       </span>
                     )}
                   </div>
@@ -860,8 +932,8 @@ export default function Landing() {
                   >
                     {p.cta}
                   </Button>
+                </SpotlightCard>
                 </Reveal>
-                </TiltCard>
               );
             })}
           </div>
