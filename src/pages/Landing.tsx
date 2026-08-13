@@ -187,27 +187,39 @@ function Section({
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-secondary">
-      <span className="h-px w-6 bg-brand-secondary/60" aria-hidden />
-
+    <motion.span
+      initial={{ opacity: 0, x: -8 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={viewportOnce}
+      transition={{ duration: 0.5, ease: easeOut }}
+      className="type-eyebrow inline-flex items-center gap-2 text-brand-secondary"
+    >
+      <motion.span
+        className="h-px w-6 origin-left bg-brand-secondary/70"
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={viewportOnce}
+        transition={{ duration: 0.6, ease: easeOut, delay: 0.1 }}
+        aria-hidden
+      />
       {children}
-    </span>
+    </motion.span>
   );
 }
 
 function Heading({
   children, className = "",
 }: { children: React.ReactNode; className?: string }) {
-  return (
-    <h2 className={`text-balance text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-[2.75rem] ${className}`}>
-      {children}
-    </h2>
-  );
+  if (typeof children === "string") {
+    return <TextReveal as="h2" text={children} className={`type-section text-balance ${className}`} />;
+  }
+  return <h2 className={`type-section text-balance ${className}`}>{children}</h2>;
 }
 
 function Lede({ children }: { children: React.ReactNode }) {
-  return <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">{children}</p>;
+  return <p className="type-lede max-w-2xl text-muted-foreground">{children}</p>;
 }
+
 
 /* ---------------------------------- page ----------------------------------- */
 
