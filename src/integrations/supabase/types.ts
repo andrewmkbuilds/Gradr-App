@@ -3542,6 +3542,7 @@ export type Database = {
         Args: { _actor: string; _limit?: number }
         Returns: undefined
       }
+      assert_not_anonymous: { Args: never; Returns: undefined }
       attribute_signup_referral: {
         Args: { _click_id?: string; _code: string }
         Returns: string
