@@ -435,6 +435,9 @@ export default function JobsFeed() {
         <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
       </div>
 
+      <NextActionBar surface="jobs" />
+
+
       <Card className="p-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-4 relative">
