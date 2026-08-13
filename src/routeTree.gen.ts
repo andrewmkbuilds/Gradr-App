@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as AiInterviewCoachRouteImport } from './routes/ai-interview-coach'
 import { Route as AtsResumeCheckerRouteImport } from './routes/ats-resume-checker'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
@@ -91,6 +92,11 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiInterviewCoachRoute = AiInterviewCoachRouteImport.update({
+  id: '/ai-interview-coach',
+  path: '/ai-interview-coach',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtsResumeCheckerRoute = AtsResumeCheckerRouteImport.update({
@@ -497,6 +503,7 @@ const LovableEmailQueueProcessRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/ai-interview-coach': typeof AiInterviewCoachRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -576,6 +583,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
+  '/ai-interview-coach': typeof AiInterviewCoachRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -658,6 +666,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/ai-interview-coach': typeof AiInterviewCoachRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -741,6 +750,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-interview-coach'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -820,6 +830,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/ai-interview-coach'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -901,6 +912,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/ai-interview-coach'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -983,6 +995,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  AiInterviewCoachRoute: typeof AiInterviewCoachRoute
   AtsResumeCheckerRoute: typeof AtsResumeCheckerRoute
   AuthRoute: typeof AuthRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
@@ -1038,6 +1051,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-interview-coach': {
+      id: '/ai-interview-coach'
+      path: '/ai-interview-coach'
+      fullPath: '/ai-interview-coach'
+      preLoaderRoute: typeof AiInterviewCoachRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ats-resume-checker': {
@@ -1663,6 +1683,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  AiInterviewCoachRoute: AiInterviewCoachRoute,
   AtsResumeCheckerRoute: AtsResumeCheckerRoute,
   AuthRoute: AuthRoute,
   CookiePolicyRoute: CookiePolicyRoute,
