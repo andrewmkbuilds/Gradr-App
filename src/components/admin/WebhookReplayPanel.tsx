@@ -299,12 +299,48 @@ export default function WebhookReplayPanel() {
               </Alert>
             )}
 
+            {probe && (
+              <Alert variant={probe.resent && !probe.idempotent ? "destructive" : "default"}>
+                <AlertDescription className="space-y-1 text-xs">
+                  <p className="font-medium">
+                    {probe.idempotent
+                      ? "Idempotency confirmed — duplicate acked"
+                      : probe.resent
+                        ? "Idempotency failed"
+                        : "Not a duplicate yet"}
+                  </p>
+                  <p className="font-mono">
+                    claim: {probe.claim} · ack: HTTP {probe.ack?.status ?? 200}{" "}
+                    {JSON.stringify(probe.ack?.body ?? {})}
+                  </p>
+                  <ul className="list-disc pl-4">
+                    {(probe.notes ?? []).map((n) => (
+                      <li key={n}>{n}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => idempotency.mutate()}
+                disabled={idempotency.isPending || replay.isPending}
+              >
+                {idempotency.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                )}
+                Re-send &amp; check idempotency
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => replay.mutate("dry_run")}
                 disabled={replay.isPending}
               >
+
                 {replay.isPending && replay.variables === "dry_run" ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
