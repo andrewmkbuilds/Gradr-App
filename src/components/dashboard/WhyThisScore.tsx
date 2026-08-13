@@ -104,7 +104,7 @@ export function WhyThisScore({ briefing }: { briefing: Briefing }) {
                           <button
                             type="button"
                             onClick={() => navigate(component.lever.to)}
-                            className="mt-3 text-xs text-primary hover:underline"
+                            className="accent-link mt-3 text-xs"
                           >
                             {component.lever.label} →
                           </button>

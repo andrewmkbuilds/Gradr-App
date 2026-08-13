@@ -113,7 +113,7 @@ export function FollowUpReminders() {
             id="followups-heading"
             className="flex items-center gap-2 text-sm font-semibold text-foreground"
           >
-            <BellRing className="h-4 w-4 text-primary" aria-hidden />
+            <BellRing className="accent-text h-4 w-4" aria-hidden />
             Follow-up reminders
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">

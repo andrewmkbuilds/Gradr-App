@@ -113,7 +113,7 @@ export default function Pricing() {
             <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
             <div className="mt-1 flex items-center gap-2 text-xs">
               <span className="text-muted-foreground line-through">{price.formattedTotal}</span>
-              <Badge variant="secondary" className="gap-1">
+              <Badge variant="accentSoft" className="gap-1">
                 <BadgePercent className="h-3 w-3" aria-hidden="true" />
                 {discountPercent}% off applied
               </Badge>
@@ -155,13 +155,13 @@ export default function Pricing() {
 
       {/* Eligibility discounts: advertised to everyone, confirmed for the verified. */}
       {(discountPercent > 0 || topProgram) && (
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4">
+        <div className="accent-card mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl px-5 py-4">
           <div className="flex items-start gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
               {discountPercent > 0 ? (
                 <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
               ) : (
-                <BadgePercent className="h-4 w-4 text-primary" aria-hidden="true" />
+                <BadgePercent className="accent-text h-4 w-4" aria-hidden="true" />
               )}
             </span>
             <div>
@@ -262,11 +262,13 @@ export default function Pricing() {
                 <DepthCard key={tier.name} tilt={tier.highlighted ? 5 : 3.5} lift={6} className="h-full">
                 <Card
                   className={`relative flex h-full flex-col p-6 ${
-                    tier.highlighted ? "border-primary shadow-lg shadow-primary/10 xl:scale-[1.02]" : "border-border"
+                    tier.highlighted
+                      ? "border-mahogany/70 shadow-lg shadow-mahogany/15 xl:scale-[1.02]"
+                      : "border-border"
                   }`}
                 >
                   {tier.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-mahogany text-mahogany-foreground text-xs font-semibold px-3 py-1 rounded-full">
                       Most popular
                     </div>
                   )}

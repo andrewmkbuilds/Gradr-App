@@ -46,11 +46,11 @@ function Chip({
       aria-pressed={selected}
       className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
         selected
-          ? "border-primary bg-primary/15 text-foreground"
+          ? "border-mahogany bg-mahogany-soft text-mahogany-ink"
           : "border-border bg-secondary/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
       }`}
     >
-      {selected && <Check className="mr-1.5 inline h-3.5 w-3.5 text-primary" aria-hidden />}
+      {selected && <Check className="accent-text mr-1.5 inline h-3.5 w-3.5" aria-hidden />}
       {label}
     </button>
   );
@@ -112,7 +112,7 @@ export default function Onboarding() {
       />
 
       <header className="mb-6">
-        <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary">
+        <p className="accent-text flex items-center gap-2 text-xs uppercase tracking-[0.2em]">
           <Sparkles className="h-3.5 w-3.5" aria-hidden /> Personalise Gradr
         </p>
         <h1 className="font-display mt-2 text-3xl font-bold tracking-tight text-foreground">
@@ -131,7 +131,7 @@ export default function Onboarding() {
                 i < step
                   ? "bg-primary text-primary-foreground"
                   : i === step
-                    ? "bg-primary/20 text-primary ring-1 ring-primary"
+                    ? "bg-mahogany-soft text-mahogany-ink ring-1 ring-mahogany"
                     : "bg-secondary text-muted-foreground"
               }`}
               aria-current={i === step ? "step" : undefined}

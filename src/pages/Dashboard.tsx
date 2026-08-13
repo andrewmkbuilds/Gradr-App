@@ -199,7 +199,7 @@ export default function Dashboard() {
       <section aria-labelledby="pipeline-heading" className="glass-card p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 id="pipeline-heading" className="text-sm font-semibold text-foreground">Pipeline by stage</h2>
-          <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
+          <button onClick={() => navigate("/pipeline")} className="accent-link text-xs">
             View pipeline →
           </button>
         </div>
@@ -232,7 +232,7 @@ export default function Dashboard() {
         <section aria-labelledby="reminders-heading" className="glass-card p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 id="reminders-heading" className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Bell className="h-4 w-4 text-primary" aria-hidden />
+              <Bell className="accent-text h-4 w-4" aria-hidden />
               Follow-ups
               {overdueCount > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">
@@ -240,7 +240,7 @@ export default function Dashboard() {
                 </span>
               )}
             </h2>
-            <button onClick={() => navigate("/pipeline")} className="text-xs text-primary hover:underline">
+            <button onClick={() => navigate("/pipeline")} className="accent-link text-xs">
               Manage →
             </button>
           </div>
@@ -281,7 +281,7 @@ export default function Dashboard() {
         <section aria-labelledby="matches-heading" className="glass-card p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 id="matches-heading" className="text-sm font-semibold text-foreground">Recent job matches</h2>
-            <button onClick={() => navigate("/jobs")} className="text-xs text-primary hover:underline">
+            <button onClick={() => navigate("/jobs")} className="accent-link text-xs">
               Browse →
             </button>
           </div>
@@ -353,7 +353,7 @@ export default function Dashboard() {
 function EmptyState({ title, body, cta, onClick }: { title: string; body: string; cta: string; onClick: () => void }) {
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-border/70 px-6 py-8 text-center">
-      <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+      <Sparkles className="accent-text h-5 w-5" aria-hidden />
       <p className="mt-3 text-sm font-medium text-foreground">{title}</p>
       <p className="mt-1 max-w-xs text-xs text-muted-foreground">{body}</p>
       <Button size="sm" variant="secondary" className="mt-4" onClick={onClick}>

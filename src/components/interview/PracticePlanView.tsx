@@ -28,7 +28,7 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
         {plan.focusAreas?.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {plan.focusAreas.map((f) => (
-              <span key={f} className="text-xs rounded-full border border-primary/30 bg-primary/10 text-primary px-2.5 py-1">
+              <span key={f} className="accent-chip px-2.5 py-1">
                 {f}
               </span>
             ))}
@@ -56,12 +56,12 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
             {d.questions?.length > 0 && (
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold text-foreground flex items-center gap-2">
-                  <MessageSquareQuote className="h-3.5 w-3.5 text-primary" /> Practice questions
+                  <MessageSquareQuote className="accent-text h-3.5 w-3.5" /> Practice questions
                 </p>
                 <ul className="space-y-1">
                   {d.questions.map((q, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                      <span className="text-primary">•</span><span>{q}</span>
+                      <span className="accent-text">•</span><span>{q}</span>
                     </li>
                   ))}
                 </ul>
@@ -76,7 +76,7 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
                 <ul className="space-y-1">
                   {d.drills.map((q, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                      <span className="text-primary">•</span><span>{q}</span>
+                      <span className="accent-text">•</span><span>{q}</span>
                     </li>
                   ))}
                 </ul>

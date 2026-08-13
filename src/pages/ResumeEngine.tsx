@@ -52,7 +52,7 @@ interface AnalysisResult {
 const typeStyles: Record<string, { icon: typeof CheckCircle; color: string }> = {
   critical: { icon: AlertTriangle, color: "text-destructive" },
   warning: { icon: AlertTriangle, color: "text-warning" },
-  improvement: { icon: Sparkles, color: "text-primary" },
+  improvement: { icon: Sparkles, color: "accent-text" },
   good: { icon: CheckCircle, color: "text-success" },
 };
 
@@ -182,7 +182,7 @@ export default function ResumeEngine() {
           <Target className="h-4 w-4 text-primary" />
           Tailor to a specific job
           {jobDescription.trim().length > 40 && (
-            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">Active</span>
+            <span className="accent-chip px-2 py-0.5 text-[10px]">Active</span>
           )}
         </span>
         <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showTailor ? "rotate-90" : ""}`} />
@@ -219,14 +219,14 @@ export default function ResumeEngine() {
         </p>
         <Link
           to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=resume_engine_header"
-          className="mt-3 inline-flex items-center gap-2 text-xs text-primary hover:underline"
+          className="accent-link mt-3 inline-flex items-center gap-2 text-xs"
         >
           <BookOpen className="h-3.5 w-3.5" />
           Guide: AI resume builders & ATS optimization
         </Link>
         <Link
           to="/ats-resume-checker?utm_source=app&utm_medium=internal_link&utm_campaign=ats_resume_checker&utm_content=resume_engine_header"
-          className="mt-2 ml-0 inline-flex items-center gap-2 text-xs text-primary hover:underline sm:ml-4"
+          className="accent-link mt-2 ml-0 inline-flex items-center gap-2 text-xs sm:ml-4"
         >
           <BookOpen className="h-3.5 w-3.5" />
           ATS resume checker: how scoring works
@@ -293,7 +293,7 @@ export default function ResumeEngine() {
                 : "Significant structural and keyword work needed."}
             </p>
             {analysis.tailoredTo && (
-              <p className="mt-2 text-xs text-primary text-center">Scored against {analysis.tailoredTo}</p>
+              <p className="accent-text mt-2 text-xs text-center font-medium">Scored against {analysis.tailoredTo}</p>
             )}
             <div className="w-full mt-6 space-y-2">
               {[
@@ -409,7 +409,7 @@ export default function ResumeEngine() {
                       <p className="text-sm text-muted-foreground line-through decoration-destructive/40">{r.before}</p>
                     </div>
                     <div>
-                      <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-primary">After</p>
+                      <p className="accent-text mb-1 text-[10px] font-semibold uppercase tracking-wide">After</p>
                       <p className="text-sm text-foreground">{r.after}</p>
                     </div>
                   </div>

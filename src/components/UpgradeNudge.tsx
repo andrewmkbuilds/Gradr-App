@@ -65,11 +65,11 @@ export function UpgradeNudge() {
 
   return (
     <section
-      className="glass-card relative overflow-hidden border-primary/30 p-5"
+      className="glass-card relative overflow-hidden border-mahogany/40 p-5"
       aria-label="Plan limit reached"
     >
       <div
-        className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/20 blur-3xl"
+        className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-mahogany/20 blur-3xl"
         aria-hidden
       />
       <button
@@ -83,7 +83,7 @@ export function UpgradeNudge() {
 
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 pr-6">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+          <p className="accent-text flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {out ? "You're out of" : "Running low on"} {label}
           </p>

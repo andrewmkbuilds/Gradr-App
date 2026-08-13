@@ -263,8 +263,8 @@ function Section({
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-      <span className="h-px w-6 bg-primary/50" aria-hidden />
+    <span className="accent-text inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+      <span className="h-px w-6 bg-mahogany/70" aria-hidden />
       {children}
     </span>
   );
@@ -329,7 +329,7 @@ export default function Landing() {
             <div className="grid items-center gap-12 lg:grid-cols-[1.04fr_1fr] lg:gap-16">
               <div className="space-y-7">
                 <BlurText>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+                  <span className="accent-chip gap-2 px-3 py-1.5 text-[11px] uppercase tracking-[0.2em]">
                     <Sparkles className="h-3.5 w-3.5" aria-hidden />
                     <ShinyText>AI career operating system</ShinyText>
                   </span>
@@ -369,7 +369,7 @@ export default function Landing() {
                   <Magnetic strength={0.18}>
                     <Button
                       size="lg"
-                      variant="outline"
+                      variant="accentOutline"
                       className="h-12 px-6 text-base"
                       onClick={() => document.getElementById("demos")?.scrollIntoView({ behavior: "smooth" })}
                     >
@@ -555,7 +555,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" variant="outline" className="h-11" onClick={start}>
+              <Button size="lg" variant="accentOutline" className="h-11" onClick={start}>
                 <Search className="mr-2 h-4 w-4" aria-hidden />
                 Find my matches
               </Button>
@@ -619,7 +619,7 @@ export default function Landing() {
               Run a mock interview
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-6" onClick={() => navigate("/pricing")}>
+            <Button size="lg" variant="accentOutline" className="h-12 px-6" onClick={() => navigate("/pricing")}>
               See interview plans
             </Button>
           </Reveal>
@@ -759,7 +759,7 @@ export default function Landing() {
             </Reveal>
 
             <Reveal delay={100} className="rounded-2xl border border-primary/30 bg-primary/[0.05] p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Gradr</h3>
+              <h3 className="accent-text text-sm font-semibold uppercase tracking-[0.18em]">Gradr</h3>
               <ul className="mt-5 space-y-3">
                 {NEW_WAY.map((t) => (
                   <li key={t} className="flex gap-3 text-sm text-foreground">

@@ -42,7 +42,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, glowing }: StatCa
           )}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">{title}</p>
-        {subtitle && <p className="mt-1 text-xs text-primary">{subtitle}</p>}
+        {subtitle && <p className="accent-text mt-1 text-xs font-medium">{subtitle}</p>}
       </SpotlightCard>
     </DepthCard>
   );

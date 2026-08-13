@@ -95,7 +95,7 @@ export function MomentumCard() {
             An application sent or a mock interview run counts as an active day.
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+        <span className="accent-chip gap-1.5 px-3 py-1 text-sm">
           <Flame className="h-4 w-4" aria-hidden />
           {streak} day{streak === 1 ? "" : "s"}
         </span>
@@ -118,10 +118,10 @@ export function MomentumCard() {
           : `Keep it alive: ${days.size} active day${days.size === 1 ? "" : "s"} in the last 30.`}
       </p>
 
-      <div className="mt-5 flex flex-col gap-3 rounded-lg border border-border/70 bg-secondary/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="accent-card mt-5 flex flex-col gap-3 rounded-lg p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-xs font-semibold text-foreground">
-            <Gift className="h-3.5 w-3.5 text-primary" aria-hidden /> Refer a friend
+            <Gift className="accent-text h-3.5 w-3.5" aria-hidden /> Refer a friend
           </p>
           <p className="mt-1 truncate text-xs text-muted-foreground">
             They get Gradr, you earn commission on every plan they buy.

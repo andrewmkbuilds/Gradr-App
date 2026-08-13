@@ -32,6 +32,16 @@
   --color-brand-secondary: hsl(var(--brand-secondary));
   --color-brand-secondary-soft: hsl(var(--brand-secondary-soft));
 
+  /* Mahogany #733E24 — premium secondary accent scale */
+  --color-mahogany: hsl(var(--mahogany));
+  --color-mahogany-foreground: hsl(var(--mahogany-foreground));
+  --color-mahogany-hover: hsl(var(--mahogany-hover));
+  --color-mahogany-soft: hsl(var(--mahogany-soft));
+  --color-mahogany-tint: hsl(var(--mahogany-tint));
+  --color-mahogany-border: hsl(var(--mahogany-border));
+  --color-mahogany-ink: hsl(var(--mahogany-ink));
+
+
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-primary-hover: hsl(var(--primary-hover));
@@ -155,8 +165,18 @@
     --accent: 195 20% 92%;
     --accent-foreground: 197 30% 18%;
 
+    /* ---------- Mahogany accent scale (light) ---------- */
+    --mahogany: 20 52% 30%;
+    --mahogany-foreground: 20 30% 97%;
+    --mahogany-hover: 20 56% 25%;
+    --mahogany-soft: 20 44% 92%;
+    --mahogany-tint: 20 46% 96%;
+    --mahogany-border: 20 34% 78%;
+    --mahogany-ink: 20 56% 26%;
+
     /* ---------- Status (harmonised, never neon) ---------- */
     --destructive: 6 56% 40%;
+
     --destructive-foreground: 20 20% 97%;
     --success: 166 44% 26%;
     --success-foreground: 20 20% 97%;
@@ -234,6 +254,17 @@
     --primary-soft: 196 40% 18%;
     --brand-secondary: 20 46% 54%;
     --brand-secondary-soft: 20 36% 18%;
+
+    /* ---------- Mahogany accent scale (dark) ---------- */
+    --mahogany: 20 48% 56%;
+    --mahogany-foreground: 20 40% 10%;
+    --mahogany-hover: 20 52% 64%;
+    --mahogany-soft: 18 32% 20%;
+    --mahogany-tint: 16 26% 15%;
+    --mahogany-border: 20 30% 34%;
+    --mahogany-ink: 20 52% 70%;
+
+
 
     /* ---------- Neutral interactive ---------- */
     --secondary: 198 20% 16%;
@@ -372,6 +403,49 @@
   .surface-secondary { background: hsl(var(--surface-secondary)); }
   .surface-elevated { background: hsl(var(--surface-elevated)); box-shadow: var(--shadow-elevated); }
   .divider { border-color: hsl(var(--border-subtle)); }
+
+  /* ---------- Mahogany accent kit ----------
+     Warm secondary accent. Used for highlights, selected states and
+     insight surfaces — never as the dominant colour of a screen. */
+  .accent-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    background: hsl(var(--mahogany-soft));
+    color: hsl(var(--mahogany-ink));
+    border: 1px solid hsl(var(--mahogany-border) / 0.7);
+  }
+  .accent-text { color: hsl(var(--mahogany-ink)); }
+  .accent-tint { background: hsl(var(--mahogany-tint)); }
+  .accent-ring { box-shadow: 0 0 0 1px hsl(var(--mahogany-border) / 0.8); }
+  /* Left rail marker for selected rows / active nav */
+  .accent-rail { box-shadow: inset 2px 0 0 0 hsl(var(--mahogany)); }
+  /* Bottom marker for selected tabs */
+  .accent-underline { box-shadow: inset 0 -2px 0 0 hsl(var(--mahogany)); }
+  /* Warm insight card: tinted background + mahogany border */
+  .accent-card {
+    background: hsl(var(--mahogany-tint));
+    border: 1px solid hsl(var(--mahogany-border) / 0.6);
+  }
+  /* Thin warm section divider */
+  .accent-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--mahogany) / 0.55) 20%,
+      hsl(var(--mahogany) / 0.55) 80%,
+      transparent
+    );
+  }
+  .accent-dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full;
+    background: hsl(var(--mahogany));
+  }
+  .accent-link {
+    color: hsl(var(--mahogany-ink));
+    text-underline-offset: 3px;
+  }
+  .accent-link:hover { text-decoration: underline; }
+
 
   .glass-card {
     @apply bg-card border border-border rounded-xl;

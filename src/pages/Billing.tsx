@@ -172,7 +172,7 @@ export default function Billing() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="h-4 w-4 text-primary" />
+            <Zap className="accent-text h-4 w-4" />
             <span className="text-sm text-muted-foreground">Application credits</span>
           </div>
           <div className="text-3xl font-bold text-foreground">{credits?.application_credits ?? 0}</div>

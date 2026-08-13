@@ -106,15 +106,16 @@ export function CompetencyTrends({ sessions }: { sessions: TrendSession[] }) {
         ))}
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="accent-card mt-4 flex flex-col gap-3 rounded-lg p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+          <p className="accent-text flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
             <Target className="h-3.5 w-3.5" aria-hidden /> Targeted drill · {weakest.label}
           </p>
           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{weakest.drill}</p>
         </div>
         <Button
           size="sm"
+          variant="accent"
           className="shrink-0 gap-2"
           onClick={() =>
             navigate(`/interview${role ? `?role=${encodeURIComponent(role)}&focus=${weakest.key}` : `?focus=${weakest.key}`}`)

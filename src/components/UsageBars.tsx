@@ -79,7 +79,7 @@ export function UsageBars({ compact }: UsageBarsProps) {
             </p>
           </div>
           {!compact && tier !== "pro" && tier !== "advanced" && (
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => navigate("/pricing")}>
+            <Button size="sm" variant="accentOutline" className="gap-1.5" onClick={() => navigate("/pricing")}>
               Upgrade <ArrowUpRight className="h-3.5 w-3.5" />
             </Button>
           )}
@@ -157,7 +157,7 @@ export function UsageBars({ compact }: UsageBarsProps) {
                 <Progress
                   value={unlimited ? 100 : pct}
                   aria-label={`${label} usage`}
-                  className={low ? "[&>div]:bg-destructive" : undefined}
+                  indicatorClassName={low ? "bg-destructive" : pct >= 70 ? "bg-mahogany" : undefined}
                 />
 
                 <p className="text-xs text-muted-foreground">
