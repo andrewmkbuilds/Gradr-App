@@ -12,6 +12,7 @@
 import { createClient } from "./supabase";
 import { dispatchAlert, shouldEscalate } from "./alerting";
 import { alertThreshold, policyFor } from "./endpointPolicy";
+import { ensurePolicyOverrides } from "./policyOverrides";
 import {
   callerKey,
   checkRateLimit,
@@ -179,6 +180,9 @@ export function withMonitoring(
 ): (req: Request) => Promise<Response> {
   return async (req: Request) => {
     if (req.method === "OPTIONS") return handler(req);
+
+    // Pick up any admin-edited limits before the bucket check (cached, ~1/min).
+    await ensurePolicyOverrides();
 
     const started = Date.now();
     let response: Response;

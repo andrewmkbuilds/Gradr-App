@@ -1,0 +1,13 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { withMonitoring } from '@/lib/edge/shared/monitor'
+
+const run = withMonitoring('/api/public/admin-endpoint-policy', async (request: Request) => {
+  const { handler } = await import('@/lib/edge/admin-endpoint-policy.server')
+  return handler(request)
+})
+
+const route = ({ request }: { request: Request }) => run(request)
+
+export const Route = createFileRoute('/api/public/admin-endpoint-policy')({
+  server: { handlers: { POST: route, OPTIONS: route } },
+})

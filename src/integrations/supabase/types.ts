@@ -1131,6 +1131,51 @@ export type Database = {
           },
         ]
       }
+      email_anomalies: {
+        Row: {
+          baseline: number | null
+          created_at: string
+          detail: Json
+          id: string
+          metric: string
+          notified_at: string | null
+          notify_error: string | null
+          observed: number
+          severity: string
+          threshold: number
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          baseline?: number | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          metric: string
+          notified_at?: string | null
+          notify_error?: string | null
+          observed: number
+          severity?: string
+          threshold: number
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          baseline?: number | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          metric?: string
+          notified_at?: string | null
+          notify_error?: string | null
+          observed?: number
+          severity?: string
+          threshold?: number
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       email_events: {
         Row: {
           created_at: string
@@ -1338,6 +1383,57 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      endpoint_policy_overrides: {
+        Row: {
+          alert_auth_rejected: number | null
+          alert_client_error: number | null
+          alert_rate_limited: number | null
+          alert_server_error: number | null
+          backoff_seconds: number | null
+          created_at: string
+          disabled: boolean
+          endpoint: string
+          max_backoff_seconds: number | null
+          note: string | null
+          rate_limit: number | null
+          updated_at: string
+          updated_by: string | null
+          window_ms: number | null
+        }
+        Insert: {
+          alert_auth_rejected?: number | null
+          alert_client_error?: number | null
+          alert_rate_limited?: number | null
+          alert_server_error?: number | null
+          backoff_seconds?: number | null
+          created_at?: string
+          disabled?: boolean
+          endpoint: string
+          max_backoff_seconds?: number | null
+          note?: string | null
+          rate_limit?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          window_ms?: number | null
+        }
+        Update: {
+          alert_auth_rejected?: number | null
+          alert_client_error?: number | null
+          alert_rate_limited?: number | null
+          alert_server_error?: number | null
+          backoff_seconds?: number | null
+          created_at?: string
+          disabled?: boolean
+          endpoint?: string
+          max_backoff_seconds?: number | null
+          note?: string | null
+          rate_limit?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          window_ms?: number | null
         }
         Relationships: []
       }

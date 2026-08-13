@@ -173,6 +173,110 @@ export const handler = async (req: Request): Promise<Response> => {
     return json({ rows: data ?? [] });
   }
 
+  /* ------------------------------- message ----------------------------- */
+  // Drill-down for a single email: every send-state row, every engagement
+  // event, and any replay lineage in either direction. This is the view you
+  // want when one user says "I never got it".
+  if (action === "message") {
+    const messageId = typeof body["messageId"] === "string" ? (body["messageId"] as string) : "";
+    if (!messageId) return json({ error: "messageId is required" }, 400);
+
+    const related = [messageId, `${messageId}:replay`];
+    const originalId = messageId.endsWith(":replay") ? messageId.slice(0, -":replay".length) : null;
+    if (originalId) related.push(originalId);
+
+    const { data: attempts, error } = await admin
+      .from("email_send_log")
+      .select("id, message_id, template_name, recipient_email, status, error_message, metadata, created_at")
+      .in("message_id", related)
+      .order("created_at", { ascending: true });
+    if (error) return json({ error: error.message }, 500);
+    if ((attempts ?? []).length === 0) return json({ error: "Message not found" }, 404);
+
+    const { data: events } = await admin
+      .from("email_events")
+      .select("id, message_id, event_type, url, user_agent, metadata, created_at")
+      .in("message_id", related)
+      .order("created_at", { ascending: true });
+
+    const { data: idempotency } = await admin
+      .from("email_idempotency")
+      .select("idempotency_key, message_id, template_name, recipient_email, created_at")
+      .in("message_id", related);
+
+    const { data: suppression } = await admin
+      .from("suppressed_emails")
+      .select("email, reason, created_at")
+      .eq("email", attempts![0]!.recipient_email)
+      .maybeSingle();
+
+    const latest = [...attempts!].reverse().find((a: any) => a.message_id === messageId) ?? attempts![attempts!.length - 1];
+
+    return json({
+      messageId,
+      latest,
+      attempts,
+      events: events ?? [],
+      replay: {
+        // Present on the original once it has been replayed; present on the
+        // replay itself as a pointer back to what it came from.
+        replayedAs: (attempts ?? []).some((a: any) => a.message_id === `${messageId}:replay`)
+          ? `${messageId}:replay`
+          : null,
+        replayOf: originalId,
+        idempotencyKeys: idempotency ?? [],
+      },
+      suppression: suppression ?? null,
+    });
+  }
+
+  /* ------------------------------ anomalies ---------------------------- */
+  if (action === "anomalies") {
+    const { data, error } = await admin
+      .from("email_anomalies")
+      .select("*")
+      .order("window_start", { ascending: false })
+      .limit(100);
+    if (error) return json({ error: error.message }, 500);
+    return json({ rows: data ?? [] });
+  }
+
+  /* ----------------------------- auth-preview -------------------------- */
+  // Branded preview of the six Supabase auth emails, rendered from the exact
+  // components the auth webhook uses, plus a live reachability audit of every
+  // image so a broken logo is caught before a user ever sees it.
+  if (action === "auth-preview") {
+    const { AUTH_TEMPLATES, authTemplate } = await import("@/lib/email-templates/authSamples");
+    const list = AUTH_TEMPLATES.map((t) => ({ key: t.key, label: t.displayName }));
+    const key = typeof body["template"] === "string" ? (body["template"] as string) : "";
+    if (!key) return json({ templates: list });
+
+    const entry = authTemplate(key);
+    if (!entry) return json({ error: "Unknown auth template" }, 404);
+
+    const { render } = await import("@react-email/render");
+    const React = (await import("react")).default;
+    const element = React.createElement(entry.component, entry.props as Record<string, unknown>);
+    const html = await render(element);
+    const text = await render(element, { plainText: true });
+
+    let images: unknown[] = [];
+    if (body["auditImages"] === true) {
+      const { auditHtmlImages } = await import("@/lib/email/imageAudit");
+      images = await auditHtmlImages(html);
+    }
+
+    return json({
+      templates: list,
+      template: key,
+      label: entry.displayName,
+      subject: entry.subject,
+      html,
+      text,
+      images,
+    });
+  }
+
   /* ------------------------------- replay ------------------------------ */
   if (action === "replay") {
     const messageId = typeof body["messageId"] === "string" ? (body["messageId"] as string) : "";
@@ -187,12 +291,12 @@ export const handler = async (req: Request): Promise<Response> => {
       .maybeSingle();
 
     if (!original) return json({ error: "Message not found" }, 404);
-    if (original.status !== "dlq") {
-      return json({ error: `Only dead-lettered messages can be replayed (state: ${original.status})` }, 409);
-    }
 
-    const replayKey = `dlq-replay:${messageId}`;
-    const replayMessageId = `${messageId}:replay`;
+    const { decideReplay } = await import("@/lib/email/replayPolicy");
+    const preflight = decideReplay(messageId, original.status, false);
+    if (!preflight.allowed) return json({ error: preflight.reason }, 409);
+
+    const { replayKey, replayMessageId } = preflight;
 
     // Idempotency gate: the unique key means a concurrent second replay loses
     // the insert race and is reported as already-replayed instead of sending.
@@ -205,6 +309,7 @@ export const handler = async (req: Request): Promise<Response> => {
     if (claimError) {
       return json({ replayed: false, idempotent: true, reason: "Already replayed once" });
     }
+
 
     const { render } = await import("@react-email/render");
     const React = (await import("react")).default;

@@ -27,6 +27,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { downloadCsv } from "@/lib/exportFile";
+import {
+  MANIFEST_COLUMNS,
+  buildManifest,
+  withManifest,
+} from "@/lib/email/exportManifest";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const ENDPOINT = "/api/public/admin-email-ops";
 
@@ -44,13 +56,44 @@ async function callApi<T>(body: Record<string, unknown>): Promise<T> {
   return payload;
 }
 
-interface LogRow {
+interface LogRow extends Record<string, unknown> {
   message_id: string;
   template_name: string;
   recipient_email: string;
   status: string;
   error_message: string | null;
   created_at: string;
+}
+
+interface MessageDetail {
+  messageId: string;
+  latest: LogRow;
+  attempts: (LogRow & { id: string; metadata: Record<string, unknown> | null })[];
+  events: {
+    id: string;
+    event_type: string;
+    url: string | null;
+    user_agent: string | null;
+    created_at: string;
+  }[];
+  replay: {
+    replayedAs: string | null;
+    replayOf: string | null;
+    idempotencyKeys: { idempotency_key: string; created_at: string }[];
+  };
+  suppression: { email: string; reason: string; created_at: string } | null;
+}
+
+interface AnomalyRow {
+  id: string;
+  metric: string;
+  severity: string;
+  observed: number;
+  baseline: number | null;
+  threshold: number;
+  window_start: string;
+  notified_at: string | null;
+  notify_error: string | null;
 }
 
 interface MetricsResponse {
@@ -81,6 +124,8 @@ export default function AdminEmailOps() {
   const [status, setStatus] = useState("all");
   const [previewName, setPreviewName] = useState("welcome");
   const [previewMode, setPreviewMode] = useState<"html" | "text">("html");
+  const [authTemplate, setAuthTemplate] = useState("signup");
+  const [openMessage, setOpenMessage] = useState<string | null>(null);
 
   const filters = useMemo(
     () => ({
@@ -111,6 +156,32 @@ export default function AdminEmailOps() {
       }),
   });
 
+  // Branded auth-email preview, with a live image reachability audit so a
+  // broken logo URL is visible here before any user receives it.
+  const authPreview = useQuery({
+    queryKey: ["email-ops-auth-preview", authTemplate],
+    queryFn: () =>
+      callApi<{
+        templates: { key: string; label: string }[];
+        label: string;
+        subject: string;
+        html: string;
+        text: string;
+        images: { url: string; ok: boolean; status: number | null; contentType: string | null; reason?: string }[];
+      }>({ action: "auth-preview", template: authTemplate, auditImages: true }),
+  });
+
+  const anomalies = useQuery({
+    queryKey: ["email-ops-anomalies"],
+    queryFn: () => callApi<{ rows: AnomalyRow[] }>({ action: "anomalies" }),
+  });
+
+  const detail = useQuery({
+    queryKey: ["email-ops-message", openMessage],
+    enabled: Boolean(openMessage),
+    queryFn: () => callApi<MessageDetail>({ action: "message", messageId: openMessage }),
+  });
+
   const replay = useMutation({
     mutationFn: (messageId: string) =>
       callApi<{ replayed: boolean; idempotent: boolean; reason?: string }>({
@@ -122,6 +193,7 @@ export default function AdminEmailOps() {
       else toast.info(result.reason ?? "Already replayed — no duplicate was sent.");
       queryClient.invalidateQueries({ queryKey: ["email-ops-dlq"] });
       queryClient.invalidateQueries({ queryKey: ["email-ops-metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["email-ops-message"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -142,24 +214,18 @@ export default function AdminEmailOps() {
       toast.error("Nothing to export for these filters");
       return;
     }
-    const exportId = crypto.randomUUID();
-    const exportedAt = new Date().toISOString();
-    const manifest = `range=${from}..${to};template=${template};status=${status}`;
-    downloadCsv(
-      `email-delivery-${to}.csv`,
-      rows.map((r) => ({ ...r, export_id: exportId, exported_at: exportedAt, export_filters: manifest })),
-      [
-        "created_at",
-        "template_name",
-        "recipient_email",
-        "status",
-        "error_message",
-        "message_id",
-        "export_id",
-        "exported_at",
-        "export_filters",
-      ],
-    );
+    // The manifest travels with every row so a downloaded file stays
+    // self-describing and auditable after it leaves the dashboard.
+    const manifest = buildManifest({ from, to, template, status }, rows.length);
+    downloadCsv(`email-delivery-${to}.csv`, withManifest(rows, manifest), [
+      "created_at",
+      "template_name",
+      "recipient_email",
+      "status",
+      "error_message",
+      "message_id",
+      ...MANIFEST_COLUMNS,
+    ]);
   };
 
   return (
@@ -238,6 +304,8 @@ export default function AdminEmailOps() {
           <TabsTrigger value="log">Delivery log</TabsTrigger>
           <TabsTrigger value="dlq">Dead letters</TabsTrigger>
           <TabsTrigger value="preview">Template preview</TabsTrigger>
+          <TabsTrigger value="auth">Auth emails</TabsTrigger>
+          <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
         </TabsList>
 
         <TabsContent value="log">
@@ -251,12 +319,13 @@ export default function AdminEmailOps() {
                     <th className="py-2">Recipient</th>
                     <th className="py-2">Status</th>
                     <th className="py-2">Error</th>
+                    <th className="py-2 sr-only">Inspect</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(metrics.data?.rows ?? []).length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-4 text-muted-foreground">
+                      <td colSpan={6} className="py-4 text-muted-foreground">
                         No emails match these filters.
                       </td>
                     </tr>
@@ -271,6 +340,15 @@ export default function AdminEmailOps() {
                       <td className={`py-2 ${STATUS_TONE[r.status] ?? ""}`}>{r.status}</td>
                       <td className="max-w-[18rem] truncate py-2 text-xs text-muted-foreground">
                         {r.error_message ?? "—"}
+                      </td>
+                      <td className="py-2 text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setOpenMessage(r.message_id)}
+                        >
+                          Inspect
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -365,7 +443,198 @@ export default function AdminEmailOps() {
             )}
           </Card>
         </TabsContent>
+
+        <TabsContent value="auth">
+          <Card className="space-y-3 p-4">
+            <p className="text-sm text-muted-foreground">
+              The exact components the auth webhook renders, with sample tokens. Every image is
+              fetched live so a broken logo shows up here, not in someone's inbox.
+            </p>
+            <div className="min-w-[16rem] max-w-sm space-y-1">
+              <Label>Auth template</Label>
+              <Select value={authTemplate} onValueChange={setAuthTemplate}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(authPreview.data?.templates ?? [{ key: authTemplate, label: authTemplate }]).map((t) => (
+                    <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {authPreview.data?.subject && (
+              <p className="text-sm text-muted-foreground">
+                Subject: <span className="text-foreground">{authPreview.data.subject}</span>
+              </p>
+            )}
+            {(authPreview.data?.images ?? []).length > 0 && (
+              <ul className="space-y-1 text-xs">
+                {(authPreview.data?.images ?? []).map((img) => (
+                  <li key={img.url} className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className={img.ok ? "text-success" : "text-destructive"}>
+                      {img.ok ? "200" : (img.status ?? "fail")}
+                    </Badge>
+                    <span className="truncate text-muted-foreground">{img.url}</span>
+                    {!img.ok && <span className="text-destructive">{img.reason}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {authPreview.isLoading ? (
+              <p className="text-sm text-muted-foreground">Rendering…</p>
+            ) : (
+              <iframe
+                title={`${authTemplate} auth email preview`}
+                srcDoc={authPreview.data?.html ?? ""}
+                className="h-[36rem] w-full rounded-lg border border-border bg-white"
+              />
+            )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="anomalies">
+          <Card className="p-4">
+            <p className="mb-3 text-sm text-muted-foreground">
+              Hourly checks on volume spikes, bounce rate, spam complaints and delivery failures.
+              Each anomaly is raised once per hour window and pushed to admin notifications.
+            </p>
+            {(anomalies.data?.rows ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No anomalies detected. Delivery is within expected thresholds.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border/60">
+                {(anomalies.data?.rows ?? []).map((a) => (
+                  <li key={a.id} className="flex flex-wrap items-center gap-3 py-3">
+                    <Badge
+                      variant="outline"
+                      className={a.severity === "critical" ? "text-destructive" : "text-warning"}
+                    >
+                      {a.severity}
+                    </Badge>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground">{a.metric}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(a.window_start).toLocaleString()} · observed {a.observed} vs
+                        threshold {a.threshold}
+                        {a.baseline != null ? ` (baseline ${a.baseline})` : ""}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {a.notify_error ? `alert failed: ${a.notify_error}` : a.notified_at ? "alerted" : "pending"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </TabsContent>
       </Tabs>
+      <Dialog open={Boolean(openMessage)} onOpenChange={(open) => !open && setOpenMessage(null)}>
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Message delivery history</DialogTitle>
+            <DialogDescription className="break-all">{openMessage}</DialogDescription>
+          </DialogHeader>
+
+          {detail.isLoading && <p className="text-sm text-muted-foreground">Loading history…</p>}
+          {detail.error && (
+            <p className="text-sm text-destructive">{(detail.error as Error).message}</p>
+          )}
+
+          {detail.data && (
+            <div className="space-y-5 text-sm">
+              <section>
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                  Delivery attempts
+                </h3>
+                <ul className="space-y-2">
+                  {detail.data.attempts.map((a) => (
+                    <li key={a.id} className="rounded-lg border border-border/60 p-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className={STATUS_TONE[a.status] ?? ""}>
+                          {a.status}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(a.created_at).toLocaleString()}
+                        </span>
+                        {a.message_id !== detail.data!.messageId && (
+                          <span className="text-xs text-muted-foreground">({a.message_id})</span>
+                        )}
+                      </div>
+                      {a.error_message && (
+                        <p className="mt-1 text-xs text-destructive">{a.error_message}</p>
+                      )}
+                      {a.metadata && Object.keys(a.metadata).length > 0 && (
+                        <pre className="mt-2 overflow-x-auto rounded bg-muted/40 p-2 text-[11px] text-muted-foreground">
+                          {JSON.stringify(a.metadata, null, 2)}
+                        </pre>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                  Recipient events
+                </h3>
+                {detail.data.events.length === 0 ? (
+                  <p className="text-muted-foreground">
+                    No opens, clicks, bounces or complaints recorded.
+                  </p>
+                ) : (
+                  <ul className="space-y-1">
+                    {detail.data.events.map((e) => (
+                      <li key={e.id} className="flex flex-wrap items-center gap-2 text-xs">
+                        <Badge variant="outline">{e.event_type}</Badge>
+                        <span className="text-muted-foreground">
+                          {new Date(e.created_at).toLocaleString()}
+                        </span>
+                        {e.url && <span className="truncate text-muted-foreground">{e.url}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section>
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                  Replay history
+                </h3>
+                <p className="text-muted-foreground">
+                  {detail.data.replay.replayOf
+                    ? `This is a replay of ${detail.data.replay.replayOf}.`
+                    : detail.data.replay.replayedAs
+                      ? `Replayed once as ${detail.data.replay.replayedAs}. Further replays are blocked.`
+                      : "Never replayed."}
+                </p>
+                {detail.data.replay.idempotencyKeys.length > 0 && (
+                  <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                    {detail.data.replay.idempotencyKeys.map((k) => (
+                      <li key={k.idempotency_key} className="break-all">
+                        {k.idempotency_key} · {new Date(k.created_at).toLocaleString()}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              {detail.data.suppression && (
+                <section>
+                  <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                    Suppression
+                  </h3>
+                  <p className="text-warning">
+                    {detail.data.suppression.email} is suppressed (
+                    {detail.data.suppression.reason}) since{" "}
+                    {new Date(detail.data.suppression.created_at).toLocaleDateString()}.
+                  </p>
+                </section>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

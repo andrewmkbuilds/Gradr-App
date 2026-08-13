@@ -23,6 +23,9 @@ jobs:
       - name: Unit and guardrail tests
         run: bunx vitest run src/test/structuredData.test.ts src/test/legalReadiness.test.ts src/test/authHeroLayout.test.ts
 
+      - name: Email images reachable (HTTP 200 + image MIME)
+        run: bun run scripts/email-image-check.tsx
+
       - name: Legal readiness (pre-deploy gate)
         run: node scripts/check-legal-readiness.mjs
 
