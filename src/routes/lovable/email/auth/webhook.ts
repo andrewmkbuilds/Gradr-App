@@ -12,12 +12,12 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+  signup: 'Confirm your email for Gradr',
+  invite: "You've been invited to Gradr",
+  magiclink: 'Your Gradr sign-in link',
+  recovery: 'Reset your Gradr password',
+  email_change: 'Confirm your new Gradr email',
+  reauthentication: 'Your Gradr verification code',
 }
 
 // Template mapping
@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "gradr-app"
+const SITE_NAME = "Gradr"
 const SENDER_DOMAIN = "notify.gradr.me"
 const ROOT_DOMAIN = "gradr.me"
 const FROM_DOMAIN = "gradr.me"
@@ -137,6 +137,9 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           siteUrl: `https://${ROOT_DOMAIN}`,
           recipient: payload.data.email,
           confirmationUrl: payload.data.url,
+          magicLinkUrl: payload.data.url,
+          recoveryUrl: payload.data.url,
+          inviteUrl: payload.data.url,
           token: payload.data.token,
           email: payload.data.email,
           oldEmail: payload.data.old_email,
