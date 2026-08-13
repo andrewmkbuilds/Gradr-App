@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRequestInstitution } from "@/hooks/useVerificationRequests";
 
@@ -19,11 +19,20 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category?: string | null;
+  /** Academic address the user already typed, used to pre-fill email + domain. */
+  prefillEmail?: string;
 }
 
 /** "Request your institution to be added" — a real submission, reviewed by an admin. */
-export function InstitutionRequestDialog({ open, onOpenChange, category = null }: Props) {
+export function InstitutionRequestDialog({
+  open,
+  onOpenChange,
+  category = null,
+  prefillEmail = "",
+}: Props) {
   const request = useRequestInstitution();
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     full_name: "",
     name: "",
@@ -34,12 +43,26 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
     notes: "",
   });
 
+  useEffect(() => {
+    if (!open) return;
+    setSubmitted(false);
+    setError(null);
+    const email = prefillEmail.trim().toLowerCase();
+    if (!email.includes("@")) return;
+    setForm((f) => ({
+      ...f,
+      email: f.email || email,
+      email_domain: f.email_domain || email.split("@")[1],
+    }));
+  }, [open, prefillEmail]);
+
   const set = (key: keyof typeof form) => (value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
 
   const submit = async () => {
+    setError(null);
     if (!form.full_name.trim() || !form.name.trim() || !form.email_domain.trim()) {
-      toast.error("Add your name, the institution and its email domain.");
+      setError("Add your name, your school and its email domain.");
       return;
     }
     try {
@@ -57,13 +80,15 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
           .filter(Boolean)
           .join(" · "),
       });
-      toast.success("Institution request submitted", {
-        description: "We'll review the domain and let you know when it's recognised.",
+      toast.success("Request received", {
+        description: "A Gradr admin will review the domain and let you know once it's approved.",
       });
-      onOpenChange(false);
+      setSubmitted(true);
       setForm({ full_name: "", name: "", website: "", email_domain: "", email: "", country: "", notes: "" });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't submit the request.");
+      const message = e instanceof Error ? e.message : "Couldn't submit the request.";
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -71,25 +96,39 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Request your institution to be added</DialogTitle>
+          <DialogTitle>Request your school or university to be added</DialogTitle>
           <DialogDescription>
-            Tell us about the institution and we'll add its domain to the recognised list after review.
+            Tell us about your school. A Gradr admin reviews every request; once the domain is approved, students there can verify instantly.
           </DialogDescription>
         </DialogHeader>
 
+        {submitted ? (
+          <div className="space-y-3 py-2">
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                Request received
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                A Gradr admin will review your school and its email domain. You are not verified yet —
+                once the domain is approved you can verify with your academic email in seconds.
+              </p>
+            </div>
+          </div>
+        ) : (
         <div className="grid gap-3 py-1 max-h-[60vh] overflow-y-auto pr-1">
-          <Field id="ir-name" label="Full name" value={form.full_name} onChange={set("full_name")} required />
-          <Field id="ir-inst" label="Institution name" value={form.name} onChange={set("name")} required />
+          <Field id="ir-name" label="Your full name" value={form.full_name} onChange={set("full_name")} required />
+          <Field id="ir-inst" label="School / university name" value={form.name} onChange={set("name")} required />
           <Field
             id="ir-site"
-            label="Institution website"
+            label="School / university website"
             value={form.website}
             onChange={set("website")}
             placeholder="https://university.edu"
           />
           <Field
             id="ir-domain"
-            label="Institution email domain"
+            label="School / university email domain"
             value={form.email_domain}
             onChange={set("email_domain")}
             placeholder="university.edu"
@@ -97,7 +136,7 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
           />
           <Field
             id="ir-email"
-            label="Institution email address"
+            label="Your academic email address"
             value={form.email}
             onChange={set("email")}
             placeholder="you@university.edu"
@@ -111,16 +150,26 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
               value={form.notes}
               onChange={(e) => set("notes")(e.target.value)}
               rows={3}
-              placeholder="Anything that helps us confirm this institution."
+              placeholder="Anything that helps us confirm this school."
             />
           </div>
+          {error && (
+            <p role="alert" className="text-xs text-destructive">
+              {error}
+            </p>
+          )}
         </div>
+        )}
 
         <DialogFooter>
-          <Button onClick={submit} disabled={request.isPending} className="gap-2">
-            {request.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-            Submit request
-          </Button>
+          {submitted ? (
+            <Button onClick={() => onOpenChange(false)}>Done</Button>
+          ) : (
+            <Button onClick={submit} disabled={request.isPending} className="gap-2">
+              {request.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+              Submit request
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

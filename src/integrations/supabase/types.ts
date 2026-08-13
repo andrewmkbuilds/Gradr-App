@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_email_verifications: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          domain: string
+          email: string
+          expires_at: string
+          id: string
+          last_sent_at: string
+          resend_count: number
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          domain: string
+          email: string
+          expires_at: string
+          id?: string
+          last_sent_at?: string
+          resend_count?: number
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          domain?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          last_sent_at?: string
+          resend_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -3758,6 +3800,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      academic_domain_status: { Args: { _email: string }; Returns: Json }
       accept_legal_document: {
         Args: { _document_id: string; _user_agent?: string }
         Returns: string

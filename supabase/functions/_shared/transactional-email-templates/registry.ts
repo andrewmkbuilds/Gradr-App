@@ -25,6 +25,7 @@ import { template as careerPlan } from './career-plan.tsx'
 import { template as verificationSubmitted } from './verification-submitted.tsx'
 import { template as verificationApproved } from './verification-approved.tsx'
 import { template as verificationRejected } from './verification-rejected.tsx'
+import { template as studentVerificationCode } from './student-verification-code.tsx'
 
 export interface TemplateEntry {
   // deno-lint-ignore no-explicit-any
@@ -67,6 +68,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'verification-submitted': verificationSubmitted,
   'verification-approved': verificationApproved,
   'verification-rejected': verificationRejected,
+  'student-verification-code': studentVerificationCode,
 }
 
 export type TemplateName = keyof typeof TEMPLATES
