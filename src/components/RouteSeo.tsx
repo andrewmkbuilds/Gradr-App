@@ -128,6 +128,11 @@ const META: Record<string, { title: string; description: string }> = {
     title: "ATS Resume Checker — Free Resume Scan & Score",
     description: "Free ATS resume checker: score your resume against any job description, spot formatting a parser can't read, and get the exact missing keywords.",
   },
+  "/ai-interview-coach": {
+    title: "AI Interview Coach — Free AI Mock Interviews",
+    description: "Practise with an AI interview coach: realtime voice mock interviews built from the job description, scored answers, and a personalised practice plan.",
+  },
+
   "/career-advice": {
     title: "Career Advice",
     description: "Free guides on resume optimization, cover letters, and interview preparation — practical advice for every stage of your job search.",
