@@ -177,6 +177,16 @@ async function upsertSubscription(data: any, env: PaddleEnv) {
     },
     { onConflict: "user_id,environment" },
   );
+
+  if (entitled) {
+    // Idempotency is keyed on the subscription id so Paddle retries of the same
+    // created event never double-send the welcome-to-Pro mail.
+    await billingEmail("subscription-started", await emailFor(userId, env), `sub-started-${data.id}`, {
+      planName: planLabel(plan?.tier, plan?.interval),
+      interval: plan?.interval ?? undefined,
+      nextBillingDate: formatDate(periodEnd),
+    });
+  }
 }
 
 // deno-lint-ignore no-explicit-any
@@ -241,6 +251,12 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
     _body: "Update your card to keep your plan active — we'll keep retrying in the meantime.",
     _link: "/billing",
     _metadata: { subscription_id: subscriptionId },
+  });
+
+  await billingEmail("payment-failed", await emailFor(target, env), `pay-failed-${data?.id ?? subscriptionId}`, {
+    amount: formatMoney(data?.details?.totals?.total, data?.currencyCode ?? "USD"),
+    failedAt: formatDate(data?.updatedAt ?? new Date().toISOString()),
+    updatePaymentUrl: "https://gradr.me/billing",
   });
 }
 
