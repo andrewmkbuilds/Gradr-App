@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   CONTENT_SECURITY_POLICY,
+  CONTENT_SECURITY_POLICY_REPORT_ONLY,
+  CSP_REPORT_PATH,
+
   DISCLOSURE_HEADERS,
   OAUTH_SENSITIVE_PATHS,
   applySecurityHeaders,
@@ -90,4 +93,60 @@ describe("evaluateSecurityHeaders", () => {
     expect(OAUTH_SENSITIVE_PATHS).toContain("/auth");
     expect(OAUTH_SENSITIVE_PATHS).toContain("/.lovable/oauth/consent");
   });
+
+  it("does not fail on opaque platform headers we cannot strip", () => {
+    const headers = hardened();
+    headers.set("x-deployment-id", "9ae5ca47b7c69a7c");
+    const verdict = evaluateSecurityHeaders(headers);
+    expect(verdict.ok).toBe(true);
+    expect(verdict.notes.join(" ")).toContain("x-deployment-id");
+  });
 });
+
+describe("report-only CSP", () => {
+  it("is emitted with a reporting endpoint alongside the enforced policy", () => {
+    const headers = applySecurityHeaders(new Headers(), {
+      secure: true,
+      origin: "https://gradr.me",
+    });
+    const reportOnly = headers.get("content-security-policy-report-only")!;
+    expect(reportOnly).toContain(`report-uri ${CSP_REPORT_PATH}`);
+    expect(reportOnly).toContain("default-src 'self'");
+    expect(headers.get("reporting-endpoints")).toBe(
+      `csp-endpoint="https://gradr.me${CSP_REPORT_PATH}"`,
+    );
+    // Report-only must never be enforced by accident.
+    expect(headers.get("content-security-policy")).toBe(CONTENT_SECURITY_POLICY);
+  });
+
+  it("allows every origin the app actually talks to", () => {
+    for (const origin of [
+      "https://*.supabase.co",
+      "wss://*.supabase.co",
+      "https://*.paddle.com",
+      "https://*.i.posthog.com",
+      "https://*.ingest.sentry.io",
+      "wss://generativelanguage.googleapis.com",
+      "https://fonts.gstatic.com",
+    ]) {
+      expect(CONTENT_SECURITY_POLICY_REPORT_ONLY).toContain(origin);
+    }
+    // The installed PWA needs its own manifest and blob workers.
+    expect(CONTENT_SECURITY_POLICY_REPORT_ONLY).toContain("manifest-src 'self'");
+    expect(CONTENT_SECURITY_POLICY_REPORT_ONLY).toContain("worker-src 'self' blob:");
+  });
+
+  it("flags a response that ships no report-only policy", () => {
+    const verdict = evaluateSecurityHeaders(
+      new Headers({
+        "content-security-policy": CONTENT_SECURITY_POLICY,
+        "strict-transport-security": "max-age=63072000; includeSubDomains",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN",
+      }),
+    );
+    expect(verdict.problems).toContain("Missing Content-Security-Policy-Report-Only");
+  });
+});
+

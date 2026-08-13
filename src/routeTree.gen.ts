@@ -83,6 +83,7 @@ import { Route as ApiPublicBrandMetadataRouteImport } from './routes/api/public/
 import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
 import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/career-plan'
 import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
+import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
 import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
 import { Route as ApiPublicDmarcIngestRouteImport } from './routes/api/public/dmarc-ingest'
@@ -494,6 +495,11 @@ const ApiPublicCompanyResearchRoute =
     path: '/api/public/company-research',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCspReportRoute = ApiPublicCspReportRouteImport.update({
+  id: '/api/public/csp-report',
+  path: '/api/public/csp-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicDailyDigestRoute = ApiPublicDailyDigestRouteImport.update({
   id: '/api/public/daily-digest',
   path: '/api/public/daily-digest',
@@ -747,6 +753,7 @@ export interface FileRoutesByFullPath {
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
   '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
@@ -856,6 +863,7 @@ export interface FileRoutesByTo {
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
   '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
@@ -967,6 +975,7 @@ export interface FileRoutesById {
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
   '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
@@ -1078,6 +1087,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
+    | '/api/public/csp-report'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
     | '/api/public/dmarc-ingest'
@@ -1187,6 +1197,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
+    | '/api/public/csp-report'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
     | '/api/public/dmarc-ingest'
@@ -1297,6 +1308,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
+    | '/api/public/csp-report'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
     | '/api/public/dmarc-ingest'
@@ -1370,6 +1382,7 @@ export interface RootRouteChildren {
   ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
   ApiPublicCareerPlanRoute: typeof ApiPublicCareerPlanRoute
   ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
+  ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
   ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
   ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
   ApiPublicDmarcIngestRoute: typeof ApiPublicDmarcIngestRoute
@@ -1926,6 +1939,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCompanyResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/csp-report': {
+      id: '/api/public/csp-report'
+      path: '/api/public/csp-report'
+      fullPath: '/api/public/csp-report'
+      preLoaderRoute: typeof ApiPublicCspReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/daily-digest': {
       id: '/api/public/daily-digest'
       path: '/api/public/daily-digest'
@@ -2290,6 +2310,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
   ApiPublicCareerPlanRoute: ApiPublicCareerPlanRoute,
   ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
+  ApiPublicCspReportRoute: ApiPublicCspReportRoute,
   ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
   ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,
   ApiPublicDmarcIngestRoute: ApiPublicDmarcIngestRoute,
