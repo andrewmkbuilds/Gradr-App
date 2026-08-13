@@ -21,6 +21,31 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Architecture guard: Gradr stays on Vite + React Router.
+      // React Router, React Query and TanStack Table remain allowed.
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@tanstack/start",
+                "@tanstack/start/*",
+                "@tanstack/start-*",
+                "@tanstack/react-start",
+                "@tanstack/react-start/*",
+                "@tanstack/react-router",
+                "@tanstack/react-router/*",
+                "@tanstack/router",
+                "@tanstack/router/*",
+              ],
+              message:
+                "TanStack Start / TanStack Router are not allowed in Gradr. Use react-router-dom — see README 'Architecture boundaries'.",
+            },
+          ],
+        },
+      ],
     },
+
   },
 );
