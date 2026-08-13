@@ -8,6 +8,13 @@ import {
   GraduationCap, Rocket, Compass, Award, Menu, X, Sparkles, ShieldCheck,
   Layers, Bot, Search, Send, RefreshCw, BarChart3, Minus,
 } from "lucide-react";
+import {
+  ANNUAL_SAVINGS_MESSAGE,
+  annualListPrice,
+  annualSavingsPercent,
+  formatUsd,
+  planPriceLabel,
+} from "@/config/pricing";
 import { Button } from "@/components/ui/button";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
