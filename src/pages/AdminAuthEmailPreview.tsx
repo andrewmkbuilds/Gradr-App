@@ -243,6 +243,24 @@ export default function AdminAuthEmailPreview() {
               )}
               <Verdict ok={(links?.forbidden ?? []).length === 0} label="No forbidden hosts" />
               <Verdict ok={(links?.externalHrefs ?? []).length === 0} label="No unexpected external links" />
+              {resolvedActionUrl && (
+                <Verdict ok={allowlist?.allowed === true} label="Redirect target allowlisted" />
+              )}
+            </div>
+
+            {resolvedActionUrl && allowlist && !allowlist.allowed && (
+              <div className="space-y-1 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs">
+                <p className="font-medium text-destructive">
+                  This link would be rewritten or blocked before sending:
+                </p>
+                <ul className="list-disc space-y-0.5 pl-4 text-destructive">
+                  {allowlist.reasons.map((reason, i) => (
+                    <li key={i}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             </div>
 
             <dl className="grid gap-2 text-xs sm:grid-cols-[10rem_1fr]">
