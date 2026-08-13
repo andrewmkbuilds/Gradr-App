@@ -21,11 +21,13 @@ const json = (body: unknown, status = 200) =>
   });
 
 function authorised(req: Request, body: Record<string, unknown>): boolean {
-  const expected = Deno.env.get("CRON_SECRET");
-  if (!expected) return false;
+  const expected = [Deno.env.get("SECURITY_CRON_SECRET"), Deno.env.get("CRON_SECRET")].filter(
+    (v): v is string => Boolean(v),
+  );
+  if (!expected.length) return false;
   const header = req.headers.get("x-cron-secret") ?? "";
   const bearer = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
-  return header === expected || bearer === expected || body.cron_secret === expected;
+  return expected.some((s) => header === s || bearer === s || body.cron_secret === s);
 }
 
 const APP_URL = "https://gradr.me/admin/security-findings";
