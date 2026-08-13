@@ -276,6 +276,17 @@
     letter-spacing: -0.006em;
   }
 
+  /* Global text selection: Yacht Club mahogany accent instead of browser default blue. */
+  ::selection {
+    background-color: #733E24;
+    color: #FFFFFF;
+  }
+  ::-moz-selection {
+    background-color: #733E24;
+    color: #FFFFFF;
+  }
+
+
 
   /* Scrolling model:
      - the document is the single primary scroll container
