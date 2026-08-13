@@ -4081,6 +4081,7 @@ export type Database = {
         Args: { _reason?: string; _source_record_id: string }
         Returns: number
       }
+      security_scan_snapshot: { Args: never; Returns: Json }
       submit_verification_request: {
         Args: {
           _category: string
