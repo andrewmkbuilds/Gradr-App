@@ -212,7 +212,7 @@ export default function AtsResumeChecker() {
               className="rounded-2xl border border-border/70 bg-card/60 p-5 backdrop-blur-sm transition-colors hover:border-primary/40"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="flex h-9 w-9 items-center justify-center extrude rounded-lg bg-primary/10 text-primary">
                   <step.icon className="h-4.5 w-4.5" aria-hidden="true" />
                 </span>
                 <h3 className="font-medium text-foreground">

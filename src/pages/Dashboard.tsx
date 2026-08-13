@@ -305,7 +305,7 @@ export default function Dashboard() {
                   className="flex items-center justify-between rounded-lg bg-secondary/50 p-3 transition-colors hover:bg-secondary"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center extrude rounded-lg bg-primary/10">
                       <span className="text-xs font-bold text-primary">{(match.company || "?")[0]}</span>
                     </div>
                     <div className="min-w-0">

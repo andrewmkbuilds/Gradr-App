@@ -38,7 +38,7 @@ export function ProGate({ children, feature = "This feature", description, credi
 
   return (
     <Card className="p-8 text-center border-border/60 bg-card/60 backdrop-blur-xs">
-      <div className="mx-auto h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+      <div className="mx-auto h-11 w-11 extrude rounded-xl bg-primary/10 flex items-center justify-center mb-4">
         <Lock className="h-5 w-5 text-primary" />
       </div>
       <h3 className="text-lg font-semibold text-foreground mb-1.5">{feature} is a Pro feature</h3>

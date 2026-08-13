@@ -86,7 +86,7 @@ export function AccountDataPanel() {
   return (
     <section className="glass-card p-6 space-y-6" aria-label="Your data">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+        <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
           <ShieldAlert className="h-5 w-5 text-primary" />
         </div>
         <div>

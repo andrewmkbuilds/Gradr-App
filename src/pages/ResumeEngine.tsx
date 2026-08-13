@@ -276,7 +276,7 @@ export default function ResumeEngine() {
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-1">Upload Your Resume</h3>
           <p className="text-sm text-muted-foreground mb-4">PDF, DOCX, or TXT • Max 10MB</p>
-          <div className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
+          <div className="px-4 py-2 extrude rounded-lg bg-primary/10 text-primary text-sm font-medium">
             Click to upload or drag & drop
           </div>
         </label>
