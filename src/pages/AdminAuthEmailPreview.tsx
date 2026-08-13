@@ -14,7 +14,7 @@
  */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Check, Link2, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Check, Download, Link2, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
