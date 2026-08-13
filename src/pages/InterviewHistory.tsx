@@ -95,7 +95,7 @@ export default function InterviewHistory() {
       </div>
 
       {rows.length === 0 && (
-        <div className="glass-card p-10 flex flex-col items-center text-center">
+        <div className="elev-2 rounded-xl p-10 flex flex-col items-center text-center">
           <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
             <Mic className="h-7 w-7 text-primary" />
           </div>
@@ -107,7 +107,7 @@ export default function InterviewHistory() {
       )}
 
       {rows.length > 1 && (
-        <div className="glass-card p-5">
+        <div className="elev-2 rounded-xl p-5">
           <p className="text-sm font-semibold text-foreground mb-3">Score trend</p>
           <div className="flex items-end gap-2 h-24">
             {trend.map((score, i) => (
@@ -130,7 +130,7 @@ export default function InterviewHistory() {
           return (
             <li key={row.id} className="relative">
               <span className="absolute -left-[31px] top-6 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
-              <div className="glass-card p-5 space-y-4">
+              <div className="elev-2 rounded-xl p-5 space-y-4">
                 <div className="flex flex-wrap items-center gap-4">
                   <ScoreRing score={row.overall_score ?? r.overallScore} size={64} label="Score" />
                   <div className="flex-1 min-w-[180px]">

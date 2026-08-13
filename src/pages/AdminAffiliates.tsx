@@ -128,7 +128,7 @@ function ApplicationsPanel() {
       ) : (
         <div className="space-y-3">
           {filtered.map((a) => (
-            <details key={a.id} className="glass-card">
+            <details key={a.id} className="elev-2 rounded-xl">
               <summary className="cursor-pointer p-4 flex items-center justify-between gap-3 flex-wrap">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-foreground">{a.full_name} <span className="text-muted-foreground text-xs">· {a.email}</span></div>
@@ -203,7 +203,7 @@ function AffiliatesPanel() {
   };
 
   return (
-    <div className="glass-card overflow-x-auto">
+    <div className="elev-2 rounded-xl overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="text-left text-xs text-muted-foreground">
           <tr><th className="p-3">Code</th><th>Status</th><th>Custom rate</th><th>Approved</th><th></th></tr>
@@ -258,7 +258,7 @@ function CommissionsPanel() {
 
 
   return (
-    <div className="glass-card overflow-x-auto">
+    <div className="elev-2 rounded-xl overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="text-left text-xs text-muted-foreground">
           <tr><th className="p-3">Date</th><th>Affiliate</th><th>Amount</th><th>Source</th><th>Status</th><th>Actions</th></tr>
@@ -328,7 +328,7 @@ function SettingsPanel() {
   const labelCls = "text-xs font-medium text-foreground block mb-1.5";
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card p-6 space-y-5">
+    <form onSubmit={handleSubmit} className="elev-2 rounded-xl p-6 space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="program_enabled" defaultChecked={settings.program_enabled} /> Program enabled</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="auto_approve" defaultChecked={settings.auto_approve} /> Auto-approve new applications</label>

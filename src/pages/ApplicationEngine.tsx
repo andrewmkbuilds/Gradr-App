@@ -99,7 +99,7 @@ function ApplicationEngineInner() {
       <CreditsBalance only="application" compact />
 
       {/* Input Fields */}
-      <div className="glass-card p-6 animate-slide-up space-y-4">
+      <div className="elev-2 rounded-xl p-6 animate-fade-in space-y-4">
         <h3 className="text-sm font-semibold text-foreground">Target Position</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
@@ -125,7 +125,7 @@ function ApplicationEngineInner() {
 
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-card p-6 animate-slide-up group hover:glow-border transition-all">
+        <div className="elev-2 rounded-xl p-6 animate-fade-in group transition-all">
           <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
             <Mail className="h-6 w-6 text-primary" />
           </div>
@@ -141,7 +141,7 @@ function ApplicationEngineInner() {
           </Button>
         </div>
 
-        <div className="glass-card p-6 animate-slide-up group hover:glow-border transition-all">
+        <div className="elev-2 rounded-xl p-6 animate-fade-in group transition-all">
           <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center mb-4 group-hover:bg-warning/20 transition-colors">
             <MessageSquare className="h-6 w-6 text-warning" />
           </div>
@@ -161,7 +161,7 @@ function ApplicationEngineInner() {
 
       {/* Result */}
       {result && (
-        <div className="glass-card p-6 animate-slide-up">
+        <div className="elev-2 rounded-xl p-6 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground">
               {activeType === "cover_letter" ? "Cover Letter" : "Recruiter Message"}

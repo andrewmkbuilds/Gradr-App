@@ -73,7 +73,7 @@ export function CameraMonitor({ active, onSnapshot }: Props) {
   const status = STATUS_COPY[snapshot.status];
 
   return (
-    <div className="glass-card p-4 space-y-3">
+    <div className="elev-2 rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-foreground flex items-center gap-2">
           {snapshot.status === "multiple-faces" ? (

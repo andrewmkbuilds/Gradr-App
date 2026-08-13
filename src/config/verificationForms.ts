@@ -327,7 +327,7 @@ export const REQUEST_STATUS_COPY: Record<
   },
   needs_more_information: {
     label: "More info needed",
-    tone: "text-amber-500 border-amber-500/40 bg-amber-500/10",
+    tone: "text-warning border-warning/40 bg-warning/10",
     hint: "Reply with the details the reviewer asked for by submitting again.",
   },
 };

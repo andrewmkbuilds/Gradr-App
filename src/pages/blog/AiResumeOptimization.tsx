@@ -146,7 +146,7 @@ export default function AiResumeOptimization() {
                   d: "Instead of guessing, you see the match score — usually 0–100 — and specific gaps to close before the recruiter ever sees the file.",
                 },
               ].map((row) => (
-                <div key={row.t} className="glass-card p-4 flex gap-3">
+                <div key={row.t} className="elev-2 rounded-xl p-4 flex gap-3">
                   <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                   <div>
                     <div className="font-medium text-foreground">{row.t}</div>
@@ -339,7 +339,7 @@ export default function AiResumeOptimization() {
                   key={g.to}
                   to={ctaHref(g.to, g.location)}
                   onClick={trackCta(g.location, g.to)}
-                  className="glass-card p-4 hover:border-primary/40 transition group"
+                  className="elev-2 rounded-xl p-4 hover:border-primary/40 transition group"
                 >
                   <div className="font-medium text-foreground group-hover:text-primary transition">
                     {g.title}
@@ -352,7 +352,7 @@ export default function AiResumeOptimization() {
             </div>
           </section>
 
-          <section className="glass-card p-6 mt-10">
+          <section className="elev-2 rounded-xl p-6 mt-10">
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               Try the Gradr Resume Engine
             </h2>

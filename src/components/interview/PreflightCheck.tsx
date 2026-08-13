@@ -132,7 +132,7 @@ export function PreflightCheck({ onReady, onCancel }: Props) {
   ];
 
   return (
-    <div className="glass-card p-6 space-y-5 animate-slide-up">
+    <div className="elev-2 rounded-xl p-6 space-y-5 animate-fade-in">
       <div>
         <h3 className="text-lg font-semibold text-foreground">Device check</h3>
         <p className="text-sm text-muted-foreground mt-1">

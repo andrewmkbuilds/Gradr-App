@@ -71,7 +71,7 @@ export function IntegrationsPanel() {
   };
 
   return (
-    <section className="glass-card p-6 space-y-5 animate-slide-up" aria-labelledby="integrations-heading">
+    <section className="elev-2 rounded-xl p-6 space-y-5 animate-fade-in" aria-labelledby="integrations-heading">
       <div className="flex items-start gap-3">
         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
           <Plug className="h-5 w-5 text-primary" />

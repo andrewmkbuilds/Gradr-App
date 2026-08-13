@@ -89,7 +89,7 @@ export function ShareCard({ code, link }: { code: string; link: string }) {
   };
 
   return (
-    <div className="glass-card p-6 space-y-5">
+    <div className="elev-2 rounded-xl p-6 space-y-5">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Invite friends</h3>

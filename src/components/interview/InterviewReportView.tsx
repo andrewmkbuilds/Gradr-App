@@ -65,8 +65,8 @@ export function InterviewReportView({
   ];
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-center gap-6">
+    <div className="space-y-6 animate-fade-in">
+      <div className="elev-2 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-6">
         <ScoreRing score={report.overallScore} size={120} label="Overall" />
         <div className="flex-1 space-y-2 text-center sm:text-left">
           <h2 className="text-xl font-semibold text-foreground">Interview scorecard</h2>
@@ -78,7 +78,7 @@ export function InterviewReportView({
         </div>
       </div>
 
-      <div className="glass-card p-6 space-y-4">
+      <div className="elev-2 rounded-xl p-6 space-y-4">
         {bars.map((b) => (
           <div key={b.label} className="space-y-1.5">
             <div className="flex justify-between text-sm">
@@ -133,7 +133,7 @@ export function InterviewReportView({
 
 function List({ title, icon, items }: { title: string; icon: React.ReactNode; items: string[] }) {
   return (
-    <div className="glass-card p-5">
+    <div className="elev-2 rounded-xl p-5">
       <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">{icon}{title}</p>
       <ul className="space-y-2">
         {items.map((item, i) => (
