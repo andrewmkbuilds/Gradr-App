@@ -19,7 +19,7 @@
 import { corsHeaders } from "./shared/cors";
 import { createClient } from "./shared/supabase";
 import { recordWebhookReplay } from "./shared/webhookDelivery";
-import { logSecurityEvent } from "./shared/securityLog";
+import { logSecurityEvent } from "./shared/securityAudit";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -207,7 +207,7 @@ export const handler = async (req: Request): Promise<Response> => {
     try {
       if (provider === "paddle") {
         const { processPaddleEvent } = await import("./payments-webhook.server");
-        const env = (delivery.environment === "production" ? "production" : "sandbox") as "sandbox" | "production";
+        const env = delivery.environment === "live" || delivery.environment === "production" ? "live" : "sandbox";
         // deno-lint-ignore no-explicit-any
         await processPaddleEvent(payload as any, env);
       } else {
