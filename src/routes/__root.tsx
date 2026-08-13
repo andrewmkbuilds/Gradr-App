@@ -129,6 +129,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   // would otherwise serve a second, indexable copy of `/ai-interview-coach`.
   // Permanently redirect any non-normalised variant to the canonical path.
   beforeLoad: ({ location }) => {
+    // Infrastructure routes (email queue, unsubscribe API) must never be rewritten.
+    if (location.pathname.startsWith("/lovable/") || location.pathname === "/email/unsubscribe") return;
     const canonical = normalizeSeoPath(location.pathname);
     if (canonical !== location.pathname && !location.pathname.startsWith("/api/")) {
       throw redirect({

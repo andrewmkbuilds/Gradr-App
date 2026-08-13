@@ -40,6 +40,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogAiResumeOptimizationRouteImport } from './routes/blog/ai-resume-optimization'
 import { Route as CareerAdviceIndexRouteImport } from './routes/career-advice/index'
 import { Route as CareerAdviceSlugRouteImport } from './routes/career-advice/$slug'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as JobSearchIndexRouteImport } from './routes/job-search/index'
 import { Route as JobSearchSlugRouteImport } from './routes/job-search/$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -93,7 +94,10 @@ import { Route as ApiPublicSearchConsoleRouteImport } from './routes/api/public/
 import { Route as ApiPublicSearchJobsRouteImport } from './routes/api/public/search-jobs'
 import { Route as ApiPublicSendNotificationRouteImport } from './routes/api/public/send-notification'
 import { Route as ApiPublicSeoMonitorRouteImport } from './routes/api/public/seo-monitor'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -248,6 +252,11 @@ const CareerAdviceIndexRoute = CareerAdviceIndexRouteImport.update({
 const CareerAdviceSlugRoute = CareerAdviceSlugRouteImport.update({
   id: '/career-advice/$slug',
   path: '/career-advice/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobSearchIndexRoute = JobSearchIndexRouteImport.update({
@@ -526,10 +535,27 @@ const ApiPublicSeoMonitorRoute = ApiPublicSeoMonitorRouteImport.update({
   path: '/api/public/seo-monitor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
     path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -562,6 +588,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AppWelcomeRoute
   '/blog/ai-resume-optimization': typeof BlogAiResumeOptimizationRoute
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/career-advice/': typeof CareerAdviceIndexRoute
@@ -615,9 +642,12 @@ export interface FileRoutesByFullPath {
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliate/': typeof AppAffiliateIndexRoute
   '/interview/': typeof AppInterviewIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/ai-interview-coach': typeof AiInterviewCoachRoute
@@ -647,6 +677,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof AppWelcomeRoute
   '/blog/ai-resume-optimization': typeof BlogAiResumeOptimizationRoute
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
   '/': typeof AppIndexRoute
   '/blog': typeof BlogIndexRoute
@@ -701,9 +732,12 @@ export interface FileRoutesByTo {
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliate': typeof AppAffiliateIndexRoute
   '/interview': typeof AppInterviewIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -735,6 +769,7 @@ export interface FileRoutesById {
   '/_app/welcome': typeof AppWelcomeRoute
   '/blog/ai-resume-optimization': typeof BlogAiResumeOptimizationRoute
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
   '/_app/': typeof AppIndexRoute
   '/blog/': typeof BlogIndexRoute
@@ -789,9 +824,12 @@ export interface FileRoutesById {
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_app/affiliate/': typeof AppAffiliateIndexRoute
   '/_app/interview/': typeof AppInterviewIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -824,6 +862,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/blog/ai-resume-optimization'
     | '/career-advice/$slug'
+    | '/email/unsubscribe'
     | '/job-search/$slug'
     | '/blog/'
     | '/career-advice/'
@@ -877,9 +916,12 @@ export interface FileRouteTypes {
     | '/api/public/search-jobs'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
+    | '/lovable/email/suppression'
     | '/affiliate/'
     | '/interview/'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/ai-interview-coach'
@@ -909,6 +951,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/blog/ai-resume-optimization'
     | '/career-advice/$slug'
+    | '/email/unsubscribe'
     | '/job-search/$slug'
     | '/'
     | '/blog'
@@ -963,9 +1006,12 @@ export interface FileRouteTypes {
     | '/api/public/search-jobs'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
+    | '/lovable/email/suppression'
     | '/affiliate'
     | '/interview'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/_app'
@@ -996,6 +1042,7 @@ export interface FileRouteTypes {
     | '/_app/welcome'
     | '/blog/ai-resume-optimization'
     | '/career-advice/$slug'
+    | '/email/unsubscribe'
     | '/job-search/$slug'
     | '/_app/'
     | '/blog/'
@@ -1050,9 +1097,12 @@ export interface FileRouteTypes {
     | '/api/public/search-jobs'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
+    | '/lovable/email/suppression'
     | '/_app/affiliate/'
     | '/_app/interview/'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1071,6 +1121,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BlogAiResumeOptimizationRoute: typeof BlogAiResumeOptimizationRoute
   CareerAdviceSlugRoute: typeof CareerAdviceSlugRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   JobSearchSlugRoute: typeof JobSearchSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   CareerAdviceIndexRoute: typeof CareerAdviceIndexRoute
@@ -1106,7 +1157,10 @@ export interface RootRouteChildren {
   ApiPublicSearchJobsRoute: typeof ApiPublicSearchJobsRoute
   ApiPublicSendNotificationRoute: typeof ApiPublicSendNotificationRoute
   ApiPublicSeoMonitorRoute: typeof ApiPublicSeoMonitorRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1326,6 +1380,13 @@ declare module '@tanstack/react-router' {
       path: '/career-advice/$slug'
       fullPath: '/career-advice/$slug'
       preLoaderRoute: typeof CareerAdviceSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/job-search/': {
@@ -1699,11 +1760,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSeoMonitorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
       fullPath: '/lovable/email/queue/process'
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1801,6 +1883,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BlogAiResumeOptimizationRoute: BlogAiResumeOptimizationRoute,
   CareerAdviceSlugRoute: CareerAdviceSlugRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   JobSearchSlugRoute: JobSearchSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   CareerAdviceIndexRoute: CareerAdviceIndexRoute,
@@ -1836,7 +1919,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSearchJobsRoute: ApiPublicSearchJobsRoute,
   ApiPublicSendNotificationRoute: ApiPublicSendNotificationRoute,
   ApiPublicSeoMonitorRoute: ApiPublicSeoMonitorRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
