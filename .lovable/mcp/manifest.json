@@ -11,7 +11,7 @@
   },
   "mcp": {
     "server": {
-      "name": "careerflow-mcp",
+      "name": "gradr-mcp",
       "version": "0.1.0",
       "title": "Gradr"
     },

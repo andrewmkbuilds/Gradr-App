@@ -13,7 +13,15 @@ const SITE_TITLE = "Gradr | AI Career Copilot for Resumes, Jobs & Interviews";
 const SITE_DESCRIPTION =
   "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.";
 const ORIGIN = "https://gradr.me";
-const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
+/**
+ * Bumped whenever the social cards are re-rendered. Crawlers (WhatsApp,
+ * LinkedIn, Discord, Slack) cache preview images aggressively by URL, so the
+ * query string is what forces them to re-fetch instead of serving the retired
+ * artwork indefinitely.
+ */
+const OG_VERSION = "2026-08-yachtclub";
+const withOgVersion = (url: string) => `${url}?v=${OG_VERSION}`;
+const OG_IMAGE = withOgVersion(`${ORIGIN}/og-image.jpg`);
 
 const META: Record<string, { title: string; description: string }> = {
   // "/" renders the public Gradr landing page for signed-out visitors (and the
@@ -183,20 +191,20 @@ function resolveDynamicMeta(pathname: string): { title: string; description: str
 function resolveOgImage(pathname: string): string {
   // The public marketing landing page gets its own card so social previews
   // never duplicate the generic sitewide image used by the home route.
-  if (pathname === "/landing") return `${ORIGIN}/og/landing.png`;
+  if (pathname === "/landing") return withOgVersion(`${ORIGIN}/og/landing.png`);
   // Keyword landing pages ship their own card so social previews match intent.
-  if (pathname === "/ai-interview-coach") return `${ORIGIN}/og/ai-interview-coach.png`;
-  if (pathname === "/ats-resume-checker") return `${ORIGIN}/og/ats-resume-checker.png`;
-  if (pathname === "/ai-resume-builder") return `${ORIGIN}/og/ai-resume-builder.png`;
+  if (pathname === "/ai-interview-coach") return withOgVersion(`${ORIGIN}/og/ai-interview-coach.png`);
+  if (pathname === "/ats-resume-checker") return withOgVersion(`${ORIGIN}/og/ats-resume-checker.png`);
+  if (pathname === "/ai-resume-builder") return withOgVersion(`${ORIGIN}/og/ai-resume-builder.png`);
   // The blog index uses a dedicated card so it never shares the homepage image.
-  if (pathname === "/blog") return `${ORIGIN}/og/blog.png`;
+  if (pathname === "/blog") return withOgVersion(`${ORIGIN}/og/blog.png`);
   if (pathname.startsWith("/blog/")) {
     const slug = pathname.slice(6);
-    if (slug) return `${ORIGIN}/og/blog-${slug}.png`;
+    if (slug) return withOgVersion(`${ORIGIN}/og/blog-${slug}.png`);
   }
   if (pathname.startsWith("/career-advice/")) {
     const slug = pathname.slice(15);
-    if (slug && GUIDES_BY_SLUG[slug]) return `${ORIGIN}/og/guide-${slug}.png`;
+    if (slug && GUIDES_BY_SLUG[slug]) return withOgVersion(`${ORIGIN}/og/guide-${slug}.png`);
   }
   return OG_IMAGE;
 }
