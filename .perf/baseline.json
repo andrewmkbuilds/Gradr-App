@@ -1,0 +1,96 @@
+{
+  "measuredAt": "2026-08-13T09:40:27.653Z",
+  "baseUrl": "http://localhost:8080",
+  "results": {
+    "landing:full": {
+      "fps": 21.1,
+      "droppedFrames": 38,
+      "longTasks": 7,
+      "longTaskMs": 1209,
+      "lcp": 3424,
+      "cls": 0,
+      "interactive": 2761
+    },
+    "landing:reduced": {
+      "fps": 29.8,
+      "droppedFrames": 32,
+      "longTasks": 7,
+      "longTaskMs": 1623,
+      "lcp": 1536,
+      "cls": 0,
+      "interactive": 3011
+    },
+    "pricing:full": {
+      "fps": 60.3,
+      "droppedFrames": 0,
+      "longTasks": 3,
+      "longTaskMs": 301,
+      "lcp": 1812,
+      "cls": 0.048,
+      "interactive": 2233
+    },
+    "pricing:reduced": {
+      "fps": 58.6,
+      "droppedFrames": 2,
+      "longTasks": 4,
+      "longTaskMs": 315,
+      "lcp": 1256,
+      "cls": 0.049,
+      "interactive": 1447
+    },
+    "interview-coach:full": {
+      "fps": 45.7,
+      "droppedFrames": 13,
+      "longTasks": 2,
+      "longTaskMs": 282,
+      "lcp": 208,
+      "cls": 0,
+      "interactive": 257
+    },
+    "interview-coach:reduced": {
+      "fps": 37.2,
+      "droppedFrames": 23,
+      "longTasks": 4,
+      "longTaskMs": 428,
+      "lcp": 148,
+      "cls": 0,
+      "interactive": 201
+    },
+    "ats-checker:full": {
+      "fps": 45.5,
+      "droppedFrames": 16,
+      "longTasks": 2,
+      "longTaskMs": 263,
+      "lcp": 188,
+      "cls": 0,
+      "interactive": 247
+    },
+    "ats-checker:reduced": {
+      "fps": 33.5,
+      "droppedFrames": 31,
+      "longTasks": 3,
+      "longTaskMs": 342,
+      "lcp": 140,
+      "cls": 0,
+      "interactive": 191
+    },
+    "status:full": {
+      "fps": 56.4,
+      "droppedFrames": 3,
+      "longTasks": 2,
+      "longTaskMs": 245,
+      "lcp": 1324,
+      "cls": 0.034,
+      "interactive": 180
+    },
+    "status:reduced": {
+      "fps": 55.2,
+      "droppedFrames": 4,
+      "longTasks": 2,
+      "longTaskMs": 255,
+      "lcp": 1336,
+      "cls": 0.034,
+      "interactive": 174
+    }
+  }
+}

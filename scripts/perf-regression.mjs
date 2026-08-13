@@ -117,7 +117,13 @@ async function measure(page, url) {
 }
 
 async function run() {
-  const browser = await chromium.launch({ headless: true });
+    // Some CI images ship a different Playwright build than the npm package
+  // expects; PERF_CHROMIUM_PATH lets the harness reuse the installed binary.
+  const executablePath = process.env.PERF_CHROMIUM_PATH;
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {}),
+  });
   const results = {};
 
   for (const route of ROUTES) {
