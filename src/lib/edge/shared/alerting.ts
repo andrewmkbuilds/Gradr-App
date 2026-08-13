@@ -98,7 +98,7 @@ async function sendAlertEmail(notice: AlertNotice, isEscalation: boolean): Promi
           <tr><td style="padding:6px 0;color:#777">Occurrences</td><td>${notice.occurrences}</td></tr>
           <tr><td style="padding:6px 0;color:#777">First seen</td><td>${new Date(notice.firstSeenAt).toUTCString()}</td></tr>
         </table>
-        <pre style="background:#f5f5f5;padding:12px;border-radius:8px;font-size:12px;white-space:pre-wrap">${
+        <pre style="background:#f2f0ef;padding:12px;border-radius:8px;font-size:12px;white-space:pre-wrap">${
           notice.message.slice(0, 800).replace(/</g, "&lt;")
         }</pre>
         <p style="font-size:13px;color:#777">Open the API health dashboard in Gradr admin to triage or replay affected webhooks.</p>
