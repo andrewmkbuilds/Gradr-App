@@ -115,6 +115,21 @@
     --shadow-elevated: 0 2px 4px hsl(197 34% 16% / 0.05), 0 18px 40px -24px hsl(197 34% 16% / 0.26);
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.1);
     --shadow-hover: 0 12px 28px -18px hsl(197 34% 16% / 0.32);
+
+    /* ---------- Elevation system (light) ----------
+       L1 page canvas, L2 resting cards, L3 focus/feature panels, L4 floating. */
+    --elev-1-bg: 22 16% 97%;
+    --elev-2-bg: 0 0% 100%;
+    --elev-3-bg: 0 0% 100%;
+    --elev-4-bg: 0 0% 100%;
+    --elev-1-border: 197 14% 88%;
+    --elev-2-border: 197 14% 90%;
+    --elev-3-border: 195 22% 84%;
+    --elev-4-border: 195 22% 82%;
+    --elev-1-shadow: none;
+    --elev-2-shadow: 0 1px 2px hsl(197 34% 16% / 0.05), 0 8px 24px -18px hsl(197 34% 16% / 0.2);
+    --elev-3-shadow: 0 2px 6px hsl(197 34% 16% / 0.06), 0 20px 44px -26px hsl(197 34% 16% / 0.3);
+    --elev-4-shadow: 0 6px 14px hsl(197 34% 16% / 0.08), 0 34px 70px -30px hsl(197 34% 16% / 0.38);
     --ambient-opacity: 0.13;
     --decor-strength: 0.45;
     --sheen-strength: 0.09;
