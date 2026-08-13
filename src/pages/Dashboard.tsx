@@ -13,6 +13,8 @@ import { Surface, SurfaceHeader } from "@/components/ui/surface";
 import { CareerReadiness, type ReadinessPillar } from "@/components/dashboard/CareerReadiness";
 import { ActivityChart, PipelineFunnelChart, type ActivityPoint } from "@/components/dashboard/DashboardCharts";
 import { CountUp } from "@/components/motion";
+import { ThreeDayPlan } from "@/components/dashboard/ThreeDayPlan";
+import { FollowUpReminders } from "@/components/dashboard/FollowUpReminders";
 
 
 interface DashboardStats {
@@ -186,16 +188,32 @@ export default function Dashboard() {
     {
       key: "resume", label: "Resume strength", weight: 3, value: s.resumeScore,
       hint: s.resumeScore > 0 ? "Latest ATS score across your resumes." : "Upload a resume to unlock this pillar.",
+      signals: [
+        { label: "Latest ATS score", value: s.resumeScore ? `${s.resumeScore}/100` : "no resume" },
+        { label: "Keyword match", value: `${s.keywordMatch}%` },
+        { label: "Formatting", value: `${s.formattingScore}%` },
+        { label: "Impact statements", value: `${s.impactScore}%` },
+      ],
     },
     {
       key: "matching", label: "Match quality", weight: 2,
       value: s.totalMatches ? (s.highConfidence / s.totalMatches) * 100 : 0,
       hint: `${s.highConfidence} of ${s.totalMatches || 0} matches above 85%.`,
+      signals: [
+        { label: "Scored matches", value: String(s.totalMatches) },
+        { label: "Above 85% match", value: String(s.highConfidence) },
+        { label: "High-confidence ratio", value: s.interviewRate },
+      ],
     },
     {
       key: "activity", label: "Application activity", weight: 2,
       value: Math.min(100, (s.appliedThisWeek / 5) * 100),
       hint: `${s.appliedThisWeek} applied this week — 5 a week keeps momentum.`,
+      signals: [
+        { label: "Applied this week", value: `${s.appliedThisWeek} of 5 target` },
+        { label: "Active pipeline", value: String(activeStages) },
+        { label: "Overdue follow-ups", value: String(overdueCount) },
+      ],
     },
     {
       key: "practice", label: "Interview practice", weight: 3,
@@ -203,6 +221,10 @@ export default function Dashboard() {
       hint: data!.interviewCount
         ? `${data!.interviewCount} mock sessions, avg score ${data!.interviewAvg || "—"}.`
         : "Run a mock interview to score this pillar.",
+      signals: [
+        { label: "Mock sessions", value: String(data!.interviewCount) },
+        { label: "Average score", value: data!.interviewAvg ? `${data!.interviewAvg}/100` : "not scored yet" },
+      ],
     },
   ];
 
@@ -236,6 +258,11 @@ export default function Dashboard() {
 
       {/* Level 3: the headline signal of the whole product. */}
       <CareerReadiness pillars={pillars} />
+
+      {/* Level 3: AI-sequenced next actions. */}
+      <ThreeDayPlan />
+
+      <FollowUpReminders />
 
       {/* Level 2: supporting analytics. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

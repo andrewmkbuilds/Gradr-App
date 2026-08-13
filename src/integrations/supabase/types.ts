@@ -3464,6 +3464,9 @@ export type Database = {
           digest_send_time: string
           digest_timezone: string
           experience_level: string | null
+          followup_days: number
+          followup_enabled: boolean
+          followup_stages: string[]
           id: string
           industries: string[] | null
           job_types: string[] | null
@@ -3486,6 +3489,9 @@ export type Database = {
           digest_send_time?: string
           digest_timezone?: string
           experience_level?: string | null
+          followup_days?: number
+          followup_enabled?: boolean
+          followup_stages?: string[]
           id?: string
           industries?: string[] | null
           job_types?: string[] | null
@@ -3508,6 +3514,9 @@ export type Database = {
           digest_send_time?: string
           digest_timezone?: string
           experience_level?: string | null
+          followup_days?: number
+          followup_enabled?: boolean
+          followup_stages?: string[]
           id?: string
           industries?: string[] | null
           job_types?: string[] | null

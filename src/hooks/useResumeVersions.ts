@@ -14,11 +14,12 @@ export interface ResumeVersion {
   impact_score: number | null;
   readability_score: number | null;
   ai_suggestions: unknown;
+  parsed_text: string | null;
   created_at: string;
 }
 
 const COLUMNS =
-  "id, file_name, file_path, version_label, ats_score, keyword_match, formatting_score, impact_score, readability_score, ai_suggestions, created_at";
+  "id, file_name, file_path, version_label, ats_score, keyword_match, formatting_score, impact_score, readability_score, ai_suggestions, parsed_text, created_at";
 
 export function useResumeVersions() {
   const { user } = useAuth();

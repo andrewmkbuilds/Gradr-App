@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { extractResumeText } from "@/lib/extractResumeText";
 import { ResumeVersions } from "@/components/resume/ResumeVersions";
+import { ResumeVersionDiff } from "@/components/resume/ResumeVersionDiff";
 
 interface Suggestion {
   type: string;
@@ -292,6 +293,8 @@ export default function ResumeEngine() {
           }}
         />
       )}
+
+      {!uploading && !analyzing && <ResumeVersionDiff key={`diff-${versionsToken}`} />}
 
       <AnimatePresence mode="wait">
         {!analysis && !uploading && !analyzing ? (
