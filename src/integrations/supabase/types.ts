@@ -1131,6 +1131,87 @@ export type Database = {
           },
         ]
       }
+      email_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          message_id: string | null
+          metadata: Json
+          recipient_email: string | null
+          template_name: string | null
+          url: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json
+          recipient_email?: string | null
+          template_name?: string | null
+          url?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          message_id?: string | null
+          metadata?: Json
+          recipient_email?: string | null
+          template_name?: string | null
+          url?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      email_feature_flags: {
+        Row: {
+          description: string | null
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          description?: string | null
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          description?: string | null
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_idempotency: {
+        Row: {
+          created_at: string
+          idempotency_key: string
+          message_id: string
+          recipient_email: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          idempotency_key: string
+          message_id: string
+          recipient_email: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          idempotency_key?: string
+          message_id?: string
+          recipient_email?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
       email_notification_log: {
         Row: {
           created_at: string

@@ -3,6 +3,9 @@ import { render } from '@react-email/render'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { TEMPLATES } from '@/lib/email-templates/registry'
+import { logEmailEvent, readEmailFlags } from '@/lib/email/events.server'
+import { injectOpenPixel, rewriteLinksForTracking, toPlainText } from '@/lib/email/tracking'
+
 
 // Configuration baked in at scaffold time
 const SITE_NAME = "gradr-app"
@@ -115,7 +118,65 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
+        // 1b. Idempotency guard — one send per idempotency key, forever.
+        // Reserve the key first: a unique-violation means this exact email was
+        // already accepted (webhook retry, double submit, queue reprocessing).
+        const { data: existingKey } = await supabase
+          .from('email_idempotency')
+          .select('message_id')
+          .eq('idempotency_key', idempotencyKey)
+          .maybeSingle()
+
+        if (existingKey) {
+          await logEmailEvent(supabase, {
+            messageId: existingKey.message_id,
+            templateName,
+            recipientEmail: effectiveRecipient,
+            eventType: 'deduped',
+            metadata: { idempotency_key: idempotencyKey },
+          })
+          return Response.json({
+            success: true,
+            deduped: true,
+            messageId: existingKey.message_id,
+          })
+        }
+
+        const { error: reserveError } = await supabase
+          .from('email_idempotency')
+          .insert({
+            idempotency_key: idempotencyKey,
+            message_id: messageId,
+            template_name: templateName,
+            recipient_email: effectiveRecipient,
+          })
+
+        if (reserveError) {
+          if ((reserveError as { code?: string }).code === '23505') {
+            const { data: raced } = await supabase
+              .from('email_idempotency')
+              .select('message_id')
+              .eq('idempotency_key', idempotencyKey)
+              .maybeSingle()
+            return Response.json({
+              success: true,
+              deduped: true,
+              messageId: raced?.message_id ?? null,
+            })
+          }
+          console.error('Failed to reserve idempotency key', { error: reserveError })
+          return Response.json({ error: 'Failed to prepare email' }, { status: 500 })
+        }
+
+        // Feature flags (plain-text fallback is opt-in; tracking defaults on).
+        const flags = await readEmailFlags(supabase, {
+          plain_text_fallback: false,
+          open_tracking: true,
+          click_tracking: true,
+        })
+
         // 2. Check suppression list (fail-closed: if we can't verify, don't send)
+
         const { data: suppressed, error: suppressionError } = await supabase
           .from('suppressed_emails')
           .select('id')
@@ -251,10 +312,23 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           return Response.json({ success: false, reason: 'email_suppressed' })
         }
 
-        // 4. Render React Email template to HTML and plain text
+        // 4. Render React Email template to HTML (+ optional plain-text fallback)
         const element = React.createElement(template.component, templateData)
-        const html = await render(element)
-        const plainText = await render(element, { plainText: true })
+        let html = await render(element)
+
+        // Click tracking first, then the open pixel (so the pixel isn't rewritten).
+        if (flags['click_tracking']) {
+          html = rewriteLinksForTracking(html, messageId)
+        }
+        if (flags['open_tracking']) {
+          html = injectOpenPixel(html, messageId)
+        }
+
+        // Plain-text alternative part is opt-in via the `plain_text_fallback` flag.
+        const plainText = flags['plain_text_fallback']
+          ? toPlainText(await render(element, { plainText: true })) || toPlainText(html)
+          : undefined
+
 
         // Resolve subject — supports static string or dynamic function
         const resolvedSubject =
@@ -306,18 +380,45 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             error_message: 'Failed to enqueue email',
           })
 
+          await logEmailEvent(supabase, {
+            messageId,
+            templateName,
+            recipientEmail: effectiveRecipient,
+            eventType: 'failed',
+            metadata: { stage: 'enqueue' },
+          })
+
+          // Release the idempotency reservation so the caller can safely retry
+          // this exact key — nothing was queued, so no duplicate risk.
+          await supabase
+            .from('email_idempotency')
+            .delete()
+            .eq('idempotency_key', idempotencyKey)
+
           return Response.json(
             { error: 'Failed to enqueue email' },
             { status: 500 }
           )
         }
 
+        await logEmailEvent(supabase, {
+          messageId,
+          templateName,
+          recipientEmail: effectiveRecipient,
+          eventType: 'queued',
+          metadata: {
+            idempotency_key: idempotencyKey,
+            plain_text_fallback: Boolean(plainText),
+          },
+        })
+
         console.log('Transactional email enqueued', {
           templateName,
           recipient_redacted: redactEmail(effectiveRecipient),
         })
 
-        return Response.json({ success: true, queued: true })
+        return Response.json({ success: true, queued: true, messageId })
+
       },
     },
   },

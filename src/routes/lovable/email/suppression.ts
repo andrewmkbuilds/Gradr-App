@@ -143,6 +143,27 @@ export const Route = createFileRoute("/lovable/email/suppression")({
           })
         }
 
+        // 2b. Record the engagement event. Terminal events are uniquely indexed,
+        // so webhook redelivery (is_retry) cannot double-count a bounce/complaint.
+        await logEmailEvent(supabase, {
+          messageId: payload.message_id ?? null,
+          templateName: 'system',
+          recipientEmail: normalizedEmail,
+          eventType:
+            payload.reason === 'bounce'
+              ? 'bounced'
+              : payload.reason === 'complaint'
+                ? 'complained'
+                : 'suppressed',
+          metadata: {
+            reason: payload.reason,
+            is_retry: payload.is_retry,
+            retry_count: payload.retry_count,
+            ...(payload.metadata ?? {}),
+          },
+        })
+
+
         console.log('Suppression processed', {
           email_redacted: normalizedEmail[0] + '***@' + normalizedEmail.split('@')[1],
           reason: payload.reason,
