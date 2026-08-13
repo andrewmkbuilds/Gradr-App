@@ -156,9 +156,14 @@ export function cspEnforcementEnabled(): boolean {
  */
 export function applySecurityHeaders(
   headers: Headers,
-  options: { secure: boolean; origin?: string; enforceCandidate?: boolean },
+  options: { secure: boolean; origin?: string; enforceCandidate?: boolean; pathname?: string },
 ): Headers {
   for (const name of DISCLOSURE_HEADERS) headers.delete(name);
+
+  if (options.pathname && shouldNoIndex(options.pathname) && !headers.has("x-robots-tag")) {
+    headers.set("x-robots-tag", "noindex, nofollow, noarchive");
+  }
+
 
   const reporting = [`report-uri ${CSP_REPORT_PATH}`, `report-to ${CSP_REPORT_GROUP}`].join("; ");
   const enforceCandidate = options.enforceCandidate ?? cspEnforcementEnabled();
