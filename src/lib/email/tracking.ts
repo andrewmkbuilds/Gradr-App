@@ -92,11 +92,22 @@ export function toPlainText(html: string): string {
     .trim();
 }
 
-/** Allow only same-site or https targets through the click redirect. */
+/** Hosts the click redirector is allowed to forward to. */
+const ALLOWED_REDIRECT_HOSTS = new Set([
+  "gradr.me",
+  "www.gradr.me",
+  "notify.gradr.me",
+  "gradr-app.lovable.app",
+]);
+
+/** Allow only https(+http for localhost-free parity) targets on Gradr-owned hosts. */
 export function isSafeRedirectTarget(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "https:" || parsed.protocol === "http:";
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    const host = parsed.hostname.toLowerCase();
+    if (host === new URL(EMAIL_SITE_URL).hostname.toLowerCase()) return true;
+    return ALLOWED_REDIRECT_HOSTS.has(host);
   } catch {
     return false;
   }
