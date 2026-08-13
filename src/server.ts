@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { applySecurityHeaders } from "./lib/security/headers";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -47,8 +48,6 @@ function isH3SwallowedErrorBody(body: string): boolean {
 // --- Response hardening -------------------------------------------------
 // The policy itself lives in `src/lib/security/headers.ts` so the SSR worker,
 // the unit tests and the production runtime check all assert the same thing.
-
-import { applySecurityHeaders } from "./lib/security/headers";
 
 function harden(response: Response, request?: Request): Response {
   const headers = new Headers(response.headers);
