@@ -12,7 +12,7 @@ import { jobLandingFaqs } from "@/content/jobLandings";
 
 export const SITE_NAME = "Gradr";
 export const SITE_ORIGIN = "https://gradr.me";
-export const OG_IMAGE = `${SITE_ORIGIN}/og-image.jpg`;
+export const OG_IMAGE = `${SITE_ORIGIN}/og-image-v2.jpg`;
 
 export type JsonLd = Record<string, unknown>;
 
@@ -20,7 +20,7 @@ const publisher = {
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_ORIGIN,
-  logo: { "@type": "ImageObject", url: `${SITE_ORIGIN}/favicon.svg` },
+  logo: { "@type": "ImageObject", url: `${SITE_ORIGIN}/gradr-logo.png` },
 };
 
 export function absoluteUrl(path: string): string {

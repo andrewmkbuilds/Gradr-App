@@ -10,7 +10,7 @@ import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
 
 const SITE = "Gradr";
 const ORIGIN = "https://gradr.me";
-const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
+const OG_IMAGE = `${ORIGIN}/og-image-v2.jpg`;
 
 const META: Record<string, { title: string; description: string }> = {
   // "/" renders the public Gradr landing page for signed-out visitors (and the
