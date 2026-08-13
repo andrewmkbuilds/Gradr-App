@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
+import { useCareerPreferences } from "@/hooks/useCareerPreferences";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
