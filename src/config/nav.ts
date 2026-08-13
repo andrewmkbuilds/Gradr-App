@@ -131,6 +131,8 @@ export const navGroups: NavGroup[] = [
       { title: "Paddle Customers", url: "/admin/paddle", icon: Wallet },
       { title: "Payments Status", url: "/admin/payments-status", icon: Activity },
       { title: "API Health", url: "/admin/api-health", icon: Activity },
+      { title: "Rate Limits", url: "/admin/rate-limits", icon: Activity },
+      { title: "Email Ops", url: "/admin/email-ops", icon: Mail },
     ],
   },
 ];
