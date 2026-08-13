@@ -219,6 +219,21 @@
     --shadow-elevated: 0 24px 60px -30px hsl(198 60% 2% / 0.85);
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.14);
     --shadow-hover: 0 18px 40px -22px hsl(198 60% 2% / 0.8);
+
+    /* ---------- Elevation system (dark) ----------
+       Depth reads through lightness first, shadow second. */
+    --elev-1-bg: 198 38% 8%;
+    --elev-2-bg: 198 34% 11%;
+    --elev-3-bg: 198 30% 14%;
+    --elev-4-bg: 198 26% 17%;
+    --elev-1-border: 198 24% 16%;
+    --elev-2-border: 198 22% 19%;
+    --elev-3-border: 197 22% 23%;
+    --elev-4-border: 196 22% 27%;
+    --elev-1-shadow: none;
+    --elev-2-shadow: 0 4px 20px hsl(198 60% 2% / 0.42);
+    --elev-3-shadow: 0 12px 34px -14px hsl(198 60% 2% / 0.6);
+    --elev-4-shadow: 0 28px 66px -26px hsl(198 60% 2% / 0.85);
     --ambient-opacity: 0.28;
     --decor-strength: 1;
     --sheen-strength: 0.14;
