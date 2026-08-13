@@ -344,67 +344,107 @@ export default function Landing() {
 
       {/* -------------------------------- hero -------------------------------- */}
       <main id="hero">
-        <div className="relative pt-28 sm:pt-32">
-          <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
-            <div className="absolute inset-0 grid-lines opacity-40" />
-            <div className="absolute left-1/2 top-[-12rem] h-[28rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
-          </div>
+        <motion.div className="relative pt-28 sm:pt-32" style={heroReduced ? undefined : { opacity: heroOpacity }}>
+          <Atmosphere />
 
           <Section className="!pb-0 !pt-0">
-            <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_1.1fr] lg:gap-14">
-              <Reveal className="space-y-6">
-                <Eyebrow>AI career operating system</Eyebrow>
-                <h1 className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-                  From resume<br className="hidden sm:block" /> to offer.
+            <motion.div
+              className="grid items-center gap-12 lg:grid-cols-[1.02fr_1.05fr] lg:gap-14"
+              style={heroReduced ? undefined : { y: heroLift }}
+            >
+              <div className="space-y-7">
+                <motion.span
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: easeOut }}
+                  className="type-eyebrow inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface/60 px-3 py-1.5 text-brand-secondary backdrop-blur"
+                >
+                  <Sparkles className="h-3 w-3" aria-hidden />
+                  AI career operating system
+                </motion.span>
+
+                <h1 className="type-hero text-balance">
+                  <TextReveal as="span" text="Your AI career" className="block" immediate delay={0.1} />
+                  <TextReveal
+                    as="span"
+                    text="command center."
+                    className="block animated-gradient-text"
+                    immediate
+                    delay={0.28}
+                  />
                 </h1>
-                <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                  Gradr is your AI career operating system. Build a stronger resume, find better-fit jobs, prepare for
-                  interviews, and make smarter career moves — in one connected workspace.
-                </p>
 
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button size="lg" className="h-12 px-6 text-base" onClick={start}>
-                    Get started free
-                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-12 px-6 text-base"
-                    onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-                  >
-                    See how Gradr works
-                  </Button>
-                </div>
+                <motion.p
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, ease: easeOut, delay: 0.5 }}
+                  className="type-lede max-w-xl text-muted-foreground"
+                >
+                  Gradr scores your resume, ranks live roles against your real skills, runs spoken mock
+                  interviews and tracks every application — one intelligent system that remembers your
+                  whole search.
+                </motion.p>
 
-                <p className="text-sm text-muted-foreground">
-                  One workspace for the entire job search. No card required to start.
-                </p>
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, ease: easeOut, delay: 0.62 }}
+                  className="flex flex-col gap-3 sm:flex-row"
+                >
+                  <Magnetic strength={8}>
+                    <Button asChild size="lg" className="group h-12 px-6 text-base">
+                      <motion.button type="button" onClick={start} whileTap={{ scale: 0.97 }} transition={springSnappy}>
+                        Get started free
+                        <ArrowRight
+                          className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                          aria-hidden
+                        />
+                      </motion.button>
+                    </Button>
+                  </Magnetic>
+                  <Magnetic strength={6}>
+                    <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base">
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.97 }}
+                        transition={springSnappy}
+                        onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+                      >
+                        See how Gradr works
+                      </motion.button>
+                    </Button>
+                  </Magnetic>
+                </motion.div>
 
-                <ul className="flex flex-wrap gap-x-5 gap-y-2 pt-2">
+                <motion.dl
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                  className="grid max-w-lg grid-cols-3 gap-4 border-t border-border/60 pt-6"
+                >
                   {[
-                    [FileText, "Resume + ATS"],
-                    [Target, "Job matching"],
-                    [Mic, "AI interviews"],
-                    [LineChart, "Career analytics"],
-                  ].map(([Icon, label]) => {
-                    const I = Icon as typeof FileText;
-                    return (
-                      <li key={label as string} className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <I className="h-3.5 w-3.5 text-primary" aria-hidden />
-                        {label as string}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </Reveal>
+                    { label: "Modules in the loop", value: 8, suffix: "" },
+                    { label: "ATS signals checked", value: 40, suffix: "+" },
+                    { label: "Interview personas", value: 12, suffix: "" },
+                  ].map((s) => (
+                    <div key={s.label}>
+                      <dt className="sr-only">{s.label}</dt>
+                      <dd className="font-display text-2xl font-bold tracking-tight text-foreground">
+                        <CountUp to={s.value} suffix={s.suffix} duration={1.6} immediate />
+                      </dd>
+                      <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.label}</p>
+                    </div>
+                  ))}
+                </motion.dl>
+              </div>
 
-              <Reveal delay={120} className="lg:pl-4">
-                <HeroWorkspace />
-              </Reveal>
-            </div>
+              <div className="lg:pl-4">
+                <HeroCommandCenter />
+              </div>
+            </motion.div>
           </Section>
-        </div>
+        </motion.div>
+
 
         {/* ------------------------------- problem ------------------------------ */}
         <Section id="product" className="border-t border-border/60">
