@@ -30,7 +30,8 @@
     "brand:scan:dist": "node scripts/brand-scan.mjs --dist",
     "brand:verify": "node scripts/brand-metadata-ci.mjs",
     "brand:og": "node scripts/og-image-verify.mjs",
-    "brand:ci": "node scripts/brand-scan.mjs --dist && node scripts/brand-metadata-ci.mjs && node scripts/og-image-verify.mjs"
+    "brand:ci": "node scripts/brand-scan.mjs --dist && node scripts/brand-metadata-ci.mjs && node scripts/og-image-verify.mjs",
+    "test:email-templates": "vitest run src/lib/email-templates/authTemplates.test.tsx src/lib/email/redirectAllowlist.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
