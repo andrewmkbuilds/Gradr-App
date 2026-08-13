@@ -154,9 +154,12 @@ export async function previewPrices(
     const key = byPaddleId.get(line.price.id);
     if (!key) continue;
     out[key] = {
-      formattedTotal: line.formattedTotals.subtotal,
+      // Use the gross total: it is what the customer is actually charged and
+      // matches the list price in @/config/pricing (Paddle's `subtotal` strips
+      // inclusive VAT in tax-inclusive countries, which understated prices).
+      formattedTotal: line.formattedTotals.total,
       currencyCode: result.data.currencyCode,
-      subtotalMinor: Number(line.totals.subtotal ?? 0),
+      subtotalMinor: Number(line.totals.total ?? 0),
     };
   }
   return out;
