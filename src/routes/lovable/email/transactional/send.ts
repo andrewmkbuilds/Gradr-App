@@ -10,7 +10,7 @@ import { injectOpenPixel, rewriteLinksForTracking, toPlainText } from '@/lib/ema
 
 
 // Configuration baked in at scaffold time
-const SITE_NAME = "gradr-app"
+const SITE_NAME = "Gradr"
 // SENDER_DOMAIN is the verified sender subdomain FQDN (e.g., "notify.example.com").
 // It MUST match the subdomain delegated to Lovable's nameservers. NEVER use the root domain.
 const SENDER_DOMAIN = "notify.gradr.me"
@@ -365,10 +365,10 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           html = injectOpenPixel(html, messageId)
         }
 
-        // Plain-text alternative part is opt-in via the `plain_text_fallback` flag.
-        const plainText = flags['plain_text_fallback']
-          ? toPlainText(await render(element, { plainText: true })) || toPlainText(html)
-          : undefined
+        // The email API requires a non-empty text part, so always render one.
+        const plainText =
+          toPlainText(await render(element, { plainText: true })) || toPlainText(html) || ' '
+
 
 
         // Resolve subject — supports static string or dynamic function
