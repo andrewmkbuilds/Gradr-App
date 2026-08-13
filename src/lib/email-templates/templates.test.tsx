@@ -67,11 +67,22 @@ describe("transactional email templates", () => {
 
     it("interpolates personalization data", async () => {
       const html = await render(element);
-      const values = stringValues(data);
-      for (const value of values) {
-        expect(html, `${name} should render "${value}"`).toContain(value);
+      // Compare on visible text: strip tags, decode entities React escapes
+      // (apostrophes/quotes) and collapse whitespace + case.
+      const visible = html
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&#x27;|&#39;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, "&")
+        .replace(/&nbsp;/g, " ")
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+      for (const value of stringValues(data)) {
+        const needle = value.replace(/\s+/g, " ").toLowerCase();
+        expect(visible, `${name} should render "${value}"`).toContain(needle);
       }
     });
+
 
     it("only uses absolute, well-formed links", async () => {
       const html = await render(element);
