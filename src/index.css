@@ -322,6 +322,43 @@
   .surface-elevated { background: hsl(var(--surface-elevated)); box-shadow: var(--shadow-elevated); }
   .divider { border-color: hsl(var(--border-subtle)); }
 
+  /* ---------- Elevation levels ----------
+     Level 1 = canvas, 2 = resting card, 3 = feature panel, 4 = floating/overlay. */
+  .elev-1 {
+    background: hsl(var(--elev-1-bg));
+    border: 1px solid hsl(var(--elev-1-border));
+    box-shadow: var(--elev-1-shadow);
+  }
+  .elev-2 {
+    background: hsl(var(--elev-2-bg));
+    border: 1px solid hsl(var(--elev-2-border));
+    box-shadow: var(--elev-2-shadow);
+  }
+  .elev-3 {
+    background: hsl(var(--elev-3-bg));
+    border: 1px solid hsl(var(--elev-3-border));
+    box-shadow: var(--elev-3-shadow);
+  }
+  .elev-4 {
+    background: hsl(var(--elev-4-bg));
+    border: 1px solid hsl(var(--elev-4-border));
+    box-shadow: var(--elev-4-shadow);
+  }
+  /* Interactive lift: a resting surface rises one level on hover. */
+  .elev-interactive {
+    transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 220ms ease, border-color 220ms ease;
+  }
+  .elev-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-3-shadow);
+    border-color: hsl(var(--primary) / 0.28);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .elev-interactive:hover { transform: none; }
+  }
+
   .glass-card {
     @apply bg-card border border-border rounded-xl;
     box-shadow: var(--shadow-card);
