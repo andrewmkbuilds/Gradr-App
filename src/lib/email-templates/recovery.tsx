@@ -8,7 +8,7 @@ interface RecoveryEmailProps {
   recoveryUrl?: string;
 }
 
-export const RecoveryEmail = ({ recoveryUrl = "https://gradr.me" }: RecoveryEmailProps) => (
+export const RecoveryEmail = ({ recoveryUrl }: RecoveryEmailProps) => (
   <EmailShell preview="Reset your Gradr password — this link expires soon." eyebrow="Password reset">
     <Headline>Reset your password</Headline>
     <Paragraph>

@@ -9,7 +9,7 @@ interface EmailChangeEmailProps {
   confirmationUrl?: string;
 }
 
-export const EmailChangeEmail = ({ newEmail, confirmationUrl = "https://gradr.me" }: EmailChangeEmailProps) => (
+export const EmailChangeEmail = ({ newEmail, confirmationUrl }: EmailChangeEmailProps) => (
   <EmailShell preview="Confirm your new email address for Gradr." eyebrow="Email change">
     <Headline>Confirm your new email</Headline>
     <Paragraph>

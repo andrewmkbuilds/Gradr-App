@@ -8,7 +8,7 @@ interface InviteEmailProps {
   inviteUrl?: string;
 }
 
-export const InviteEmail = ({ inviteUrl = "https://gradr.me" }: InviteEmailProps) => (
+export const InviteEmail = ({ inviteUrl }: InviteEmailProps) => (
   <EmailShell preview="You've been invited to join Gradr." eyebrow="Invitation">
     <Headline>You&apos;ve been invited to Gradr</Headline>
     <Paragraph>

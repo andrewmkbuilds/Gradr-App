@@ -8,7 +8,7 @@ interface MagicLinkEmailProps {
   magicLinkUrl?: string;
 }
 
-export const MagicLinkEmail = ({ magicLinkUrl = "https://gradr.me" }: MagicLinkEmailProps) => (
+export const MagicLinkEmail = ({ magicLinkUrl }: MagicLinkEmailProps) => (
   <EmailShell preview="Your secure sign-in link for Gradr." eyebrow="Sign in">
     <Headline>Your sign-in link</Headline>
     <Paragraph>

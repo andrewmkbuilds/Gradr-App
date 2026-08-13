@@ -8,7 +8,7 @@ interface SignupEmailProps {
   confirmationUrl?: string;
 }
 
-export const SignupEmail = ({ recipient, confirmationUrl = "https://gradr.me" }: SignupEmailProps) => (
+export const SignupEmail = ({ recipient, confirmationUrl }: SignupEmailProps) => (
   <EmailShell preview="Confirm your email to activate your Gradr account." eyebrow="Confirm your email">
     <Headline>Confirm your email</Headline>
     <Paragraph>
