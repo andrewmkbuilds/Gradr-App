@@ -50,6 +50,7 @@ const AdminAffiliates = lazy(() => import("./pages/AdminAffiliates"));
 const AdminBlogAnalytics = lazy(() => import("./pages/AdminBlogAnalytics"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminSecurityLog = lazy(() => import("@/pages/AdminSecurityLog"));
+const AdminSecurityFindings = lazy(() => import("@/pages/AdminSecurityFindings"));
 const AdminNavAnalytics = lazy(() => import("@/pages/AdminNavAnalytics"));
 const AdminSeoMonitor = lazy(() => import("@/pages/AdminSeoMonitor"));
 const AdminPaddle = lazy(() => import("@/pages/AdminPaddle"));
@@ -131,6 +132,7 @@ function ProtectedRoutes() {
           <Route path="/admin/digest-preview" element={<RequireAdmin><AnimatedPage><DigestPreview /></AnimatedPage></RequireAdmin>} />
           <Route path="/admin/affiliates" element={<RequireAdmin><AnimatedPage><AdminAffiliates /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/blog-analytics" element={<RequireAdmin><AnimatedPage><AdminBlogAnalytics /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/security-findings" element={<RequireAdmin><AnimatedPage><AdminSecurityFindings /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/security-log" element={<RequireAdmin><AnimatedPage><AdminSecurityLog /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/seo-monitor" element={<RequireAdmin><AnimatedPage><AdminSeoMonitor /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/nav-analytics" element={<RequireAdmin><AnimatedPage><AdminNavAnalytics /></AnimatedPage></RequireAdmin>} />

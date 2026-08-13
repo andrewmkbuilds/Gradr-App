@@ -47,6 +47,30 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_csrf_tokens: {
+        Row: {
+          admin_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          token_hash: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          token_hash: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       affiliate_applications: {
         Row: {
           admin_notes: string | null
@@ -2951,15 +2975,148 @@ export type Database = {
         }
         Relationships: []
       }
+      security_export_tokens: {
+        Row: {
+          admin_id: string
+          created_at: string
+          expires_at: string
+          format: string
+          id: string
+          internal_ids: string[]
+          run_id: string | null
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          expires_at: string
+          format: string
+          id?: string
+          internal_ids?: string[]
+          run_id?: string | null
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          expires_at?: string
+          format?: string
+          id?: string
+          internal_ids?: string[]
+          run_id?: string | null
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      security_finding_issues: {
+        Row: {
+          commit_sha: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          internal_id: string
+          issue_number: number
+          issue_url: string
+          repo: string
+          run_id: string | null
+        }
+        Insert: {
+          commit_sha?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          internal_id: string
+          issue_number: number
+          issue_url: string
+          repo: string
+          run_id?: string | null
+        }
+        Update: {
+          commit_sha?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          internal_id?: string
+          issue_number?: number
+          issue_url?: string
+          repo?: string
+          run_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_finding_issues_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "security_scan_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_scan_findings: {
+        Row: {
+          created_at: string
+          description: string | null
+          entity: string | null
+          fingerprint: string | null
+          id: string
+          internal_id: string
+          level: string
+          metadata: Json
+          run_id: string
+          scanner_name: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          entity?: string | null
+          fingerprint?: string | null
+          id?: string
+          internal_id: string
+          level?: string
+          metadata?: Json
+          run_id: string
+          scanner_name?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          entity?: string | null
+          fingerprint?: string | null
+          id?: string
+          internal_id?: string
+          level?: string
+          metadata?: Json
+          run_id?: string
+          scanner_name?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_scan_findings_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "security_scan_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_scan_runs: {
         Row: {
           branch: string | null
+          commit_ref: string | null
           commit_sha: string | null
           commit_url: string | null
           counts_by_level: Json
           created_at: string
+          created_by: string | null
           finding_count: number
           findings: Json
+          finished_at: string | null
           id: string
           internal_ids: string[]
           notes: string | null
@@ -2967,15 +3124,21 @@ export type Database = {
           pr_url: string | null
           scanned_at: string
           source: string
+          started_at: string
+          totals: Json
+          trigger: string
         }
         Insert: {
           branch?: string | null
+          commit_ref?: string | null
           commit_sha?: string | null
           commit_url?: string | null
           counts_by_level?: Json
           created_at?: string
+          created_by?: string | null
           finding_count?: number
           findings?: Json
+          finished_at?: string | null
           id?: string
           internal_ids?: string[]
           notes?: string | null
@@ -2983,15 +3146,21 @@ export type Database = {
           pr_url?: string | null
           scanned_at?: string
           source?: string
+          started_at?: string
+          totals?: Json
+          trigger?: string
         }
         Update: {
           branch?: string | null
+          commit_ref?: string | null
           commit_sha?: string | null
           commit_url?: string | null
           counts_by_level?: Json
           created_at?: string
+          created_by?: string | null
           finding_count?: number
           findings?: Json
+          finished_at?: string | null
           id?: string
           internal_ids?: string[]
           notes?: string | null
@@ -2999,6 +3168,9 @@ export type Database = {
           pr_url?: string | null
           scanned_at?: string
           source?: string
+          started_at?: string
+          totals?: Json
+          trigger?: string
         }
         Relationships: []
       }
@@ -3927,6 +4099,7 @@ export type Database = {
         Args: { _reason?: string; _source_record_id: string }
         Returns: number
       }
+      security_scan_snapshot: { Args: never; Returns: Json }
       submit_verification_request: {
         Args: {
           _category: string
