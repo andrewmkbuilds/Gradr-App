@@ -365,10 +365,10 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           html = injectOpenPixel(html, messageId)
         }
 
-        // Plain-text alternative part is opt-in via the `plain_text_fallback` flag.
-        const plainText = flags['plain_text_fallback']
-          ? toPlainText(await render(element, { plainText: true })) || toPlainText(html)
-          : undefined
+        // The email API requires a non-empty text part, so always render one.
+        const plainText =
+          toPlainText(await render(element, { plainText: true })) || toPlainText(html) || ' '
+
 
 
         // Resolve subject — supports static string or dynamic function
