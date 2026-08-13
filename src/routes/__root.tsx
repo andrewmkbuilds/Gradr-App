@@ -30,9 +30,6 @@ import { reportLovableError } from "@/lib/lovable-error-reporting";
 import NotFound from "@/pages/NotFound";
 import { AppSplash } from "@/components/AppSplash";
 
-const SITE_TITLE = "Gradr | AI Resume Builder, Job Matching & Interview Coach";
-const SITE_DESCRIPTION =
-  "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.";
 
 // Paint the correct theme before first render so there is no flash.
 // Ported from the pre-migration index.html head script.
