@@ -53,6 +53,16 @@ const STAGE_META: { key: keyof StageCount; label: string; icon: typeof Bookmark;
   { key: "rejected", label: "Rejected", icon: XCircle, color: "text-destructive" },
 ];
 
+/** Names the lowest-scoring resume sub-metric so the drill-down can point at it. */
+function weakestResumeArea(s: DashboardStats) {
+  const areas = [
+    { label: "keyword coverage", value: s.keywordMatch },
+    { label: "formatting", value: s.formattingScore },
+    { label: "impact statements", value: s.impactScore },
+  ].sort((a, b) => a.value - b.value);
+  return `Lowest signal right now: ${areas[0].label} at ${areas[0].value}%.`;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
