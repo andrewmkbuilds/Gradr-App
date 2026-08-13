@@ -23,6 +23,8 @@ Disallow: /affiliate/apply
 Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
+Disallow: /.lovable/
+Disallow: /api/
 Disallow: /mcp
 
 User-agent: Bingbot
@@ -46,6 +48,8 @@ Disallow: /affiliate/apply
 Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
+Disallow: /.lovable/
+Disallow: /api/
 Disallow: /mcp
 
 # Social preview crawlers need unrestricted access to render link cards.
@@ -79,6 +83,8 @@ Disallow: /affiliate/apply
 Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
+Disallow: /.lovable/
+Disallow: /api/
 Disallow: /mcp
 
 Sitemap: https://gradr.me/sitemap.xml
