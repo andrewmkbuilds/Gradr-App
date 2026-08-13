@@ -260,5 +260,105 @@ export const handler = async (req: Request): Promise<Response> => {
     return json({ mode, applied: true, edited, effects });
   }
 
+  /* ---------------- idempotency probe ----------------
+   * Re-sends the *same* stored body through the exact claim step the live
+   * endpoint runs first, and reports the ack the provider would receive.
+   * A processed event must come back as "duplicate" -> HTTP 200
+   * {received:true,duplicate:true} with zero business logic executed, which is
+   * what makes provider retries safe. The probe never mutates a processed row
+   * (the claim short-circuits on it), so it is safe to run repeatedly. */
+  if (action === "idempotency") {
+    const id = typeof body.deliveryId === "string" ? body.deliveryId : "";
+    if (!id) return json({ error: "deliveryId is required" }, 400);
+
+    const { data, error } = await admin
+      .from("webhook_deliveries")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) return json({ error: error.message }, 400);
+    if (!data) return json({ error: "Delivery not found" }, 404);
+
+    const delivery = data as unknown as DeliveryRow;
+    if (delivery.replay_of) {
+      return json(
+        {
+          error:
+            "This row is itself a replay and carries a synthetic event id, so it is not part of the provider's retry stream.",
+        },
+        400,
+      );
+    }
+    if (!delivery.payload) {
+      return json(
+        { error: "This delivery was recorded before payload capture, so it cannot be re-sent." },
+        400,
+      );
+    }
+
+    // Not yet processed: re-sending would legitimately do work, so report the
+    // predicted behaviour instead of running it.
+    if (delivery.state !== "processed") {
+      return json({
+        deliveryId: id,
+        provider: delivery.provider,
+        eventId: delivery.event_id,
+        state: delivery.state,
+        resent: false,
+        idempotent: false,
+        claim: delivery.state === "failed" ? "retry" : "in_flight",
+        ack: { status: 200, body: { received: true } },
+        notes: [
+          `This event is "${delivery.state}", not processed.`,
+          "A provider retry would be accepted and the handler would run again — that is intended recovery behaviour, not a duplicate.",
+          "Use Dry run / Replay for real to re-apply it, then probe idempotency again.",
+        ],
+      });
+    }
+
+    const claim = await claimWebhookEvent({
+      provider: delivery.provider,
+      eventId: delivery.event_id,
+      eventType: delivery.event_type,
+      environment: delivery.environment,
+      payload: delivery.payload,
+    });
+
+    const idempotent = claim === "duplicate";
+
+    await logSecurityEvent({
+      category: "admin_action",
+      event: "webhook_idempotency_probe",
+      decision: idempotent ? "allowed" : "failed",
+      userId: user.id,
+      source: "admin-webhook-replay",
+      details: { delivery_id: id, provider: delivery.provider, claim },
+    });
+
+    return json({
+      deliveryId: id,
+      provider: delivery.provider,
+      eventId: delivery.event_id,
+      state: delivery.state,
+      resent: true,
+      claim,
+      idempotent,
+      ack: idempotent
+        ? { status: 200, body: { received: true, duplicate: true } }
+        : { status: 200, body: { received: true } },
+      notes: idempotent
+        ? [
+            "Re-sent the stored body: the endpoint recognised the event id and acked as a duplicate.",
+            "No handler ran, no credits granted, no subscription touched.",
+            "Provider retries of this event are safe.",
+          ]
+        : [
+            `Idempotency did NOT hold — the claim returned "${claim}" instead of "duplicate".`,
+            "A provider retry of this event would execute the handler a second time.",
+          ],
+    });
+  }
+
   return json({ error: "Unsupported action" }, 400);
+
 };
