@@ -70,6 +70,7 @@ import { Route as AppAffiliateResourcesRouteImport } from './routes/_app/affilia
 import { Route as AppInterviewIndexRouteImport } from './routes/_app/interview/index'
 import { Route as AppInterviewHistoryRouteImport } from './routes/_app/interview/history'
 import { Route as ApiPublicAdminEmailOpsRouteImport } from './routes/api/public/admin-email-ops'
+import { Route as ApiPublicAdminEndpointPolicyRouteImport } from './routes/api/public/admin-endpoint-policy'
 import { Route as ApiPublicAdminRpcRouteImport } from './routes/api/public/admin-rpc'
 import { Route as ApiPublicAdminWebhookReplayRouteImport } from './routes/api/public/admin-webhook-replay'
 import { Route as ApiPublicAdminWebhookSimulateRouteImport } from './routes/api/public/admin-webhook-simulate'
@@ -80,6 +81,7 @@ import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/car
 import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
 import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
 import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
+import { Route as ApiPublicEmailAnomalyRouteImport } from './routes/api/public/email-anomaly'
 import { Route as ApiPublicGenerateApplicationRouteImport } from './routes/api/public/generate-application'
 import { Route as ApiPublicGetPaddlePriceRouteImport } from './routes/api/public/get-paddle-price'
 import { Route as ApiPublicInterviewCoachRouteImport } from './routes/api/public/interview-coach'
@@ -414,6 +416,12 @@ const ApiPublicAdminEmailOpsRoute = ApiPublicAdminEmailOpsRouteImport.update({
   path: '/api/public/admin-email-ops',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAdminEndpointPolicyRoute =
+  ApiPublicAdminEndpointPolicyRouteImport.update({
+    id: '/api/public/admin-endpoint-policy',
+    path: '/api/public/admin-endpoint-policy',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAdminRpcRoute = ApiPublicAdminRpcRouteImport.update({
   id: '/api/public/admin-rpc',
   path: '/api/public/admin-rpc',
@@ -466,6 +474,11 @@ const ApiPublicDailyDigestRoute = ApiPublicDailyDigestRouteImport.update({
 const ApiPublicDeleteAccountRoute = ApiPublicDeleteAccountRouteImport.update({
   id: '/api/public/delete-account',
   path: '/api/public/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEmailAnomalyRoute = ApiPublicEmailAnomalyRouteImport.update({
+  id: '/api/public/email-anomaly',
+  path: '/api/public/email-anomaly',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicGenerateApplicationRoute =
@@ -678,6 +691,7 @@ export interface FileRoutesByFullPath {
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
   '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
+  '/api/public/admin-endpoint-policy': typeof ApiPublicAdminEndpointPolicyRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
@@ -688,6 +702,7 @@ export interface FileRoutesByFullPath {
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
   '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
   '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
   '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
@@ -778,6 +793,7 @@ export interface FileRoutesByTo {
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
   '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
+  '/api/public/admin-endpoint-policy': typeof ApiPublicAdminEndpointPolicyRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
@@ -788,6 +804,7 @@ export interface FileRoutesByTo {
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
   '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
   '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
   '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
@@ -880,6 +897,7 @@ export interface FileRoutesById {
   '/_app/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/_app/interview/history': typeof AppInterviewHistoryRoute
   '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
+  '/api/public/admin-endpoint-policy': typeof ApiPublicAdminEndpointPolicyRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
@@ -890,6 +908,7 @@ export interface FileRoutesById {
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
   '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
   '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
   '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
@@ -982,6 +1001,7 @@ export interface FileRouteTypes {
     | '/affiliate/resources'
     | '/interview/history'
     | '/api/public/admin-email-ops'
+    | '/api/public/admin-endpoint-policy'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
     | '/api/public/admin-webhook-simulate'
@@ -992,6 +1012,7 @@ export interface FileRouteTypes {
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
+    | '/api/public/email-anomaly'
     | '/api/public/generate-application'
     | '/api/public/get-paddle-price'
     | '/api/public/interview-coach'
@@ -1082,6 +1103,7 @@ export interface FileRouteTypes {
     | '/affiliate/resources'
     | '/interview/history'
     | '/api/public/admin-email-ops'
+    | '/api/public/admin-endpoint-policy'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
     | '/api/public/admin-webhook-simulate'
@@ -1092,6 +1114,7 @@ export interface FileRouteTypes {
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
+    | '/api/public/email-anomaly'
     | '/api/public/generate-application'
     | '/api/public/get-paddle-price'
     | '/api/public/interview-coach'
@@ -1183,6 +1206,7 @@ export interface FileRouteTypes {
     | '/_app/affiliate/resources'
     | '/_app/interview/history'
     | '/api/public/admin-email-ops'
+    | '/api/public/admin-endpoint-policy'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
     | '/api/public/admin-webhook-simulate'
@@ -1193,6 +1217,7 @@ export interface FileRouteTypes {
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
+    | '/api/public/email-anomaly'
     | '/api/public/generate-application'
     | '/api/public/get-paddle-price'
     | '/api/public/interview-coach'
@@ -1250,6 +1275,7 @@ export interface RootRouteChildren {
   JobSearchIndexRoute: typeof JobSearchIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicAdminEmailOpsRoute: typeof ApiPublicAdminEmailOpsRoute
+  ApiPublicAdminEndpointPolicyRoute: typeof ApiPublicAdminEndpointPolicyRoute
   ApiPublicAdminRpcRoute: typeof ApiPublicAdminRpcRoute
   ApiPublicAdminWebhookReplayRoute: typeof ApiPublicAdminWebhookReplayRoute
   ApiPublicAdminWebhookSimulateRoute: typeof ApiPublicAdminWebhookSimulateRoute
@@ -1260,6 +1286,7 @@ export interface RootRouteChildren {
   ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
   ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
   ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
+  ApiPublicEmailAnomalyRoute: typeof ApiPublicEmailAnomalyRoute
   ApiPublicGenerateApplicationRoute: typeof ApiPublicGenerateApplicationRoute
   ApiPublicGetPaddlePriceRoute: typeof ApiPublicGetPaddlePriceRoute
   ApiPublicInterviewCoachRoute: typeof ApiPublicInterviewCoachRoute
@@ -1719,6 +1746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAdminEmailOpsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/admin-endpoint-policy': {
+      id: '/api/public/admin-endpoint-policy'
+      path: '/api/public/admin-endpoint-policy'
+      fullPath: '/api/public/admin-endpoint-policy'
+      preLoaderRoute: typeof ApiPublicAdminEndpointPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/admin-rpc': {
       id: '/api/public/admin-rpc'
       path: '/api/public/admin-rpc'
@@ -1787,6 +1821,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/delete-account'
       fullPath: '/api/public/delete-account'
       preLoaderRoute: typeof ApiPublicDeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/email-anomaly': {
+      id: '/api/public/email-anomaly'
+      path: '/api/public/email-anomaly'
+      fullPath: '/api/public/email-anomaly'
+      preLoaderRoute: typeof ApiPublicEmailAnomalyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/generate-application': {
@@ -2095,6 +2136,7 @@ const rootRouteChildren: RootRouteChildren = {
   JobSearchIndexRoute: JobSearchIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicAdminEmailOpsRoute: ApiPublicAdminEmailOpsRoute,
+  ApiPublicAdminEndpointPolicyRoute: ApiPublicAdminEndpointPolicyRoute,
   ApiPublicAdminRpcRoute: ApiPublicAdminRpcRoute,
   ApiPublicAdminWebhookReplayRoute: ApiPublicAdminWebhookReplayRoute,
   ApiPublicAdminWebhookSimulateRoute: ApiPublicAdminWebhookSimulateRoute,
@@ -2105,6 +2147,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
   ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
   ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,
+  ApiPublicEmailAnomalyRoute: ApiPublicEmailAnomalyRoute,
   ApiPublicGenerateApplicationRoute: ApiPublicGenerateApplicationRoute,
   ApiPublicGetPaddlePriceRoute: ApiPublicGetPaddlePriceRoute,
   ApiPublicInterviewCoachRoute: ApiPublicInterviewCoachRoute,

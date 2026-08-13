@@ -144,19 +144,77 @@ const POLICIES: Record<string, EndpointPolicy> = {
   },
 };
 
+/**
+ * Admin-editable overrides, loaded from `endpoint_policy_overrides` by the
+ * server and merged on top of the code defaults above. The code defaults stay
+ * the source of truth for anything an admin has not deliberately changed, so a
+ * partially-filled override row only moves the fields it sets.
+ */
+export interface PolicyOverride {
+  endpoint: string;
+  rate_limit: number | null;
+  window_ms: number | null;
+  backoff_seconds: number | null;
+  max_backoff_seconds: number | null;
+  disabled: boolean;
+  alert_server_error: number | null;
+  alert_rate_limited: number | null;
+  alert_auth_rejected: number | null;
+  alert_client_error: number | null;
+}
+
+let overrides = new Map<string, PolicyOverride>();
+
+export function setPolicyOverrides(rows: PolicyOverride[]): void {
+  overrides = new Map(rows.map((r) => [r.endpoint, r]));
+}
+
+export function getPolicyOverride(endpoint: string): PolicyOverride | undefined {
+  return overrides.get(endpoint);
+}
+
+function merge(endpoint: string, base: EndpointPolicy): EndpointPolicy {
+  const o = overrides.get(endpoint);
+  if (!o) return base;
+
+  const baseRule = base.rateLimit === false ? DEFAULT_RULE : base.rateLimit;
+  const rateLimit: RateLimitRule | false = o.disabled
+    ? false
+    : {
+        limit: o.rate_limit ?? baseRule.limit,
+        windowMs: o.window_ms ?? baseRule.windowMs,
+        backoffSeconds: o.backoff_seconds ?? baseRule.backoffSeconds,
+        maxBackoffSeconds: o.max_backoff_seconds ?? baseRule.maxBackoffSeconds,
+      };
+
+  const alertAfter: Partial<Record<AlertKind, number>> = { ...base.alertAfter };
+  if (o.alert_server_error != null) alertAfter.server_error = o.alert_server_error;
+  if (o.alert_rate_limited != null) alertAfter.rate_limited = o.alert_rate_limited;
+  if (o.alert_auth_rejected != null) alertAfter.auth_rejected = o.alert_auth_rejected;
+  if (o.alert_client_error != null) alertAfter.client_error = o.alert_client_error;
+
+  return { rateLimit, alertAfter };
+}
+
 export function policyFor(endpoint: string): EndpointPolicy {
+  return merge(endpoint, POLICIES[endpoint] ?? DEFAULT_POLICY);
+}
+
+/** The code default for an endpoint, ignoring any admin override. */
+export function basePolicyFor(endpoint: string): EndpointPolicy {
   return POLICIES[endpoint] ?? DEFAULT_POLICY;
 }
 
 /**
- * Every explicitly configured endpoint, for the admin policy viewer.
+ * Every explicitly configured endpoint, for the admin policy editor.
  * Endpoints absent from this list fall back to {@link DEFAULT_POLICY}.
  */
 export function listPolicies(): { endpoint: string; policy: EndpointPolicy }[] {
   return Object.entries(POLICIES)
-    .map(([endpoint, policy]) => ({ endpoint, policy }))
+    .map(([endpoint]) => ({ endpoint, policy: policyFor(endpoint) }))
     .sort((a, b) => a.endpoint.localeCompare(b.endpoint));
 }
+
 
 /** How many occurrences before this incident is worth announcing. */
 export function alertThreshold(endpoint: string, kind: string): number {

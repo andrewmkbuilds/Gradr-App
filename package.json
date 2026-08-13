@@ -23,6 +23,7 @@
     "audit:deps": "node scripts/dependency-audit.mjs",
     "format": "prettier --write .",
     "seo:validate": "node scripts/validate-seo-html.mjs",
+    "check:email-images": "bun run scripts/email-image-check.tsx",
     "perf:baseline": "node scripts/perf-regression.mjs --save",
     "perf:check": "node scripts/perf-regression.mjs"
   },
