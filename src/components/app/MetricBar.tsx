@@ -39,7 +39,7 @@ export function MetricBar({ label, value, hint, tone = "auto", delay = 0, classN
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         <span className="text-xs font-semibold tabular-nums text-foreground">
-          <CountUp value={clamped} />%
+          <CountUp to={clamped} suffix="%" duration={0.9} />
         </span>
       </div>
       <div
