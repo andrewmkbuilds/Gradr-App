@@ -199,9 +199,24 @@ export default function Pricing() {
       <VerificationDialog open={verifyOpen} onOpenChange={setVerifyOpen} />
 
       {pricesError && (
-        <p className="text-center text-sm text-destructive">
-          Couldn't load localized prices: {pricesError}
-        </p>
+        <Card className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 border-warning/40 bg-warning/5 px-5 py-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Prices are temporarily unavailable</p>
+            <p className="text-xs text-muted-foreground">
+              Plans and features are all here — live amounts will be back shortly. You can still
+              start checkout and the current price is confirmed before you pay.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pricesLoading}
+            onClick={() => setAttempt((n) => n + 1)}
+          >
+            {pricesLoading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
+            Retry
+          </Button>
+        </Card>
       )}
 
       {tab === "plans" ? (
