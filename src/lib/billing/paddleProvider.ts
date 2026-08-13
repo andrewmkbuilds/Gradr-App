@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddle, getPaddleEnvironment, getPaddlePriceId } from "@/lib/paddle";
 import { resolveCheckoutDiscount } from "@/hooks/useEligibility";
+import { PAID_PLAN_IDS, PLAN_PRICING } from "@/config/pricing";
 import type {
   BillingProvider,
   CheckoutRequest,
