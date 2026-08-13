@@ -430,7 +430,7 @@ export default function AiInterviewCoach() {
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           Walk in already having had the conversation
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-foreground/80">
           Run your first spoken mock interview in a few minutes and see exactly where your
           answers hold up. Free to start — no credit card.
         </p>
