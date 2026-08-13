@@ -111,7 +111,9 @@ function legacyBrandHits(text: string): string[] {
 
 async function inspectRoute(origin: string, route: { path: string; ogImage: string; indexable: boolean }): Promise<RouteMetadata> {
   const url = `${origin}${route.path}`;
-  const expectedOgImage = `${origin}${route.ogImage}`;
+  // Social cards are always advertised on the canonical origin, even when a
+  // preview host is being crawled.
+  const expectedOgImage = `${spec.brand.origin}${route.ogImage}`;
   const problems: string[] = [];
   let html = "";
   let status = 0;

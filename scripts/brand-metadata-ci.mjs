@@ -81,7 +81,8 @@ for (const route of spec.routes) {
   const twitterImage = meta(head, "name", "twitter:image");
   const canonical = link(head, "canonical");
   const manifestHref = link(head, "manifest");
-  const expectedOg = `${BASE}${route.ogImage}?v=${spec.ogVersion}`;
+  // og:image is always canonical-origin absolute, even when crawling a preview host.
+  const expectedOg = `${spec.brand.origin}${route.ogImage}?v=${spec.ogVersion}`;
 
   if (!title || title.length < 10) problems.push("missing or too-short <title>");
   if (title && !title.includes(spec.brand.name)) problems.push(`<title> does not mention ${spec.brand.name}`);

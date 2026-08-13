@@ -80,8 +80,11 @@ for (const cardPath of cards) {
 for (const legacy of spec.forbidden.ogFilenames) {
   const url = `${BASE}/og/${legacy}`;
   try {
-    const res = await fetch(url, { method: "HEAD" });
-    if (res.ok) {
+    const res = await fetch(url);
+    const type = res.headers.get("content-type") || "";
+    // A dev/SPA server answers unknown paths with the app shell; only a real
+    // image response means the retired asset is still deployed.
+    if (res.ok && type.startsWith("image/")) {
       failures++;
       console.error(`FAIL ${url} — retired OG asset is still being served`);
     }
