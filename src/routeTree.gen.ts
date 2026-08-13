@@ -63,6 +63,7 @@ import { Route as AppAdminPaymentsStatusRouteImport } from './routes/_app/admin/
 import { Route as AppAdminRateLimitsRouteImport } from './routes/_app/admin/rate-limits'
 import { Route as AppAdminSearchConsoleRouteImport } from './routes/_app/admin/search-console'
 import { Route as AppAdminSecurityLogRouteImport } from './routes/_app/admin/security-log'
+import { Route as AppAdminSecurityScansRouteImport } from './routes/_app/admin/security-scans'
 import { Route as AppAdminSeoMonitorRouteImport } from './routes/_app/admin/seo-monitor'
 import { Route as AppAdminSeoPerformanceRouteImport } from './routes/_app/admin/seo-performance'
 import { Route as AppAdminVerificationsRouteImport } from './routes/_app/admin/verifications'
@@ -392,6 +393,11 @@ const AppAdminSearchConsoleRoute = AppAdminSearchConsoleRouteImport.update({
 const AppAdminSecurityLogRoute = AppAdminSecurityLogRouteImport.update({
   id: '/admin/security-log',
   path: '/admin/security-log',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminSecurityScansRoute = AppAdminSecurityScansRouteImport.update({
+  id: '/admin/security-scans',
+  path: '/admin/security-scans',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminSeoMonitorRoute = AppAdminSeoMonitorRouteImport.update({
@@ -760,6 +766,7 @@ export interface FileRoutesByFullPath {
   '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
+  '/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
   '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
@@ -874,6 +881,7 @@ export interface FileRoutesByTo {
   '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
+  '/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
   '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
@@ -990,6 +998,7 @@ export interface FileRoutesById {
   '/_app/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/_app/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/_app/admin/security-log': typeof AppAdminSecurityLogRoute
+  '/_app/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/_app/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
   '/_app/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/_app/admin/verifications': typeof AppAdminVerificationsRoute
@@ -1106,6 +1115,7 @@ export interface FileRouteTypes {
     | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
+    | '/admin/security-scans'
     | '/admin/seo-monitor'
     | '/admin/seo-performance'
     | '/admin/verifications'
@@ -1220,6 +1230,7 @@ export interface FileRouteTypes {
     | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
+    | '/admin/security-scans'
     | '/admin/seo-monitor'
     | '/admin/seo-performance'
     | '/admin/verifications'
@@ -1335,6 +1346,7 @@ export interface FileRouteTypes {
     | '/_app/admin/rate-limits'
     | '/_app/admin/search-console'
     | '/_app/admin/security-log'
+    | '/_app/admin/security-scans'
     | '/_app/admin/seo-monitor'
     | '/_app/admin/seo-performance'
     | '/_app/admin/verifications'
@@ -1852,6 +1864,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminSecurityLogRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/security-scans': {
+      id: '/_app/admin/security-scans'
+      path: '/admin/security-scans'
+      fullPath: '/admin/security-scans'
+      preLoaderRoute: typeof AppAdminSecurityScansRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/seo-monitor': {
       id: '/_app/admin/seo-monitor'
       path: '/admin/seo-monitor'
@@ -2300,6 +2319,7 @@ interface AppRouteChildren {
   AppAdminRateLimitsRoute: typeof AppAdminRateLimitsRoute
   AppAdminSearchConsoleRoute: typeof AppAdminSearchConsoleRoute
   AppAdminSecurityLogRoute: typeof AppAdminSecurityLogRoute
+  AppAdminSecurityScansRoute: typeof AppAdminSecurityScansRoute
   AppAdminSeoMonitorRoute: typeof AppAdminSeoMonitorRoute
   AppAdminSeoPerformanceRoute: typeof AppAdminSeoPerformanceRoute
   AppAdminVerificationsRoute: typeof AppAdminVerificationsRoute
@@ -2343,6 +2363,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminRateLimitsRoute: AppAdminRateLimitsRoute,
   AppAdminSearchConsoleRoute: AppAdminSearchConsoleRoute,
   AppAdminSecurityLogRoute: AppAdminSecurityLogRoute,
+  AppAdminSecurityScansRoute: AppAdminSecurityScansRoute,
   AppAdminSeoMonitorRoute: AppAdminSeoMonitorRoute,
   AppAdminSeoPerformanceRoute: AppAdminSeoPerformanceRoute,
   AppAdminVerificationsRoute: AppAdminVerificationsRoute,
