@@ -122,6 +122,7 @@ export const navGroups: NavGroup[] = [
       { title: "Legal Documents", url: "/admin/legal", icon: ScrollText },
       { title: "Audit Log", url: "/admin/audit-log", icon: ScrollText },
       { title: "Security Log", url: "/admin/security-log", icon: ShieldCheck },
+      { title: "Security Scans", url: "/admin/security-scans", icon: ShieldCheck },
       { title: "OAuth Forensics", url: "/admin/oauth-forensics", icon: ShieldCheck },
       { title: "Search Console", url: "/admin/search-console", icon: Search },
       { title: "SEO Performance", url: "/admin/seo-performance", icon: BarChart3 },
