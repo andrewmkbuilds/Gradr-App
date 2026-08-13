@@ -140,7 +140,7 @@ export default function GrowthEngine() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div id="skill-gaps" className="elev-2 rounded-xl p-6 scroll-mt-20 lg:col-span-2">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Target className="h-4 w-4 text-primary" /> Top skill gaps across {matches.length} matched roles
+              <Target className="h-4 w-4 text-mahogany" /> Top skill gaps across {matches.length} matched roles
             </h2>
             {gaps.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">
@@ -158,7 +158,7 @@ export default function GrowthEngine() {
                     </div>
                     <div className="h-1.5 rounded-full bg-secondary">
                       <div
-                        className="h-full rounded-full bg-primary transition-all"
+                        className="h-full rounded-full bg-mahogany transition-all"
                         style={{ width: `${Math.round((g.count / maxCount) * 100)}%` }}
                       />
                     </div>
@@ -171,7 +171,7 @@ export default function GrowthEngine() {
           <div id="proof" className="space-y-6 scroll-mt-20">
             <div className="elev-2 rounded-xl p-6">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <TrendingUp className="h-4 w-4 text-primary" /> Resume weak points
+                <TrendingUp className="h-4 w-4 text-mahogany" /> Resume weak points
               </h2>
               {resume ? (
                 <>
@@ -185,7 +185,7 @@ export default function GrowthEngine() {
                   ) : (
                     <ul className="mt-3 space-y-2">
                       {resumeWeaknesses.map((w) => (
-                        <li key={w.label} className="flex items-center justify-between rounded-lg bg-secondary/40 p-3">
+                        <li key={w.label} className="accent-panel flex items-center justify-between rounded-lg p-3">
                           <span className="text-xs text-foreground">{w.label}</span>
                           <span className="text-xs font-medium text-warning">{w.value}%</span>
                         </li>

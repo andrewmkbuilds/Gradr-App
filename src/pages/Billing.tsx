@@ -179,7 +179,7 @@ export default function Billing() {
         </Card>
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-2">
-            <Mic className="h-4 w-4 text-primary" />
+            <Mic className="h-4 w-4 text-mahogany" />
             <span className="text-sm text-muted-foreground">Interview prep credits</span>
           </div>
           <div className="text-3xl font-bold text-foreground">{credits?.interview_credits ?? 0}</div>
