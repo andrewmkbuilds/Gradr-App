@@ -616,6 +616,8 @@ export type Database = {
           kind: string
           last_seen_at: string
           message: string
+          notified_at: string | null
+          notify_error: string | null
           occurrences: number
           resolved: boolean
           resolved_at: string | null
@@ -627,6 +629,8 @@ export type Database = {
           kind: string
           last_seen_at?: string
           message: string
+          notified_at?: string | null
+          notify_error?: string | null
           occurrences?: number
           resolved?: boolean
           resolved_at?: string | null
@@ -638,6 +642,8 @@ export type Database = {
           kind?: string
           last_seen_at?: string
           message?: string
+          notified_at?: string | null
+          notify_error?: string | null
           occurrences?: number
           resolved?: boolean
           resolved_at?: string | null
@@ -2635,7 +2641,12 @@ export type Database = {
           event_type: string | null
           id: string
           last_error: string | null
+          payload: Json | null
+          processed_at: string | null
           provider: string
+          replay_of: string | null
+          replays: number
+          signature_verified: boolean | null
           state: string
           updated_at: string
         }
@@ -2647,7 +2658,12 @@ export type Database = {
           event_type?: string | null
           id?: string
           last_error?: string | null
+          payload?: Json | null
+          processed_at?: string | null
           provider: string
+          replay_of?: string | null
+          replays?: number
+          signature_verified?: boolean | null
           state?: string
           updated_at?: string
         }
@@ -2659,11 +2675,24 @@ export type Database = {
           event_type?: string | null
           id?: string
           last_error?: string | null
+          payload?: Json | null
+          processed_at?: string | null
           provider?: string
+          replay_of?: string | null
+          replays?: number
+          signature_verified?: boolean | null
           state?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_replay_of_fkey"
+            columns: ["replay_of"]
+            isOneToOne: false
+            referencedRelation: "webhook_deliveries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
