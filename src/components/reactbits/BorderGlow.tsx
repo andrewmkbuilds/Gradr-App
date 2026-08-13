@@ -72,14 +72,14 @@ const BorderGlow: React.FC<BorderGlowProps> = ({
   children,
   className = '',
   edgeSensitivity = 30,
-  glowColor = '40 80 80',
-  backgroundColor = '#120F17',
+  glowColor = '36 95 115',
+  backgroundColor = '#0f2a33',
   borderRadius = 28,
   glowRadius = 40,
   glowIntensity = 1.0,
   coneSpread = 25,
   animated = false,
-  colors = ['#c084fc', '#f472b6', '#38bdf8'],
+  colors = ['#245F73', '#733E24', '#BBBDBC'],
   fillOpacity = 0.5,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);

@@ -49,7 +49,7 @@ export function ReferralLeaderboard() {
               {r.tier_name && (
                 <span
                   className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full"
-                  style={{ background: `${r.tier_color ?? "#38bdf8"}22`, color: r.tier_color ?? "#38bdf8" }}
+                  style={{ background: `${r.tier_color ?? "#245F73"}22`, color: r.tier_color ?? "#245F73" }}
                 >
                   {r.tier_name}
                 </span>

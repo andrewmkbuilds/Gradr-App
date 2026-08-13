@@ -114,7 +114,7 @@ export function Glare({
       background={background}
       borderColor={borderColor}
       borderRadius={radius}
-      glareColor="#9be9ff"
+      glareColor="#F2F0EF"
       glareOpacity={0.16}
       glareAngle={-38}
       glareSize={220}
