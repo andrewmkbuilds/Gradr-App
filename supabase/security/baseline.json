@@ -183,10 +183,9 @@
     },
     "discovered_jobs": {
       "anon": [],
-      "authenticated": [
-        "SELECT"
-      ]
+      "authenticated": []
     },
+
     "affiliate_settings": {
       "anon": [],
       "authenticated": [
