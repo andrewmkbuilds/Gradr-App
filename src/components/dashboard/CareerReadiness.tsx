@@ -5,6 +5,8 @@ import { easeOut } from "@/lib/motion/tokens";
 import { Surface } from "@/components/ui/surface";
 import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { ChevronDown, Info } from "lucide-react";
 
 export interface ReadinessPillar {
   key: string;
@@ -14,6 +16,8 @@ export interface ReadinessPillar {
   /** Relative weight in the composite score. */
   weight: number;
   hint: string;
+  /** Raw data signals behind the number, shown in the "why this score" panel. */
+  signals?: { label: string; value: string }[];
 }
 
 export function computeReadiness(pillars: ReadinessPillar[]) {
@@ -45,7 +49,9 @@ export function CareerReadiness({
   className?: string;
 }) {
   const reduced = useReducedMotionPref();
+  const [explain, setExplain] = useState(false);
   const score = computeReadiness(pillars);
+  const totalWeight = pillars.reduce((a, p) => a + p.weight, 0) || 1;
   const state = band(score);
 
   const size = 200;
@@ -120,7 +126,7 @@ export function CareerReadiness({
           {pillars.map((p, i) => {
             const v = clamp(p.value);
             return (
-              <li key={p.key}>
+              <div key={p.key}>
                 <div className="flex items-baseline justify-between text-xs">
                   <span className="font-medium text-foreground">{p.label}</span>
                   <span className="tabular-nums text-muted-foreground">{v}%</span>
@@ -138,10 +144,60 @@ export function CareerReadiness({
                   />
                 </div>
                 <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{p.hint}</p>
-              </li>
+              </div>
             );
           })}
         </DepthLayer>
+      </div>
+
+      <div className="mt-5 border-t border-border/60 pt-4">
+        <button
+          type="button"
+          onClick={() => setExplain((v) => !v)}
+          aria-expanded={explain}
+          aria-controls="readiness-explainer"
+          className="flex min-h-11 w-full items-center justify-between gap-2 text-left text-xs font-medium text-primary"
+        >
+          <span className="inline-flex items-center gap-1.5">
+            <Info className="h-3.5 w-3.5" aria-hidden="true" /> Why this score?
+          </span>
+          <ChevronDown className={cn("h-4 w-4 transition-transform", explain && "rotate-180")} aria-hidden="true" />
+        </button>
+
+        {explain && (
+          <div id="readiness-explainer" className="mt-3 space-y-3">
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Readiness is a weighted average of four pillars. Each pillar is scored 0–100 from your own data, multiplied
+              by its weight, then divided by the total weight ({totalWeight}).
+            </p>
+            <ul className="space-y-2">
+              {pillars.map((p) => {
+                const v = clamp(p.value);
+                const contribution = Math.round((v * p.weight) / totalWeight);
+                return (
+                  <li key={p.key} className="elev-1 rounded-lg p-3">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <span className="text-xs font-medium text-foreground">{p.label}</span>
+                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                        {v} × weight {p.weight} ÷ {totalWeight} = <span className="text-foreground">+{contribution} pts</span>
+                      </span>
+                    </div>
+                    {p.signals && p.signals.length > 0 && (
+                      <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2">
+                        {p.signals.map((sig) => (
+                          <div key={sig.label} className="flex items-baseline justify-between gap-2 text-[11px]">
+                            <dt className="text-muted-foreground">{sig.label}</dt>
+                            <dd className="tabular-nums text-foreground">{sig.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </div>
     </Surface>
     </DepthStage>
