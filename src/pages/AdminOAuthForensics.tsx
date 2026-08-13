@@ -317,11 +317,11 @@ export default function AdminOAuthForensics() {
 
 
   const traces = useQuery({
-    queryKey: ["oauth-forensics", "traces"],
+    queryKey: ["oauth-forensics", "traces", filters],
     queryFn: async () => {
       const { data, error } = await invokeFunction<{ traces: Trace[]; expectedFinalUrl: string }>(
         "oauth-forensics",
-        { body: { action: "traces", limit: 50 } },
+        { body: { action: "traces", limit: 100, filters } },
       );
       if (error) throw error;
       return data!;
@@ -329,15 +329,16 @@ export default function AdminOAuthForensics() {
   });
 
   const checks = useQuery({
-    queryKey: ["oauth-forensics", "checks"],
+    queryKey: ["oauth-forensics", "checks", filters],
     queryFn: async () => {
       const { data, error } = await invokeFunction<{ checks: FlowCheck[] }>("oauth-forensics", {
-        body: { action: "checks", limit: 50 },
+        body: { action: "checks", limit: 100, filters },
       });
       if (error) throw error;
       return data!.checks;
     },
   });
+
 
   const csp = useQuery({
     queryKey: ["oauth-forensics", "csp"],
