@@ -5,7 +5,7 @@
  * indicator that follows the section currently in view and a staggered
  * full-screen menu on mobile.
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,14 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { Magnetic } from "@/components/motion";
+import { useMotionPrefs } from "@/hooks/useMotionPrefs";
 import { ease, spring } from "@/lib/motion";
 
 export type NavItem = { label: string; href: string };
 
 /** Inputs that mean "the user took the wheel back" from a click-driven scroll. */
 const USER_SCROLL_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+
 
 
 type Props = {
