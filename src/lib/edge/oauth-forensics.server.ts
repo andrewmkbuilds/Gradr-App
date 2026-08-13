@@ -20,6 +20,8 @@
  */
 import { corsHeaders } from "./shared/cors";
 import { createClient } from "./shared/supabase";
+import { dispatchOAuthAlert } from "./shared/alerting";
+import { redactOAuthUrl, redactTraceRow } from "@/lib/oauth/redact";
 import {
   CONTENT_SECURITY_POLICY,
   CONTENT_SECURITY_POLICY_REPORT_ONLY,
@@ -29,6 +31,7 @@ import {
   STRICT_TRANSPORT_SECURITY,
   evaluateSecurityHeaders,
 } from "@/lib/security/headers";
+
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
