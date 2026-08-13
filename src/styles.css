@@ -932,3 +932,28 @@
     .depth-press, .depth-press:hover, .depth-press:active { transform: none; transition: none; }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Reduced motion / reduced interaction
+   `data-reduce-motion` is set pre-paint by the bootstrap script in __root and
+   kept in sync by MotionPrefsProvider, so it covers BOTH the OS
+   `prefers-reduced-motion` signal and the in-app toggle.
+--------------------------------------------------------------------------- */
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Ambient/parallax/decorative layers stop moving entirely. */
+html[data-reduce-motion="true"] [data-motion-decorative] {
+  display: none !important;
+}
+
+html[data-reduce-motion="true"] [data-depth-layer],
+html[data-reduce-motion="true"] [data-magnetic] {
+  transform: none !important;
+}
