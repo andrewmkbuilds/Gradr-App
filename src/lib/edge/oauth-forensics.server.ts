@@ -751,7 +751,7 @@ export const handler = async (req: Request): Promise<Response> => {
       const { data, error } = await q;
       if (error) return json({ error: error.message }, 500);
       return json({
-        traces: (data ?? []).map((row) => redactTraceRow(row)),
+        traces: ((data ?? []) as Record<string, unknown>[]).map((row) => redactTraceRow(row)),
         expectedFinalUrl: EXPECTED_FINAL_URL,
       });
     }
@@ -769,7 +769,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
       const { data, error } = await q;
       if (error) return json({ error: error.message }, 500);
-      return json({ checks: (data ?? []).map((row) => redactTraceRow(row)) });
+      return json({ checks: ((data ?? []) as Record<string, unknown>[]).map((row) => redactTraceRow(row)) });
     }
 
     case "headers":
