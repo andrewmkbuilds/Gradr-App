@@ -25,6 +25,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+type JobPatch = {
+  follow_up_enabled?: boolean;
+  follow_up_days?: number;
+  last_touch_at?: string;
+};
+
 const CADENCE_OPTIONS = [2, 3, 5, 7, 10, 14];
 const ACTIVE_STAGES = ["applied", "interview"];
 
@@ -73,7 +79,7 @@ export function FollowUpReminders() {
   });
 
   const patch = useMutation({
-    mutationFn: async ({ id, values }: { id: string; values: Record<string, unknown> }) => {
+    mutationFn: async ({ id, values }: { id: string; values: JobPatch }) => {
       const { error } = await supabase.from("tracked_jobs").update(values).eq("id", id);
       if (error) throw error;
     },
