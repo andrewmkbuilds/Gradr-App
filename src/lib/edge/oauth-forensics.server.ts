@@ -393,7 +393,204 @@ export interface IncidentReport {
   flowChecks: FlowCheckRow[];
   headerProbes: Array<{ path: string; status: number | null; headers: Record<string, string | null>; problems: string[] }>;
   markdown: string;
+  /** Flat one-row-per-hop timeline, ready for a spreadsheet. */
+  csv: string;
+  /** Self-contained print stylesheet + markup; the admin prints it to PDF. */
+  printableHtml: string;
 }
+
+/* -------------------------------------------------------- csv + print --- */
+
+const csvCell = (value: unknown): string => {
+  const text = value === null || value === undefined ? "" : String(value);
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
+const csvRows = (rows: Array<Array<unknown>>): string =>
+  rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
+
+function csvTimeline(report: IncidentReport): string {
+  const rows: Array<Array<unknown>> = [
+    [
+      "section",
+      "timestamp",
+      "request_id",
+      "account",
+      "outcome",
+      "deviation",
+      "state_valid",
+      "nonce_valid",
+      "hop_order",
+      "hop_kind",
+      "url",
+      "notes",
+    ],
+  ];
+
+  for (const trace of report.traces) {
+    const hops = trace.hops ?? [];
+    if (!hops.length) {
+      rows.push([
+        "signin",
+        trace.created_at,
+        trace.request_id,
+        trace.provider,
+        trace.outcome,
+        trace.deviation ? "yes" : "no",
+        fmtBool(trace.state_valid),
+        fmtBool(trace.nonce_valid),
+        "",
+        "",
+        "",
+        "no hops recorded",
+      ]);
+    }
+    for (const hop of hops) {
+      rows.push([
+        "signin",
+        hop.at,
+        trace.request_id,
+        trace.provider,
+        trace.outcome,
+        trace.deviation ? "yes" : "no",
+        fmtBool(trace.state_valid),
+        fmtBool(trace.nonce_valid),
+        hop.order,
+        hop.kind,
+        hop.url,
+        "",
+      ]);
+    }
+  }
+
+  for (const check of report.flowChecks) {
+    rows.push([
+      "daily-check",
+      check.created_at,
+      "",
+      check.account_label,
+      check.status,
+      "",
+      "",
+      "",
+      "",
+      "final",
+      check.final_url ?? "",
+      (check.failures ?? []).join("; "),
+    ]);
+  }
+
+  for (const probe of report.headerProbes) {
+    rows.push([
+      "header-probe",
+      report.generatedAt,
+      "",
+      "",
+      probe.problems.length ? "fail" : "pass",
+      "",
+      "",
+      "",
+      "",
+      "header",
+      probe.path,
+      probe.problems.join("; "),
+    ]);
+  }
+
+  return csvRows(rows);
+}
+
+const esc = (value: unknown) =>
+  String(value ?? "—").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+function printableTimeline(report: IncidentReport): string {
+  const traceBlocks = report.traces
+    .map(
+      (trace) => `
+      <section class="trace">
+        <h3>${esc(trace.request_id)} <span class="meta">${esc(trace.created_at)}</span></h3>
+        <p class="meta">
+          Provider ${esc(trace.provider)} · Outcome ${esc(trace.outcome)} ·
+          Final domain ${esc(trace.final_domain)} ·
+          Deviation <strong>${trace.deviation ? "YES" : "no"}</strong> ·
+          State ${fmtBool(trace.state_valid)} · Nonce ${fmtBool(trace.nonce_valid)}
+        </p>
+        <table>
+          <thead><tr><th>#</th><th>Timestamp</th><th>Hop</th><th>URL (redacted)</th></tr></thead>
+          <tbody>
+            ${(trace.hops ?? [])
+              .map(
+                (hop) =>
+                  `<tr><td>${esc(hop.order)}</td><td>${esc(hop.at)}</td><td>${esc(hop.kind)}</td><td class="url">${esc(hop.url)}</td></tr>`,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </section>`,
+    )
+    .join("");
+
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<title>Gradr OAuth incident timeline — ${esc(report.generatedAt.slice(0, 10))}</title>
+<style>
+  :root { color-scheme: light; }
+  body { font-family: -apple-system, Segoe UI, system-ui, sans-serif; color: #1b1f22; margin: 32px; }
+  h1 { color: #245F73; margin: 0 0 4px; font-size: 22px; }
+  h2 { color: #245F73; font-size: 16px; margin: 28px 0 8px; border-bottom: 2px solid #245F73; padding-bottom: 4px; }
+  h3 { font-size: 13px; margin: 18px 0 4px; }
+  .meta { color: #6b7075; font-size: 11px; margin: 2px 0; font-weight: 400; }
+  .statement { background: #F2F0EF; border-left: 4px solid #733E24; padding: 12px 14px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-top: 6px; }
+  th { text-align: left; background: #F2F0EF; padding: 5px 6px; }
+  td { padding: 4px 6px; border-top: 1px solid #e4e2e1; vertical-align: top; }
+  .url { font-family: ui-monospace, Menlo, monospace; word-break: break-all; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 20px; font-size: 12px; }
+  footer { margin-top: 28px; font-size: 10px; color: #6b7075; }
+  @media print { body { margin: 12mm; } .trace, table { break-inside: avoid; } }
+</style></head>
+<body>
+  <h1>Gradr OAuth incident timeline</h1>
+  <p class="meta">Generated ${esc(report.generatedAt)} · Window ${esc(report.window.from)} → ${esc(report.window.to)}</p>
+  <div class="grid">
+    <div>Domain: <strong>${esc(report.domain)}</strong></div>
+    <div>Expected landing: <strong>${esc(report.expectedFinalUrl)}</strong></div>
+    <div>Sign-ins analysed: <strong>${report.summary.traces}</strong></div>
+    <div>Domain deviations: <strong>${report.summary.deviations}</strong></div>
+    <div>State/nonce failures: <strong>${report.summary.stateFailures}</strong></div>
+    <div>Daily checks: <strong>${report.summary.flowChecks}</strong> (${report.summary.flowCheckFailures} failed)</div>
+  </div>
+  <h2>Summary statement</h2>
+  <p class="statement">${esc(report.statement)}</p>
+  <h2>Redirect chains</h2>
+  ${traceBlocks || "<p class='meta'>No sign-ins recorded in this window.</p>"}
+  <h2>Automated daily sign-in checks</h2>
+  <table>
+    <thead><tr><th>Run</th><th>Account</th><th>Status</th><th>Final URL</th><th>Failures</th></tr></thead>
+    <tbody>${report.flowChecks
+      .map(
+        (c) =>
+          `<tr><td>${esc(c.created_at)}</td><td>${esc(c.account_label)}</td><td>${esc(c.status)}</td><td class="url">${esc(c.final_url)}</td><td>${esc((c.failures ?? []).join("; ") || "none")}</td></tr>`,
+      )
+      .join("")}</tbody>
+  </table>
+  <h2>Security headers on OAuth paths</h2>
+  <table>
+    <thead><tr><th>Path</th><th>Status</th><th>CSP</th><th>HSTS</th><th>Referrer-Policy</th><th>Problems</th></tr></thead>
+    <tbody>${report.headerProbes
+      .map((p) => {
+        const h = p.headers ?? {};
+        return `<tr><td class="url">${esc(p.path)}</td><td>${esc(p.status)}</td><td>${h["content-security-policy"] ? "present" : "MISSING"}</td><td>${h["strict-transport-security"] ? "present" : "MISSING"}</td><td>${esc(h["referrer-policy"] ?? "MISSING")}</td><td>${esc((p.problems ?? []).join("; ") || "none")}</td></tr>`;
+      })
+      .join("")}</tbody>
+  </table>
+  <footer>
+    All OAuth credentials and CSRF material (code, tokens, state, nonce) are redacted as
+    <code>[redacted:n]</code>; only the length is retained so the shape of each request stays verifiable.
+  </footer>
+</body></html>`;
+}
+
 
 async function buildIncidentReport(days: number, limit: number): Promise<IncidentReport> {
   const to = new Date();
