@@ -71,3 +71,68 @@ export const wordVariants: Variants = {
 
 /** Shared viewport config so scroll reveals trigger consistently. */
 export const viewportOnce = { once: true, amount: 0.2, margin: "0px 0px -10% 0px" } as const;
+
+/* --------------------------- extended variants --------------------------- */
+
+export const fadeDown: Variants = {
+  hidden: { opacity: 0, y: -14 },
+  show: { opacity: 1, y: 0, transition: { duration: duration.base, ease: easeOut } },
+};
+
+export const slideInLeft: Variants = {
+  hidden: { opacity: 0, x: -28 },
+  show: { opacity: 1, x: 0, transition: springSmooth },
+};
+
+export const slideInRight: Variants = {
+  hidden: { opacity: 0, x: 28 },
+  show: { opacity: 1, x: 0, transition: springSmooth },
+};
+
+export const popIn: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  show: { opacity: 1, scale: 1, transition: springSnappy },
+};
+
+/** Row inside a staggered list. */
+export const listItem: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: duration.fast, ease: easeOut } },
+};
+
+/** Route-level transition used by AnimatedPage. */
+export const pageTransition: Variants = {
+  initial: { opacity: 0, y: 10, scale: 0.995 },
+  animate: { opacity: 1, y: 0, scale: 1, transition: { duration: duration.fast, ease: easeOut } },
+  exit: { opacity: 0, y: -6, scale: 0.997, transition: { duration: duration.micro, ease: easeOut } },
+};
+
+/** Cross-fade-only equivalents used whenever motion is reduced. */
+export const reducedFade: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: duration.micro } },
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: duration.micro } },
+  exit: { opacity: 0, transition: { duration: duration.micro } },
+};
+
+/**
+ * Strip every positional/scale channel out of a variant set, keeping opacity
+ * and timing. Use when a component needs its own variants but must still
+ * honour `prefers-reduced-motion`.
+ */
+export function toReduced(variants: Variants): Variants {
+  const out: Variants = {};
+  for (const [state, value] of Object.entries(variants)) {
+    if (typeof value !== "object" || value === null) {
+      out[state] = value as never;
+      continue;
+    }
+    const v = value as Record<string, unknown>;
+    out[state] = {
+      opacity: v.opacity ?? 1,
+      transition: { duration: duration.micro, ease: easeOut },
+    } as never;
+  }
+  return out;
+}

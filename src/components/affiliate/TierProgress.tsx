@@ -1,6 +1,6 @@
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Trophy, Sparkles, Flame, Lock, Check } from "lucide-react";
 import type { AffiliateOverview } from "@/hooks/useAffiliate";
 import { DEFAULT_TIER_COLOR } from "@/lib/design/yachtClub";
