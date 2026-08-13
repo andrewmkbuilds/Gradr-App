@@ -165,13 +165,15 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
     () => ({
       ...prefs,
       systemReduced,
+      lowPower,
+      lowPowerReason,
       reduceMotion,
       effectiveDepth,
       setMode: (mode) => update({ mode }),
       setDepth: (depth) => update({ depth: Math.min(1, Math.max(0, depth)) }),
       setDiagnostics: (diagnostics) => update({ diagnostics }),
     }),
-    [prefs, systemReduced, reduceMotion, effectiveDepth, update],
+    [prefs, systemReduced, lowPower, lowPowerReason, reduceMotion, effectiveDepth, update],
   );
 
   return <MotionPrefsContext.Provider value={value}>{children}</MotionPrefsContext.Provider>;
@@ -187,6 +189,8 @@ export function useMotionPrefs(): MotionPrefsValue {
   return {
     ...DEFAULTS,
     systemReduced: false,
+    lowPower: false,
+    lowPowerReason: null,
     reduceMotion: false,
     effectiveDepth: 1,
     setMode: () => {},
