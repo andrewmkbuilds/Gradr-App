@@ -1,3 +1,6 @@
+// Must stay first: guarantees Web Storage exists before any module (including
+// the Supabase client) touches localStorage.
+import "./lib/storagePolyfill";
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";

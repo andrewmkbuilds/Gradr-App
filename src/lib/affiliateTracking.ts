@@ -11,6 +11,7 @@
  *     signs up, calls `attribute_signup_referral` RPC and clears the cookie.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { safeStorage } from "@/lib/safeStorage";
 
 const COOKIE_NAME = "cf_ref";
 const CLICK_COOKIE_NAME = "cf_ref_click";
@@ -35,10 +36,10 @@ function clearCookie(name: string) {
 }
 
 function getVisitorKey(): string {
-  let key = localStorage.getItem(VISITOR_KEY);
+  let key = safeStorage.get(VISITOR_KEY);
   if (!key) {
     key = crypto.randomUUID();
-    localStorage.setItem(VISITOR_KEY, key);
+    safeStorage.set(VISITOR_KEY, key);
   }
   return key;
 }
