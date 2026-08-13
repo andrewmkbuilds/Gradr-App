@@ -13,7 +13,7 @@ import { useDepthEnabled } from "./depth";
 type SurfaceProps = {
   children: ReactNode;
   className?: string;
-  /** Border-glow accent hue; defaults to the Gradr cyan primary. */
+  /** Border-glow accent hue; defaults to the Gradr teal primary. */
   glow?: string;
 };
 

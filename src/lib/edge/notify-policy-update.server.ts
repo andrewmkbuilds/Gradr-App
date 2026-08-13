@@ -15,17 +15,17 @@ const escape = (v: unknown) =>
   String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 function emailHtml(docTitle: string, version: number, effective: string, summary: string, link: string) {
-  return `<!doctype html><html><body style="margin:0;background:#0b1020;padding:32px 0;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif">
+  return `<!doctype html><html><body style="margin:0;background:#0c222b;padding:32px 0;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-    <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#111a33;border:1px solid #1e2b4d;border-radius:16px;padding:32px">
-      <tr><td style="color:#7dd3fc;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding-bottom:12px">Gradr</td></tr>
-      <tr><td style="color:#f8fafc;font-size:22px;font-weight:600;padding-bottom:12px">We've updated our ${escape(docTitle)}</td></tr>
-      <tr><td style="color:#c3ccdd;font-size:15px;line-height:1.6;padding-bottom:16px">
+    <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#123542;border:1px solid #1d4a5b;border-radius:16px;padding:32px">
+      <tr><td style="color:#9dc3ce;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding-bottom:12px">Gradr</td></tr>
+      <tr><td style="color:#F2F0EF;font-size:22px;font-weight:600;padding-bottom:12px">We've updated our ${escape(docTitle)}</td></tr>
+      <tr><td style="color:#c8d3d7;font-size:15px;line-height:1.6;padding-bottom:16px">
         Version ${version} takes effect on ${escape(effective)}. Please review the changes — you'll be asked to accept them the next time you open Gradr.
       </td></tr>
-      ${summary ? `<tr><td style="color:#c3ccdd;font-size:14px;line-height:1.6;background:#0d1730;border:1px solid #1e2b4d;border-radius:10px;padding:14px;margin-bottom:16px"><strong style="color:#f8fafc">What changed</strong><br/>${escape(summary)}</td></tr><tr><td style="height:20px"></td></tr>` : ""}
-      <tr><td><a href="${link}" style="display:inline-block;background:#22d3ee;color:#06121f;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">Review the update</a></td></tr>
-      <tr><td style="color:#64748b;font-size:12px;padding-top:28px">This is a required service notice about your Gradr account.</td></tr>
+      ${summary ? `<tr><td style="color:#c8d3d7;font-size:14px;line-height:1.6;background:#0e2b36;border:1px solid #1d4a5b;border-radius:10px;padding:14px;margin-bottom:16px"><strong style="color:#F2F0EF">What changed</strong><br/>${escape(summary)}</td></tr><tr><td style="height:20px"></td></tr>` : ""}
+      <tr><td><a href="${link}" style="display:inline-block;background:#245F73;color:#F2F0EF;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">Review the update</a></td></tr>
+      <tr><td style="color:#8f9ea3;font-size:12px;padding-top:28px">This is a required service notice about your Gradr account.</td></tr>
     </table>
   </td></tr></table></body></html>`;
 }

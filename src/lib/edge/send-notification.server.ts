@@ -35,14 +35,14 @@ const escape = (v: unknown) =>
     .replace(/>/g, "&gt;");
 
 function shell(heading: string, body: string, ctaLabel: string, ctaHref: string) {
-  return `<!doctype html><html><body style="margin:0;background:#0b1020;padding:32px 0;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif">
+  return `<!doctype html><html><body style="margin:0;background:#0c222b;padding:32px 0;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-    <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#111a33;border:1px solid #1e2b4d;border-radius:16px;padding:32px">
-      <tr><td style="color:#7dd3fc;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding-bottom:12px">Gradr</td></tr>
-      <tr><td style="color:#f8fafc;font-size:22px;font-weight:600;padding-bottom:12px">${heading}</td></tr>
-      <tr><td style="color:#c3ccdd;font-size:15px;line-height:1.6;padding-bottom:24px">${body}</td></tr>
-      <tr><td><a href="${ctaHref}" style="display:inline-block;background:#22d3ee;color:#06121f;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">${ctaLabel}</a></td></tr>
-      <tr><td style="color:#64748b;font-size:12px;padding-top:28px">You can turn these emails off in Gradr → Settings → Notifications.</td></tr>
+    <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#123542;border:1px solid #1d4a5b;border-radius:16px;padding:32px">
+      <tr><td style="color:#9dc3ce;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding-bottom:12px">Gradr</td></tr>
+      <tr><td style="color:#F2F0EF;font-size:22px;font-weight:600;padding-bottom:12px">${heading}</td></tr>
+      <tr><td style="color:#c8d3d7;font-size:15px;line-height:1.6;padding-bottom:24px">${body}</td></tr>
+      <tr><td><a href="${ctaHref}" style="display:inline-block;background:#245F73;color:#F2F0EF;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">${ctaLabel}</a></td></tr>
+      <tr><td style="color:#8f9ea3;font-size:12px;padding-top:28px">You can turn these emails off in Gradr → Settings → Notifications.</td></tr>
     </table>
   </td></tr></table></body></html>`;
 }

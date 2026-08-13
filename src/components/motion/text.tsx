@@ -103,7 +103,7 @@ export function GradientText({ children, className = "" }: { children: ReactNode
       className={`bg-clip-text text-transparent ${className}`}
       style={{
         backgroundImage:
-          "linear-gradient(100deg, hsl(var(--primary)) 0%, hsl(210 90% 62%) 45%, hsl(266 70% 68%) 100%)",
+          "linear-gradient(100deg, hsl(var(--primary)) 0%, hsl(195 40% 42%) 48%, hsl(20 52% 34%) 100%)",
       }}
     >
       {children}

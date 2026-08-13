@@ -70,7 +70,7 @@ export function downloadTranscriptDoc(args: Args) {
     .map(
       (m) =>
         `<p style="margin:0 0 4pt 0;font-weight:bold;color:${
-          m.role === "assistant" ? "#0f766e" : "#1f2937"
+          m.role === "assistant" ? "#245F73" : "#733E24"
         }">${m.role === "assistant" ? "Interviewer" : "You"}</p>` +
         `<p style="margin:0 0 12pt 0;line-height:1.5">${escapeHtml(m.content).replace(/\n/g, "<br/>")}</p>`,
     )
@@ -80,7 +80,7 @@ export function downloadTranscriptDoc(args: Args) {
 <meta charset="utf-8"><title>Gradr Interview Transcript</title></head>
 <body style="font-family:Calibri,Arial,sans-serif;font-size:11pt">
 <h1 style="font-size:18pt;margin:0">Gradr — Mock Interview Transcript</h1>
-<p style="color:#6b7280;margin:4pt 0 18pt 0">${escapeHtml(header(args))}</p>
+<p style="color:#5c6b70;margin:4pt 0 18pt 0">${escapeHtml(header(args))}</p>
 ${body}
 </body></html>`;
 
