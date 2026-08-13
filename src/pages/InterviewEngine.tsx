@@ -492,6 +492,17 @@ function InterviewEngineInner() {
           exporting={exporting}
           onViewHistory={() => navigate("/interview/history")}
         />
+        {planStream.status !== "done" && (
+          <GenerationStream
+            status={planStream.status}
+            progress={planStream.progress}
+            label={planStream.label}
+            error={planStream.error}
+            title="7-day practice plan"
+            onCancel={planStream.cancel}
+            onRetry={planStream.retry}
+          />
+        )}
         <SessionDebrief
           report={report}
           messages={messages}
