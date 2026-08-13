@@ -421,6 +421,11 @@ export function RouteSeo() {
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={meta.description} />
       <meta name="twitter:image" content={ogImage} />
+      {routeLd?.map((node, i) => (
+        <script key={`route-ld-${i}`} type="application/ld+json">
+          {JSON.stringify(node)}
+        </script>
+      ))}
       {legalLd?.map((node, i) => (
         <script key={`legal-ld-${i}`} type="application/ld+json">
           {JSON.stringify(node)}
