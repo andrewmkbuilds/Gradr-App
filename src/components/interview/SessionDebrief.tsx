@@ -11,7 +11,7 @@ import {
 interface Props {
   report: InterviewReport;
   messages: TranscriptTurn[];
-  targetRole?: string | null;
+  targetRole?: string | null | undefined;
   durationSec: number;
   onPractiseQuestion?: (question: string) => void;
 }

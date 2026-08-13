@@ -22,7 +22,7 @@
       ]
     },
     "skipLibCheck": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "strictNullChecks": true,
     "strict": false,
     "target": "ES2020",

@@ -144,7 +144,7 @@ export function InterviewStudio(props: Props) {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
-        {connectionLost && (
+        {connectionLost && onDismissConnectionError && (
           <ConnectionErrorOverlay
             open
             retrying={connecting}

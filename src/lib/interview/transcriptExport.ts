@@ -5,7 +5,7 @@ export type TranscriptTurn = { role: "user" | "assistant"; content: string };
 
 interface Args {
   messages: TranscriptTurn[];
-  targetRole?: string | null;
+  targetRole?: string | null | undefined;
   durationSec?: number;
   createdAt?: string | number;
 }

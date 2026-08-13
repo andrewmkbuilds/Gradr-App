@@ -512,7 +512,7 @@ function InterviewEngineInner() {
 
         {stage === "setup" ? (
           <InterviewSetup
-            initial={sessionCtx ?? undefined}
+            {...(sessionCtx ? { initial: sessionCtx } : {})}
             onContinue={(ctx) => {
               setSessionCtx(ctx);
               setTargetRole(ctx.targetRole ?? "");
@@ -526,7 +526,13 @@ function InterviewEngineInner() {
           />
         )}
 
-        {stage === "setup" && <InterviewScheduler defaultRole={targetRole || sessionCtx?.targetRole} />}
+        {stage === "setup" && (
+          <InterviewScheduler
+            {...(targetRole || sessionCtx?.targetRole
+              ? { defaultRole: targetRole || sessionCtx?.targetRole }
+              : {})}
+          />
+        )}
 
 
         {!voice.supported && (
