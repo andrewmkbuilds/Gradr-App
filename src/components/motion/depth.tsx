@@ -31,6 +31,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { spring } from "@/lib/motion";
+import { useMotionPrefs } from "@/hooks/useMotionPrefs";
 import { cn } from "@/lib/utils";
 
 /* ----------------------------- capability gate ---------------------------- */
