@@ -1,0 +1,2 @@
+UPDATE public.affiliate_settings SET affiliate_terms = replace(affiliate_terms, 'CareerFlow OS', 'Gradr') WHERE affiliate_terms ILIKE '%CareerFlow OS%';
+ALTER TABLE public.affiliate_settings ALTER COLUMN affiliate_terms SET DEFAULT 'Standard affiliate terms apply. No self-referrals, spam, or misleading promotion. Gradr may revoke affiliate status at any time for policy violations.';
