@@ -21,6 +21,8 @@ import { buildBriefing, setupSteps, type BriefingInput } from "@/lib/careerBrief
 import { Button } from "@/components/ui/button";
 import { MotionReveal } from "@/components/motion";
 import { MomentumCard } from "@/components/dashboard/MomentumCard";
+import { FollowUpReminders } from "@/components/dashboard/FollowUpReminders";
+
 import { UpgradeNudge } from "@/components/UpgradeNudge";
 
 interface StageCount {
