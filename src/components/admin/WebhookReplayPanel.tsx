@@ -40,6 +40,16 @@ interface DryRunResult {
   error?: string;
 }
 
+interface IdempotencyResult {
+  resent: boolean;
+  idempotent: boolean;
+  claim: string;
+  state?: string;
+  ack?: { status: number; body: Record<string, unknown> };
+  notes?: string[];
+}
+
+
 const ENDPOINT = "/api/public/admin-webhook-replay";
 
 async function callReplayApi<T>(body: Record<string, unknown>): Promise<T> {
