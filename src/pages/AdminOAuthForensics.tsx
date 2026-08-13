@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { redactOAuthUrl } from "@/lib/oauth/redact";
+import CspInsightsPanel from "@/components/admin/CspInsightsPanel";
 import { useSeoOverride } from "@/lib/seoOverride";
 
 
