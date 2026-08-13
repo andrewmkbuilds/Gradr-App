@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "bun run scripts/generate-sitemap.ts",
     "dev": "vite",
-    "prebuild": "bun run scripts/generate-sitemap.ts",
+    "prebuild": "node scripts/check-no-tanstack.mjs && bun run scripts/generate-sitemap.ts",
     "typecheck": "tsgo -p tsconfig.app.json && tsgo -p tsconfig.node.json",
     "build": "bun run typecheck && vite build",
     "build:dev": "vite build --mode development",
@@ -21,7 +21,8 @@
     "test:visual": "node scripts/auth-hero-visual.mjs",
     "test:visual:logo": "node scripts/logo-visual.mjs",
     "test:a11y": "node scripts/a11y-nav.mjs",
-    "audit:deps": "node scripts/dependency-audit.mjs"
+    "audit:deps": "node scripts/dependency-audit.mjs",
+    "check:no-tanstack": "node scripts/check-no-tanstack.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
