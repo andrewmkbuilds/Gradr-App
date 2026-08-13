@@ -1,6 +1,8 @@
 import { sendLovableEmail } from '@lovable.dev/email-js'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { logEmailEvent } from '@/lib/email/events.server'
+
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -209,6 +211,14 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                   msg_id: msg.msg_id,
                   message_id: payload.message_id,
                 })
+                await logEmailEvent(supabase, {
+                  messageId: payload.message_id,
+                  templateName: (payload.label || queue) as string,
+                  recipientEmail: payload.to,
+                  eventType: 'deduped',
+                  metadata: { queue, reason: 'already_sent' },
+                })
+
                 const { error: dupDelError } = await supabase.rpc('delete_email', {
                   queue_name: queue,
                   message_id: msg.msg_id,
@@ -246,6 +256,18 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                 recipient_email: payload.to,
                 status: 'sent',
               })
+
+              // Delivery event — unique per message so queue reprocessing
+              // can never double-count a send.
+              await logEmailEvent(supabase, {
+                messageId: payload.message_id,
+                templateName: (payload.label || queue) as string,
+                recipientEmail: payload.to,
+                eventType: 'sent',
+                metadata: { queue, idempotency_key: payload.idempotency_key },
+              })
+
+
 
               // Delete from queue
               const { error: delError } = await supabase.rpc('delete_email', {
@@ -305,6 +327,18 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                 status: 'failed',
                 error_message: errorMsg.slice(0, 1000),
               })
+              await logEmailEvent(supabase, {
+                messageId: payload.message_id,
+                templateName: (payload.label || queue) as string,
+                recipientEmail: payload.to,
+                eventType: 'failed',
+                metadata: {
+                  queue,
+                  attempt: failedAttempts + 1,
+                  error: errorMsg.slice(0, 300),
+                },
+              })
+
               if (payload?.message_id && typeof payload.message_id === 'string') {
                 failedAttemptsByMessageId.set(payload.message_id, failedAttempts + 1)
               }

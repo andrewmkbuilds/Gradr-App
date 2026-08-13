@@ -95,6 +95,8 @@ import { Route as ApiPublicSearchJobsRouteImport } from './routes/api/public/sea
 import { Route as ApiPublicSendNotificationRouteImport } from './routes/api/public/send-notification'
 import { Route as ApiPublicSeoMonitorRouteImport } from './routes/api/public/seo-monitor'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicEmailClickRouteImport } from './routes/api/public/email/click'
+import { Route as ApiPublicEmailOpenRouteImport } from './routes/api/public/email/open'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -540,6 +542,16 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEmailClickRoute = ApiPublicEmailClickRouteImport.update({
+  id: '/api/public/email/click',
+  path: '/api/public/email/click',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEmailOpenRoute = ApiPublicEmailOpenRouteImport.update({
+  id: '/api/public/email/open',
+  path: '/api/public/email/open',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -645,6 +657,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliate/': typeof AppAffiliateIndexRoute
   '/interview/': typeof AppInterviewIndexRoute
+  '/api/public/email/click': typeof ApiPublicEmailClickRoute
+  '/api/public/email/open': typeof ApiPublicEmailOpenRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -735,6 +749,8 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliate': typeof AppAffiliateIndexRoute
   '/interview': typeof AppInterviewIndexRoute
+  '/api/public/email/click': typeof ApiPublicEmailClickRoute
+  '/api/public/email/open': typeof ApiPublicEmailOpenRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -827,6 +843,8 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_app/affiliate/': typeof AppAffiliateIndexRoute
   '/_app/interview/': typeof AppInterviewIndexRoute
+  '/api/public/email/click': typeof ApiPublicEmailClickRoute
+  '/api/public/email/open': typeof ApiPublicEmailOpenRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -919,6 +937,8 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/affiliate/'
     | '/interview/'
+    | '/api/public/email/click'
+    | '/api/public/email/open'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1009,6 +1029,8 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/affiliate'
     | '/interview'
+    | '/api/public/email/click'
+    | '/api/public/email/open'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1100,6 +1122,8 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_app/affiliate/'
     | '/_app/interview/'
+    | '/api/public/email/click'
+    | '/api/public/email/open'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1158,6 +1182,8 @@ export interface RootRouteChildren {
   ApiPublicSendNotificationRoute: typeof ApiPublicSendNotificationRoute
   ApiPublicSeoMonitorRoute: typeof ApiPublicSeoMonitorRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicEmailClickRoute: typeof ApiPublicEmailClickRoute
+  ApiPublicEmailOpenRoute: typeof ApiPublicEmailOpenRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -1767,6 +1793,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/email/click': {
+      id: '/api/public/email/click'
+      path: '/api/public/email/click'
+      fullPath: '/api/public/email/click'
+      preLoaderRoute: typeof ApiPublicEmailClickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/email/open': {
+      id: '/api/public/email/open'
+      path: '/api/public/email/open'
+      fullPath: '/api/public/email/open'
+      preLoaderRoute: typeof ApiPublicEmailOpenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -1920,6 +1960,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSendNotificationRoute: ApiPublicSendNotificationRoute,
   ApiPublicSeoMonitorRoute: ApiPublicSeoMonitorRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicEmailClickRoute: ApiPublicEmailClickRoute,
+  ApiPublicEmailOpenRoute: ApiPublicEmailOpenRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
