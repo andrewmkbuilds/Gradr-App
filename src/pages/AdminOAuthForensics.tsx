@@ -802,6 +802,8 @@ export default function AdminOAuthForensics() {
             </div>
           )}
 
+          {/* Trend chart, new-pair highlighting, payload drill-down and export. */}
+          <CspInsightsPanel />
 
 
           {csp.isLoading ? (
