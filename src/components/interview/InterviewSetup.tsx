@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router-dom";
 import { Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import {
   type DifficultyId,
   type SessionContext,
 } from "@/lib/interview/personas";
+import { Surface } from "@/components/ui/surface";
+import { stagger, fadeUp, springSnappy } from "@/lib/motion/tokens";
 import { entitlementFor, personaAllowed, difficultyAllowed } from "@/lib/interview/entitlements";
 
 interface Props {
@@ -35,6 +38,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
   const [tier, setTier] = useState<string | null>(null);
 
   const ent = entitlementFor(tier);
+  const reduced = useReducedMotion();
 
 
   // Auto-fill from the user's saved profile and most recent parsed resume.
@@ -89,15 +93,25 @@ export function InterviewSetup({ initial, onContinue }: Props) {
 
 
   return (
-    <div className="glass-card p-6 space-y-6 animate-slide-up">
-      <div>
-        <h3 className="text-lg font-semibold text-foreground">Set up your interview</h3>
-        <p className="text-sm text-muted-foreground mt-1">
+    <motion.div
+      variants={stagger(0.07)}
+      initial={reduced ? false : "hidden"}
+      animate="show"
+      className="elev-3 space-y-6 rounded-2xl p-6 sm:p-7"
+    >
+      <motion.div variants={fadeUp}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+          Step 1 of 2
+        </p>
+        <h3 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground">
+          Set up your interview
+        </h3>
+        <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
           Pick who's interviewing you and how hard they push. Everything is grounded in your role and resume.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-secondary/30 p-3">
+      <motion.div variants={fadeUp} className="elev-2 flex flex-wrap items-center justify-between gap-3 rounded-xl p-3">
         <div className="flex items-center gap-2 text-sm">
           <Radio className={`h-4 w-4 ${ent.realtimeVoice ? "text-primary" : "text-muted-foreground"}`} />
           <span className="text-foreground">
@@ -110,74 +124,82 @@ export function InterviewSetup({ initial, onContinue }: Props) {
             <Link to="/pricing">Upgrade</Link>
           </Button>
         )}
-      </div>
+      </motion.div>
 
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Interviewer</p>
+      <motion.div variants={fadeUp}>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Interviewer</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {PERSONAS.map((p) => {
             const locked = !personaAllowed(ent, p.id);
             return (
-              <button
+              <motion.button
                 key={p.id}
                 type="button"
                 disabled={locked}
                 onClick={() => setPersonaId(p.id)}
-                className={`text-left rounded-xl border p-3 transition-colors ${
+                whileHover={locked || reduced ? undefined : { y: -2 }}
+                whileTap={locked || reduced ? undefined : { scale: 0.985 }}
+                transition={springSnappy}
+                aria-pressed={personaId === p.id}
+                className={`relative rounded-xl border p-3 text-left transition-colors ${
                   locked
-                    ? "border-border bg-secondary/20 opacity-60 cursor-not-allowed"
+                    ? "cursor-not-allowed border-border bg-secondary/20 opacity-60"
                     : personaId === p.id
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-secondary/40 hover:bg-secondary"
+                      ? "border-primary bg-primary/10 shadow-[0_0_0_1px_hsl(var(--primary)/0.35)]"
+                      : "border-border bg-secondary/40 hover:border-primary/40 hover:bg-secondary"
                 }`}
               >
                 <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
                   {p.label}
                   {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
                 </div>
-                <div className="text-xs text-muted-foreground mt-0.5">
+                <div className="mt-0.5 text-xs text-muted-foreground">
                   {locked ? "Unlocks on a higher plan" : p.blurb}
                 </div>
-              </button>
+              </motion.button>
             );
           })}
         </div>
-      </div>
+      </motion.div>
 
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Difficulty</p>
+      <motion.div variants={fadeUp}>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Difficulty</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {DIFFICULTIES.map((d) => {
             const locked = !difficultyAllowed(ent, d.id);
             return (
-              <button
+              <motion.button
                 key={d.id}
                 type="button"
                 disabled={locked}
                 onClick={() => setDifficultyId(d.id)}
-                className={`text-left rounded-xl border p-3 transition-colors ${
+                whileHover={locked || reduced ? undefined : { y: -2 }}
+                whileTap={locked || reduced ? undefined : { scale: 0.985 }}
+                transition={springSnappy}
+                aria-pressed={difficultyId === d.id}
+                className={`rounded-xl border p-3 text-left transition-colors ${
                   locked
-                    ? "border-border bg-secondary/20 opacity-60 cursor-not-allowed"
+                    ? "cursor-not-allowed border-border bg-secondary/20 opacity-60"
                     : difficultyId === d.id
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-secondary/40 hover:bg-secondary"
+                      ? "border-primary bg-primary/10 shadow-[0_0_0_1px_hsl(var(--primary)/0.35)]"
+                      : "border-border bg-secondary/40 hover:border-primary/40 hover:bg-secondary"
                 }`}
               >
                 <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
                   {d.label}
                   {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
                 </div>
-                <div className="text-xs text-muted-foreground mt-0.5">
+                <div className="mt-0.5 text-xs text-muted-foreground">
                   {locked ? "Unlocks on a higher plan" : d.blurb}
                 </div>
-              </button>
+              </motion.button>
             );
           })}
         </div>
-      </div>
+      </motion.div>
 
 
-      <div className="grid sm:grid-cols-2 gap-3">
+      <motion.div variants={fadeUp} className="grid gap-3 sm:grid-cols-2">
         <Input
           placeholder="Target role (e.g. Senior Frontend Engineer)"
           value={targetRole}
@@ -190,7 +212,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
           onChange={(e) => setCompany(e.target.value)}
           className="bg-secondary border-border"
         />
-      </div>
+      </motion.div>
 
       <Textarea
         placeholder="Paste the job description (optional) — questions will be grounded in it"
@@ -200,7 +222,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         className="bg-secondary border-border resize-none"
       />
 
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <motion.div variants={fadeUp} className="flex items-center gap-2 text-xs text-muted-foreground">
         {loadingContext ? (
           <>
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading your profile and resume…
@@ -213,7 +235,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         ) : (
           <>Upload a resume in Resume Intelligence for questions tailored to your real projects.</>
         )}
-      </div>
+      </motion.div>
 
       <Button
         onClick={() => {
@@ -232,9 +254,9 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         }}
         className="bg-primary text-primary-foreground hover:bg-primary/90"
       >
-        <Sparkles className="h-4 w-4 mr-2" />
+        <Sparkles className="mr-2 h-4 w-4" />
         Continue to device check
       </Button>
-    </div>
+    </motion.div>
   );
 }
