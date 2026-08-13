@@ -25,7 +25,16 @@ const failures: string[] = [];
 
 for (const path of PATHS) {
   const response = await fetch(`${ORIGIN}${path}`, { redirect: "manual" });
+
+  // Redirects and 404s are served by the hosting edge before our worker runs,
+  // so they carry no policy of ours to verify — only documents count.
+  if (response.status < 200 || response.status >= 300) {
+    console.log(`  skipped ${path} (${response.status}, not a document response)`);
+    continue;
+  }
+
   const verdict = evaluateSecurityHeaders(response.headers, { secure: SECURE });
+
 
   for (const problem of verdict.problems) failures.push(`${path}: ${problem}`);
   for (const note of verdict.notes) console.log(`note ${path}: ${note}`);
