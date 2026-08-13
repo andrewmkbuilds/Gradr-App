@@ -415,7 +415,77 @@
     mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 75%);
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 75%);
   }
+
+  /* Film grain. Static SVG noise — no JS, no repaint cost. */
+  .noise-layer {
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Glass surface used across marketing panels and floating UI. */
+  .glass-panel {
+    background: hsl(var(--surface) / 0.62);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid hsl(var(--border) / 0.8);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Slow-drifting brand gradient for eyebrow rules and accent text. */
+  .animated-gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      hsl(var(--foreground)) 0%,
+      hsl(var(--primary-glow)) 38%,
+      hsl(var(--brand-secondary)) 60%,
+      hsl(var(--foreground)) 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-pan 9s ease-in-out infinite;
+  }
+  @keyframes gradient-pan {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* ---------- Typography: display vs UI ----------
+     Bricolage Grotesque carries the editorial voice; Geist runs the
+     interface. Never mix them within the same block of text. */
+  .font-display {
+    font-family: "Bricolage Grotesque", "Geist", system-ui, sans-serif;
+    font-optical-sizing: auto;
+  }
+  .type-hero {
+    @apply font-display;
+    font-size: clamp(2.75rem, 7.2vw, 5.5rem);
+    font-weight: 800;
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+  }
+  .type-section {
+    @apply font-display;
+    font-size: clamp(1.875rem, 3.6vw, 3rem);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+  }
+  .type-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+  }
+  .type-lede {
+    font-size: clamp(1rem, 1.4vw, 1.1875rem);
+    line-height: 1.65;
+    letter-spacing: -0.005em;
+  }
 }
+
 
 /* ============================================================
    Motion system — one timing language for the whole product.
