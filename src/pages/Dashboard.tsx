@@ -9,6 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 import { UsageBars } from "@/components/UsageBars";
+import { Surface, SurfaceHeader } from "@/components/ui/surface";
+import { CareerReadiness, type ReadinessPillar } from "@/components/dashboard/CareerReadiness";
+import { ActivityChart, PipelineFunnelChart, type ActivityPoint } from "@/components/dashboard/DashboardCharts";
+import { CountUp } from "@/components/motion";
 
 
 interface DashboardStats {
@@ -63,7 +67,7 @@ export default function Dashboard() {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const now = new Date();
 
-    const [resumeRes, matchRes, trackedRes, remindersRes] = await Promise.all([
+    const [resumeRes, matchRes, trackedRes, remindersRes, interviewRes] = await Promise.all([
       supabase
         .from("resumes")
         .select("ats_score, keyword_match, formatting_score, impact_score")
@@ -78,7 +82,7 @@ export default function Dashboard() {
         .limit(10),
       supabase
         .from("tracked_jobs")
-        .select("status, applied_at")
+        .select("status, applied_at, created_at")
         .eq("user_id", user!.id),
       supabase
         .from("job_reminders")
@@ -86,6 +90,11 @@ export default function Dashboard() {
         .eq("user_id", user!.id)
         .eq("done", false)
         .order("due_at", { ascending: true })
+        .limit(20),
+      supabase
+        .from("interview_sessions")
+        .select("created_at, overall_score")
+        .order("created_at", { ascending: false })
         .limit(20),
     ]);
 
@@ -117,13 +126,41 @@ export default function Dashboard() {
       appliedThisWeek,
     };
 
+    // Eight-week momentum series from tracked jobs + interview sessions.
+    const sessions = (interviewRes.data || []) as { created_at: string; overall_score: number | null }[];
+    const weeks: ActivityPoint[] = [];
+    for (let i = 7; i >= 0; i--) {
+      const end = new Date(now);
+      end.setDate(end.getDate() - i * 7);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 7);
+      weeks.push({
+        label: `${start.getMonth() + 1}/${start.getDate()}`,
+        applications: tracked.filter((t) => t.applied_at && inRange(t.applied_at, start, end)).length,
+        interviews: sessions.filter((x) => inRange(x.created_at, start, end)).length,
+      });
+    }
+
+    const scored = sessions.filter((x) => typeof x.overall_score === "number");
+    const interviewAvg = scored.length
+      ? Math.round(scored.reduce((a, x) => a + (x.overall_score ?? 0), 0) / scored.length)
+      : 0;
+
     return {
       stats,
+      activity: weeks,
+      interviewCount: sessions.length,
+      interviewAvg,
       stages: stageCounts,
       reminders: allReminders.slice(0, 5),
       overdueCount: overdue,
       jobMatches: matches.slice(0, 4),
     };
+  }
+
+  function inRange(iso: string, start: Date, end: Date) {
+    const d = new Date(iso).getTime();
+    return d >= start.getTime() && d < end.getTime();
   }
 
   if (loading) {
