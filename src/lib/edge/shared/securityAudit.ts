@@ -14,7 +14,8 @@ export type SecurityCategory =
   | "ai_authorization"
   | "eligibility"
   | "discount"
-  | "affiliate";
+  | "affiliate"
+  | "admin_action";
 export type SecurityDecision = "allowed" | "denied" | "received" | "processed" | "failed";
 
 export interface SecurityEvent {
