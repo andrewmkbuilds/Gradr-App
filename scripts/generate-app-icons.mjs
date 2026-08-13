@@ -23,6 +23,13 @@ const PUBLIC = join(ROOT, "public");
 const ICON_DIR = join(PUBLIC, "icons");
 const SPLASH_DIR = join(PUBLIC, "splash");
 
+/** Reads width/height straight out of a PNG IHDR chunk (no image deps). */
+function pngSize(file) {
+  const buf = readFileSync(file);
+  if (buf.length < 24 || buf.readUInt32BE(0) !== 0x89504e47) return null;
+  return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+
 /** Yacht Club palette — keep in sync with src/index.css tokens. */
 const TEAL = "#245F73";
 const DEEP = "#0b1c22";
