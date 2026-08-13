@@ -54,6 +54,12 @@ function salaryLabel(job: RealJobMatch) {
 }
 
 export default function JobMatchingEngine() {
+  const { user } = useAuth();
+  const [matches, setMatches] = useState<RealJobMatch[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [targetRole, setTargetRole] = useState("");
+  const [location, setLocation] = useState("");
   useSeoOverride(
     targetRole.trim()
       ? {
@@ -62,12 +68,6 @@ export default function JobMatchingEngine() {
         }
       : null,
   );
-  const { user } = useAuth();
-  const [matches, setMatches] = useState<RealJobMatch[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [targetRole, setTargetRole] = useState("");
-  const [location, setLocation] = useState("");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [hasResume, setHasResume] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);

@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useEffect, useRef, useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +54,13 @@ const COUNTRIES = [
 ];
 
 export default function JobsFeed() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  // Shared targeting cache: onboarding writes to it, so a change there
+  // re-ranks this feed immediately instead of waiting for a reload.
+  const { preferences, isLoading: prefsLoading } = useCareerPreferences();
+  const [what, setWhat] = useState("");
+  const [where, setWhere] = useState("");
   useSeoOverride(
     what.trim()
       ? {
@@ -61,13 +69,6 @@ export default function JobsFeed() {
         }
       : null,
   );
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  // Shared targeting cache: onboarding writes to it, so a change there
-  // re-ranks this feed immediately instead of waiting for a reload.
-  const { preferences, isLoading: prefsLoading } = useCareerPreferences();
-  const [what, setWhat] = useState("");
-  const [where, setWhere] = useState("");
   const [country, setCountry] = useState("us");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [sortBy, setSortBy] = useState<"relevance" | "date" | "salary">("relevance");

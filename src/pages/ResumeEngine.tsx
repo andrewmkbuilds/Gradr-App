@@ -58,6 +58,13 @@ const typeStyles: Record<string, { icon: typeof CheckCircle; color: string }> = 
 };
 
 export default function ResumeEngine() {
+  const { user } = useAuth();
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   useSeoOverride(
     jobTitle.trim()
       ? {
@@ -66,13 +73,6 @@ export default function ResumeEngine() {
         }
       : null,
   );
-  const { user } = useAuth();
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const [fileName, setFileName] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [showTailor, setShowTailor] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
