@@ -319,8 +319,17 @@ export const handler = async (req: Request): Promise<Response> => {
       images = await auditHtmlImages(html);
     }
 
-    const { inspectAuthEmailHtml, linksMatchActionUrl } = await import("@/lib/email/authLinkAudit");
+    const { inspectAuthEmailHtml, linksMatchActionUrl, validateAuthRedirect } = await import(
+      "@/lib/email/authLinkAudit"
+    );
     const inspection = inspectAuthEmailHtml(html);
+    const allowlist = validateAuthRedirect(actionUrl);
+
+    await auditAdminAccess(admin as never, user.id, "view", "auth_email_preview", 1, {
+      template: key,
+      suppliedActionUrl: Boolean(supplied),
+      allowlist_ok: allowlist.allowed,
+    });
 
     return json({
       templates: list,
@@ -331,6 +340,7 @@ export const handler = async (req: Request): Promise<Response> => {
       text,
       images,
       actionUrl,
+      allowlist,
       links: {
         ...inspection,
         // reauthentication carries a code, not a link — nothing to match.
@@ -343,12 +353,13 @@ export const handler = async (req: Request): Promise<Response> => {
   /* --------------------------- auth-link-audit -------------------------- */
   // Which dynamic action URL was used for each auth email we sent. Sanitized at
   // write time: digests only, no tokens, no full URLs, no credentials.
+  const AUTH_AUDIT_COLUMNS =
+    "id, run_id, message_id, action_type, template_key, recipient_redacted, link_origin, link_path, link_type, redirect_to, token_param, token_digest, url_digest, link_valid, allowlist_ok, allowlist_reasons, redirect_sanitized, blocked, created_at";
+
   if (action === "auth-link-audit") {
     let query = admin
       .from("auth_email_link_audit")
-      .select(
-        "id, run_id, message_id, action_type, template_key, recipient_redacted, link_origin, link_path, link_type, redirect_to, token_param, token_digest, url_digest, link_valid, created_at",
-      )
+      .select(AUTH_AUDIT_COLUMNS)
       .gte("created_at", start)
       .lte("created_at", end)
       .order("created_at", { ascending: false })
@@ -357,8 +368,138 @@ export const handler = async (req: Request): Promise<Response> => {
 
     const { data, error } = await query;
     if (error) return json({ error: error.message }, 500);
+
+    await auditAdminAccess(
+      admin as never,
+      user.id,
+      "view",
+      "auth_email_link_audit",
+      (data ?? []).length,
+      { range: { start, end }, template: template || null },
+    );
+
     return json({ range: { start, end }, rows: data ?? [] });
   }
+
+  /* --------------------------- auth-preview-export ---------------------- */
+  // One downloadable evidence bundle: the rendered email exactly as sent
+  // (HTML + plain text), the link inspection and allowlist verdict, and every
+  // audit entry in the selected date range. `format: "csv"` returns just the
+  // audit rows as CSV; the default JSON carries everything.
+  if (action === "auth-preview-export") {
+    const key = typeof body["template"] === "string" ? (body["template"] as string) : "";
+    const format = body["format"] === "csv" ? "csv" : "json";
+
+    let query = admin
+      .from("auth_email_link_audit")
+      .select(AUTH_AUDIT_COLUMNS)
+      .gte("created_at", start)
+      .lte("created_at", end)
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (key) query = query.eq("action_type", key);
+
+    const { data: auditRows, error: auditError } = await query;
+    if (auditError) return json({ error: auditError.message }, 500);
+    const rows = (auditRows ?? []) as Record<string, unknown>[];
+
+    await auditAdminAccess(admin as never, user.id, "export", "auth_email_link_audit", rows.length, {
+      range: { start, end },
+      template: key || null,
+      format,
+    });
+
+    const stamp = new Date().toISOString().slice(0, 10);
+
+    if (format === "csv") {
+      const columns = [
+        "created_at",
+        "action_type",
+        "template_key",
+        "message_id",
+        "run_id",
+        "recipient_redacted",
+        "link_origin",
+        "link_path",
+        "link_type",
+        "redirect_to",
+        "token_param",
+        "token_digest",
+        "url_digest",
+        "link_valid",
+        "allowlist_ok",
+        "allowlist_reasons",
+        "redirect_sanitized",
+        "blocked",
+      ];
+      return new Response(toCsv(rows, columns), {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": `attachment; filename="gradr-auth-email-audit-${stamp}.csv"`,
+        },
+      });
+    }
+
+    let rendered: Record<string, unknown> | null = null;
+    if (key) {
+      const { authTemplate, authUrlPropFor } = await import("@/lib/email-templates/authSamples");
+      const entry = authTemplate(key);
+      if (!entry) return json({ error: "Unknown auth template" }, 404);
+
+      const supplied =
+        typeof body["actionUrl"] === "string" ? (body["actionUrl"] as string).trim() : "";
+      const urlProp = authUrlPropFor(key);
+      const props: Record<string, unknown> = { ...(entry.props as Record<string, unknown>) };
+      if (supplied && /^https?:\/\//i.test(supplied) && urlProp) props[urlProp] = supplied;
+      const exportActionUrl = urlProp ? ((props[urlProp] as string | undefined) ?? null) : null;
+
+      const { render } = await import("@react-email/render");
+      const React = (await import("react")).default;
+      const element = React.createElement(entry.component, props);
+      const html = await render(element);
+      const text = await render(element, { plainText: true });
+
+      const { inspectAuthEmailHtml, validateAuthRedirect } = await import(
+        "@/lib/email/authLinkAudit"
+      );
+
+      rendered = {
+        template: key,
+        label: entry.displayName,
+        subject: entry.subject,
+        actionUrl: exportActionUrl,
+        html,
+        text,
+        links: inspectAuthEmailHtml(html),
+        allowlist: validateAuthRedirect(exportActionUrl),
+      };
+    }
+
+    return new Response(
+      JSON.stringify(
+        {
+          exportedAt: new Date().toISOString(),
+          exportedBy: user.id,
+          range: { start, end },
+          template: key || null,
+          rendered,
+          auditEntries: rows,
+        },
+        null,
+        2,
+      ),
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Content-Disposition": `attachment; filename="gradr-auth-email-report-${stamp}.json"`,
+        },
+      },
+    );
+  }
+
+
 
 
   /* ------------------------------- replay ------------------------------ */
