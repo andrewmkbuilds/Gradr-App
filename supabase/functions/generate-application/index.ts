@@ -198,22 +198,31 @@ serve(async (req) => {
           }
         };
 
-        const streamed = await streamGatewayChat({
-          apiKey: LOVABLE_API_KEY,
-          body: gatewayBody,
-          signal,
-          onText: (delta, all) => {
-            writer.delta(delta);
-            report(all.length);
-          },
-          onToolArgs: (_name, _delta, all) => report(all.length),
-        });
+        let streamed;
+        try {
+          streamed = await streamGatewayChat({
+            apiKey: LOVABLE_API_KEY,
+            body: gatewayBody,
+            signal,
+            onText: (delta, all) => {
+              writer.delta(delta);
+              report(all.length);
+            },
+            onToolArgs: (_name, _delta, all) => report(all.length),
+          });
+        } catch (err) {
+          // Client cancelled (or the socket died) — give the credit back.
+          if (chargedUserId) await refund(chargedUserId, "application", paymentEnv);
+          if (signal.aborted) return;
+          throw err;
+        }
 
         if (!streamed.ok) {
           if (chargedUserId) await refund(chargedUserId, "application", paymentEnv);
           writer.send("error", { message: streamed.error ?? "AI generation failed", status: streamed.status });
           return;
         }
+
 
         let result: Record<string, unknown> | null = null;
         if (isProse) {
