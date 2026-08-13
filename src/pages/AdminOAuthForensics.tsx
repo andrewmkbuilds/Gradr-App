@@ -537,8 +537,8 @@ export default function AdminOAuthForensics() {
                 {expanded === trace.id && (
                   <div className="space-y-3 border-t border-border p-4">
                     <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
-                      <p>Expected redirect: <span className="break-all font-mono">{trace.expected_redirect_uri ?? "—"}</span></p>
-                      <p>Final URL: <span className="break-all font-mono">{trace.final_url ?? "—"}</span></p>
+                      <p>Expected redirect: <span className="break-all font-mono">{redactOAuthUrl(trace.expected_redirect_uri) || "—"}</span></p>
+                      <p>Final URL: <span className="break-all font-mono">{redactOAuthUrl(trace.final_url) || "—"}</span></p>
                       <p>State returned: {trace.state_present ? "yes" : "no"} ({tri(trace.state_valid)})</p>
                       <p>Nonce returned: {trace.nonce_present ? "yes" : "no"} ({tri(trace.nonce_valid)})</p>
                     </div>
@@ -628,7 +628,7 @@ export default function AdminOAuthForensics() {
                   <Verdict ok={check.status === "pass"} label={check.status} />
                 </div>
                 <p className="mt-2 break-all font-mono text-xs text-muted-foreground">
-                  {check.final_url ?? "—"}{" "}
+                  {redactOAuthUrl(check.final_url) || "—"}{" "}
                   <span className="text-muted-foreground/70">(expected {check.expected_final_url})</span>
                 </p>
                 {(check.failures ?? []).length > 0 && (
