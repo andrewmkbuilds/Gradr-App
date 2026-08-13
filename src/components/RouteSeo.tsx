@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { canonicalPath } from "@/lib/seo/canonical";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
@@ -135,6 +136,11 @@ const META: Record<string, { title: string; description: string }> = {
     title: "ATS Resume Checker — Free Resume Scan & Score",
     description: "Free ATS resume checker: score your resume against any job description, spot formatting a parser can't read, and get the exact missing keywords.",
   },
+  "/ai-interview-coach": {
+    title: "AI Interview Coach — Free Voice Mock Interviews",
+    description:
+      "Practice spoken mock interviews with an AI interview coach that adapts to your target role, asks real follow-ups, and scores your answers with a full transcript.",
+  },
   "/career-advice": {
     title: "Career Advice",
     description: "Free guides on resume optimization, cover letters, and interview preparation — practical advice for every stage of your job search.",
@@ -212,8 +218,8 @@ function isNoIndex(pathname: string): boolean {
 
 export function RouteSeo() {
   const { pathname } = useLocation();
-  const meta = META[pathname] ??
-    resolveDynamicMeta(pathname) ?? {
+  const meta = META[canonicalPath(pathname)] ??
+    resolveDynamicMeta(canonicalPath(pathname)) ?? {
       title: "AI Career Copilot for Resumes, Jobs & Interviews",
       description:
         "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
@@ -222,9 +228,12 @@ export function RouteSeo() {
   // /landing) gets its own distinct title so titles and og:title never collide.
   const fullTitle =
     pathname === "/" ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews" : `${meta.title} — ${SITE}`;
-  const url = `${ORIGIN}${pathname}`;
-  const ogImage = resolveOgImage(pathname);
-  const noindex = isNoIndex(pathname);
+  // Canonical always points at the normalised path (lowercase, no trailing
+  // slash, aliases resolved) so URL variants never split indexing signals.
+  const canonical = canonicalPath(pathname);
+  const url = `${ORIGIN}${canonical}`;
+  const ogImage = resolveOgImage(canonical);
+  const noindex = isNoIndex(canonical);
 
   // index.html ships a full static SEO head so crawlers that never execute
   // JavaScript still read correct Gradr metadata. react-helmet-async only
