@@ -20,6 +20,8 @@ import { WhyThisScore } from "@/components/dashboard/WhyThisScore";
 import { buildBriefing, setupSteps, type BriefingInput } from "@/lib/careerBriefing";
 import { Button } from "@/components/ui/button";
 import { MotionReveal } from "@/components/motion";
+import { MomentumCard } from "@/components/dashboard/MomentumCard";
+import { UpgradeNudge } from "@/components/UpgradeNudge";
 
 interface StageCount {
   saved: number; applied: number; interview: number; offer: number; rejected: number;
@@ -166,6 +168,8 @@ export default function Dashboard() {
     <div className="mx-auto max-w-7xl space-y-6">
       <PaymentIssueBanner />
 
+      <UpgradeNudge />
+
       <DailyBriefing briefing={briefing} name={displayName} />
 
       <WhyThisScore briefing={briefing} />
@@ -175,6 +179,8 @@ export default function Dashboard() {
       <GettingStarted steps={steps} />
 
       <NextThreeDays />
+
+      <MomentumCard />
 
       <MotionReveal onView className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

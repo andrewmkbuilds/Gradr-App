@@ -28,6 +28,7 @@ import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, C
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { handleAiFunctionError } from "@/lib/aiErrors";
+import { PipelineInsights } from "@/components/pipeline/PipelineInsights";
 
 type Status = "saved" | "applied" | "interview" | "offer" | "rejected";
 
@@ -316,6 +317,14 @@ export default function Pipeline() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <PipelineInsights
+        jobs={jobs}
+        onOpenJob={(id) => {
+          const job = jobs.find((j) => j.id === id);
+          if (job) setSelected(job);
+        }}
+      />
 
       {/* Reminders bar */}
       {reminders.length > 0 && (
