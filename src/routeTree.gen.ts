@@ -63,6 +63,7 @@ import { Route as AppAdminPaymentsStatusRouteImport } from './routes/_app/admin/
 import { Route as AppAdminRateLimitsRouteImport } from './routes/_app/admin/rate-limits'
 import { Route as AppAdminSearchConsoleRouteImport } from './routes/_app/admin/search-console'
 import { Route as AppAdminSecurityLogRouteImport } from './routes/_app/admin/security-log'
+import { Route as AppAdminSecurityScansRouteImport } from './routes/_app/admin/security-scans'
 import { Route as AppAdminSeoMonitorRouteImport } from './routes/_app/admin/seo-monitor'
 import { Route as AppAdminSeoPerformanceRouteImport } from './routes/_app/admin/seo-performance'
 import { Route as AppAdminVerificationsRouteImport } from './routes/_app/admin/verifications'
@@ -103,6 +104,7 @@ import { Route as ApiPublicOauthForensicsRouteImport } from './routes/api/public
 import { Route as ApiPublicParseJobUrlRouteImport } from './routes/api/public/parse-job-url'
 import { Route as ApiPublicPaymentsPortalRouteImport } from './routes/api/public/payments-portal'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments-webhook'
+import { Route as ApiPublicPermissionDeniedRouteImport } from './routes/api/public/permission-denied'
 import { Route as ApiPublicPracticePlanRouteImport } from './routes/api/public/practice-plan'
 import { Route as ApiPublicRecommendJobsRouteImport } from './routes/api/public/recommend-jobs'
 import { Route as ApiPublicResolveDiscountRouteImport } from './routes/api/public/resolve-discount'
@@ -110,6 +112,7 @@ import { Route as ApiPublicRevenuecatSyncRouteImport } from './routes/api/public
 import { Route as ApiPublicSearchConsoleRouteImport } from './routes/api/public/search-console'
 import { Route as ApiPublicSearchJobsRouteImport } from './routes/api/public/search-jobs'
 import { Route as ApiPublicSecurityDigestRouteImport } from './routes/api/public/security-digest'
+import { Route as ApiPublicSecurityScansRouteImport } from './routes/api/public/security-scans'
 import { Route as ApiPublicSendNotificationRouteImport } from './routes/api/public/send-notification'
 import { Route as ApiPublicSeoMonitorRouteImport } from './routes/api/public/seo-monitor'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -392,6 +395,11 @@ const AppAdminSecurityLogRoute = AppAdminSecurityLogRouteImport.update({
   path: '/admin/security-log',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminSecurityScansRoute = AppAdminSecurityScansRouteImport.update({
+  id: '/admin/security-scans',
+  path: '/admin/security-scans',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminSeoMonitorRoute = AppAdminSeoMonitorRouteImport.update({
   id: '/admin/seo-monitor',
   path: '/admin/seo-monitor',
@@ -602,6 +610,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPermissionDeniedRoute =
+  ApiPublicPermissionDeniedRouteImport.update({
+    id: '/api/public/permission-denied',
+    path: '/api/public/permission-denied',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPracticePlanRoute = ApiPublicPracticePlanRouteImport.update({
   id: '/api/public/practice-plan',
   path: '/api/public/practice-plan',
@@ -636,6 +650,11 @@ const ApiPublicSearchJobsRoute = ApiPublicSearchJobsRouteImport.update({
 const ApiPublicSecurityDigestRoute = ApiPublicSecurityDigestRouteImport.update({
   id: '/api/public/security-digest',
   path: '/api/public/security-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSecurityScansRoute = ApiPublicSecurityScansRouteImport.update({
+  id: '/api/public/security-scans',
+  path: '/api/public/security-scans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicSendNotificationRoute =
@@ -747,6 +766,7 @@ export interface FileRoutesByFullPath {
   '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
+  '/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
   '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
@@ -785,6 +805,7 @@ export interface FileRoutesByFullPath {
   '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
   '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
   '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/permission-denied': typeof ApiPublicPermissionDeniedRoute
   '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
   '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
   '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
@@ -792,6 +813,7 @@ export interface FileRoutesByFullPath {
   '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
   '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
+  '/api/public/security-scans': typeof ApiPublicSecurityScansRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -859,6 +881,7 @@ export interface FileRoutesByTo {
   '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
+  '/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
   '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
@@ -897,6 +920,7 @@ export interface FileRoutesByTo {
   '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
   '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
   '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/permission-denied': typeof ApiPublicPermissionDeniedRoute
   '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
   '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
   '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
@@ -904,6 +928,7 @@ export interface FileRoutesByTo {
   '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
   '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
+  '/api/public/security-scans': typeof ApiPublicSecurityScansRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -973,6 +998,7 @@ export interface FileRoutesById {
   '/_app/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/_app/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/_app/admin/security-log': typeof AppAdminSecurityLogRoute
+  '/_app/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/_app/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
   '/_app/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/_app/admin/verifications': typeof AppAdminVerificationsRoute
@@ -1011,6 +1037,7 @@ export interface FileRoutesById {
   '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
   '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
   '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/permission-denied': typeof ApiPublicPermissionDeniedRoute
   '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
   '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
   '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
@@ -1018,6 +1045,7 @@ export interface FileRoutesById {
   '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
   '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
   '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
+  '/api/public/security-scans': typeof ApiPublicSecurityScansRoute
   '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
   '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -1087,6 +1115,7 @@ export interface FileRouteTypes {
     | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
+    | '/admin/security-scans'
     | '/admin/seo-monitor'
     | '/admin/seo-performance'
     | '/admin/verifications'
@@ -1125,6 +1154,7 @@ export interface FileRouteTypes {
     | '/api/public/parse-job-url'
     | '/api/public/payments-portal'
     | '/api/public/payments-webhook'
+    | '/api/public/permission-denied'
     | '/api/public/practice-plan'
     | '/api/public/recommend-jobs'
     | '/api/public/resolve-discount'
@@ -1132,6 +1162,7 @@ export interface FileRouteTypes {
     | '/api/public/search-console'
     | '/api/public/search-jobs'
     | '/api/public/security-digest'
+    | '/api/public/security-scans'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
     | '/lovable/email/suppression'
@@ -1199,6 +1230,7 @@ export interface FileRouteTypes {
     | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
+    | '/admin/security-scans'
     | '/admin/seo-monitor'
     | '/admin/seo-performance'
     | '/admin/verifications'
@@ -1237,6 +1269,7 @@ export interface FileRouteTypes {
     | '/api/public/parse-job-url'
     | '/api/public/payments-portal'
     | '/api/public/payments-webhook'
+    | '/api/public/permission-denied'
     | '/api/public/practice-plan'
     | '/api/public/recommend-jobs'
     | '/api/public/resolve-discount'
@@ -1244,6 +1277,7 @@ export interface FileRouteTypes {
     | '/api/public/search-console'
     | '/api/public/search-jobs'
     | '/api/public/security-digest'
+    | '/api/public/security-scans'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
     | '/lovable/email/suppression'
@@ -1312,6 +1346,7 @@ export interface FileRouteTypes {
     | '/_app/admin/rate-limits'
     | '/_app/admin/search-console'
     | '/_app/admin/security-log'
+    | '/_app/admin/security-scans'
     | '/_app/admin/seo-monitor'
     | '/_app/admin/seo-performance'
     | '/_app/admin/verifications'
@@ -1350,6 +1385,7 @@ export interface FileRouteTypes {
     | '/api/public/parse-job-url'
     | '/api/public/payments-portal'
     | '/api/public/payments-webhook'
+    | '/api/public/permission-denied'
     | '/api/public/practice-plan'
     | '/api/public/recommend-jobs'
     | '/api/public/resolve-discount'
@@ -1357,6 +1393,7 @@ export interface FileRouteTypes {
     | '/api/public/search-console'
     | '/api/public/search-jobs'
     | '/api/public/security-digest'
+    | '/api/public/security-scans'
     | '/api/public/send-notification'
     | '/api/public/seo-monitor'
     | '/lovable/email/suppression'
@@ -1426,6 +1463,7 @@ export interface RootRouteChildren {
   ApiPublicParseJobUrlRoute: typeof ApiPublicParseJobUrlRoute
   ApiPublicPaymentsPortalRoute: typeof ApiPublicPaymentsPortalRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicPermissionDeniedRoute: typeof ApiPublicPermissionDeniedRoute
   ApiPublicPracticePlanRoute: typeof ApiPublicPracticePlanRoute
   ApiPublicRecommendJobsRoute: typeof ApiPublicRecommendJobsRoute
   ApiPublicResolveDiscountRoute: typeof ApiPublicResolveDiscountRoute
@@ -1433,6 +1471,7 @@ export interface RootRouteChildren {
   ApiPublicSearchConsoleRoute: typeof ApiPublicSearchConsoleRoute
   ApiPublicSearchJobsRoute: typeof ApiPublicSearchJobsRoute
   ApiPublicSecurityDigestRoute: typeof ApiPublicSecurityDigestRoute
+  ApiPublicSecurityScansRoute: typeof ApiPublicSecurityScansRoute
   ApiPublicSendNotificationRoute: typeof ApiPublicSendNotificationRoute
   ApiPublicSeoMonitorRoute: typeof ApiPublicSeoMonitorRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -1825,6 +1864,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminSecurityLogRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/security-scans': {
+      id: '/_app/admin/security-scans'
+      path: '/admin/security-scans'
+      fullPath: '/admin/security-scans'
+      preLoaderRoute: typeof AppAdminSecurityScansRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/seo-monitor': {
       id: '/_app/admin/seo-monitor'
       path: '/admin/seo-monitor'
@@ -2105,6 +2151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/permission-denied': {
+      id: '/api/public/permission-denied'
+      path: '/api/public/permission-denied'
+      fullPath: '/api/public/permission-denied'
+      preLoaderRoute: typeof ApiPublicPermissionDeniedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/practice-plan': {
       id: '/api/public/practice-plan'
       path: '/api/public/practice-plan'
@@ -2152,6 +2205,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/security-digest'
       fullPath: '/api/public/security-digest'
       preLoaderRoute: typeof ApiPublicSecurityDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/security-scans': {
+      id: '/api/public/security-scans'
+      path: '/api/public/security-scans'
+      fullPath: '/api/public/security-scans'
+      preLoaderRoute: typeof ApiPublicSecurityScansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/send-notification': {
@@ -2259,6 +2319,7 @@ interface AppRouteChildren {
   AppAdminRateLimitsRoute: typeof AppAdminRateLimitsRoute
   AppAdminSearchConsoleRoute: typeof AppAdminSearchConsoleRoute
   AppAdminSecurityLogRoute: typeof AppAdminSecurityLogRoute
+  AppAdminSecurityScansRoute: typeof AppAdminSecurityScansRoute
   AppAdminSeoMonitorRoute: typeof AppAdminSeoMonitorRoute
   AppAdminSeoPerformanceRoute: typeof AppAdminSeoPerformanceRoute
   AppAdminVerificationsRoute: typeof AppAdminVerificationsRoute
@@ -2302,6 +2363,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminRateLimitsRoute: AppAdminRateLimitsRoute,
   AppAdminSearchConsoleRoute: AppAdminSearchConsoleRoute,
   AppAdminSecurityLogRoute: AppAdminSecurityLogRoute,
+  AppAdminSecurityScansRoute: AppAdminSecurityScansRoute,
   AppAdminSeoMonitorRoute: AppAdminSeoMonitorRoute,
   AppAdminSeoPerformanceRoute: AppAdminSeoPerformanceRoute,
   AppAdminVerificationsRoute: AppAdminVerificationsRoute,
@@ -2370,6 +2432,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicParseJobUrlRoute: ApiPublicParseJobUrlRoute,
   ApiPublicPaymentsPortalRoute: ApiPublicPaymentsPortalRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicPermissionDeniedRoute: ApiPublicPermissionDeniedRoute,
   ApiPublicPracticePlanRoute: ApiPublicPracticePlanRoute,
   ApiPublicRecommendJobsRoute: ApiPublicRecommendJobsRoute,
   ApiPublicResolveDiscountRoute: ApiPublicResolveDiscountRoute,
@@ -2377,6 +2440,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSearchConsoleRoute: ApiPublicSearchConsoleRoute,
   ApiPublicSearchJobsRoute: ApiPublicSearchJobsRoute,
   ApiPublicSecurityDigestRoute: ApiPublicSecurityDigestRoute,
+  ApiPublicSecurityScansRoute: ApiPublicSecurityScansRoute,
   ApiPublicSendNotificationRoute: ApiPublicSendNotificationRoute,
   ApiPublicSeoMonitorRoute: ApiPublicSeoMonitorRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
