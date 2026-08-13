@@ -248,3 +248,111 @@ export async function dispatchOAuthAlert(notice: OAuthAlertNotice): Promise<stri
   });
   return errors.length > 0 ? errors.join("; ") : null;
 }
+
+/* ---------------------------------------------------------- CSP alerts -- */
+
+export interface CspAlertNotice {
+  /** "spike" = volume above threshold; "new-combo" = unseen directive/origin pair. */
+  kind: "spike" | "new-combo" | "readiness";
+  headline: string;
+  /** One line per affected directive/origin pair. */
+  details: string[];
+  windowHours: number;
+  dashboardUrl?: string;
+}
+
+const CSP_ALERT_TITLE: Record<CspAlertNotice["kind"], string> = {
+  spike: "CSP violation spike",
+  "new-combo": "New CSP directive/origin violation",
+  readiness: "CSP enforcement readiness changed",
+};
+
+async function postCspSlack(notice: CspAlertNotice): Promise<void> {
+  const url = process.env['ALERT_SLACK_WEBHOOK_URL'];
+  if (!url) return;
+  const title = CSP_ALERT_TITLE[notice.kind];
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: `:shield: Gradr — ${title}`,
+      blocks: [
+        { type: "header", text: { type: "plain_text", text: `Gradr — ${title}` } },
+        {
+          type: "section",
+          fields: [
+            { type: "mrkdwn", text: `*Window*\nlast ${notice.windowHours}h` },
+            { type: "mrkdwn", text: `*Summary*\n${notice.headline}` },
+          ],
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*Affected*\n\`\`\`${notice.details.slice(0, 20).join("\n").slice(0, 2500) || "see dashboard"}\`\`\``,
+          },
+        },
+        ...(notice.dashboardUrl
+          ? [{ type: "context", elements: [{ type: "mrkdwn", text: `<${notice.dashboardUrl}|Open CSP monitor>` }] }]
+          : []),
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`Slack responded ${res.status}`);
+}
+
+async function sendCspEmail(notice: CspAlertNotice): Promise<void> {
+  const to = process.env['ALERT_EMAIL_TO'];
+  const apiKey = process.env['LOVABLE_API_KEY'];
+  const from = process.env['ALERT_EMAIL_FROM'] ?? 'alerts@notify.gradr.me';
+  if (!to) return;
+  if (!apiKey) throw new Error('LOVABLE_API_KEY is not configured');
+
+  const title = CSP_ALERT_TITLE[notice.kind];
+  const subject = `[Gradr] ${title} — ${notice.headline}`;
+  const escaped = (value: string) => value.replace(/</g, "&lt;");
+
+  await sendLovableEmail({
+    to,
+    from,
+    subject,
+    text: `${subject}\n\nWindow: last ${notice.windowHours}h\n\n${notice.details.join("\n")}\n\n${notice.dashboardUrl ?? ""}`,
+    html: `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:600px">
+        <h2 style="margin:0 0 4px;color:#245F73">${title}</h2>
+        <p style="color:#555;margin:0 0 16px">${escaped(notice.headline)}</p>
+        <p style="font-size:13px;color:#777">Window: last ${notice.windowHours} hours</p>
+        <pre style="background:#F2F0EF;padding:12px;border-radius:8px;font-size:12px;white-space:pre-wrap">${
+          escaped(notice.details.join("\n").slice(0, 3000))
+        }</pre>
+        ${
+          notice.dashboardUrl
+            ? `<p style="font-size:13px"><a href="${notice.dashboardUrl}" style="color:#733E24">Open the CSP monitor</a></p>`
+            : ""
+        }
+      </div>
+    `,
+  }, { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] });
+}
+
+/**
+ * Announces a CSP spike, a newly seen directive/origin pair, or a change in
+ * enforcement readiness. Best-effort, exactly like the other dispatchers.
+ */
+export async function dispatchCspAlert(notice: CspAlertNotice): Promise<string | null> {
+  const targets = alertingTargets();
+  if (!targets.slack && !targets.email) return "no alert channel configured";
+
+  const errors: string[] = [];
+  const results = await Promise.allSettled([
+    targets.slack ? postCspSlack(notice) : Promise.resolve(),
+    targets.email ? sendCspEmail(notice) : Promise.resolve(),
+  ]);
+  ["slack", "email"].forEach((label, i) => {
+    const r = results[i];
+    if (r && r.status === "rejected") {
+      errors.push(`${label}: ${r.reason instanceof Error ? r.reason.message : String(r.reason)}`);
+    }
+  });
+  return errors.length > 0 ? errors.join("; ") : null;
+}

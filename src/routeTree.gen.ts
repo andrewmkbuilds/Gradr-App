@@ -83,6 +83,7 @@ import { Route as ApiPublicBrandMetadataRouteImport } from './routes/api/public/
 import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
 import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/career-plan'
 import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
+import { Route as ApiPublicCspAlertsRouteImport } from './routes/api/public/csp-alerts'
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
 import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
@@ -495,6 +496,11 @@ const ApiPublicCompanyResearchRoute =
     path: '/api/public/company-research',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCspAlertsRoute = ApiPublicCspAlertsRouteImport.update({
+  id: '/api/public/csp-alerts',
+  path: '/api/public/csp-alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCspReportRoute = ApiPublicCspReportRouteImport.update({
   id: '/api/public/csp-report',
   path: '/api/public/csp-report',
@@ -753,6 +759,7 @@ export interface FileRoutesByFullPath {
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/csp-alerts': typeof ApiPublicCspAlertsRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -863,6 +870,7 @@ export interface FileRoutesByTo {
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/csp-alerts': typeof ApiPublicCspAlertsRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -975,6 +983,7 @@ export interface FileRoutesById {
   '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
   '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
+  '/api/public/csp-alerts': typeof ApiPublicCspAlertsRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
@@ -1087,6 +1096,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
+    | '/api/public/csp-alerts'
     | '/api/public/csp-report'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -1197,6 +1207,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
+    | '/api/public/csp-alerts'
     | '/api/public/csp-report'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -1308,6 +1319,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-sync'
     | '/api/public/career-plan'
     | '/api/public/company-research'
+    | '/api/public/csp-alerts'
     | '/api/public/csp-report'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
@@ -1382,6 +1394,7 @@ export interface RootRouteChildren {
   ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
   ApiPublicCareerPlanRoute: typeof ApiPublicCareerPlanRoute
   ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
+  ApiPublicCspAlertsRoute: typeof ApiPublicCspAlertsRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
   ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
   ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
@@ -1939,6 +1952,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCompanyResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/csp-alerts': {
+      id: '/api/public/csp-alerts'
+      path: '/api/public/csp-alerts'
+      fullPath: '/api/public/csp-alerts'
+      preLoaderRoute: typeof ApiPublicCspAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/csp-report': {
       id: '/api/public/csp-report'
       path: '/api/public/csp-report'
@@ -2310,6 +2330,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
   ApiPublicCareerPlanRoute: ApiPublicCareerPlanRoute,
   ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
+  ApiPublicCspAlertsRoute: ApiPublicCspAlertsRoute,
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
   ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
   ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,

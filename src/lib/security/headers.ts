@@ -111,6 +111,20 @@ export const PERMISSIONS_POLICY = [
 ].join(", ");
 
 /**
+ * The enforce-CSP flag.
+ *
+ * The candidate policy is only promoted from report-only to enforced by the
+ * readiness gate (`scripts/csp-enforce-gate.mjs`), which requires a full week
+ * with zero critical violations. Nothing else should set `CSP_ENFORCE`.
+ */
+export function cspEnforcementEnabled(): boolean {
+  const flag = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[
+    "CSP_ENFORCE"
+  ];
+  return flag === "1" || flag === "true";
+}
+
+/**
  * Applies the policy to a header bag in place. `secure` is false for plain-HTTP
  * local development, where HSTS would poison the developer's browser. `origin`
  * is the absolute site origin, needed by `Reporting-Endpoints`, which — unlike
@@ -118,29 +132,36 @@ export const PERMISSIONS_POLICY = [
  */
 export function applySecurityHeaders(
   headers: Headers,
-  options: { secure: boolean; origin?: string },
+  options: { secure: boolean; origin?: string; enforceCandidate?: boolean },
 ): Headers {
   for (const name of DISCLOSURE_HEADERS) headers.delete(name);
 
+  const reporting = [`report-uri ${CSP_REPORT_PATH}`, `report-to ${CSP_REPORT_GROUP}`].join("; ");
+  const enforceCandidate = options.enforceCandidate ?? cspEnforcementEnabled();
+
   if (!headers.has("content-security-policy")) {
-    headers.set("content-security-policy", CONTENT_SECURITY_POLICY);
+    headers.set(
+      "content-security-policy",
+      enforceCandidate
+        ? `${CONTENT_SECURITY_POLICY_REPORT_ONLY}; ${reporting}`
+        : CONTENT_SECURITY_POLICY,
+    );
   }
-  if (!headers.has("content-security-policy-report-only")) {
-    const reporting = [
-      `report-uri ${CSP_REPORT_PATH}`,
-      `report-to ${CSP_REPORT_GROUP}`,
-    ].join("; ");
+  // Once the candidate policy is enforced there is nothing left to trial, so the
+  // report-only header is dropped rather than duplicated.
+  if (!enforceCandidate && !headers.has("content-security-policy-report-only")) {
     headers.set(
       "content-security-policy-report-only",
       `${CONTENT_SECURITY_POLICY_REPORT_ONLY}; ${reporting}`,
     );
-    if (options.origin && !headers.has("reporting-endpoints")) {
-      headers.set(
-        "reporting-endpoints",
-        `${CSP_REPORT_GROUP}="${options.origin}${CSP_REPORT_PATH}"`,
-      );
-    }
   }
+  if (options.origin && !headers.has("reporting-endpoints")) {
+    headers.set(
+      "reporting-endpoints",
+      `${CSP_REPORT_GROUP}="${options.origin}${CSP_REPORT_PATH}"`,
+    );
+  }
+
 
   if (options.secure && !headers.has("strict-transport-security")) {
     headers.set("strict-transport-security", STRICT_TRANSPORT_SECURITY);

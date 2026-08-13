@@ -23,6 +23,10 @@
     "test:nav": "playwright test tests/nav-active-state.spec.ts tests/nav-a11y-overflow.spec.ts tests/nav-visual.spec.ts",
 
     "audit:deps": "node scripts/dependency-audit.mjs",
+    "fingerprint:snapshot": "node scripts/fingerprint-snapshot.mjs",
+    "fingerprint:diff": "node scripts/fingerprint-diff.mjs",
+    "csp:alerts": "node scripts/csp-alert-check.mjs",
+    "csp:gate": "node scripts/csp-enforce-gate.mjs",
     "format": "prettier --write .",
     "seo:validate": "node scripts/validate-seo-html.mjs",
     "check:email-images": "bun run scripts/email-image-check.tsx",
