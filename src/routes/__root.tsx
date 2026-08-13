@@ -247,6 +247,7 @@ function RootComponent() {
           <ThemeProvider>
             <MotionPrefsProvider>
             <TooltipProvider>
+              <SpatialField />
               <Toaster />
               <Sonner />
               <HelmetProvider>
