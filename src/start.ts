@@ -9,8 +9,13 @@ import { renderErrorPage } from "./lib/error-page";
  */
 const isInfraRequest = (url: string) => {
   const { pathname } = new URL(url);
-  return pathname.startsWith("/lovable/") || pathname === "/email/unsubscribe";
+  return (
+    pathname.startsWith("/lovable/") ||
+    pathname.startsWith("/api/public/email/") ||
+    pathname === "/email/unsubscribe"
+  );
 };
+
 
 const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
   if (isInfraRequest(request.url)) return next();
