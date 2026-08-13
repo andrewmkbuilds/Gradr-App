@@ -233,7 +233,7 @@ export default function Pipeline() {
   const activeJob = activeId ? jobs.find((j) => j.id === activeId) : null;
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+    return <SkeletonList rows={3} className="max-w-[1400px] mx-auto" />;
   }
 
   return (
