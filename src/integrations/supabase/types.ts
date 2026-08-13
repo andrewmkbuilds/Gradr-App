@@ -683,6 +683,36 @@ export type Database = {
         }
         Relationships: []
       }
+      career_plans: {
+        Row: {
+          created_at: string
+          id: string
+          steps: Json
+          summary: string | null
+          updated_at: string
+          user_id: string
+          valid_until: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          steps?: Json
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+          valid_until?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          steps?: Json
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+          valid_until?: string
+        }
+        Relationships: []
+      }
       company_research: {
         Row: {
           cache_key: string
@@ -2226,7 +2256,10 @@ export type Database = {
           description: string | null
           details: Json | null
           external_id: string | null
+          follow_up_days: number
+          follow_up_enabled: boolean
           id: string
+          last_touch_at: string | null
           location: string | null
           match_score: number | null
           notes: string | null
@@ -2250,7 +2283,10 @@ export type Database = {
           description?: string | null
           details?: Json | null
           external_id?: string | null
+          follow_up_days?: number
+          follow_up_enabled?: boolean
           id?: string
+          last_touch_at?: string | null
           location?: string | null
           match_score?: number | null
           notes?: string | null
@@ -2274,7 +2310,10 @@ export type Database = {
           description?: string | null
           details?: Json | null
           external_id?: string | null
+          follow_up_days?: number
+          follow_up_enabled?: boolean
           id?: string
+          last_touch_at?: string | null
           location?: string | null
           match_score?: number | null
           notes?: string | null
@@ -2370,12 +2409,17 @@ export type Database = {
           digest_timezone: string
           experience_level: string | null
           id: string
+          industries: string[] | null
+          job_types: string[] | null
           keywords: string[] | null
           locations: string[] | null
           onboarded: boolean
+          onboarded_at: string | null
           remote_preference: string | null
+          salary_max: number | null
           salary_min: number | null
           target_role: string | null
+          target_roles: string[] | null
           updated_at: string
           user_id: string
         }
@@ -2387,12 +2431,17 @@ export type Database = {
           digest_timezone?: string
           experience_level?: string | null
           id?: string
+          industries?: string[] | null
+          job_types?: string[] | null
           keywords?: string[] | null
           locations?: string[] | null
           onboarded?: boolean
+          onboarded_at?: string | null
           remote_preference?: string | null
+          salary_max?: number | null
           salary_min?: number | null
           target_role?: string | null
+          target_roles?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -2404,12 +2453,17 @@ export type Database = {
           digest_timezone?: string
           experience_level?: string | null
           id?: string
+          industries?: string[] | null
+          job_types?: string[] | null
           keywords?: string[] | null
           locations?: string[] | null
           onboarded?: boolean
+          onboarded_at?: string | null
           remote_preference?: string | null
+          salary_max?: number | null
           salary_min?: number | null
           target_role?: string | null
+          target_roles?: string[] | null
           updated_at?: string
           user_id?: string
         }
