@@ -436,66 +436,13 @@ async function grantPackCredits(data: any, env: PaddleEnv) {
   }
 }
 
-export const handler = async (req: Request): Promise<Response> => {
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
-
-  const env = (new URL(req.url).searchParams.get("env") || "sandbox") as PaddleEnv;
-  let eventId: string | null = null;
-
-  // 1) Signature verification — an unsigned/forged body never reaches any handler.
-  // deno-lint-ignore no-explicit-any
-  let event: any;
-  try {
-    event = await verifyWebhook(req, env);
-  } catch (e) {
-    await logSecurityEvent({
-      category: "billing_webhook",
-      event: "signature_verification_failed",
-      decision: "failed",
-      env,
-      source: "payments-webhook",
-      reason: e instanceof Error ? e.message : String(e),
-    });
-    // 400 = do not retry: a bad signature will never become valid.
-    return new Response("Invalid signature", { status: 400 });
-  }
-
-  try {
-    const eventUserId = (event.data?.customData?.userId ?? null) as string | null;
-    eventId = (event.eventId ?? event.notificationId ?? null) as string | null;
-
-    // 2) Idempotency — Paddle retries for days; each event is handled once.
-    if (eventId) {
-      const claim = await claimWebhookEvent({
-        provider: "paddle",
-        eventId,
-        eventType: String(event.eventType),
-        environment: env,
-      });
-      if (claim === "duplicate") {
-        return new Response(JSON.stringify({ received: true, duplicate: true }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-    }
-
-    await logSecurityEvent({
-      category: "billing_webhook",
-      event: String(event.eventType),
-      decision: "received",
-      userId: eventUserId,
-      env,
-      source: "payments-webhook",
-      details: {
-        event_id: eventId,
-        status: event.data?.status ?? null,
-        customer_id: event.data?.customerId ?? event.data?.id ?? null,
-        subscription_id: event.data?.subscriptionId ?? null,
-      },
-    });
-
-    switch (event.eventType) {
+/**
+ * Applies one verified Paddle event to our data. Split out of the HTTP handler
+ * so the admin replay simulator can re-run a stored event without a signature.
+ */
+// deno-lint-ignore no-explicit-any
+export async function processPaddleEvent(event: any, env: PaddleEnv): Promise<void> {
+  switch (event.eventType) {
       case EventName.SubscriptionCreated:
         await mirrorSubscription(event.data, env);
         await upsertSubscription(event.data, env);
@@ -531,6 +478,70 @@ export const handler = async (req: Request): Promise<Response> => {
       default:
         console.log("Unhandled event:", event.eventType);
     }
+}
+
+export const handler = async (req: Request): Promise<Response> => {
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+
+  const env = (new URL(req.url).searchParams.get("env") || "sandbox") as PaddleEnv;
+  let eventId: string | null = null;
+
+  // 1) Signature verification — an unsigned/forged body never reaches any handler.
+  // deno-lint-ignore no-explicit-any
+  let event: any;
+  try {
+    event = await verifyWebhook(req, env);
+  } catch (e) {
+    await logSecurityEvent({
+      category: "billing_webhook",
+      event: "signature_verification_failed",
+      decision: "failed",
+      env,
+      source: "payments-webhook",
+      reason: e instanceof Error ? e.message : String(e),
+    });
+    // 400 = do not retry: a bad signature will never become valid.
+    return new Response("Invalid signature", { status: 400 });
+  }
+
+  try {
+    const eventUserId = (event.data?.customData?.userId ?? null) as string | null;
+    eventId = (event.eventId ?? event.notificationId ?? null) as string | null;
+
+    // 2) Idempotency — Paddle retries for days; each event is handled once.
+    if (eventId) {
+      const claim = await claimWebhookEvent({
+        provider: "paddle",
+        eventId,
+        eventType: String(event.eventType),
+        environment: env,
+        payload: event,
+        signatureVerified: true,
+      });
+      if (claim === "duplicate") {
+        return new Response(JSON.stringify({ received: true, duplicate: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    await logSecurityEvent({
+      category: "billing_webhook",
+      event: String(event.eventType),
+      decision: "received",
+      userId: eventUserId,
+      env,
+      source: "payments-webhook",
+      details: {
+        event_id: eventId,
+        status: event.data?.status ?? null,
+        customer_id: event.data?.customerId ?? event.data?.id ?? null,
+        subscription_id: event.data?.subscriptionId ?? null,
+      },
+    });
+
+    await processPaddleEvent(event, env);
 
     if (eventId) await markWebhookProcessed("paddle", eventId);
     await logSecurityEvent({

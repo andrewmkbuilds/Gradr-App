@@ -7,13 +7,13 @@ import {
   Loader2,
   RefreshCw,
   ShieldAlert,
-  Webhook,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import WebhookReplayPanel from "@/components/admin/WebhookReplayPanel";
 
 interface HealthEvent {
   id: string;
@@ -34,17 +34,6 @@ interface HealthAlert {
   occurrences: number;
   first_seen_at: string;
   last_seen_at: string;
-}
-
-interface Delivery {
-  id: string;
-  provider: string;
-  event_id: string;
-  event_type: string | null;
-  state: string;
-  attempts: number;
-  last_error: string | null;
-  created_at: string;
 }
 
 const WINDOW_HOURS = 24;
@@ -112,20 +101,6 @@ export default function AdminApiHealth() {
     },
   });
 
-  const deliveries = useQuery({
-    queryKey: ["webhook-deliveries"],
-    refetchInterval: 60_000,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("webhook_deliveries")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(25);
-      if (error) throw error;
-      return (data ?? []) as unknown as Delivery[];
-    },
-  });
-
   const resolve = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -170,7 +145,7 @@ export default function AdminApiHealth() {
 
   const refreshAll = async () => {
     setRefreshing(true);
-    await Promise.all([events.refetch(), alerts.refetch(), deliveries.refetch()]);
+    await Promise.all([events.refetch(), alerts.refetch()]);
     setRefreshing(false);
   };
 
@@ -308,32 +283,7 @@ export default function AdminApiHealth() {
         )}
       </Card>
 
-      <Card className="p-4">
-        <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
-          <Webhook className="h-4 w-4 text-primary" aria-hidden="true" /> Webhook deliveries
-        </h2>
-        {(deliveries.data ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">No webhook events received yet.</p>
-        ) : (
-          <ul className="divide-y divide-border/60">
-            {(deliveries.data ?? []).map((d) => (
-              <li key={d.id} className="flex flex-wrap items-center gap-3 py-2">
-                <Badge variant="outline" className={d.state === "processed" ? "text-success" : "text-warning"}>
-                  {d.state}
-                </Badge>
-                <span className="text-sm text-foreground">{d.provider}</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {d.event_type ?? "event"} · {d.event_id} · {d.attempts} attempt(s) ·{" "}
-                  {timeAgo(d.created_at)}
-                </span>
-                {d.last_error && (
-                  <span className="truncate text-xs text-destructive">{d.last_error}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+      <WebhookReplayPanel />
     </div>
   );
 }
