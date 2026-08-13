@@ -11,7 +11,7 @@ import getProfile from "./tools/get-profile";
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
 export default defineMcp({
-  name: "careerflow-mcp",
+  name: "gradr-mcp",
   title: "Gradr",
   version: "0.1.0",
   instructions:
