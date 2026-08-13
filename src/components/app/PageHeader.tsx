@@ -72,7 +72,7 @@ export function PageHeader({
         animate={{ scaleX: 1 }}
         transition={reduced ? { duration: 0 } : { ...springSmooth, delay: 0.1 }}
         style={{ transformOrigin: "left" }}
-        className="mt-6 h-px w-full bg-gradient-to-r from-primary/50 via-border to-transparent"
+        className="accent-rule mt-6 w-full"
       />
     </header>
   );

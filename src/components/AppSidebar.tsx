@@ -41,7 +41,7 @@ const baseRow =
   "nav-item interactive depth-press group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors";
 const idleRow = "text-muted-foreground hover:bg-secondary hover:text-foreground";
 const activeRow =
-  "bg-primary/10 text-primary shadow-[0_6px_18px_-12px_hsl(var(--primary)/0.85),inset_0_1px_0_hsl(0_0%_100%/0.12)]";
+  "accent-marker bg-primary/10 pl-4 text-primary shadow-[0_6px_18px_-12px_hsl(var(--primary)/0.85),inset_0_1px_0_hsl(0_0%_100%/0.12)]";
 
 export function AppSidebar() {
   const { state, toggleSidebar, isMobile, setOpenMobile, openMobile } = useSidebar();
@@ -211,7 +211,7 @@ export function AppSidebar() {
                                     className={cn(
                                       "interactive flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
                                       active
-                                        ? "bg-primary/10 font-medium text-primary"
+                                        ? "accent-marker bg-primary/10 pl-3.5 font-medium text-primary"
                                         : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                                     )}
                                   >
