@@ -134,7 +134,6 @@ export default function AdminOAuthForensics() {
   useSeoOverride({
     title: "OAuth Forensics | Gradr Admin",
     description: "Redirect chains, state/nonce validation, security headers and automated OAuth checks.",
-    noindex: true,
   });
 
   const [expanded, setExpanded] = useState<string | null>(null);
