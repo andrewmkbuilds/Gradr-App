@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { MotionPreferenceProvider } from "@/hooks/useMotionPreference";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
+import { CANONICAL_ALIASES } from "@/lib/seo/canonical";
 import { CookieConsent } from "@/components/CookieConsent";
 import { PublicShell } from "@/components/PublicShell";
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -69,6 +70,7 @@ const CookiePolicy = lazy(() => import("./pages/legal/CookiePolicy"));
 const Dpa = lazy(() => import("./pages/legal/Dpa"));
 const AiResumeOptimization = lazy(() => import("./pages/blog/AiResumeOptimization"));
 const AtsResumeChecker = lazy(() => import("./pages/AtsResumeChecker"));
+const AiInterviewCoach = lazy(() => import("./pages/AiInterviewCoach"));
 const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
 const GuideArticle = lazy(() => import("./pages/GuideArticle"));
 const JobSearchIndex = lazy(() => import("./pages/JobSearchIndex"));
@@ -208,6 +210,12 @@ function AppRoutes() {
         <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
         <Route path="/ats-resume-checker" element={<AnimatedPage><AtsResumeChecker /></AnimatedPage>} />
+        <Route path="/ai-interview-coach" element={<AnimatedPage><AiInterviewCoach /></AnimatedPage>} />
+        {/* Duplicate URL variants collapse into the canonical path so only one
+            version of each landing page can ever be indexed. */}
+        {Object.keys(CANONICAL_ALIASES).map((alias) => (
+          <Route key={alias} path={alias} element={<Navigate to={CANONICAL_ALIASES[alias]} replace />} />
+        ))}
         <Route path="/career-advice" element={<AnimatedPage><CareerAdvice /></AnimatedPage>} />
         <Route path="/career-advice/:slug" element={<AnimatedPage><GuideArticle /></AnimatedPage>} />
         <Route path="/pricing" element={<PricingRoute />} />

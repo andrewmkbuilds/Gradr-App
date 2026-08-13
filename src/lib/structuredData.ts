@@ -284,11 +284,107 @@ export function validateJsonLd(node: JsonLd, label = "jsonld"): string[] {
       requireAbsoluteUrl(node.url, ".url");
       break;
     }
+    case "HowTo": {
+      requireText(node.name, ".name");
+      requireText(node.description, ".description");
+      requireAbsoluteUrl(node.url, ".url");
+      const steps = node.step;
+      if (!Array.isArray(steps) || steps.length < 2) {
+        errors.push(`${at(".step")}: needs at least 2 steps`);
+        break;
+      }
+      steps.forEach((raw, i) => {
+        const step = raw as JsonLd;
+        if (step["@type"] !== "HowToStep") errors.push(`${at(`.step[${i}]`)}: @type must be HowToStep`);
+        if (step.position !== i + 1) errors.push(`${at(`.step[${i}].position`)}: must be ${i + 1}`);
+        requireText(step.name, `.step[${i}].name`);
+        requireText(step.text, `.step[${i}].text`);
+      });
+      break;
+    }
+    case "DefinedTermSet": {
+      requireText(node.name, ".name");
+      requireText(node.description, ".description");
+      requireAbsoluteUrl(node.url, ".url");
+      const terms = node.hasDefinedTerm;
+      if (!Array.isArray(terms) || terms.length === 0) {
+        errors.push(`${at(".hasDefinedTerm")}: must be a non-empty array`);
+        break;
+      }
+      terms.forEach((raw, i) => {
+        const term = raw as JsonLd;
+        if (term["@type"] !== "DefinedTerm") errors.push(`${at(`.hasDefinedTerm[${i}]`)}: @type must be DefinedTerm`);
+        requireText(term.name, `.hasDefinedTerm[${i}].name`);
+        requireText(term.description, `.hasDefinedTerm[${i}].description`);
+      });
+      break;
+    }
+    case "SoftwareApplication": {
+      requireText(node.name, ".name");
+      requireText(node.description, ".description");
+      requireAbsoluteUrl(node.url, ".url");
+      requireText(node.applicationCategory, ".applicationCategory");
+      break;
+    }
     default:
       break;
   }
 
   return errors;
+}
+
+
+/** HowTo block for step-by-step landing pages (rich-result eligible). */
+export function buildHowToLd(input: {
+  name: string;
+  description: string;
+  path: string;
+  steps: { name: string; text: string }[];
+}): JsonLd {
+  const url = absoluteUrl(input.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: input.name,
+    description: input.description,
+    url,
+    inLanguage: "en",
+    step: input.steps.map((step, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: step.name,
+      text: step.text,
+      url: `${url}#step-${i + 1}`,
+    })),
+  };
+}
+
+/**
+ * Machine-readable rubric for pages that publish a scoring table. Modelled as
+ * a DefinedTermSet so each scoring dimension keeps its own name/description
+ * instead of being flattened into prose.
+ */
+export function buildScoringTableLd(input: {
+  name: string;
+  description: string;
+  path: string;
+  terms: { name: string; description: string }[];
+}): JsonLd {
+  const url = absoluteUrl(input.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "DefinedTermSet",
+    name: input.name,
+    description: input.description,
+    url,
+    inLanguage: "en",
+    hasDefinedTerm: input.terms.map((term) => ({
+      "@type": "DefinedTerm",
+      name: term.name,
+      description: term.description,
+      inDefinedTermSet: url,
+    })),
+  };
 }
 
 /** Throwing variant used in development to surface schema drift early. */
