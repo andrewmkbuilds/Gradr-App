@@ -24,6 +24,13 @@ jobs:
         with:
           node-version: 20
 
+      # Fail early with instructions instead of silently diffing prod vs prod.
+      - name: Preflight configuration check
+        env:
+          GRADR_BASE_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN }}
+          GRADR_PREVIEW_ORIGIN: ${{ github.event.inputs.head_origin || vars.GRADR_PREVIEW_ORIGIN }}
+        run: node scripts/ci-preflight.mjs fingerprint
+
       - name: Snapshot production (base)
         run: node scripts/fingerprint-snapshot.mjs "${BASE_ORIGIN}" --out /tmp/base.json
         env:
@@ -32,18 +39,37 @@ jobs:
       - name: Snapshot branch preview (head)
         run: node scripts/fingerprint-snapshot.mjs "${HEAD_ORIGIN}" --out /tmp/head.json
         env:
-          HEAD_ORIGIN: ${{ github.event.inputs.head_origin || vars.GRADR_PREVIEW_ORIGIN || 'https://gradr.me' }}
+          HEAD_ORIGIN: ${{ github.event.inputs.head_origin || vars.GRADR_PREVIEW_ORIGIN }}
 
       - name: Diff snapshots
         run: |
-          node scripts/fingerprint-diff.mjs /tmp/base.json /tmp/head.json
-          node scripts/fingerprint-diff.mjs /tmp/base.json /tmp/head.json --markdown >> "$GITHUB_STEP_SUMMARY"
+          node scripts/fingerprint-diff.mjs /tmp/base.json /tmp/head.json | tee /tmp/fingerprint-diff.txt
+          node scripts/fingerprint-diff.mjs /tmp/base.json /tmp/head.json --markdown > /tmp/fingerprint-diff.md
+          cat /tmp/fingerprint-diff.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload snapshots
         if: always()
+        id: artifacts
         uses: actions/upload-artifact@v4
         with:
           name: fingerprint-snapshots
           path: |
             /tmp/base.json
             /tmp/head.json
+            /tmp/fingerprint-diff.txt
+            /tmp/fingerprint-diff.md
+
+      # Direct links so a reviewer can open the exact before/after evidence.
+      - name: Link evidence in the summary
+        if: always()
+        run: |
+          {
+            echo ""
+            echo "### Evidence"
+            echo ""
+            echo "- [Download snapshots & diff (\`fingerprint-snapshots\`)](${{ steps.artifacts.outputs.artifact-url }})"
+            echo "- [Full workflow run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo "- Base origin: \`${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}\` · Head origin: \`${{ github.event.inputs.head_origin || vars.GRADR_PREVIEW_ORIGIN }}\`"
+            echo ""
+            echo "Artifact contents: \`base.json\` (production), \`head.json\` (this branch), \`fingerprint-diff.md\` (rendered diff)."
+          } >> "$GITHUB_STEP_SUMMARY"

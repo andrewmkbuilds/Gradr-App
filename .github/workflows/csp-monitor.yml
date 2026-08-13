@@ -27,11 +27,41 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      # Fail with setup instructions rather than a bare 401 from the endpoint.
+      - name: Preflight configuration check
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN }}
+        run: node scripts/ci-preflight.mjs csp
+
       - name: Evaluate CSP violations and alert
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
-        run: node scripts/csp-alert-check.mjs ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
+        run: |
+          node scripts/csp-alert-check.mjs ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            | tee /tmp/csp-alert-check.txt
+
+      - name: Upload alert check evidence
+        if: always()
+        id: artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: csp-alert-check
+          path: /tmp/csp-alert-check.txt
+
+      - name: Link evidence in the summary
+        if: always()
+        run: |
+          {
+            echo ""
+            echo "### Evidence"
+            echo ""
+            echo "- [Download alert check output (\`csp-alert-check\`)](${{ steps.artifacts.outputs.artifact-url }})"
+            echo "- [Full workflow run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo "- [Admin CSP monitor](https://gradr.me/admin/oauth-forensics?tab=csp)"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   enforcement-gate:
     if: github.event.schedule == '40 6 * * *' || github.event_name == 'workflow_dispatch'
@@ -41,13 +71,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Preflight configuration check
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN }}
+        run: node scripts/ci-preflight.mjs csp
+
       - name: CSP enforcement readiness
         id: gate
         continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
-        run: node scripts/csp-enforce-gate.mjs
+        run: node scripts/csp-enforce-gate.mjs | tee /tmp/csp-enforce-gate.txt
+
+      - name: Upload gate evidence
+        if: always()
+        id: artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: csp-enforcement-gate
+          path: /tmp/csp-enforce-gate.txt
+
       - name: Report verdict
         run: |
           if [ "${{ steps.gate.outputs.should_promote }}" = "true" ]; then
@@ -55,3 +101,10 @@ jobs:
           else
             echo "CSP stays in report-only for now." >> "$GITHUB_STEP_SUMMARY"
           fi
+          {
+            echo ""
+            echo "### Evidence"
+            echo ""
+            echo "- [Download gate output (\`csp-enforcement-gate\`)](${{ steps.artifacts.outputs.artifact-url }})"
+            echo "- [Full workflow run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> "$GITHUB_STEP_SUMMARY"

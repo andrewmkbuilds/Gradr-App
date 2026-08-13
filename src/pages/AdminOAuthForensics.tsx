@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { redactOAuthUrl } from "@/lib/oauth/redact";
+import CspInsightsPanel from "@/components/admin/CspInsightsPanel";
 import { useSeoOverride } from "@/lib/seoOverride";
 
 
@@ -802,6 +803,8 @@ export default function AdminOAuthForensics() {
             </div>
           )}
 
+          {/* Trend chart, new-pair highlighting, payload drill-down and export. */}
+          <CspInsightsPanel />
 
 
           {csp.isLoading ? (
