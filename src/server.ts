@@ -45,54 +45,15 @@ function isH3SwallowedErrorBody(body: string): boolean {
 }
 
 // --- Response hardening -------------------------------------------------
-// Goal: remove unnecessary technology/version disclosure and add the
-// privacy/isolation headers the app actually needs. We deliberately do NOT
-// touch HSTS, Referrer-Policy, X-Content-Type-Options or caching — those are
-// already correct and legitimate.
+// The policy itself lives in `src/lib/security/headers.ts` so the SSR worker,
+// the unit tests and the production runtime check all assert the same thing.
 
-// Headers that leak stack/build details without any functional purpose.
-const DISCLOSURE_HEADERS = [
-  "x-powered-by",
-  "x-aspnet-version",
-  "x-aspnetmvc-version",
-  "x-generator",
-  "x-runtime",
-  "x-version",
-  "x-deployment-id",
-  "x-nitro-prerender",
-  "x-sveltekit-page",
-];
+import { applySecurityHeaders } from "./lib/security/headers";
 
-// camera/microphone/display-capture stay enabled for the AI Mock Interview.
-// `payment` is intentionally omitted so the Paddle checkout overlay keeps working.
-const PERMISSIONS_POLICY = [
-  "camera=(self)",
-  "microphone=(self)",
-  "display-capture=(self)",
-  "geolocation=()",
-  "usb=()",
-  "serial=()",
-  "bluetooth=()",
-  "midi=()",
-  "idle-detection=()",
-  "browsing-topics=()",
-].join(", ");
-
-function harden(response: Response): Response {
+function harden(response: Response, request?: Request): Response {
   const headers = new Headers(response.headers);
-  for (const name of DISCLOSURE_HEADERS) headers.delete(name);
-
-  if (!headers.has("permissions-policy")) {
-    headers.set("permissions-policy", PERMISSIONS_POLICY);
-  }
-  if (!headers.has("x-frame-options")) headers.set("x-frame-options", "SAMEORIGIN");
-  if (!headers.has("x-permitted-cross-domain-policies")) {
-    headers.set("x-permitted-cross-domain-policies", "none");
-  }
-  // "allow-popups" is required: Google OAuth and Paddle open popup windows.
-  if (!headers.has("cross-origin-opener-policy")) {
-    headers.set("cross-origin-opener-policy", "same-origin-allow-popups");
-  }
+  const secure = request ? new URL(request.url).protocol === "https:" : true;
+  applySecurityHeaders(headers, { secure });
 
   // 101/204/205/304 must stay body-less; everything else reuses the original stream.
   const nullBody = [101, 204, 205, 304].includes(response.status);
@@ -108,7 +69,7 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return harden(await normalizeCatastrophicSsrResponse(response));
+      return harden(await normalizeCatastrophicSsrResponse(response), request);
     } catch (error) {
       console.error(error);
       return harden(
@@ -116,6 +77,7 @@ export default {
           status: 500,
           headers: { "content-type": "text/html; charset=utf-8" },
         }),
+        request,
       );
     }
   },
