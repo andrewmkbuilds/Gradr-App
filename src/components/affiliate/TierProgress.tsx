@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Trophy, Sparkles, Flame, Lock, Check } from "lucide-react";
 import type { AffiliateOverview } from "@/hooks/useAffiliate";
 import { DEFAULT_TIER_COLOR } from "@/lib/design/yachtClub";
+import { safeStorage } from "@/lib/safeStorage";
 
 type Tier = {
   id: string;
@@ -68,15 +69,15 @@ export function TierProgress({
     const key = current?.key ?? null;
     if (!key) return;
     const storageKey = "gradr.affiliate.tier";
-    const stored = localStorage.getItem(storageKey);
+    const stored = safeStorage.get(storageKey);
     if (stored && stored !== key && seen.current !== key) {
       seen.current = key;
       setCelebrate(true);
       const t = setTimeout(() => setCelebrate(false), 2200);
-      localStorage.setItem(storageKey, key);
+      safeStorage.set(storageKey, key);
       return () => clearTimeout(t);
     }
-    localStorage.setItem(storageKey, key);
+    safeStorage.set(storageKey, key);
   }, [current?.key]);
 
   return (
