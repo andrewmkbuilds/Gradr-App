@@ -11,7 +11,7 @@ import { ProGate } from "@/components/ProGate";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { GenerationStream } from "@/components/ai/GenerationStream";
 import { useAiStream } from "@/hooks/useAiStream";
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader } from "@/components/app/PageHeader";
 
 type GenerationType = "cover_letter" | "recruiter_message";
 
@@ -37,7 +37,9 @@ function ApplicationEngineInner() {
   const stream = useAiStream<GeneratedContent>({
     fn: "generate-application",
     initialLabel: "Reading your resume",
-    onResult: () => toast.success(`${TITLES[activeType ?? "cover_letter"]} ready`),
+    onResult: () => {
+      toast.success(`${TITLES[activeType ?? "cover_letter"]} ready`);
+    },
   });
 
   const generate = useCallback(
