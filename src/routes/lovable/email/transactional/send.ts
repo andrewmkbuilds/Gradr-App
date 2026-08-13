@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 import { logEmailEvent, readEmailFlags } from '@/lib/email/events.server'
+import { authorizeSend } from '@/lib/email/authorize.server'
+
 import { injectOpenPixel, rewriteLinksForTracking, toPlainText } from '@/lib/email/tracking'
 
 
@@ -56,11 +58,26 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
 
         const token = authHeader.slice('Bearer '.length).trim()
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
-        if (authError || !user) {
-          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        // System callers (queue processor, pg_cron) present the service role key.
+        const isSystem = token === supabaseServiceKey
+        let callerEmail: string | null = null
+        let isAdmin = false
+
+        if (!isSystem) {
+          const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+          if (authError || !user) {
+            return Response.json({ error: 'Unauthorized' }, { status: 401 })
+          }
+          // Anonymous/guest sessions have no verified address and may not send.
+          callerEmail = user.email ?? null
+          const { data: adminFlag } = await supabase.rpc('has_role', {
+            _user_id: user.id,
+            _role: 'admin',
+          })
+          isAdmin = adminFlag === true
         }
+
 
         // Parse request body
         let templateName: string
@@ -117,6 +134,30 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             { status: 400 }
           )
         }
+
+        // Authorization: a valid JWT is not enough. Ordinary users may only mail
+        // themselves, only with self-service templates, and never with links
+        // pointing off Gradr's domains.
+        const authz = authorizeSend({
+          isSystem,
+          isAdmin,
+          callerEmail,
+          recipientEmail: effectiveRecipient,
+          recipientFixedByTemplate: Boolean(template.to),
+          templateName,
+          templateData,
+        })
+        if (!authz.ok) {
+          console.warn('Blocked transactional send', {
+            templateName,
+            recipient: redactEmail(effectiveRecipient),
+            caller: redactEmail(callerEmail),
+            reason: authz.error,
+          })
+          return Response.json({ error: authz.error }, { status: authz.status ?? 403 })
+        }
+
+
 
         // 1b. Idempotency guard — one send per idempotency key, forever.
         // Reserve the key first: a unique-violation means this exact email was
