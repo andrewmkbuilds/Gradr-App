@@ -1,5 +1,6 @@
 import { Crown, Medal } from "lucide-react";
 import { useAffiliateLeaderboard } from "@/hooks/useAffiliate";
+import { DEFAULT_TIER_COLOR } from "@/lib/design/yachtClub";
 
 type Row = {
   rank: number;
@@ -49,7 +50,7 @@ export function ReferralLeaderboard() {
               {r.tier_name && (
                 <span
                   className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full"
-                  style={{ background: `${r.tier_color ?? "#38bdf8"}22`, color: r.tier_color ?? "#38bdf8" }}
+                  style={{ background: `${r.tier_color ?? DEFAULT_TIER_COLOR}22`, color: r.tier_color ?? DEFAULT_TIER_COLOR }}
                 >
                   {r.tier_name}
                 </span>

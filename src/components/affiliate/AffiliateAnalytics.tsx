@@ -113,12 +113,12 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
               <AreaChart data={timeseries}>
                 <defs>
                   <linearGradient id="clicksFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="signupsFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--success, 142 71% 45%))" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="hsl(var(--success, 142 71% 45%))" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--chart-2))" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
@@ -126,8 +126,8 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
                 <YAxis tick={chartAxisStyle} allowDecimals={false} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Area name="Clicks" type="monotone" dataKey="clicks" stroke="hsl(var(--primary))" fill="url(#clicksFill)" strokeWidth={2} />
-                <Area name="Signups" type="monotone" dataKey="signups" stroke="hsl(var(--success, 142 71% 45%))" fill="url(#signupsFill)" strokeWidth={2} />
+                <Area name="Clicks" type="monotone" dataKey="clicks" stroke="hsl(var(--chart-1))" fill="url(#clicksFill)" strokeWidth={2} />
+                <Area name="Signups" type="monotone" dataKey="signups" stroke="hsl(var(--chart-2))" fill="url(#signupsFill)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -144,7 +144,7 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
                 {/* recharts 3 widens tooltip values to string | number | array, so coerce before formatting */}
                 <Tooltip contentStyle={tooltipStyle} formatter={(v) => `$${Number(v).toFixed(2)}`} />
 
-                <Bar name="Earned" dataKey="earned" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar name="Earned" dataKey="earned" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

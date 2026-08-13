@@ -17,6 +17,7 @@ export default {
         border: {
           DEFAULT: "hsl(var(--border))",
           subtle: "hsl(var(--border-subtle))",
+          strong: "hsl(var(--border-strong))",
         },
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -31,12 +32,24 @@ export default {
         info: {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
+          soft: "hsl(var(--info-soft))",
+        },
+        chart: {
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
+          6: "hsl(var(--chart-6))",
         },
         brand: {
           DEFAULT: "hsl(var(--primary))",
           hover: "hsl(var(--primary-hover))",
           soft: "hsl(var(--primary-soft))",
+          glow: "hsl(var(--primary-glow))",
           secondary: "hsl(var(--brand-secondary))",
+          "secondary-hover": "hsl(var(--brand-secondary-hover))",
+          "secondary-foreground": "hsl(var(--brand-secondary-foreground))",
           "secondary-soft": "hsl(var(--brand-secondary-soft))",
         },
         primary: {
@@ -52,6 +65,7 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+          soft: "hsl(var(--destructive-soft))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -72,10 +86,12 @@ export default {
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
+          soft: "hsl(var(--success-soft))",
         },
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
+          soft: "hsl(var(--warning-soft))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

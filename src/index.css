@@ -13,156 +13,202 @@
    Never hardcode a palette colour in a component.
    ============================================================ */
 @layer base {
+  /* ============================================================
+     YACHT CLUB PALETTE — foundation
+       Soft White  #F2F0EF  →  20 10% 94%
+       Cool Gray   #BBBDBC  →  150 3% 74%
+       Ocean Teal  #245F73  →  195 52% 30%   (primary)
+       Mahogany    #733E24  →  20 52% 30%    (signature accent)
+     Every other value below is derived from these four by
+     shifting lightness/saturation only — no foreign hues.
+     ============================================================ */
   :root {
-    /* ---------- Surfaces ---------- */
-    --background: 220 33% 98%;
+    /* ---------- Foundation (raw, for reference + derivations) ---------- */
+    --yc-soft-white: 20 10% 94%;
+    --yc-cool-gray: 150 3% 74%;
+    --yc-ocean-teal: 195 52% 30%;
+    --yc-mahogany: 20 52% 30%;
+
+    /* ---------- Surfaces — warm ivory derived from Soft White ---------- */
+    --background: 24 22% 97%;
     --surface: 0 0% 100%;
-    --surface-secondary: 220 28% 96%;
+    --surface-secondary: 22 16% 95%;
     --surface-elevated: 0 0% 100%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 44% 13%;
+    --card-foreground: 197 32% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 44% 13%;
+    --popover-foreground: 197 32% 14%;
 
-    /* ---------- Text ---------- */
-    --foreground: 222 44% 13%;
-    --text-secondary: 220 14% 38%;
-    --text-muted: 220 12% 52%;
-    --muted: 220 26% 95%;
-    --muted-foreground: 220 12% 44%;
+    /* ---------- Text — deep sea ink, not black ---------- */
+    --foreground: 197 32% 14%;
+    --text-secondary: 197 16% 33%;
+    --text-muted: 193 12% 40%;
+    --muted: 22 14% 94%;
+    --muted-foreground: 195 11% 42%;
 
     /* ---------- Brand ---------- */
-    --primary: 191 95% 33%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 191 95% 28%;
-    --primary-soft: 189 85% 94%;
-    --brand-secondary: 262 72% 52%;
-    --brand-secondary-soft: 262 80% 96%;
+    --primary: 195 52% 30%;
+    --primary-foreground: 20 20% 97%;
+    --primary-hover: 195 56% 24%;
+    --primary-soft: 195 38% 92%;
+    --primary-glow: 192 46% 44%;
+    --brand-secondary: 20 52% 30%;
+    --brand-secondary-hover: 20 56% 24%;
+    --brand-secondary-foreground: 20 25% 97%;
+    --brand-secondary-soft: 22 48% 93%;
 
     /* ---------- Neutral interactive (shadcn semantics) ---------- */
-    --secondary: 220 26% 95%;
-    --secondary-foreground: 222 40% 20%;
-    --accent: 220 28% 95%;
-    --accent-foreground: 222 40% 20%;
+    --secondary: 22 14% 94%;
+    --secondary-foreground: 197 30% 20%;
+    --accent: 195 22% 93%;
+    --accent-foreground: 197 34% 18%;
 
-    /* ---------- Status ---------- */
-    --destructive: 0 72% 44%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 152 62% 32%;
-    --success-foreground: 0 0% 100%;
-    --warning: 32 90% 40%;
-    --warning-foreground: 0 0% 100%;
-    --info: 214 84% 44%;
-    --info-foreground: 0 0% 100%;
+    /* ---------- Status — muted maritime signals ---------- */
+    --destructive: 6 54% 42%;
+    --destructive-foreground: 20 20% 97%;
+    --destructive-soft: 6 52% 94%;
+    --success: 162 38% 28%;
+    --success-foreground: 20 20% 97%;
+    --success-soft: 162 32% 92%;
+    --warning: 34 56% 38%;
+    --warning-foreground: 20 20% 97%;
+    --warning-soft: 36 60% 92%;
+    --info: 200 44% 34%;
+    --info-foreground: 20 20% 97%;
+    --info-soft: 200 40% 93%;
 
     /* ---------- Lines, inputs, focus ---------- */
-    --border: 220 18% 88%;
-    --border-subtle: 220 20% 93%;
-    --input: 220 18% 86%;
-    --ring: 191 95% 33%;
-    --overlay: 222 40% 18%;
-    --overlay-opacity: 0.35;
+    --border: 24 12% 86%;
+    --border-subtle: 24 14% 91%;
+    --border-strong: 195 14% 74%;
+    --input: 24 12% 84%;
+    --ring: 195 52% 30%;
+    --overlay: 197 34% 16%;
+    --overlay-opacity: 0.34;
 
     --radius: 0.7rem;
 
+    /* ---------- Charts — teal → mahogany spectrum ---------- */
+    --chart-1: 195 52% 30%;
+    --chart-2: 20 52% 38%;
+    --chart-3: 192 40% 48%;
+    --chart-4: 34 48% 44%;
+    --chart-5: 205 26% 56%;
+    --chart-6: 162 32% 34%;
+
     /* ---------- Sidebar ---------- */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 12% 44%;
-    --sidebar-primary: 191 95% 33%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 28% 95%;
-    --sidebar-accent-foreground: 222 44% 13%;
-    --sidebar-border: 220 20% 91%;
-    --sidebar-ring: 191 95% 33%;
+    --sidebar-background: 24 20% 98%;
+    --sidebar-foreground: 195 12% 40%;
+    --sidebar-primary: 195 52% 30%;
+    --sidebar-primary-foreground: 20 20% 97%;
+    --sidebar-accent: 195 22% 93%;
+    --sidebar-accent-foreground: 197 34% 16%;
+    --sidebar-border: 24 14% 89%;
+    --sidebar-ring: 195 52% 30%;
 
     /* ---------- Composites ---------- */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--brand-secondary)));
     --gradient-card: linear-gradient(135deg, hsl(var(--surface)), hsl(var(--surface-secondary)));
     --gradient-glow: 0 0 40px hsl(var(--primary) / 0.12);
-    --shadow-card: 0 1px 2px hsl(222 40% 20% / 0.05), 0 8px 24px -16px hsl(222 40% 20% / 0.18);
-    --shadow-elevated: 0 2px 4px hsl(222 40% 20% / 0.05), 0 18px 40px -24px hsl(222 40% 20% / 0.28);
+    --shadow-card: 0 1px 2px hsl(197 34% 16% / 0.05), 0 8px 24px -16px hsl(197 34% 16% / 0.18);
+    --shadow-elevated: 0 2px 4px hsl(197 34% 16% / 0.05), 0 18px 40px -24px hsl(197 34% 16% / 0.26);
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.1);
-    --shadow-hover: 0 12px 28px -18px hsl(222 40% 20% / 0.35);
-    --ambient-opacity: 0.14;
+    --shadow-hover: 0 12px 28px -18px hsl(197 34% 16% / 0.32);
+    --ambient-opacity: 0.13;
     --decor-strength: 0.45;
-    --sheen-strength: 0.10;
+    --sheen-strength: 0.09;
   }
 
   .dark {
-    /* ---------- Surfaces ---------- */
-    --background: 222 47% 6%;
-    --surface: 222 44% 8.5%;
-    --surface-secondary: 222 34% 12%;
-    --surface-elevated: 222 32% 15%;
+    /* ---------- Surfaces — deep harbour water ---------- */
+    --background: 198 40% 7%;
+    --surface: 198 34% 10%;
+    --surface-secondary: 198 28% 13%;
+    --surface-elevated: 198 24% 16%;
 
-    --card: 222 44% 8.5%;
-    --card-foreground: 210 40% 96%;
-    --popover: 222 42% 10%;
-    --popover-foreground: 210 40% 96%;
+    --card: 198 34% 10%;
+    --card-foreground: 20 18% 95%;
+    --popover: 198 32% 12%;
+    --popover-foreground: 20 18% 95%;
 
-    /* ---------- Text ---------- */
-    --foreground: 210 40% 97%;
-    --text-secondary: 215 20% 72%;
-    --text-muted: 215 16% 55%;
-    --muted: 222 30% 13%;
-    --muted-foreground: 215 18% 63%;
+    /* ---------- Text — Soft White on water ---------- */
+    --foreground: 20 18% 96%;
+    --text-secondary: 193 12% 76%;
+    --text-muted: 193 10% 58%;
+    --muted: 198 26% 14%;
+    --muted-foreground: 193 12% 66%;
 
-    /* ---------- Brand ---------- */
-    --primary: 187 92% 52%;
-    --primary-foreground: 222 47% 7%;
-    --primary-hover: 187 92% 60%;
-    --primary-soft: 187 70% 16%;
-    --brand-secondary: 265 85% 68%;
-    --brand-secondary-soft: 265 50% 18%;
+    /* ---------- Brand — lifted for contrast on dark ---------- */
+    --primary: 192 46% 56%;
+    --primary-foreground: 198 45% 8%;
+    --primary-hover: 192 50% 66%;
+    --primary-soft: 195 40% 17%;
+    --primary-glow: 190 52% 62%;
+    --brand-secondary: 20 48% 52%;
+    --brand-secondary-hover: 20 52% 60%;
+    --brand-secondary-foreground: 20 30% 97%;
+    --brand-secondary-soft: 20 38% 17%;
 
     /* ---------- Neutral interactive ---------- */
-    --secondary: 222 30% 14%;
-    --secondary-foreground: 210 36% 88%;
-    --accent: 222 30% 15%;
-    --accent-foreground: 210 40% 96%;
+    --secondary: 198 26% 15%;
+    --secondary-foreground: 20 14% 90%;
+    --accent: 198 26% 17%;
+    --accent-foreground: 20 18% 95%;
 
     /* ---------- Status ---------- */
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 210 40% 98%;
-    --success: 152 62% 47%;
-    --success-foreground: 222 47% 7%;
-    --warning: 38 92% 55%;
-    --warning-foreground: 222 47% 7%;
-    --info: 210 95% 62%;
-    --info-foreground: 222 47% 7%;
+    --destructive: 6 58% 56%;
+    --destructive-foreground: 198 45% 8%;
+    --destructive-soft: 6 40% 18%;
+    --success: 162 40% 48%;
+    --success-foreground: 198 45% 8%;
+    --success-soft: 162 34% 15%;
+    --warning: 36 58% 56%;
+    --warning-foreground: 198 45% 8%;
+    --warning-soft: 34 42% 16%;
+    --info: 198 48% 58%;
+    --info-foreground: 198 45% 8%;
+    --info-soft: 198 40% 16%;
 
     /* ---------- Lines, inputs, focus ---------- */
-    --border: 222 26% 18%;
-    --border-subtle: 222 26% 14%;
-    --input: 222 26% 19%;
-    --ring: 187 92% 52%;
-    --overlay: 222 60% 3%;
+    --border: 198 22% 20%;
+    --border-subtle: 198 22% 15%;
+    --border-strong: 195 20% 32%;
+    --input: 198 22% 21%;
+    --ring: 192 46% 56%;
+    --overlay: 198 50% 3%;
     --overlay-opacity: 0.72;
 
+    /* ---------- Charts ---------- */
+    --chart-1: 192 46% 58%;
+    --chart-2: 20 48% 56%;
+    --chart-3: 195 34% 42%;
+    --chart-4: 36 52% 56%;
+    --chart-5: 205 20% 66%;
+    --chart-6: 162 36% 46%;
+
     /* ---------- Sidebar ---------- */
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 215 18% 63%;
-    --sidebar-primary: 187 92% 52%;
-    --sidebar-primary-foreground: 222 47% 7%;
-    --sidebar-accent: 222 30% 13%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 222 26% 14%;
-    --sidebar-ring: 187 92% 52%;
+    --sidebar-background: 198 42% 6%;
+    --sidebar-foreground: 193 12% 64%;
+    --sidebar-primary: 192 46% 56%;
+    --sidebar-primary-foreground: 198 45% 8%;
+    --sidebar-accent: 198 26% 14%;
+    --sidebar-accent-foreground: 20 18% 95%;
+    --sidebar-border: 198 22% 14%;
+    --sidebar-ring: 192 46% 56%;
 
     /* ---------- Composites ---------- */
     --gradient-card: linear-gradient(135deg, hsl(var(--surface)), hsl(var(--surface-elevated)));
     --gradient-glow: 0 0 40px hsl(var(--primary) / 0.15);
-    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.3);
-    --shadow-elevated: 0 24px 60px -30px hsl(0 0% 0% / 0.85);
-    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.12);
-    --shadow-hover: 0 18px 40px -22px hsl(0 0% 0% / 0.8);
-    --ambient-opacity: 0.32;
+    --shadow-card: 0 4px 24px hsl(198 60% 2% / 0.42);
+    --shadow-elevated: 0 24px 60px -30px hsl(198 60% 2% / 0.85);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.14);
+    --shadow-hover: 0 18px 40px -22px hsl(198 60% 2% / 0.8);
+    --ambient-opacity: 0.28;
     --decor-strength: 1;
-    --sheen-strength: 0.16;
+    --sheen-strength: 0.14;
   }
 }
-
 @layer base {
   * { @apply border-border; }
   html { color-scheme: light; }

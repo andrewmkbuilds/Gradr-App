@@ -10,8 +10,8 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "categories": ["productivity", "education", "business"],
-  "background_color": "#070d1a",
-  "theme_color": "#070d1a",
+  "background_color": "#0b1c22",
+  "theme_color": "#245f73",
   "icons": [
     { "src": "/favicon.png", "sizes": "64x64", "type": "image/png", "purpose": "any" },
     { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
