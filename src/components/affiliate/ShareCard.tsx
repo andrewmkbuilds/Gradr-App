@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Copy, Check, Share2, Twitter, Linkedin, Mail, MessageCircle, Download } from "lucide-react";
 import { toast } from "sonner";
+import { yachtClub } from "@/lib/design/yachtClub";
 
 const SHARE_COPY =
   "I use Gradr to run my whole job search — AI resume scoring, job matching and realistic mock interviews. Try it with my link:";
@@ -52,30 +53,30 @@ export function ShareCard({ code, link }: { code: string; link: string }) {
     if (!ctx) return;
 
     const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, "#0b1120");
-    grad.addColorStop(1, "#0e2a3f");
+    grad.addColorStop(0, yachtClub.deepSea);
+    grad.addColorStop(1, yachtClub.harbour);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.fillStyle = "rgba(34,211,238,0.14)";
+    ctx.fillStyle = "rgba(115, 62, 36, 0.22)";
     ctx.beginPath();
     ctx.arc(w - 140, 120, 220, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = yachtClub.softWhite;
     ctx.font = "bold 64px system-ui, -apple-system, Segoe UI, sans-serif";
     ctx.fillText("Gradr", 80, 140);
 
     ctx.font = "500 44px system-ui, -apple-system, Segoe UI, sans-serif";
-    ctx.fillStyle = "#cbd5e1";
+    ctx.fillStyle = yachtClub.coolGray;
     ctx.fillText("Your AI career command center", 80, 220);
 
     ctx.font = "bold 92px system-ui, -apple-system, Segoe UI, sans-serif";
-    ctx.fillStyle = "#22d3ee";
+    ctx.fillStyle = yachtClub.seaGlass;
     ctx.fillText(code, 80, 380);
 
     ctx.font = "400 34px system-ui, -apple-system, Segoe UI, sans-serif";
-    ctx.fillStyle = "#94a3b8";
+    ctx.fillStyle = yachtClub.stone;
     ctx.fillText("Use my referral code to get started", 80, 440);
     ctx.fillText(link, 80, 520);
 

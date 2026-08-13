@@ -187,8 +187,9 @@ function Section({
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-      <span className="h-px w-6 bg-primary/50" aria-hidden />
+    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-secondary">
+      <span className="h-px w-6 bg-brand-secondary/60" aria-hidden />
+
       {children}
     </span>
   );
