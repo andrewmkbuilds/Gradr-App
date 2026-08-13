@@ -66,8 +66,17 @@ export const EmailLayout = ({
                     src={LOGO_URL}
                     width="36"
                     height="36"
-                    alt="Gradr"
-                    style={{ display: 'block', borderRadius: '9px' }}
+                    alt="Gradr logo"
+                    style={{
+                      display: 'block',
+                      width: '36px',
+                      height: '36px',
+                      maxWidth: '36px',
+                      borderRadius: '9px',
+                      border: '0',
+                      outline: 'none',
+                      textDecoration: 'none',
+                    }}
                   />
                 </Link>
               </Column>

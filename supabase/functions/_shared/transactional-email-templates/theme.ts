@@ -33,7 +33,12 @@ export const displayStack =
   "Georgia, 'Times New Roman', 'Segoe UI', Helvetica, Arial, sans-serif"
 
 export const SITE_URL = 'https://gradr.me'
-export const LOGO_URL = 'https://gradr.me/gradr-logo-256.png'
+// Email images MUST be immutable, public, unauthenticated HTTPS URLs: Gmail
+// fetches them through its own proxy with no cookies and no session. This points
+// at the CDN asset (content-addressed by id), not at /public/*, so a frontend
+// deploy or file rename can never break already-delivered mail.
+export const LOGO_URL =
+  'https://gradr.me/__l5e/assets-v1/344283be-10b7-4dab-8af4-1afe9b7233c3/gradr-email-logo-144.png'
 export const SUPPORT_EMAIL = 'support@gradr.me'
 
 /** Append UTM params so email traffic is attributable in analytics. */
