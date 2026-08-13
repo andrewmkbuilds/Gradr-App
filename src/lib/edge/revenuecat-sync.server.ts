@@ -108,6 +108,20 @@ async function syncUser(userId: string, email: string) {
   return { subscribed: active, tier: active ? tierFor(productIdentifier) : null };
 }
 
+/**
+ * Re-applies a stored RevenueCat event by re-syncing the affected user against
+ * RevenueCat's own API. Used by the admin replay simulator.
+ */
+export async function processRevenueCatEvent(body: unknown): Promise<{ subscribed: boolean }> {
+  const event = (body as { event?: Record<string, unknown> })?.event ?? {};
+  const appUserId = (event['app_user_id'] ?? event['original_app_user_id'] ?? null) as string | null;
+  if (!appUserId) throw new Error("Event has no app_user_id");
+  const { data: userRes } = await admin().auth.admin.getUserById(appUserId);
+  const email = userRes?.user?.email;
+  if (!email) throw new Error("No Gradr account matches this app_user_id");
+  return syncUser(appUserId, email);
+}
+
 export const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -141,6 +155,8 @@ export const handler = async (req: Request): Promise<Response> => {
           eventId,
           eventType: String(event.type ?? "unknown"),
           environment: event.environment ?? null,
+          payload: body,
+          signatureVerified: true,
         });
         if (claim === "duplicate") return json({ received: true, duplicate: true }, 200);
       }
