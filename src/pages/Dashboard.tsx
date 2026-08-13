@@ -21,6 +21,8 @@ import { buildBriefing, setupSteps, type BriefingInput } from "@/lib/careerBrief
 import { Button } from "@/components/ui/button";
 import { MotionReveal } from "@/components/motion";
 import { MomentumCard } from "@/components/dashboard/MomentumCard";
+import { FollowUpReminders } from "@/components/dashboard/FollowUpReminders";
+
 import { UpgradeNudge } from "@/components/UpgradeNudge";
 
 interface StageCount {
@@ -180,7 +182,10 @@ export default function Dashboard() {
 
       <NextThreeDays />
 
+      <FollowUpReminders />
+
       <MomentumCard />
+
 
       <MotionReveal onView className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
