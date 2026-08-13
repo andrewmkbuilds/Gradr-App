@@ -47,7 +47,7 @@ export function SessionDebrief({ report, messages, targetRole, durationSec, onPr
   };
 
   return (
-    <section className="glass-card space-y-6 p-5 sm:p-6" aria-labelledby="debrief-title">
+    <section className="elev-2 rounded-xl space-y-6 p-5 sm:p-6" aria-labelledby="debrief-title">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 id="debrief-title" className="text-lg font-semibold tracking-tight text-foreground">

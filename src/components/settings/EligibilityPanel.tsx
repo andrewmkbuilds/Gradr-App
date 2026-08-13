@@ -25,7 +25,7 @@ export function EligibilityPanel() {
     <section
       id="eligibility"
       aria-labelledby="eligibility-heading"
-      className="glass-card p-6 space-y-5 animate-slide-up scroll-mt-24"
+      className="elev-2 rounded-xl p-6 space-y-5 animate-fade-in scroll-mt-24"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">

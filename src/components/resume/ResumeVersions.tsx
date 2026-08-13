@@ -16,7 +16,7 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
 
   if (loading) {
     return (
-      <div className="glass-card flex items-center gap-2 p-5 text-sm text-muted-foreground">
+      <div className="elev-2 rounded-xl flex items-center gap-2 p-5 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" /> Loading your saved versions…
       </div>
     );
@@ -24,7 +24,7 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
 
   if (versions.length === 0) {
     return (
-      <div className="glass-card p-5">
+      <div className="elev-2 rounded-xl p-5">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Layers className="h-4 w-4 text-primary" /> Resume versions
         </h3>
@@ -37,7 +37,7 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
   }
 
   return (
-    <div className="glass-card p-5">
+    <div className="elev-2 rounded-xl p-5">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Layers className="h-4 w-4 text-primary" /> Resume versions

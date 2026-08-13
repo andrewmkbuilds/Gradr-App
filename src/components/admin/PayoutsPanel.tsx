@@ -61,7 +61,7 @@ export function PayoutsPanel() {
         <CreatePayoutDialog />
       </div>
 
-      <div className="glass-card overflow-x-auto">
+      <div className="elev-2 rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
             <tr>

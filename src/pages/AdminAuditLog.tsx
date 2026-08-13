@@ -130,7 +130,7 @@ export default function AdminAuditLog() {
         </select>
       </div>
 
-      <div className="glass-card overflow-x-auto">
+      <div className="elev-2 rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
             <tr>
@@ -242,7 +242,7 @@ function StatTile({
   icon: typeof Eye;
 }) {
   return (
-    <div className="glass-card p-4">
+    <div className="elev-2 rounded-xl p-4">
       <div className="flex items-center gap-2 text-muted-foreground text-xs">
         <Icon className="h-3.5 w-3.5" />
         {label}

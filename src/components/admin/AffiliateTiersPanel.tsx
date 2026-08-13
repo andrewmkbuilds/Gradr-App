@@ -81,7 +81,7 @@ export function AffiliateTiersPanel() {
         threshold they have reached, and the bonus rate is added to their percentage commission.
       </p>
 
-      <div className="glass-card overflow-x-auto">
+      <div className="elev-2 rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground">
             <tr>
@@ -138,7 +138,7 @@ export function AffiliateTiersPanel() {
         </table>
       </div>
 
-      <form onSubmit={create} className="glass-card p-4 grid gap-3 sm:grid-cols-6 items-end">
+      <form onSubmit={create} className="elev-2 rounded-xl p-4 grid gap-3 sm:grid-cols-6 items-end">
         <label className="text-xs text-muted-foreground sm:col-span-1">
           Key
           <input name="key" required placeholder="legend" className="mt-1 w-full px-2 py-1.5 rounded bg-secondary border border-border text-sm" />

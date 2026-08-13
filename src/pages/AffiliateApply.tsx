@@ -41,7 +41,7 @@ export default function AffiliateApply() {
   }
   if (my?.application?.status === "pending") {
     return (
-      <div className="max-w-2xl mx-auto glass-card p-8 text-center">
+      <div className="max-w-2xl mx-auto elev-2 rounded-xl p-8 text-center">
         <h1 className="text-xl font-semibold text-foreground mb-2">Application under review</h1>
         <p className="text-sm text-muted-foreground">We typically review within 48 hours. We'll notify you once a decision is made.</p>
       </div>
@@ -94,7 +94,7 @@ export default function AffiliateApply() {
         <p className="text-sm text-muted-foreground mt-1">Tell us about you and your audience.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="glass-card p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="elev-2 rounded-xl p-6 space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div><label className={labelCls}>Full name *</label><input name="full_name" required defaultValue={user?.user_metadata?.full_name || ""} className={inputCls} /></div>
           <div><label className={labelCls}>Contact email *</label><input name="email" type="email" required defaultValue={user?.email || ""} className={inputCls} /></div>

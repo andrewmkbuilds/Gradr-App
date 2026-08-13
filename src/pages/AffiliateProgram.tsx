@@ -40,7 +40,7 @@ export default function AffiliateProgram() {
       );
     }
     return (
-      <button onClick={() => navigate("/affiliate/apply")} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition glow-border">
+      <button onClick={() => navigate("/affiliate/apply")} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition ring-1 ring-primary/20">
         Apply to become an affiliate <ArrowRight className="h-4 w-4" />
       </button>
     );
@@ -48,7 +48,7 @@ export default function AffiliateProgram() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
-      <div className="text-center space-y-4 animate-slide-up">
+      <div className="text-center space-y-4 animate-fade-in">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
           <Sparkles className="h-3 w-3" /> Gradr Partner Program
         </div>
@@ -68,7 +68,7 @@ export default function AffiliateProgram() {
           { icon: Clock, title: `${cookieDays}-day cookie`, desc: "Industry-leading attribution window — full credit for the journey." },
           { icon: Users, title: "Audience aligned", desc: "Perfect for career creators, coaches, bootcamps, and communities." },
         ].map((b) => (
-          <div key={b.title} className="glass-card p-6 animate-slide-up">
+          <div key={b.title} className="elev-2 rounded-xl p-6 animate-fade-in">
             <b.icon className="h-5 w-5 text-primary mb-3" />
             <div className="text-sm font-semibold text-foreground">{b.title}</div>
             <p className="text-xs text-muted-foreground mt-1">{b.desc}</p>
@@ -76,7 +76,7 @@ export default function AffiliateProgram() {
         ))}
       </div>
 
-      <div className="glass-card p-6 animate-slide-up">
+      <div className="elev-2 rounded-xl p-6 animate-fade-in">
         <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" /> How it works
         </h2>
@@ -96,7 +96,7 @@ export default function AffiliateProgram() {
         </ol>
       </div>
 
-      <div className="glass-card p-6 animate-slide-up">
+      <div className="elev-2 rounded-xl p-6 animate-fade-in">
         <h2 className="text-lg font-semibold text-foreground mb-3">Terms summary</h2>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {[

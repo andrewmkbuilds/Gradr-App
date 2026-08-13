@@ -32,7 +32,7 @@ export function ConnectionErrorOverlay({
       aria-describedby="conn-error-desc"
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in"
     >
-      <div className="glass-card w-full max-w-md p-6 text-center shadow-2xl">
+      <div className="elev-2 rounded-xl w-full max-w-md p-6 text-center shadow-2xl">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
           <AlertTriangle className="h-6 w-6 text-destructive" aria-hidden="true" />
         </div>

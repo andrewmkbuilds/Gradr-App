@@ -114,7 +114,7 @@ export function CampaignBuilder({ affiliateProfileId, affiliateCode }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="glass-card p-6 space-y-4">
+      <div className="elev-2 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Plus className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-semibold text-foreground">Campaign link builder</h3>
@@ -176,7 +176,7 @@ export function CampaignBuilder({ affiliateProfileId, affiliateCode }: Props) {
         </button>
       </div>
 
-      <div className="glass-card p-6">
+      <div className="elev-2 rounded-xl p-6">
         <h3 className="text-sm font-semibold text-foreground mb-3">Saved campaigns</h3>
         {isLoading ? (
           <Loader2 className="h-5 w-5 animate-spin text-primary" />

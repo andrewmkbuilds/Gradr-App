@@ -64,7 +64,7 @@ export const STATUS_COPY: Record<VerificationStatus, { label: string; tone: stri
   },
   expired: {
     label: "Expired",
-    tone: "text-amber-500 border-amber-500/40 bg-amber-500/10",
+    tone: "text-warning border-warning/40 bg-warning/10",
     hint: "Re-verify to keep your discount active.",
   },
   revoked: {

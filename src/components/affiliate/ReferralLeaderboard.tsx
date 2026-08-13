@@ -16,7 +16,7 @@ export function ReferralLeaderboard() {
   const rows = (data as Row[] | undefined) ?? [];
 
   return (
-    <div className="glass-card p-6">
+    <div className="elev-2 rounded-xl p-6">
       <div className="flex items-center gap-2 mb-4">
         <Crown className="h-4 w-4 text-warning" />
         <h3 className="text-sm font-semibold text-foreground">Leaderboard</h3>

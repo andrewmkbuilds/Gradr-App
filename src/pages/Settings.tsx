@@ -142,7 +142,7 @@ export default function Settings() {
         <p className="text-sm text-muted-foreground mt-1">Set your career preferences to improve AI recommendations</p>
       </div>
 
-      <section aria-labelledby="appearance-heading" className="glass-card p-6 space-y-4 animate-slide-up">
+      <section aria-labelledby="appearance-heading" className="elev-2 rounded-xl p-6 space-y-4 animate-fade-in">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Palette className="h-5 w-5 text-primary" aria-hidden="true" />
@@ -164,7 +164,7 @@ export default function Settings() {
         </div>
       </section>
 
-      <div className="glass-card p-6 space-y-5 animate-slide-up">
+      <div className="elev-2 rounded-xl p-6 space-y-5 animate-fade-in">
         <div className="flex items-center gap-3 mb-2">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <User className="h-5 w-5 text-primary" />
@@ -214,7 +214,7 @@ export default function Settings() {
         </Button>
       </div>
 
-      <div className="glass-card p-6 space-y-5 animate-slide-up">
+      <div className="elev-2 rounded-xl p-6 space-y-5 animate-fade-in">
         <div className="flex items-center gap-3 mb-2">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Bell className="h-5 w-5 text-primary" />

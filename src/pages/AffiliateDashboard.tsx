@@ -160,7 +160,7 @@ export default function AffiliateDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="glass-card p-6 lg:col-span-2">
+            <div className="elev-2 rounded-xl p-6 lg:col-span-2">
               <div className="flex items-center justify-between text-sm mb-2">
                 <h3 className="font-semibold text-foreground">Payout progress</h3>
                 <span className="text-xs text-muted-foreground">
@@ -191,7 +191,7 @@ export default function AffiliateDashboard() {
               </div>
             </div>
 
-            <div className="glass-card p-6">
+            <div className="elev-2 rounded-xl p-6">
               <h3 className="text-sm font-semibold text-foreground mb-2">Earnings projection</h3>
               <div className="text-3xl font-bold text-foreground">
                 ${(earnings?.projected_next_30d ?? 0).toFixed(2)}
@@ -205,7 +205,7 @@ export default function AffiliateDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <ActivityTimeline events={timeline} />
-            <div className="glass-card p-6">
+            <div className="elev-2 rounded-xl p-6">
               <h3 className="text-sm font-semibold text-foreground mb-3">Payout history</h3>
               {data!.payouts.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-8 text-center">No payouts yet. Payouts are processed monthly once you hit the minimum threshold.</p>

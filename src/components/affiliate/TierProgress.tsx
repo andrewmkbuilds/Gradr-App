@@ -80,7 +80,7 @@ export function TierProgress({
   }, [current?.key]);
 
   return (
-    <div className="relative glass-card p-6 overflow-hidden">
+    <div className="relative elev-2 rounded-xl p-6 overflow-hidden">
       <Celebration active={celebrate} />
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
@@ -181,7 +181,7 @@ export function MilestoneBadges({ overview }: { overview: AffiliateOverview }) {
   ];
 
   return (
-    <div className="glass-card p-6">
+    <div className="elev-2 rounded-xl p-6">
       <h3 className="text-sm font-semibold text-foreground mb-4">Achievements</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {badges.map((b) => (

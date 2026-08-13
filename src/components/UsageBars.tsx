@@ -44,7 +44,7 @@ export function UsageBars({ compact }: UsageBarsProps) {
 
   if (isLoading) {
     return (
-      <div className="glass-card p-6 space-y-4" aria-busy="true">
+      <div className="elev-2 rounded-xl p-6 space-y-4" aria-busy="true">
         <div className="h-4 w-40 rounded bg-muted/40 animate-pulse" />
         {[0, 1, 2].map((i) => (
           <div key={i} className="h-12 rounded bg-muted/20 animate-pulse" />
@@ -55,7 +55,7 @@ export function UsageBars({ compact }: UsageBarsProps) {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <section className="glass-card p-6 space-y-5" aria-label="Monthly usage">
+      <section className="elev-2 rounded-xl p-6 space-y-5" aria-label="Monthly usage">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-foreground">Monthly usage</h2>

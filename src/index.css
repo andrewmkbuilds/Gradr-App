@@ -359,17 +359,6 @@
     .elev-interactive:hover { transform: none; }
   }
 
-  .glass-card {
-    @apply bg-card border border-border rounded-xl;
-    box-shadow: var(--shadow-card);
-  }
-  .glow-border { @apply border border-primary/20; box-shadow: var(--shadow-glow); }
-  .gradient-text {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
   .stat-value { @apply text-3xl font-bold tracking-tight; font-variant-numeric: tabular-nums; }
 
   .glassmorphic {

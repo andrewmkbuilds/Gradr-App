@@ -106,7 +106,7 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card p-5">
+        <div className="elev-2 rounded-xl p-5">
           <div className="text-sm font-semibold text-foreground mb-3">Clicks & signups</div>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -133,7 +133,7 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
           </div>
         </div>
 
-        <div className="glass-card p-5">
+        <div className="elev-2 rounded-xl p-5">
           <div className="text-sm font-semibold text-foreground mb-3">Commission earned</div>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -151,7 +151,7 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
         </div>
       </div>
 
-      <div className="glass-card p-0 overflow-hidden">
+      <div className="elev-2 rounded-xl p-0 overflow-hidden">
         <div className="flex gap-1 border-b border-border px-3 pt-3 overflow-x-auto">
           {(["clicks", "referrals", "commissions", "payouts"] as const).map((t) => (
             <button

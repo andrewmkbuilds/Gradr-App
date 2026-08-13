@@ -27,7 +27,7 @@ const TONE = {
 
 export function ActivityTimeline({ events }: { events: TimelineEvent[] }) {
   return (
-    <div className="glass-card p-6">
+    <div className="elev-2 rounded-xl p-6">
       <h3 className="text-sm font-semibold text-foreground mb-4">Referral activity</h3>
       {events.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8 text-center">
