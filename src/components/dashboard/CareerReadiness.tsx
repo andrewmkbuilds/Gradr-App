@@ -78,15 +78,18 @@ export function CareerReadiness({
       </div>
       <p className="text-xs text-muted-foreground">Weighted across resume, matching, activity and practice.</p>
 
-      <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-        <DepthLayer z={40} className="relative shrink-0" style={{ width: size, height: size * 0.86 }}>
+      <div className="mt-4 flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
+        <DepthLayer
+          z={40}
+          className="relative aspect-square w-[min(180px,55vw)] shrink-0 sm:w-[200px]"
+        >
           <svg
-            width={size}
-            height={size}
+            width="100%"
+            height="100%"
             viewBox={`0 0 ${size} ${size}`}
             className="-rotate-[225deg]"
             role="img"
-            aria-label={`Career readiness score ${score} out of 100`}
+            aria-label={`Career readiness score ${score} out of 100 — ${state.label}`}
           >
             <circle
               cx={size / 2}
@@ -115,23 +118,33 @@ export function CareerReadiness({
           </svg>
 
           <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
-            <span className="font-display text-5xl font-bold leading-none tracking-tight text-foreground">
+            <span className="font-display text-4xl font-bold leading-none tracking-tight text-foreground sm:text-5xl">
               <CountUp to={score} duration={1.4} />
             </span>
-            <span className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:text-[11px]">
               readiness
             </span>
           </div>
         </DepthLayer>
 
-        <DepthLayer z={18} className="w-full space-y-3">
+        <DepthLayer z={18} className="w-full space-y-2">
           {pillars.map((p, i) => {
             const v = clamp(p.value);
             return (
-              <div key={p.key}>
-                <div className="flex items-baseline justify-between text-xs">
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => setActive(p)}
+                aria-haspopup="dialog"
+                aria-label={`${p.label}: ${v} out of 100. Open factors and next actions.`}
+                className="focus-visible:ring-ring -mx-2 block w-[calc(100%+1rem)] rounded-lg px-2 py-2 text-left transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2"
+              >
+                <div className="flex items-baseline justify-between gap-2 text-xs">
                   <span className="font-medium text-foreground">{p.label}</span>
-                  <span className="tabular-nums text-muted-foreground">{v}%</span>
+                  <span className="inline-flex items-center gap-1 tabular-nums text-muted-foreground">
+                    {v}%
+                    <ChevronRight className="h-3.5 w-3.5 text-mahogany" aria-hidden="true" />
+                  </span>
                 </div>
                 <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-secondary">
                   <motion.div
@@ -146,11 +159,18 @@ export function CareerReadiness({
                   />
                 </div>
                 <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{p.hint}</p>
-              </div>
+              </button>
             );
           })}
         </DepthLayer>
       </div>
+
+      <PillarDrilldown
+        pillar={active}
+        totalWeight={totalWeight}
+        onOpenChange={(open) => !open && setActive(null)}
+      />
+
 
       <div className="mt-5 border-t border-border/60 pt-4">
         <button
