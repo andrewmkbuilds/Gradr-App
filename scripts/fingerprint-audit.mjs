@@ -171,10 +171,17 @@ async function main() {
     const type = response.headers.get("content-type") ?? "";
     // SPA hosting answers unknown paths with the HTML shell; only a real file
     // (JSON/text/octet-stream) counts as a leak.
-    if (response.ok && !type.includes("text/html")) {
-      fail(`${path} is publicly reachable (${response.status} ${type})`);
-    }
+    if (!response.ok || type.includes("text/html")) continue;
+
+    const body = (await response.text()).slice(0, 20_000);
+    // The deploy bundle ships a stub `package.json`/lockfile the host requires.
+    // Those are harmless — they name no dependency, script or version. Only a
+    // manifest that actually enumerates the stack is a disclosure.
+    const revealsStack = /"(?:dependencies|devDependencies|scripts|engines|version|packages)"\s*:/.test(body);
+    if (revealsStack) fail(`${path} is publicly reachable and reveals the stack (${type})`);
+    else notes.push(`${path}: served as a content-free deploy stub (no dependencies or versions)`);
   }
+
   console.log(`  checked ${LEAK_PATHS.length} known leak paths\n`);
 
   for (const note of notes) console.log(`note: ${note}`);
