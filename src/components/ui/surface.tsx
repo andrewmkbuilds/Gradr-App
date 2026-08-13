@@ -40,7 +40,7 @@ export const Surface = forwardRef<HTMLDivElement, SurfaceProps>(
         "depth-surface",
         LEVEL_CLASS[level],
         RADIUS[level],
-        !flush && "p-5",
+        !flush && "p-4 sm:p-5",
         interactive && "elev-interactive depth-hover",
         className,
       )}
