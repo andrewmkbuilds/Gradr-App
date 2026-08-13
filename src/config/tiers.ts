@@ -8,6 +8,8 @@
  * Prices themselves are NEVER hard-coded here: the pricing page renders the
  * localized `formattedTotals` returned by `Paddle.PricePreview()`.
  */
+import { PLAN_PRICING } from "./pricing";
+
 export type TierName = "Starter" | "Pro" | "Advanced";
 
 export interface Tier {
@@ -32,7 +34,7 @@ export const TIERS: Tier[] = [
       "8 AI mock interviews per month",
       "Email support",
     ],
-    priceId: { month: "starter_monthly", year: "starter_annual" },
+    priceId: { month: PLAN_PRICING.starter.priceId!.monthly, year: PLAN_PRICING.starter.priceId!.annual },
   },
   {
     name: "Pro",
@@ -46,7 +48,7 @@ export const TIERS: Tier[] = [
       "Realtime AI mock interviews",
       "Priority support",
     ],
-    priceId: { month: "pro_monthly", year: "pro_annual" },
+    priceId: { month: PLAN_PRICING.pro.priceId!.monthly, year: PLAN_PRICING.pro.priceId!.annual },
     highlighted: true,
   },
   {
@@ -61,7 +63,7 @@ export const TIERS: Tier[] = [
       "Priority AI queue",
       "Concierge onboarding",
     ],
-    priceId: { month: "advanced_monthly", year: "advanced_annual" },
+    priceId: { month: PLAN_PRICING.advanced.priceId!.monthly, year: PLAN_PRICING.advanced.priceId!.annual },
   },
 ];
 
