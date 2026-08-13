@@ -254,7 +254,7 @@ export function HeroCommandCenter() {
 
         {/* floating match panel */}
         <motion.div
-          className="absolute -right-4 top-16 hidden w-[248px] sm:block lg:-right-12"
+          className="absolute -right-6 -top-10 hidden w-[236px] sm:block lg:-right-20"
           initial={{ opacity: 0, x: 30, y: 10 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ ...springSoft, delay: 0.45 }}
@@ -270,7 +270,7 @@ export function HeroCommandCenter() {
 
         {/* floating insight chip */}
         <motion.div
-          className="absolute -left-3 bottom-10 hidden sm:block lg:-left-10"
+          className="absolute -left-4 -bottom-6 hidden sm:block lg:-left-14"
           style={reduced ? undefined : mid}
         >
           <motion.div
