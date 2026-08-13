@@ -5,7 +5,7 @@
  * indicator that follows the section currently in view and a staggered
  * full-screen menu on mobile.
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,14 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { Magnetic } from "@/components/motion";
+import { useMotionPrefs } from "@/hooks/useMotionPrefs";
 import { ease, spring } from "@/lib/motion";
 
 export type NavItem = { label: string; href: string };
 
 /** Inputs that mean "the user took the wheel back" from a click-driven scroll. */
 const USER_SCROLL_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+
 
 
 type Props = {
@@ -30,7 +32,11 @@ type Props = {
 };
 
 export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
-  const reduce = useReducedMotion();
+  const systemReduce = useReducedMotion();
+  const { reduceMotion } = useMotionPrefs();
+  // OS `prefers-reduced-motion` OR the in-app toggle: either one means every
+  // nav interaction resolves instantly — no smooth scroll, no deferred spy.
+  const reduce = Boolean(systemReduce) || reduceMotion;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
@@ -46,24 +52,46 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
    */
   const lockRef = useRef<string | null>(null);
   const releaseRef = useRef<(() => void) | null>(null);
+  const reduceRef = useRef(reduce);
+  reduceRef.current = reduce;
 
   useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 16));
 
-  const goTo = (href: string) => {
+  const goTo = useCallback((href: string, opts?: { closeMenu?: boolean }) => {
     if (!href.startsWith("#")) return false;
     const el = document.getElementById(href.slice(1));
     if (!el) return false;
+    const instant = reduceRef.current;
 
     // Paint the active state on the same frame as the click — never wait for
-    // the scroll animation to finish.
+    // the scroll animation to finish, and never for the menu exit animation.
     setActive(href);
     lockRef.current = href;
     releaseRef.current?.();
 
-    // Deferred a frame so the mobile menu's `overflow: hidden` lock is lifted
-    // before the scroll starts, otherwise the jump is swallowed.
-    requestAnimationFrame(() => el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }));
+    if (opts?.closeMenu) {
+      setOpen(false);
+      // Release the scroll lock imperatively instead of waiting for the
+      // `open` effect to flush: otherwise `overflow: hidden` is still on the
+      // body when we scroll and the jump is swallowed. This removes the
+      // frame-timing race between closing the menu and scrolling.
+      document.body.style.overflow = "";
+    }
+
+    el.scrollIntoView({ behavior: instant ? "auto" : "smooth", block: "start" });
     history.replaceState(null, "", href);
+
+    // Move focus to the section so keyboard users land where they navigated;
+    // `tabindex=-1` keeps it out of the tab order afterwards.
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+    el.focus({ preventScroll: true });
+
+    // Reduced motion means the scroll already completed synchronously, so the
+    // spy can never fight us — drop the lock immediately.
+    if (instant) {
+      lockRef.current = null;
+      return true;
+    }
 
     // The lock lifts on the next *user-initiated* scroll rather than on a
     // timer, so the programmatic scroll can never hand the indicator back to a
@@ -79,7 +107,36 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
       window.addEventListener(evt, release, { passive: true, once: true });
     }
     return true;
-  };
+  }, []);
+
+  /**
+   * Keyboard navigation for the nav list: Enter/Space activate (matching the
+   * click path exactly, so the active state syncs identically), arrows move
+   * between items, Home/End jump to the ends. Tab order is untouched.
+   */
+  const onItemKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLAnchorElement>, href: string, closeMenu?: boolean) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        if (goTo(href, { closeMenu })) e.preventDefault();
+        return;
+      }
+      if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+      const list = e.currentTarget.closest("ul");
+      if (!list) return;
+      const links = Array.from(list.querySelectorAll<HTMLAnchorElement>("a[data-nav-item]"));
+      const i = links.indexOf(e.currentTarget);
+      if (i < 0) return;
+      e.preventDefault();
+      const next =
+        e.key === "Home" ? 0
+        : e.key === "End" ? links.length - 1
+        : e.key === "ArrowRight" || e.key === "ArrowDown" ? (i + 1) % links.length
+        : (i - 1 + links.length) % links.length;
+      links[next]?.focus();
+    },
+    [goTo],
+  );
+
 
 
   /**
@@ -119,7 +176,10 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
       setActive((prev) => (prev === next ? prev : next));
     };
 
+    // Under reduced motion the spy updates synchronously on every scroll
+    // event: no rAF deferral, so the active state never trails the viewport.
     const schedule = () => {
+      if (reduce) { if (frame) { cancelAnimationFrame(frame); frame = 0; } pick(); return; }
       if (!frame) frame = requestAnimationFrame(pick);
     };
     const onResize = () => { measure(); schedule(); };
@@ -138,7 +198,8 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
       ro.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [items]);
+  }, [items, reduce]);
+
 
 
   useEffect(() => () => { releaseRef.current?.(); }, []);
@@ -183,8 +244,11 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
               <li key={n.label} className="relative">
                 <a
                   href={n.href}
+                  data-nav-item={n.href}
+                  data-active={isActive ? "true" : "false"}
                   aria-current={isActive ? "true" : undefined}
                   onClick={(e) => { if (goTo(n.href)) e.preventDefault(); }}
+                  onKeyDown={(e) => onItemKeyDown(e, n.href)}
                   className={`relative block rounded-full px-3 py-1.5 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -204,6 +268,7 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
           })}
         </ul>
 
+
         <div className="hidden shrink-0 items-center gap-2 md:flex">
           <MotionQuickToggle className="min-h-9 min-w-9" />
           <ThemeToggle className="min-h-9 min-w-9" />
@@ -222,7 +287,9 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
           className="grid h-10 w-10 place-items-center rounded-xl text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
+          aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
+
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -232,10 +299,12 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
         {open && (
           <motion.div
             key="mobile-menu"
-            initial={{ opacity: 0, y: -8 }}
+            id="mobile-menu"
+            data-mobile-menu
+            initial={reduce ? false : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: ease.standard }}
+            exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -8 }}
+            transition={reduce ? { duration: 0 } : { duration: 0.25, ease: ease.standard }}
             className="glass-float elev-4 mx-auto mt-2 w-full max-w-6xl overflow-hidden rounded-2xl border border-border p-3 lg:hidden"
           >
             <ul>
@@ -244,15 +313,21 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
                   key={n.label}
                   initial={reduce ? false : { opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.04 * i, duration: 0.3, ease: ease.entrance }}
+                  transition={reduce ? { duration: 0 } : { delay: 0.04 * i, duration: 0.3, ease: ease.entrance }}
                 >
                   <a
                     href={n.href}
+                    data-nav-item={n.href}
+                    data-active={active === n.href ? "true" : "false"}
                     aria-current={active === n.href ? "true" : undefined}
                     onClick={(e) => {
-                      setOpen(false);
-                      if (goTo(n.href)) e.preventDefault();
+                      // One call owns both the active state and the close, so
+                      // there is no ordering race between them.
+                      if (goTo(n.href, { closeMenu: true })) e.preventDefault();
+                      else setOpen(false);
                     }}
+                    onKeyDown={(e) => onItemKeyDown(e, n.href, true)}
+
                     className={`flex min-h-12 items-center rounded-xl px-3 text-[15px] transition-colors hover:bg-secondary/60 hover:text-foreground ${
                       active === n.href ? "bg-secondary/50 text-foreground" : "text-muted-foreground"
                     }`}
