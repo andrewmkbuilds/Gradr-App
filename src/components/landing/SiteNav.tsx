@@ -176,7 +176,10 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
       setActive((prev) => (prev === next ? prev : next));
     };
 
+    // Under reduced motion the spy updates synchronously on every scroll
+    // event: no rAF deferral, so the active state never trails the viewport.
     const schedule = () => {
+      if (reduce) { if (frame) { cancelAnimationFrame(frame); frame = 0; } pick(); return; }
       if (!frame) frame = requestAnimationFrame(pick);
     };
     const onResize = () => { measure(); schedule(); };
@@ -195,7 +198,8 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
       ro.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [items]);
+  }, [items, reduce]);
+
 
 
   useEffect(() => () => { releaseRef.current?.(); }, []);
