@@ -2624,6 +2624,39 @@ export type Database = {
         }
         Relationships: []
       }
+      permission_denied_signals: {
+        Row: {
+          authenticated: boolean
+          code: string | null
+          created_at: string
+          id: string
+          mentions_has_role: boolean
+          message: string | null
+          relation: string | null
+          route: string
+        }
+        Insert: {
+          authenticated?: boolean
+          code?: string | null
+          created_at?: string
+          id?: string
+          mentions_has_role?: boolean
+          message?: string | null
+          relation?: string | null
+          route: string
+        }
+        Update: {
+          authenticated?: boolean
+          code?: string | null
+          created_at?: string
+          id?: string
+          mentions_has_role?: boolean
+          message?: string | null
+          relation?: string | null
+          route?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -2915,6 +2948,57 @@ export type Database = {
           period_start?: string
           summary?: Json
           triggered_by?: string
+        }
+        Relationships: []
+      }
+      security_scan_runs: {
+        Row: {
+          branch: string | null
+          commit_sha: string | null
+          commit_url: string | null
+          counts_by_level: Json
+          created_at: string
+          finding_count: number
+          findings: Json
+          id: string
+          internal_ids: string[]
+          notes: string | null
+          pr_number: number | null
+          pr_url: string | null
+          scanned_at: string
+          source: string
+        }
+        Insert: {
+          branch?: string | null
+          commit_sha?: string | null
+          commit_url?: string | null
+          counts_by_level?: Json
+          created_at?: string
+          finding_count?: number
+          findings?: Json
+          id?: string
+          internal_ids?: string[]
+          notes?: string | null
+          pr_number?: number | null
+          pr_url?: string | null
+          scanned_at?: string
+          source?: string
+        }
+        Update: {
+          branch?: string | null
+          commit_sha?: string | null
+          commit_url?: string | null
+          counts_by_level?: Json
+          created_at?: string
+          finding_count?: number
+          findings?: Json
+          id?: string
+          internal_ids?: string[]
+          notes?: string | null
+          pr_number?: number | null
+          pr_url?: string | null
+          scanned_at?: string
+          source?: string
         }
         Relationships: []
       }
