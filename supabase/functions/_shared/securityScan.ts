@@ -88,6 +88,12 @@ export async function runScan(
       commit_ref: commit.ref ?? null,
       commit_url: commit.url ?? null,
       totals: totalsOf(raw),
+      // Legacy columns kept in sync so older readers of this table stay correct.
+      finding_count: raw.length,
+      internal_ids: raw.map((f) => f.internal_id),
+      counts_by_level: totalsOf(raw),
+      findings: raw,
+      branch: commit.ref ?? null,
       created_by: opts.createdBy ?? null,
     })
     .select("*")
