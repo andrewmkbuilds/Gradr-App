@@ -56,6 +56,7 @@ export function DailyBriefing({ briefing, name }: { briefing: Briefing; name?: s
   return (
     <section aria-labelledby="briefing-heading" className="lume-border glass-panel reflect relative overflow-hidden rounded-2xl">
       <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/15 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute -bottom-28 -left-16 h-56 w-56 rounded-full bg-mahogany/12 blur-3xl" aria-hidden />
       <div className="relative grid gap-6 p-6 lg:grid-cols-[auto_1fr] lg:p-8">
         <div className="flex items-center gap-6">
           <ReadinessDial value={briefing.readiness} />
@@ -80,7 +81,7 @@ export function DailyBriefing({ briefing, name }: { briefing: Briefing; name?: s
         </div>
 
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-[0.2em] text-primary">
+          <p className="accent-text text-xs uppercase tracking-[0.2em]">
             {greeting()}
             {name ? `, ${name}` : ""}
           </p>
@@ -89,7 +90,7 @@ export function DailyBriefing({ briefing, name }: { briefing: Briefing; name?: s
           </h1>
           <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">{briefing.summary}</p>
 
-          <div className="mt-4 flex items-center gap-3 rounded-xl bg-secondary/50 px-3.5 py-2.5">
+          <div className="accent-card mt-4 flex items-center gap-3 rounded-xl px-3.5 py-2.5">
             <Flame className={`h-4 w-4 shrink-0 ${weeklyGoal.pct >= 100 ? "text-success" : "text-warning"}`} aria-hidden />
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-2 text-xs">

@@ -104,7 +104,7 @@ export function NextThreeDays() {
               if (steps.length === 0) return null;
               return (
                 <div key={day}>
-                  <h3 className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{DAY_LABEL[day - 1]}</h3>
+                  <h3 className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground"><span className="accent-dot" aria-hidden />{DAY_LABEL[day - 1]}</h3>
                   <ul className="mt-2 space-y-2">
                     {steps.map((step) => (
                       <li
@@ -136,7 +136,7 @@ export function NextThreeDays() {
                             <button
                               type="button"
                               onClick={() => navigate(step.to)}
-                              className="inline-flex items-center gap-1 text-[0.7rem] text-primary hover:underline"
+                              className="accent-link inline-flex items-center gap-1 text-[0.7rem]"
                             >
                               Open <ArrowRight className="h-3 w-3" aria-hidden />
                             </button>
