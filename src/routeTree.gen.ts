@@ -51,6 +51,7 @@ import { Route as AppAdminApiHealthRouteImport } from './routes/_app/admin/api-h
 import { Route as AppAdminAuditLogRouteImport } from './routes/_app/admin/audit-log'
 import { Route as AppAdminAuthEmailPreviewRouteImport } from './routes/_app/admin/auth-email-preview'
 import { Route as AppAdminBlogAnalyticsRouteImport } from './routes/_app/admin/blog-analytics'
+import { Route as AppAdminBrandMetadataRouteImport } from './routes/_app/admin/brand-metadata'
 import { Route as AppAdminDigestPreviewRouteImport } from './routes/_app/admin/digest-preview'
 import { Route as AppAdminDiscountsRouteImport } from './routes/_app/admin/discounts'
 import { Route as AppAdminEmailOpsRouteImport } from './routes/_app/admin/email-ops'
@@ -324,6 +325,11 @@ const AppAdminAuthEmailPreviewRoute =
 const AppAdminBlogAnalyticsRoute = AppAdminBlogAnalyticsRouteImport.update({
   id: '/admin/blog-analytics',
   path: '/admin/blog-analytics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminBrandMetadataRoute = AppAdminBrandMetadataRouteImport.update({
+  id: '/admin/brand-metadata',
+  path: '/admin/brand-metadata',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminDigestPreviewRoute = AppAdminDigestPreviewRouteImport.update({
@@ -699,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit-log': typeof AppAdminAuditLogRoute
   '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
+  '/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
   '/admin/email-ops': typeof AppAdminEmailOpsRoute
@@ -805,6 +812,7 @@ export interface FileRoutesByTo {
   '/admin/audit-log': typeof AppAdminAuditLogRoute
   '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
+  '/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
   '/admin/email-ops': typeof AppAdminEmailOpsRoute
@@ -913,6 +921,7 @@ export interface FileRoutesById {
   '/_app/admin/audit-log': typeof AppAdminAuditLogRoute
   '/_app/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/_app/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
+  '/_app/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/_app/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/_app/admin/discounts': typeof AppAdminDiscountsRoute
   '/_app/admin/email-ops': typeof AppAdminEmailOpsRoute
@@ -1021,6 +1030,7 @@ export interface FileRouteTypes {
     | '/admin/audit-log'
     | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
+    | '/admin/brand-metadata'
     | '/admin/digest-preview'
     | '/admin/discounts'
     | '/admin/email-ops'
@@ -1127,6 +1137,7 @@ export interface FileRouteTypes {
     | '/admin/audit-log'
     | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
+    | '/admin/brand-metadata'
     | '/admin/digest-preview'
     | '/admin/discounts'
     | '/admin/email-ops'
@@ -1234,6 +1245,7 @@ export interface FileRouteTypes {
     | '/_app/admin/audit-log'
     | '/_app/admin/auth-email-preview'
     | '/_app/admin/blog-analytics'
+    | '/_app/admin/brand-metadata'
     | '/_app/admin/digest-preview'
     | '/_app/admin/discounts'
     | '/_app/admin/email-ops'
@@ -1663,6 +1675,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/blog-analytics'
       fullPath: '/admin/blog-analytics'
       preLoaderRoute: typeof AppAdminBlogAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/brand-metadata': {
+      id: '/_app/admin/brand-metadata'
+      path: '/admin/brand-metadata'
+      fullPath: '/admin/brand-metadata'
+      preLoaderRoute: typeof AppAdminBrandMetadataRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/digest-preview': {
@@ -2129,6 +2148,7 @@ interface AppRouteChildren {
   AppAdminAuditLogRoute: typeof AppAdminAuditLogRoute
   AppAdminAuthEmailPreviewRoute: typeof AppAdminAuthEmailPreviewRoute
   AppAdminBlogAnalyticsRoute: typeof AppAdminBlogAnalyticsRoute
+  AppAdminBrandMetadataRoute: typeof AppAdminBrandMetadataRoute
   AppAdminDigestPreviewRoute: typeof AppAdminDigestPreviewRoute
   AppAdminDiscountsRoute: typeof AppAdminDiscountsRoute
   AppAdminEmailOpsRoute: typeof AppAdminEmailOpsRoute
@@ -2170,6 +2190,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminAuditLogRoute: AppAdminAuditLogRoute,
   AppAdminAuthEmailPreviewRoute: AppAdminAuthEmailPreviewRoute,
   AppAdminBlogAnalyticsRoute: AppAdminBlogAnalyticsRoute,
+  AppAdminBrandMetadataRoute: AppAdminBrandMetadataRoute,
   AppAdminDigestPreviewRoute: AppAdminDigestPreviewRoute,
   AppAdminDiscountsRoute: AppAdminDiscountsRoute,
   AppAdminEmailOpsRoute: AppAdminEmailOpsRoute,
