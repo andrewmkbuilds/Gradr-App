@@ -968,3 +968,96 @@ html[data-motion="full"] *::after {
   animation-iteration-count: revert-layer;
   transition-duration: revert-layer;
 }
+
+/* ============================================================
+   MAHOGANY ACCENT UTILITIES
+   Teal remains the primary identity; these give mahogany a
+   consistent, reusable vocabulary for emphasis across the app.
+   ============================================================ */
+@layer utilities {
+  /* Tinted panel: warm wash + hairline. Use for insight/recommendation blocks. */
+  .accent-panel {
+    background-color: hsl(var(--mahogany-tint));
+    border: 1px solid hsl(var(--mahogany-border) / 0.75);
+  }
+
+  /* Small pill label — "Recommended", "Top match", "New insight". */
+  .accent-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--mahogany-border) / 0.8);
+    background-color: hsl(var(--mahogany-soft));
+    color: hsl(var(--mahogany-strong));
+    padding: 0.125rem 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* 2px vertical marker for active nav rows / selected list items. */
+  .accent-marker {
+    position: relative;
+  }
+  .accent-marker::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 3px;
+    border-radius: 9999px;
+    background-color: hsl(var(--mahogany));
+  }
+
+  /* Card that should read as "the important one" without shouting. */
+  .accent-card {
+    border-color: hsl(var(--mahogany-border) / 0.8);
+    box-shadow: inset 3px 0 0 hsl(var(--mahogany) / 0.9);
+  }
+
+  /* Section divider that fades teal → mahogany → nothing. */
+  .accent-rule {
+    height: 1px;
+    background-image: linear-gradient(
+      to right,
+      hsl(var(--primary) / 0.5) 0%,
+      hsl(var(--mahogany) / 0.55) 38%,
+      hsl(var(--border)) 70%,
+      transparent 100%
+    );
+  }
+
+  .accent-dot {
+    display: inline-block;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: hsl(var(--mahogany));
+  }
+
+  .link-accent {
+    color: hsl(var(--mahogany));
+    text-decoration-color: hsl(var(--mahogany) / 0.4);
+    text-underline-offset: 3px;
+  }
+  .link-accent:hover {
+    color: hsl(var(--mahogany-hover));
+    text-decoration-line: underline;
+  }
+
+  /* Hover warmth for selectable rows/cards. */
+  .accent-hover {
+    transition: background-color var(--dur-base) var(--ease-out-soft),
+      border-color var(--dur-base) var(--ease-out-soft);
+  }
+  .accent-hover:hover {
+    background-color: hsl(var(--mahogany-soft) / 0.7);
+    border-color: hsl(var(--mahogany-border));
+  }
+
+  .ring-accent {
+    box-shadow: 0 0 0 2px hsl(var(--mahogany-ring) / 0.35);
+  }
+}
