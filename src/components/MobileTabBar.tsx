@@ -27,7 +27,7 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="glass-bar fixed inset-x-0 bottom-0 z-40 border-t border-border/70 pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="glass-bar glass-float fixed inset-x-0 bottom-0 z-40 border-t border-border/70 pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="grid grid-cols-5">
         {tabs.map((tab) => {
