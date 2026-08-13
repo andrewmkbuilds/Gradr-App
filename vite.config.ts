@@ -25,6 +25,18 @@ export default defineConfig(({ mode }) => ({
     // in production. Rollup's default chunking + route-level React.lazy already
     // keep the entry payload small.
     chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        // Opaque, content-hashed filenames. Default Rollup naming leaks the
+        // dependency graph to anyone reading the HTML (`react-dom-*.js`,
+        // `motion-*.js`, route/component names), which is the only stack
+        // fingerprint we actually control. Names are cosmetic — this changes
+        // no chunk boundaries, so it cannot reintroduce the TDZ crash above.
+        entryFileNames: 'assets/[hash].js',
+        chunkFileNames: 'assets/[hash].js',
+        assetFileNames: 'assets/[hash][extname]',
+      },
+    },
   },
   resolve: {
     alias: {
