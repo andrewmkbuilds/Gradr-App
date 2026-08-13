@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { consume, paymentRequired, refund, resolveEnv, type PaymentEnv } from "../_shared/entitlements.ts";
 import { logAiAuthorization } from "../_shared/securityAudit.ts";
+import { sseResponse, streamGatewayChat } from "../_shared/aiStream.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
