@@ -882,16 +882,21 @@ export default function Landing() {
                     billing === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {k === "monthly" ? "Monthly" : "Annual"}
-                  {k === "annual" && <span className="ml-2 text-[11px] opacity-80">save up to 26%</span>}
+                  {k === "monthly" ? "Monthly" : "Yearly"}
                 </button>
               ))}
             </div>
+            <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-mahogany-border bg-mahogany/10 px-3 py-1 text-xs font-medium text-mahogany">
+              {ANNUAL_SAVINGS_MESSAGE}
+            </p>
           </Reveal>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {PLANS.map((p, i) => {
-              const price = p[billing];
+              const priceLabel = planPriceLabel(p.id, billing);
+              const periodNote =
+                p.id === "free" ? "forever" : billing === "annual" ? "per year" : "per month";
+              const savings = billing === "annual" ? annualSavingsPercent(p.id) : 0;
               return (
                 <Reveal key={p.name} delay={i * 70} className="h-full">
                 <SpotlightCard
@@ -913,9 +918,19 @@ export default function Landing() {
                   <p className="mt-2 text-sm text-muted-foreground">{p.tagline}</p>
 
                   <div className="mt-6 flex items-baseline gap-2">
-                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{price.price}</span>
-                    <span className="text-sm text-muted-foreground">{price.note}</span>
+                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{priceLabel}</span>
+                    <span className="text-sm text-muted-foreground">{periodNote}</span>
                   </div>
+                  {savings > 0 && (
+                    <div className="mt-2 flex items-center gap-2 text-xs">
+                      <span className="tabular-nums text-muted-foreground line-through">
+                        {formatUsd(annualListPrice(p.id))}
+                      </span>
+                      <span className="rounded-full bg-mahogany px-2 py-0.5 font-semibold text-mahogany-foreground">
+                        Save {savings}%
+                      </span>
+                    </div>
+                  )}
 
                   <ul className="mt-6 flex-1 space-y-2.5">
                     {p.features.map((f) => (
