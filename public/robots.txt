@@ -1,4 +1,4 @@
-# Gradr — AI career command center (gradr.me)
+# Gradr — AI career platform for resumes, jobs & interviews (gradr.me)
 # Public marketing, pricing, legal and career-content pages are crawlable.
 # Authenticated product surfaces, credential flows and admin tools are not.
 
