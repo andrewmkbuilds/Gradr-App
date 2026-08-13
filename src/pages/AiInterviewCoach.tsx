@@ -353,8 +353,8 @@ export default function AiInterviewCoach() {
         </div>
       </section>
 
-      <section className="mt-16 rounded-2xl border border-primary/25 bg-primary/5 p-8 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+      <section className="mt-16 rounded-2xl border border-primary/25 bg-primary/5 p-8 text-center" aria-labelledby="practise-cta">
+        <h2 id="practise-cta" className="text-2xl font-semibold tracking-tight text-foreground">
           Practise before it counts
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
