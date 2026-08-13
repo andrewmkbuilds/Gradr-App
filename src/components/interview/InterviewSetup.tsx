@@ -16,7 +16,6 @@ import {
   type DifficultyId,
   type SessionContext,
 } from "@/lib/interview/personas";
-import { Surface } from "@/components/ui/surface";
 import { stagger, fadeUp, springSnappy } from "@/lib/motion/tokens";
 import { entitlementFor, personaAllowed, difficultyAllowed } from "@/lib/interview/entitlements";
 
