@@ -6,16 +6,24 @@ import {
   Download,
   FileText,
   Loader2,
+  Printer,
   RefreshCw,
+  Search,
   ShieldCheck,
+  Table2,
+  X,
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { redactOAuthUrl } from "@/lib/oauth/redact";
 import { useSeoOverride } from "@/lib/seoOverride";
+
 
 interface Hop {
   order: number;
@@ -125,7 +133,6 @@ interface CspSummary {
 }
 
 function HopChain({ hops }: { hops: Hop[] | null }) {
-
   if (!hops?.length) return <p className="text-sm text-muted-foreground">No hops recorded.</p>;
   return (
     <ol className="space-y-2">
@@ -135,7 +142,8 @@ function HopChain({ hops }: { hops: Hop[] | null }) {
             {hop.order}
           </span>
           <div className="min-w-0">
-            <p className="break-all font-mono text-xs text-foreground">{hop.url}</p>
+            {/* Defence in depth: the server already redacts, we never render raw. */}
+            <p className="break-all font-mono text-xs text-foreground">{redactOAuthUrl(hop.url)}</p>
             <p className="text-xs text-muted-foreground">
               {hop.kind}
               {hop.note ? ` · ${hop.note}` : ""} · {when(hop.at)}
@@ -147,6 +155,155 @@ function HopChain({ hops }: { hops: Hop[] | null }) {
   );
 }
 
+/* ------------------------------------------------------------- filters --- */
+
+interface Filters {
+  from: string;
+  to: string;
+  userId: string;
+  accountKind: string;
+  outcome: string;
+  deviation: string;
+  stateNonce: string;
+  q: string;
+}
+
+const EMPTY_FILTERS: Filters = {
+  from: "",
+  to: "",
+  userId: "",
+  accountKind: "all",
+  outcome: "all",
+  deviation: "all",
+  stateNonce: "all",
+  q: "",
+};
+
+const isFiltered = (f: Filters) =>
+  Object.entries(f).some(([key, value]) => value !== EMPTY_FILTERS[key as keyof Filters]);
+
+const selectClass =
+  "h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+function FilterBar({
+  value,
+  onChange,
+  onReset,
+  onApply,
+}: {
+  value: Filters;
+  onChange: (next: Filters) => void;
+  onReset: () => void;
+  onApply: () => void;
+}) {
+  const set = <K extends keyof Filters>(key: K, next: Filters[K]) => onChange({ ...value, [key]: next });
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="space-y-1">
+          <Label htmlFor="f-from" className="text-xs text-muted-foreground">From</Label>
+          <Input id="f-from" type="date" value={value.from} onChange={(e) => set("from", e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-to" className="text-xs text-muted-foreground">To</Label>
+          <Input id="f-to" type="date" value={value.to} onChange={(e) => set("to", e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-user" className="text-xs text-muted-foreground">User ID</Label>
+          <Input
+            id="f-user"
+            placeholder="uuid"
+            value={value.userId}
+            onChange={(e) => set("userId", e.target.value.trim())}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-kind" className="text-xs text-muted-foreground">Google account type</Label>
+          <select
+            id="f-kind"
+            className={selectClass}
+            value={value.accountKind}
+            onChange={(e) => set("accountKind", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="consumer">Consumer (gmail.com)</option>
+            <option value="workspace">Workspace</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-outcome" className="text-xs text-muted-foreground">Outcome</Label>
+          <select
+            id="f-outcome"
+            className={selectClass}
+            value={value.outcome}
+            onChange={(e) => set("outcome", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="success">Success</option>
+            <option value="error">Error</option>
+            <option value="abandoned">Abandoned</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-dev" className="text-xs text-muted-foreground">Deviation</Label>
+          <select
+            id="f-dev"
+            className={selectClass}
+            value={value.deviation}
+            onChange={(e) => set("deviation", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="only">Deviations only</option>
+            <option value="none">Clean chains only</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-state" className="text-xs text-muted-foreground">State / nonce</Label>
+          <select
+            id="f-state"
+            className={selectClass}
+            value={value.stateNonce}
+            onChange={(e) => set("stateNonce", e.target.value)}
+          >
+            <option value="all">Any</option>
+            <option value="failed">Failed validation</option>
+            <option value="valid">Both valid</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="f-q" className="text-xs text-muted-foreground">Search</Label>
+          <Input
+            id="f-q"
+            placeholder="request id, domain, error"
+            value={value.q}
+            onChange={(e) => set("q", e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onApply();
+            }}
+          />
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button size="sm" onClick={onApply}>
+          <Search className="mr-2 h-4 w-4" />
+          Apply filters
+        </Button>
+        {isFiltered(value) && (
+          <Button size="sm" variant="ghost" onClick={onReset}>
+            <X className="mr-2 h-4 w-4" />
+            Clear
+          </Button>
+        )}
+        <span className="text-xs text-muted-foreground">
+          Credentials, tokens, state and nonce values are redacted everywhere, including exports.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminOAuthForensics() {
   useSeoOverride({
     title: "OAuth Forensics | Gradr Admin",
@@ -155,13 +312,16 @@ export default function AdminOAuthForensics() {
 
   const [expanded, setExpanded] = useState<string | null>(null);
   const [headerReport, setHeaderReport] = useState<HeaderReport | null>(null);
+  const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+
 
   const traces = useQuery({
-    queryKey: ["oauth-forensics", "traces"],
+    queryKey: ["oauth-forensics", "traces", filters],
     queryFn: async () => {
       const { data, error } = await invokeFunction<{ traces: Trace[]; expectedFinalUrl: string }>(
         "oauth-forensics",
-        { body: { action: "traces", limit: 50 } },
+        { body: { action: "traces", limit: 100, filters } },
       );
       if (error) throw error;
       return data!;
@@ -169,15 +329,16 @@ export default function AdminOAuthForensics() {
   });
 
   const checks = useQuery({
-    queryKey: ["oauth-forensics", "checks"],
+    queryKey: ["oauth-forensics", "checks", filters],
     queryFn: async () => {
       const { data, error } = await invokeFunction<{ checks: FlowCheck[] }>("oauth-forensics", {
-        body: { action: "checks", limit: 50 },
+        body: { action: "checks", limit: 100, filters },
       });
       if (error) throw error;
       return data!.checks;
     },
   });
+
 
   const csp = useQuery({
     queryKey: ["oauth-forensics", "csp"],
@@ -209,20 +370,42 @@ export default function AdminOAuthForensics() {
   });
 
   const exportIncident = useMutation({
-    mutationFn: async (format: "md" | "json") => {
-      const { data, error } = await invokeFunction<{ markdown: string; generatedAt: string }>(
-        "oauth-forensics",
-        { body: { action: "export", days: 14, limit: 100 } },
-      );
+    mutationFn: async (format: "md" | "json" | "csv" | "pdf") => {
+      const { data, error } = await invokeFunction<{
+        markdown: string;
+        csv: string;
+        printableHtml: string;
+        generatedAt: string;
+      }>("oauth-forensics", { body: { action: "export", days: 14, limit: 100 } });
       if (error) throw error;
       return { format, report: data! };
     },
     onSuccess: ({ format, report }) => {
       const stamp = new Date(report.generatedAt).toISOString().slice(0, 10);
-      const body = format === "md" ? report.markdown : JSON.stringify(report, null, 2);
-      const blob = new Blob([body], {
-        type: format === "md" ? "text/markdown" : "application/json",
-      });
+
+      // PDF is produced by the browser's own print-to-PDF on a print-styled doc,
+      // which keeps links selectable and avoids shipping a PDF engine.
+      if (format === "pdf") {
+        const win = window.open("", "_blank", "noopener,noreferrer,width=1024,height=768");
+        if (!win) {
+          toast.error("Allow pop-ups to generate the printable PDF");
+          return;
+        }
+        win.document.write(report.printableHtml);
+        win.document.close();
+        win.addEventListener("load", () => {
+          win.focus();
+          win.print();
+        });
+        toast.success("Printable timeline opened — choose “Save as PDF”");
+        return;
+      }
+
+      const body =
+        format === "md" ? report.markdown : format === "csv" ? report.csv : JSON.stringify(report, null, 2);
+      const mime =
+        format === "md" ? "text/markdown" : format === "csv" ? "text/csv;charset=utf-8" : "application/json";
+      const blob = new Blob([format === "csv" ? `\uFEFF${body}` : body], { type: mime });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -233,6 +416,7 @@ export default function AdminOAuthForensics() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
 
   const rows = traces.data?.traces ?? [];
   const deviations = rows.filter((t) => t.deviation).length;
@@ -264,13 +448,21 @@ export default function AdminOAuthForensics() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
+          <Button variant="outline" onClick={() => exportIncident.mutate("csv")} disabled={exportIncident.isPending}>
+            <Table2 className="mr-2 h-4 w-4" />
+            CSV
+          </Button>
+          <Button variant="outline" onClick={() => exportIncident.mutate("pdf")} disabled={exportIncident.isPending}>
+            <Printer className="mr-2 h-4 w-4" />
+            PDF
+          </Button>
           <Button variant="secondary" onClick={() => exportIncident.mutate("json")} disabled={exportIncident.isPending}>
             {exportIncident.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Download className="mr-2 h-4 w-4" />
             )}
-            Export JSON
+            JSON
           </Button>
           <Button onClick={() => exportIncident.mutate("md")} disabled={exportIncident.isPending}>
             <FileText className="mr-2 h-4 w-4" />
@@ -279,12 +471,23 @@ export default function AdminOAuthForensics() {
         </div>
       </header>
 
+      <FilterBar
+        value={draft}
+        onChange={setDraft}
+        onApply={() => setFilters(draft)}
+        onReset={() => {
+          setDraft(EMPTY_FILTERS);
+          setFilters(EMPTY_FILTERS);
+        }}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Sign-ins traced" value={rows.length} />
         <Stat label="Domain deviations" value={deviations} tone={deviations ? "bad" : "ok"} />
         <Stat label="State/nonce failures" value={stateFailures} tone={stateFailures ? "bad" : "ok"} />
         <Stat label="Failed daily checks" value={failedChecks} tone={failedChecks ? "bad" : "ok"} />
       </div>
+
 
       <Tabs defaultValue="traces">
         <TabsList>
@@ -334,8 +537,8 @@ export default function AdminOAuthForensics() {
                 {expanded === trace.id && (
                   <div className="space-y-3 border-t border-border p-4">
                     <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
-                      <p>Expected redirect: <span className="break-all font-mono">{trace.expected_redirect_uri ?? "—"}</span></p>
-                      <p>Final URL: <span className="break-all font-mono">{trace.final_url ?? "—"}</span></p>
+                      <p>Expected redirect: <span className="break-all font-mono">{redactOAuthUrl(trace.expected_redirect_uri) || "—"}</span></p>
+                      <p>Final URL: <span className="break-all font-mono">{redactOAuthUrl(trace.final_url) || "—"}</span></p>
                       <p>State returned: {trace.state_present ? "yes" : "no"} ({tri(trace.state_valid)})</p>
                       <p>Nonce returned: {trace.nonce_present ? "yes" : "no"} ({tri(trace.nonce_valid)})</p>
                     </div>
@@ -425,7 +628,7 @@ export default function AdminOAuthForensics() {
                   <Verdict ok={check.status === "pass"} label={check.status} />
                 </div>
                 <p className="mt-2 break-all font-mono text-xs text-muted-foreground">
-                  {check.final_url ?? "—"}{" "}
+                  {redactOAuthUrl(check.final_url) || "—"}{" "}
                   <span className="text-muted-foreground/70">(expected {check.expected_final_url})</span>
                 </p>
                 {(check.failures ?? []).length > 0 && (
