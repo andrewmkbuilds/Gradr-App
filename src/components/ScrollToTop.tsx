@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 
 /**
  * Resets scroll on every route change: the window (the app's single primary
@@ -7,11 +8,10 @@ import { useLocation } from "react-router-dom";
  */
 export function ScrollToTop() {
   const { pathname, hash } = useLocation();
+  const reduced = useReducedMotionPref();
 
   useEffect(() => {
-    const behavior: ScrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ? "auto"
-      : "smooth";
+    const behavior: ScrollBehavior = reduced ? "auto" : "smooth";
 
     if (hash) {
       // Let the target render, then bring the anchored section into view.
@@ -26,7 +26,7 @@ export function ScrollToTop() {
     document.querySelectorAll<HTMLElement>("[data-scroll-container]").forEach((el) => {
       el.scrollTo({ top: 0, left: 0, behavior });
     });
-  }, [pathname, hash]);
+  }, [pathname, hash, reduced]);
 
 
   return null;
