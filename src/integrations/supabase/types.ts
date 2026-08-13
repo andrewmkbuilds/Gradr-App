@@ -818,6 +818,48 @@ export type Database = {
         }
         Relationships: []
       }
+      csp_alert_notices: {
+        Row: {
+          alert_key: string
+          blocked_origin: string | null
+          delivery_error: string | null
+          directive: string | null
+          first_alerted_at: string
+          headline: string
+          id: string
+          kind: string
+          last_alerted_at: string
+          occurrences: number
+          payload: Json
+        }
+        Insert: {
+          alert_key: string
+          blocked_origin?: string | null
+          delivery_error?: string | null
+          directive?: string | null
+          first_alerted_at?: string
+          headline: string
+          id?: string
+          kind: string
+          last_alerted_at?: string
+          occurrences?: number
+          payload?: Json
+        }
+        Update: {
+          alert_key?: string
+          blocked_origin?: string | null
+          delivery_error?: string | null
+          directive?: string | null
+          first_alerted_at?: string
+          headline?: string
+          id?: string
+          kind?: string
+          last_alerted_at?: string
+          occurrences?: number
+          payload?: Json
+        }
+        Relationships: []
+      }
       csp_violation_reports: {
         Row: {
           blocked_origin: string | null

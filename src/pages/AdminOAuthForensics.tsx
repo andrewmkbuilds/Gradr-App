@@ -132,6 +132,47 @@ interface CspSummary {
   enforcedPolicy: string;
 }
 
+interface CspStatus {
+  enforced: boolean;
+  analysis: {
+    windowHours: number;
+    recentTotal: number;
+    spikes: {
+      key: string;
+      directive: string;
+      blockedOrigin: string;
+      recent: number;
+      baselineRate: number;
+      multiple: number;
+      surfaces: string[];
+    }[];
+    newCombos: {
+      key: string;
+      directive: string;
+      blockedOrigin: string;
+      recent: number;
+      firstSeen: string;
+      surfaces: string[];
+    }[];
+    readiness: {
+      ready: boolean;
+      cleanDays: number;
+      requiredCleanDays: number;
+      summary: string;
+      blockers: string[];
+      surfaces: { id: string; label: string; violations: number; clean: boolean }[];
+    };
+  };
+  notices: {
+    id: string;
+    kind: string;
+    headline: string;
+    last_alerted_at: string;
+    delivery_error: string | null;
+  }[];
+}
+
+
 function HopChain({ hops }: { hops: Hop[] | null }) {
   if (!hops?.length) return <p className="text-sm text-muted-foreground">No hops recorded.</p>;
   return (
@@ -350,6 +391,19 @@ export default function AdminOAuthForensics() {
       return data!;
     },
   });
+
+  // Spike / new-combo detection plus the enforce-CSP readiness gate.
+  const cspStatus = useQuery({
+    queryKey: ["csp-alerts", "status"],
+    queryFn: async () => {
+      const { data, error } = await invokeFunction<CspStatus>("csp-alerts", {
+        body: { action: "status", days: 14 },
+      });
+      if (error) throw error;
+      return data!;
+    },
+  });
+
 
 
 
@@ -662,6 +716,93 @@ export default function AdminOAuthForensics() {
               </pre>
             )}
           </div>
+
+          {/* Enforcement gate: the policy only flips after a clean week. */}
+          {cspStatus.data && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium">
+                  Enforcement readiness —{" "}
+                  <span className={cspStatus.data.analysis.readiness.ready ? "text-primary" : "text-muted-foreground"}>
+                    {cspStatus.data.enforced
+                      ? "enforcing"
+                      : cspStatus.data.analysis.readiness.ready
+                        ? "ready to enforce"
+                        : "report-only"}
+                  </span>
+                </p>
+                <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs">
+                  {cspStatus.data.analysis.readiness.cleanDays}/
+                  {cspStatus.data.analysis.readiness.requiredCleanDays} clean days
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {cspStatus.data.analysis.readiness.summary}
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                {cspStatus.data.analysis.readiness.surfaces.map((surface) => (
+                  <div
+                    key={surface.id}
+                    className="rounded-lg border border-border px-3 py-2 text-xs"
+                  >
+                    <span className={surface.clean ? "text-primary" : "text-destructive"}>
+                      {surface.clean ? "clean" : `${surface.violations} violation(s)`}
+                    </span>
+                    <p className="text-muted-foreground">{surface.label}</p>
+                  </div>
+                ))}
+              </div>
+              {cspStatus.data.analysis.readiness.blockers.length > 0 && (
+                <ul className="mt-3 space-y-1 text-xs text-destructive">
+                  {cspStatus.data.analysis.readiness.blockers.map((blocker) => (
+                    <li key={blocker}>• {blocker}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Anomalies: volume spikes and never-before-seen directive/origin pairs. */}
+          {(cspStatus.data?.analysis.spikes.length ?? 0) +
+            (cspStatus.data?.analysis.newCombos.length ?? 0) >
+            0 && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-sm font-medium">
+                Anomalies in the last {cspStatus.data?.analysis.windowHours ?? 24}h
+              </p>
+              <ul className="mt-2 space-y-1 text-xs">
+                {cspStatus.data?.analysis.spikes.map((spike) => (
+                  <li key={`spike-${spike.key}`} className="font-mono">
+                    <span className="text-destructive">spike</span> {spike.directive} →{" "}
+                    {spike.blockedOrigin} · {spike.recent} reports ({spike.multiple}x baseline)
+                  </li>
+                ))}
+                {cspStatus.data?.analysis.newCombos.map((combo) => (
+                  <li key={`new-${combo.key}`} className="font-mono">
+                    <span className="text-accent-foreground">new</span> {combo.directive} →{" "}
+                    {combo.blockedOrigin} · {combo.recent} reports
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {(cspStatus.data?.notices.length ?? 0) > 0 && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-sm font-medium">Recent alerts sent</p>
+              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                {cspStatus.data?.notices.slice(0, 10).map((notice) => (
+                  <li key={notice.id}>
+                    <span className="font-mono">[{notice.kind}]</span> {notice.headline} —{" "}
+                    {when(notice.last_alerted_at)}
+                    {notice.delivery_error ? ` (delivery: ${notice.delivery_error})` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+
 
           {csp.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading violation reports…</p>

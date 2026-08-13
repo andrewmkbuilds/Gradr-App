@@ -1,0 +1,49 @@
+name: Fingerprint metadata diff
+
+# Shows exactly what changed in head tags, security headers and the
+# webmanifest between this branch's preview deployment and production.
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      head_origin:
+        description: Origin to compare against production
+        required: false
+
+concurrency:
+  group: fingerprint-diff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Snapshot production (base)
+        run: node scripts/fingerprint-snapshot.mjs "${BASE_ORIGIN}" --out /tmp/base.json
+        env:
+          BASE_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
+
+      - name: Snapshot branch preview (head)
+        run: node scripts/fingerprint-snapshot.mjs "${HEAD_ORIGIN}" --out /tmp/head.json
+        env:
+          HEAD_ORIGIN: ${{ github.event.inputs.head_origin || vars.GRADR_PREVIEW_ORIGIN || 'https://gradr.me' }}
+
+      - name: Diff snapshots
+        run: |
+          node scripts/fingerprint-diff.mjs /tmp/base.json /tmp/head.json
+          node scripts/fingerprint-diff.mjs /tmp/base.json /tmp/head.json --markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fingerprint-snapshots
+          path: |
+            /tmp/base.json
+            /tmp/head.json

@@ -1,0 +1,57 @@
+name: CSP monitor & enforcement gate
+
+# Hourly: alert on report-only violation spikes and brand-new
+# directive/origin pairs. Daily: evaluate whether the candidate policy has
+# been clean long enough to be enforced.
+on:
+  schedule:
+    - cron: "17 * * * *"
+    - cron: "40 6 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Evaluate without sending alerts
+        type: boolean
+        default: false
+
+concurrency:
+  group: csp-monitor
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    if: github.event.schedule != '40 6 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Evaluate CSP violations and alert
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
+        run: node scripts/csp-alert-check.mjs ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
+
+  enforcement-gate:
+    if: github.event.schedule == '40 6 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: CSP enforcement readiness
+        id: gate
+        continue-on-error: true
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GRADR_ORIGIN: ${{ vars.GRADR_BASE_ORIGIN || 'https://gradr.me' }}
+        run: node scripts/csp-enforce-gate.mjs
+      - name: Report verdict
+        run: |
+          if [ "${{ steps.gate.outputs.should_promote }}" = "true" ]; then
+            echo "CSP is ready to enforce — set CSP_ENFORCE=true and redeploy." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "CSP stays in report-only for now." >> "$GITHUB_STEP_SUMMARY"
+          fi
