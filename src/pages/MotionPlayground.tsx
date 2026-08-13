@@ -48,7 +48,7 @@ export default function MotionPlayground() {
 
   const [springKey, setSpringKey] = useState<SpringKey>("smooth");
   const [easeKey, setEaseKey] = useState<EaseKey>("standard");
-  const [easeDuration, setEaseDuration] = useState(duration.base);
+  const [easeDuration, setEaseDuration] = useState<number>(duration.base);
   const [variantKey, setVariantKey] = useState<VariantKey>("page");
   const [run, setRun] = useState(0);
   const [shown, setShown] = useState(true);
