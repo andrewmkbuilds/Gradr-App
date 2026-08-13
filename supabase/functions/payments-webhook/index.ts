@@ -7,6 +7,7 @@ import {
   type PaddleEnv,
 } from "../_shared/paddle.ts";
 import { logSecurityEvent } from "../_shared/securityAudit.ts";
+import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
@@ -30,6 +31,28 @@ async function emailFor(userId: string, env: PaddleEnv): Promise<string> {
   if (row?.email) return row.email as string;
   const { data } = await db().auth.admin.getUserById(userId);
   return data?.user?.email ?? "unknown@gradr.local";
+}
+
+/** Billing emails are best-effort; a delivery problem never fails a webhook. */
+// deno-lint-ignore no-explicit-any
+async function billingEmail(
+  template: string,
+  recipient: string | null | undefined,
+  idempotencyKey: string,
+  templateData: Record<string, unknown>,
+) {
+  if (!recipient || recipient === "unknown@gradr.local") return;
+  await sendTransactionalEmail({
+    templateName: template,
+    recipientEmail: recipient,
+    idempotencyKey,
+    templateData,
+  });
+}
+
+function planLabel(tier?: string | null, interval?: string | null): string {
+  const name = tier ? `Gradr ${tier.charAt(0).toUpperCase()}${tier.slice(1)}` : "Gradr Pro";
+  return interval ? `${name} (${interval})` : name;
 }
 
 
