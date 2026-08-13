@@ -25,6 +25,8 @@ import { handleAiFunctionError } from "@/lib/aiErrors";
 import { extractResumeText } from "@/lib/extractResumeText";
 import { ResumeVersions } from "@/components/resume/ResumeVersions";
 import { ResumeVersionDiff } from "@/components/resume/ResumeVersionDiff";
+import { GenerationStream } from "@/components/ai/GenerationStream";
+import { useAiStream } from "@/hooks/useAiStream";
 
 interface Suggestion {
   type: string;
@@ -70,6 +72,14 @@ export default function ResumeEngine() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Streamed analysis: milestones + an early partial result with the
+  // deterministic scores, then the AI coaching notes.
+  const analysis_stream = useAiStream<AnalysisResult>({
+    fn: "analyze-resume",
+    initialLabel: "Parsing your resume",
+    onPartial: (partial) => setAnalysis(partial),
+  });
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [fileName, setFileName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -116,14 +126,17 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(true);
 
-      const { data: analysisData, error: fnError } = await supabase.functions.invoke("analyze-resume", {
-        body: { resumeText: text, jobDescription, jobTitle, environment: getPaddleEnvironment() },
+      // Deterministic scores stream back first (as a `partial`), so the dials
+      // fill in while the AI coaching notes are still being written.
+      const analysisData = await analysis_stream.start({
+        resumeText: text,
+        jobDescription,
+        jobTitle,
+        environment: getPaddleEnvironment(),
       });
 
-      if (fnError || analysisData?.error) {
-        if (handleAiFunctionError(fnError, analysisData)) return;
-        throw fnError ?? new Error(analysisData?.error || "Analysis failed");
-      }
+      // Canceled or failed — the hook has already surfaced the reason.
+      if (!analysisData) return;
 
       setAnalysis(analysisData);
 
@@ -161,7 +174,7 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(false);
     }
-  }, [user, jobDescription, jobTitle]);
+  }, [user, jobDescription, jobTitle, analysis_stream]);
 
   const handleRescan = async () => {
     if (!file) return;
