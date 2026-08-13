@@ -16,7 +16,7 @@ function Bar({ label, value, delay }: { label: string; value: number; delay: num
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
         <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow"
+          className="h-full rounded-full bg-gradient-to-r from-primary to-brand-glow"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: value / 100 }}
           style={{ transformOrigin: "left" }}

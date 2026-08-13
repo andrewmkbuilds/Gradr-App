@@ -108,7 +108,11 @@ const css = await compileCss();
 /** Every class selector present in the compiled stylesheet. */
 const emitted = new Set();
 for (const [, sel] of css.matchAll(/\.((?:\\.|[\w-])+)/g)) {
-  emitted.add(sel.replace(/\\(.)/g, "$1"));
+  const clean = sel.replace(/\\(.)/g, "$1");
+  emitted.add(clean);
+  // `.last\:border-0` also proves `border-0` compiles.
+  const base = clean.split(":").pop();
+  if (base) emitted.add(base);
 }
 
 const unknown = [];
