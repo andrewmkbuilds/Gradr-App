@@ -59,10 +59,18 @@ export async function captureReferralFromUrl() {
     const code = params.get("ref");
     if (!code) return;
 
-    // Validate the code + read the cookie window server-side. The underlying
-    // lookups are service-role only; visitors never touch them directly.
+    // Validate the code, read the cookie window and record the click entirely
+    // server-side. Visitors have no direct read/write access to affiliate
+    // tables, so referral clicks cannot be forged from the browser.
     const { data: publicInfo } = await invokeFunction("affiliate-public", {
-      body: { code },
+      body: {
+        code,
+        landing_page: window.location.pathname + window.location.search,
+        utm_source: params.get("utm_source"),
+        utm_medium: params.get("utm_medium"),
+        utm_campaign: params.get("utm_campaign"),
+        visitor_key: getVisitorKey(),
+      },
     });
     const hit = publicInfo?.affiliate ?? null;
     if (!hit || !hit.isActive) return;
@@ -72,27 +80,8 @@ export async function captureReferralFromUrl() {
 
     setCookie(COOKIE_NAME, code, days);
 
-    // Log click
-    const utm_source = params.get("utm_source");
-    const utm_medium = params.get("utm_medium");
-    const utm_campaign = params.get("utm_campaign");
+    if (publicInfo?.clickId) setCookie(CLICK_COOKIE_NAME, publicInfo.clickId, days);
 
-    const { data: click } = await supabase
-      .from("affiliate_clicks")
-      .insert({
-        affiliate_profile_id: hit.profileId,
-        affiliate_code: code,
-        landing_page: window.location.pathname + window.location.search,
-        utm_source,
-        utm_medium,
-        utm_campaign,
-        visitor_key: getVisitorKey(),
-        user_agent: navigator.userAgent.slice(0, 500),
-      })
-      .select("id")
-      .single();
-
-    if (click?.id) setCookie(CLICK_COOKIE_NAME, click.id, days);
   } catch (e) {
     // Tracking is best-effort — never block the app
     console.warn("[affiliate] capture failed", e);
