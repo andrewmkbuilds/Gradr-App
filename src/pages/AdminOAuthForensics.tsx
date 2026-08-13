@@ -291,6 +291,8 @@ export default function AdminOAuthForensics() {
           <TabsTrigger value="traces">Redirect chains</TabsTrigger>
           <TabsTrigger value="headers">Security headers</TabsTrigger>
           <TabsTrigger value="checks">Daily flow checks</TabsTrigger>
+          <TabsTrigger value="csp">CSP monitor</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="traces" className="mt-6 space-y-3">
