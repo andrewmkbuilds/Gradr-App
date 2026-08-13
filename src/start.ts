@@ -7,7 +7,10 @@ import { renderErrorPage } from "./lib/error-page";
  * called by infrastructure, not browsers, and authenticate themselves. They
  * must skip app-level middleware entirely or those calls get redirected.
  */
-const isInfraRequest = (url: string) => new URL(url).pathname.startsWith("/lovable/");
+const isInfraRequest = (url: string) => {
+  const { pathname } = new URL(url);
+  return pathname.startsWith("/lovable/") || pathname === "/email/unsubscribe";
+};
 
 const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
   if (isInfraRequest(request.url)) return next();
