@@ -270,9 +270,9 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Career Dashboard</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">Career Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">Your AI-powered career command center</p>
       </div>
 
@@ -282,7 +282,7 @@ export default function Dashboard() {
 
 
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard icon={FileText} title="Resume Score" value={s.resumeScore > 0 ? String(s.resumeScore) : "—"} subtitle={s.resumeScore > 0 ? "Latest ATS score" : "Upload a resume"} glowing={s.resumeScore > 0} />
         <StatCard icon={Send} title="Applied This Week" value={String(s.appliedThisWeek)} subtitle={`${stages.applied} total in pipeline`} />
         <StatCard icon={Briefcase} title="Pipeline" value={String(totalTracked)} subtitle={`${activeStages} active`} />
@@ -298,7 +298,7 @@ export default function Dashboard() {
       <FollowUpReminders />
 
       {/* Level 2: supporting analytics. */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
         <ActivityChart data={activity} />
         <PipelineFunnelChart data={funnel} />
       </div>
@@ -314,12 +314,12 @@ export default function Dashboard() {
             </button>
           }
         />
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
           {STAGE_META.map((stage) => (
             <button
               key={stage.key}
               onClick={() => navigate("/pipeline")}
-              className="elev-1 elev-interactive flex flex-col items-start rounded-lg p-4 text-left"
+              className="elev-1 elev-interactive flex min-h-11 flex-col items-start rounded-lg p-3 text-left sm:p-4"
             >
               <stage.icon className={`h-4 w-4 ${stage.color} mb-2`} />
               <span className="stat-value text-foreground">
@@ -331,7 +331,7 @@ export default function Dashboard() {
         </div>
       </Surface>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         {/* Resume Health */}
         <Surface level={2}>
           <SurfaceHeader title="Resume Health" icon={FileText} />
@@ -440,7 +440,7 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <Surface level={2}>
         <SurfaceHeader title="Quick Actions" icon={Zap} />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4">
           {[
             { icon: FileText, label: "Optimize Resume", desc: "Improve your ATS score", path: "/resume" },
             { icon: Target, label: "Find Jobs", desc: "AI-matched opportunities", path: "/jobs" },
@@ -450,7 +450,7 @@ export default function Dashboard() {
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className="elev-1 elev-interactive accent-hover group flex flex-col items-start rounded-lg p-4 text-left"
+              className="elev-1 elev-interactive accent-hover group flex min-h-11 flex-col items-start rounded-lg p-3 text-left sm:p-4"
             >
               <action.icon className="mb-3 h-5 w-5 text-primary transition-transform duration-200 group-hover:scale-110" />
               <span className="text-sm font-medium text-foreground">{action.label}</span>
