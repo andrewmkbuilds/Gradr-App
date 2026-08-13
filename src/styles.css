@@ -227,10 +227,10 @@
     --muted-foreground: 195 9% 64%;
 
     /* ---------- Brand ---------- */
-    --primary: 192 44% 54%;
-    --primary-foreground: 198 40% 8%;
-    --primary-hover: 192 46% 62%;
-    --primary-active: 192 40% 46%;
+    --primary: 195 38% 48%;
+    --primary-foreground: 20 20% 96%;
+    --primary-hover: 195 40% 56%;
+    --primary-active: 195 42% 40%;
     --primary-soft: 196 40% 18%;
     --brand-secondary: 20 46% 54%;
     --brand-secondary-soft: 20 36% 18%;
@@ -264,7 +264,7 @@
     --border-subtle: 198 18% 17%;
     --border-strong: 198 16% 32%;
     --input: 198 18% 24%;
-    --ring: 192 44% 54%;
+    --ring: 195 38% 48%;
     --overlay: 198 44% 4%;
     --overlay-opacity: 0.7;
 
