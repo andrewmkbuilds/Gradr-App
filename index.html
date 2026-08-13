@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="Gradr" />
+    <meta name="theme-color" content="#070d1a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)" />
+    <script>
+      // Paint the correct theme before first render so there is no flash.
+      (function () {
+        try {
+          var stored = localStorage.getItem("gradr-theme");
+          var dark =
+            stored === "dark" ||
+            ((stored === null || stored === "system") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://xaeyjrekewnwjujnrqgu.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://xaeyjrekewnwjujnrqgu.supabase.co" />
+    <title>Gradr | Your AI Career Command Center</title>
+    <meta
+      name="description"
+      content="Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching."
+    />
+    <link rel="canonical" href="https://gradr.me/" />
+    <meta name="author" content="Gradr" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta
+      name="keywords"
+      content="AI career platform, resume analysis, ATS optimization, job matching, job applications, AI mock interviews, interview coaching, career development"
+    />
+    <meta name="application-name" content="Gradr" />
+    <meta name="google-site-verification" content="N0LjBnLEMo8ZqJ1lwaVLoswy8UkfIXMwgdfk35YEY-s" />
+    <meta name="google-site-verification" content="KJgcSDDga9hUzoDhgnCK8yWa_MU6PJX_kW27pzKLbAo" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Gradr" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Gradr | Your AI Career Command Center" />
+    <meta
+      property="og:description"
+      content="Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching."
+    />
+    <meta property="og:url" content="https://gradr.me/" />
+    <meta property="og:image" content="https://gradr.me/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Gradr — AI career command center" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Gradr | Your AI Career Command Center" />
+    <meta
+      name="twitter:description"
+      content="Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching."
+    />
+    <meta name="twitter:image" content="https://gradr.me/og-image.jpg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://gradr.me/#organization",
+            "name": "Gradr",
+            "alternateName": "Gradr AI Career Command Center",
+            "url": "https://gradr.me/",
+            "logo": "https://gradr.me/icon-512.png",
+            "description": "Gradr is an AI career platform for job seekers, covering resume analysis, ATS optimization, job matching, job applications, and AI mock interview coaching."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://gradr.me/#website",
+            "name": "Gradr",
+            "url": "https://gradr.me/",
+            "publisher": { "@id": "https://gradr.me/#organization" },
+            "inLanguage": "en"
+          },
+          {
+            "@type": ["SoftwareApplication", "WebApplication"],
+            "@id": "https://gradr.me/#software",
+            "name": "Gradr",
+            "alternateName": "Gradr Career OS",
+            "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "Career and job search software",
+            "operatingSystem": "Web browser",
+            "url": "https://gradr.me/",
+            "browserRequirements": "Requires JavaScript and a modern web browser",
+            "publisher": { "@id": "https://gradr.me/#organization" },
+            "description": "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching. It scores resumes against ATS rules, matches you to live job openings, drafts tailored applications, and runs realtime AI mock interviews with coaching feedback.",
+            "featureList": [
+              "AI resume analysis and ATS optimization scoring",
+              "AI job matching against live job openings",
+              "Tailored job application and cover letter generation",
+              "Realtime AI mock interviews with interview coaching",
+              "Application pipeline tracking and career development planning"
+            ],
+            "keywords": "AI career platform, resume analysis, ATS optimization, job matching, job applications, AI mock interviews, interview coaching, career development",
+            "audience": {
+              "@type": "Audience",
+              "audienceType": "Job seekers, students, graduates, and career changers"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "description": "Free plan available, with paid Pro plans for advanced AI features."
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+
+  <body>
+    <!--
+      Static, crawlable description of Gradr. React (createRoot) replaces the
+      contents of #root on mount, so this is only ever visible for the first
+      paint — but it guarantees that crawlers and AI answer engines which do
+      not execute JavaScript still read what Gradr actually is, instead of an
+      empty document they have to guess about.
+    -->
+    <div id="root">
+      <main id="seo-shell" style="max-width: 46rem; margin: 0 auto; padding: 4rem 1.5rem; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; line-height: 1.6;">
+        <h1>Gradr — Your AI Career Command Center</h1>
+        <p>
+          Gradr is your AI career command center for resume analysis, job matching, applications,
+          and interview coaching. It is a career platform for job seekers, students, graduates and
+          career changers — not a grading, marking or test-score tool.
+        </p>
+        <h2>What Gradr does</h2>
+        <ul>
+          <li>
+            <strong>Resume analysis and ATS optimization</strong> — upload a resume and get an ATS
+            compatibility score, keyword gaps, and AI rewrite suggestions.
+          </li>
+          <li>
+            <strong>AI job matching</strong> — score your profile against live job openings and see
+            exactly how to close the gap for each role.
+          </li>
+          <li>
+            <strong>Job applications</strong> — generate tailored cover letters and recruiter
+            outreach, then track every application through an offer pipeline.
+          </li>
+          <li>
+            <strong>AI mock interviews and interview coaching</strong> — practise realtime voice
+            interviews and get a scored debrief with concrete coaching feedback.
+          </li>
+          <li>
+            <strong>Career development</strong> — skill gap analysis and a personalised roadmap to
+            your next role.
+          </li>
+        </ul>
+        <p><a href="/pricing">Pricing</a> · <a href="/career-advice">Career advice guides</a> · <a href="/job-search">Job search by role</a> · <a href="/auth">Sign in</a></p>
+        <p>Loading the Gradr app…</p>
+      </main>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

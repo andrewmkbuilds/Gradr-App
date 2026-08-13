@@ -78,7 +78,7 @@ export function ThemeSegmentedControl({ className }: { className?: string }) {
             className={cn(
               "interactive press-scale flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
               active
-                ? "bg-surface text-foreground shadow-xs ring-1 ring-border"
+                ? "bg-surface text-foreground shadow-sm ring-1 ring-border"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >

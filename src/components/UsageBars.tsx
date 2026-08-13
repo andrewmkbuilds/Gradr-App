@@ -45,9 +45,9 @@ export function UsageBars({ compact }: UsageBarsProps) {
   if (isLoading) {
     return (
       <div className="glass-card p-6 space-y-4" aria-busy="true">
-        <div className="h-4 w-40 rounded-sm bg-muted/40 animate-pulse" />
+        <div className="h-4 w-40 rounded bg-muted/40 animate-pulse" />
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-12 rounded-sm bg-muted/20 animate-pulse" />
+          <div key={i} className="h-12 rounded bg-muted/20 animate-pulse" />
         ))}
       </div>
     );
@@ -115,7 +115,7 @@ export function UsageBars({ compact }: UsageBarsProps) {
                       <span
                         tabIndex={0}
                         aria-label={`${label} usage details`}
-                        className={`text-xs font-medium shrink-0 cursor-help rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
+                        className={`text-xs font-medium shrink-0 cursor-help rounded outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                           low ? "text-destructive" : "text-muted-foreground"
                         }`}
                       >

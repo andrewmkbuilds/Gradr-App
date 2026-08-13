@@ -7,7 +7,6 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { adminRpc } from "@/lib/adminRpc";
 
 type Payout = {
   id: string;
@@ -158,13 +157,13 @@ function CreatePayoutDialog() {
       if (!affiliateId) throw new Error("Choose an affiliate");
       const amt = Number(amount);
       if (!amt || amt <= 0) throw new Error("Enter a positive amount");
-      const { data, error } = await adminRpc<string>("admin_create_payout", {
+      const { data, error } = await supabase.rpc("admin_create_payout", {
         _affiliate_profile_id: affiliateId,
         _amount: amt,
         _payout_method: method,
-        _reference: reference || null,
-        _notes: notes || null,
-        _commission_ids: includeUnpaid ? (unpaidCommissions || []).map((c) => c.id) : null,
+        _reference: reference || undefined,
+        _notes: notes || undefined,
+        _commission_ids: includeUnpaid ? (unpaidCommissions || []).map((c) => c.id) : undefined,
       });
       if (error) throw error;
       return data;
@@ -265,9 +264,9 @@ function MarkPaidButton({ payout }: { payout: Payout }) {
 
   const markPaid = useMutation({
     mutationFn: async () => {
-      const { error } = await adminRpc("admin_mark_payout_paid", {
+      const { error } = await supabase.rpc("admin_mark_payout_paid", {
         _payout_id: payout.id,
-        _reference: reference || null,
+        _reference: reference || undefined,
         _payout_method: method,
       });
       if (error) throw error;

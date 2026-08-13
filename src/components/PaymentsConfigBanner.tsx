@@ -45,7 +45,7 @@ export function PaymentsConfigBanner({ context = "pricing", className }: Payment
               {diag.missing.map((name, i) => (
                 <span key={name}>
                   {i > 0 && ", "}
-                  <code className="rounded-sm bg-muted px-1.5 py-0.5 text-xs text-foreground">{name}</code>
+                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-foreground">{name}</code>
                 </span>
               ))}
             </p>
@@ -61,7 +61,7 @@ export function PaymentsConfigBanner({ context = "pricing", className }: Payment
 
           <p className="text-xs text-muted-foreground">
             After updating the variables, rebuild and republish the app — Vite inlines{" "}
-            <code className="rounded-sm bg-muted px-1 py-0.5">VITE_*</code> values at build time.{" "}
+            <code className="rounded bg-muted px-1 py-0.5">VITE_*</code> values at build time.{" "}
             <a
               href="https://docs.lovable.dev/features/payments"
               target="_blank"

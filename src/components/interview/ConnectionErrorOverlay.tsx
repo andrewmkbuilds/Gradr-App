@@ -12,7 +12,7 @@ interface Props {
 
 /**
  * Full-surface overlay shown when realtime streaming drops mid-interview.
- * Keeps the transcript visible behind a blur-sm and offers one-click recovery.
+ * Keeps the transcript visible behind a blur and offers one-click recovery.
  */
 export function ConnectionErrorOverlay({
   open,
@@ -30,7 +30,7 @@ export function ConnectionErrorOverlay({
       aria-modal="true"
       aria-labelledby="conn-error-title"
       aria-describedby="conn-error-desc"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-xs motion-safe:animate-in motion-safe:fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in"
     >
       <div className="glass-card w-full max-w-md p-6 text-center shadow-2xl">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">

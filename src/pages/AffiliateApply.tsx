@@ -84,7 +84,7 @@ export default function AffiliateApply() {
     navigate("/affiliate");
   };
 
-  const inputCls = "w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/40";
+  const inputCls = "w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
   const labelCls = "text-xs font-medium text-foreground block mb-1.5";
 
   return (

@@ -19,7 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { adminRpc } from "@/lib/adminRpc";
 
 type Tab = "applications" | "affiliates" | "commissions" | "payouts" | "tiers" | "settings";
 
@@ -77,15 +76,15 @@ function ApplicationsPanel() {
   });
 
   const approve = async (id: string) => {
-    const { error } = await adminRpc("approve_affiliate_application", { _application_id: id });
+    const { error } = await supabase.rpc("approve_affiliate_application", { _application_id: id });
     if (error) return toast.error(error.message);
     toast.success("Approved & affiliate profile created");
     qc.invalidateQueries({ queryKey: ["adminApplications"] });
   };
   const reject = async (id: string, reason: string) => {
-    const { error } = await adminRpc("reject_affiliate_application", {
+    const { error } = await supabase.rpc("reject_affiliate_application", {
       _application_id: id,
-      _reason: reason.trim() || null,
+      _reason: reason.trim() || undefined,
     });
     if (error) return toast.error(error.message);
     toast.success("Rejected — applicant notified");
@@ -222,7 +221,7 @@ function AffiliatesPanel() {
               </td>
 
               <td>
-                <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded-sm bg-secondary border border-border text-xs" />
+                <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
               </td>
               <td className="text-xs text-muted-foreground">{format(new Date(p.approval_date), "MMM d, yyyy")}</td>
               <td></td>
@@ -247,7 +246,7 @@ function CommissionsPanel() {
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
   const setStatus = async (id: string, status: "pending" | "approved" | "paid" | "reversed" | "canceled") => {
-    const { error } = await adminRpc("admin_set_commission_status", {
+    const { error } = await supabase.rpc("admin_set_commission_status", {
       _commission_ids: [id],
       _status: status,
     });
@@ -369,7 +368,7 @@ function AffiliateStatusSelect({
   const [value, setValue] = useState(status);
   const [pending, setPending] = useState<string | null>(null);
 
-  const cls = "px-2 py-1 rounded-sm bg-secondary border border-border text-xs";
+  const cls = "px-2 py-1 rounded bg-secondary border border-border text-xs";
 
   const apply = async (next: string) => {
     setValue(next);

@@ -20,9 +20,8 @@ const META: Record<string, { title: string; description: string }> = {
       "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
   },
   "/landing": {
-    title: "From resume to offer in one workspace",
-    description:
-      "See how Gradr turns a resume into interviews: ATS scoring, real job matches, tailored applications, and AI mock interviews with instant feedback.",
+    title: "From resume to offer",
+    description: "Gradr brings resume intelligence, job matching, applications, and AI mock interviews into one workspace.",
   },
   "/auth": {
     title: "Sign in",
@@ -159,9 +158,6 @@ function resolveDynamicMeta(pathname: string): { title: string; description: str
  * generic site image.
  */
 function resolveOgImage(pathname: string): string {
-  // The public marketing landing page gets its own card so social previews
-  // never duplicate the generic sitewide image used by the home route.
-  if (pathname === "/landing") return `${ORIGIN}/og/landing.png`;
   if (pathname.startsWith("/blog/")) {
     const slug = pathname.slice(6);
     if (slug) return `${ORIGIN}/og/blog-${slug}.png`;
@@ -214,10 +210,8 @@ export function RouteSeo() {
       description:
         "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
     };
-  // "/" keeps the brand-first title; every other route (including /landing)
-  // gets its own distinct title so no two public URLs duplicate one another.
   const fullTitle =
-    pathname === "/"
+    pathname === "/" || pathname === "/landing"
       ? "Gradr | Your AI Career Command Center"
       : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;

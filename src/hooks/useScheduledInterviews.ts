@@ -97,13 +97,14 @@ export function useScheduledInterviews() {
   /** Schedules a mock interview locally, and on Google Calendar when connected. */
   const scheduleMock = useCallback(
     async (input: { title: string; startsAt: string; durationMin: number; targetRole?: string }) => {
-      const viaCalendar = await callCalendar({
+      const calendarInput: Record<string, unknown> = {
         action: "create",
         title: input.title,
         startsAt: input.startsAt,
         durationMin: input.durationMin,
-        targetRole: input.targetRole,
-      });
+      };
+      if (input.targetRole) calendarInput.targetRole = input.targetRole;
+      const viaCalendar = await callCalendar(calendarInput);
 
       if (!viaCalendar?.ok) {
         // Calendar not connected or the create failed — keep the local schedule.
@@ -132,7 +133,7 @@ export function useScheduledInterviews() {
           template: "interview_scheduled",
           input: {
             title: input.title,
-            role: input.targetRole,
+            ...(input.targetRole ? { role: input.targetRole } : {}),
             whenLabel: new Date(input.startsAt).toLocaleString(),
             link: "/interview",
           },

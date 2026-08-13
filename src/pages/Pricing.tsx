@@ -210,7 +210,7 @@ export default function Pricing() {
                   aria-pressed={interval === i}
                   className={`px-4 py-1.5 text-sm rounded-full transition-colors ${
                     interval === i
-                      ? "bg-primary text-primary-foreground shadow-xs"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >

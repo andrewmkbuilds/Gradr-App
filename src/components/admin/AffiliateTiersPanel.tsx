@@ -95,25 +95,25 @@ export function AffiliateTiersPanel() {
                 <td className="p-3 font-mono text-xs text-muted-foreground">{t.key}</td>
                 <td>
                   <input defaultValue={t.name} onBlur={(e) => e.target.value !== t.name && patch(t.id, { name: e.target.value })}
-                    className="w-28 px-2 py-1 rounded-sm bg-secondary border border-border text-xs" />
+                    className="w-28 px-2 py-1 rounded bg-secondary border border-border text-xs" />
                 </td>
                 <td>
                   <input type="number" min={0} defaultValue={t.min_referrals}
                     onBlur={(e) => Number(e.target.value) !== t.min_referrals && patch(t.id, { min_referrals: Number(e.target.value) })}
-                    className="w-20 px-2 py-1 rounded-sm bg-secondary border border-border text-xs" />
+                    className="w-20 px-2 py-1 rounded bg-secondary border border-border text-xs" />
                 </td>
                 <td>
                   <input type="number" min={0} step="0.5" defaultValue={t.bonus_rate}
                     onBlur={(e) => Number(e.target.value) !== Number(t.bonus_rate) && patch(t.id, { bonus_rate: Number(e.target.value) })}
-                    className="w-20 px-2 py-1 rounded-sm bg-secondary border border-border text-xs" />
+                    className="w-20 px-2 py-1 rounded bg-secondary border border-border text-xs" />
                 </td>
                 <td>
                   <input type="color" defaultValue={t.color} onBlur={(e) => e.target.value !== t.color && patch(t.id, { color: e.target.value })}
-                    className="h-7 w-10 rounded-sm bg-secondary border border-border" aria-label={`${t.name} colour`} />
+                    className="h-7 w-10 rounded bg-secondary border border-border" aria-label={`${t.name} colour`} />
                 </td>
                 <td>
                   <input defaultValue={t.perks ?? ""} onBlur={(e) => e.target.value !== (t.perks ?? "") && patch(t.id, { perks: e.target.value })}
-                    className="w-56 px-2 py-1 rounded-sm bg-secondary border border-border text-xs" />
+                    className="w-56 px-2 py-1 rounded bg-secondary border border-border text-xs" />
                 </td>
                 <td>
                   <input type="checkbox" defaultChecked={t.active} onChange={(e) => patch(t.id, { active: e.target.checked })}
@@ -141,27 +141,27 @@ export function AffiliateTiersPanel() {
       <form onSubmit={create} className="glass-card p-4 grid gap-3 sm:grid-cols-6 items-end">
         <label className="text-xs text-muted-foreground sm:col-span-1">
           Key
-          <input name="key" required placeholder="legend" className="mt-1 w-full px-2 py-1.5 rounded-sm bg-secondary border border-border text-sm" />
+          <input name="key" required placeholder="legend" className="mt-1 w-full px-2 py-1.5 rounded bg-secondary border border-border text-sm" />
         </label>
         <label className="text-xs text-muted-foreground sm:col-span-1">
           Name
-          <input name="name" required placeholder="Legend" className="mt-1 w-full px-2 py-1.5 rounded-sm bg-secondary border border-border text-sm" />
+          <input name="name" required placeholder="Legend" className="mt-1 w-full px-2 py-1.5 rounded bg-secondary border border-border text-sm" />
         </label>
         <label className="text-xs text-muted-foreground sm:col-span-1">
           Min referrals
-          <input name="min_referrals" type="number" min={0} defaultValue={50} className="mt-1 w-full px-2 py-1.5 rounded-sm bg-secondary border border-border text-sm" />
+          <input name="min_referrals" type="number" min={0} defaultValue={50} className="mt-1 w-full px-2 py-1.5 rounded bg-secondary border border-border text-sm" />
         </label>
         <label className="text-xs text-muted-foreground sm:col-span-1">
           Bonus %
-          <input name="bonus_rate" type="number" min={0} step="0.5" defaultValue={0} className="mt-1 w-full px-2 py-1.5 rounded-sm bg-secondary border border-border text-sm" />
+          <input name="bonus_rate" type="number" min={0} step="0.5" defaultValue={0} className="mt-1 w-full px-2 py-1.5 rounded bg-secondary border border-border text-sm" />
         </label>
         <label className="text-xs text-muted-foreground sm:col-span-1">
           Colour
-          <input name="color" type="color" defaultValue="#22d3ee" className="mt-1 h-9 w-full rounded-sm bg-secondary border border-border" />
+          <input name="color" type="color" defaultValue="#22d3ee" className="mt-1 h-9 w-full rounded bg-secondary border border-border" />
         </label>
         <label className="text-xs text-muted-foreground sm:col-span-5">
           Perks
-          <input name="perks" placeholder="What this level unlocks" className="mt-1 w-full px-2 py-1.5 rounded-sm bg-secondary border border-border text-sm" />
+          <input name="perks" placeholder="What this level unlocks" className="mt-1 w-full px-2 py-1.5 rounded bg-secondary border border-border text-sm" />
         </label>
         <button disabled={creating} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm disabled:opacity-60">
           {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />} Add tier

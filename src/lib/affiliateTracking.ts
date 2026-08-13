@@ -3,7 +3,7 @@
  *
  * Flow:
  *  1. captureReferralFromUrl()  — runs on app load. If `?ref=CODE` present,
- *     validates the code via the `affiliate-public` edge function, sets a cookie for
+ *     validates the code via `lookup_affiliate_by_code`, sets a cookie for
  *     `affiliate_settings.cookie_duration_days` days (default 90), and writes
  *     an `affiliate_clicks` row.
  *  2. getReferralCookie() / getClickId() — read current tracking values.
@@ -58,16 +58,16 @@ export async function captureReferralFromUrl() {
     const code = params.get("ref");
     if (!code) return;
 
-    // Validate the code + read the cookie window server-side. The underlying
-    // lookups are service-role only; visitors never touch them directly.
-    const { data: publicInfo } = await supabase.functions.invoke("affiliate-public", {
-      body: { code },
-    });
-    const hit = publicInfo?.affiliate ?? null;
-    if (!hit || !hit.isActive) return;
+    // Validate the code (RPC returns array)
+    const { data: lookup } = await supabase.rpc("lookup_affiliate_by_code", { _code: code });
+    const hit = Array.isArray(lookup) ? lookup[0] : null;
+    if (!hit || !hit.is_active) return;
 
+    // Pull cookie duration from public settings, fall back to 90.
     let days = DEFAULT_DAYS;
-    if (publicInfo?.settings?.cookie_duration_days) days = publicInfo.settings.cookie_duration_days;
+    const { data: settingsRows } = await supabase.rpc("get_affiliate_public_settings");
+    const settings = Array.isArray(settingsRows) ? settingsRows[0] : settingsRows;
+    if (settings?.cookie_duration_days) days = settings.cookie_duration_days;
 
     setCookie(COOKIE_NAME, code, days);
 
@@ -79,7 +79,7 @@ export async function captureReferralFromUrl() {
     const { data: click } = await supabase
       .from("affiliate_clicks")
       .insert({
-        affiliate_profile_id: hit.profileId,
+        affiliate_profile_id: hit.profile_id,
         affiliate_code: code,
         landing_page: window.location.pathname + window.location.search,
         utm_source,
@@ -105,7 +105,7 @@ export async function attributeSignupReferral() {
     const clickId = getClickId();
     const { data } = await supabase.rpc("attribute_signup_referral", {
       _code: code,
-      _click_id: clickId,
+      _click_id: clickId ?? undefined,
     });
     if (data) {
       // Successfully attributed — clear cookie to prevent re-attribution
