@@ -57,6 +57,7 @@ import { Route as AppAdminDiscountsRouteImport } from './routes/_app/admin/disco
 import { Route as AppAdminEmailOpsRouteImport } from './routes/_app/admin/email-ops'
 import { Route as AppAdminLegalRouteImport } from './routes/_app/admin/legal'
 import { Route as AppAdminNavAnalyticsRouteImport } from './routes/_app/admin/nav-analytics'
+import { Route as AppAdminOauthForensicsRouteImport } from './routes/_app/admin/oauth-forensics'
 import { Route as AppAdminPaddleRouteImport } from './routes/_app/admin/paddle'
 import { Route as AppAdminPaymentsStatusRouteImport } from './routes/_app/admin/payments-status'
 import { Route as AppAdminRateLimitsRouteImport } from './routes/_app/admin/rate-limits'
@@ -356,6 +357,11 @@ const AppAdminLegalRoute = AppAdminLegalRouteImport.update({
 const AppAdminNavAnalyticsRoute = AppAdminNavAnalyticsRouteImport.update({
   id: '/admin/nav-analytics',
   path: '/admin/nav-analytics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminOauthForensicsRoute = AppAdminOauthForensicsRouteImport.update({
+  id: '/admin/oauth-forensics',
+  path: '/admin/oauth-forensics',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminPaddleRoute = AppAdminPaddleRouteImport.update({
@@ -717,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/admin/legal': typeof AppAdminLegalRoute
   '/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
+  '/admin/oauth-forensics': typeof AppAdminOauthForensicsRoute
   '/admin/paddle': typeof AppAdminPaddleRoute
   '/admin/payments-status': typeof AppAdminPaymentsStatusRoute
   '/admin/rate-limits': typeof AppAdminRateLimitsRoute
@@ -825,6 +832,7 @@ export interface FileRoutesByTo {
   '/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/admin/legal': typeof AppAdminLegalRoute
   '/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
+  '/admin/oauth-forensics': typeof AppAdminOauthForensicsRoute
   '/admin/paddle': typeof AppAdminPaddleRoute
   '/admin/payments-status': typeof AppAdminPaymentsStatusRoute
   '/admin/rate-limits': typeof AppAdminRateLimitsRoute
@@ -935,6 +943,7 @@ export interface FileRoutesById {
   '/_app/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/_app/admin/legal': typeof AppAdminLegalRoute
   '/_app/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
+  '/_app/admin/oauth-forensics': typeof AppAdminOauthForensicsRoute
   '/_app/admin/paddle': typeof AppAdminPaddleRoute
   '/_app/admin/payments-status': typeof AppAdminPaymentsStatusRoute
   '/_app/admin/rate-limits': typeof AppAdminRateLimitsRoute
@@ -1045,6 +1054,7 @@ export interface FileRouteTypes {
     | '/admin/email-ops'
     | '/admin/legal'
     | '/admin/nav-analytics'
+    | '/admin/oauth-forensics'
     | '/admin/paddle'
     | '/admin/payments-status'
     | '/admin/rate-limits'
@@ -1153,6 +1163,7 @@ export interface FileRouteTypes {
     | '/admin/email-ops'
     | '/admin/legal'
     | '/admin/nav-analytics'
+    | '/admin/oauth-forensics'
     | '/admin/paddle'
     | '/admin/payments-status'
     | '/admin/rate-limits'
@@ -1262,6 +1273,7 @@ export interface FileRouteTypes {
     | '/_app/admin/email-ops'
     | '/_app/admin/legal'
     | '/_app/admin/nav-analytics'
+    | '/_app/admin/oauth-forensics'
     | '/_app/admin/paddle'
     | '/_app/admin/payments-status'
     | '/_app/admin/rate-limits'
@@ -1732,6 +1744,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminNavAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/oauth-forensics': {
+      id: '/_app/admin/oauth-forensics'
+      path: '/admin/oauth-forensics'
+      fullPath: '/admin/oauth-forensics'
+      preLoaderRoute: typeof AppAdminOauthForensicsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/paddle': {
       id: '/_app/admin/paddle'
       path: '/admin/paddle'
@@ -2174,6 +2193,7 @@ interface AppRouteChildren {
   AppAdminEmailOpsRoute: typeof AppAdminEmailOpsRoute
   AppAdminLegalRoute: typeof AppAdminLegalRoute
   AppAdminNavAnalyticsRoute: typeof AppAdminNavAnalyticsRoute
+  AppAdminOauthForensicsRoute: typeof AppAdminOauthForensicsRoute
   AppAdminPaddleRoute: typeof AppAdminPaddleRoute
   AppAdminPaymentsStatusRoute: typeof AppAdminPaymentsStatusRoute
   AppAdminRateLimitsRoute: typeof AppAdminRateLimitsRoute
@@ -2216,6 +2236,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminEmailOpsRoute: AppAdminEmailOpsRoute,
   AppAdminLegalRoute: AppAdminLegalRoute,
   AppAdminNavAnalyticsRoute: AppAdminNavAnalyticsRoute,
+  AppAdminOauthForensicsRoute: AppAdminOauthForensicsRoute,
   AppAdminPaddleRoute: AppAdminPaddleRoute,
   AppAdminPaymentsStatusRoute: AppAdminPaymentsStatusRoute,
   AppAdminRateLimitsRoute: AppAdminRateLimitsRoute,
