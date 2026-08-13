@@ -8,6 +8,7 @@ import { ScoreRing } from "@/components/ScoreRing";
 import type { InterviewReport } from "@/components/interview/InterviewReportView";
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
+import { CompetencyTrends } from "@/components/interview/CompetencyTrends";
 
 interface SessionRow {
   id: string;
@@ -105,6 +106,8 @@ export default function InterviewHistory() {
           <Button onClick={() => navigate("/interview")}>Start a mock interview</Button>
         </div>
       )}
+
+      <CompetencyTrends sessions={rows} />
 
       {rows.length > 1 && (
         <div className="glass-card p-5">
