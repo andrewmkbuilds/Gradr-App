@@ -65,17 +65,17 @@ describe("interview setup validation", () => {
 
   it("omits blank optional fields from the built session context", () => {
     const ctx = buildSessionContext({
-      personaId: "recruiter",
+      personaId: "hiring-manager",
       difficultyId: "standard",
       draft: { targetRole: "  ", company: "", jobDescription: "   " },
     });
-    expect(ctx).toEqual({ personaId: "recruiter", difficultyId: "standard" });
+    expect(ctx).toEqual({ personaId: "hiring-manager", difficultyId: "standard" });
     expect("targetRole" in ctx).toBe(false);
   });
 
   it("trims and carries the fields it does keep into the model directive", () => {
     const ctx = buildSessionContext({
-      personaId: "recruiter",
+      personaId: "hiring-manager",
       difficultyId: "standard",
       draft: { targetRole: "  Data Analyst  ", company: " Helio Labs ", jobDescription: " SQL and dbt " },
       resumeText: "Shipped a churn model.",
