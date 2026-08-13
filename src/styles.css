@@ -255,6 +255,17 @@
     --brand-secondary: 20 46% 54%;
     --brand-secondary-soft: 20 36% 18%;
 
+    /* ---------- Mahogany accent scale (dark) ---------- */
+    --mahogany: 20 48% 56%;
+    --mahogany-foreground: 20 40% 10%;
+    --mahogany-hover: 20 52% 64%;
+    --mahogany-soft: 18 32% 20%;
+    --mahogany-tint: 16 26% 15%;
+    --mahogany-border: 20 30% 34%;
+    --mahogany-ink: 20 52% 70%;
+
+
+
     /* ---------- Neutral interactive ---------- */
     --secondary: 198 20% 16%;
     --secondary-foreground: 20 12% 88%;
