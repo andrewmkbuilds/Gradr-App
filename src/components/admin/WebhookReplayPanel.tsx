@@ -109,6 +109,8 @@ export default function WebhookReplayPanel() {
     onSuccess: (delivery) => {
       setSelected(delivery);
       setDryRun(null);
+      setProbe(null);
+
       setJsonError(null);
       setDraft(JSON.stringify(delivery.payload ?? {}, null, 2));
     },
