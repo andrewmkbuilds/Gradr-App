@@ -370,20 +370,42 @@ export default function AdminOAuthForensics() {
   });
 
   const exportIncident = useMutation({
-    mutationFn: async (format: "md" | "json") => {
-      const { data, error } = await invokeFunction<{ markdown: string; generatedAt: string }>(
-        "oauth-forensics",
-        { body: { action: "export", days: 14, limit: 100 } },
-      );
+    mutationFn: async (format: "md" | "json" | "csv" | "pdf") => {
+      const { data, error } = await invokeFunction<{
+        markdown: string;
+        csv: string;
+        printableHtml: string;
+        generatedAt: string;
+      }>("oauth-forensics", { body: { action: "export", days: 14, limit: 100 } });
       if (error) throw error;
       return { format, report: data! };
     },
     onSuccess: ({ format, report }) => {
       const stamp = new Date(report.generatedAt).toISOString().slice(0, 10);
-      const body = format === "md" ? report.markdown : JSON.stringify(report, null, 2);
-      const blob = new Blob([body], {
-        type: format === "md" ? "text/markdown" : "application/json",
-      });
+
+      // PDF is produced by the browser's own print-to-PDF on a print-styled doc,
+      // which keeps links selectable and avoids shipping a PDF engine.
+      if (format === "pdf") {
+        const win = window.open("", "_blank", "noopener,noreferrer,width=1024,height=768");
+        if (!win) {
+          toast.error("Allow pop-ups to generate the printable PDF");
+          return;
+        }
+        win.document.write(report.printableHtml);
+        win.document.close();
+        win.addEventListener("load", () => {
+          win.focus();
+          win.print();
+        });
+        toast.success("Printable timeline opened — choose “Save as PDF”");
+        return;
+      }
+
+      const body =
+        format === "md" ? report.markdown : format === "csv" ? report.csv : JSON.stringify(report, null, 2);
+      const mime =
+        format === "md" ? "text/markdown" : format === "csv" ? "text/csv;charset=utf-8" : "application/json";
+      const blob = new Blob([format === "csv" ? `\uFEFF${body}` : body], { type: mime });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -394,6 +416,7 @@ export default function AdminOAuthForensics() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
 
   const rows = traces.data?.traces ?? [];
   const deviations = rows.filter((t) => t.deviation).length;
