@@ -171,7 +171,12 @@ function resolveDynamicMeta(pathname: string): { title: string; description: str
  * (scripts/generate-og-images.mjs). Everything else falls back to the
  * generic site image.
  */
+const PAGE_OG_IMAGES: Record<string, string> = {
+  "/ai-interview-coach": `${ORIGIN}/og/page-ai-interview-coach.png`,
+};
+
 function resolveOgImage(pathname: string): string {
+  if (PAGE_OG_IMAGES[pathname]) return PAGE_OG_IMAGES[pathname];
   if (pathname.startsWith("/blog/")) {
     const slug = pathname.slice(6);
     if (slug) return `${ORIGIN}/og/blog-${slug}.png`;

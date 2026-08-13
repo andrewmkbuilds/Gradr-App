@@ -39,8 +39,24 @@ function parseEntries(file, kind) {
   return entries;
 }
 
+/**
+ * Standalone marketing landing pages that need their own social card
+ * (kind "page" -> /og/page-<slug>.png, matched by resolveOgImage in RouteSeo).
+ */
+const PAGE_TARGETS = [
+  {
+    kind: "page",
+    slug: "ai-interview-coach",
+    title: "AI Interview Coach — free voice mock interviews",
+    description:
+      "Practice a real spoken interview for your target role. Adaptive follow-ups, a weighted score across five dimensions, and a full transcript.",
+    eyebrow: "Interview Engine",
+  },
+];
+
 export function ogTargets() {
   return [
+    ...PAGE_TARGETS,
     ...parseEntries("src/content/blogPosts.ts", "blog"),
     ...parseEntries("src/content/guides.ts", "guide"),
   ];
