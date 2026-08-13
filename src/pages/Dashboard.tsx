@@ -14,6 +14,9 @@ import { UsageBars } from "@/components/UsageBars";
 import { DashboardSkeleton } from "@/components/skeletons/RouteSkeletons";
 import { DailyBriefing } from "@/components/dashboard/DailyBriefing";
 import { GettingStarted } from "@/components/dashboard/GettingStarted";
+import { TargetingCard } from "@/components/dashboard/TargetingCard";
+import { NextThreeDays } from "@/components/dashboard/NextThreeDays";
+import { WhyThisScore } from "@/components/dashboard/WhyThisScore";
 import { buildBriefing, setupSteps, type BriefingInput } from "@/lib/careerBriefing";
 import { Button } from "@/components/ui/button";
 import { MotionReveal } from "@/components/motion";
@@ -165,7 +168,13 @@ export default function Dashboard() {
 
       <DailyBriefing briefing={briefing} name={displayName} />
 
+      <WhyThisScore briefing={briefing} />
+
+      <TargetingCard />
+
       <GettingStarted steps={steps} />
+
+      <NextThreeDays />
 
       <MotionReveal onView className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
