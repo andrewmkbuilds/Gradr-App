@@ -216,9 +216,24 @@ function isNoIndex(pathname: string): boolean {
   return NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+/**
+ * TanStack Router matches paths case-insensitively and tolerates a trailing
+ * slash, so `/AI-Interview-Coach/` renders the same page as
+ * `/ai-interview-coach`. Without normalisation each variant would emit a
+ * self-referencing canonical and Google would treat them as separate URLs.
+ * Canonical, og:url and the metadata lookup all use the normalised form.
+ */
+export function normalizeSeoPath(pathname: string): string {
+  const lower = pathname.toLowerCase();
+  const trimmed = lower.length > 1 ? lower.replace(/\/+$/, "") : lower;
+  return trimmed === "" ? "/" : trimmed;
+}
+
 export function RouteSeo() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const pathname = normalizeSeoPath(location.pathname);
   const meta = META[pathname] ??
+
     resolveDynamicMeta(pathname) ?? {
       title: "AI Resume Builder, Job Matching & Interview Coach",
       description:
