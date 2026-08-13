@@ -75,6 +75,7 @@ const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
 const GuideArticle = lazy(() => import("./pages/GuideArticle"));
 const JobSearchIndex = lazy(() => import("./pages/JobSearchIndex"));
 const JobLanding = lazy(() => import("./pages/JobLanding"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const InterviewHistory = lazy(() => import("./pages/InterviewHistory"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
@@ -204,6 +205,7 @@ function AppRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        <Route path="/unsubscribe" element={<AnimatedPage><Unsubscribe /></AnimatedPage>} />
         <Route path="/landing" element={<AnimatedPage><Landing /></AnimatedPage>} />
         <Route path="/auth" element={<AnimatedPage><AuthRoute /></AnimatedPage>} />
         <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />

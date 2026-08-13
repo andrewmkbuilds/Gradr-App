@@ -7,6 +7,7 @@ import {
   type PaddleEnv,
 } from "../_shared/paddle.ts";
 import { logSecurityEvent } from "../_shared/securityAudit.ts";
+import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
@@ -30,6 +31,28 @@ async function emailFor(userId: string, env: PaddleEnv): Promise<string> {
   if (row?.email) return row.email as string;
   const { data } = await db().auth.admin.getUserById(userId);
   return data?.user?.email ?? "unknown@gradr.local";
+}
+
+/** Billing emails are best-effort; a delivery problem never fails a webhook. */
+// deno-lint-ignore no-explicit-any
+async function billingEmail(
+  template: string,
+  recipient: string | null | undefined,
+  idempotencyKey: string,
+  templateData: Record<string, unknown>,
+) {
+  if (!recipient || recipient === "unknown@gradr.local") return;
+  await sendTransactionalEmail({
+    templateName: template,
+    recipientEmail: recipient,
+    idempotencyKey,
+    templateData,
+  });
+}
+
+function planLabel(tier?: string | null, interval?: string | null): string {
+  const name = tier ? `Gradr ${tier.charAt(0).toUpperCase()}${tier.slice(1)}` : "Gradr Pro";
+  return interval ? `${name} (${interval})` : name;
 }
 
 
@@ -154,6 +177,16 @@ async function upsertSubscription(data: any, env: PaddleEnv) {
     },
     { onConflict: "user_id,environment" },
   );
+
+  if (entitled) {
+    // Idempotency is keyed on the subscription id so Paddle retries of the same
+    // created event never double-send the welcome-to-Pro mail.
+    await billingEmail("subscription-started", await emailFor(userId, env), `sub-started-${data.id}`, {
+      planName: planLabel(plan?.tier, plan?.interval),
+      interval: plan?.interval ?? undefined,
+      nextBillingDate: formatDate(periodEnd),
+    });
+  }
 }
 
 // deno-lint-ignore no-explicit-any
@@ -218,6 +251,12 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
     _body: "Update your card to keep your plan active — we'll keep retrying in the meantime.",
     _link: "/billing",
     _metadata: { subscription_id: subscriptionId },
+  });
+
+  await billingEmail("payment-failed", await emailFor(target, env), `pay-failed-${data?.id ?? subscriptionId}`, {
+    amount: formatMoney(data?.details?.totals?.total, data?.currencyCode ?? "USD"),
+    failedAt: formatDate(data?.updatedAt ?? new Date().toISOString()),
+    updatePaymentUrl: "https://gradr.me/billing",
   });
 }
 
