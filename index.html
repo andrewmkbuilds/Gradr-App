@@ -171,19 +171,17 @@
         #app-splash img, #app-splash .splash-track span { animation: none; }
         #app-splash { transition: none; }
       }
-      /* SEO shell stays in the DOM for non-JS crawlers but is never visible. */
-      #seo-shell {
-        position: absolute !important;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        clip-path: inset(50%);
-        white-space: nowrap;
-        border: 0;
+      /* Fallback content for non-JS crawlers lives in <noscript>; nothing is
+         hidden from users with CSS (no cloaking / hidden-text patterns). */
+      noscript .no-js-shell {
+        max-width: 44rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem;
+        font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: #1a2b31;
+        line-height: 1.6;
       }
+
     </style>
   </head>
 
