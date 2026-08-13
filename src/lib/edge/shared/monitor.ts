@@ -73,9 +73,13 @@ async function notify(
 }
 
 async function raiseAlert(endpoint: string, kind: HealthOutcome, message: string) {
+  // Transient failures are recorded but stay silent until they repeat enough
+  // times to look like a real incident for this specific endpoint.
+  const threshold = Math.max(1, alertThreshold(endpoint, kind));
+
   const { data: open } = await db()
     .from("api_health_alerts")
-    .select("id, occurrences, first_seen_at")
+    .select("id, occurrences, first_seen_at, notified_at")
     .eq("endpoint", endpoint)
     .eq("kind", kind)
     .eq("resolved", false)
@@ -92,7 +96,10 @@ async function raiseAlert(endpoint: string, kind: HealthOutcome, message: string
       })
       .eq("id", open.id);
 
-    if (shouldEscalate(occurrences)) {
+    const firstAnnouncement = !open.notified_at && occurrences >= threshold;
+    const escalation = Boolean(open.notified_at) && shouldEscalate(occurrences);
+
+    if (firstAnnouncement || escalation) {
       await notify(
         String(open.id),
         endpoint,
@@ -100,7 +107,7 @@ async function raiseAlert(endpoint: string, kind: HealthOutcome, message: string
         message,
         occurrences,
         String(open.first_seen_at ?? new Date().toISOString()),
-        true,
+        escalation,
       );
     }
     return;
@@ -112,7 +119,7 @@ async function raiseAlert(endpoint: string, kind: HealthOutcome, message: string
     .select("id, first_seen_at")
     .maybeSingle();
 
-  if (created?.id) {
+  if (created?.id && threshold <= 1) {
     await notify(
       String(created.id),
       endpoint,
@@ -124,6 +131,7 @@ async function raiseAlert(endpoint: string, kind: HealthOutcome, message: string
     );
   }
 }
+
 
 export async function recordApiHealth(params: {
   endpoint: string;
