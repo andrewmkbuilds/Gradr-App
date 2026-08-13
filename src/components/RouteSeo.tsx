@@ -9,6 +9,8 @@ import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
 
 const SITE = "Gradr";
 const SITE_TITLE = "Gradr | AI Career Copilot for Resumes, Jobs & Interviews";
+const SITE_DESCRIPTION =
+  "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.";
 const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
@@ -17,8 +19,7 @@ const META: Record<string, { title: string; description: string }> = {
   // dashboard once authenticated), so its metadata must describe the product.
   "/": {
     title: "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
-    description:
-      "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
+    description: SITE_DESCRIPTION,
   },
   "/landing": {
     title: "From resume to offer in one workspace",
@@ -238,18 +239,16 @@ export function RouteSeo() {
   const location = useLocation();
   const pathname = normalizeSeoPath(location.pathname);
   const meta = META[pathname] ??
-
     resolveDynamicMeta(pathname) ?? {
-      title: "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
-      description:
-        "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
+      title: SITE_TITLE,
+      description: SITE_DESCRIPTION,
     };
   // "/" keeps the brand-first title; every other route (including /landing)
   // gets its own distinct title so no two public URLs duplicate one another.
   const fullTitle =
     pathname === "/"
       ? SITE_TITLE
-      : `${meta.title} — ${SITE_TITLE}`;
+      : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
   const noindex = isNoIndex(pathname);

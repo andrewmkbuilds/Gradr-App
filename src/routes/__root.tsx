@@ -77,8 +77,8 @@ const structuredData = JSON.stringify({
       alternateName: "Gradr AI Career Command Center",
       url: "https://gradr.me/",
       logo: "https://gradr.me/icon-512.png",
-      description:
-        "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
+        description:
+          "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.",
     },
     {
       "@type": "WebSite",
@@ -99,8 +99,8 @@ const structuredData = JSON.stringify({
       url: "https://gradr.me/",
       browserRequirements: "Requires JavaScript and a modern web browser",
       publisher: { "@id": "https://gradr.me/#organization" },
-      description:
-        "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
+        description:
+          "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.",
       featureList: [
         "AI resume analysis and ATS optimization scoring",
         "AI job matching against live job openings",
