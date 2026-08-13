@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { WebhookError, verifyWebhookRequest } from '@lovable.dev/webhooks-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { logEmailEvent } from '@/lib/email/events.server'
+
 
 // Suppression event payload sent by the Go API when Mailgun reports
 // a bounce, complaint, or unsubscribe.
