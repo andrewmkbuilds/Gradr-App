@@ -53,6 +53,14 @@ const COUNTRIES = [
 ];
 
 export default function JobsFeed() {
+  useSeoOverride(
+    what.trim()
+      ? {
+          title: `Job Feed — ${what.trim()}${where.trim() ? ` in ${where.trim()}` : ""}`,
+          description: `AI-ranked ${what.trim()} openings matched to your resume and career preferences.`,
+        }
+      : null,
+  );
   const { user } = useAuth();
   const navigate = useNavigate();
   // Shared targeting cache: onboarding writes to it, so a change there

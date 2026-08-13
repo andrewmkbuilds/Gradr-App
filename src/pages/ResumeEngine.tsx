@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useCallback } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { Link } from "@/lib/router-compat";
@@ -57,6 +58,14 @@ const typeStyles: Record<string, { icon: typeof CheckCircle; color: string }> = 
 };
 
 export default function ResumeEngine() {
+  useSeoOverride(
+    jobTitle.trim()
+      ? {
+          title: `Resume Engine — tailoring for ${jobTitle.trim()}`,
+          description: `ATS scoring and AI rewrites for your resume against the ${jobTitle.trim()} role.`,
+        }
+      : null,
+  );
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);

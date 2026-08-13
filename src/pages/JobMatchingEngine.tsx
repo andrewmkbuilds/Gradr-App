@@ -1,3 +1,4 @@
+import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import { Link } from "@/lib/router-compat";
@@ -53,6 +54,14 @@ function salaryLabel(job: RealJobMatch) {
 }
 
 export default function JobMatchingEngine() {
+  useSeoOverride(
+    targetRole.trim()
+      ? {
+          title: `Job Matching — ${targetRole.trim()}${location.trim() ? ` in ${location.trim()}` : ""}`,
+          description: `Live match scores between your resume and ${targetRole.trim()} roles, with the gap to close on each posting.`,
+        }
+      : null,
+  );
   const { user } = useAuth();
   const [matches, setMatches] = useState<RealJobMatch[]>([]);
   const [loading, setLoading] = useState(false);
