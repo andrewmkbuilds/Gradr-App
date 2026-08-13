@@ -681,7 +681,74 @@
     line-height: 1.65;
     letter-spacing: -0.005em;
   }
+
+  /* --- In-app scale (see src/lib/design/typography.ts) --- */
+  .type-h1 {
+    @apply font-display;
+    font-size: clamp(1.5rem, 2.4vw, 1.875rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+  .type-h2 {
+    @apply font-display;
+    font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .type-h3 {
+    @apply font-display;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+  .type-h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .type-overline {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+  .type-body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .type-body-sm {
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+  .type-caption {
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .type-metric {
+    @apply font-display tabular-nums;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .type-metric-sm {
+    @apply font-display tabular-nums;
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .type-mono {
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    letter-spacing: -0.01em;
+  }
 }
+
 
 
 /* ============================================================
