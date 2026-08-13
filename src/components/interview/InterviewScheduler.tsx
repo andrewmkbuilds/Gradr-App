@@ -47,12 +47,13 @@ export function InterviewScheduler({ defaultRole }: { defaultRole?: string }) {
   const onSchedule = async () => {
     if (!title.trim()) return toast.error("Give the session a title first.");
     if (!startsAt || Number.isNaN(Date.parse(startsAt))) return toast.error("Pick a valid time.");
-    const ok = await scheduleMock({
+    const scheduleInput: Parameters<typeof scheduleMock>[0] = {
       title: title.trim(),
       startsAt: new Date(startsAt).toISOString(),
       durationMin: duration,
-      targetRole: defaultRole,
-    });
+    };
+    if (defaultRole) scheduleInput.targetRole = defaultRole;
+    const ok = await scheduleMock(scheduleInput);
     toast[ok ? "success" : "error"](
       ok ? "Interview scheduled." : "Couldn't schedule that session.",
     );

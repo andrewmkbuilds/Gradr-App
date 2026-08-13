@@ -22,6 +22,8 @@
       ]
     },
     "skipLibCheck": true,
+    "exactOptionalPropertyTypes": true,
+    "strictNullChecks": true,
     "strict": false,
     "target": "ES2020",
     "types": [

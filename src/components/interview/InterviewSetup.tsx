@@ -216,16 +216,20 @@ export function InterviewSetup({ initial, onContinue }: Props) {
       </div>
 
       <Button
-        onClick={() =>
-          onContinue({
+        onClick={() => {
+          const nextContext: SessionContext = {
             personaId,
             difficultyId,
-            targetRole: targetRole.trim() || undefined,
-            company: company.trim() || undefined,
-            jobDescription: jobDescription.trim() || undefined,
-            resumeText: resumeText || undefined,
-          })
-        }
+          };
+          const role = targetRole.trim();
+          const companyName = company.trim();
+          const description = jobDescription.trim();
+          if (role) nextContext.targetRole = role;
+          if (companyName) nextContext.company = companyName;
+          if (description) nextContext.jobDescription = description;
+          if (resumeText) nextContext.resumeText = resumeText;
+          onContinue(nextContext);
+        }}
         className="bg-primary text-primary-foreground hover:bg-primary/90"
       >
         <Sparkles className="h-4 w-4 mr-2" />

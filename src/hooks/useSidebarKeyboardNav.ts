@@ -14,8 +14,8 @@ import { useCallback, useEffect, useRef, type RefObject } from "react";
  * Rows opt in with `data-nav-focusable`; group headers add `data-nav-group`
  * and children add `data-nav-parent="<groupId>"`.
  */
-export function useSidebarKeyboardNav(
-  containerRef: RefObject<HTMLElement>,
+export function useSidebarKeyboardNav<T extends HTMLElement>(
+  containerRef: RefObject<T | null>,
   handlers: {
     setGroupOpen: (groupId: string, open: boolean) => void;
     isGroupOpen: (groupId: string) => boolean;
@@ -109,7 +109,11 @@ export function useSidebarKeyboardNav(
  * when the drawer opens, so screen-reader and keyboard users start where they
  * currently are rather than at the top of a long list.
  */
-export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open: boolean, enabled: boolean) {
+export function useMobileDrawerFocus<T extends HTMLElement>(
+  containerRef: RefObject<T | null>,
+  open: boolean,
+  enabled: boolean,
+) {
   const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -185,8 +189,8 @@ export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open:
  * keypress and pins the body so iOS Safari does not rubber-band the page behind
  * the sheet.
  */
-export function useMobileDrawerContainment(
-  containerRef: RefObject<HTMLElement>,
+export function useMobileDrawerContainment<T extends HTMLElement>(
+  containerRef: RefObject<T | null>,
   open: boolean,
   enabled: boolean,
 ) {
