@@ -186,10 +186,9 @@ export default function AiInterviewCoach() {
               "Run a realistic spoken mock interview for your target role and turn the scored report into a focused practice plan.",
             path: AI_INTERVIEW_COACH_PATH,
             steps: STEPS.map((s) => ({ name: s.name, text: s.text })),
-          })}
-          {...{}}
-          {...{}}
+          }),
         ]}
+
         label="ai-interview-coach"
       />
       <JsonLd
