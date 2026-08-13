@@ -507,7 +507,14 @@ function InterviewEngineInner() {
           <p className="text-sm text-muted-foreground mt-1">
             Realtime voice interview with live presence coaching and a scored report at the end
           </p>
+          <Link
+            to="/ai-interview-coach?utm_source=app&utm_medium=internal_link&utm_campaign=ai_interview_coach&utm_content=interview_engine_header"
+            className="mt-3 inline-flex items-center gap-2 text-xs text-primary hover:underline"
+          >
+            How the AI interview coach scores your answers
+          </Link>
         </div>
+
         <CreditsBalance only="interview" compact />
         <VoiceUsageMeter compact />
 
