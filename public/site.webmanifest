@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Gradr — AI Resume Builder, Job Matching & Interview Coach",
+  "name": "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
   "short_name": "Gradr",
-  "description": "Gradr is an AI career platform that builds ATS-friendly resumes, matches you to real jobs, and prepares you with AI mock interviews.",
+  "description": "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "/",
