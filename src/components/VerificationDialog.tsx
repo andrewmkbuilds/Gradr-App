@@ -268,7 +268,7 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
                 !looksInstitutional(emailValue) &&
                 isFreeMailDomain(emailValue) &&
                 form.key !== "military" && (
-                  <p className="text-xs text-amber-500">
+                  <p className="text-xs text-warning">
                     That looks like a personal mailbox. A work or school address speeds up review — a
                     reviewer may ask for more information otherwise.
                   </p>

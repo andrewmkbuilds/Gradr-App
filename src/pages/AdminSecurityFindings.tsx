@@ -39,14 +39,14 @@ import {
 
 const LEVEL_STYLE: Record<string, string> = {
   error: "bg-destructive/10 text-destructive border-destructive/30",
-  warning: "bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400",
+  warning: "bg-warning/10 text-warning border-warning/30",
   info: "bg-primary/10 text-primary border-primary/30",
 };
 
 const STATUS_STYLE: Record<DiffEntry["status"], string> = {
   new: "bg-destructive/10 text-destructive border-destructive/30",
   resolved: "bg-success/10 text-success border-success/30",
-  changed: "bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400",
+  changed: "bg-warning/10 text-warning border-warning/30",
   unchanged: "bg-muted text-muted-foreground border-border",
 };
 
