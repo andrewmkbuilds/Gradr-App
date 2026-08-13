@@ -243,6 +243,76 @@ export function analyzeCsp(rows: CspViolationRow[], options: CspAnalysisOptions 
   };
 }
 
+/* -------------------------------------------------- charting / drill-down --- */
+
+export interface CspBucket {
+  /** ISO date (UTC day) this bucket covers. */
+  date: string;
+  total: number;
+  /** Reports touching a critical surface (auth / Supabase / PWA). */
+  critical: number;
+  /** Combos whose very first report landed in this bucket. */
+  newCombos: number;
+  /** Report counts keyed by effective directive. */
+  byDirective: Record<string, number>;
+}
+
+/**
+ * Day-bucketed violation volume for the admin trend chart.
+ *
+ * Empty days are emitted too, otherwise a spike after silence looks like a
+ * gentle slope instead of the cliff it actually is.
+ */
+export function bucketCspReports(
+  rows: CspViolationRow[],
+  options: { now?: Date; days?: number } = {},
+): CspBucket[] {
+  const now = options.now ?? new Date();
+  const days = Math.max(1, options.days ?? CSP_DEFAULTS.baselineDays);
+  const dayOf = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+
+  const buckets = new Map<string, CspBucket>();
+  const start = now.getTime() - (days - 1) * 86_400_000;
+  for (let i = 0; i < days; i += 1) {
+    const date = dayOf(start + i * 86_400_000);
+    buckets.set(date, { date, total: 0, critical: 0, newCombos: 0, byDirective: {} });
+  }
+
+  const firstSeen = new Map<string, number>();
+  for (const row of rows) {
+    const t = Date.parse(row.created_at);
+    if (!Number.isFinite(t)) continue;
+    const key = `${directiveOf(row)}|${originOf(row)}`;
+    const prev = firstSeen.get(key);
+    if (prev === undefined || t < prev) firstSeen.set(key, t);
+  }
+
+  for (const row of rows) {
+    const t = Date.parse(row.created_at);
+    if (!Number.isFinite(t)) continue;
+    const bucket = buckets.get(dayOf(t));
+    if (!bucket) continue;
+    const directive = directiveOf(row);
+    bucket.total += 1;
+    if (surfacesFor(row).length > 0) bucket.critical += 1;
+    bucket.byDirective[directive] = (bucket.byDirective[directive] ?? 0) + 1;
+  }
+
+  for (const [, t] of firstSeen) {
+    const bucket = buckets.get(dayOf(t));
+    if (bucket) bucket.newCombos += 1;
+  }
+
+  return [...buckets.values()];
+}
+
+/** Raw reports behind one directive/origin combo, newest first. */
+export function reportsForCombo<T extends CspViolationRow>(rows: T[], comboKey: string): T[] {
+  return rows
+    .filter((row) => `${directiveOf(row)}|${originOf(row)}` === comboKey)
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+}
+
 /**
  * The enforce-CSP gate.
  *

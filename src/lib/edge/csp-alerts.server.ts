@@ -17,6 +17,8 @@ import { createClient } from "./shared/supabase";
 import { dispatchCspAlert } from "./shared/alerting";
 import {
   analyzeCsp,
+  bucketCspReports,
+  reportsForCombo,
   CSP_DEFAULTS,
   type CspAnalysis,
   type CspViolationRow,
@@ -71,6 +73,57 @@ async function loadReports(days: number): Promise<CspViolationRow[]> {
     .limit(5000);
   if (error) throw new Error(error.message);
   return (data ?? []) as CspViolationRow[];
+}
+
+/** Full report rows, used for chart drill-down and incident exports. */
+interface CspDetailRow extends CspViolationRow {
+  id?: string;
+  source_file?: string | null;
+  line_number?: number | null;
+  column_number?: number | null;
+  status_code?: number | null;
+  disposition?: string | null;
+  script_sample?: string | null;
+  user_agent?: string | null;
+}
+
+async function loadDetailedReports(days: number, limit = 5000): Promise<CspDetailRow[]> {
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const { data, error } = await db()
+    .from("csp_violation_reports")
+    .select(
+      "id, created_at, effective_directive, violated_directive, blocked_origin, blocked_uri, document_path, document_uri, source_file, line_number, column_number, status_code, disposition, script_sample, user_agent",
+    )
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as CspDetailRow[];
+}
+
+/**
+ * Deployment provenance for incident exports.
+ *
+ * Whoever reads the ticket needs to know *which build* produced the evidence,
+ * so we carry whatever the CI/host injected rather than guessing.
+ */
+function buildMetadata() {
+  const env = process.env;
+  const repo = env["GITHUB_REPOSITORY"] ?? env["GRADR_REPOSITORY"] ?? null;
+  const sha =
+    env["GITHUB_SHA"] ?? env["CF_PAGES_COMMIT_SHA"] ?? env["COMMIT_SHA"] ?? env["VITE_COMMIT_SHA"] ?? null;
+  const runId = env["GITHUB_RUN_ID"] ?? null;
+  const prNumber = env["GITHUB_PR_NUMBER"] ?? null;
+  return {
+    repository: repo,
+    commitSha: sha,
+    commitUrl: repo && sha ? `https://github.com/${repo}/commit/${sha}` : null,
+    branch: env["GITHUB_REF_NAME"] ?? env["CF_PAGES_BRANCH"] ?? null,
+    pullRequest: prNumber,
+    pullRequestUrl: repo && prNumber ? `https://github.com/${repo}/pull/${prNumber}` : null,
+    workflowRunUrl: repo && runId ? `https://github.com/${repo}/actions/runs/${runId}` : null,
+    environment: env["NODE_ENV"] ?? null,
+  };
 }
 
 /** Alerts already announced, so a persistent combo doesn't page every hour. */
@@ -254,6 +307,56 @@ export const handler = async (req: Request): Promise<Response> => {
           .order("last_alerted_at", { ascending: false })
           .limit(50);
         return json({ analysis, notices: notices ?? [], enforced: cspEnforcementEnabled() });
+      }
+      /** Trend chart: day buckets plus the combos that explain each shape. */
+      case "timeseries": {
+        const rows = await loadReports(days);
+        const analysis = analyzeCsp(rows, { baselineDays: days });
+        return json({
+          days,
+          buckets: bucketCspReports(rows, { days }),
+          combos: analysis.combos.slice(0, 100),
+          spikes: analysis.spikes,
+          newCombos: analysis.newCombos,
+          windowHours: analysis.windowHours,
+          generatedAt: analysis.now,
+        });
+      }
+      /** Drill-down: the raw reports behind one directive/origin pair. */
+      case "combo": {
+        const comboKey = String(body["key"] ?? url.searchParams.get("key") ?? "").slice(0, 400);
+        if (!comboKey.includes("|")) return json({ error: "A combo key is required" }, 400);
+        const rows = await loadDetailedReports(days);
+        const matches = reportsForCombo(rows, comboKey).slice(0, 200);
+        return json({ key: comboKey, days, total: matches.length, reports: matches });
+      }
+      /** One-click incident bundle for auditing and ticket creation. */
+      case "incident": {
+        const rows = await loadDetailedReports(days, 2000);
+        const analysis = analyzeCsp(rows, { baselineDays: days });
+        const { data: notices } = await db()
+          .from("csp_alert_notices")
+          .select("*")
+          .order("last_alerted_at", { ascending: false })
+          .limit(100);
+        return json({
+          generatedAt: analysis.now,
+          days,
+          build: buildMetadata(),
+          policy: {
+            enforced: cspEnforcementEnabled(),
+            mode: cspEnforcementEnabled() ? "enforce" : "report-only",
+            candidate: CONTENT_SECURITY_POLICY_REPORT_ONLY,
+          },
+          readiness: analysis.readiness,
+          totals: { reports: analysis.total, recent: analysis.recentTotal, combos: analysis.combos.length },
+          buckets: bucketCspReports(rows, { days }),
+          combos: analysis.combos,
+          spikes: analysis.spikes,
+          newCombos: analysis.newCombos,
+          notices: notices ?? [],
+          reports: rows.slice(0, 1000),
+        });
       }
       default:
         return json({ error: `Unknown action "${action}"` }, 400);
