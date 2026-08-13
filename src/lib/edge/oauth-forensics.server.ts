@@ -672,10 +672,15 @@ async function buildIncidentReport(days: number, limit: number): Promise<Inciden
     flowChecks,
     headerProbes,
     markdown: "",
+    csv: "",
+    printableHtml: "",
   };
   report.markdown = markdownTimeline(report);
+  report.csv = csvTimeline(report);
+  report.printableHtml = printableTimeline(report);
   return report;
 }
+
 
 /* ------------------------------------------------------------- handler --- */
 
