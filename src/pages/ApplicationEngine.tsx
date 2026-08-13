@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Zap, FileText, Mail, MessageSquare, Loader2, Copy, Check } from "lucide-react";
+import { useCallback, useState } from "react";
+import { FileText, Mail, MessageSquare, Loader2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,9 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { handleAiFunctionError } from "@/lib/aiErrors";
 import { ProGate } from "@/components/ProGate";
 import { CreditsBalance } from "@/components/CreditsBalance";
+import { GenerationStream } from "@/components/ai/GenerationStream";
+import { useAiStream } from "@/hooks/useAiStream";
+import { PageHeader } from "@/components/app/PageHeader";
 
 type GenerationType = "cover_letter" | "recruiter_message";
 
@@ -18,46 +20,60 @@ interface GeneratedContent {
   body: string;
 }
 
+const TITLES: Record<GenerationType, string> = {
+  cover_letter: "Cover letter",
+  recruiter_message: "Recruiter message",
+};
+
 function ApplicationEngineInner() {
   const { user } = useAuth();
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const [activeType, setActiveType] = useState<GenerationType | null>(null);
-  const [result, setResult] = useState<GeneratedContent | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const generate = async (type: GenerationType) => {
-    if (!user) { toast.error("Please sign in first"); return; }
+  const stream = useAiStream<GeneratedContent>({
+    fn: "generate-application",
+    initialLabel: "Reading your resume",
+    onResult: () => {
+      toast.success(`${TITLES[activeType ?? "cover_letter"]} ready`);
+    },
+  });
 
-    setLoading(true);
-    setActiveType(type);
-    setResult(null);
-
-    try {
-      const { data: resumes } = await supabase
-        .from("resumes")
-        .select("parsed_text")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      const resumeText = resumes?.[0]?.parsed_text || "";
-      if (!resumeText) {
-        toast.error("Upload a resume first in the Resume Intelligence page");
-        setLoading(false);
+  const generate = useCallback(
+    async (type: GenerationType) => {
+      if (!user) {
+        toast.error("Please sign in first");
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("display_name")
-        .eq("user_id", user.id)
-        .single();
+      setActiveType(type);
+      setCopied(false);
+      setPreparing(true);
 
-      const { data, error } = await supabase.functions.invoke("generate-application", {
-        body: {
+      try {
+        const { data: resumes } = await supabase
+          .from("resumes")
+          .select("parsed_text")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        const resumeText = resumes?.[0]?.parsed_text || "";
+        if (!resumeText) {
+          toast.error("Upload a resume first in Resume Intelligence");
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("user_id", user.id)
+          .single();
+
+        await stream.start({
           environment: getPaddleEnvironment(),
           type,
           resumeText,
@@ -65,118 +81,133 @@ function ApplicationEngineInner() {
           company: company || undefined,
           jobDescription: jobDescription || undefined,
           userName: profile?.display_name || user.email,
-        },
-      });
-
-      if (error || data?.error) {
-        if (handleAiFunctionError(error, data)) { setLoading(false); return; }
-        throw error ?? new Error(data?.error || "Generation failed");
+        });
+      } catch (e: any) {
+        toast.error(e?.message || "Generation failed");
+      } finally {
+        setPreparing(false);
       }
+    },
+    [company, jobDescription, jobTitle, stream, user],
+  );
 
-      setResult(data);
-      toast.success(`${type === "cover_letter" ? "Cover letter" : "Recruiter message"} generated!`);
-    } catch (e: any) {
-      toast.error(e.message || "Generation failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const result = stream.result;
+  const busy = preparing || stream.isStreaming;
 
   const copyToClipboard = () => {
     if (!result) return;
     navigator.clipboard.writeText(`${result.subject}\n\n${result.body}`);
     setCopied(true);
-    toast.success("Copied to clipboard!");
+    toast.success("Copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="type-h1 text-foreground tracking-tight">Application Engine</h1>
-        <p className="text-sm text-muted-foreground mt-1">AI-powered cover letters & recruiter outreach</p>
-      </div>
+    <div className="page-shell page-stack mx-auto max-w-6xl">
+      <PageHeader
+        title="Application Engine"
+        description="AI-drafted cover letters and recruiter outreach, tailored to your resume."
+      />
       <CreditsBalance only="application" compact />
 
-      {/* Input Fields */}
-      <div className="elev-2 rounded-xl p-6 animate-fade-in space-y-4">
-        <h3 className="text-sm font-semibold text-foreground">Target Position</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Target position */}
+      <div className="elev-2 pad-panel space-y-4 rounded-xl">
+        <h2 className="type-h3 text-foreground">Target position</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
-            placeholder="Job title (e.g., Senior Frontend Engineer)"
+            placeholder="Job title (e.g. Senior Frontend Engineer)"
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
-            className="bg-secondary border-border"
+            aria-label="Job title"
+            className="border-border bg-secondary"
           />
           <Input
             placeholder="Company name"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="bg-secondary border-border"
+            aria-label="Company name"
+            className="border-border bg-secondary"
           />
         </div>
         <Textarea
           placeholder="Paste the job description (optional — improves quality)"
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          className="bg-secondary border-border min-h-[100px]"
+          aria-label="Job description"
+          className="min-h-[100px] border-border bg-secondary"
         />
       </div>
 
-      {/* Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="elev-2 rounded-xl p-6 animate-fade-in group transition-all">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-            <Mail className="h-6 w-6 text-primary" />
+      {/* Actions */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="elev-2 pad-panel group rounded-xl transition-all">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+            <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-1">Cover Letter</h3>
-          <p className="text-sm text-muted-foreground mb-4">AI-tailored cover letter based on your resume and job description</p>
-          <Button
-            onClick={() => generate("cover_letter")}
-            disabled={loading}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            {loading && activeType === "cover_letter" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
-            Generate Cover Letter
+          <h3 className="type-h3 mb-1 text-foreground">Cover letter</h3>
+          <p className="measure type-body-sm mb-4 text-muted-foreground">
+            A tailored letter built from your resume and the job description.
+          </p>
+          <Button onClick={() => generate("cover_letter")} disabled={busy} className="min-h-11">
+            {busy && activeType === "cover_letter" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
+            )}
+            Generate cover letter
           </Button>
         </div>
 
-        <div className="elev-2 rounded-xl p-6 animate-fade-in group transition-all">
-          <div className="h-12 w-12 rounded-xl bg-mahogany-soft flex items-center justify-center mb-4 group-hover:bg-mahogany/20 transition-colors">
-            <MessageSquare className="h-6 w-6 text-mahogany" />
+        <div className="elev-2 pad-panel group rounded-xl transition-all">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-mahogany-soft transition-colors group-hover:bg-mahogany/20">
+            <MessageSquare className="h-6 w-6 text-mahogany" aria-hidden="true" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-1">Recruiter Message</h3>
-          <p className="text-sm text-muted-foreground mb-4">Concise outreach message for recruiters or hiring managers</p>
-          <Button
-            onClick={() => generate("recruiter_message")}
-            disabled={loading}
-            variant="outline"
-            className="border-border text-foreground hover:bg-secondary"
-          >
-            {loading && activeType === "recruiter_message" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <MessageSquare className="h-4 w-4 mr-2" />}
-            Generate Message
+          <h3 className="type-h3 mb-1 text-foreground">Recruiter message</h3>
+          <p className="measure type-body-sm mb-4 text-muted-foreground">
+            Concise outreach for recruiters or hiring managers.
+          </p>
+          <Button onClick={() => generate("recruiter_message")} disabled={busy} variant="outline" className="min-h-11">
+            {busy && activeType === "recruiter_message" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <MessageSquare className="mr-2 h-4 w-4" aria-hidden="true" />
+            )}
+            Generate message
           </Button>
         </div>
       </div>
 
-      {/* Result */}
-      {result && (
-        <div className="elev-2 rounded-xl p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground">
-              {activeType === "cover_letter" ? "Cover Letter" : "Recruiter Message"}
-            </h3>
-            <Button variant="ghost" size="sm" onClick={copyToClipboard} className="text-muted-foreground hover:text-foreground">
-              {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
-              {copied ? "Copied" : "Copy"}
-            </Button>
+      {/* Streamed output */}
+      <GenerationStream
+        status={stream.status}
+        progress={stream.progress}
+        label={stream.label}
+        text={stream.text}
+        error={stream.error}
+        title={TITLES[activeType ?? "cover_letter"]}
+        description="Drafted from your latest resume."
+        onCancel={stream.cancel}
+        onRetry={stream.retry}
+      >
+        {result ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="type-h4 text-foreground">{result.subject}</p>
+              <Button variant="ghost" size="sm" onClick={copyToClipboard} className="min-h-11 shrink-0 sm:min-h-9">
+                {copied ? (
+                  <Check className="mr-1 h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Copy className="mr-1 h-4 w-4" aria-hidden="true" />
+                )}
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+            <p className="measure-wide type-body whitespace-pre-wrap rounded-lg bg-secondary/50 p-4 text-foreground/85">
+              {result.body}
+            </p>
           </div>
-          <div className="p-4 rounded-lg bg-secondary/50 space-y-3">
-            <p className="text-sm font-medium text-foreground">{result.subject}</p>
-            <p className="text-sm text-foreground/80 whitespace-pre-wrap">{result.body}</p>
-          </div>
-        </div>
-      )}
+        ) : null}
+      </GenerationStream>
     </div>
   );
 }

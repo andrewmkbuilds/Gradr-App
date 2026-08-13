@@ -21,10 +21,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { handleAiFunctionError } from "@/lib/aiErrors";
 import { extractResumeText } from "@/lib/extractResumeText";
 import { ResumeVersions } from "@/components/resume/ResumeVersions";
 import { ResumeVersionDiff } from "@/components/resume/ResumeVersionDiff";
+import { GenerationStream } from "@/components/ai/GenerationStream";
+import { useAiStream } from "@/hooks/useAiStream";
 
 interface Suggestion {
   type: string;
@@ -70,6 +71,14 @@ export default function ResumeEngine() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Streamed analysis: milestones + an early partial result with the
+  // deterministic scores, then the AI coaching notes.
+  const analysisStream = useAiStream<AnalysisResult>({
+    fn: "analyze-resume",
+    initialLabel: "Parsing your resume",
+    onPartial: (partial) => setAnalysis(partial),
+  });
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [fileName, setFileName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -116,14 +125,17 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(true);
 
-      const { data: analysisData, error: fnError } = await supabase.functions.invoke("analyze-resume", {
-        body: { resumeText: text, jobDescription, jobTitle, environment: getPaddleEnvironment() },
+      // Deterministic scores stream back first (as a `partial`), so the dials
+      // fill in while the AI coaching notes are still being written.
+      const analysisData = await analysisStream.start({
+        resumeText: text,
+        jobDescription,
+        jobTitle,
+        environment: getPaddleEnvironment(),
       });
 
-      if (fnError || analysisData?.error) {
-        if (handleAiFunctionError(fnError, analysisData)) return;
-        throw fnError ?? new Error(analysisData?.error || "Analysis failed");
-      }
+      // Canceled or failed — the hook has already surfaced the reason.
+      if (!analysisData) return;
 
       setAnalysis(analysisData);
 
@@ -161,7 +173,7 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(false);
     }
-  }, [user, jobDescription, jobTitle]);
+  }, [user, jobDescription, jobTitle, analysisStream]);
 
   const handleRescan = async () => {
     if (!file) return;
@@ -296,6 +308,22 @@ export default function ResumeEngine() {
 
       {!uploading && !analyzing && <ResumeVersionDiff key={`diff-${versionsToken}`} />}
 
+      {/* Live analysis progress: cancel while it runs, retry if it fails.
+          Once the scorecard below is final, the rail retires itself. */}
+      {analysisStream.status !== "done" && (
+      <GenerationStream
+        status={analysisStream.status}
+        progress={analysisStream.progress}
+        label={analysisStream.label}
+        text={analysisStream.text}
+        error={analysisStream.error}
+        title="Resume analysis"
+        description="Scores and coaching notes are ready."
+        onCancel={analysisStream.cancel}
+        onRetry={analysisStream.retry}
+      />
+      )}
+
       <AnimatePresence mode="wait">
         {!analysis && !uploading && !analyzing ? (
           <motion.div key="dropzone" {...stagger(0)} exit={{ opacity: 0 }}>
@@ -321,7 +349,7 @@ export default function ResumeEngine() {
               </label>
             </Magnetic>
           </motion.div>
-        ) : uploading || analyzing ? (
+        ) : uploading ? (
           <motion.div key="working" {...stagger(0)} exit={{ opacity: 0 }}>
             <Surface level={3} className="flex flex-col items-center justify-center gap-4 py-14 text-center">
               <div className="relative flex h-16 w-16 items-center justify-center">
@@ -335,11 +363,9 @@ export default function ResumeEngine() {
               </div>
               <div>
                 <h3 className="font-display text-lg text-foreground" role="status">
-                  {uploading ? "Uploading your resume" : "Scoring your resume"}
+                  Uploading your resume
                 </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {uploading ? "Encrypting and storing the file…" : "Parsing structure, keywords, impact and readability…"}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Encrypting and storing the file…</p>
               </div>
             </Surface>
           </motion.div>

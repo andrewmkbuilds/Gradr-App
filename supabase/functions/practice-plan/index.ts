@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sseResponse, streamGatewayChat } from "../_shared/aiStream.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,14 +55,12 @@ serve(async (req) => {
       });
     }
     const targetRole = String(body.targetRole ?? "").slice(0, 120);
+    const wantsStream = body.stream === true;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const planRequest = {
         model: "google/gemini-3-flash-preview",
         messages: [
           {
@@ -108,8 +107,58 @@ serve(async (req) => {
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "submit_plan" } },
-      }),
+      tool_choice: { type: "function", function: { name: "submit_plan" } },
+    };
+
+    // ------------------------- streamed generation ------------------------
+    if (wantsStream) {
+      return sseResponse(corsHeaders, async (writer, signal) => {
+        writer.stage("read", "Reading your scorecard", 0.12);
+        writer.stage("plan", "Designing your 7-day plan", 0.25);
+
+        let streamed;
+        try {
+          streamed = await streamGatewayChat({
+            apiKey: LOVABLE_API_KEY,
+            body: planRequest,
+            signal,
+            onToolArgs: (_name, _delta, all) => {
+              // Each day is roughly a fixed slice of the payload, so argument
+              // length is an honest progress signal here.
+              writer.stage("plan", "Designing your 7-day plan", Math.min(0.95, 0.25 + (all.length / 4200) * 0.7));
+            },
+          });
+        } catch (err) {
+          if (signal.aborted) return;
+          throw err;
+        }
+
+        if (!streamed.ok) {
+          writer.send("error", { message: streamed.error ?? "Plan generation failed", status: streamed.status });
+          return;
+        }
+
+        const args = streamed.toolArgs["submit_plan"] ?? Object.values(streamed.toolArgs)[0];
+        let plan: unknown = null;
+        try {
+          plan = args ? JSON.parse(args) : null;
+        } catch {
+          plan = null;
+        }
+        if (!plan) {
+          writer.send("error", { message: "The model returned an incomplete plan. Please retry.", status: 502 });
+          return;
+        }
+
+        writer.stage("done", "Plan ready", 1);
+        writer.send("result", { plan });
+      });
+    }
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify(planRequest),
     });
 
     if (response.status === 429 || response.status === 402) {

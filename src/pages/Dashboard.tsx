@@ -1,4 +1,5 @@
-import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Loader2, Bookmark, Send, CalendarCheck, Trophy, XCircle, Bell, AlertCircle } from "lucide-react";
+import { SkeletonList, SkeletonPanel } from "@/components/states";
+import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Bookmark, Send, CalendarCheck, Trophy, XCircle, Bell, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ScoreRing } from "@/components/ScoreRing";
 import { supabase } from "@/integrations/supabase/client";
@@ -177,8 +178,14 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="page-shell page-stack mx-auto max-w-6xl" aria-busy="true">
+        <SkeletonPanel lines={2} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonPanel key={i} lines={1} />
+          ))}
+        </div>
+        <SkeletonList rows={2} />
       </div>
     );
   }
