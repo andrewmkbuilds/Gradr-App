@@ -510,12 +510,14 @@ export default function Landing() {
                     { label: "Interview personas", value: 12, suffix: "" },
                   ].map((s) => (
                     <div key={s.label}>
-                      <dt className="sr-only">{s.label}</dt>
+                      {/* dd first visually via order so the label stays the
+                          dt element — a <dl> group may only contain dt/dd. */}
                       <dd className="font-display text-2xl font-bold tracking-tight text-foreground">
                         <CountUp to={s.value} suffix={s.suffix} duration={1.6} immediate />
                       </dd>
-                      <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.label}</p>
+                      <dt className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.label}</dt>
                     </div>
+
                   ))}
                 </motion.dl>
               </div>
