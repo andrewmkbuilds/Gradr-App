@@ -221,6 +221,42 @@ function resolveOgImage(pathname: string): string {
  * account/credential flows, admin tooling and affiliate back-office. They hold
  * no public content and only dilute how search engines understand Gradr.
  */
+/**
+ * Product/engine surfaces that get a WebApplication JSON-LD block. These sit
+ * behind sign-in and stay noindexed, but the structured data still attaches
+ * their feature vocabulary to the Gradr entity for search and AI crawlers.
+ */
+const ENGINE_LD: Record<string, { name: string; features: string[] }> = {
+  "/resume": {
+    name: "Resume Intelligence",
+    features: ["ATS scoring", "Keyword gap analysis", "AI rewrite suggestions", "Resume version comparison"],
+  },
+  "/match": {
+    name: "Job Matching Engine",
+    features: ["Live job matching", "Resume-to-role fit scoring", "Skill gap breakdown"],
+  },
+  "/jobs": {
+    name: "Job Feed",
+    features: ["Live job discovery", "Personalized recommendations", "One-click tracking"],
+  },
+  "/apply": {
+    name: "Application Engine",
+    features: ["Tailored cover letters", "Application package generation", "Company research"],
+  },
+  "/pipeline": {
+    name: "Application Pipeline",
+    features: ["Application tracking", "Interview scheduling", "Pipeline insights"],
+  },
+  "/interview": {
+    name: "AI Interview Studio",
+    features: ["Realtime AI mock interviews", "Voice and camera coaching", "Scorecard PDF export"],
+  },
+  "/growth": {
+    name: "Growth Engine",
+    features: ["Personalized practice plans", "Skill development tracking", "Career planning"],
+  },
+};
+
 const NOINDEX_EXACT = new Set([
   "/auth",
   "/forgot-password",
