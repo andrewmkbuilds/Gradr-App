@@ -99,9 +99,12 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
   // SSR-safe: start from defaults, hydrate from storage after mount.
   const [prefs, setPrefs] = useState<StoredPrefs>(DEFAULTS);
   const [systemReduced, setSystemReduced] = useState(false);
+  const [weakDeviceReason, setWeakDeviceReason] = useState<string | null>(null);
+  const [fpsLow, setFpsLow] = useState(false);
 
   useEffect(() => {
     setPrefs(readStored());
+    setWeakDeviceReason(detectWeakDevice());
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setSystemReduced(mq.matches);
     sync();
@@ -109,9 +112,36 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // Runtime fallback: if the device can't hold ~30fps for a sustained window,
+  // treat it as low-power even when static hints looked fine.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let frames = 0;
+    let windowStart = performance.now();
+    let lowStreaks = 0;
+    let raf = 0;
+    const tick = (now: number) => {
+      frames += 1;
+      if (now - windowStart >= 2000) {
+        const fps = (frames * 1000) / (now - windowStart);
+        lowStreaks = fps < 30 ? lowStreaks + 1 : 0;
+        if (lowStreaks >= 3) setFpsLow(true);
+        frames = 0;
+        windowStart = now;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const lowPower = weakDeviceReason !== null || fpsLow;
+  const lowPowerReason = weakDeviceReason ?? (fpsLow ? "Sustained low frame rate" : null);
+
   const reduceMotion =
     prefs.mode === "reduced" || (prefs.mode === "system" && systemReduced);
-  const effectiveDepth = reduceMotion ? 0 : prefs.depth;
+  // Low-power devices keep motion but halve depth so heavy 3D stays affordable.
+  const effectiveDepth = reduceMotion ? 0 : lowPower ? Math.min(prefs.depth, 0.4) : prefs.depth;
 
   // Persist + mirror to the document so CSS can react instantly.
   useEffect(() => {
