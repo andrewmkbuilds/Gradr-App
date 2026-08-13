@@ -92,12 +92,12 @@ const NEW_WAY = [
   "One system that remembers your history",
 ];
 
+/** Prices are read from the single source of truth in @/config/pricing. */
 const PLANS = [
   {
+    id: "free" as const,
     name: "Free",
     tagline: "Enough to feel the whole system.",
-    monthly: { price: "$0", note: "forever" },
-    annual: { price: "$0", note: "forever" },
     features: [
       "Resume upload and ATS scoring",
       "Job discovery and matching",
@@ -108,10 +108,9 @@ const PLANS = [
     cta: "Get started free",
   },
   {
+    id: "starter" as const,
     name: "Starter",
     tagline: "For an active job search.",
-    monthly: { price: "$9", note: "per month" },
-    annual: { price: "$84", note: "per year · save $24" },
     features: [
       "Everything in Free",
       "Expanded resume and ATS passes",
@@ -123,10 +122,9 @@ const PLANS = [
     cta: "Start with Starter",
   },
   {
+    id: "pro" as const,
     name: "Pro",
     tagline: "The complete Gradr experience.",
-    monthly: { price: "$19", note: "per month" },
-    annual: { price: "$168", note: "per year · $14/month" },
     highlight: true,
     features: [
       "Everything in Starter",
@@ -139,7 +137,22 @@ const PLANS = [
     ],
     cta: "Go Pro",
   },
+  {
+    id: "advanced" as const,
+    name: "Advanced",
+    tagline: "Maximum firepower for a high-stakes search.",
+    features: [
+      "Everything in Pro",
+      "Extended realtime interview sessions",
+      "Deep company and interviewer research",
+      "Personalized practice plans",
+      "Priority AI queue",
+      "Concierge onboarding",
+    ],
+    cta: "Go Advanced",
+  },
 ];
+
 
 const FAQS: [string, string][] = [
   ["What is Gradr?", "Gradr is an AI career operating system. It connects resume intelligence, ATS optimization, job matching, application generation, networking outreach, AI mock interviews, and career analytics in a single workspace — so each step feeds the next instead of living in a different tool."],
