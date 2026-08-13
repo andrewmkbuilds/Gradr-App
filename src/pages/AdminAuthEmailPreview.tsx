@@ -261,7 +261,7 @@ export default function AdminAuthEmailPreview() {
               </div>
             )}
 
-            </div>
+
 
             <dl className="grid gap-2 text-xs sm:grid-cols-[10rem_1fr]">
               <dt className="text-muted-foreground">Action URL</dt>
