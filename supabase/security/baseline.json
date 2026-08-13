@@ -236,7 +236,9 @@
       "my_affiliate_overview",
       "my_eligibility_state",
       "pending_legal_acceptances",
-      "reject_affiliate_application"
+      "reject_affiliate_application",
+      "request_institution",
+      "submit_verification_request"
     ]
   },
   "findingGuards": [

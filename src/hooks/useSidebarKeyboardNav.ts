@@ -26,10 +26,13 @@ export function useSidebarKeyboardNav<T extends HTMLElement>(
   const rows = useCallback((): HTMLElement[] => {
     const root = containerRef.current;
     if (!root) return [];
-    return Array.from(root.querySelectorAll<HTMLElement>("[data-nav-focusable]")).filter(
-      // Skip rows inside collapsed groups.
-      (el) => el.offsetParent !== null || el === document.activeElement,
-    );
+    return Array.from(root.querySelectorAll<HTMLElement>("[data-nav-focusable]")).filter((el) => {
+      if (el === document.activeElement) return true;
+      // Skip rows inside a collapsed disclosure or an explicitly hidden subtree.
+      // Checked structurally (not via offsetParent) so the order stays stable
+      // while the accordion is mid-animation.
+      return !el.closest('[data-nav-panel][data-state="closed"],[hidden],[aria-hidden="true"]');
+    });
   }, [containerRef]);
 
   const focusAt = useCallback(

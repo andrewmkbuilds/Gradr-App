@@ -1,10 +1,11 @@
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
-import { Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
+import { AlertCircle, Info, Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,10 +20,54 @@ import {
 } from "@/lib/interview/personas";
 import { stagger, fadeUp, springSnappy } from "@/lib/motion/tokens";
 import { entitlementFor, personaAllowed, difficultyAllowed } from "@/lib/interview/entitlements";
+import {
+  LIMITS,
+  buildSessionContext,
+  validateSetup,
+  type SetupField,
+} from "@/lib/interview/setupValidation";
 
 interface Props {
   initial?: Partial<SessionContext>;
   onContinue: (ctx: SessionContext) => void;
+}
+
+/** One labelled optional field with inline error / advisory messaging. */
+function Field({
+  id,
+  label,
+  hint,
+  error,
+  warning,
+  children,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string | undefined;
+  warning?: string | undefined;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+        <Label htmlFor={id}>{label}</Label>
+        {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
+      </div>
+      {children}
+      {error ? (
+        <p id={`${id}-error`} role="alert" className="flex items-start gap-1.5 text-xs text-destructive">
+          <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+          {error}
+        </p>
+      ) : warning ? (
+        <p id={`${id}-warning`} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <Info className="mt-0.5 h-3 w-3 shrink-0 text-brand-secondary" aria-hidden="true" />
+          {warning}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 /** Pre-session setup: interviewer persona, difficulty and role/resume grounding. */
@@ -36,9 +81,34 @@ export function InterviewSetup({ initial, onContinue }: Props) {
   const [resumeLabel, setResumeLabel] = useState<string | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
   const [tier, setTier] = useState<string | null>(null);
+  const [touched, setTouched] = useState<Partial<Record<SetupField, boolean>>>({});
+  const [attempted, setAttempted] = useState(false);
 
   const ent = entitlementFor(tier);
   const reduced = useReducedMotionPref();
+
+  const validation = useMemo(
+    () => validateSetup({ targetRole, company, jobDescription }),
+    [targetRole, company, jobDescription],
+  );
+
+  // Only surface a field's message once the user has left it, or once they've
+  // tried to continue — typing "S" for "Senior" shouldn't read as an error.
+  const showIssues: Record<SetupField, boolean> = {
+    targetRole: Boolean(touched.targetRole) || attempted,
+    company: Boolean(touched.company) || attempted,
+    jobDescription: Boolean(touched.jobDescription) || attempted,
+  };
+
+  const touch = (field: SetupField) => setTouched((prev) => ({ ...prev, [field]: true }));
+
+  const describedBy = (id: string, field: SetupField) => {
+    if (!showIssues[field]) return undefined;
+    if (validation.errors[field]) return `${id}-error`;
+    if (validation.warnings[field]) return `${id}-warning`;
+    return undefined;
+  };
+
 
 
   // Auto-fill from the user's saved profile and most recent parsed resume.
@@ -199,28 +269,70 @@ export function InterviewSetup({ initial, onContinue }: Props) {
       </motion.div>
 
 
-      <motion.div variants={fadeUp} className="grid gap-3 sm:grid-cols-2">
-        <Input
-          placeholder="Target role (e.g. Senior Frontend Engineer)"
-          value={targetRole}
-          onChange={(e) => setTargetRole(e.target.value)}
-          className="bg-secondary border-border"
-        />
-        <Input
-          placeholder="Company (optional)"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          className="bg-secondary border-border"
-        />
+      <motion.div variants={fadeUp} className="grid gap-4 sm:grid-cols-2">
+        <Field
+          id="interview-target-role"
+          label="Target role"
+          hint="Optional — improves question relevance"
+          error={showIssues.targetRole ? validation.errors.targetRole : undefined}
+          warning={showIssues.targetRole ? validation.warnings.targetRole : undefined}
+        >
+          <Input
+            id="interview-target-role"
+            placeholder="e.g. Senior Frontend Engineer"
+            value={targetRole}
+            maxLength={LIMITS.targetRole.max + 20}
+            onChange={(e) => setTargetRole(e.target.value)}
+            onBlur={() => touch("targetRole")}
+            aria-invalid={Boolean(validation.errors.targetRole) || undefined}
+            aria-describedby={describedBy("interview-target-role", "targetRole")}
+          />
+        </Field>
+        <Field
+          id="interview-company"
+          label="Company"
+          hint="Optional — tailors culture and product questions"
+          error={showIssues.company ? validation.errors.company : undefined}
+          warning={showIssues.company ? validation.warnings.company : undefined}
+        >
+          <Input
+            id="interview-company"
+            placeholder="e.g. Northwind"
+            value={company}
+            maxLength={LIMITS.company.max + 20}
+            onChange={(e) => setCompany(e.target.value)}
+            onBlur={() => touch("company")}
+            aria-invalid={Boolean(validation.errors.company) || undefined}
+            aria-describedby={describedBy("interview-company", "company")}
+          />
+        </Field>
       </motion.div>
 
-      <Textarea
-        placeholder="Paste the job description (optional) — questions will be grounded in it"
-        value={jobDescription}
-        onChange={(e) => setJobDescription(e.target.value)}
-        rows={4}
-        className="bg-secondary border-border resize-none"
-      />
+      <motion.div variants={fadeUp}>
+        <Field
+          id="interview-jd"
+          label="Job description"
+          hint={
+            jobDescription.trim().length
+              ? `${jobDescription.trim().length.toLocaleString()} / ${LIMITS.jobDescription.max.toLocaleString()} characters`
+              : "Optional — questions will be grounded in it"
+          }
+          error={showIssues.jobDescription ? validation.errors.jobDescription : undefined}
+          warning={showIssues.jobDescription ? validation.warnings.jobDescription : undefined}
+        >
+          <Textarea
+            id="interview-jd"
+            placeholder="Paste the job posting here"
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            onBlur={() => touch("jobDescription")}
+            rows={4}
+            aria-invalid={Boolean(validation.errors.jobDescription) || undefined}
+            aria-describedby={describedBy("interview-jd", "jobDescription")}
+            className="resize-none"
+          />
+        </Field>
+      </motion.div>
 
       <motion.div variants={fadeUp} className="flex items-center gap-2 text-xs text-muted-foreground">
         {loadingContext ? (
@@ -237,26 +349,33 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         )}
       </motion.div>
 
-      <Button
-        onClick={() => {
-          const nextContext: SessionContext = {
-            personaId,
-            difficultyId,
-          };
-          const role = targetRole.trim();
-          const companyName = company.trim();
-          const description = jobDescription.trim();
-          if (role) nextContext.targetRole = role;
-          if (companyName) nextContext.company = companyName;
-          if (description) nextContext.jobDescription = description;
-          if (resumeText) nextContext.resumeText = resumeText;
-          onContinue(nextContext);
-        }}
-        className="bg-primary text-primary-foreground hover:bg-primary/90"
-      >
-        <Sparkles className="mr-2 h-4 w-4" />
-        Continue to device check
-      </Button>
+      <motion.div variants={fadeUp} className="space-y-3">
+        {attempted && !validation.valid && (
+          <p id="interview-setup-blocked" role="alert" className="flex items-start gap-2 text-sm text-destructive">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            Fix the highlighted fields before starting — or clear them, since they're all optional.
+          </p>
+        )}
+        <Button
+          onClick={() => {
+            setAttempted(true);
+            setTouched({ targetRole: true, company: true, jobDescription: true });
+            if (!validation.valid) return;
+            onContinue(
+              buildSessionContext({
+                personaId,
+                difficultyId,
+                draft: { targetRole, company, jobDescription },
+                ...(resumeText ? { resumeText } : {}),
+              }),
+            );
+          }}
+          aria-describedby={attempted && !validation.valid ? "interview-setup-blocked" : undefined}
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Continue to device check
+        </Button>
+      </motion.div>
     </motion.div>
   );
 }
