@@ -18,7 +18,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/hooks/useAuth";
-import { RouteSeo } from "@/components/RouteSeo";
+import { RouteSeo, normalizeSeoPath } from "@/components/RouteSeo";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import RootErrorBoundary from "@/components/RootErrorBoundary";
