@@ -56,11 +56,26 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
 
         const token = authHeader.slice('Bearer '.length).trim()
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
-        if (authError || !user) {
-          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        // System callers (queue processor, pg_cron) present the service role key.
+        const isSystem = token === supabaseServiceKey
+        let callerEmail: string | null = null
+        let isAdmin = false
+
+        if (!isSystem) {
+          const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+          if (authError || !user) {
+            return Response.json({ error: 'Unauthorized' }, { status: 401 })
+          }
+          // Anonymous/guest sessions have no verified address and may not send.
+          callerEmail = user.email ?? null
+          const { data: adminFlag } = await supabase.rpc('has_role', {
+            _user_id: user.id,
+            _role: 'admin',
+          })
+          isAdmin = adminFlag === true
         }
+
 
         // Parse request body
         let templateName: string
