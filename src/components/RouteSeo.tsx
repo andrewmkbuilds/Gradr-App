@@ -172,6 +172,8 @@ function resolveOgImage(pathname: string): string {
   // The public marketing landing page gets its own card so social previews
   // never duplicate the generic sitewide image used by the home route.
   if (pathname === "/landing") return `${ORIGIN}/og/landing.png`;
+  // Keyword landing pages ship their own card so social previews match intent.
+  if (pathname === "/ai-interview-coach") return `${ORIGIN}/og/ai-interview-coach.png`;
   if (pathname.startsWith("/blog/")) {
     const slug = pathname.slice(6);
     if (slug) return `${ORIGIN}/og/blog-${slug}.png`;
