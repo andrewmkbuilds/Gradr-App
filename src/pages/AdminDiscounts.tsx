@@ -119,7 +119,7 @@ export default function AdminDiscounts() {
       const { error } = await supabase.rpc("admin_review_verification", {
         _verification_id: input.id,
         _status: input.status,
-        _reason: input.reason ?? null,
+        _reason: input.reason ?? undefined,
       });
       if (error) throw error;
     },

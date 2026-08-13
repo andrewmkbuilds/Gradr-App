@@ -161,9 +161,9 @@ function CreatePayoutDialog() {
         _affiliate_profile_id: affiliateId,
         _amount: amt,
         _payout_method: method,
-        _reference: reference || null,
-        _notes: notes || null,
-        _commission_ids: includeUnpaid ? (unpaidCommissions || []).map((c) => c.id) : null,
+        _reference: reference || undefined,
+        _notes: notes || undefined,
+        _commission_ids: includeUnpaid ? (unpaidCommissions || []).map((c) => c.id) : undefined,
       });
       if (error) throw error;
       return data;
@@ -266,7 +266,7 @@ function MarkPaidButton({ payout }: { payout: Payout }) {
     mutationFn: async () => {
       const { error } = await supabase.rpc("admin_mark_payout_paid", {
         _payout_id: payout.id,
-        _reference: reference || null,
+        _reference: reference || undefined,
         _payout_method: method,
       });
       if (error) throw error;

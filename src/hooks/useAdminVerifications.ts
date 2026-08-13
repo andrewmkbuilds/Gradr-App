@@ -30,7 +30,7 @@ export function useAdminVerificationRequests(status: string | null) {
     queryKey: ["admin-verification-requests", status],
     queryFn: async (): Promise<AdminVerificationRequest[]> => {
       const { data, error } = await supabase.rpc("admin_verification_requests", {
-        _status: status,
+        _status: status ?? undefined,
         _limit: 200,
       });
       if (error) throw new Error(error.message);
@@ -51,8 +51,8 @@ export function useReviewVerificationRequest() {
       const { error } = await supabase.rpc("admin_review_verification_request", {
         _request_id: input.requestId,
         _decision: input.decision,
-        _notes: input.notes ?? null,
-        _discount_percentage: input.discountPercentage ?? null,
+        _notes: input.notes ?? undefined,
+        _discount_percentage: input.discountPercentage ?? undefined,
       });
       if (error) throw new Error(error.message);
     },

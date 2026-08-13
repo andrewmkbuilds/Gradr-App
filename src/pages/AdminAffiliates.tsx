@@ -84,7 +84,7 @@ function ApplicationsPanel() {
   const reject = async (id: string, reason: string) => {
     const { error } = await supabase.rpc("reject_affiliate_application", {
       _application_id: id,
-      _reason: reason.trim() || null,
+      _reason: reason.trim() || undefined,
     });
     if (error) return toast.error(error.message);
     toast.success("Rejected — applicant notified");
