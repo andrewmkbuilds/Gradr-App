@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
   "short_name": "Gradr",
-  "description": "Gradr is your AI-powered career copilot. Build ATS-optimized resumes, discover better job matches, track applications, practice interviews, and get personalized guidance to accelerate your career.",
+  "description": "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "/",
