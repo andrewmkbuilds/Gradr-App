@@ -48,7 +48,7 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const { signOut } = useAuth();
   const { data: isAdmin } = useIsAdmin();
-  const navRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   // Admin links are only rendered for verified admins. This is presentation
   // only — every admin route is additionally wrapped in <RequireAdmin> and

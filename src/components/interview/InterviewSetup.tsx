@@ -351,7 +351,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
 
       <motion.div variants={fadeUp} className="space-y-3">
         {attempted && !validation.valid && (
-          <p role="alert" className="flex items-start gap-2 text-sm text-destructive">
+          <p id="interview-setup-blocked" role="alert" className="flex items-start gap-2 text-sm text-destructive">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             Fix the highlighted fields before starting — or clear them, since they're all optional.
           </p>
