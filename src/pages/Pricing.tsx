@@ -264,7 +264,7 @@ export default function Pricing() {
                   }`}
                 >
                   {tier.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-mahogany text-mahogany-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-[0_8px_20px_-12px_hsl(var(--mahogany))]">
                       Most popular
                     </div>
                   )}

@@ -50,7 +50,7 @@ export function PageHeader({
       >
         <div className="min-w-0 space-y-2">
           {eyebrow && (
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-mahogany">
               {icon}
               {eyebrow}
             </p>

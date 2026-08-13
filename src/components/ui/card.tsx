@@ -22,7 +22,10 @@ const cardVariants = cva(
         insight:
           "border border-primary/25 bg-primary text-primary-foreground shadow-[0_18px_40px_-24px_hsl(var(--primary)/0.7)] [&_.text-muted-foreground]:text-primary-foreground/75",
         /** Brand moment — mahogany hairline and wash. */
-        highlight: "border border-brand-secondary/30 bg-brand-secondary-soft/60",
+        highlight: "accent-card border bg-mahogany-tint",
+        /** Solid mahogany moment — one per page at most. */
+        accent:
+          "border border-mahogany/30 bg-mahogany text-mahogany-foreground shadow-[0_18px_40px_-24px_hsl(var(--mahogany)/0.7)] [&_.text-muted-foreground]:text-mahogany-foreground/75",
         /** Needs attention, without shouting. */
         warning: "border border-warning/35 bg-warning-soft/60",
         /** Something went wrong. */
