@@ -17,6 +17,10 @@ import { ease, spring } from "@/lib/motion";
 
 export type NavItem = { label: string; href: string };
 
+/** Inputs that mean "the user took the wheel back" from a click-driven scroll. */
+const USER_SCROLL_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+
+
 type Props = {
   items: NavItem[];
   authed: boolean;
@@ -33,28 +37,118 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
   const { scrollY } = useScroll();
   const navRef = useRef<HTMLElement>(null);
 
+  /**
+   * While a click-driven smooth scroll is running, the observer would fire for
+   * every section swept past and drag the indicator backwards. `lockRef` holds
+   * the clicked target so scroll-spy updates are ignored until the scroll
+   * settles; a rapid second click simply overwrites the target, so the navbar
+   * can never get stuck on a stale section.
+   */
+  const lockRef = useRef<string | null>(null);
+  const releaseRef = useRef<(() => void) | null>(null);
+
   useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 16));
 
-  // Track which section owns the viewport so the pill indicator can follow it.
+  const goTo = (href: string) => {
+    if (!href.startsWith("#")) return false;
+    const el = document.getElementById(href.slice(1));
+    if (!el) return false;
+
+    // Paint the active state on the same frame as the click — never wait for
+    // the scroll animation to finish.
+    setActive(href);
+    lockRef.current = href;
+    releaseRef.current?.();
+
+    // Deferred a frame so the mobile menu's `overflow: hidden` lock is lifted
+    // before the scroll starts, otherwise the jump is swallowed.
+    requestAnimationFrame(() => el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }));
+    history.replaceState(null, "", href);
+
+    // The lock lifts on the next *user-initiated* scroll rather than on a
+    // timer, so the programmatic scroll can never hand the indicator back to a
+    // section it merely passed through, and neighbouring anchors that share a
+    // scroll position keep the section the user actually chose.
+    const release = () => {
+      if (lockRef.current === href) lockRef.current = null;
+      for (const evt of USER_SCROLL_EVENTS) window.removeEventListener(evt, release);
+      releaseRef.current = null;
+    };
+    releaseRef.current = release;
+    for (const evt of USER_SCROLL_EVENTS) {
+      window.addEventListener(evt, release, { passive: true, once: true });
+    }
+    return true;
+  };
+
+
+  /**
+   * Scroll-spy. Some landing sections are zero-height anchor markers, so
+   * intersection ratios can't rank them — position does. One passive scroll
+   * listener, coalesced into a single rAF, picks the last section whose top
+   * has crossed the reading line and only calls setState when the winner
+   * actually changes, so there is at most one re-render per section boundary.
+   */
   useEffect(() => {
-    const ids = items.map((i) => i.href).filter((h) => h.startsWith("#")).map((h) => h.slice(1));
-    const nodes = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
-    if (!nodes.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(`#${visible.target.id}`);
-      },
-      { rootMargin: "-45% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
-    );
-    nodes.forEach((n) => io.observe(n));
-    return () => io.disconnect();
+    const hrefs = items.map((i) => i.href).filter((h) => h.startsWith("#"));
+    if (!hrefs.length) return;
+
+    let frame = 0;
+    let tops: { href: string; top: number }[] = [];
+
+    const measure = () => {
+      tops = hrefs
+        .map((href) => {
+          const el = document.getElementById(href.slice(1));
+          if (!el) return null;
+          return { href, top: el.getBoundingClientRect().top + window.scrollY };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a!.top - b!.top) as { href: string; top: number }[];
+    };
+
+    const pick = () => {
+      frame = 0;
+      if (lockRef.current || !tops.length) return;
+      const line = window.scrollY + window.innerHeight * 0.32;
+      // Bottom of the page always belongs to the final section.
+      const atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      let next = window.scrollY < tops[0].top - window.innerHeight * 0.32 ? null : tops[0].href;
+      if (atEnd) next = tops[tops.length - 1].href;
+      else for (const s of tops) if (s.top <= line) next = s.href;
+      setActive((prev) => (prev === next ? prev : next));
+    };
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(pick);
+    };
+    const onResize = () => { measure(); schedule(); };
+
+    measure();
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", onResize);
+    // Late-loading media/fonts shift section offsets; re-measure when they do.
+    const ro = new ResizeObserver(onResize);
+    ro.observe(document.body);
+
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", onResize);
+      ro.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [items]);
+
+
+  useEffect(() => () => { releaseRef.current?.(); }, []);
+
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
+
 
   return (
     <header ref={navRef} className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
@@ -75,6 +169,7 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
       >
         <a
           href="#hero"
+          onClick={(e) => { if (goTo("#hero")) e.preventDefault(); }}
           className="flex shrink-0 items-center gap-2 rounded-lg px-1 py-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         >
           <BrandLogo size={26} />
@@ -88,10 +183,13 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
               <li key={n.label} className="relative">
                 <a
                   href={n.href}
+                  aria-current={isActive ? "true" : undefined}
+                  onClick={(e) => { if (goTo(n.href)) e.preventDefault(); }}
                   className={`relative block rounded-full px-3 py-1.5 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
+
                   {isActive && (
                     <motion.span
                       layoutId="nav-pill"
@@ -150,9 +248,16 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
                 >
                   <a
                     href={n.href}
-                    onClick={() => setOpen(false)}
-                    className="flex min-h-12 items-center rounded-xl px-3 text-[15px] text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
+                    aria-current={active === n.href ? "true" : undefined}
+                    onClick={(e) => {
+                      setOpen(false);
+                      if (goTo(n.href)) e.preventDefault();
+                    }}
+                    className={`flex min-h-12 items-center rounded-xl px-3 text-[15px] transition-colors hover:bg-secondary/60 hover:text-foreground ${
+                      active === n.href ? "bg-secondary/50 text-foreground" : "text-muted-foreground"
+                    }`}
                   >
+
                     {n.label}
                   </a>
                 </motion.li>
