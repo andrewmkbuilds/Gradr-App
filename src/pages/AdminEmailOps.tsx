@@ -39,6 +39,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import EmailAuthHealth from "@/components/admin/EmailAuthHealth";
+import DmarcReports from "@/components/admin/DmarcReports";
+
 
 const ENDPOINT = "/api/public/admin-email-ops";
 
@@ -306,6 +309,9 @@ export default function AdminEmailOps() {
           <TabsTrigger value="preview">Template preview</TabsTrigger>
           <TabsTrigger value="auth">Auth emails</TabsTrigger>
           <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
+          <TabsTrigger value="authhealth">Auth health</TabsTrigger>
+          <TabsTrigger value="dmarc">DMARC</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="log">
@@ -533,7 +539,16 @@ export default function AdminEmailOps() {
             )}
           </Card>
         </TabsContent>
+
+        <TabsContent value="authhealth" className="pt-4">
+          <EmailAuthHealth />
+        </TabsContent>
+
+        <TabsContent value="dmarc" className="pt-4">
+          <DmarcReports />
+        </TabsContent>
       </Tabs>
+
       <Dialog open={Boolean(openMessage)} onOpenChange={(open) => !open && setOpenMessage(null)}>
         <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
           <DialogHeader>

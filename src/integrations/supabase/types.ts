@@ -1084,6 +1084,122 @@ export type Database = {
         }
         Relationships: []
       }
+      dmarc_report_records: {
+        Row: {
+          aligned: boolean
+          disposition: string | null
+          dkim_domain: string | null
+          dkim_result: string | null
+          dkim_selector: string | null
+          envelope_from: string | null
+          header_from: string | null
+          id: string
+          message_count: number
+          report_id: string
+          source_ip: string
+          spf_domain: string | null
+          spf_result: string | null
+        }
+        Insert: {
+          aligned?: boolean
+          disposition?: string | null
+          dkim_domain?: string | null
+          dkim_result?: string | null
+          dkim_selector?: string | null
+          envelope_from?: string | null
+          header_from?: string | null
+          id?: string
+          message_count?: number
+          report_id: string
+          source_ip: string
+          spf_domain?: string | null
+          spf_result?: string | null
+        }
+        Update: {
+          aligned?: boolean
+          disposition?: string | null
+          dkim_domain?: string | null
+          dkim_result?: string | null
+          dkim_selector?: string | null
+          envelope_from?: string | null
+          header_from?: string | null
+          id?: string
+          message_count?: number
+          report_id?: string
+          source_ip?: string
+          spf_domain?: string | null
+          spf_result?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dmarc_report_records_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "dmarc_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dmarc_reports: {
+        Row: {
+          created_at: string
+          date_begin: string
+          date_end: string
+          external_report_id: string
+          fail_messages: number
+          id: string
+          org_email: string | null
+          org_name: string
+          pass_messages: number
+          policy_adkim: string | null
+          policy_aspf: string | null
+          policy_domain: string
+          policy_p: string | null
+          policy_pct: number | null
+          policy_sp: string | null
+          source: string
+          total_messages: number
+        }
+        Insert: {
+          created_at?: string
+          date_begin: string
+          date_end: string
+          external_report_id: string
+          fail_messages?: number
+          id?: string
+          org_email?: string | null
+          org_name: string
+          pass_messages?: number
+          policy_adkim?: string | null
+          policy_aspf?: string | null
+          policy_domain: string
+          policy_p?: string | null
+          policy_pct?: number | null
+          policy_sp?: string | null
+          source?: string
+          total_messages?: number
+        }
+        Update: {
+          created_at?: string
+          date_begin?: string
+          date_end?: string
+          external_report_id?: string
+          fail_messages?: number
+          id?: string
+          org_email?: string | null
+          org_name?: string
+          pass_messages?: number
+          policy_adkim?: string | null
+          policy_aspf?: string | null
+          policy_domain?: string
+          policy_p?: string | null
+          policy_pct?: number | null
+          policy_sp?: string | null
+          source?: string
+          total_messages?: number
+        }
+        Relationships: []
+      }
       eligibility_categories: {
         Row: {
           active: boolean
@@ -1227,6 +1343,69 @@ export type Database = {
           threshold?: number
           window_end?: string
           window_start?: string
+        }
+        Relationships: []
+      }
+      email_auth_checks: {
+        Row: {
+          auth_results: Json
+          created_at: string
+          dkim_ok: boolean
+          dkim_selectors: Json
+          dmarc_ok: boolean
+          dmarc_policy: string | null
+          dmarc_record: string | null
+          domain: string
+          duration_ms: number | null
+          headers_verified: boolean
+          id: string
+          issues: Json
+          overall: string
+          sending_domain: string | null
+          spf_ok: boolean
+          spf_record: string | null
+          test_message_id: string | null
+          test_send_ok: boolean
+        }
+        Insert: {
+          auth_results?: Json
+          created_at?: string
+          dkim_ok?: boolean
+          dkim_selectors?: Json
+          dmarc_ok?: boolean
+          dmarc_policy?: string | null
+          dmarc_record?: string | null
+          domain: string
+          duration_ms?: number | null
+          headers_verified?: boolean
+          id?: string
+          issues?: Json
+          overall?: string
+          sending_domain?: string | null
+          spf_ok?: boolean
+          spf_record?: string | null
+          test_message_id?: string | null
+          test_send_ok?: boolean
+        }
+        Update: {
+          auth_results?: Json
+          created_at?: string
+          dkim_ok?: boolean
+          dkim_selectors?: Json
+          dmarc_ok?: boolean
+          dmarc_policy?: string | null
+          dmarc_record?: string | null
+          domain?: string
+          duration_ms?: number | null
+          headers_verified?: boolean
+          id?: string
+          issues?: Json
+          overall?: string
+          sending_domain?: string | null
+          spf_ok?: boolean
+          spf_record?: string | null
+          test_message_id?: string | null
+          test_send_ok?: boolean
         }
         Relationships: []
       }

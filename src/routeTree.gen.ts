@@ -82,7 +82,9 @@ import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/car
 import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
 import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
 import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
+import { Route as ApiPublicDmarcIngestRouteImport } from './routes/api/public/dmarc-ingest'
 import { Route as ApiPublicEmailAnomalyRouteImport } from './routes/api/public/email-anomaly'
+import { Route as ApiPublicEmailAuthCheckRouteImport } from './routes/api/public/email-auth-check'
 import { Route as ApiPublicGenerateApplicationRouteImport } from './routes/api/public/generate-application'
 import { Route as ApiPublicGetPaddlePriceRouteImport } from './routes/api/public/get-paddle-price'
 import { Route as ApiPublicInterviewCoachRouteImport } from './routes/api/public/interview-coach'
@@ -483,9 +485,19 @@ const ApiPublicDeleteAccountRoute = ApiPublicDeleteAccountRouteImport.update({
   path: '/api/public/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDmarcIngestRoute = ApiPublicDmarcIngestRouteImport.update({
+  id: '/api/public/dmarc-ingest',
+  path: '/api/public/dmarc-ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicEmailAnomalyRoute = ApiPublicEmailAnomalyRouteImport.update({
   id: '/api/public/email-anomaly',
   path: '/api/public/email-anomaly',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEmailAuthCheckRoute = ApiPublicEmailAuthCheckRouteImport.update({
+  id: '/api/public/email-auth-check',
+  path: '/api/public/email-auth-check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicGenerateApplicationRoute =
@@ -710,7 +722,9 @@ export interface FileRoutesByFullPath {
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
   '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
+  '/api/public/email-auth-check': typeof ApiPublicEmailAuthCheckRoute
   '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
   '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
   '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
@@ -813,7 +827,9 @@ export interface FileRoutesByTo {
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
   '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
+  '/api/public/email-auth-check': typeof ApiPublicEmailAuthCheckRoute
   '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
   '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
   '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
@@ -918,7 +934,9 @@ export interface FileRoutesById {
   '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
   '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
   '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
+  '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
   '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
+  '/api/public/email-auth-check': typeof ApiPublicEmailAuthCheckRoute
   '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
   '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
   '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
@@ -1023,7 +1041,9 @@ export interface FileRouteTypes {
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
+    | '/api/public/dmarc-ingest'
     | '/api/public/email-anomaly'
+    | '/api/public/email-auth-check'
     | '/api/public/generate-application'
     | '/api/public/get-paddle-price'
     | '/api/public/interview-coach'
@@ -1126,7 +1146,9 @@ export interface FileRouteTypes {
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
+    | '/api/public/dmarc-ingest'
     | '/api/public/email-anomaly'
+    | '/api/public/email-auth-check'
     | '/api/public/generate-application'
     | '/api/public/get-paddle-price'
     | '/api/public/interview-coach'
@@ -1230,7 +1252,9 @@ export interface FileRouteTypes {
     | '/api/public/company-research'
     | '/api/public/daily-digest'
     | '/api/public/delete-account'
+    | '/api/public/dmarc-ingest'
     | '/api/public/email-anomaly'
+    | '/api/public/email-auth-check'
     | '/api/public/generate-application'
     | '/api/public/get-paddle-price'
     | '/api/public/interview-coach'
@@ -1299,7 +1323,9 @@ export interface RootRouteChildren {
   ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
   ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
   ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
+  ApiPublicDmarcIngestRoute: typeof ApiPublicDmarcIngestRoute
   ApiPublicEmailAnomalyRoute: typeof ApiPublicEmailAnomalyRoute
+  ApiPublicEmailAuthCheckRoute: typeof ApiPublicEmailAuthCheckRoute
   ApiPublicGenerateApplicationRoute: typeof ApiPublicGenerateApplicationRoute
   ApiPublicGetPaddlePriceRoute: typeof ApiPublicGetPaddlePriceRoute
   ApiPublicInterviewCoachRoute: typeof ApiPublicInterviewCoachRoute
@@ -1843,11 +1869,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDeleteAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/dmarc-ingest': {
+      id: '/api/public/dmarc-ingest'
+      path: '/api/public/dmarc-ingest'
+      fullPath: '/api/public/dmarc-ingest'
+      preLoaderRoute: typeof ApiPublicDmarcIngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/email-anomaly': {
       id: '/api/public/email-anomaly'
       path: '/api/public/email-anomaly'
       fullPath: '/api/public/email-anomaly'
       preLoaderRoute: typeof ApiPublicEmailAnomalyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/email-auth-check': {
+      id: '/api/public/email-auth-check'
+      path: '/api/public/email-auth-check'
+      fullPath: '/api/public/email-auth-check'
+      preLoaderRoute: typeof ApiPublicEmailAuthCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/generate-application': {
@@ -2169,7 +2209,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
   ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
   ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,
+  ApiPublicDmarcIngestRoute: ApiPublicDmarcIngestRoute,
   ApiPublicEmailAnomalyRoute: ApiPublicEmailAnomalyRoute,
+  ApiPublicEmailAuthCheckRoute: ApiPublicEmailAuthCheckRoute,
   ApiPublicGenerateApplicationRoute: ApiPublicGenerateApplicationRoute,
   ApiPublicGetPaddlePriceRoute: ApiPublicGetPaddlePriceRoute,
   ApiPublicInterviewCoachRoute: ApiPublicInterviewCoachRoute,
