@@ -1,3 +1,4 @@
+import { NextActionBar } from "@/components/NextActionBar";
 import { useEffect, useMemo, useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
 import {
@@ -287,6 +288,7 @@ export default function Pipeline() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
+      <NextActionBar surface="pipeline" />
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Application Pipeline</h1>

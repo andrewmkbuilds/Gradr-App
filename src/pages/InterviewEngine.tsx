@@ -1,3 +1,4 @@
+import { NextActionBar } from "@/components/NextActionBar";
 import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
@@ -511,6 +512,7 @@ function InterviewEngineInner() {
   if (!started) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
+        <NextActionBar surface="interview" />
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">AI Mock Interview</h1>
           <p className="text-sm text-muted-foreground mt-1">

@@ -1,3 +1,5 @@
+import { NextActionBar } from "@/components/NextActionBar";
+import { IssueTriage } from "@/components/resume/IssueTriage";
 import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useCallback } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
@@ -242,7 +244,10 @@ export default function ResumeEngine() {
         </Link>
       </div>
 
+      <NextActionBar surface="resume" />
+
       {!uploading && !analyzing && tailorPanel}
+
 
       {!uploading && !analyzing && (
         <ResumeVersions
@@ -325,9 +330,26 @@ export default function ResumeEngine() {
           </div>
 
           {/* Suggestions */}
+          <div className="lg:col-span-2">
+            <IssueTriage
+              input={{
+                atsScore: analysis.ats_score,
+                keywordMatch: analysis.keyword_match,
+                formattingScore: analysis.formatting_score,
+                impactScore: analysis.impact_score,
+                readabilityScore: analysis.readability_score,
+                missingSkills: analysis.metrics?.missingSkills,
+                quantifiedBullets: analysis.metrics?.quantifiedBullets,
+                wordCount: analysis.metrics?.wordCount,
+              }}
+            />
+          </div>
+
+          {/* Suggestions */}
           <div className="glass-card p-6 lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Fix list</h3>
+              <h3 className="text-sm font-semibold text-foreground">Detailed suggestions</h3>
+
               <span className="text-xs text-muted-foreground">{analysis.suggestions.length} items</span>
             </div>
             <div className="space-y-3">

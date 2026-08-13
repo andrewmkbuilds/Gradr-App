@@ -1,3 +1,4 @@
+import { NextActionBar } from "@/components/NextActionBar";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
@@ -107,6 +108,7 @@ export default function GrowthEngine() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      <NextActionBar surface="growth" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Growth &amp; Proof</h1>
         <p className="mt-1 text-sm text-muted-foreground">

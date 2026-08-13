@@ -1,3 +1,4 @@
+import { NextActionBar } from "@/components/NextActionBar";
 import { useSeoOverride } from "@/lib/seoOverride";
 import { useEffect, useRef, useState } from "react";
 import { invokeFunction } from "@/lib/invokeFunction";
@@ -434,6 +435,9 @@ export default function JobsFeed() {
         <h1 className="text-2xl font-bold tracking-tight">Job Feed</h1>
         <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
       </div>
+
+      <NextActionBar surface="jobs" />
+
 
       <Card className="p-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
