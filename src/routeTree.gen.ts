@@ -52,10 +52,12 @@ import { Route as AppAdminAuditLogRouteImport } from './routes/_app/admin/audit-
 import { Route as AppAdminBlogAnalyticsRouteImport } from './routes/_app/admin/blog-analytics'
 import { Route as AppAdminDigestPreviewRouteImport } from './routes/_app/admin/digest-preview'
 import { Route as AppAdminDiscountsRouteImport } from './routes/_app/admin/discounts'
+import { Route as AppAdminEmailOpsRouteImport } from './routes/_app/admin/email-ops'
 import { Route as AppAdminLegalRouteImport } from './routes/_app/admin/legal'
 import { Route as AppAdminNavAnalyticsRouteImport } from './routes/_app/admin/nav-analytics'
 import { Route as AppAdminPaddleRouteImport } from './routes/_app/admin/paddle'
 import { Route as AppAdminPaymentsStatusRouteImport } from './routes/_app/admin/payments-status'
+import { Route as AppAdminRateLimitsRouteImport } from './routes/_app/admin/rate-limits'
 import { Route as AppAdminSearchConsoleRouteImport } from './routes/_app/admin/search-console'
 import { Route as AppAdminSecurityLogRouteImport } from './routes/_app/admin/security-log'
 import { Route as AppAdminSeoMonitorRouteImport } from './routes/_app/admin/seo-monitor'
@@ -67,6 +69,7 @@ import { Route as AppAffiliateDashboardRouteImport } from './routes/_app/affilia
 import { Route as AppAffiliateResourcesRouteImport } from './routes/_app/affiliate/resources'
 import { Route as AppInterviewIndexRouteImport } from './routes/_app/interview/index'
 import { Route as AppInterviewHistoryRouteImport } from './routes/_app/interview/history'
+import { Route as ApiPublicAdminEmailOpsRouteImport } from './routes/api/public/admin-email-ops'
 import { Route as ApiPublicAdminRpcRouteImport } from './routes/api/public/admin-rpc'
 import { Route as ApiPublicAdminWebhookReplayRouteImport } from './routes/api/public/admin-webhook-replay'
 import { Route as ApiPublicAdminWebhookSimulateRouteImport } from './routes/api/public/admin-webhook-simulate'
@@ -321,6 +324,11 @@ const AppAdminDiscountsRoute = AppAdminDiscountsRouteImport.update({
   path: '/admin/discounts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminEmailOpsRoute = AppAdminEmailOpsRouteImport.update({
+  id: '/admin/email-ops',
+  path: '/admin/email-ops',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminLegalRoute = AppAdminLegalRouteImport.update({
   id: '/admin/legal',
   path: '/admin/legal',
@@ -339,6 +347,11 @@ const AppAdminPaddleRoute = AppAdminPaddleRouteImport.update({
 const AppAdminPaymentsStatusRoute = AppAdminPaymentsStatusRouteImport.update({
   id: '/admin/payments-status',
   path: '/admin/payments-status',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRateLimitsRoute = AppAdminRateLimitsRouteImport.update({
+  id: '/admin/rate-limits',
+  path: '/admin/rate-limits',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminSearchConsoleRoute = AppAdminSearchConsoleRouteImport.update({
@@ -395,6 +408,11 @@ const AppInterviewHistoryRoute = AppInterviewHistoryRouteImport.update({
   id: '/interview/history',
   path: '/interview/history',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiPublicAdminEmailOpsRoute = ApiPublicAdminEmailOpsRouteImport.update({
+  id: '/api/public/admin-email-ops',
+  path: '/api/public/admin-email-ops',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAdminRpcRoute = ApiPublicAdminRpcRouteImport.update({
   id: '/api/public/admin-rpc',
@@ -644,10 +662,12 @@ export interface FileRoutesByFullPath {
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
+  '/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/admin/legal': typeof AppAdminLegalRoute
   '/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
   '/admin/paddle': typeof AppAdminPaddleRoute
   '/admin/payments-status': typeof AppAdminPaymentsStatusRoute
+  '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
@@ -657,6 +677,7 @@ export interface FileRoutesByFullPath {
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
+  '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
@@ -741,10 +762,12 @@ export interface FileRoutesByTo {
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
+  '/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/admin/legal': typeof AppAdminLegalRoute
   '/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
   '/admin/paddle': typeof AppAdminPaddleRoute
   '/admin/payments-status': typeof AppAdminPaymentsStatusRoute
+  '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
@@ -754,6 +777,7 @@ export interface FileRoutesByTo {
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
+  '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
@@ -840,10 +864,12 @@ export interface FileRoutesById {
   '/_app/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
   '/_app/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/_app/admin/discounts': typeof AppAdminDiscountsRoute
+  '/_app/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/_app/admin/legal': typeof AppAdminLegalRoute
   '/_app/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
   '/_app/admin/paddle': typeof AppAdminPaddleRoute
   '/_app/admin/payments-status': typeof AppAdminPaymentsStatusRoute
+  '/_app/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/_app/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/_app/admin/security-log': typeof AppAdminSecurityLogRoute
   '/_app/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
@@ -853,6 +879,7 @@ export interface FileRoutesById {
   '/_app/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/_app/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/_app/interview/history': typeof AppInterviewHistoryRoute
+  '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
   '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
   '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
   '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
@@ -939,10 +966,12 @@ export interface FileRouteTypes {
     | '/admin/blog-analytics'
     | '/admin/digest-preview'
     | '/admin/discounts'
+    | '/admin/email-ops'
     | '/admin/legal'
     | '/admin/nav-analytics'
     | '/admin/paddle'
     | '/admin/payments-status'
+    | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
     | '/admin/seo-monitor'
@@ -952,6 +981,7 @@ export interface FileRouteTypes {
     | '/affiliate/dashboard'
     | '/affiliate/resources'
     | '/interview/history'
+    | '/api/public/admin-email-ops'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
     | '/api/public/admin-webhook-simulate'
@@ -1036,10 +1066,12 @@ export interface FileRouteTypes {
     | '/admin/blog-analytics'
     | '/admin/digest-preview'
     | '/admin/discounts'
+    | '/admin/email-ops'
     | '/admin/legal'
     | '/admin/nav-analytics'
     | '/admin/paddle'
     | '/admin/payments-status'
+    | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
     | '/admin/seo-monitor'
@@ -1049,6 +1081,7 @@ export interface FileRouteTypes {
     | '/affiliate/dashboard'
     | '/affiliate/resources'
     | '/interview/history'
+    | '/api/public/admin-email-ops'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
     | '/api/public/admin-webhook-simulate'
@@ -1134,10 +1167,12 @@ export interface FileRouteTypes {
     | '/_app/admin/blog-analytics'
     | '/_app/admin/digest-preview'
     | '/_app/admin/discounts'
+    | '/_app/admin/email-ops'
     | '/_app/admin/legal'
     | '/_app/admin/nav-analytics'
     | '/_app/admin/paddle'
     | '/_app/admin/payments-status'
+    | '/_app/admin/rate-limits'
     | '/_app/admin/search-console'
     | '/_app/admin/security-log'
     | '/_app/admin/seo-monitor'
@@ -1147,6 +1182,7 @@ export interface FileRouteTypes {
     | '/_app/affiliate/dashboard'
     | '/_app/affiliate/resources'
     | '/_app/interview/history'
+    | '/api/public/admin-email-ops'
     | '/api/public/admin-rpc'
     | '/api/public/admin-webhook-replay'
     | '/api/public/admin-webhook-simulate'
@@ -1213,6 +1249,7 @@ export interface RootRouteChildren {
   CareerAdviceIndexRoute: typeof CareerAdviceIndexRoute
   JobSearchIndexRoute: typeof JobSearchIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  ApiPublicAdminEmailOpsRoute: typeof ApiPublicAdminEmailOpsRoute
   ApiPublicAdminRpcRoute: typeof ApiPublicAdminRpcRoute
   ApiPublicAdminWebhookReplayRoute: typeof ApiPublicAdminWebhookReplayRoute
   ApiPublicAdminWebhookSimulateRoute: typeof ApiPublicAdminWebhookSimulateRoute
@@ -1556,6 +1593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminDiscountsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/email-ops': {
+      id: '/_app/admin/email-ops'
+      path: '/admin/email-ops'
+      fullPath: '/admin/email-ops'
+      preLoaderRoute: typeof AppAdminEmailOpsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/legal': {
       id: '/_app/admin/legal'
       path: '/admin/legal'
@@ -1582,6 +1626,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/payments-status'
       fullPath: '/admin/payments-status'
       preLoaderRoute: typeof AppAdminPaymentsStatusRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/rate-limits': {
+      id: '/_app/admin/rate-limits'
+      path: '/admin/rate-limits'
+      fullPath: '/admin/rate-limits'
+      preLoaderRoute: typeof AppAdminRateLimitsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/search-console': {
@@ -1660,6 +1711,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/interview/history'
       preLoaderRoute: typeof AppInterviewHistoryRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/public/admin-email-ops': {
+      id: '/api/public/admin-email-ops'
+      path: '/api/public/admin-email-ops'
+      fullPath: '/api/public/admin-email-ops'
+      preLoaderRoute: typeof ApiPublicAdminEmailOpsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/admin-rpc': {
       id: '/api/public/admin-rpc'
@@ -1951,10 +2009,12 @@ interface AppRouteChildren {
   AppAdminBlogAnalyticsRoute: typeof AppAdminBlogAnalyticsRoute
   AppAdminDigestPreviewRoute: typeof AppAdminDigestPreviewRoute
   AppAdminDiscountsRoute: typeof AppAdminDiscountsRoute
+  AppAdminEmailOpsRoute: typeof AppAdminEmailOpsRoute
   AppAdminLegalRoute: typeof AppAdminLegalRoute
   AppAdminNavAnalyticsRoute: typeof AppAdminNavAnalyticsRoute
   AppAdminPaddleRoute: typeof AppAdminPaddleRoute
   AppAdminPaymentsStatusRoute: typeof AppAdminPaymentsStatusRoute
+  AppAdminRateLimitsRoute: typeof AppAdminRateLimitsRoute
   AppAdminSearchConsoleRoute: typeof AppAdminSearchConsoleRoute
   AppAdminSecurityLogRoute: typeof AppAdminSecurityLogRoute
   AppAdminSeoMonitorRoute: typeof AppAdminSeoMonitorRoute
@@ -1989,10 +2049,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminBlogAnalyticsRoute: AppAdminBlogAnalyticsRoute,
   AppAdminDigestPreviewRoute: AppAdminDigestPreviewRoute,
   AppAdminDiscountsRoute: AppAdminDiscountsRoute,
+  AppAdminEmailOpsRoute: AppAdminEmailOpsRoute,
   AppAdminLegalRoute: AppAdminLegalRoute,
   AppAdminNavAnalyticsRoute: AppAdminNavAnalyticsRoute,
   AppAdminPaddleRoute: AppAdminPaddleRoute,
   AppAdminPaymentsStatusRoute: AppAdminPaymentsStatusRoute,
+  AppAdminRateLimitsRoute: AppAdminRateLimitsRoute,
   AppAdminSearchConsoleRoute: AppAdminSearchConsoleRoute,
   AppAdminSecurityLogRoute: AppAdminSecurityLogRoute,
   AppAdminSeoMonitorRoute: AppAdminSeoMonitorRoute,
@@ -2032,6 +2094,7 @@ const rootRouteChildren: RootRouteChildren = {
   CareerAdviceIndexRoute: CareerAdviceIndexRoute,
   JobSearchIndexRoute: JobSearchIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  ApiPublicAdminEmailOpsRoute: ApiPublicAdminEmailOpsRoute,
   ApiPublicAdminRpcRoute: ApiPublicAdminRpcRoute,
   ApiPublicAdminWebhookReplayRoute: ApiPublicAdminWebhookReplayRoute,
   ApiPublicAdminWebhookSimulateRoute: ApiPublicAdminWebhookSimulateRoute,

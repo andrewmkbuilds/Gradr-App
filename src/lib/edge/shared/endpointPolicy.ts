@@ -131,6 +131,7 @@ const POLICIES: Record<string, EndpointPolicy> = {
   "/api/public/admin-rpc": { rateLimit: ADMIN_RULE, alertAfter: DEFAULT_ALERT_AFTER },
   "/api/public/admin-webhook-replay": { rateLimit: ADMIN_RULE, alertAfter: DEFAULT_ALERT_AFTER },
   "/api/public/admin-webhook-simulate": { rateLimit: ADMIN_RULE, alertAfter: DEFAULT_ALERT_AFTER },
+  "/api/public/admin-email-ops": { rateLimit: ADMIN_RULE, alertAfter: DEFAULT_ALERT_AFTER },
 
   // ---- Destructive / sensitive ----------------------------------------
   "/api/public/delete-account": {
@@ -145,6 +146,16 @@ const POLICIES: Record<string, EndpointPolicy> = {
 
 export function policyFor(endpoint: string): EndpointPolicy {
   return POLICIES[endpoint] ?? DEFAULT_POLICY;
+}
+
+/**
+ * Every explicitly configured endpoint, for the admin policy viewer.
+ * Endpoints absent from this list fall back to {@link DEFAULT_POLICY}.
+ */
+export function listPolicies(): { endpoint: string; policy: EndpointPolicy }[] {
+  return Object.entries(POLICIES)
+    .map(([endpoint, policy]) => ({ endpoint, policy }))
+    .sort((a, b) => a.endpoint.localeCompare(b.endpoint));
 }
 
 /** How many occurrences before this incident is worth announcing. */
