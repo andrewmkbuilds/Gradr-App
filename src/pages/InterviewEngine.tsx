@@ -415,12 +415,11 @@ function InterviewEngineInner() {
     if (!report) return;
     setPlanLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("practice-plan", {
-        body: { report, targetRole },
-      });
-      if (error) throw error;
-      if (!data?.plan) throw new Error("No plan returned");
-      const newPlan = data.plan as PracticePlan;
+      const streamed = await planStream.start({ report, targetRole });
+      // Canceled or failed — the stream surface shows why and offers a retry.
+      if (!streamed?.plan) return;
+
+      const newPlan = streamed.plan;
       setPlan(newPlan);
       if (sessionId) {
         await supabase
@@ -431,8 +430,6 @@ function InterviewEngineInner() {
           })
           .eq("id", sessionId);
       }
-    } catch {
-      toast.error("Couldn't build your practice plan. Please try again.");
     } finally {
       setPlanLoading(false);
     }
