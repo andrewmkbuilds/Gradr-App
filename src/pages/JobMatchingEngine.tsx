@@ -313,7 +313,7 @@ export default function JobMatchingEngine() {
                             </div>
                             <div className="flex flex-wrap items-center gap-1.5">
                               {job.match.matchedSkills.slice(0, 3).map((s) => (
-                                <span key={s} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{s}</span>
+                                <span key={s} className="accent-chip">{s}</span>
                               ))}
                             </div>
                           </div>

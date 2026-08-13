@@ -60,7 +60,7 @@ interface Reminder {
 const COLUMNS: { key: Status; label: string; tone: string }[] = [
   { key: "saved", label: "Saved", tone: "bg-muted/40" },
   { key: "applied", label: "Applied", tone: "bg-primary/10" },
-  { key: "interview", label: "Interview", tone: "bg-warning/10" },
+  { key: "interview", label: "Interview", tone: "bg-mahogany-soft/70" },
   { key: "offer", label: "Offer", tone: "bg-success/10" },
   { key: "rejected", label: "Rejected", tone: "bg-destructive/10" },
 ];
@@ -73,7 +73,7 @@ function JobCard({ job, onClick }: { job: TrackedJob; onClick: () => void }) {
       {...listeners}
       {...attributes}
       onClick={onClick}
-      className={`p-3 rounded-lg bg-card border border-border hover:border-primary/40 cursor-grab active:cursor-grabbing transition-all ${
+      className={`p-3 rounded-lg bg-card border border-border hover:border-mahogany/50 hover:shadow-[inset_2px_0_0_hsl(var(--mahogany)/0.8)] cursor-grab active:cursor-grabbing transition-all ${
         isDragging ? "opacity-30" : ""
       }`}
     >
@@ -81,7 +81,7 @@ function JobCard({ job, onClick }: { job: TrackedJob; onClick: () => void }) {
       <p className="text-xs text-muted-foreground mt-1">{job.company || "Unknown"}</p>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {typeof job.match_score === "number" && (
-          <Badge className="text-[10px] bg-primary/15 text-primary border-primary/30">
+          <Badge variant="accent-soft" className="text-[10px]">
             <Sparkles className="h-2.5 w-2.5 mr-0.5" />{job.match_score}%
           </Badge>
         )}
