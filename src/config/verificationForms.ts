@@ -46,6 +46,8 @@ export interface VerificationForm {
   confirmation: string;
   /** Show the "my institution isn't supported" escape hatch. */
   institutionRequest?: boolean;
+  /** Verified by emailing a one-time code to an academic address (no review queue). */
+  emailVerification?: boolean;
   fields: VerificationField[];
 }
 
@@ -77,45 +79,16 @@ export const VERIFICATION_FORMS: VerificationForm[] = [
     key: "student",
     label: "Student",
     discountPercent: 50,
-    blurb: "Currently enrolled at a school, college or university.",
+    blurb: "Verify with your school or university email — instant, no documents.",
     storageNote:
-      "We store your name, school, school email and country so a reviewer can confirm enrolment.",
-    confirmation: "I confirm I am currently enrolled at the institution above.",
+      "We store only your academic email address and its domain to confirm enrolment.",
+    confirmation: "I confirm this is my own school or university email address.",
     institutionRequest: true,
-    fields: [
-      NAME,
-      {
-        name: "organization",
-        label: "School / university name",
-        type: "text",
-        required: true,
-        placeholder: "University of Manchester",
-      },
-      {
-        name: "website",
-        label: "School website",
-        type: "url",
-        required: true,
-        placeholder: "https://manchester.ac.uk",
-      },
-      {
-        name: "email",
-        label: "School email address",
-        type: "email",
-        required: true,
-        placeholder: "you@university.edu",
-        help: "Must be issued by the institution you named — a matching domain speeds up review, but never approves automatically.",
-      },
-      {
-        name: "personal_email",
-        label: "Personal email (optional)",
-        type: "email",
-        placeholder: "you@gmail.com",
-        help: "Used only to reach you if your school address stops working.",
-      },
-      COUNTRY,
-    ],
+    /** Handled by the academic-email code flow, not a review queue. */
+    emailVerification: true,
+    fields: [],
   },
+
   {
     key: "educator",
     label: "Educator",

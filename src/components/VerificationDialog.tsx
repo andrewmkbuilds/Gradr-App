@@ -46,6 +46,7 @@ import {
   useSubmitVerificationRequest,
 } from "@/hooks/useVerificationRequests";
 import { InstitutionRequestDialog } from "@/components/verification/InstitutionRequestDialog";
+import { StudentEmailVerification } from "@/components/verification/StudentEmailVerification";
 import { useAuth } from "@/hooks/useAuth";
 import { trackEvent } from "@/lib/analytics";
 
@@ -76,6 +77,7 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
   const [file, setFile] = useState<File | null>(null);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [institutionOpen, setInstitutionOpen] = useState(false);
+  const [institutionEmail, setInstitutionEmail] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -88,6 +90,8 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
   }, [open, defaultType]);
 
   const form = selected ? verificationForm(selected) : undefined;
+  const isEmailVerify = Boolean(form?.emailVerification);
+
   const latest = useMemo(
     () => (selected ? requests.find((r) => r.category === selected) : undefined),
     [requests, selected],
@@ -158,10 +162,13 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
               {form ? `Verify: ${form.label}` : "Get your discount"}
             </DialogTitle>
             <DialogDescription>
-              {form
-                ? "Fill in your details. A Gradr reviewer checks every request by hand — nothing is approved automatically."
-                : "Pick what describes you. Requests are reviewed by our team, usually within 1–2 business days."}
+              {isEmailVerify
+                ? "Confirm your school or university email address. We email you a one-time code — no student ID, documents or third parties involved."
+                : form
+                  ? "Fill in your details. A Gradr reviewer checks every request by hand — nothing is approved automatically."
+                  : "Pick what describes you. Requests are reviewed by our team, usually within 1–2 business days."}
             </DialogDescription>
+
           </DialogHeader>
 
           {/* Step 1 — category picker */}
@@ -200,8 +207,21 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
             </div>
           )}
 
+          {/* Student — academic email ownership check */}
+          {form && isEmailVerify && (
+            <div className="max-h-[65vh] overflow-y-auto pr-1">
+              <StudentEmailVerification
+                discountPercent={form.discountPercent}
+                onRequestInstitution={(prefill) => {
+                  setInstitutionEmail(prefill);
+                  setInstitutionOpen(true);
+                }}
+              />
+            </div>
+          )}
+
           {/* Step 3 — real submitted state */}
-          {form && submittedRequest && (
+          {form && !isEmailVerify && submittedRequest && (
             <div className="space-y-4 py-2">
               <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
                 <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -228,7 +248,8 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
           )}
 
           {/* Step 2 — category form */}
-          {form && !submittedRequest && (
+          {form && !isEmailVerify && !submittedRequest && (
+
             <div className="space-y-4 py-1 max-h-[60vh] overflow-y-auto pr-1">
               {latest && (
                 <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -307,7 +328,7 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
               <span />
             )}
 
-            {form &&
+            {form && !isEmailVerify &&
               (submittedRequest ? (
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={checkStatus} disabled={isFetching} className="gap-2">
@@ -330,6 +351,12 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
                   Submit for review
                 </Button>
               ))}
+            {form && isEmailVerify && (
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Close
+              </Button>
+            )}
+
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -338,6 +365,7 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
         open={institutionOpen}
         onOpenChange={setInstitutionOpen}
         category={selected}
+        prefillEmail={institutionEmail}
       />
     </>
   );

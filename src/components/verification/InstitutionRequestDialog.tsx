@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +19,17 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category?: string | null;
+  /** Academic address the user already typed, used to pre-fill email + domain. */
+  prefillEmail?: string;
 }
 
 /** "Request your institution to be added" — a real submission, reviewed by an admin. */
-export function InstitutionRequestDialog({ open, onOpenChange, category = null }: Props) {
+export function InstitutionRequestDialog({
+  open,
+  onOpenChange,
+  category = null,
+  prefillEmail = "",
+}: Props) {
   const request = useRequestInstitution();
   const [form, setForm] = useState({
     full_name: "",
@@ -33,6 +40,17 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
     country: "",
     notes: "",
   });
+
+  useEffect(() => {
+    if (!open) return;
+    const email = prefillEmail.trim().toLowerCase();
+    if (!email.includes("@")) return;
+    setForm((f) => ({
+      ...f,
+      email: f.email || email,
+      email_domain: f.email_domain || email.split("@")[1],
+    }));
+  }, [open, prefillEmail]);
 
   const set = (key: keyof typeof form) => (value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -57,8 +75,8 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
           .filter(Boolean)
           .join(" · "),
       });
-      toast.success("Institution request submitted", {
-        description: "We'll review the domain and let you know when it's recognised.",
+      toast.success("Request received", {
+        description: "A Gradr admin will review the domain and let you know once it's approved.",
       });
       onOpenChange(false);
       setForm({ full_name: "", name: "", website: "", email_domain: "", email: "", country: "", notes: "" });
@@ -71,25 +89,25 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Request your institution to be added</DialogTitle>
+          <DialogTitle>Request your school or university to be added</DialogTitle>
           <DialogDescription>
-            Tell us about the institution and we'll add its domain to the recognised list after review.
+            Tell us about your school. A Gradr admin reviews every request; once the domain is approved, students there can verify instantly.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3 py-1 max-h-[60vh] overflow-y-auto pr-1">
-          <Field id="ir-name" label="Full name" value={form.full_name} onChange={set("full_name")} required />
-          <Field id="ir-inst" label="Institution name" value={form.name} onChange={set("name")} required />
+          <Field id="ir-name" label="Your full name" value={form.full_name} onChange={set("full_name")} required />
+          <Field id="ir-inst" label="School / university name" value={form.name} onChange={set("name")} required />
           <Field
             id="ir-site"
-            label="Institution website"
+            label="School / university website"
             value={form.website}
             onChange={set("website")}
             placeholder="https://university.edu"
           />
           <Field
             id="ir-domain"
-            label="Institution email domain"
+            label="School / university email domain"
             value={form.email_domain}
             onChange={set("email_domain")}
             placeholder="university.edu"
@@ -97,7 +115,7 @@ export function InstitutionRequestDialog({ open, onOpenChange, category = null }
           />
           <Field
             id="ir-email"
-            label="Institution email address"
+            label="Your academic email address"
             value={form.email}
             onChange={set("email")}
             placeholder="you@university.edu"
