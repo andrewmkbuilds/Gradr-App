@@ -42,3 +42,11 @@ jobs:
       - name: Dependency audit (version floors + high/critical advisories)
         run: node scripts/dependency-audit.mjs
 
+      - name: Security headers and technology-disclosure gate (production)
+        run: node scripts/check-security-headers.mjs https://gradr.me
+
+      - name: Runtime header assertions (/auth and OAuth paths)
+        env:
+          RUN_HEADER_CHECKS: "1"
+          SECURITY_HEADERS_TARGET: https://gradr.me
+        run: bunx vitest run src/test/securityHeaders.test.ts
