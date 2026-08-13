@@ -100,7 +100,7 @@ export function redactHops<T extends RedactableHop>(hops: T[] | null | undefined
 
 /** Redacts every URL-bearing field on a stored trace/check row. */
 export function redactTraceRow<T extends object>(row: T): T {
-  const next: Record<string, unknown> = { ...row };
+  const next = { ...row } as Record<string, unknown>;
   for (const key of ["start_url", "final_url", "expected_redirect_uri", "redirect_uri", "expected_final_url"]) {
     if (typeof next[key] === "string") next[key] = redactOAuthUrl(next[key] as string);
   }
