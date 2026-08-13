@@ -34,9 +34,11 @@ import {
 } from "@/components/effects";
 import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
 import {
-  ResumeVisual, MatchVisual, ApplicationVisual,
-  InterviewVisual, AssistantVisual, AnalyticsVisual,
+  ApplicationVisual, AssistantVisual,
 } from "@/components/landing/visuals";
+import {
+  ResumeIntelligenceDemo, JobMatchingDemo, InterviewCoachDemo, CareerIntelligenceDemo,
+} from "@/components/landing/demos";
 
 /* ---------------------------------- data ---------------------------------- */
 
@@ -623,7 +625,7 @@ export default function Landing() {
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
             </Reveal>
-            <Reveal delay={100}><ScrollFloat><ResumeVisual /></ScrollFloat></Reveal>
+            <Reveal delay={100}><ResumeIntelligenceDemo /></Reveal>
           </div>
         </Section>
 
@@ -632,7 +634,7 @@ export default function Landing() {
           <SceneBackground variant="threads" intensity={0.4} />
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
             <Reveal delay={100} className="lg:order-2 lg:pl-4">
-              <ScrollFloat><MatchVisual /></ScrollFloat>
+              <JobMatchingDemo />
             </Reveal>
             <Reveal className="space-y-5 lg:order-1">
               <Eyebrow>02 — Job matching</Eyebrow>
@@ -692,7 +694,7 @@ export default function Landing() {
             </Lede>
           </Reveal>
 
-          <Reveal delay={100} className="mt-10"><ScrollFloat distance={60}><InterviewVisual /></ScrollFloat></Reveal>
+          <Reveal delay={100} className="mt-10"><InterviewCoachDemo /></Reveal>
 
           <MagicBento
             className="mt-10"
@@ -762,7 +764,7 @@ export default function Landing() {
                 ))}
               </ul>
             </Reveal>
-            <Reveal delay={100}><ScrollFloat><AnalyticsVisual /></ScrollFloat></Reveal>
+            <Reveal delay={100}><CareerIntelligenceDemo /></Reveal>
           </div>
         </Section>
 
