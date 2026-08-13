@@ -184,7 +184,12 @@ export function withMonitoring(
     let response: Response;
     let errorMessage: string | null = null;
 
-    const rule = options?.rateLimit === false ? null : (options?.rateLimit ?? DEFAULT_RULE);
+    const configured = policyFor(endpoint).rateLimit;
+    const rule =
+      options?.rateLimit === false || (options?.rateLimit === undefined && configured === false)
+        ? null
+        : (options?.rateLimit ?? (configured as RateLimitRule));
+
     const verdict = rule ? checkRateLimit(endpoint, callerKey(req), rule) : null;
 
     if (verdict && !verdict.allowed) {
