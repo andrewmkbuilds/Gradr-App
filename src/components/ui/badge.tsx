@@ -14,7 +14,7 @@ const badgeVariants = cva(
         outline: "text-foreground",
         accent:
           "border-transparent bg-mahogany text-mahogany-foreground hover:bg-mahogany-hover",
-        "accent-soft":
+        accentSoft:
           "border-mahogany-border/80 bg-mahogany-soft text-mahogany-strong hover:bg-mahogany-soft/80",
       },
     },

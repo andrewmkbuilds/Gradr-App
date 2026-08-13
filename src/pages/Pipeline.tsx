@@ -81,7 +81,7 @@ function JobCard({ job, onClick }: { job: TrackedJob; onClick: () => void }) {
       <p className="text-xs text-muted-foreground mt-1">{job.company || "Unknown"}</p>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {typeof job.match_score === "number" && (
-          <Badge variant="accent-soft" className="text-[10px]">
+          <Badge variant="accentSoft" className="text-[10px]">
             <Sparkles className="h-2.5 w-2.5 mr-0.5" />{job.match_score}%
           </Badge>
         )}
