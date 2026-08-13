@@ -287,7 +287,9 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
           className="grid h-10 w-10 place-items-center rounded-xl text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
+          aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
+
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
