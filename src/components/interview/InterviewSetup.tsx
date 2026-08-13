@@ -1,10 +1,11 @@
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
-import { Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
+import { AlertCircle, Info, Sparkles, Loader2, FileText, Lock, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,10 +20,54 @@ import {
 } from "@/lib/interview/personas";
 import { stagger, fadeUp, springSnappy } from "@/lib/motion/tokens";
 import { entitlementFor, personaAllowed, difficultyAllowed } from "@/lib/interview/entitlements";
+import {
+  LIMITS,
+  buildSessionContext,
+  validateSetup,
+  type SetupField,
+} from "@/lib/interview/setupValidation";
 
 interface Props {
   initial?: Partial<SessionContext>;
   onContinue: (ctx: SessionContext) => void;
+}
+
+/** One labelled optional field with inline error / advisory messaging. */
+function Field({
+  id,
+  label,
+  hint,
+  error,
+  warning,
+  children,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string | undefined;
+  warning?: string | undefined;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+        <Label htmlFor={id}>{label}</Label>
+        {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
+      </div>
+      {children}
+      {error ? (
+        <p id={`${id}-error`} role="alert" className="flex items-start gap-1.5 text-xs text-destructive">
+          <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+          {error}
+        </p>
+      ) : warning ? (
+        <p id={`${id}-warning`} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <Info className="mt-0.5 h-3 w-3 shrink-0 text-brand-secondary" aria-hidden="true" />
+          {warning}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 /** Pre-session setup: interviewer persona, difficulty and role/resume grounding. */
