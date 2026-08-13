@@ -37,6 +37,10 @@ const DEFAULTS: StoredPrefs = { mode: "system", depth: 1, diagnostics: false };
 interface MotionPrefsValue extends StoredPrefs {
   /** OS-level `prefers-reduced-motion: reduce`. */
   systemReduced: boolean;
+  /** Weak device / data-saver / sustained low FPS detected. */
+  lowPower: boolean;
+  /** Why low-power kicked in, for the settings UI. */
+  lowPowerReason: string | null;
   /** Final answer every component should branch on. */
   reduceMotion: boolean;
   /** Depth intensity after applying reduced-motion (0 when reduced). */
@@ -47,6 +51,27 @@ interface MotionPrefsValue extends StoredPrefs {
 }
 
 const MotionPrefsContext = createContext<MotionPrefsValue | null>(null);
+
+/** Static device hints: data saver, low RAM, few cores. */
+function detectWeakDevice(): string | null {
+  if (typeof navigator === "undefined") return null;
+  const nav = navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string };
+    deviceMemory?: number;
+  };
+  if (nav.connection?.saveData) return "Data saver is on";
+  if (nav.connection?.effectiveType && /2g/.test(nav.connection.effectiveType)) {
+    return "Slow network detected";
+  }
+  if (typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 && nav.deviceMemory <= 2) {
+    return "Low device memory";
+  }
+  if (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency <= 2) {
+    return "Limited CPU cores";
+  }
+  return null;
+}
+
 
 function readStored(): StoredPrefs {
   if (typeof window === "undefined") return DEFAULTS;
