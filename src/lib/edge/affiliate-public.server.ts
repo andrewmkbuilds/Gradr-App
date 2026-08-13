@@ -44,6 +44,7 @@ export const handler = async (req: Request): Promise<Response> => {
       .maybeSingle();
 
     let affiliate: { profileId: string; code: string; isActive: boolean } | null = null;
+    let clickId: string | null = null;
     if (code) {
       const { data: profile } = await admin
         .from("affiliate_profiles")
@@ -56,13 +57,38 @@ export const handler = async (req: Request): Promise<Response> => {
           code: profile.affiliate_code,
           isActive: profile.status === "active",
         };
+
+        // Click logging is server-side only: visitors have no write access to
+        // `affiliate_clicks`, so a forged profile id / code pair cannot be
+        // inserted from the browser.
+        if (affiliate.isActive) {
+          const str = (v: unknown, max: number) =>
+            typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+          const { data: click } = await admin
+            .from("affiliate_clicks")
+            .insert({
+              affiliate_profile_id: profile.id,
+              affiliate_code: profile.affiliate_code,
+              landing_page: str(body?.landing_page, 2048),
+              utm_source: str(body?.utm_source, 200),
+              utm_medium: str(body?.utm_medium, 200),
+              utm_campaign: str(body?.utm_campaign, 200),
+              visitor_key: str(body?.visitor_key, 128),
+              user_agent: str(req.headers.get("user-agent"), 500),
+            })
+            .select("id")
+            .maybeSingle();
+          clickId = click?.id ?? null;
+        }
       }
     }
 
     return json({
       settings: settings ?? null,
       affiliate,
+      clickId,
     });
+
   } catch (_e) {
     return json({ error: "Affiliate lookup failed" }, 500);
   }
