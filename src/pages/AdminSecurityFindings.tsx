@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowRight,
   Download,
-  ExternalLink,
   FileJson,
   Github,
   Loader2,
@@ -412,5 +411,3 @@ function SideBySide({
     </div>
   );
 }
-
-export { ExternalLink };

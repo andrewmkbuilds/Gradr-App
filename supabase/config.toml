@@ -1,1 +1,9 @@
 project_id = "xaeyjrekewnwjujnrqgu"
+[functions.security-findings]
+verify_jwt = true
+
+[functions.security-export]
+verify_jwt = false
+
+[functions.security-scan-cron]
+verify_jwt = false
