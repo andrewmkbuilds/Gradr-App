@@ -93,17 +93,31 @@ export default function Pricing() {
    * the struck-through list price — the real reduction is applied by Paddle at
    * checkout, from a server-resolved discount.
    */
-  const PriceLine = ({ id, suffix }: { id: string; suffix: string }) => {
-    if (pricesLoading) return <Skeleton className="h-10 w-32" />;
+  const PriceLine = ({
+    id,
+    plan,
+    suffix,
+  }: {
+    id: string;
+    plan: PlanId;
+    suffix: string;
+  }) => {
+    // Source of truth for the amount; Paddle only localizes the presentation.
+    const fallback = planPriceLabel(plan, interval);
     const price = prices[id];
-    if (!price) return <span className="text-sm text-muted-foreground">Price unavailable</span>;
+    if (pricesLoading && !price) return <Skeleton className="h-10 w-32" />;
 
-    const discounted = discountPercent > 0 && price.subtotalMinor > 0
+    const listLabel = price?.formattedTotal ?? fallback;
+    const subtotalMinor = price?.subtotalMinor ?? planAmount(plan, interval);
+
+    const discounted = discountPercent > 0 && subtotalMinor > 0
       ? formatMinorAmount(
-          Math.round(price.subtotalMinor * (1 - discountPercent / 100)),
-          price.currencyCode,
+          Math.round(subtotalMinor * (1 - discountPercent / 100)),
+          price?.currencyCode ?? "USD",
         )
       : null;
+
+    const yearlySavings = interval === "annual" ? annualSavingsPercent(plan) : 0;
 
     return (
       <div>
@@ -112,7 +126,7 @@ export default function Pricing() {
             <span className="text-4xl font-bold text-foreground">{discounted}</span>
             <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
             <div className="mt-1 flex items-center gap-2 text-xs">
-              <span className="text-muted-foreground line-through">{price.formattedTotal}</span>
+              <span className="text-muted-foreground line-through">{listLabel}</span>
               <Badge variant="secondary" className="gap-1">
                 <BadgePercent className="h-3 w-3" aria-hidden="true" />
                 {discountPercent}% off applied
@@ -121,13 +135,24 @@ export default function Pricing() {
           </>
         ) : (
           <>
-            <span className="text-4xl font-bold text-foreground">{price.formattedTotal}</span>
+            <span className="text-4xl font-bold text-foreground">{listLabel}</span>
             <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
           </>
+        )}
+        {yearlySavings > 0 && (
+          <div className="mt-2 flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground line-through tabular-nums">
+              {formatUsd(annualListPrice(plan))}
+            </span>
+            <Badge className="bg-mahogany text-mahogany-foreground hover:bg-mahogany">
+              Save {yearlySavings}%
+            </Badge>
+          </div>
         )}
       </div>
     );
   };
+
 
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-10">
