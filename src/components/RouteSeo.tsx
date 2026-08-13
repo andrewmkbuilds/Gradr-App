@@ -15,9 +15,9 @@ const META: Record<string, { title: string; description: string }> = {
   // "/" renders the public Gradr landing page for signed-out visitors (and the
   // dashboard once authenticated), so its metadata must describe the product.
   "/": {
-    title: "Your AI Career Command Center",
+    title: "AI Career Copilot for Resumes, Jobs & Interviews",
     description:
-      "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
+      "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
   },
   "/landing": {
     title: "From resume to offer",
@@ -206,13 +206,13 @@ export function RouteSeo() {
   const { pathname } = useLocation();
   const meta = META[pathname] ??
     resolveDynamicMeta(pathname) ?? {
-      title: "Your AI Career Command Center",
+      title: "AI Career Copilot for Resumes, Jobs & Interviews",
       description:
-        "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
+        "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
     };
   const fullTitle =
     pathname === "/" || pathname === "/landing"
-      ? "Gradr | Your AI Career Command Center"
+      ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews"
       : `${meta.title} — ${SITE}`;
   const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
