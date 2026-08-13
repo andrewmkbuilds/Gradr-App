@@ -32,6 +32,9 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: SEO and Open Graph tag check (home page)
+        run: node scripts/check-seo-tags.mjs
+
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium firefox webkit
 
