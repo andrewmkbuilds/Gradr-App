@@ -17,6 +17,7 @@ import { Reveal } from "@/components/landing/Reveal";
 import { motion, useScroll, useTransform } from "motion/react";
 import {
   Atmosphere, CountUp, Magnetic, Parallax, ScrollProgress, TextReveal, TiltCard,
+  DepthStage, DepthLayer, ScrollDepth, FloatPanel,
   easeOut, viewportOnce, springSnappy,
 } from "@/components/motion";
 import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
@@ -353,6 +354,7 @@ export default function Landing() {
 
       {/* -------------------------------- hero -------------------------------- */}
       <main id="hero">
+        <ScrollDepth rotate={4} scale={0.96} fade={0.45}>
         <motion.div className="relative pt-28 sm:pt-32" style={heroReduced ? undefined : { opacity: heroOpacity }}>
           <Atmosphere />
 
@@ -453,6 +455,7 @@ export default function Landing() {
             </motion.div>
           </Section>
         </motion.div>
+        </ScrollDepth>
 
 
         {/* ------------------------------- problem ------------------------------ */}
