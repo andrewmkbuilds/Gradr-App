@@ -236,6 +236,15 @@
       "submit_verification_request"
     ]
   },
+  "resolvedFindings": [
+    "email_auth_check_bypass",
+    "email_click_open_redirect",
+    "rpc_fake_commissions",
+    "SUPA_rls_policy_always_true",
+    "SUPA_auth_allow_anonymous_sign_ins",
+    "SUPA_anon_security_definer_function_executable",
+    "SUPA_authenticated_security_definer_function_executable"
+  ],
   "findingGuards": [
     {
       "internalId": "SUPA_auth_allow_anonymous_sign_ins",
