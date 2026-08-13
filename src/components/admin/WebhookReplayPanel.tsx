@@ -88,6 +88,8 @@ export default function WebhookReplayPanel() {
   const [selected, setSelected] = useState<DeliveryRow | null>(null);
   const [draft, setDraft] = useState("");
   const [dryRun, setDryRun] = useState<DryRunResult | null>(null);
+  const [probe, setProbe] = useState<IdempotencyResult | null>(null);
+
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   const deliveries = useQuery({
