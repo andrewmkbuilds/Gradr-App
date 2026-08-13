@@ -617,8 +617,10 @@ async function buildIncidentReport(days: number, limit: number): Promise<Inciden
       .limit(50),
   ]);
 
-  const traces = (traceRes.data ?? []) as TraceRow[];
-  const flowChecks = (checkRes.data ?? []) as FlowCheckRow[];
+  // Redact credentials and CSRF material before anything leaves the database.
+  const traces = ((traceRes.data ?? []) as TraceRow[]).map((row) => redactTraceRow(row));
+  const flowChecks = ((checkRes.data ?? []) as FlowCheckRow[]).map((row) => redactTraceRow(row));
+
   const headerRows = (headerRes.data ?? []) as Array<{
     run_id: string;
     path: string;
