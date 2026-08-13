@@ -317,10 +317,33 @@ export function RouteSeo() {
         lastUpdated: legalUpdated[pathname],
       })
     : null;
+  // JSON-LD for the key non-editorial surfaces: home, pricing and the product
+  // engines. Editorial pages (guides, blog, job landings) and the tool landing
+  // pages emit their own richer payloads, so they are skipped here to avoid
+  // shipping two competing blocks for one URL.
+  const engine = ENGINE_LD[pathname];
+  const routeLd =
+    pathname === "/"
+      ? homeJsonLd({ name: SITE_TITLE, description: meta.description })
+      : pathname === "/pricing"
+        ? pricingJsonLd({
+            name: meta.title,
+            description: meta.description,
+            tiers: TIERS.map((t) => ({ name: t.name, description: t.description })),
+          })
+        : engine
+          ? enginePageJsonLd({
+              path: pathname,
+              name: engine.name,
+              description: meta.description,
+              features: engine.features,
+            })
+          : null;
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
   // Article/BlogPosting JSON-LD is emitted by the editorial pages themselves
   // (GuideArticle + blog posts via structuredData.ts), so nothing extra here.
+
 
 
 
