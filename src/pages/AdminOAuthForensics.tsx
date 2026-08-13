@@ -108,7 +108,24 @@ function Stat({ label, value, tone }: { label: string; value: string | number; t
   );
 }
 
+interface CspGroup {
+  directive: string;
+  blockedOrigin: string;
+  count: number;
+  lastSeen: string;
+  samplePath: string | null;
+}
+
+interface CspSummary {
+  days: number;
+  total: number;
+  groups: CspGroup[];
+  candidatePolicy: string;
+  enforcedPolicy: string;
+}
+
 function HopChain({ hops }: { hops: Hop[] | null }) {
+
   if (!hops?.length) return <p className="text-sm text-muted-foreground">No hops recorded.</p>;
   return (
     <ol className="space-y-2">
