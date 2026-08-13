@@ -1013,7 +1013,8 @@ html[data-motion="full"] *::after {
 
   /* Card that should read as "the important one" without shouting. */
   .accent-card {
-    border-color: hsl(var(--mahogany-border) / 0.8);
+    border: 1px solid hsl(var(--mahogany-border) / 0.8);
+    background-color: hsl(var(--card));
     box-shadow: inset 3px 0 0 hsl(var(--mahogany) / 0.9);
   }
 
