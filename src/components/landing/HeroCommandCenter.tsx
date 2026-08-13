@@ -254,7 +254,7 @@ export function HeroCommandCenter() {
 
         {/* floating match panel */}
         <motion.div
-          className="absolute -right-6 -top-10 hidden w-[236px] sm:block lg:-right-20"
+          className="absolute -right-4 -top-8 hidden w-[228px] sm:block lg:-right-6"
           initial={{ opacity: 0, x: 30, y: 10 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ ...springSoft, delay: 0.45 }}
