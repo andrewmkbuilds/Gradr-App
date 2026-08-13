@@ -26,8 +26,38 @@ function generateToken(): string {
 }
 
 // Auth note: this function uses verify_jwt = true in config.toml, so Supabase's
-// gateway validates the caller's JWT (anon or service_role) before the request
-// reaches this code. No in-function auth check is needed.
+// gateway validates the caller's JWT before the request reaches this code.
+//
+// Trust model on top of that:
+//  - service_role callers (edge functions, cron, webhooks) may send any template
+//    to any recipient — billing, verification decisions and admin alerts.
+//  - end-user callers may only send templates on USER_SENDABLE, and only to their
+//    own verified address. This stops one signed-in user from mailing spoofed
+//    "payment failed" notices to somebody else.
+const USER_SENDABLE = new Set([
+  'welcome',
+  'resume-analysis',
+  'ats-score-update',
+  'interview-completed',
+  'interview-report',
+  'career-plan',
+  'daily-briefing',
+  'application-followup',
+  'job-match',
+  'verification-submitted',
+])
+
+function decodeJwtClaims(token: string): Record<string, unknown> | null {
+  try {
+    const payload = token.split('.')[1]
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
+
+
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
