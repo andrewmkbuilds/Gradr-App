@@ -149,7 +149,6 @@ function brandCardHtml({ tagline, pills = [] }, logoDataUri) {
 const STATIC_CARDS = [
   {
     out: "og-image.jpg",
-    root: true,
     tagline: "AI career copilot for resumes, job matches and interviews — one workspace, from first draft to signed offer.",
     pills: ["Resume intelligence", "Job matching", "Mock interviews", "Application pipeline"],
   },
