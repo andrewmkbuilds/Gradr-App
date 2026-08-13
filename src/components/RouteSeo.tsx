@@ -122,6 +122,11 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Affiliate Resources",
     description: "Campaign link builder, brand assets, and copy templates for Gradr affiliate partners.",
   },
+  "/status": {
+    title: "System Status \u2014 API Uptime & Incident History",
+    description:
+      "Live Gradr platform health: API success rates, last successful webhook delivery, open alerts, and a 30-day incident history.",
+  },
   "/blog": {
     title: "Career Guides & Job Search Blog",
     description:

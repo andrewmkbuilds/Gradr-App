@@ -22,7 +22,9 @@
     "test:a11y": "node scripts/a11y-nav.mjs",
     "audit:deps": "node scripts/dependency-audit.mjs",
     "format": "prettier --write .",
-    "seo:validate": "node scripts/validate-seo-html.mjs"
+    "seo:validate": "node scripts/validate-seo-html.mjs",
+    "perf:baseline": "node scripts/perf-regression.mjs --save",
+    "perf:check": "node scripts/perf-regression.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

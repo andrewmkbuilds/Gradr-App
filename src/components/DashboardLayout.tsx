@@ -5,6 +5,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AmbientBackground } from "@/components/AmbientBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { PolicyUpdateGate } from "@/components/legal/PolicyUpdateGate";
 import { NavBreadcrumb } from "@/components/NavBreadcrumb";
@@ -34,6 +35,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <NavBreadcrumb />
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              <MotionQuickToggle />
               <ThemeToggle />
               <NotificationsBell />
             </div>
