@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "@/lib/router-compat";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
@@ -15,7 +15,6 @@ import {
 import { toast } from "sonner";
 import { z } from "zod";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
-import { beginOAuthTrace, completeOAuthTrace } from "@/lib/oauth/oauthTrace";
 
 /** Client-side field validation — mirrors the server rules, fails fast and inline. */
 const passwordSchema = z
@@ -61,15 +60,6 @@ export default function Auth() {
   useEffect(() => {
     const message = consumeAuthCallbackError();
     if (message) toast.error(message);
-  }, []);
-
-  // Close the audit trail for an OAuth round-trip that just landed here: the
-  // redirect hops, timings and state/nonce validation are recorded for incident
-  // reports. Fire-and-forget — it must never delay or block sign-in.
-  useEffect(() => {
-    void completeOAuthTrace({ userId: user?.id ?? null });
-    // Runs once per landing; `user` is read opportunistically.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Belt and braces: AuthRoute redirects once a real session exists, but if this
@@ -180,11 +170,6 @@ export default function Auth() {
 
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
-    beginOAuthTrace({
-      provider,
-      expectedRedirectUri: postAuthUrl,
-      accountKind: isGuest ? "guest-upgrade" : isSignUp ? "new" : "existing",
-    });
     const { error } = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: postAuthUrl,
     });

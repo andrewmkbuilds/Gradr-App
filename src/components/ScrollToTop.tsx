@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "@/lib/router-compat";
+import { useLocation } from "react-router-dom";
 
 /**
  * Resets scroll on every route change: the window (the app's single primary

@@ -1,4 +1,4 @@
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import { ScrollText, ExternalLink } from "lucide-react";
 import { LEGAL_PAGES } from "@/content/legal";
 import { usePublishedLegalDocument } from "@/hooks/useLegalDocuments";

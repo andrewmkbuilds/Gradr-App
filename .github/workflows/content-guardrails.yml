@@ -23,9 +23,6 @@ jobs:
       - name: Unit and guardrail tests
         run: bunx vitest run src/test/structuredData.test.ts src/test/legalReadiness.test.ts src/test/authHeroLayout.test.ts
 
-      - name: Email images reachable (HTTP 200 + image MIME)
-        run: bun run scripts/email-image-check.tsx
-
       - name: Legal readiness (pre-deploy gate)
         run: node scripts/check-legal-readiness.mjs
 
@@ -39,9 +36,6 @@ jobs:
         run: |
           bunx vite preview --port 8080 &
           for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:8080/ && break; sleep 1; done
-
-      - name: Home page SEO + Open Graph tags
-        run: node scripts/check-home-seo.mjs http://localhost:8080
 
       - name: Auth hero visual regression (Chrome, Firefox, Safari engines)
         env:

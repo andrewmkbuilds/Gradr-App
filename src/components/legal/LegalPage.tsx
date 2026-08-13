@@ -1,6 +1,6 @@
 import { PublicShell } from "@/components/PublicShell";
 import { LEGAL_PAGES, POLICIES_UPDATED } from "@/content/legal";
-import { Link, useLocation } from "@/lib/router-compat";
+import { Link, useLocation } from "react-router-dom";
 
 interface LegalPageProps {
   title: string;
@@ -28,7 +28,7 @@ export function LegalPage({ title, intro, lastUpdated, children }: LegalPageProp
                 aria-current={pathname === page.path ? "page" : undefined}
                 className={
                   pathname === page.path
-                    ? "extrude rounded-md bg-primary/10 px-3 py-1 font-medium text-primary"
+                    ? "rounded-md bg-primary/10 px-3 py-1 font-medium text-primary"
                     : "rounded-md px-3 py-1 text-muted-foreground transition-colors hover:text-foreground"
                 }
               >

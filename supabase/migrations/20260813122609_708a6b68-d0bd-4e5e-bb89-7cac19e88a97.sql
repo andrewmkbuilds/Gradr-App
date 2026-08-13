@@ -1,1 +1,0 @@
-DELETE FROM public.oauth_signin_traces WHERE request_id = 'selftest-1';

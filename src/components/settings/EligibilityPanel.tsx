@@ -29,7 +29,7 @@ export function EligibilityPanel() {
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <BadgePercent className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
           <div>
@@ -72,7 +72,7 @@ export function EligibilityPanel() {
                 key={v.id}
                 className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card/60 p-3"
               >
-                <span className="flex h-9 w-9 items-center justify-center extrude rounded-lg bg-primary/10">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
                   <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">

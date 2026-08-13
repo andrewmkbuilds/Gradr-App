@@ -1,11 +1,9 @@
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { trackEvent } from "@/lib/analytics";
 import { LEGAL_PAGES } from "@/content/legal";
-import { AmbientBackground } from "@/components/AmbientBackground";
 
 interface PublicShellProps {
   children: React.ReactNode;
@@ -22,9 +20,8 @@ const NAV = [
 /** Chrome for public, indexable pages (guides + job landing pages). */
 export function PublicShell({ children, source }: PublicShellProps) {
   return (
-    <div className="relative min-h-screen bg-background">
-      <AmbientBackground />
-      <header className="glass-float sticky top-0 z-40 border-b border-border/60">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
           <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
             <BrandLogo size={22} />
@@ -42,7 +39,6 @@ export function PublicShell({ children, source }: PublicShellProps) {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <MotionQuickToggle />
             <ThemeToggle />
             <Link
               to="/auth?mode=signup"
@@ -56,11 +52,11 @@ export function PublicShell({ children, source }: PublicShellProps) {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-4 py-10">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>
 
       <footer className="border-t border-border/60 py-8">
         <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Gradr — the AI career platform.</p>
+          <p>© {new Date().getFullYear()} Gradr — the AI career command center.</p>
           <nav aria-label="Footer" className="flex flex-wrap gap-4">
             {NAV.map((item) => (
               <Link key={item.to} to={item.to} className="hover:text-foreground">

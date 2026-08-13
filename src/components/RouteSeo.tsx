@@ -1,41 +1,23 @@
 import { useEffect } from "react";
-import { useLocation } from "@/lib/router-compat";
+import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { GUIDES_BY_SLUG } from "@/content/guides";
 import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
-import {
-  legalJsonLd,
-  homeJsonLd,
-  pricingJsonLd,
-  enginePageJsonLd,
-} from "@/lib/structuredData";
-import { TIERS } from "@/config/tiers";
-
-import { useSeoOverrideValue } from "@/lib/seoOverride";
+import { legalJsonLd } from "@/lib/structuredData";
 import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
 
 const SITE = "Gradr";
-const SITE_TITLE = "Gradr | AI Career Copilot for Resumes, Jobs & Interviews";
-const SITE_DESCRIPTION =
-  "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.";
 const ORIGIN = "https://gradr.me";
-/**
- * Bumped whenever the social cards are re-rendered. Crawlers (WhatsApp,
- * LinkedIn, Discord, Slack) cache preview images aggressively by URL, so the
- * query string is what forces them to re-fetch instead of serving the retired
- * artwork indefinitely.
- */
-const OG_VERSION = "2026-08-yachtclub";
-const withOgVersion = (url: string) => `${url}?v=${OG_VERSION}`;
-const OG_IMAGE = withOgVersion(`${ORIGIN}/og-image.jpg`);
+const OG_IMAGE = `${ORIGIN}/og-image.jpg`;
 
 const META: Record<string, { title: string; description: string }> = {
   // "/" renders the public Gradr landing page for signed-out visitors (and the
   // dashboard once authenticated), so its metadata must describe the product.
   "/": {
-    title: "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
-    description: SITE_DESCRIPTION,
+    title: "Your AI Career Command Center",
+    description:
+      "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
   },
   "/landing": {
     title: "From resume to offer in one workspace",
@@ -44,7 +26,7 @@ const META: Record<string, { title: string; description: string }> = {
   },
   "/auth": {
     title: "Sign in",
-    description: "Sign in or create your Gradr account to access your AI career platform.",
+    description: "Sign in or create your Gradr account to access your AI career command center.",
   },
   "/forgot-password": {
     title: "Forgot password",
@@ -138,16 +120,6 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Affiliate Resources",
     description: "Campaign link builder, brand assets, and copy templates for Gradr affiliate partners.",
   },
-  "/status": {
-    title: "System Status \u2014 API Uptime & Incident History",
-    description:
-      "Live Gradr platform health: API success rates, last successful webhook delivery, open alerts, and a 30-day incident history.",
-  },
-  "/blog": {
-    title: "Career Guides & Job Search Blog",
-    description:
-      "Practical guides on resumes, ATS scoring, job applications, and interview prep from the Gradr career team.",
-  },
   "/blog/ai-resume-optimization": {
     title: "AI Resume Builder & ATS Guide",
     description: "How AI resume builders help candidates beat Applicant Tracking Systems — keyword matching, formatting rules, and AI-driven rewrites.",
@@ -156,15 +128,6 @@ const META: Record<string, { title: string; description: string }> = {
     title: "ATS Resume Checker — Free Resume Scan & Score",
     description: "Free ATS resume checker: score your resume against any job description, spot formatting a parser can't read, and get the exact missing keywords.",
   },
-  "/ai-resume-builder": {
-    title: "AI Resume Builder — Free ATS-Ready Resume Maker",
-    description: "Free AI resume builder: turn your real experience into an ATS-ready resume, rewrite bullet points against any job description, and export a clean PDF or DOCX.",
-  },
-  "/ai-interview-coach": {
-    title: "AI Interview Coach — Free AI Mock Interviews",
-    description: "Practise with an AI interview coach: realtime voice mock interviews built from the job description, scored answers, and a personalised practice plan.",
-  },
-
   "/career-advice": {
     title: "Career Advice",
     description: "Free guides on resume optimization, cover letters, and interview preparation — practical advice for every stage of your job search.",
@@ -198,20 +161,14 @@ function resolveDynamicMeta(pathname: string): { title: string; description: str
 function resolveOgImage(pathname: string): string {
   // The public marketing landing page gets its own card so social previews
   // never duplicate the generic sitewide image used by the home route.
-  if (pathname === "/landing") return withOgVersion(`${ORIGIN}/og/landing.png`);
-  // Keyword landing pages ship their own card so social previews match intent.
-  if (pathname === "/ai-interview-coach") return withOgVersion(`${ORIGIN}/og/ai-interview-coach.png`);
-  if (pathname === "/ats-resume-checker") return withOgVersion(`${ORIGIN}/og/ats-resume-checker.png`);
-  if (pathname === "/ai-resume-builder") return withOgVersion(`${ORIGIN}/og/ai-resume-builder.png`);
-  // The blog index uses a dedicated card so it never shares the homepage image.
-  if (pathname === "/blog") return withOgVersion(`${ORIGIN}/og/blog.png`);
+  if (pathname === "/landing") return `${ORIGIN}/og/landing.png`;
   if (pathname.startsWith("/blog/")) {
     const slug = pathname.slice(6);
-    if (slug) return withOgVersion(`${ORIGIN}/og/blog-${slug}.png`);
+    if (slug) return `${ORIGIN}/og/blog-${slug}.png`;
   }
   if (pathname.startsWith("/career-advice/")) {
     const slug = pathname.slice(15);
-    if (slug && GUIDES_BY_SLUG[slug]) return withOgVersion(`${ORIGIN}/og/guide-${slug}.png`);
+    if (slug && GUIDES_BY_SLUG[slug]) return `${ORIGIN}/og/guide-${slug}.png`;
   }
   return OG_IMAGE;
 }
@@ -221,42 +178,6 @@ function resolveOgImage(pathname: string): string {
  * account/credential flows, admin tooling and affiliate back-office. They hold
  * no public content and only dilute how search engines understand Gradr.
  */
-/**
- * Product/engine surfaces that get a WebApplication JSON-LD block. These sit
- * behind sign-in and stay noindexed, but the structured data still attaches
- * their feature vocabulary to the Gradr entity for search and AI crawlers.
- */
-const ENGINE_LD: Record<string, { name: string; features: string[] }> = {
-  "/resume": {
-    name: "Resume Intelligence",
-    features: ["ATS scoring", "Keyword gap analysis", "AI rewrite suggestions", "Resume version comparison"],
-  },
-  "/match": {
-    name: "Job Matching Engine",
-    features: ["Live job matching", "Resume-to-role fit scoring", "Skill gap breakdown"],
-  },
-  "/jobs": {
-    name: "Job Feed",
-    features: ["Live job discovery", "Personalized recommendations", "One-click tracking"],
-  },
-  "/apply": {
-    name: "Application Engine",
-    features: ["Tailored cover letters", "Application package generation", "Company research"],
-  },
-  "/pipeline": {
-    name: "Application Pipeline",
-    features: ["Application tracking", "Interview scheduling", "Pipeline insights"],
-  },
-  "/interview": {
-    name: "AI Interview Studio",
-    features: ["Realtime AI mock interviews", "Voice and camera coaching", "Scorecard PDF export"],
-  },
-  "/growth": {
-    name: "Growth Engine",
-    features: ["Personalized practice plans", "Skill development tracking", "Career planning"],
-  },
-};
-
 const NOINDEX_EXACT = new Set([
   "/auth",
   "/forgot-password",
@@ -285,43 +206,21 @@ function isNoIndex(pathname: string): boolean {
   return NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-/**
- * TanStack Router matches paths case-insensitively and tolerates a trailing
- * slash, so `/AI-Interview-Coach/` renders the same page as
- * `/ai-interview-coach`. Without normalisation each variant would emit a
- * self-referencing canonical and Google would treat them as separate URLs.
- * Canonical, og:url and the metadata lookup all use the normalised form.
- */
-export function normalizeSeoPath(pathname: string): string {
-  const lower = pathname.toLowerCase();
-  const trimmed = lower.length > 1 ? lower.replace(/\/+$/, "") : lower;
-  return trimmed === "" ? "/" : trimmed;
-}
-
 export function RouteSeo() {
-  const location = useLocation();
-  const pathname = normalizeSeoPath(location.pathname);
-  const override = useSeoOverrideValue();
-  const baseMeta = META[pathname] ??
+  const { pathname } = useLocation();
+  const meta = META[pathname] ??
     resolveDynamicMeta(pathname) ?? {
-      title: SITE_TITLE,
-      description: SITE_DESCRIPTION,
+      title: "Your AI Career Command Center",
+      description:
+        "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.",
     };
-  // Product surfaces (resume, matching, interview…) push a live title through
-  // useSeoOverride so the tab and canonical reflect what's on screen, without
-  // rendering a competing Helmet block.
-  const meta = {
-    title: override?.title ?? baseMeta.title,
-    description: override?.description ?? baseMeta.description,
-  };
   // "/" keeps the brand-first title; every other route (including /landing)
   // gets its own distinct title so no two public URLs duplicate one another.
   const fullTitle =
     pathname === "/"
-      ? SITE_TITLE
+      ? "Gradr | Your AI Career Command Center"
       : `${meta.title} — ${SITE}`;
-  const canonicalPath = override?.path ?? pathname;
-  const url = `${ORIGIN}${canonicalPath}`;
+  const url = `${ORIGIN}${pathname}`;
   const ogImage = resolveOgImage(pathname);
   const noindex = isNoIndex(pathname);
 
@@ -360,36 +259,8 @@ export function RouteSeo() {
         lastUpdated: legalUpdated[pathname],
       })
     : null;
-  // JSON-LD for the key non-editorial surfaces: home, pricing and the product
-  // engines. Editorial pages (guides, blog, job landings) and the tool landing
-  // pages emit their own richer payloads, so they are skipped here to avoid
-  // shipping two competing blocks for one URL.
-  const engine = ENGINE_LD[pathname];
-  const routeLd =
-    pathname === "/"
-      ? homeJsonLd({ name: SITE_TITLE, description: meta.description })
-      : pathname === "/pricing"
-        ? pricingJsonLd({
-            name: meta.title,
-            description: meta.description,
-            tiers: TIERS.map((t) => ({ name: t.name, description: t.description })),
-          })
-        : engine
-          ? enginePageJsonLd({
-              path: pathname,
-              name: engine.name,
-              description: meta.description,
-              features: engine.features,
-            })
-          : null;
   const isArticle =
     pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
-  // Article/BlogPosting JSON-LD is emitted by the editorial pages themselves
-  // (GuideArticle + blog posts via structuredData.ts), so nothing extra here.
-
-
-
-
   return (
     <Helmet>
       <html lang="en" />
@@ -421,11 +292,6 @@ export function RouteSeo() {
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={meta.description} />
       <meta name="twitter:image" content={ogImage} />
-      {routeLd?.map((node, i) => (
-        <script key={`route-ld-${i}`} type="application/ld+json">
-          {JSON.stringify(node)}
-        </script>
-      ))}
       {legalLd?.map((node, i) => (
         <script key={`legal-ld-${i}`} type="application/ld+json">
           {JSON.stringify(node)}
@@ -434,5 +300,4 @@ export function RouteSeo() {
     </Helmet>
   );
 }
-
 

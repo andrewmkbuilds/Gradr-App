@@ -2,19 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Cursor-following 3D tilt. On by default; pass `tilt={false}` for dense
-   *  data surfaces (tables, chart shells) where movement would be noise. */
-  tilt?: boolean;
-}
-
-const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, tilt = true, ...props }, ref) => (
+const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    {...(tilt ? { "data-tilt": "" } : {})}
     className={cn(
-      "reflect elev-1 relative rounded-lg border bg-card text-card-foreground",
-      tilt ? "tilt-3d" : "depth-surface",
+      "lift-card rounded-lg border bg-card text-card-foreground shadow-xs hover:shadow-[0_16px_36px_-24px_hsl(0_0%_0%/0.9)]",
       className,
     )}
     {...props}

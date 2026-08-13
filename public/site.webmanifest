@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Gradr | AI Career Copilot for Resumes, Jobs & Interviews",
+  "name": "Gradr — AI Career Command Center",
   "short_name": "Gradr",
-  "description": "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.",
+  "description": "Resume ATS scoring, job matching, instant applications, and realtime AI mock interviews.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "/",
@@ -10,8 +10,8 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "categories": ["productivity", "education", "business"],
-  "background_color": "#0f2a33",
-  "theme_color": "#245F73",
+  "background_color": "#070d1a",
+  "theme_color": "#070d1a",
   "icons": [
     { "src": "/favicon.png", "sizes": "64x64", "type": "image/png", "purpose": "any" },
     { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },

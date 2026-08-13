@@ -11,7 +11,6 @@
  *     signs up, calls `attribute_signup_referral` RPC and clears the cookie.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { invokeFunction } from "@/lib/invokeFunction";
 
 const COOKIE_NAME = "cf_ref";
 const CLICK_COOKIE_NAME = "cf_ref_click";
@@ -59,18 +58,10 @@ export async function captureReferralFromUrl() {
     const code = params.get("ref");
     if (!code) return;
 
-    // Validate the code, read the cookie window and record the click entirely
-    // server-side. Visitors have no direct read/write access to affiliate
-    // tables, so referral clicks cannot be forged from the browser.
-    const { data: publicInfo } = await invokeFunction("affiliate-public", {
-      body: {
-        code,
-        landing_page: window.location.pathname + window.location.search,
-        utm_source: params.get("utm_source"),
-        utm_medium: params.get("utm_medium"),
-        utm_campaign: params.get("utm_campaign"),
-        visitor_key: getVisitorKey(),
-      },
+    // Validate the code + read the cookie window server-side. The underlying
+    // lookups are service-role only; visitors never touch them directly.
+    const { data: publicInfo } = await supabase.functions.invoke("affiliate-public", {
+      body: { code },
     });
     const hit = publicInfo?.affiliate ?? null;
     if (!hit || !hit.isActive) return;
@@ -80,8 +71,27 @@ export async function captureReferralFromUrl() {
 
     setCookie(COOKIE_NAME, code, days);
 
-    if (publicInfo?.clickId) setCookie(CLICK_COOKIE_NAME, publicInfo.clickId, days);
+    // Log click
+    const utm_source = params.get("utm_source");
+    const utm_medium = params.get("utm_medium");
+    const utm_campaign = params.get("utm_campaign");
 
+    const { data: click } = await supabase
+      .from("affiliate_clicks")
+      .insert({
+        affiliate_profile_id: hit.profileId,
+        affiliate_code: code,
+        landing_page: window.location.pathname + window.location.search,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        visitor_key: getVisitorKey(),
+        user_agent: navigator.userAgent.slice(0, 500),
+      })
+      .select("id")
+      .single();
+
+    if (click?.id) setCookie(CLICK_COOKIE_NAME, click.id, days);
   } catch (e) {
     // Tracking is best-effort — never block the app
     console.warn("[affiliate] capture failed", e);
@@ -95,7 +105,7 @@ export async function attributeSignupReferral() {
     const clickId = getClickId();
     const { data } = await supabase.rpc("attribute_signup_referral", {
       _code: code,
-      _click_id: clickId ?? undefined,
+      _click_id: clickId,
     });
     if (data) {
       // Successfully attributed — clear cookie to prevent re-attribution

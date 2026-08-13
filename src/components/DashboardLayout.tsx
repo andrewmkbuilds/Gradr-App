@@ -5,16 +5,12 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AmbientBackground } from "@/components/AmbientBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { MotionQuickToggle } from "@/components/motion/MotionQuickToggle";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { PolicyUpdateGate } from "@/components/legal/PolicyUpdateGate";
 import { NavBreadcrumb } from "@/components/NavBreadcrumb";
-import { AnimatePresence } from "framer-motion";
-import { useLocation } from "@/lib/router-compat";
 
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { pathname } = useLocation();
   return (
     <SidebarProvider>
       <AmbientBackground />
@@ -29,13 +25,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col min-w-0">
           <PaymentTestModeBanner />
           <GuestBanner />
-          <header className="glass-bar glass-float enter-up sticky top-0 z-30 h-14 flex items-center justify-between gap-3 border-b border-border/70 px-4 shrink-0">
+          <header className="glass-bar enter-up sticky top-0 z-30 h-14 flex items-center justify-between gap-3 border-b border-border/70 px-4 shrink-0">
             <div className="flex min-w-0 items-center gap-3">
               <SidebarTrigger className="interactive press-scale shrink-0 text-muted-foreground hover:text-foreground" />
               <NavBreadcrumb />
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              <MotionQuickToggle />
               <ThemeToggle />
               <NotificationsBell />
             </div>
@@ -45,12 +40,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               stops wide children (tables, charts) creating a horizontal bar. */}
           <main id="main-content" className="flex-1 min-w-0 overflow-x-clip p-4 pb-24 sm:p-6 md:pb-6">
 
-            {/* Route-level exit/enter choreography for authenticated navigation. */}
-            <AnimatePresence mode="wait" initial={false}>
-              <div key={pathname} className="contents">
-                {children}
-              </div>
-            </AnimatePresence>
+            {children}
           </main>
           <MobileTabBar />
           <PolicyUpdateGate />

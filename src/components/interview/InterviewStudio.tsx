@@ -149,7 +149,7 @@ export function InterviewStudio(props: Props) {
             open
             retrying={connecting}
             onRetry={onReconnect}
-            onDismiss={onDismissConnectionError ?? (() => {})}
+            onDismiss={onDismissConnectionError}
           />
         )}
         {/* ---------- Header ---------- */}
@@ -391,7 +391,7 @@ export function InterviewStudio(props: Props) {
                     className={cn("flex gap-3", msg.role === "user" && "justify-end")}
                   >
                     {msg.role === "assistant" && (
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center extrude rounded-lg bg-primary/10">
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         <Bot className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                       </div>
                     )}
@@ -428,7 +428,7 @@ export function InterviewStudio(props: Props) {
                 ))}
                 {thinking && (
                   <div className="flex gap-3">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center extrude rounded-lg bg-primary/10">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                       <Bot className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                     </div>
                     <div className="flex items-center gap-1 rounded-xl bg-secondary/60 px-3.5 py-3">

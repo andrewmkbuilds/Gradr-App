@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
-import { Navigate } from "@/lib/router-compat";
+import { Navigate } from "react-router-dom";
 import { Loader2, ScrollText, Send, Upload, Eye, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -108,7 +107,7 @@ export default function AdminLegal() {
 
   const notify = async (doc: LegalDocument) => {
     setBusy(true);
-    const { data, error } = await invokeFunction("notify-policy-update", {
+    const { data, error } = await supabase.functions.invoke("notify-policy-update", {
       body: { document_id: doc.id },
     });
     setBusy(false);

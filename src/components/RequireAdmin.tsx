@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef } from "react";
-import { Link, useLocation } from "@/lib/router-compat";
+import { Link, useLocation } from "react-router-dom";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { useAuth } from "@/hooks/useAuth";

@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { FileText, Loader2, Pencil, Trash2, Check, X, Layers, GitCompare } from "lucide-react";
+import { FileText, Loader2, Pencil, Trash2, Check, X, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useResumeVersions, type ResumeVersion } from "@/hooks/useResumeVersions";
-import { ResumeCompare } from "@/components/resume/ResumeCompare";
 
 interface Props {
   activeId?: string | null;
@@ -14,7 +13,6 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
   const { versions, loading, rename, remove } = useResumeVersions();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
-  const [comparing, setComparing] = useState(false);
 
   if (loading) {
     return (
@@ -44,27 +42,8 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Layers className="h-4 w-4 text-primary" /> Resume versions
         </h3>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{versions.length} saved</span>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8"
-            disabled={versions.length < 2}
-            onClick={() => setComparing(true)}
-          >
-            <GitCompare className="mr-1.5 h-4 w-4" aria-hidden />
-            Compare
-          </Button>
-        </div>
+        <span className="text-xs text-muted-foreground">{versions.length} saved</span>
       </div>
-
-      <ResumeCompare
-        open={comparing}
-        onOpenChange={setComparing}
-        versions={versions}
-        initialBaseId={activeId ?? null}
-      />
 
       <ul className="mt-4 space-y-2">
         {versions.map((v) => {

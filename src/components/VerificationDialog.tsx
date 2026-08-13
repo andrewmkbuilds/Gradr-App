@@ -176,7 +176,7 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
                     onClick={() => setSelected(c.key)}
                     className="flex items-center gap-3 rounded-lg border border-border bg-card/60 p-3 text-left transition-colors hover:border-primary/50 hover:bg-primary/5"
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center extrude rounded-lg bg-primary/10">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                       <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                     </span>
                     <span className="min-w-0 flex-1">

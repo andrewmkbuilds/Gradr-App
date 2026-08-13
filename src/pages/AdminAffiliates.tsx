@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "@/lib/router-compat";
+import { Navigate } from "react-router-dom";
 import { Loader2, Check, X, Pause, Play, Search, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

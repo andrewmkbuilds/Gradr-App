@@ -55,7 +55,7 @@ export function usePremiumVoice() {
         if (!session?.access_token) throw new Error("no session");
 
         const res = await fetch(
-          "/api/public/interview-voice",
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-voice`,
           {
             method: "POST",
             headers: {

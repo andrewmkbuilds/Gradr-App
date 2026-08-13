@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   CheckCircle2,
@@ -19,7 +19,6 @@ import {
   absoluteUrl,
   buildBreadcrumbLd,
   buildFaqLd,
-  buildHowToLd,
 } from "@/lib/structuredData";
 
 const PATH = "/ats-resume-checker";
@@ -149,14 +148,6 @@ export default function AtsResumeChecker() {
       <JsonLd
         nodes={[
           softwareLd,
-          buildHowToLd({
-            name: "How to check your resume against an ATS",
-            description:
-              "Four steps to score an existing resume against a specific job description and fix what an Applicant Tracking System cannot read.",
-            path: PATH,
-            totalTime: "PT10M",
-            steps: STEPS.map((s) => ({ name: s.title, text: s.body })),
-          }),
           buildFaqLd(FAQS),
           buildBreadcrumbLd([
             { name: "Gradr", path: "/" },
@@ -167,7 +158,7 @@ export default function AtsResumeChecker() {
       />
 
       <section className="mx-auto max-w-3xl text-center">
-        <p className="accent-text text-xs font-semibold uppercase tracking-wider">
+        <p className="text-xs font-medium uppercase tracking-wider text-primary">
           Free tool · Resume Intelligence
         </p>
         <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
@@ -188,11 +179,11 @@ export default function AtsResumeChecker() {
             Check my resume free
           </Link>
           <Link
-            to={ctaHref("/ai-resume-builder", "hero_secondary")}
-            onClick={trackCta("hero_secondary", "/ai-resume-builder")}
+            to={ctaHref("/blog/ai-resume-optimization", "hero_secondary")}
+            onClick={trackCta("hero_secondary", "/blog/ai-resume-optimization")}
             className="inline-flex h-11 items-center gap-2 rounded-xl border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
-            Build a resume with AI
+            Read the ATS optimization guide
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
@@ -212,7 +203,7 @@ export default function AtsResumeChecker() {
               className="rounded-2xl border border-border/70 bg-card/60 p-5 backdrop-blur-sm transition-colors hover:border-primary/40"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center extrude rounded-lg bg-primary/10 text-primary">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <step.icon className="h-4.5 w-4.5" aria-hidden="true" />
                 </span>
                 <h3 className="font-medium text-foreground">
@@ -227,7 +218,7 @@ export default function AtsResumeChecker() {
 
       <section className="mt-16" aria-labelledby="common-issues">
         <h2 id="common-issues" className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground">
-          <ShieldAlert className="accent-text h-5 w-5" aria-hidden="true" />
+          <ShieldAlert className="h-5 w-5 text-primary" aria-hidden="true" />
           Common ATS issues Gradr catches
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -313,18 +304,11 @@ export default function AtsResumeChecker() {
               location: "related_job_search",
             },
             {
-              to: "/ai-interview-coach",
-              title: "AI Interview Coach",
-              desc: "Once your resume lands the interview, practise it with a realtime AI mock interview.",
-              location: "related_interview_coach",
-            },
-            {
               to: "/career-advice",
               title: "Career Advice Guides",
               desc: "Free guides on resumes, cover letters, and interview preparation.",
               location: "related_advice",
             },
-
           ].map((item) => (
             <Link
               key={item.to}

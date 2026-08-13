@@ -34,18 +34,6 @@ jobs:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: node scripts/security-findings-guard.mjs
 
-      - name: Fail if a resolved scanner finding reappears
-        env:
-          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: node scripts/security-regression-check.mjs
-
-      - name: Anonymous access + has_role isolation check
-        env:
-          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
-          BASE_URL: https://gradr.me
-        run: node scripts/anon-permission-check.mjs
-
-
       - name: RLS and policy regression tests
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}

@@ -1,9 +1,5 @@
-import { NextActionBar } from "@/components/NextActionBar";
-import { IssueTriage } from "@/components/resume/IssueTriage";
-import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useCallback } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import {
   Upload, FileText, CheckCircle, AlertTriangle, Sparkles, RefreshCw, Loader2, BookOpen,
   Target, Gauge, ChevronRight, XCircle,
@@ -55,7 +51,7 @@ interface AnalysisResult {
 const typeStyles: Record<string, { icon: typeof CheckCircle; color: string }> = {
   critical: { icon: AlertTriangle, color: "text-destructive" },
   warning: { icon: AlertTriangle, color: "text-warning" },
-  improvement: { icon: Sparkles, color: "accent-text" },
+  improvement: { icon: Sparkles, color: "text-primary" },
   good: { icon: CheckCircle, color: "text-success" },
 };
 
@@ -67,14 +63,6 @@ export default function ResumeEngine() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [fileName, setFileName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
-  useSeoOverride(
-    jobTitle.trim()
-      ? {
-          title: `Resume Engine — tailoring for ${jobTitle.trim()}`,
-          description: `ATS scoring and AI rewrites for your resume against the ${jobTitle.trim()} role.`,
-        }
-      : null,
-  );
   const [jobDescription, setJobDescription] = useState("");
   const [showTailor, setShowTailor] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
@@ -118,7 +106,7 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(true);
 
-      const { data: analysisData, error: fnError } = await invokeFunction("analyze-resume", {
+      const { data: analysisData, error: fnError } = await supabase.functions.invoke("analyze-resume", {
         body: { resumeText: text, jobDescription, jobTitle, environment: getPaddleEnvironment() },
       });
 
@@ -193,7 +181,7 @@ export default function ResumeEngine() {
           <Target className="h-4 w-4 text-primary" />
           Tailor to a specific job
           {jobDescription.trim().length > 40 && (
-            <span className="accent-chip px-2 py-0.5 text-[10px]">Active</span>
+            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">Active</span>
           )}
         </span>
         <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showTailor ? "rotate-90" : ""}`} />
@@ -230,24 +218,21 @@ export default function ResumeEngine() {
         </p>
         <Link
           to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=resume_engine_header"
-          className="accent-link mt-3 inline-flex items-center gap-2 text-xs"
+          className="mt-3 inline-flex items-center gap-2 text-xs text-primary hover:underline"
         >
           <BookOpen className="h-3.5 w-3.5" />
           Guide: AI resume builders & ATS optimization
         </Link>
         <Link
           to="/ats-resume-checker?utm_source=app&utm_medium=internal_link&utm_campaign=ats_resume_checker&utm_content=resume_engine_header"
-          className="accent-link mt-2 ml-0 inline-flex items-center gap-2 text-xs sm:ml-4"
+          className="mt-2 ml-0 inline-flex items-center gap-2 text-xs text-primary hover:underline sm:ml-4"
         >
           <BookOpen className="h-3.5 w-3.5" />
           ATS resume checker: how scoring works
         </Link>
       </div>
 
-      <NextActionBar surface="resume" />
-
       {!uploading && !analyzing && tailorPanel}
-
 
       {!uploading && !analyzing && (
         <ResumeVersions
@@ -281,7 +266,7 @@ export default function ResumeEngine() {
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-1">Upload Your Resume</h3>
           <p className="text-sm text-muted-foreground mb-4">PDF, DOCX, or TXT • Max 10MB</p>
-          <div className="px-4 py-2 extrude rounded-lg bg-primary/10 text-primary text-sm font-medium">
+          <div className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
             Click to upload or drag & drop
           </div>
         </label>
@@ -307,7 +292,7 @@ export default function ResumeEngine() {
                 : "Significant structural and keyword work needed."}
             </p>
             {analysis.tailoredTo && (
-              <p className="accent-text mt-2 text-xs text-center font-medium">Scored against {analysis.tailoredTo}</p>
+              <p className="mt-2 text-xs text-primary text-center">Scored against {analysis.tailoredTo}</p>
             )}
             <div className="w-full mt-6 space-y-2">
               {[
@@ -330,26 +315,9 @@ export default function ResumeEngine() {
           </div>
 
           {/* Suggestions */}
-          <div className="lg:col-span-2">
-            <IssueTriage
-              input={{
-                atsScore: analysis.ats_score,
-                keywordMatch: analysis.keyword_match,
-                formattingScore: analysis.formatting_score,
-                impactScore: analysis.impact_score,
-                readabilityScore: analysis.readability_score,
-                missingSkills: analysis.metrics?.missingSkills,
-                quantifiedBullets: analysis.metrics?.quantifiedBullets,
-                wordCount: analysis.metrics?.wordCount,
-              }}
-            />
-          </div>
-
-          {/* Suggestions */}
           <div className="glass-card p-6 lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Detailed suggestions</h3>
-
+              <h3 className="text-sm font-semibold text-foreground">Fix list</h3>
               <span className="text-xs text-muted-foreground">{analysis.suggestions.length} items</span>
             </div>
             <div className="space-y-3">
@@ -440,7 +408,7 @@ export default function ResumeEngine() {
                       <p className="text-sm text-muted-foreground line-through decoration-destructive/40">{r.before}</p>
                     </div>
                     <div>
-                      <p className="accent-text mb-1 text-[10px] font-semibold uppercase tracking-wide">After</p>
+                      <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-primary">After</p>
                       <p className="text-sm text-foreground">{r.after}</p>
                     </div>
                   </div>

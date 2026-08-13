@@ -1,4 +1,4 @@
-# Gradr — AI career platform for resumes, jobs & interviews (gradr.me)
+# Gradr — AI career command center (gradr.me)
 # Public marketing, pricing, legal and career-content pages are crawlable.
 # Authenticated product surfaces, credential flows and admin tools are not.
 
@@ -23,8 +23,6 @@ Disallow: /affiliate/apply
 Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
-Disallow: /.lovable/
-Disallow: /api/
 Disallow: /mcp
 
 User-agent: Bingbot
@@ -48,8 +46,6 @@ Disallow: /affiliate/apply
 Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
-Disallow: /.lovable/
-Disallow: /api/
 Disallow: /mcp
 
 # Social preview crawlers need unrestricted access to render link cards.
@@ -83,8 +79,6 @@ Disallow: /affiliate/apply
 Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
-Disallow: /.lovable/
-Disallow: /api/
 Disallow: /mcp
 
 Sitemap: https://gradr.me/sitemap.xml

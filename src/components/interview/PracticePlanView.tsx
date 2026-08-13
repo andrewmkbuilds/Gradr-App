@@ -28,7 +28,7 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
         {plan.focusAreas?.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {plan.focusAreas.map((f) => (
-              <span key={f} className="accent-chip px-2.5 py-1">
+              <span key={f} className="text-xs rounded-full border border-primary/30 bg-primary/10 text-primary px-2.5 py-1">
                 {f}
               </span>
             ))}
@@ -41,7 +41,7 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
           <li key={d.day} className="glass-card p-5 space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="h-8 w-8 shrink-0 extrude rounded-lg bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center">
+                <span className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center">
                   {d.day}
                 </span>
                 <div>
@@ -56,12 +56,12 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
             {d.questions?.length > 0 && (
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold text-foreground flex items-center gap-2">
-                  <MessageSquareQuote className="accent-text h-3.5 w-3.5" /> Practice questions
+                  <MessageSquareQuote className="h-3.5 w-3.5 text-primary" /> Practice questions
                 </p>
                 <ul className="space-y-1">
                   {d.questions.map((q, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                      <span className="accent-text">•</span><span>{q}</span>
+                      <span className="text-primary">•</span><span>{q}</span>
                     </li>
                   ))}
                 </ul>
@@ -76,7 +76,7 @@ export function PracticePlanView({ plan }: { plan: PracticePlan }) {
                 <ul className="space-y-1">
                   {d.drills.map((q, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                      <span className="accent-text">•</span><span>{q}</span>
+                      <span className="text-primary">•</span><span>{q}</span>
                     </li>
                   ))}
                 </ul>

@@ -15,7 +15,7 @@ import { useCallback, useEffect, useRef, type RefObject } from "react";
  * and children add `data-nav-parent="<groupId>"`.
  */
 export function useSidebarKeyboardNav(
-  containerRef: RefObject<HTMLElement | null>,
+  containerRef: RefObject<HTMLElement>,
   handlers: {
     setGroupOpen: (groupId: string, open: boolean) => void;
     isGroupOpen: (groupId: string) => boolean;
@@ -109,7 +109,7 @@ export function useSidebarKeyboardNav(
  * when the drawer opens, so screen-reader and keyboard users start where they
  * currently are rather than at the top of a long list.
  */
-export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement | null>, open: boolean, enabled: boolean) {
+export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement>, open: boolean, enabled: boolean) {
   const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -186,7 +186,7 @@ export function useMobileDrawerFocus(containerRef: RefObject<HTMLElement | null>
  * the sheet.
  */
 export function useMobileDrawerContainment(
-  containerRef: RefObject<HTMLElement | null>,
+  containerRef: RefObject<HTMLElement>,
   open: boolean,
   enabled: boolean,
 ) {

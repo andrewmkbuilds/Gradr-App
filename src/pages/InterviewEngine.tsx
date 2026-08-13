@@ -1,8 +1,5 @@
-import { NextActionBar } from "@/components/NextActionBar";
-import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
-import { useNavigate, Link } from "@/lib/router-compat";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { toast } from "sonner";
@@ -36,7 +33,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 type Engine = "realtime" | "fallback";
 
 
-const INTERVIEW_URL = "/api/public/interview-coach";
+const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
 
 function InterviewEngineInner() {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -44,14 +41,6 @@ function InterviewEngineInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [targetRole, setTargetRole] = useState("");
   const [started, setStarted] = useState(false);
-  useSeoOverride(
-    targetRole.trim()
-      ? {
-          title: `Interview Engine — mock interview for ${targetRole.trim()}`,
-          description: `Realtime AI mock interview and scorecard for the ${targetRole.trim()} role.`,
-        }
-      : null,
-  );
   const [stage, setStage] = useState<"setup" | "preflight">("setup");
   const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);
@@ -362,7 +351,7 @@ function InterviewEngineInner() {
     setBuildingReport(true);
     const elapsed = Math.round((Date.now() - startedAt.current) / 1000);
     try {
-      const { data, error } = await invokeFunction("interview-report", {
+      const { data, error } = await supabase.functions.invoke("interview-report", {
         body: {
           messages,
           targetRole,
@@ -405,7 +394,7 @@ function InterviewEngineInner() {
           setSessionId(saved.id);
           void metrics.linkSession(saved.id);
           // Follow-up nudge with the scorecard + practice plan.
-          void invokeFunction("send-notification", {
+          void supabase.functions.invoke("send-notification", {
             body: {
               template: "interview_followup",
               input: { role: targetRole || undefined, link: `/interview/history` },
@@ -426,7 +415,7 @@ function InterviewEngineInner() {
     if (!report) return;
     setPlanLoading(true);
     try {
-      const { data, error } = await invokeFunction("practice-plan", {
+      const { data, error } = await supabase.functions.invoke("practice-plan", {
         body: { report, targetRole },
       });
       if (error) throw error;
@@ -512,20 +501,12 @@ function InterviewEngineInner() {
   if (!started) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
-        <NextActionBar surface="interview" />
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">AI Mock Interview</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Realtime voice interview with live presence coaching and a scored report at the end
           </p>
-          <Link
-            to="/ai-interview-coach?utm_source=app&utm_medium=internal_link&utm_campaign=ai_interview_coach&utm_content=interview_engine_header"
-            className="accent-link mt-3 inline-flex items-center gap-2 text-xs"
-          >
-            How the AI interview coach scores your answers
-          </Link>
         </div>
-
         <CreditsBalance only="interview" compact />
         <VoiceUsageMeter compact />
 

@@ -20,23 +20,8 @@ Deno.serve(async (req) => {
       environment,
       `/prices?external_id=${encodeURIComponent(priceId)}`,
     );
-
-    // The gateway can answer with a plain-text upstream error (e.g.
-    // "upstream connect error ..."), so never assume the body is JSON.
-    const raw = await res.text();
-    let data: unknown = null;
-    try {
-      data = raw ? JSON.parse(raw) : null;
-    } catch {
-      data = null;
-    }
-
-    if (!res.ok || data === null) {
-      console.error("get-paddle-price gateway error", res.status, raw.slice(0, 300));
-      return json({ error: "Price service unavailable" }, 502);
-    }
-
-    const paddleId = (data as { data?: Array<{ id?: string }> })?.data?.[0]?.id;
+    const data = await res.json();
+    const paddleId = data?.data?.[0]?.id;
     if (!paddleId) return json({ error: "Price not found" }, 404);
 
     return json({ paddleId });

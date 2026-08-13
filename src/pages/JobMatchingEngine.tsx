@@ -1,7 +1,5 @@
-import { useSeoOverride } from "@/lib/seoOverride";
 import { useState, useEffect } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import {
   Target, TrendingUp, MapPin, DollarSign, Loader2, Search, BookOpen,
@@ -60,14 +58,6 @@ export default function JobMatchingEngine() {
   const [searched, setSearched] = useState(false);
   const [targetRole, setTargetRole] = useState("");
   const [location, setLocation] = useState("");
-  useSeoOverride(
-    targetRole.trim()
-      ? {
-          title: `Job Matching — ${targetRole.trim()}${location.trim() ? ` in ${location.trim()}` : ""}`,
-          description: `Live match scores between your resume and ${targetRole.trim()} roles, with the gap to close on each posting.`,
-        }
-      : null,
-  );
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [hasResume, setHasResume] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -106,7 +96,7 @@ export default function JobMatchingEngine() {
         return;
       }
 
-      const { data, error } = await invokeFunction("match-jobs", {
+      const { data, error } = await supabase.functions.invoke("match-jobs", {
         body: {
           resumeText,
           targetRole: targetRole || profile?.target_job_title || "",
@@ -177,7 +167,7 @@ export default function JobMatchingEngine() {
             </span>
             <Link
               to="/blog/ai-resume-optimization?utm_source=app&utm_medium=internal_link&utm_campaign=ai_resume_optimization&utm_content=match_engine_header"
-              className="accent-link inline-flex items-center gap-2 text-xs"
+              className="inline-flex items-center gap-2 text-xs text-primary hover:underline"
             >
               <BookOpen className="h-3.5 w-3.5" />
               Guide: boost your ATS match score
@@ -215,7 +205,7 @@ export default function JobMatchingEngine() {
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            <Switch id="remote-only" aria-label="Remote only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
+            <Switch id="remote-only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
             <Label htmlFor="remote-only" className="text-xs text-muted-foreground">Remote only</Label>
           </div>
           {!hasResume && (
@@ -244,7 +234,7 @@ export default function JobMatchingEngine() {
               </div>
               <div className="glass-card p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="accent-text h-4 w-4" />
+                  <TrendingUp className="h-4 w-4 text-primary" />
                   <span className="text-xs text-muted-foreground">Avg match score</span>
                 </div>
                 <p className="stat-value text-foreground">{avgScore}%</p>
@@ -292,7 +282,7 @@ export default function JobMatchingEngine() {
                         </div>
                         <div className="flex flex-wrap items-center gap-1.5">
                           {job.match.matchedSkills.slice(0, 3).map((s) => (
-                            <span key={s} className="accent-chip px-2 py-0.5 text-xs font-medium">{s}</span>
+                            <span key={s} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{s}</span>
                           ))}
                         </div>
                       </div>

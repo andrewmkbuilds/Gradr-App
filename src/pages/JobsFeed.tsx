@@ -1,13 +1,8 @@
-import { NextActionBar } from "@/components/NextActionBar";
-import { useSeoOverride } from "@/lib/seoOverride";
-import { useEffect, useRef, useState } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
-import { useCareerPreferences } from "@/hooks/useCareerPreferences";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +15,7 @@ import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
 import { formatDistanceToNow } from "date-fns";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
-import { useNavigate } from "@/lib/router-compat";
+import { useNavigate } from "react-router-dom";
 import { CompanyResearchDialog } from "@/components/research/CompanyResearchDialog";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { prefetchLogos } from "@/lib/logos";
@@ -57,19 +52,8 @@ const COUNTRIES = [
 export default function JobsFeed() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  // Shared targeting cache: onboarding writes to it, so a change there
-  // re-ranks this feed immediately instead of waiting for a reload.
-  const { preferences, isLoading: prefsLoading } = useCareerPreferences();
   const [what, setWhat] = useState("");
   const [where, setWhere] = useState("");
-  useSeoOverride(
-    what.trim()
-      ? {
-          title: `Job Feed — ${what.trim()}${where.trim() ? ` in ${where.trim()}` : ""}`,
-          description: `AI-ranked ${what.trim()} openings matched to your resume and career preferences.`,
-        }
-      : null,
-  );
   const [country, setCountry] = useState("us");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [sortBy, setSortBy] = useState<"relevance" | "date" | "salary">("relevance");
@@ -85,38 +69,14 @@ export default function JobsFeed() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasResume, setHasResume] = useState<boolean | null>(null);
   const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
-  const targetingRef = useRef<string>("");
 
   useEffect(() => {
     if (user) {
+      void initialize();
       void loadTracked();
       void checkResume();
     }
   }, [user]);
-
-  // Apply saved targeting to the search controls and re-run the search whenever
-  // it changes (first load, or right after onboarding saves new roles).
-  useEffect(() => {
-    if (!user || prefsLoading) return;
-    void logPreferencesRead("jobs_feed", preferences.onboarded);
-    if (!preferences.onboarded) {
-      setShowOnboarding(true);
-      return;
-    }
-    const role = preferences.targetRoles[0] ?? "";
-    const loc = preferences.locations[0] ?? "";
-    const ctry = preferences.country ?? "us";
-    const remote = preferences.remotePreference === "remote";
-    const signature = JSON.stringify([role, loc, ctry, remote, preferences.industries, preferences.salaryMin]);
-    if (signature === targetingRef.current) return;
-    targetingRef.current = signature;
-    setWhat(role);
-    setWhere(loc);
-    setCountry(ctry);
-    setRemoteOnly(remote);
-    if (role) void runSearch(role, loc, ctry, remote);
-  }, [user, prefsLoading, preferences]);
-
 
   const checkResume = async () => {
     if (!user) return;
@@ -148,8 +108,19 @@ export default function JobsFeed() {
     return () => window.clearInterval(id);
   }, [user, noResumeScoringAttempted, jobs]);
 
-
-
+  const initialize = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
+    void logPreferencesRead("jobs_feed", Boolean(data));
+    if (!data || !data.onboarded) {
+      setShowOnboarding(true);
+      return;
+    }
+    setWhat(data.target_role || "");
+    setWhere(data.locations?.[0] || "");
+    setCountry(data.country || "us");
+    if (data.remote_preference === "remote") setRemoteOnly(true);
+  };
 
   const handleOnboardingComplete = (prefs: { what: string; where: string; country: string; remoteOnly: boolean; salaryMin: number | null }) => {
     setShowOnboarding(false);
@@ -186,7 +157,7 @@ export default function JobsFeed() {
     setLoading(true);
     setJobs([]);
     try {
-      const { data, error } = await invokeFunction("search-jobs", {
+      const { data, error } = await supabase.functions.invoke("search-jobs", {
         body: { what: q, where: loc, country: ctry, remoteOnly: remote, sortBy },
       });
       if (error || data?.error) {
@@ -232,7 +203,7 @@ export default function JobsFeed() {
     setNoResumeScoringAttempted(false);
     setScoring(true);
     try {
-      const { data, error } = await invokeFunction("recommend-jobs", {
+      const { data, error } = await supabase.functions.invoke("recommend-jobs", {
         body: { jobs: list, resumeText },
       });
       if (error || data?.error) return;
@@ -330,7 +301,7 @@ export default function JobsFeed() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      const { data, error } = await invokeFunction("generate-application", {
+      const { data, error } = await supabase.functions.invoke("generate-application", {
         body: {
           environment: getPaddleEnvironment(),
           type: "application_pack",
@@ -369,7 +340,7 @@ export default function JobsFeed() {
     }
     trackJourney("job_url_import_started", { host });
     try {
-      const { data, error } = await invokeFunction("parse-job-url", {
+      const { data, error } = await supabase.functions.invoke("parse-job-url", {
         body: { url: pasteUrl.trim() },
       });
       if (error || data?.error) {
@@ -436,9 +407,6 @@ export default function JobsFeed() {
         <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
       </div>
 
-      <NextActionBar surface="jobs" />
-
-
       <Card className="p-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-4 relative">
@@ -466,7 +434,7 @@ export default function JobsFeed() {
         </div>
         <div className="flex flex-wrap items-center gap-4 pt-1">
           <div className="flex items-center gap-2">
-            <Switch id="remote" aria-label="Remote only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
+            <Switch id="remote" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
             <Label htmlFor="remote" className="text-sm">Remote only</Label>
           </div>
           <Select value={sortBy} onValueChange={(v: "relevance" | "date" | "salary") => setSortBy(v)}>

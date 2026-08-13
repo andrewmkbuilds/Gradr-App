@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "interactive press-scale depth-press relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "interactive press-scale relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -19,10 +19,6 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-[0_8px_22px_-14px_hsl(0_0%_0%/0.9)]",
         ghost: "hover:bg-accent hover:text-accent-foreground",
-        accent:
-          "sheen bg-mahogany text-mahogany-foreground hover:bg-mahogany-hover hover:shadow-[0_10px_28px_-12px_hsl(var(--mahogany)/0.7)]",
-        accentOutline:
-          "border border-mahogany-border bg-mahogany-tint text-mahogany-ink hover:bg-mahogany-soft hover:border-mahogany",
         link: "nav-underline text-primary underline-offset-4",
       },
       size: {

@@ -2,23 +2,7 @@ import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/r
 
 import { renderErrorPage } from "./lib/error-page";
 
-/**
- * `/lovable/*` routes (email queue processing, webhook callbacks, preview) are
- * called by infrastructure, not browsers, and authenticate themselves. They
- * must skip app-level middleware entirely or those calls get redirected.
- */
-const isInfraRequest = (url: string) => {
-  const { pathname } = new URL(url);
-  return (
-    pathname.startsWith("/lovable/") ||
-    pathname.startsWith("/api/public/email/") ||
-    pathname === "/email/unsubscribe"
-  );
-};
-
-
-const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
-  if (isInfraRequest(request.url)) return next();
+const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
     return await next();
   } catch (error) {

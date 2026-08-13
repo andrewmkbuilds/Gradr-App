@@ -3,7 +3,6 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
-  redirect,
   Scripts,
   useRouter,
   type ErrorComponentProps,
@@ -18,7 +17,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/hooks/useAuth";
-import { RouteSeo, normalizeSeoPath } from "@/components/RouteSeo";
+import { RouteSeo } from "@/components/RouteSeo";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import RootErrorBoundary from "@/components/RootErrorBoundary";
@@ -29,11 +28,10 @@ import { captureReferralFromUrl } from "@/lib/affiliateTracking";
 import { useLocation } from "@/lib/router-compat";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 import NotFound from "@/pages/NotFound";
-import { AppSplash } from "@/components/AppSplash";
-import { MotionPrefsProvider } from "@/hooks/useMotionPrefs";
-import { SpatialField } from "@/components/motion/SpatialField";
-import { PerfDiagnostics } from "@/components/motion/PerfDiagnostics";
 
+const SITE_TITLE = "Gradr | Your AI Career Command Center";
+const SITE_DESCRIPTION =
+  "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching.";
 
 // Paint the correct theme before first render so there is no flash.
 // Ported from the pre-migration index.html head script.
@@ -51,22 +49,6 @@ const themeBootstrap = `(function () {
   }
 })();`;
 
-// Apply saved motion preferences before first paint so CSS animations never
-// flash at full strength for a reduced-motion user.
-const motionBootstrap = `(function () {
-  try {
-    var raw = localStorage.getItem("gradr-motion-prefs");
-    var p = raw ? JSON.parse(raw) : {};
-    var mode = p.mode || "system";
-    var sys = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var reduced = mode === "reduced" || (mode === "system" && sys);
-    document.documentElement.dataset.reduceMotion = reduced ? "true" : "false";
-    document.documentElement.dataset.depth = reduced
-      ? "0.00"
-      : (typeof p.depth === "number" ? p.depth : 1).toFixed(2);
-  } catch (e) {}
-})();`;
-
 // Ported from the pre-migration index.html JSON-LD block.
 const structuredData = JSON.stringify({
   "@context": "https://schema.org",
@@ -77,18 +59,9 @@ const structuredData = JSON.stringify({
       name: "Gradr",
       alternateName: "Gradr AI Career Command Center",
       url: "https://gradr.me/",
-      logo: {
-        "@type": "ImageObject",
-        "@id": "https://gradr.me/#logo",
-        url: "https://gradr.me/icon-512.png",
-        contentUrl: "https://gradr.me/icon-512.png",
-        width: 512,
-        height: 512,
-        caption: "Gradr",
-      },
-      image: { "@id": "https://gradr.me/#logo" },
-        description:
-          "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
+      logo: "https://gradr.me/icon-512.png",
+      description:
+        "Gradr is an AI career platform for job seekers, covering resume analysis, ATS optimization, job matching, job applications, and AI mock interview coaching.",
     },
     {
       "@type": "WebSite",
@@ -109,8 +82,8 @@ const structuredData = JSON.stringify({
       url: "https://gradr.me/",
       browserRequirements: "Requires JavaScript and a modern web browser",
       publisher: { "@id": "https://gradr.me/#organization" },
-        description:
-          "AI career copilot for resumes, job matches, and interviews — all in one Gradr workspace.",
+      description:
+        "Gradr is your AI career command center for resume analysis, job matching, applications, and interview coaching. It scores resumes against ATS rules, matches you to live job openings, drafts tailored applications, and runs realtime AI mock interviews with coaching feedback.",
       featureList: [
         "AI resume analysis and ATS optimization scoring",
         "AI job matching against live job openings",
@@ -135,29 +108,17 @@ const structuredData = JSON.stringify({
 });
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  // TanStack Router matches paths case-insensitively, so `/AI-Interview-Coach`
-  // would otherwise serve a second, indexable copy of `/ai-interview-coach`.
-  // Permanently redirect any non-normalised variant to the canonical path.
-  beforeLoad: ({ location }) => {
-    // Infrastructure routes (email queue, unsubscribe API) must never be rewritten.
-    if (location.pathname.startsWith("/lovable/") || location.pathname === "/email/unsubscribe") return;
-    const canonical = normalizeSeoPath(location.pathname);
-    if (canonical !== location.pathname && !location.pathname.startsWith("/api/")) {
-      throw redirect({
-        href: `${canonical}${location.searchStr ?? ""}`,
-        statusCode: 301,
-        throw: true,
-      });
-    }
-  },
-
   head: () => ({
     meta: [
       { charSet: "UTF-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-      // Title, description, robots, canonical, og:* and twitter:* are owned by
-      // <RouteSeo /> so every route renders exactly one of each.
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESCRIPTION },
       { name: "author", content: "Gradr" },
+      {
+        name: "robots",
+        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+      },
       {
         name: "keywords",
         content:
@@ -165,33 +126,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "application-name", content: "Gradr" },
       { name: "apple-mobile-web-app-title", content: "Gradr" },
-      { name: "theme-color", content: "#0f2a33", media: "(prefers-color-scheme: dark)" },
-      { name: "theme-color", content: "#f2f0ef", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#070d1a", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#f7f9fc", media: "(prefers-color-scheme: light)" },
       { name: "google-site-verification", content: "N0LjBnLEMo8ZqJ1lwaVLoswy8UkfIXMwgdfk35YEY-s" },
       { name: "google-site-verification", content: "KJgcSDDga9hUzoDhgnCK8yWa_MU6PJX_kW27pzKLbAo" },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Gradr" },
       { property: "og:locale", content: "en_US" },
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESCRIPTION },
+      { property: "og:url", content: "https://gradr.me/" },
+      { property: "og:image", content: "https://gradr.me/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Gradr — AI career command center" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { name: "twitter:image", content: "https://gradr.me/og-image.jpg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap",
-      },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
-
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
-      // No sitewide canonical here: RouteSeo emits a self-referencing
-      // canonical per route, and a root one would be inherited by every page.
-
+      { rel: "canonical", href: "https://gradr.me/" },
       { rel: "preconnect", href: "https://xaeyjrekewnwjujnrqgu.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://xaeyjrekewnwjujnrqgu.supabase.co" },
     ],
     scripts: [
       { children: themeBootstrap },
-      { children: motionBootstrap },
       { type: "application/ld+json", children: structuredData },
     ],
   }),
@@ -255,9 +219,7 @@ function RootComponent() {
       >
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <MotionPrefsProvider>
             <TooltipProvider>
-              <SpatialField />
               <Toaster />
               <Sonner />
               <HelmetProvider>
@@ -266,14 +228,11 @@ function RootComponent() {
                 <TelemetryRouteTracker />
                 <AuthProvider>
                   <RouteSeo />
-                  <AppSplash />
                   <Outlet />
                   <CookieConsent />
-                  <PerfDiagnostics />
                 </AuthProvider>
               </HelmetProvider>
             </TooltipProvider>
-            </MotionPrefsProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </SentryErrorBoundary>

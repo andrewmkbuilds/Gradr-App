@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Navigate } from "@/lib/router-compat";
+import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2,
@@ -435,7 +435,7 @@ export default function AdminPaddle() {
 function Tile({ label, value, icon: Icon }: { label: string; value: number; icon: typeof CreditCard }) {
   return (
     <div className="glass-card p-4 flex items-center gap-3">
-      <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
         <Icon className="h-5 w-5 text-primary" />
       </div>
       <div>

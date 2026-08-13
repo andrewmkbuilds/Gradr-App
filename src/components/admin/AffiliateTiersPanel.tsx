@@ -157,7 +157,7 @@ export function AffiliateTiersPanel() {
         </label>
         <label className="text-xs text-muted-foreground sm:col-span-1">
           Colour
-          <input name="color" type="color" defaultValue="#245F73" className="mt-1 h-9 w-full rounded-sm bg-secondary border border-border" />
+          <input name="color" type="color" defaultValue="#22d3ee" className="mt-1 h-9 w-full rounded-sm bg-secondary border border-border" />
         </label>
         <label className="text-xs text-muted-foreground sm:col-span-5">
           Perks

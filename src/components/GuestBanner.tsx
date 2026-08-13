@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Sparkles, X } from "lucide-react";
-import { Link, useLocation } from "@/lib/router-compat";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { authPath, nextFromLocation } from "@/lib/nextRedirect";
 

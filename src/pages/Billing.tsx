@@ -12,13 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useNavigate, useSearchParams } from "@/lib/router-compat";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useBillingActions, useCredits, usePurchases, useSubscription } from "@/hooks/useSubscription";
 import { Seo } from "@/components/Seo";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 
 function formatMoney(cents: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() })
@@ -172,7 +172,7 @@ export default function Billing() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="accent-text h-4 w-4" />
+            <Zap className="h-4 w-4 text-primary" />
             <span className="text-sm text-muted-foreground">Application credits</span>
           </div>
           <div className="text-3xl font-bold text-foreground">{credits?.application_credits ?? 0}</div>

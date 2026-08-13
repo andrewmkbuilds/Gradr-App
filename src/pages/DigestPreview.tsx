@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
 import { Bell, Briefcase, Clock, Loader2, Mail, ShieldAlert, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,7 +41,7 @@ export default function DigestPreview() {
 
   const prepareLivePreview = async () => {
     setPreviewing(true);
-    const { data, error } = await invokeFunction("daily-digest", { body: { previewOnly: true } });
+    const { data, error } = await supabase.functions.invoke("daily-digest", { body: { previewOnly: true } });
     setPreviewing(false);
     if (error || data?.error) {
       toast.error(data?.error || "Could not prepare digest preview");

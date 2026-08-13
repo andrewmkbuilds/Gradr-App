@@ -52,30 +52,30 @@ export function ShareCard({ code, link }: { code: string; link: string }) {
     if (!ctx) return;
 
     const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, "#0f2a33");
-    grad.addColorStop(1, "#245F73");
+    grad.addColorStop(0, "#0b1120");
+    grad.addColorStop(1, "#0e2a3f");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.fillStyle = "rgba(115,62,36,0.22)";
+    ctx.fillStyle = "rgba(34,211,238,0.14)";
     ctx.beginPath();
     ctx.arc(w - 140, 120, 220, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#F2F0EF";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "bold 64px system-ui, -apple-system, Segoe UI, sans-serif";
     ctx.fillText("Gradr", 80, 140);
 
     ctx.font = "500 44px system-ui, -apple-system, Segoe UI, sans-serif";
-    ctx.fillStyle = "#BBBDBC";
-    ctx.fillText("AI Resume Builder, Job Matching & Interview Coach", 80, 220);
+    ctx.fillStyle = "#cbd5e1";
+    ctx.fillText("Your AI career command center", 80, 220);
 
     ctx.font = "bold 92px system-ui, -apple-system, Segoe UI, sans-serif";
-    ctx.fillStyle = "#F2F0EF";
+    ctx.fillStyle = "#22d3ee";
     ctx.fillText(code, 80, 380);
 
     ctx.font = "400 34px system-ui, -apple-system, Segoe UI, sans-serif";
-    ctx.fillStyle = "#9FAFB4";
+    ctx.fillStyle = "#94a3b8";
     ctx.fillText("Use my referral code to get started", 80, 440);
     ctx.fillText(link, 80, 520);
 

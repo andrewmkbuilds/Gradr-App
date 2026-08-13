@@ -1,124 +1,6 @@
-@import "tailwindcss" source(none);
-@source "../src";
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
-
-/* ============================================================
-   Tailwind v4 theme mapping — ported from tailwind.config.ts.
-   HSL channel values live on :root/.dark below; this block maps
-   them to utility classes (bg-primary, border-border, ...).
-   ============================================================ */
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-
-  --color-border: hsl(var(--border));
-  --color-border-subtle: hsl(var(--border-subtle));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-
-  --color-surface: hsl(var(--surface));
-  --color-surface-secondary: hsl(var(--surface-secondary));
-  --color-surface-elevated: hsl(var(--surface-elevated));
-  --color-overlay: hsl(var(--overlay));
-
-  --color-brand: hsl(var(--primary));
-  --color-brand-hover: hsl(var(--primary-hover));
-  --color-brand-soft: hsl(var(--primary-soft));
-  --color-brand-secondary: hsl(var(--brand-secondary));
-  --color-brand-secondary-soft: hsl(var(--brand-secondary-soft));
-
-  /* Mahogany #733E24 — premium secondary accent scale */
-  --color-mahogany: hsl(var(--mahogany));
-  --color-mahogany-foreground: hsl(var(--mahogany-foreground));
-  --color-mahogany-hover: hsl(var(--mahogany-hover));
-  --color-mahogany-soft: hsl(var(--mahogany-soft));
-  --color-mahogany-tint: hsl(var(--mahogany-tint));
-  --color-mahogany-border: hsl(var(--mahogany-border));
-  --color-mahogany-ink: hsl(var(--mahogany-ink));
-
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-primary-hover: hsl(var(--primary-hover));
-  --color-primary-soft: hsl(var(--primary-soft));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-success: hsl(var(--success));
-  --color-success-foreground: hsl(var(--success-foreground));
-  --color-warning: hsl(var(--warning));
-  --color-warning-foreground: hsl(var(--warning-foreground));
-  --color-info: hsl(var(--info));
-  --color-info-foreground: hsl(var(--info-foreground));
-
-  /* Yacht Club chart palette — every series stays inside the brand family. */
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-  --color-chart-6: hsl(var(--chart-6));
-
-  --color-sidebar: hsl(var(--sidebar-background));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
-
-  /* Typography system: distinctive display face + readable UI sans */
-  --font-display: "Bricolage Grotesque", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-
-
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
-  --animate-slide-up: slide-up 0.4s ease-out;
-
-  @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
-  }
-  @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height); }
-    to { height: 0; }
-  }
-  @keyframes pulse-glow {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-  }
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-}
-
-/* Ported container config (center + 2rem padding + 1400px cap) */
-@utility container {
-  width: 100%;
-  margin-inline: auto;
-  padding-inline: 2rem;
-  @media (width >= 1400px) {
-    max-width: 1400px;
-  }
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ============================================================
    GRADR DESIGN SYSTEM
@@ -132,194 +14,152 @@
    ============================================================ */
 @layer base {
   :root {
-    /* ---------- Surfaces (F2F0EF off-white foundation) ---------- */
-    --background: 20 12% 95%;
+    /* ---------- Surfaces ---------- */
+    --background: 220 33% 98%;
     --surface: 0 0% 100%;
-    --surface-secondary: 20 10% 92%;
+    --surface-secondary: 220 28% 96%;
     --surface-elevated: 0 0% 100%;
 
     --card: 0 0% 100%;
-    --card-foreground: 197 32% 13%;
+    --card-foreground: 222 44% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 197 32% 13%;
+    --popover-foreground: 222 44% 13%;
 
     /* ---------- Text ---------- */
-    --foreground: 197 32% 13%;
-    --text-secondary: 197 14% 33%;
-    --text-muted: 195 9% 46%;
-    --muted: 20 10% 92%;
-    --muted-foreground: 195 9% 42%;
+    --foreground: 222 44% 13%;
+    --text-secondary: 220 14% 38%;
+    --text-muted: 220 12% 52%;
+    --muted: 220 26% 95%;
+    --muted-foreground: 220 12% 44%;
 
-    /* ---------- Brand: #245F73 deep ocean teal + #733E24 mahogany ---------- */
-    --primary: 195 52% 30%;
-    --primary-foreground: 20 20% 97%;
-    --primary-hover: 195 54% 25%;
-    --primary-active: 196 58% 20%;
-    --primary-soft: 195 38% 92%;
-    --brand-secondary: 20 52% 30%;
-    --brand-secondary-soft: 20 42% 93%;
+    /* ---------- Brand ---------- */
+    --primary: 191 95% 33%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 191 95% 28%;
+    --primary-soft: 189 85% 94%;
+    --brand-secondary: 262 72% 52%;
+    --brand-secondary-soft: 262 80% 96%;
 
-    /* ---------- Neutral interactive (#BBBDBC family) ---------- */
-    --secondary: 20 10% 91%;
-    --secondary-foreground: 197 28% 20%;
-    --accent: 195 20% 92%;
-    --accent-foreground: 197 30% 18%;
+    /* ---------- Neutral interactive (shadcn semantics) ---------- */
+    --secondary: 220 26% 95%;
+    --secondary-foreground: 222 40% 20%;
+    --accent: 220 28% 95%;
+    --accent-foreground: 222 40% 20%;
 
-    /* ---------- Mahogany accent scale (light) ---------- */
-    --mahogany: 20 52% 30%;
-    --mahogany-foreground: 20 30% 97%;
-    --mahogany-hover: 20 56% 25%;
-    --mahogany-soft: 20 44% 92%;
-    --mahogany-tint: 20 46% 96%;
-    --mahogany-border: 20 34% 78%;
-    --mahogany-ink: 20 56% 26%;
-
-    /* ---------- Status (harmonised, never neon) ---------- */
-    --destructive: 6 56% 40%;
-
-    --destructive-foreground: 20 20% 97%;
-    --success: 166 44% 26%;
-    --success-foreground: 20 20% 97%;
-    --warning: 30 58% 36%;
-    --warning-foreground: 20 20% 97%;
-    --info: 200 44% 34%;
-    --info-foreground: 20 20% 97%;
-
-    /* ---------- Data visualisation ---------- */
-    --chart-1: 195 52% 30%;
-    --chart-2: 20 52% 34%;
-    --chart-3: 197 30% 52%;
-    --chart-4: 30 30% 62%;
-    --chart-5: 196 46% 18%;
-    --chart-6: 150 4% 66%;
+    /* ---------- Status ---------- */
+    --destructive: 0 72% 44%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 62% 32%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 90% 40%;
+    --warning-foreground: 0 0% 100%;
+    --info: 214 84% 44%;
+    --info-foreground: 0 0% 100%;
 
     /* ---------- Lines, inputs, focus ---------- */
-    --border: 24 8% 85%;
-    --border-subtle: 24 10% 90%;
-    --border-strong: 20 6% 76%;
-    --input: 24 8% 82%;
-    --ring: 195 52% 30%;
-    --overlay: 197 34% 14%;
-    --overlay-opacity: 0.38;
+    --border: 220 18% 88%;
+    --border-subtle: 220 20% 93%;
+    --input: 220 18% 86%;
+    --ring: 191 95% 33%;
+    --overlay: 222 40% 18%;
+    --overlay-opacity: 0.35;
 
-    --radius: 0.6rem;
+    --radius: 0.7rem;
 
     /* ---------- Sidebar ---------- */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 195 9% 42%;
-    --sidebar-primary: 195 52% 30%;
-    --sidebar-primary-foreground: 20 20% 97%;
-    --sidebar-accent: 195 22% 93%;
-    --sidebar-accent-foreground: 197 32% 15%;
-    --sidebar-border: 24 10% 89%;
-    --sidebar-ring: 195 52% 30%;
+    --sidebar-foreground: 220 12% 44%;
+    --sidebar-primary: 191 95% 33%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 28% 95%;
+    --sidebar-accent-foreground: 222 44% 13%;
+    --sidebar-border: 220 20% 91%;
+    --sidebar-ring: 191 95% 33%;
 
     /* ---------- Composites ---------- */
-    --gradient-primary: linear-gradient(135deg, hsl(196 56% 24%), hsl(var(--primary)) 55%, hsl(20 46% 36%));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--brand-secondary)));
     --gradient-card: linear-gradient(135deg, hsl(var(--surface)), hsl(var(--surface-secondary)));
-    --gradient-glow: 0 0 40px hsl(var(--primary) / 0.10);
-    --shadow-card: 0 1px 2px hsl(197 34% 14% / 0.05), 0 8px 24px -18px hsl(197 34% 14% / 0.22);
-    --shadow-elevated: 0 2px 6px hsl(197 34% 14% / 0.06), 0 20px 44px -28px hsl(197 34% 14% / 0.32);
-    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.10);
-    --shadow-hover: 0 14px 30px -20px hsl(197 34% 14% / 0.38);
-    --ambient-opacity: 0.10;
-    --decor-strength: 0.35;
-    --sheen-strength: 0.07;
+    --gradient-glow: 0 0 40px hsl(var(--primary) / 0.12);
+    --shadow-card: 0 1px 2px hsl(222 40% 20% / 0.05), 0 8px 24px -16px hsl(222 40% 20% / 0.18);
+    --shadow-elevated: 0 2px 4px hsl(222 40% 20% / 0.05), 0 18px 40px -24px hsl(222 40% 20% / 0.28);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.1);
+    --shadow-hover: 0 12px 28px -18px hsl(222 40% 20% / 0.35);
+    --ambient-opacity: 0.14;
+    --decor-strength: 0.45;
+    --sheen-strength: 0.10;
   }
 
   .dark {
-    /* ---------- Surfaces: deep blue-grey, never pure black ---------- */
-    --background: 198 30% 8%;
-    --surface: 198 26% 11%;
-    --surface-secondary: 198 22% 14%;
-    --surface-elevated: 198 20% 17%;
+    /* ---------- Surfaces ---------- */
+    --background: 222 47% 6%;
+    --surface: 222 44% 8.5%;
+    --surface-secondary: 222 34% 12%;
+    --surface-elevated: 222 32% 15%;
 
-    --card: 198 26% 11%;
-    --card-foreground: 20 14% 94%;
-    --popover: 198 26% 12%;
-    --popover-foreground: 20 14% 94%;
+    --card: 222 44% 8.5%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 42% 10%;
+    --popover-foreground: 210 40% 96%;
 
     /* ---------- Text ---------- */
-    --foreground: 20 14% 95%;
-    --text-secondary: 195 10% 74%;
-    --text-muted: 195 8% 57%;
-    --muted: 198 20% 15%;
-    --muted-foreground: 195 9% 64%;
+    --foreground: 210 40% 97%;
+    --text-secondary: 215 20% 72%;
+    --text-muted: 215 16% 55%;
+    --muted: 222 30% 13%;
+    --muted-foreground: 215 18% 63%;
 
     /* ---------- Brand ---------- */
-    --primary: 195 38% 48%;
-    --primary-foreground: 20 20% 96%;
-    --primary-hover: 195 40% 56%;
-    --primary-active: 195 42% 40%;
-    --primary-soft: 196 40% 18%;
-    --brand-secondary: 20 46% 54%;
-    --brand-secondary-soft: 20 36% 18%;
-
-    /* ---------- Mahogany accent scale (dark) ---------- */
-    --mahogany: 20 48% 56%;
-    --mahogany-foreground: 20 40% 10%;
-    --mahogany-hover: 20 52% 64%;
-    --mahogany-soft: 18 32% 20%;
-    --mahogany-tint: 16 26% 15%;
-    --mahogany-border: 20 30% 34%;
-    --mahogany-ink: 20 52% 70%;
-
-
+    --primary: 187 92% 52%;
+    --primary-foreground: 222 47% 7%;
+    --primary-hover: 187 92% 60%;
+    --primary-soft: 187 70% 16%;
+    --brand-secondary: 265 85% 68%;
+    --brand-secondary-soft: 265 50% 18%;
 
     /* ---------- Neutral interactive ---------- */
-    --secondary: 198 20% 16%;
-    --secondary-foreground: 20 12% 88%;
-    --accent: 198 22% 18%;
-    --accent-foreground: 20 14% 94%;
+    --secondary: 222 30% 14%;
+    --secondary-foreground: 210 36% 88%;
+    --accent: 222 30% 15%;
+    --accent-foreground: 210 40% 96%;
 
     /* ---------- Status ---------- */
-    --destructive: 6 58% 55%;
-    --destructive-foreground: 20 14% 96%;
-    --success: 164 38% 47%;
-    --success-foreground: 198 40% 8%;
-    --warning: 30 58% 55%;
-    --warning-foreground: 198 40% 8%;
-    --info: 199 44% 58%;
-    --info-foreground: 198 40% 8%;
-
-    /* ---------- Data visualisation ---------- */
-    --chart-1: 192 44% 54%;
-    --chart-2: 20 46% 54%;
-    --chart-3: 197 28% 66%;
-    --chart-4: 30 28% 62%;
-    --chart-5: 194 40% 34%;
-    --chart-6: 150 4% 58%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 152 62% 47%;
+    --success-foreground: 222 47% 7%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 222 47% 7%;
+    --info: 210 95% 62%;
+    --info-foreground: 222 47% 7%;
 
     /* ---------- Lines, inputs, focus ---------- */
-    --border: 198 18% 22%;
-    --border-subtle: 198 18% 17%;
-    --border-strong: 198 16% 32%;
-    --input: 198 18% 24%;
-    --ring: 195 38% 48%;
-    --overlay: 198 44% 4%;
-    --overlay-opacity: 0.7;
+    --border: 222 26% 18%;
+    --border-subtle: 222 26% 14%;
+    --input: 222 26% 19%;
+    --ring: 187 92% 52%;
+    --overlay: 222 60% 3%;
+    --overlay-opacity: 0.72;
 
     /* ---------- Sidebar ---------- */
-    --sidebar-background: 198 32% 7%;
-    --sidebar-foreground: 195 9% 64%;
-    --sidebar-primary: 192 44% 54%;
-    --sidebar-primary-foreground: 198 40% 8%;
-    --sidebar-accent: 198 22% 15%;
-    --sidebar-accent-foreground: 20 14% 94%;
-    --sidebar-border: 198 18% 16%;
-    --sidebar-ring: 192 44% 54%;
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 215 18% 63%;
+    --sidebar-primary: 187 92% 52%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-accent: 222 30% 13%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 222 26% 14%;
+    --sidebar-ring: 187 92% 52%;
 
     /* ---------- Composites ---------- */
-    --gradient-primary: linear-gradient(135deg, hsl(194 42% 40%), hsl(var(--primary)) 55%, hsl(20 42% 50%));
     --gradient-card: linear-gradient(135deg, hsl(var(--surface)), hsl(var(--surface-elevated)));
-    --gradient-glow: 0 0 40px hsl(var(--primary) / 0.14);
-    --shadow-card: 0 4px 24px hsl(198 60% 2% / 0.42);
-    --shadow-elevated: 0 24px 60px -30px hsl(198 60% 2% / 0.85);
+    --gradient-glow: 0 0 40px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 24px 60px -30px hsl(0 0% 0% / 0.85);
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.12);
-    --shadow-hover: 0 18px 40px -22px hsl(198 60% 2% / 0.8);
-    --ambient-opacity: 0.22;
-    --decor-strength: 0.8;
-    --sheen-strength: 0.12;
+    --shadow-hover: 0 18px 40px -22px hsl(0 0% 0% / 0.8);
+    --ambient-opacity: 0.32;
+    --decor-strength: 1;
+    --sheen-strength: 0.16;
   }
 }
 
@@ -355,19 +195,6 @@
   *::-webkit-scrollbar-corner { background: transparent; }
   /* Legacy stepper arrows are what makes the bar look broken/inset. */
   *::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
-
-  /* Global text selection: Yacht Club mahogany accent, never default blue. */
-  *::selection {
-    background-color: #733E24;
-    color: #FFFFFF;
-    text-shadow: none;
-  }
-  *::-moz-selection {
-    background-color: #733E24;
-    color: #FFFFFF;
-    text-shadow: none;
-  }
-
 
   /* Theme switch: colours cross-fade, nothing moves. */
   html.theme-transition,
@@ -408,6 +235,7 @@
   .overlay-scrim {
     background: hsl(var(--overlay) / var(--overlay-opacity));
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 
   /* ---------- Surfaces ---------- */
@@ -416,68 +244,9 @@
   .surface-elevated { background: hsl(var(--surface-elevated)); box-shadow: var(--shadow-elevated); }
   .divider { border-color: hsl(var(--border-subtle)); }
 
-  /* ---------- Mahogany accent kit ----------
-     Warm secondary accent. Used for highlights, selected states and
-     insight surfaces — never as the dominant colour of a screen. */
-  .accent-chip {
-    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
-    background: hsl(var(--mahogany-soft));
-    color: hsl(var(--mahogany-ink));
-    border: 1px solid hsl(var(--mahogany-border) / 0.7);
-  }
-  .accent-text { color: hsl(var(--mahogany-ink)); }
-  .accent-tint { background: hsl(var(--mahogany-tint)); }
-  .accent-ring { box-shadow: 0 0 0 1px hsl(var(--mahogany-border) / 0.8); }
-  /* Left rail marker for selected rows / active nav */
-  .accent-rail { box-shadow: inset 2px 0 0 0 hsl(var(--mahogany)); }
-  /* Bottom marker for selected tabs */
-  .accent-underline { box-shadow: inset 0 -2px 0 0 hsl(var(--mahogany)); }
-  /* Warm insight card: tinted background + mahogany border */
-  .accent-card {
-    background: hsl(var(--mahogany-tint));
-    border: 1px solid hsl(var(--mahogany-border) / 0.6);
-  }
-  /* Thin warm section divider */
-  .accent-divider {
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--mahogany) / 0.55) 20%,
-      hsl(var(--mahogany) / 0.55) 80%,
-      transparent
-    );
-  }
-  .accent-dot {
-    @apply inline-block h-1.5 w-1.5 rounded-full;
-    background: hsl(var(--mahogany));
-  }
-  .accent-link {
-    color: hsl(var(--mahogany-ink));
-    text-underline-offset: 3px;
-  }
-  .accent-link:hover { text-decoration: underline; }
-
-
   .glass-card {
     @apply bg-card border border-border rounded-xl;
     box-shadow: var(--shadow-card);
-    position: relative;
-    transform: translateZ(0);
-    transition:
-      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .glass-card:hover {
-      transform: translate3d(0, -3px, 0);
-      border-color: hsl(var(--primary) / 0.26);
-      box-shadow: var(--shadow-hover);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .glass-card, .glass-card:hover { transform: none; transition: none; }
   }
   .glow-border { @apply border border-primary/20; box-shadow: var(--shadow-glow); }
   .gradient-text {
@@ -491,6 +260,7 @@
   .glassmorphic {
     background: hsl(var(--surface) / 0.72);
     backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
     border: 1px solid hsl(var(--border));
     box-shadow: var(--shadow-elevated);
   }
@@ -548,7 +318,7 @@
   @keyframes shimmer { to { background-position: -200% 0; } }
 
   .kinetic-text {
-    background: linear-gradient(110deg, hsl(var(--primary)) 0%, hsl(var(--chart-3)) 35%, hsl(var(--brand-secondary)) 65%, hsl(var(--primary)) 100%);
+    background: linear-gradient(110deg, hsl(var(--primary)) 0%, hsl(var(--info)) 35%, hsl(var(--brand-secondary)) 65%, hsl(var(--primary)) 100%);
     background-size: 220% auto;
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     animation: kinetic 6s linear infinite;
@@ -762,12 +532,14 @@
   .glass-panel {
     background: hsl(var(--surface) / 0.82);
     backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
     border: 1px solid hsl(var(--border));
     box-shadow: var(--shadow-elevated);
   }
   .glass-bar {
     background: hsl(var(--background) / 0.78);
     backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
   }
 
   /* ---------- Loading / feedback ---------- */
@@ -810,453 +582,5 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-}
-
-/* ============================================================
-   PEAK UI LAYER — atmospheric depth, glass surfaces, grain,
-   and a deliberate display-typography system.
-   Everything below is token-driven and works in both themes.
-   ============================================================ */
-@layer utilities {
-  /* ---------- Display typography ---------- */
-  .font-display { font-family: var(--font-display); }
-
-  .display-xl {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(2.35rem, 4.3vw, 3.85rem);
-    line-height: 0.98;
-    letter-spacing: -0.045em;
-    text-wrap: balance;
-  }
-  .display-lg {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(2rem, 4.4vw, 3.25rem);
-    line-height: 1.02;
-    letter-spacing: -0.035em;
-    text-wrap: balance;
-  }
-  .display-sm {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: clamp(1.35rem, 2.2vw, 1.85rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
-  }
-  /* Wide, quiet, uppercase label — used for eyebrows and section marks. */
-  .label-wide {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-  }
-  .numeric { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-
-  /* ---------- Atmosphere ---------- */
-  /* Fine film grain. Sits above backgrounds, below content. */
-  .grain::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.035;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Soft atmospheric wash behind a section. */
-  .atmos {
-    background:
-      radial-gradient(60rem 32rem at 12% -10%, hsl(var(--primary) / calc(var(--ambient-opacity) * 0.55)), transparent 62%),
-      radial-gradient(52rem 30rem at 92% 8%, hsl(var(--brand-secondary) / calc(var(--ambient-opacity) * 0.45)), transparent 60%);
-  }
-
-  /* ---------- Surfaces ---------- */
-  .hairline { border: 1px solid hsl(var(--border) / 0.7); }
-
-  .glass-panel {
-    position: relative;
-    background: linear-gradient(
-      160deg,
-      hsl(var(--surface) / 0.82),
-      hsl(var(--surface-secondary) / 0.62)
-    );
-    border: 1px solid hsl(var(--border) / 0.8);
-    border-radius: 1.25rem;
-    backdrop-filter: blur(22px) saturate(150%);
-    box-shadow:
-      0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset,
-      var(--shadow-elevated);
-  }
-
-  /* Thin luminous top edge — reads as light hitting a glass panel. */
-  .edge-light::before {
-    content: "";
-    position: absolute;
-    inset-inline: 12%;
-    top: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.55), transparent);
-    pointer-events: none;
-  }
-
-  /* Gradient hairline frame that lights up on hover. */
-  .lume-border {
-    position: relative;
-    isolation: isolate;
-  }
-  .lume-border::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(140deg, hsl(var(--primary) / 0.5), transparent 42%, hsl(var(--brand-secondary) / 0.45));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity var(--dur-base) var(--ease-out-soft);
-    pointer-events: none;
-  }
-  .lume-border:hover::after,
-  .lume-border[data-active="true"]::after { opacity: 1; }
-
-  /* Animated conic sweep for premium CTAs / active states. */
-  .sweep {
-    background:
-      linear-gradient(hsl(var(--surface)), hsl(var(--surface))) padding-box,
-      conic-gradient(
-        from var(--sweep-angle, 0deg),
-        hsl(var(--primary) / 0.9),
-        hsl(var(--brand-secondary) / 0.6),
-        hsl(var(--primary) / 0.15),
-        hsl(var(--primary) / 0.9)
-      ) border-box;
-    border: 1px solid transparent;
-    animation: sweep-spin 6s linear infinite;
-  }
-  @property --sweep-angle {
-    syntax: "<angle>";
-    inherits: false;
-    initial-value: 0deg;
-  }
-  @keyframes sweep-spin { to { --sweep-angle: 360deg; } }
-
-  /* Dotted field for hero backdrops — quieter than a full grid. */
-  .dot-field {
-    background-image: radial-gradient(hsl(var(--border) / 0.9) 1px, transparent 1px);
-    background-size: 26px 26px;
-    mask-image: radial-gradient(ellipse 65% 55% at 50% 20%, #000 10%, transparent 72%);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .sweep, .aurora-bg, .liquid-blob, .float-slow, .float-mid { animation: none !important; }
-  }
-}
-
-@layer utilities {
-  /* ---------- Spatial depth (3D layer) ---------- */
-  /* Soft, depth-scaled shadow for floating layers. --depth is set inline. */
-  .depth-shadow {
-    filter: drop-shadow(0 calc(6px * var(--depth, 1)) calc(18px * var(--depth, 1)) hsl(220 60% 2% / 0.35));
-  }
-
-  /* Any surface that should react to hover with elevation + light.
-     Pure CSS so it works on every card without a JS wrapper. */
-  .depth-surface {
-    transform: translateZ(0);
-    transition:
-      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .depth-surface:hover {
-      transform: translate3d(0, -3px, 0);
-      border-color: hsl(var(--primary) / 0.28);
-      box-shadow:
-        0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset,
-        0 22px 44px -26px hsl(220 60% 2% / 0.85),
-        0 0 0 1px hsl(var(--primary) / 0.06);
-    }
-  }
-
-  /* Top-edge reflection: reads as glass catching ambient light. */
-  .reflect::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      hsl(0 0% 100% / 0.07) 0%,
-      transparent 22%,
-      transparent 78%,
-      hsl(var(--primary) / 0.05) 100%
-    );
-  }
-
-  /* Perspective helpers for scenes composed in JSX. */
-  .scene { perspective: 1400px; }
-  .scene-flat { transform-style: preserve-3d; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .depth-surface,
-    .depth-surface:hover { transform: none; transition: none; }
-    .depth-shadow { filter: none; }
-  }
-}
-
-/* Modal panels arrive from depth rather than simply scaling up. */
-@keyframes depth-modal-in {
-  from { opacity: 0; transform: translate(-50%, -50%) perspective(1400px) translateZ(-90px) rotateX(6deg); }
-  to   { opacity: 1; transform: translate(-50%, -50%) perspective(1400px) translateZ(0) rotateX(0deg); }
-}
-@keyframes depth-modal-out {
-  from { opacity: 1; transform: translate(-50%, -50%) perspective(1400px) translateZ(0) rotateX(0deg); }
-  to   { opacity: 0; transform: translate(-50%, -50%) perspective(1400px) translateZ(-70px) rotateX(4deg); }
-}
-.depth-modal[data-state="open"] { animation: depth-modal-in 260ms cubic-bezier(0.16, 1, 0.3, 1); }
-.depth-modal[data-state="closed"] { animation: depth-modal-out 160ms cubic-bezier(0.4, 0, 1, 1); }
-@media (prefers-reduced-motion: reduce) {
-  .depth-modal[data-state="open"],
-  .depth-modal[data-state="closed"] { animation: none; }
-}
-
-/* Buttons sit slightly above the surface and press into it. */
-@layer utilities {
-  .depth-press {
-    transform: translateZ(0);
-    transition:
-      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .depth-press:hover:not(:disabled) { transform: translate3d(0, -1.5px, 0); }
-  }
-  .depth-press:active:not(:disabled) { transform: translate3d(0, 1px, 0) scale(0.985); }
-  @media (prefers-reduced-motion: reduce) {
-    .depth-press, .depth-press:hover, .depth-press:active { transform: none; transition: none; }
-  }
-}
-
-/* ---------------------------------------------------------------------------
-   Reduced motion / reduced interaction
-   `data-reduce-motion` is set pre-paint by the bootstrap script in __root and
-   kept in sync by MotionPrefsProvider, so it covers BOTH the OS
-   `prefers-reduced-motion` signal and the in-app toggle.
---------------------------------------------------------------------------- */
-html[data-reduce-motion="true"] *,
-html[data-reduce-motion="true"] *::before,
-html[data-reduce-motion="true"] *::after {
-  animation-duration: 0.001ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.001ms !important;
-  scroll-behavior: auto !important;
-}
-
-/* Ambient/parallax/decorative layers stop moving entirely. */
-html[data-reduce-motion="true"] [data-motion-decorative] {
-  display: none !important;
-}
-
-html[data-reduce-motion="true"] [data-depth-layer],
-html[data-reduce-motion="true"] [data-magnetic] {
-  transform: none !important;
-}
-
-/* ---------------------------------------------------------------------------
-   Spatial system v2 — the shared 3D language
-   Applied through the shared primitives (card, button, overlays, fields, nav)
-   so every page inherits the same depth instead of one-off effects.
-   All of it is transform/opacity/shadow work: no layout, no paint storms.
---------------------------------------------------------------------------- */
-@layer utilities {
-  /* Elevation ladder. Higher = further off the page. */
-  .elev-1 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 6px 16px -12px hsl(220 60% 2% / 0.6); }
-  .elev-2 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 14px 30px -18px hsl(220 60% 2% / 0.7); }
-  .elev-3 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 26px 50px -28px hsl(220 60% 2% / 0.85); }
-  .elev-4 { box-shadow: 0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset, 0 38px 70px -34px hsl(220 60% 2% / 0.92); }
-
-  /* Cursor-following tilt. Vars come from SpatialField; with no pointer the
-     element sits perfectly flat, so touch and SSR render unchanged. */
-  .tilt-3d {
-    --tilt-max: 5deg;
-    --tx: 0;
-    --ty: 0;
-    transform-style: preserve-3d;
-    will-change: transform;
-    transform:
-      perspective(1200px)
-      rotateX(calc(var(--ty) * var(--tilt-max) * -1))
-      rotateY(calc(var(--tx) * var(--tilt-max)))
-      translate3d(0, 0, 0);
-    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .tilt-3d[data-tilt-active="true"] {
-    transform:
-      perspective(1200px)
-      rotateX(calc(var(--ty) * var(--tilt-max) * -1))
-      rotateY(calc(var(--tx) * var(--tilt-max)))
-      translate3d(0, -4px, 0);
-    transition: transform 120ms linear;
-  }
-  /* Specular highlight that tracks the cursor across the surface. */
-  .tilt-3d::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 320ms var(--ease-out-soft);
-    background: radial-gradient(
-      420px circle at var(--px, 50%) var(--py, 50%),
-      hsl(var(--primary) / 0.12),
-      transparent 60%
-    );
-  }
-  .tilt-3d[data-tilt-active="true"]::before { opacity: 1; }
-  /* Children can be pushed forward in Z for real parallax inside a card. */
-  .tilt-layer { transform: translateZ(28px); }
-
-  /* Floating chrome: navbars, sidebars, tab bars. Reads as glass hovering
-     above the page rather than a bar welded to it. */
-  .glass-float {
-    background: linear-gradient(180deg, hsl(var(--surface) / 0.88), hsl(var(--surface) / 0.72));
-    backdrop-filter: blur(20px) saturate(160%);
-    border-color: hsl(var(--border) / 0.7);
-    box-shadow:
-      0 1px 0 0 hsl(0 0% 100% / var(--sheen-strength)) inset,
-      0 18px 40px -30px hsl(220 60% 2% / 0.9);
-  }
-
-  /* Overlay surfaces arrive from behind the page plane. */
-  .depth-pop {
-    transform-origin: var(--radix-popper-transform-origin, center);
-  }
-  .depth-pop[data-state="open"] { animation: depth-pop-in 200ms cubic-bezier(0.16, 1, 0.3, 1); }
-  .depth-pop[data-state="closed"] { animation: depth-pop-out 130ms cubic-bezier(0.4, 0, 1, 1); }
-
-  /* Fields look milled into the surface instead of drawn on top of it. */
-  .inset-depth {
-    background: linear-gradient(180deg, hsl(var(--surface-secondary) / 0.55), hsl(var(--surface) / 0.35));
-    box-shadow:
-      inset 0 1px 2px hsl(220 60% 2% / 0.16),
-      0 1px 0 0 hsl(0 0% 100% / calc(var(--sheen-strength) * 0.8));
-    transition: box-shadow 220ms var(--ease-out-soft), border-color 220ms var(--ease-out-soft);
-  }
-  .inset-depth:focus-visible,
-  .inset-depth:focus-within {
-    border-color: hsl(var(--primary) / 0.55);
-    box-shadow:
-      inset 0 1px 2px hsl(220 60% 2% / 0.1),
-      0 0 0 3px hsl(var(--primary) / 0.16),
-      0 8px 20px -16px hsl(var(--primary) / 0.7);
-  }
-
-  /* Icon chips with a soft extruded face. */
-  .extrude {
-    background: linear-gradient(160deg, hsl(var(--primary) / 0.16), hsl(var(--primary) / 0.06));
-    box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.22),
-      inset 0 -1px 0 hsl(220 60% 2% / 0.18),
-      0 8px 18px -14px hsl(var(--primary) / 0.8);
-  }
-
-  /* Sections gently rise out of depth as they enter the viewport. */
-  .rise-in {
-    animation: rise-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 22%;
-  }
-
-  /* Coarse pointers get elevation and light, never tilt. */
-  @media not all and (hover: hover) {
-    .tilt-3d,
-    .tilt-3d[data-tilt-active="true"] { transform: none; }
-    .tilt-layer { transform: none; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .tilt-3d,
-    .tilt-3d[data-tilt-active="true"] { transform: none; transition: none; }
-    .tilt-3d::before { display: none; }
-    .rise-in { animation: none; }
-    .depth-pop[data-state="open"],
-    .depth-pop[data-state="closed"] { animation: none; }
-  }
-}
-
-@keyframes depth-pop-in {
-  from { opacity: 0; transform: perspective(1000px) translateZ(-40px) translateY(-6px) scale(0.97); }
-  to   { opacity: 1; transform: perspective(1000px) translateZ(0) translateY(0) scale(1); }
-}
-@keyframes depth-pop-out {
-  from { opacity: 1; transform: perspective(1000px) translateZ(0) scale(1); }
-  to   { opacity: 0; transform: perspective(1000px) translateZ(-30px) scale(0.98); }
-}
-@keyframes rise-in {
-  from { opacity: 0; transform: perspective(1200px) translate3d(0, 26px, -60px) rotateX(3deg); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* The in-app motion toggle switches the whole spatial layer off, not just
-   the ambient decoration. */
-html[data-reduce-motion="true"] .tilt-3d,
-html[data-reduce-motion="true"] .tilt-3d[data-tilt-active="true"],
-html[data-reduce-motion="true"] .tilt-layer { transform: none !important; }
-html[data-reduce-motion="true"] .tilt-3d::before { display: none !important; }
-
-/* Ambient depth planes used by <AmbientBackground /> */
-@layer utilities {
-  /* Far floor: a perspective plane that recedes to a horizon line. */
-  .ambient-floor {
-    position: absolute;
-    inset-inline: -40%;
-    bottom: -10%;
-    height: 65%;
-    transform: perspective(760px) rotateX(72deg);
-    transform-origin: bottom center;
-    background-image:
-      linear-gradient(to right, hsl(var(--primary) / 0.16) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(var(--primary) / 0.16) 1px, transparent 1px);
-    background-size: 90px 90px;
-    mask-image: linear-gradient(to top, #000, transparent 78%);
-    opacity: calc(var(--ambient-opacity) * 1.6);
-    animation: floor-travel 22s linear infinite;
-  }
-  @keyframes floor-travel {
-    from { background-position: 0 0; }
-    to   { background-position: 0 90px; }
-  }
-
-  /* Near plane: sparse motes drifting through the light. */
-  .ambient-motes { position: absolute; inset: 0; }
-  .ambient-mote {
-    position: absolute;
-    border-radius: 9999px;
-    background: hsl(var(--primary) / 0.5);
-    box-shadow: 0 0 12px hsl(var(--primary) / 0.45);
-    opacity: 0;
-    animation-name: mote-float;
-    animation-timing-function: var(--ease-in-out-soft);
-    animation-iteration-count: infinite;
-  }
-  @keyframes mote-float {
-    0%   { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.7); }
-    25%  { opacity: 0.7; }
-    60%  { opacity: 0.45; transform: translate3d(10px, -26px, 0) scale(1); }
-    100% { opacity: 0; transform: translate3d(-6px, -52px, 0) scale(0.8); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ambient-floor, .ambient-mote { animation: none; }
-    .ambient-mote { opacity: 0.35; }
   }
 }

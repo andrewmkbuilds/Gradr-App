@@ -1,4 +1,4 @@
-import { useNavigate } from "@/lib/router-compat";
+import { useNavigate } from "react-router-dom";
 import { DollarSign, Users, TrendingUp, Clock, Sparkles, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { useMyAffiliate, useAffiliateSettings } from "@/hooks/useAffiliate";
 
@@ -49,7 +49,7 @@ export default function AffiliateProgram() {
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="text-center space-y-4 animate-slide-up">
-        <div className="inline-flex items-center gap-2 px-3 py-1 extrude rounded-full bg-primary/10 text-primary text-xs font-medium">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
           <Sparkles className="h-3 w-3" /> Gradr Partner Program
         </div>
         <h1 className="text-4xl font-bold text-foreground tracking-tight">
@@ -89,7 +89,7 @@ export default function AffiliateProgram() {
             "Get paid monthly once you cross the minimum payout threshold.",
           ].map((step, i) => (
             <li key={i} className="flex gap-3">
-              <span className="h-6 w-6 extrude rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+              <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
               <span className="text-muted-foreground pt-0.5">{step}</span>
             </li>
           ))}

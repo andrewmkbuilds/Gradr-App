@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,7 +45,7 @@ export function PolicyUpdateGate() {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <div className="mb-2 flex h-10 w-10 items-center justify-center extrude rounded-full bg-primary/10 text-primary">
+          <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <DialogTitle>

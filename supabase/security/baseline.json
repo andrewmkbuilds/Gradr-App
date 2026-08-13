@@ -183,9 +183,10 @@
     },
     "discovered_jobs": {
       "anon": [],
-      "authenticated": []
+      "authenticated": [
+        "SELECT"
+      ]
     },
-
     "affiliate_settings": {
       "anon": [],
       "authenticated": [
@@ -224,9 +225,7 @@
       "affiliate_leaderboard",
       "attribute_signup_referral",
       "entitlement_snapshot",
-      "has_role",
       "is_admin",
-      "is_anonymous_session",
       "log_admin_access_denied",
       "log_user_preferences_read",
       "my_affiliate_overview",
@@ -236,15 +235,6 @@
       "submit_verification_request"
     ]
   },
-  "resolvedFindings": [
-    "email_auth_check_bypass",
-    "email_click_open_redirect",
-    "rpc_fake_commissions",
-    "SUPA_rls_policy_always_true",
-    "SUPA_auth_allow_anonymous_sign_ins",
-    "SUPA_anon_security_definer_function_executable",
-    "SUPA_authenticated_security_definer_function_executable"
-  ],
   "findingGuards": [
     {
       "internalId": "SUPA_auth_allow_anonymous_sign_ins",

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronDown, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { Link, useLocation } from "@/lib/router-compat";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { cn } from "@/lib/utils";
@@ -40,7 +40,7 @@ function isGroupActive(group: NavGroup, pathname: string) {
 const baseRow =
   "nav-item interactive group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors";
 const idleRow = "text-muted-foreground hover:bg-secondary hover:text-foreground";
-const activeRow = "bg-primary/10 text-primary accent-rail";
+const activeRow = "bg-primary/10 text-primary";
 
 export function AppSidebar() {
   const { state, toggleSidebar, isMobile, setOpenMobile, openMobile } = useSidebar();
@@ -209,7 +209,7 @@ export function AppSidebar() {
                                     className={cn(
                                       "interactive flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
                                       active
-                                        ? "bg-primary/10 font-medium text-primary accent-rail"
+                                        ? "bg-primary/10 font-medium text-primary"
                                         : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                                     )}
                                   >

@@ -10,9 +10,10 @@ import {
   useSearch as tsSearch,
   useRouter,
   Link as TSLink,
+  Navigate as TSNavigate,
   Outlet as TSOutlet,
 } from "@tanstack/react-router";
-import { useMemo, useCallback, useEffect, useRef, forwardRef, type ComponentProps, type ReactNode } from "react";
+import { useMemo, useCallback, forwardRef, type ComponentProps, type ReactNode } from "react";
 
 // ---------- shared URL parsing ----------
 
@@ -143,33 +144,9 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 
 // ---------- Navigate ----------
 
-/**
- * Declarative redirect.
- *
- * TanStack's <Navigate> re-issues navigation on every render, so a guard that
- * renders it while its parent is still re-rendering (auth/admin guards do,
- * because the session hook settles asynchronously) throws "Maximum update
- * depth exceeded" and wedges the page. Navigating exactly once from an effect
- * keeps the react-router-style call sites working without the loop.
- */
-export function Navigate({ to, replace = false, state }: { to: string; replace?: boolean; state?: unknown }) {
-  const nav = tsNavigate();
-  const fired = useRef(false);
-  useEffect(() => {
-    if (fired.current) return;
-    fired.current = true;
-    const { pathname, search, hash } = parseTo(to);
-    void nav({
-      to: pathname as never,
-      search: search as never,
-      hash,
-      state: state as never,
-      replace,
-    });
-    // Redirect targets are static per mount; re-running would re-loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [to]);
-  return null;
+export function Navigate({ to, replace, state }: { to: string; replace?: boolean; state?: unknown }) {
+  const { pathname, search, hash } = parseTo(to);
+  return <TSNavigate to={pathname as never} search={search as never} hash={hash} state={state as never} replace={replace} />;
 }
 
 // ---------- Outlet ----------

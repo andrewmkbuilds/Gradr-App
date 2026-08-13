@@ -1,5 +1,4 @@
 import { ThemeSegmentedControl } from "@/components/ThemeToggle";
-import { invokeFunction } from "@/lib/invokeFunction";
 import { useState, useEffect } from "react";
 import { Palette, User, Save, Loader2, Bell, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { IntegrationsPanel } from "@/components/settings/IntegrationsPanel";
-import { MotionPanel } from "@/components/settings/MotionPanel";
 import { LegalLinksPanel } from "@/components/legal/LegalLinksPanel";
 import { AccountDataPanel } from "@/components/settings/AccountDataPanel";
 import { EligibilityPanel } from "@/components/settings/EligibilityPanel";
@@ -116,7 +114,7 @@ export default function Settings() {
   const sendTestDigest = async () => {
     if (!user) return;
     setTestingDigest(true);
-    const { data, error } = await invokeFunction("daily-digest", { body: { test: true } });
+    const { data, error } = await supabase.functions.invoke("daily-digest", { body: { test: true } });
     setTestingDigest(false);
     if (error || data?.error) {
       toast.error(data?.error || "Failed to prepare test digest");
@@ -145,7 +143,7 @@ export default function Settings() {
 
       <section aria-labelledby="appearance-heading" className="glass-card p-6 space-y-4 animate-slide-up">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Palette className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
           <div>
@@ -158,7 +156,7 @@ export default function Settings() {
 
       <div className="glass-card p-6 space-y-5 animate-slide-up">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <User className="h-5 w-5 text-primary" />
           </div>
           <div>
@@ -208,7 +206,7 @@ export default function Settings() {
 
       <div className="glass-card p-6 space-y-5 animate-slide-up">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Bell className="h-5 w-5 text-primary" />
           </div>
           <div>
@@ -251,8 +249,6 @@ export default function Settings() {
       </div>
 
       <UsageBars />
-
-      <MotionPanel />
 
       <IntegrationsPanel />
 

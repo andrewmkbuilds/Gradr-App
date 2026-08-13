@@ -1,6 +1,4 @@
-import { NextActionBar } from "@/components/NextActionBar";
 import { useEffect, useMemo, useState } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
 import {
   DndContext,
   DragEndEvent,
@@ -23,13 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy, Clock, CheckCircle2, AlarmClock } from "lucide-react";
+import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { handleAiFunctionError } from "@/lib/aiErrors";
-import { PipelineInsights } from "@/components/pipeline/PipelineInsights";
 
 type Status = "saved" | "applied" | "interview" | "offer" | "rejected";
 
@@ -52,19 +47,6 @@ interface TrackedJob {
   created_at: string;
   notes: string | null;
   application_pack: ApplicationPack | null;
-  follow_up_enabled: boolean;
-  follow_up_days: number;
-  last_touch_at: string | null;
-}
-
-/** When the next nudge is due for an auto follow-up job, or null if it's off. */
-function followUpDueAt(job: TrackedJob): Date | null {
-  if (!job.follow_up_enabled) return null;
-  const anchor = job.last_touch_at ?? job.applied_at ?? job.created_at;
-  if (!anchor) return null;
-  const due = new Date(anchor);
-  due.setDate(due.getDate() + (job.follow_up_days || 5));
-  return due;
 }
 
 interface Reminder {
@@ -99,25 +81,11 @@ function JobCard({ job, onClick }: { job: TrackedJob; onClick: () => void }) {
       <p className="text-xs text-muted-foreground mt-1">{job.company || "Unknown"}</p>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {typeof job.match_score === "number" && (
-          <Badge variant="accentSoft" className="text-[10px]">
+          <Badge className="text-[10px] bg-primary/15 text-primary border-primary/30">
             <Sparkles className="h-2.5 w-2.5 mr-0.5" />{job.match_score}%
           </Badge>
         )}
         {job.remote && <Badge variant="secondary" className="text-[10px]">Remote</Badge>}
-        {(() => {
-          const due = followUpDueAt(job);
-          if (!due) return null;
-          const overdue = due.getTime() <= Date.now();
-          return (
-            <Badge
-              variant="secondary"
-              className={`text-[10px] ${overdue ? "bg-warning/20 text-warning" : ""}`}
-            >
-              <Clock className="h-2.5 w-2.5 mr-0.5" />
-              {overdue ? "Follow up now" : `Follow up ${formatDistanceToNow(due, { addSuffix: true })}`}
-            </Badge>
-          );
-        })()}
       </div>
     </div>
   );
@@ -226,29 +194,11 @@ export default function Pipeline() {
     await supabase.from("job_reminders").update({ done: true }).eq("id", id);
   };
 
-  const patchJob = async (id: string, updates: Partial<TrackedJob>) => {
-    setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...updates } : j)));
-    setSelected((cur) => (cur && cur.id === id ? { ...cur, ...updates } : cur));
-    const { error } = await supabase
-      .from("tracked_jobs")
-      .update(updates as never)
-      .eq("id", id);
-    if (error) {
-      toast.error("Couldn't save follow-up settings");
-      load();
-    }
-  };
-
-  const markTouched = async (job: TrackedJob) => {
-    await patchJob(job.id, { last_touch_at: new Date().toISOString() });
-    toast.success("Follow-up clock reset");
-  };
-
   const addFromUrl = async () => {
     if (!pasteUrl.trim()) return;
     setPasting(true);
     try {
-      const { data, error } = await invokeFunction("parse-job-url", {
+      const { data, error } = await supabase.functions.invoke("parse-job-url", {
         body: { url: pasteUrl.trim() },
       });
       if (error || data?.error) {
@@ -288,7 +238,6 @@ export default function Pipeline() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
-      <NextActionBar surface="pipeline" />
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Application Pipeline</h1>
@@ -319,14 +268,6 @@ export default function Pipeline() {
           </DialogContent>
         </Dialog>
       </div>
-
-      <PipelineInsights
-        jobs={jobs}
-        onOpenJob={(id) => {
-          const job = jobs.find((j) => j.id === id);
-          if (job) setSelected(job);
-        }}
-      />
 
       {/* Reminders bar */}
       {reminders.length > 0 && (
@@ -384,7 +325,7 @@ export default function Pipeline() {
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline">{selected.status}</Badge>
                   {typeof selected.match_score === "number" && (
-                    <Badge variant="accentSoft">{selected.match_score}% match</Badge>
+                    <Badge className="bg-primary/15 text-primary border-primary/30">{selected.match_score}% match</Badge>
                   )}
                   {selected.applied_at && <Badge variant="secondary">Applied {formatDistanceToNow(new Date(selected.applied_at), { addSuffix: true })}</Badge>}
                 </div>
@@ -397,8 +338,8 @@ export default function Pipeline() {
                 {selected.application_pack && (
                   <div className="space-y-3 pt-2 border-t border-border max-h-[300px] overflow-y-auto">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="accent-text h-4 w-4" />
-                      <Label className="accent-text text-xs uppercase tracking-wider">AI Application Pack</Label>
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <Label className="text-xs uppercase tracking-wider text-primary">AI Application Pack</Label>
                     </div>
                     {selected.application_pack.cover_letter && (
                       <div className="space-y-1">
@@ -463,57 +404,6 @@ export default function Pipeline() {
                     )}
                   </div>
                 )}
-
-                <div className="space-y-3 pt-2 border-t border-border">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <Label htmlFor="followup-toggle" className="text-xs uppercase tracking-wider text-muted-foreground">
-                        Automatic follow-up
-                      </Label>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Gradr nudges you on your dashboard when this one goes quiet.
-                      </p>
-                    </div>
-                    <Switch
-                      id="followup-toggle"
-                      checked={selected.follow_up_enabled}
-                      onCheckedChange={(v) => patchJob(selected.id, { follow_up_enabled: v })}
-                    />
-                  </div>
-
-                  {selected.follow_up_enabled && (
-                    <div className="space-y-2 rounded-lg bg-secondary/40 p-3">
-                      <div className="flex items-center gap-2">
-                        <Label className="text-xs text-muted-foreground shrink-0">Nudge me after</Label>
-                        <Select
-                          value={String(selected.follow_up_days || 5)}
-                          onValueChange={(v) => patchJob(selected.id, { follow_up_days: Number(v) })}
-                        >
-                          <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {[3, 5, 7, 10, 14, 21].map((d) => (
-                              <SelectItem key={d} value={String(d)}>{d} days</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {(() => {
-                        const due = followUpDueAt(selected);
-                        if (!due) return null;
-                        const overdue = due.getTime() <= Date.now();
-                        return (
-                          <p className={`flex items-center gap-1.5 text-xs ${overdue ? "text-warning" : "text-muted-foreground"}`}>
-                            <AlarmClock className="h-3 w-3" />
-                            {overdue ? "Due now" : `Next nudge ${formatDistanceToNow(due, { addSuffix: true })}`}
-                          </p>
-                        );
-                      })()}
-                      <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => markTouched(selected)}>
-                        <CheckCircle2 className="h-3.5 w-3.5" /> I followed up today
-                      </Button>
-                    </div>
-                  )}
-                </div>
 
                 <div className="space-y-2 pt-2 border-t border-border">
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground">Add reminder</Label>

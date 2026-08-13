@@ -82,13 +82,13 @@ export function useSubmitVerificationRequest() {
         _category: input.category,
         _full_name: input.full_name,
         _email: input.email,
-        _organization: input.organization ?? undefined,
-        _website: input.website ?? undefined,
-        _personal_email: input.personal_email ?? undefined,
-        _country: input.country ?? undefined,
-        _role_or_status: input.role_or_status ?? undefined,
-        _supporting_information: input.supporting_information ?? undefined,
-        _document_path: input.document_path ?? undefined,
+        _organization: input.organization ?? null,
+        _website: input.website ?? null,
+        _personal_email: input.personal_email ?? null,
+        _country: input.country ?? null,
+        _role_or_status: input.role_or_status ?? null,
+        _supporting_information: input.supporting_information ?? null,
+        _document_path: input.document_path ?? null,
       });
       if (error) throw new Error(error.message);
       return data as string;
@@ -114,10 +114,10 @@ export function useRequestInstitution() {
       const { data, error } = await supabase.rpc("request_institution", {
         _name: input.name,
         _email_domain: input.email_domain,
-        _website: input.website ?? undefined,
-        _country: input.country ?? undefined,
-        _category: input.category ?? undefined,
-        _notes: input.notes ?? undefined,
+        _website: input.website ?? null,
+        _country: input.country ?? null,
+        _category: input.category ?? null,
+        _notes: input.notes ?? null,
       });
       if (error) throw new Error(error.message);
       return data as string;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "@/lib/router-compat";
+import { useNavigate } from "react-router-dom";
 import { Loader2, FileDown, CalendarDays, ArrowLeft, Trash2, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { ScoreRing } from "@/components/ScoreRing";
 import type { InterviewReport } from "@/components/interview/InterviewReportView";
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
-import { CompetencyTrends } from "@/components/interview/CompetencyTrends";
 
 interface SessionRow {
   id: string;
@@ -107,8 +106,6 @@ export default function InterviewHistory() {
         </div>
       )}
 
-      <CompetencyTrends sessions={rows} />
-
       {rows.length > 1 && (
         <div className="glass-card p-5">
           <p className="text-sm font-semibold text-foreground mb-3">Score trend</p>
@@ -188,7 +185,7 @@ export default function InterviewHistory() {
                     {row.practice_plan && (
                       <div className="pt-2">
                         <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-                          <CalendarDays className="accent-text h-4 w-4" /> Saved practice plan
+                          <CalendarDays className="h-4 w-4 text-primary" /> Saved practice plan
                         </p>
                         <PracticePlanView plan={row.practice_plan} />
                       </div>
@@ -211,7 +208,7 @@ function Feedback({ title, items }: { title: string; items: string[] }) {
       <ul className="space-y-1.5">
         {(items ?? []).map((item, i) => (
           <li key={i} className="text-sm text-muted-foreground flex gap-2">
-            <span className="accent-text">•</span>
+            <span className="text-primary">•</span>
             <span>{item}</span>
           </li>
         ))}

@@ -1,32 +1,22 @@
-import { forwardRef, type ComponentProps } from "react";
-import { Link, useLocation } from "@/lib/router-compat";
+import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom";
+import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
-interface NavLinkCompatProps extends Omit<ComponentProps<typeof Link>, "className"> {
+interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
   className?: string;
   activeClassName?: string;
   pendingClassName?: string;
-  end?: boolean;
 }
 
-/**
- * react-router NavLink replacement: computes the active state from the
- * current location instead of the removed function-form className prop.
- */
 const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
-  ({ className, activeClassName, end, to, ...props }, ref) => {
-    const { pathname } = useLocation();
-    const target = typeof to === "string" ? to.split("?")[0]?.split("#")[0] ?? "" : "";
-    const isActive = end
-      ? pathname === target
-      : pathname === target || (target !== "/" && pathname.startsWith(`${target}/`));
-
+  ({ className, activeClassName, pendingClassName, to, ...props }, ref) => {
     return (
-      <Link
+      <RouterNavLink
         ref={ref}
         to={to}
-        aria-current={isActive ? "page" : undefined}
-        className={cn(className, isActive && activeClassName)}
+        className={({ isActive, isPending }) =>
+          cn(className, isActive && activeClassName, isPending && pendingClassName)
+        }
         {...props}
       />
     );

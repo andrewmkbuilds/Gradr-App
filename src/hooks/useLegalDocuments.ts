@@ -133,7 +133,7 @@ export function usePendingLegalAcceptances(enabled: boolean) {
     async (documentId: string) => {
       const { error } = await supabase.rpc("accept_legal_document", {
         _document_id: documentId,
-        _user_agent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+        _user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
       });
       if (error) throw error;
       await refresh();

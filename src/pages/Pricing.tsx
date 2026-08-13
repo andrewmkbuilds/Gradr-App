@@ -1,18 +1,17 @@
 import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DepthCard } from "@/components/motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNavigate } from "@/lib/router-compat";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBillingActions, useSubscription } from "@/hooks/useSubscription";
 import { CREDIT_PACKS, FREE_TIER, TIERS, type Tier } from "@/config/tiers";
 import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
 import { VerificationDialog } from "@/components/VerificationDialog";
 import { useDiscountPrograms, useMyEligibility } from "@/hooks/useEligibility";
@@ -41,10 +40,7 @@ export default function Pricing() {
   const [pricesError, setPricesError] = useState<string | null>(null);
 
   // Localized prices come straight from Paddle — no client-side math, no
-  // re-formatting of the strings Paddle returns. When Paddle (or our price
-  // resolver) is down the page still renders every plan and feature list; only
-  // the amounts degrade to an "unavailable" state with a retry.
-  const [attempt, setAttempt] = useState(0);
+  // re-formatting of the strings Paddle returns.
   useEffect(() => {
     let cancelled = false;
     const ids = [
@@ -60,14 +56,13 @@ export default function Pricing() {
       })
       .catch((err) => {
         if (cancelled) return;
-        setPrices({});
         setPricesError(err instanceof Error ? err.message : "Couldn't load prices");
       })
       .finally(() => !cancelled && setPricesLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [attempt]);
+  }, []);
 
   const priceFor = (id: string) => prices[id]?.formattedTotal;
 
@@ -117,7 +112,7 @@ export default function Pricing() {
             <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
             <div className="mt-1 flex items-center gap-2 text-xs">
               <span className="text-muted-foreground line-through">{price.formattedTotal}</span>
-              <Badge variant="accentSoft" className="gap-1">
+              <Badge variant="secondary" className="gap-1">
                 <BadgePercent className="h-3 w-3" aria-hidden="true" />
                 {discountPercent}% off applied
               </Badge>
@@ -159,13 +154,13 @@ export default function Pricing() {
 
       {/* Eligibility discounts: advertised to everyone, confirmed for the verified. */}
       {(discountPercent > 0 || topProgram) && (
-        <div className="accent-card mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl px-5 py-4">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center extrude rounded-lg bg-primary/10">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
               {discountPercent > 0 ? (
                 <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
               ) : (
-                <BadgePercent className="accent-text h-4 w-4" aria-hidden="true" />
+                <BadgePercent className="h-4 w-4 text-primary" aria-hidden="true" />
               )}
             </span>
             <div>
@@ -199,24 +194,9 @@ export default function Pricing() {
       <VerificationDialog open={verifyOpen} onOpenChange={setVerifyOpen} />
 
       {pricesError && (
-        <Card className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 border-warning/40 bg-warning/5 px-5 py-4">
-          <div>
-            <p className="text-sm font-medium text-foreground">Prices are temporarily unavailable</p>
-            <p className="text-xs text-muted-foreground">
-              Plans and features are all here — live amounts will be back shortly. You can still
-              start checkout and the current price is confirmed before you pay.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={pricesLoading}
-            onClick={() => setAttempt((n) => n + 1)}
-          >
-            {pricesLoading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
-            Retry
-          </Button>
-        </Card>
+        <p className="text-center text-sm text-destructive">
+          Couldn't load localized prices: {pricesError}
+        </p>
       )}
 
       {tab === "plans" ? (
@@ -241,10 +221,9 @@ export default function Pricing() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            <DepthCard tilt={3.5} lift={6} className="h-full">
-            <Card className="relative flex h-full flex-col p-6 border-border">
+            <Card className="relative p-6 flex flex-col border-border">
               <div className="flex items-center gap-2 mb-4">
-                <div className="h-9 w-9 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <h2 className="text-lg font-semibold text-foreground">{FREE_TIER.name}</h2>
@@ -270,7 +249,6 @@ export default function Pricing() {
                 {currentPlan === "free" ? "Current plan" : "Get started"}
               </Button>
             </Card>
-            </DepthCard>
 
             {TIERS.map((tier) => {
               const Icon = TIER_ICONS[tier.name] ?? Rocket;
@@ -278,22 +256,20 @@ export default function Pricing() {
               const pendingKey = `${tier.key}-${interval}`;
               const current = currentPlan === tier.key && billingInterval === interval;
               return (
-                <DepthCard key={tier.name} tilt={tier.highlighted ? 5 : 3.5} lift={6} className="h-full">
                 <Card
-                  className={`relative flex h-full flex-col p-6 ${
-                    tier.highlighted
-                      ? "border-mahogany/70 shadow-lg shadow-mahogany/15 xl:scale-[1.02]"
-                      : "border-border"
+                  key={tier.name}
+                  className={`relative p-6 flex flex-col ${
+                    tier.highlighted ? "border-primary shadow-lg shadow-primary/10 xl:scale-[1.02]" : "border-border"
                   }`}
                 >
                   {tier.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-mahogany text-mahogany-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
                       Most popular
                     </div>
                   )}
 
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="h-9 w-9 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon className="h-4 w-4 text-primary" />
                     </div>
                     <h2 className="text-lg font-semibold text-foreground">{tier.name}</h2>
@@ -331,7 +307,6 @@ export default function Pricing() {
                     )}
                   </Button>
                 </Card>
-                </DepthCard>
               );
             })}
           </div>
@@ -340,7 +315,7 @@ export default function Pricing() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CREDIT_PACKS.map((pack) => (
             <Card key={pack.priceId} className="p-5 flex flex-col">
-              <div className="h-9 w-9 extrude rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <h2 className="text-sm font-semibold text-foreground">{pack.label}</h2>

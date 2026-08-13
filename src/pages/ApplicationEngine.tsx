@@ -1,6 +1,4 @@
-import { useSeoOverride } from "@/lib/seoOverride";
 import { useState } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
 import { Zap, FileText, Mail, MessageSquare, Loader2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,14 +23,6 @@ function ApplicationEngineInner() {
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  useSeoOverride(
-    jobTitle.trim()
-      ? {
-          title: `Application Engine — ${jobTitle.trim()}${company.trim() ? ` at ${company.trim()}` : ""}`,
-          description: `Generate a tailored cover letter and recruiter outreach for the ${jobTitle.trim()} role.`,
-        }
-      : null,
-  );
   const [loading, setLoading] = useState(false);
   const [activeType, setActiveType] = useState<GenerationType | null>(null);
   const [result, setResult] = useState<GeneratedContent | null>(null);
@@ -66,7 +56,7 @@ function ApplicationEngineInner() {
         .eq("user_id", user.id)
         .single();
 
-      const { data, error } = await invokeFunction("generate-application", {
+      const { data, error } = await supabase.functions.invoke("generate-application", {
         body: {
           environment: getPaddleEnvironment(),
           type,
@@ -136,7 +126,7 @@ function ApplicationEngineInner() {
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="glass-card p-6 animate-slide-up group hover:glow-border transition-all">
-          <div className="h-12 w-12 extrude rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
             <Mail className="h-6 w-6 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-1">Cover Letter</h3>

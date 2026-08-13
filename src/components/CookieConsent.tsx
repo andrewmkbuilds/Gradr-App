@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "@/lib/router-compat";
+import { Link } from "react-router-dom";
 import { Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -34,27 +34,17 @@ export function openCookiePreferences() {
  * Privacy Control signal is auto-honoured as "reject optional".
  */
 export function CookieConsent() {
-  // Start hidden so server and client markup match; the real state is read
-  // after mount, which also avoids showing the banner to people who already chose.
-  const [decided, setDecided] = useState(true);
+  const [decided, setDecided] = useState(() => readConsent() !== null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [choices, setChoices] = useState<ConsentChoices>(ALL_OFF);
+  const [choices, setChoices] = useState<ConsentChoices>(() => readConsent()?.choices ?? ALL_OFF);
 
   useEffect(() => {
-    const stored = readConsent();
-    if (stored) {
-      setChoices(stored.choices);
-      setDecided(true);
-      return;
-    }
     // Honour GPC without prompting.
-    if (hasGlobalPrivacyControl()) {
+    if (!decided && hasGlobalPrivacyControl()) {
       writeConsent(ALL_OFF);
       setDecided(true);
-      return;
     }
-    setDecided(false);
-  }, []);
+  }, [decided]);
 
   useEffect(() => {
     const open = () => {

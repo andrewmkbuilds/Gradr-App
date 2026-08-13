@@ -13,17 +13,17 @@ interface State {
  * component can never produce a completely blank page.
  */
 export class RootErrorBoundary extends Component<Props, State> {
-  override state: State = { error: null };
+  state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
     return { error };
   }
 
-  override componentDidCatch(error: Error, info: ErrorInfo) {
+  componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Root error boundary caught:", error, info.componentStack);
   }
 
-  override render() {
+  render() {
     if (!this.state.error) return this.props.children;
 
     return (

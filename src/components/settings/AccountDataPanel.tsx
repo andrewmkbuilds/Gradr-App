@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { invokeFunction } from "@/lib/invokeFunction";
 import { Download, Trash2, Loader2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { useNavigate } from "@/lib/router-compat";
+import { useNavigate } from "react-router-dom";
 
 /** Tables exported in the personal data archive. */
 const EXPORT_TABLES = [
@@ -68,7 +67,7 @@ export function AccountDataPanel() {
     }
     setDeleting(true);
     try {
-      const { data, error } = await invokeFunction("delete-account", {
+      const { data, error } = await supabase.functions.invoke("delete-account", {
         body: { confirm: "DELETE" },
       });
       if (error) throw error;
@@ -86,7 +85,7 @@ export function AccountDataPanel() {
   return (
     <section className="glass-card p-6 space-y-6" aria-label="Your data">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 extrude rounded-lg bg-primary/10 flex items-center justify-center">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
           <ShieldAlert className="h-5 w-5 text-primary" />
         </div>
         <div>

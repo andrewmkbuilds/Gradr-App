@@ -10,8 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as AiInterviewCoachRouteImport } from './routes/ai-interview-coach'
-import { Route as AiResumeBuilderRouteImport } from './routes/ai-resume-builder'
 import { Route as AtsResumeCheckerRouteImport } from './routes/ats-resume-checker'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
@@ -22,7 +20,6 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as StatusRouteImport } from './routes/status'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
@@ -32,40 +29,28 @@ import { Route as AppGrowthRouteImport } from './routes/_app/growth'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
 import { Route as AppManageSubscriptionRouteImport } from './routes/_app/manage-subscription'
 import { Route as AppMatchRouteImport } from './routes/_app/match'
-import { Route as AppMotionPlaygroundRouteImport } from './routes/_app/motion-playground'
-import { Route as AppOnboardingRouteImport } from './routes/_app/onboarding'
 import { Route as AppPipelineRouteImport } from './routes/_app/pipeline'
 import { Route as AppResumeRouteImport } from './routes/_app/resume'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppWelcomeRouteImport } from './routes/_app/welcome'
-import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogAiResumeOptimizationRouteImport } from './routes/blog/ai-resume-optimization'
 import { Route as CareerAdviceIndexRouteImport } from './routes/career-advice/index'
 import { Route as CareerAdviceSlugRouteImport } from './routes/career-advice/$slug'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as JobSearchIndexRouteImport } from './routes/job-search/index'
 import { Route as JobSearchSlugRouteImport } from './routes/job-search/$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AppAdminAffiliatesRouteImport } from './routes/_app/admin/affiliates'
-import { Route as AppAdminApiHealthRouteImport } from './routes/_app/admin/api-health'
 import { Route as AppAdminAuditLogRouteImport } from './routes/_app/admin/audit-log'
-import { Route as AppAdminAuthEmailPreviewRouteImport } from './routes/_app/admin/auth-email-preview'
 import { Route as AppAdminBlogAnalyticsRouteImport } from './routes/_app/admin/blog-analytics'
-import { Route as AppAdminBrandMetadataRouteImport } from './routes/_app/admin/brand-metadata'
 import { Route as AppAdminDigestPreviewRouteImport } from './routes/_app/admin/digest-preview'
 import { Route as AppAdminDiscountsRouteImport } from './routes/_app/admin/discounts'
-import { Route as AppAdminEmailOpsRouteImport } from './routes/_app/admin/email-ops'
 import { Route as AppAdminLegalRouteImport } from './routes/_app/admin/legal'
 import { Route as AppAdminNavAnalyticsRouteImport } from './routes/_app/admin/nav-analytics'
-import { Route as AppAdminOauthForensicsRouteImport } from './routes/_app/admin/oauth-forensics'
 import { Route as AppAdminPaddleRouteImport } from './routes/_app/admin/paddle'
 import { Route as AppAdminPaymentsStatusRouteImport } from './routes/_app/admin/payments-status'
-import { Route as AppAdminRateLimitsRouteImport } from './routes/_app/admin/rate-limits'
 import { Route as AppAdminSearchConsoleRouteImport } from './routes/_app/admin/search-console'
 import { Route as AppAdminSecurityLogRouteImport } from './routes/_app/admin/security-log'
-import { Route as AppAdminSecurityScansRouteImport } from './routes/_app/admin/security-scans'
 import { Route as AppAdminSeoMonitorRouteImport } from './routes/_app/admin/seo-monitor'
-import { Route as AppAdminSeoPerformanceRouteImport } from './routes/_app/admin/seo-performance'
 import { Route as AppAdminVerificationsRouteImport } from './routes/_app/admin/verifications'
 import { Route as AppAffiliateIndexRouteImport } from './routes/_app/affiliate/index'
 import { Route as AppAffiliateApplyRouteImport } from './routes/_app/affiliate/apply'
@@ -73,69 +58,9 @@ import { Route as AppAffiliateDashboardRouteImport } from './routes/_app/affilia
 import { Route as AppAffiliateResourcesRouteImport } from './routes/_app/affiliate/resources'
 import { Route as AppInterviewIndexRouteImport } from './routes/_app/interview/index'
 import { Route as AppInterviewHistoryRouteImport } from './routes/_app/interview/history'
-import { Route as ApiPublicAdminEmailOpsRouteImport } from './routes/api/public/admin-email-ops'
-import { Route as ApiPublicAdminEndpointPolicyRouteImport } from './routes/api/public/admin-endpoint-policy'
-import { Route as ApiPublicAdminRpcRouteImport } from './routes/api/public/admin-rpc'
-import { Route as ApiPublicAdminWebhookReplayRouteImport } from './routes/api/public/admin-webhook-replay'
-import { Route as ApiPublicAdminWebhookSimulateRouteImport } from './routes/api/public/admin-webhook-simulate'
-import { Route as ApiPublicAffiliatePublicRouteImport } from './routes/api/public/affiliate-public'
-import { Route as ApiPublicAnalyzeResumeRouteImport } from './routes/api/public/analyze-resume'
-import { Route as ApiPublicBrandMetadataRouteImport } from './routes/api/public/brand-metadata'
-import { Route as ApiPublicCalendarSyncRouteImport } from './routes/api/public/calendar-sync'
-import { Route as ApiPublicCareerPlanRouteImport } from './routes/api/public/career-plan'
-import { Route as ApiPublicCompanyResearchRouteImport } from './routes/api/public/company-research'
-import { Route as ApiPublicCspAlertsRouteImport } from './routes/api/public/csp-alerts'
-import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
-import { Route as ApiPublicDailyDigestRouteImport } from './routes/api/public/daily-digest'
-import { Route as ApiPublicDeleteAccountRouteImport } from './routes/api/public/delete-account'
-import { Route as ApiPublicDmarcIngestRouteImport } from './routes/api/public/dmarc-ingest'
-import { Route as ApiPublicEmailAnomalyRouteImport } from './routes/api/public/email-anomaly'
-import { Route as ApiPublicEmailAuthCheckRouteImport } from './routes/api/public/email-auth-check'
-import { Route as ApiPublicGenerateApplicationRouteImport } from './routes/api/public/generate-application'
-import { Route as ApiPublicGetPaddlePriceRouteImport } from './routes/api/public/get-paddle-price'
-import { Route as ApiPublicInterviewCoachRouteImport } from './routes/api/public/interview-coach'
-import { Route as ApiPublicInterviewRealtimeTokenRouteImport } from './routes/api/public/interview-realtime-token'
-import { Route as ApiPublicInterviewReportRouteImport } from './routes/api/public/interview-report'
-import { Route as ApiPublicInterviewVoiceRouteImport } from './routes/api/public/interview-voice'
-import { Route as ApiPublicJobsApifyRouteImport } from './routes/api/public/jobs-apify'
-import { Route as ApiPublicMatchJobsRouteImport } from './routes/api/public/match-jobs'
-import { Route as ApiPublicNotifyPolicyUpdateRouteImport } from './routes/api/public/notify-policy-update'
-import { Route as ApiPublicOauthForensicsRouteImport } from './routes/api/public/oauth-forensics'
-import { Route as ApiPublicParseJobUrlRouteImport } from './routes/api/public/parse-job-url'
-import { Route as ApiPublicPaymentsPortalRouteImport } from './routes/api/public/payments-portal'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments-webhook'
-import { Route as ApiPublicPermissionDeniedRouteImport } from './routes/api/public/permission-denied'
-import { Route as ApiPublicPracticePlanRouteImport } from './routes/api/public/practice-plan'
-import { Route as ApiPublicRecommendJobsRouteImport } from './routes/api/public/recommend-jobs'
-import { Route as ApiPublicResolveDiscountRouteImport } from './routes/api/public/resolve-discount'
-import { Route as ApiPublicRevenuecatSyncRouteImport } from './routes/api/public/revenuecat-sync'
-import { Route as ApiPublicSearchConsoleRouteImport } from './routes/api/public/search-console'
-import { Route as ApiPublicSearchJobsRouteImport } from './routes/api/public/search-jobs'
-import { Route as ApiPublicSecurityDigestRouteImport } from './routes/api/public/security-digest'
-import { Route as ApiPublicSecurityScansRouteImport } from './routes/api/public/security-scans'
-import { Route as ApiPublicSendNotificationRouteImport } from './routes/api/public/send-notification'
-import { Route as ApiPublicSeoMonitorRouteImport } from './routes/api/public/seo-monitor'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ApiPublicEmailClickRouteImport } from './routes/api/public/email/click'
-import { Route as ApiPublicEmailOpenRouteImport } from './routes/api/public/email/open'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiInterviewCoachRoute = AiInterviewCoachRouteImport.update({
-  id: '/ai-interview-coach',
-  path: '/ai-interview-coach',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiResumeBuilderRoute = AiResumeBuilderRouteImport.update({
-  id: '/ai-resume-builder',
-  path: '/ai-resume-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtsResumeCheckerRoute = AtsResumeCheckerRouteImport.update({
@@ -188,11 +113,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StatusRoute = StatusRouteImport.update({
-  id: '/status',
-  path: '/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -238,16 +158,6 @@ const AppMatchRoute = AppMatchRouteImport.update({
   path: '/match',
   getParentRoute: () => AppRoute,
 } as any)
-const AppMotionPlaygroundRoute = AppMotionPlaygroundRouteImport.update({
-  id: '/motion-playground',
-  path: '/motion-playground',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppOnboardingRoute = AppOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppPipelineRoute = AppPipelineRouteImport.update({
   id: '/pipeline',
   path: '/pipeline',
@@ -268,11 +178,6 @@ const AppWelcomeRoute = AppWelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => AppRoute,
 } as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/blog/',
-  path: '/blog/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BlogAiResumeOptimizationRoute =
   BlogAiResumeOptimizationRouteImport.update({
     id: '/blog/ai-resume-optimization',
@@ -287,11 +192,6 @@ const CareerAdviceIndexRoute = CareerAdviceIndexRouteImport.update({
 const CareerAdviceSlugRoute = CareerAdviceSlugRouteImport.update({
   id: '/career-advice/$slug',
   path: '/career-advice/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobSearchIndexRoute = JobSearchIndexRouteImport.update({
@@ -314,30 +214,14 @@ const AppAdminAffiliatesRoute = AppAdminAffiliatesRouteImport.update({
   path: '/admin/affiliates',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminApiHealthRoute = AppAdminApiHealthRouteImport.update({
-  id: '/admin/api-health',
-  path: '/admin/api-health',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAdminAuditLogRoute = AppAdminAuditLogRouteImport.update({
   id: '/admin/audit-log',
   path: '/admin/audit-log',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminAuthEmailPreviewRoute =
-  AppAdminAuthEmailPreviewRouteImport.update({
-    id: '/admin/auth-email-preview',
-    path: '/admin/auth-email-preview',
-    getParentRoute: () => AppRoute,
-  } as any)
 const AppAdminBlogAnalyticsRoute = AppAdminBlogAnalyticsRouteImport.update({
   id: '/admin/blog-analytics',
   path: '/admin/blog-analytics',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAdminBrandMetadataRoute = AppAdminBrandMetadataRouteImport.update({
-  id: '/admin/brand-metadata',
-  path: '/admin/brand-metadata',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminDigestPreviewRoute = AppAdminDigestPreviewRouteImport.update({
@@ -350,11 +234,6 @@ const AppAdminDiscountsRoute = AppAdminDiscountsRouteImport.update({
   path: '/admin/discounts',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminEmailOpsRoute = AppAdminEmailOpsRouteImport.update({
-  id: '/admin/email-ops',
-  path: '/admin/email-ops',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAdminLegalRoute = AppAdminLegalRouteImport.update({
   id: '/admin/legal',
   path: '/admin/legal',
@@ -363,11 +242,6 @@ const AppAdminLegalRoute = AppAdminLegalRouteImport.update({
 const AppAdminNavAnalyticsRoute = AppAdminNavAnalyticsRouteImport.update({
   id: '/admin/nav-analytics',
   path: '/admin/nav-analytics',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAdminOauthForensicsRoute = AppAdminOauthForensicsRouteImport.update({
-  id: '/admin/oauth-forensics',
-  path: '/admin/oauth-forensics',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminPaddleRoute = AppAdminPaddleRouteImport.update({
@@ -380,11 +254,6 @@ const AppAdminPaymentsStatusRoute = AppAdminPaymentsStatusRouteImport.update({
   path: '/admin/payments-status',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminRateLimitsRoute = AppAdminRateLimitsRouteImport.update({
-  id: '/admin/rate-limits',
-  path: '/admin/rate-limits',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAdminSearchConsoleRoute = AppAdminSearchConsoleRouteImport.update({
   id: '/admin/search-console',
   path: '/admin/search-console',
@@ -395,19 +264,9 @@ const AppAdminSecurityLogRoute = AppAdminSecurityLogRouteImport.update({
   path: '/admin/security-log',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminSecurityScansRoute = AppAdminSecurityScansRouteImport.update({
-  id: '/admin/security-scans',
-  path: '/admin/security-scans',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAdminSeoMonitorRoute = AppAdminSeoMonitorRouteImport.update({
   id: '/admin/seo-monitor',
   path: '/admin/seo-monitor',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAdminSeoPerformanceRoute = AppAdminSeoPerformanceRouteImport.update({
-  id: '/admin/seo-performance',
-  path: '/admin/seo-performance',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminVerificationsRoute = AppAdminVerificationsRouteImport.update({
@@ -445,277 +304,9 @@ const AppInterviewHistoryRoute = AppInterviewHistoryRouteImport.update({
   path: '/interview/history',
   getParentRoute: () => AppRoute,
 } as any)
-const ApiPublicAdminEmailOpsRoute = ApiPublicAdminEmailOpsRouteImport.update({
-  id: '/api/public/admin-email-ops',
-  path: '/api/public/admin-email-ops',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicAdminEndpointPolicyRoute =
-  ApiPublicAdminEndpointPolicyRouteImport.update({
-    id: '/api/public/admin-endpoint-policy',
-    path: '/api/public/admin-endpoint-policy',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicAdminRpcRoute = ApiPublicAdminRpcRouteImport.update({
-  id: '/api/public/admin-rpc',
-  path: '/api/public/admin-rpc',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicAdminWebhookReplayRoute =
-  ApiPublicAdminWebhookReplayRouteImport.update({
-    id: '/api/public/admin-webhook-replay',
-    path: '/api/public/admin-webhook-replay',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicAdminWebhookSimulateRoute =
-  ApiPublicAdminWebhookSimulateRouteImport.update({
-    id: '/api/public/admin-webhook-simulate',
-    path: '/api/public/admin-webhook-simulate',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicAffiliatePublicRoute =
-  ApiPublicAffiliatePublicRouteImport.update({
-    id: '/api/public/affiliate-public',
-    path: '/api/public/affiliate-public',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicAnalyzeResumeRoute = ApiPublicAnalyzeResumeRouteImport.update({
-  id: '/api/public/analyze-resume',
-  path: '/api/public/analyze-resume',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicBrandMetadataRoute = ApiPublicBrandMetadataRouteImport.update({
-  id: '/api/public/brand-metadata',
-  path: '/api/public/brand-metadata',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicCalendarSyncRoute = ApiPublicCalendarSyncRouteImport.update({
-  id: '/api/public/calendar-sync',
-  path: '/api/public/calendar-sync',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicCareerPlanRoute = ApiPublicCareerPlanRouteImport.update({
-  id: '/api/public/career-plan',
-  path: '/api/public/career-plan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicCompanyResearchRoute =
-  ApiPublicCompanyResearchRouteImport.update({
-    id: '/api/public/company-research',
-    path: '/api/public/company-research',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicCspAlertsRoute = ApiPublicCspAlertsRouteImport.update({
-  id: '/api/public/csp-alerts',
-  path: '/api/public/csp-alerts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicCspReportRoute = ApiPublicCspReportRouteImport.update({
-  id: '/api/public/csp-report',
-  path: '/api/public/csp-report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicDailyDigestRoute = ApiPublicDailyDigestRouteImport.update({
-  id: '/api/public/daily-digest',
-  path: '/api/public/daily-digest',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicDeleteAccountRoute = ApiPublicDeleteAccountRouteImport.update({
-  id: '/api/public/delete-account',
-  path: '/api/public/delete-account',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicDmarcIngestRoute = ApiPublicDmarcIngestRouteImport.update({
-  id: '/api/public/dmarc-ingest',
-  path: '/api/public/dmarc-ingest',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicEmailAnomalyRoute = ApiPublicEmailAnomalyRouteImport.update({
-  id: '/api/public/email-anomaly',
-  path: '/api/public/email-anomaly',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicEmailAuthCheckRoute = ApiPublicEmailAuthCheckRouteImport.update({
-  id: '/api/public/email-auth-check',
-  path: '/api/public/email-auth-check',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicGenerateApplicationRoute =
-  ApiPublicGenerateApplicationRouteImport.update({
-    id: '/api/public/generate-application',
-    path: '/api/public/generate-application',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicGetPaddlePriceRoute = ApiPublicGetPaddlePriceRouteImport.update({
-  id: '/api/public/get-paddle-price',
-  path: '/api/public/get-paddle-price',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicInterviewCoachRoute = ApiPublicInterviewCoachRouteImport.update({
-  id: '/api/public/interview-coach',
-  path: '/api/public/interview-coach',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicInterviewRealtimeTokenRoute =
-  ApiPublicInterviewRealtimeTokenRouteImport.update({
-    id: '/api/public/interview-realtime-token',
-    path: '/api/public/interview-realtime-token',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicInterviewReportRoute =
-  ApiPublicInterviewReportRouteImport.update({
-    id: '/api/public/interview-report',
-    path: '/api/public/interview-report',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicInterviewVoiceRoute = ApiPublicInterviewVoiceRouteImport.update({
-  id: '/api/public/interview-voice',
-  path: '/api/public/interview-voice',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicJobsApifyRoute = ApiPublicJobsApifyRouteImport.update({
-  id: '/api/public/jobs-apify',
-  path: '/api/public/jobs-apify',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicMatchJobsRoute = ApiPublicMatchJobsRouteImport.update({
-  id: '/api/public/match-jobs',
-  path: '/api/public/match-jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicNotifyPolicyUpdateRoute =
-  ApiPublicNotifyPolicyUpdateRouteImport.update({
-    id: '/api/public/notify-policy-update',
-    path: '/api/public/notify-policy-update',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicOauthForensicsRoute = ApiPublicOauthForensicsRouteImport.update({
-  id: '/api/public/oauth-forensics',
-  path: '/api/public/oauth-forensics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicParseJobUrlRoute = ApiPublicParseJobUrlRouteImport.update({
-  id: '/api/public/parse-job-url',
-  path: '/api/public/parse-job-url',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicPaymentsPortalRoute = ApiPublicPaymentsPortalRouteImport.update({
-  id: '/api/public/payments-portal',
-  path: '/api/public/payments-portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments-webhook',
-    path: '/api/public/payments-webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicPermissionDeniedRoute =
-  ApiPublicPermissionDeniedRouteImport.update({
-    id: '/api/public/permission-denied',
-    path: '/api/public/permission-denied',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicPracticePlanRoute = ApiPublicPracticePlanRouteImport.update({
-  id: '/api/public/practice-plan',
-  path: '/api/public/practice-plan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicRecommendJobsRoute = ApiPublicRecommendJobsRouteImport.update({
-  id: '/api/public/recommend-jobs',
-  path: '/api/public/recommend-jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicResolveDiscountRoute =
-  ApiPublicResolveDiscountRouteImport.update({
-    id: '/api/public/resolve-discount',
-    path: '/api/public/resolve-discount',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicRevenuecatSyncRoute = ApiPublicRevenuecatSyncRouteImport.update({
-  id: '/api/public/revenuecat-sync',
-  path: '/api/public/revenuecat-sync',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicSearchConsoleRoute = ApiPublicSearchConsoleRouteImport.update({
-  id: '/api/public/search-console',
-  path: '/api/public/search-console',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicSearchJobsRoute = ApiPublicSearchJobsRouteImport.update({
-  id: '/api/public/search-jobs',
-  path: '/api/public/search-jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicSecurityDigestRoute = ApiPublicSecurityDigestRouteImport.update({
-  id: '/api/public/security-digest',
-  path: '/api/public/security-digest',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicSecurityScansRoute = ApiPublicSecurityScansRouteImport.update({
-  id: '/api/public/security-scans',
-  path: '/api/public/security-scans',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicSendNotificationRoute =
-  ApiPublicSendNotificationRouteImport.update({
-    id: '/api/public/send-notification',
-    path: '/api/public/send-notification',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicSeoMonitorRoute = ApiPublicSeoMonitorRouteImport.update({
-  id: '/api/public/seo-monitor',
-  path: '/api/public/seo-monitor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicEmailClickRoute = ApiPublicEmailClickRouteImport.update({
-  id: '/api/public/email/click',
-  path: '/api/public/email/click',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicEmailOpenRoute = ApiPublicEmailOpenRouteImport.update({
-  id: '/api/public/email/open',
-  path: '/api/public/email/open',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
-  '/ai-interview-coach': typeof AiInterviewCoachRoute
-  '/ai-resume-builder': typeof AiResumeBuilderRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -726,7 +317,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/$': typeof AppSplatRoute
   '/apply': typeof AppApplyRoute
@@ -735,101 +325,37 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof AppJobsRoute
   '/manage-subscription': typeof AppManageSubscriptionRoute
   '/match': typeof AppMatchRoute
-  '/motion-playground': typeof AppMotionPlaygroundRoute
-  '/onboarding': typeof AppOnboardingRoute
   '/pipeline': typeof AppPipelineRoute
   '/resume': typeof AppResumeRoute
   '/settings': typeof AppSettingsRoute
   '/welcome': typeof AppWelcomeRoute
   '/blog/ai-resume-optimization': typeof BlogAiResumeOptimizationRoute
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
-  '/blog/': typeof BlogIndexRoute
   '/career-advice/': typeof CareerAdviceIndexRoute
   '/job-search/': typeof JobSearchIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/affiliates': typeof AppAdminAffiliatesRoute
-  '/admin/api-health': typeof AppAdminApiHealthRoute
   '/admin/audit-log': typeof AppAdminAuditLogRoute
-  '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
-  '/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
-  '/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/admin/legal': typeof AppAdminLegalRoute
   '/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
-  '/admin/oauth-forensics': typeof AppAdminOauthForensicsRoute
   '/admin/paddle': typeof AppAdminPaddleRoute
   '/admin/payments-status': typeof AppAdminPaymentsStatusRoute
-  '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
-  '/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
-  '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
   '/affiliate/apply': typeof AppAffiliateApplyRoute
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
-  '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
-  '/api/public/admin-endpoint-policy': typeof ApiPublicAdminEndpointPolicyRoute
-  '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
-  '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
-  '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
-  '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
-  '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
-  '/api/public/brand-metadata': typeof ApiPublicBrandMetadataRoute
-  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
-  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
-  '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
-  '/api/public/csp-alerts': typeof ApiPublicCspAlertsRoute
-  '/api/public/csp-report': typeof ApiPublicCspReportRoute
-  '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
-  '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
-  '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
-  '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
-  '/api/public/email-auth-check': typeof ApiPublicEmailAuthCheckRoute
-  '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
-  '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
-  '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
-  '/api/public/interview-realtime-token': typeof ApiPublicInterviewRealtimeTokenRoute
-  '/api/public/interview-report': typeof ApiPublicInterviewReportRoute
-  '/api/public/interview-voice': typeof ApiPublicInterviewVoiceRoute
-  '/api/public/jobs-apify': typeof ApiPublicJobsApifyRoute
-  '/api/public/match-jobs': typeof ApiPublicMatchJobsRoute
-  '/api/public/notify-policy-update': typeof ApiPublicNotifyPolicyUpdateRoute
-  '/api/public/oauth-forensics': typeof ApiPublicOauthForensicsRoute
-  '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
-  '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
-  '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/api/public/permission-denied': typeof ApiPublicPermissionDeniedRoute
-  '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
-  '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
-  '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
-  '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
-  '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
-  '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
-  '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
-  '/api/public/security-scans': typeof ApiPublicSecurityScansRoute
-  '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
-  '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliate/': typeof AppAffiliateIndexRoute
   '/interview/': typeof AppInterviewIndexRoute
-  '/api/public/email/click': typeof ApiPublicEmailClickRoute
-  '/api/public/email/open': typeof ApiPublicEmailOpenRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
-  '/ai-interview-coach': typeof AiInterviewCoachRoute
-  '/ai-resume-builder': typeof AiResumeBuilderRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -840,7 +366,6 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/$': typeof AppSplatRoute
   '/apply': typeof AppApplyRoute
@@ -849,104 +374,40 @@ export interface FileRoutesByTo {
   '/jobs': typeof AppJobsRoute
   '/manage-subscription': typeof AppManageSubscriptionRoute
   '/match': typeof AppMatchRoute
-  '/motion-playground': typeof AppMotionPlaygroundRoute
-  '/onboarding': typeof AppOnboardingRoute
   '/pipeline': typeof AppPipelineRoute
   '/resume': typeof AppResumeRoute
   '/settings': typeof AppSettingsRoute
   '/welcome': typeof AppWelcomeRoute
   '/blog/ai-resume-optimization': typeof BlogAiResumeOptimizationRoute
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
   '/': typeof AppIndexRoute
-  '/blog': typeof BlogIndexRoute
   '/career-advice': typeof CareerAdviceIndexRoute
   '/job-search': typeof JobSearchIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/affiliates': typeof AppAdminAffiliatesRoute
-  '/admin/api-health': typeof AppAdminApiHealthRoute
   '/admin/audit-log': typeof AppAdminAuditLogRoute
-  '/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
-  '/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/admin/discounts': typeof AppAdminDiscountsRoute
-  '/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/admin/legal': typeof AppAdminLegalRoute
   '/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
-  '/admin/oauth-forensics': typeof AppAdminOauthForensicsRoute
   '/admin/paddle': typeof AppAdminPaddleRoute
   '/admin/payments-status': typeof AppAdminPaymentsStatusRoute
-  '/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/admin/security-log': typeof AppAdminSecurityLogRoute
-  '/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
-  '/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/admin/verifications': typeof AppAdminVerificationsRoute
   '/affiliate/apply': typeof AppAffiliateApplyRoute
   '/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/interview/history': typeof AppInterviewHistoryRoute
-  '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
-  '/api/public/admin-endpoint-policy': typeof ApiPublicAdminEndpointPolicyRoute
-  '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
-  '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
-  '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
-  '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
-  '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
-  '/api/public/brand-metadata': typeof ApiPublicBrandMetadataRoute
-  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
-  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
-  '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
-  '/api/public/csp-alerts': typeof ApiPublicCspAlertsRoute
-  '/api/public/csp-report': typeof ApiPublicCspReportRoute
-  '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
-  '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
-  '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
-  '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
-  '/api/public/email-auth-check': typeof ApiPublicEmailAuthCheckRoute
-  '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
-  '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
-  '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
-  '/api/public/interview-realtime-token': typeof ApiPublicInterviewRealtimeTokenRoute
-  '/api/public/interview-report': typeof ApiPublicInterviewReportRoute
-  '/api/public/interview-voice': typeof ApiPublicInterviewVoiceRoute
-  '/api/public/jobs-apify': typeof ApiPublicJobsApifyRoute
-  '/api/public/match-jobs': typeof ApiPublicMatchJobsRoute
-  '/api/public/notify-policy-update': typeof ApiPublicNotifyPolicyUpdateRoute
-  '/api/public/oauth-forensics': typeof ApiPublicOauthForensicsRoute
-  '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
-  '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
-  '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/api/public/permission-denied': typeof ApiPublicPermissionDeniedRoute
-  '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
-  '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
-  '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
-  '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
-  '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
-  '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
-  '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
-  '/api/public/security-scans': typeof ApiPublicSecurityScansRoute
-  '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
-  '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliate': typeof AppAffiliateIndexRoute
   '/interview': typeof AppInterviewIndexRoute
-  '/api/public/email/click': typeof ApiPublicEmailClickRoute
-  '/api/public/email/open': typeof ApiPublicEmailOpenRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
-  '/ai-interview-coach': typeof AiInterviewCoachRoute
-  '/ai-resume-builder': typeof AiResumeBuilderRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
   '/cookie-policy': typeof CookiePolicyRoute
@@ -957,7 +418,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/_app/$': typeof AppSplatRoute
   '/_app/apply': typeof AppApplyRoute
@@ -966,105 +426,41 @@ export interface FileRoutesById {
   '/_app/jobs': typeof AppJobsRoute
   '/_app/manage-subscription': typeof AppManageSubscriptionRoute
   '/_app/match': typeof AppMatchRoute
-  '/_app/motion-playground': typeof AppMotionPlaygroundRoute
-  '/_app/onboarding': typeof AppOnboardingRoute
   '/_app/pipeline': typeof AppPipelineRoute
   '/_app/resume': typeof AppResumeRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/welcome': typeof AppWelcomeRoute
   '/blog/ai-resume-optimization': typeof BlogAiResumeOptimizationRoute
   '/career-advice/$slug': typeof CareerAdviceSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/job-search/$slug': typeof JobSearchSlugRoute
   '/_app/': typeof AppIndexRoute
-  '/blog/': typeof BlogIndexRoute
   '/career-advice/': typeof CareerAdviceIndexRoute
   '/job-search/': typeof JobSearchIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/_app/admin/affiliates': typeof AppAdminAffiliatesRoute
-  '/_app/admin/api-health': typeof AppAdminApiHealthRoute
   '/_app/admin/audit-log': typeof AppAdminAuditLogRoute
-  '/_app/admin/auth-email-preview': typeof AppAdminAuthEmailPreviewRoute
   '/_app/admin/blog-analytics': typeof AppAdminBlogAnalyticsRoute
-  '/_app/admin/brand-metadata': typeof AppAdminBrandMetadataRoute
   '/_app/admin/digest-preview': typeof AppAdminDigestPreviewRoute
   '/_app/admin/discounts': typeof AppAdminDiscountsRoute
-  '/_app/admin/email-ops': typeof AppAdminEmailOpsRoute
   '/_app/admin/legal': typeof AppAdminLegalRoute
   '/_app/admin/nav-analytics': typeof AppAdminNavAnalyticsRoute
-  '/_app/admin/oauth-forensics': typeof AppAdminOauthForensicsRoute
   '/_app/admin/paddle': typeof AppAdminPaddleRoute
   '/_app/admin/payments-status': typeof AppAdminPaymentsStatusRoute
-  '/_app/admin/rate-limits': typeof AppAdminRateLimitsRoute
   '/_app/admin/search-console': typeof AppAdminSearchConsoleRoute
   '/_app/admin/security-log': typeof AppAdminSecurityLogRoute
-  '/_app/admin/security-scans': typeof AppAdminSecurityScansRoute
   '/_app/admin/seo-monitor': typeof AppAdminSeoMonitorRoute
-  '/_app/admin/seo-performance': typeof AppAdminSeoPerformanceRoute
   '/_app/admin/verifications': typeof AppAdminVerificationsRoute
   '/_app/affiliate/apply': typeof AppAffiliateApplyRoute
   '/_app/affiliate/dashboard': typeof AppAffiliateDashboardRoute
   '/_app/affiliate/resources': typeof AppAffiliateResourcesRoute
   '/_app/interview/history': typeof AppInterviewHistoryRoute
-  '/api/public/admin-email-ops': typeof ApiPublicAdminEmailOpsRoute
-  '/api/public/admin-endpoint-policy': typeof ApiPublicAdminEndpointPolicyRoute
-  '/api/public/admin-rpc': typeof ApiPublicAdminRpcRoute
-  '/api/public/admin-webhook-replay': typeof ApiPublicAdminWebhookReplayRoute
-  '/api/public/admin-webhook-simulate': typeof ApiPublicAdminWebhookSimulateRoute
-  '/api/public/affiliate-public': typeof ApiPublicAffiliatePublicRoute
-  '/api/public/analyze-resume': typeof ApiPublicAnalyzeResumeRoute
-  '/api/public/brand-metadata': typeof ApiPublicBrandMetadataRoute
-  '/api/public/calendar-sync': typeof ApiPublicCalendarSyncRoute
-  '/api/public/career-plan': typeof ApiPublicCareerPlanRoute
-  '/api/public/company-research': typeof ApiPublicCompanyResearchRoute
-  '/api/public/csp-alerts': typeof ApiPublicCspAlertsRoute
-  '/api/public/csp-report': typeof ApiPublicCspReportRoute
-  '/api/public/daily-digest': typeof ApiPublicDailyDigestRoute
-  '/api/public/delete-account': typeof ApiPublicDeleteAccountRoute
-  '/api/public/dmarc-ingest': typeof ApiPublicDmarcIngestRoute
-  '/api/public/email-anomaly': typeof ApiPublicEmailAnomalyRoute
-  '/api/public/email-auth-check': typeof ApiPublicEmailAuthCheckRoute
-  '/api/public/generate-application': typeof ApiPublicGenerateApplicationRoute
-  '/api/public/get-paddle-price': typeof ApiPublicGetPaddlePriceRoute
-  '/api/public/interview-coach': typeof ApiPublicInterviewCoachRoute
-  '/api/public/interview-realtime-token': typeof ApiPublicInterviewRealtimeTokenRoute
-  '/api/public/interview-report': typeof ApiPublicInterviewReportRoute
-  '/api/public/interview-voice': typeof ApiPublicInterviewVoiceRoute
-  '/api/public/jobs-apify': typeof ApiPublicJobsApifyRoute
-  '/api/public/match-jobs': typeof ApiPublicMatchJobsRoute
-  '/api/public/notify-policy-update': typeof ApiPublicNotifyPolicyUpdateRoute
-  '/api/public/oauth-forensics': typeof ApiPublicOauthForensicsRoute
-  '/api/public/parse-job-url': typeof ApiPublicParseJobUrlRoute
-  '/api/public/payments-portal': typeof ApiPublicPaymentsPortalRoute
-  '/api/public/payments-webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/api/public/permission-denied': typeof ApiPublicPermissionDeniedRoute
-  '/api/public/practice-plan': typeof ApiPublicPracticePlanRoute
-  '/api/public/recommend-jobs': typeof ApiPublicRecommendJobsRoute
-  '/api/public/resolve-discount': typeof ApiPublicResolveDiscountRoute
-  '/api/public/revenuecat-sync': typeof ApiPublicRevenuecatSyncRoute
-  '/api/public/search-console': typeof ApiPublicSearchConsoleRoute
-  '/api/public/search-jobs': typeof ApiPublicSearchJobsRoute
-  '/api/public/security-digest': typeof ApiPublicSecurityDigestRoute
-  '/api/public/security-scans': typeof ApiPublicSecurityScansRoute
-  '/api/public/send-notification': typeof ApiPublicSendNotificationRoute
-  '/api/public/seo-monitor': typeof ApiPublicSeoMonitorRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_app/affiliate/': typeof AppAffiliateIndexRoute
   '/_app/interview/': typeof AppInterviewIndexRoute
-  '/api/public/email/click': typeof ApiPublicEmailClickRoute
-  '/api/public/email/open': typeof ApiPublicEmailOpenRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/ai-interview-coach'
-    | '/ai-resume-builder'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -1075,7 +471,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refund-policy'
     | '/reset-password'
-    | '/status'
     | '/terms'
     | '/$'
     | '/apply'
@@ -1084,101 +479,37 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/manage-subscription'
     | '/match'
-    | '/motion-playground'
-    | '/onboarding'
     | '/pipeline'
     | '/resume'
     | '/settings'
     | '/welcome'
     | '/blog/ai-resume-optimization'
     | '/career-advice/$slug'
-    | '/email/unsubscribe'
     | '/job-search/$slug'
-    | '/blog/'
     | '/career-advice/'
     | '/job-search/'
     | '/.lovable/oauth/consent'
     | '/admin/affiliates'
-    | '/admin/api-health'
     | '/admin/audit-log'
-    | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
-    | '/admin/brand-metadata'
     | '/admin/digest-preview'
     | '/admin/discounts'
-    | '/admin/email-ops'
     | '/admin/legal'
     | '/admin/nav-analytics'
-    | '/admin/oauth-forensics'
     | '/admin/paddle'
     | '/admin/payments-status'
-    | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
-    | '/admin/security-scans'
     | '/admin/seo-monitor'
-    | '/admin/seo-performance'
     | '/admin/verifications'
     | '/affiliate/apply'
     | '/affiliate/dashboard'
     | '/affiliate/resources'
     | '/interview/history'
-    | '/api/public/admin-email-ops'
-    | '/api/public/admin-endpoint-policy'
-    | '/api/public/admin-rpc'
-    | '/api/public/admin-webhook-replay'
-    | '/api/public/admin-webhook-simulate'
-    | '/api/public/affiliate-public'
-    | '/api/public/analyze-resume'
-    | '/api/public/brand-metadata'
-    | '/api/public/calendar-sync'
-    | '/api/public/career-plan'
-    | '/api/public/company-research'
-    | '/api/public/csp-alerts'
-    | '/api/public/csp-report'
-    | '/api/public/daily-digest'
-    | '/api/public/delete-account'
-    | '/api/public/dmarc-ingest'
-    | '/api/public/email-anomaly'
-    | '/api/public/email-auth-check'
-    | '/api/public/generate-application'
-    | '/api/public/get-paddle-price'
-    | '/api/public/interview-coach'
-    | '/api/public/interview-realtime-token'
-    | '/api/public/interview-report'
-    | '/api/public/interview-voice'
-    | '/api/public/jobs-apify'
-    | '/api/public/match-jobs'
-    | '/api/public/notify-policy-update'
-    | '/api/public/oauth-forensics'
-    | '/api/public/parse-job-url'
-    | '/api/public/payments-portal'
-    | '/api/public/payments-webhook'
-    | '/api/public/permission-denied'
-    | '/api/public/practice-plan'
-    | '/api/public/recommend-jobs'
-    | '/api/public/resolve-discount'
-    | '/api/public/revenuecat-sync'
-    | '/api/public/search-console'
-    | '/api/public/search-jobs'
-    | '/api/public/security-digest'
-    | '/api/public/security-scans'
-    | '/api/public/send-notification'
-    | '/api/public/seo-monitor'
-    | '/lovable/email/suppression'
     | '/affiliate/'
     | '/interview/'
-    | '/api/public/email/click'
-    | '/api/public/email/open'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
-    | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/ai-interview-coach'
-    | '/ai-resume-builder'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -1189,7 +520,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refund-policy'
     | '/reset-password'
-    | '/status'
     | '/terms'
     | '/$'
     | '/apply'
@@ -1198,103 +528,39 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/manage-subscription'
     | '/match'
-    | '/motion-playground'
-    | '/onboarding'
     | '/pipeline'
     | '/resume'
     | '/settings'
     | '/welcome'
     | '/blog/ai-resume-optimization'
     | '/career-advice/$slug'
-    | '/email/unsubscribe'
     | '/job-search/$slug'
     | '/'
-    | '/blog'
     | '/career-advice'
     | '/job-search'
     | '/.lovable/oauth/consent'
     | '/admin/affiliates'
-    | '/admin/api-health'
     | '/admin/audit-log'
-    | '/admin/auth-email-preview'
     | '/admin/blog-analytics'
-    | '/admin/brand-metadata'
     | '/admin/digest-preview'
     | '/admin/discounts'
-    | '/admin/email-ops'
     | '/admin/legal'
     | '/admin/nav-analytics'
-    | '/admin/oauth-forensics'
     | '/admin/paddle'
     | '/admin/payments-status'
-    | '/admin/rate-limits'
     | '/admin/search-console'
     | '/admin/security-log'
-    | '/admin/security-scans'
     | '/admin/seo-monitor'
-    | '/admin/seo-performance'
     | '/admin/verifications'
     | '/affiliate/apply'
     | '/affiliate/dashboard'
     | '/affiliate/resources'
     | '/interview/history'
-    | '/api/public/admin-email-ops'
-    | '/api/public/admin-endpoint-policy'
-    | '/api/public/admin-rpc'
-    | '/api/public/admin-webhook-replay'
-    | '/api/public/admin-webhook-simulate'
-    | '/api/public/affiliate-public'
-    | '/api/public/analyze-resume'
-    | '/api/public/brand-metadata'
-    | '/api/public/calendar-sync'
-    | '/api/public/career-plan'
-    | '/api/public/company-research'
-    | '/api/public/csp-alerts'
-    | '/api/public/csp-report'
-    | '/api/public/daily-digest'
-    | '/api/public/delete-account'
-    | '/api/public/dmarc-ingest'
-    | '/api/public/email-anomaly'
-    | '/api/public/email-auth-check'
-    | '/api/public/generate-application'
-    | '/api/public/get-paddle-price'
-    | '/api/public/interview-coach'
-    | '/api/public/interview-realtime-token'
-    | '/api/public/interview-report'
-    | '/api/public/interview-voice'
-    | '/api/public/jobs-apify'
-    | '/api/public/match-jobs'
-    | '/api/public/notify-policy-update'
-    | '/api/public/oauth-forensics'
-    | '/api/public/parse-job-url'
-    | '/api/public/payments-portal'
-    | '/api/public/payments-webhook'
-    | '/api/public/permission-denied'
-    | '/api/public/practice-plan'
-    | '/api/public/recommend-jobs'
-    | '/api/public/resolve-discount'
-    | '/api/public/revenuecat-sync'
-    | '/api/public/search-console'
-    | '/api/public/search-jobs'
-    | '/api/public/security-digest'
-    | '/api/public/security-scans'
-    | '/api/public/send-notification'
-    | '/api/public/seo-monitor'
-    | '/lovable/email/suppression'
     | '/affiliate'
     | '/interview'
-    | '/api/public/email/click'
-    | '/api/public/email/open'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
-    | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/_app'
-    | '/ai-interview-coach'
-    | '/ai-resume-builder'
     | '/ats-resume-checker'
     | '/auth'
     | '/cookie-policy'
@@ -1305,7 +571,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refund-policy'
     | '/reset-password'
-    | '/status'
     | '/terms'
     | '/_app/$'
     | '/_app/apply'
@@ -1314,104 +579,40 @@ export interface FileRouteTypes {
     | '/_app/jobs'
     | '/_app/manage-subscription'
     | '/_app/match'
-    | '/_app/motion-playground'
-    | '/_app/onboarding'
     | '/_app/pipeline'
     | '/_app/resume'
     | '/_app/settings'
     | '/_app/welcome'
     | '/blog/ai-resume-optimization'
     | '/career-advice/$slug'
-    | '/email/unsubscribe'
     | '/job-search/$slug'
     | '/_app/'
-    | '/blog/'
     | '/career-advice/'
     | '/job-search/'
     | '/.lovable/oauth/consent'
     | '/_app/admin/affiliates'
-    | '/_app/admin/api-health'
     | '/_app/admin/audit-log'
-    | '/_app/admin/auth-email-preview'
     | '/_app/admin/blog-analytics'
-    | '/_app/admin/brand-metadata'
     | '/_app/admin/digest-preview'
     | '/_app/admin/discounts'
-    | '/_app/admin/email-ops'
     | '/_app/admin/legal'
     | '/_app/admin/nav-analytics'
-    | '/_app/admin/oauth-forensics'
     | '/_app/admin/paddle'
     | '/_app/admin/payments-status'
-    | '/_app/admin/rate-limits'
     | '/_app/admin/search-console'
     | '/_app/admin/security-log'
-    | '/_app/admin/security-scans'
     | '/_app/admin/seo-monitor'
-    | '/_app/admin/seo-performance'
     | '/_app/admin/verifications'
     | '/_app/affiliate/apply'
     | '/_app/affiliate/dashboard'
     | '/_app/affiliate/resources'
     | '/_app/interview/history'
-    | '/api/public/admin-email-ops'
-    | '/api/public/admin-endpoint-policy'
-    | '/api/public/admin-rpc'
-    | '/api/public/admin-webhook-replay'
-    | '/api/public/admin-webhook-simulate'
-    | '/api/public/affiliate-public'
-    | '/api/public/analyze-resume'
-    | '/api/public/brand-metadata'
-    | '/api/public/calendar-sync'
-    | '/api/public/career-plan'
-    | '/api/public/company-research'
-    | '/api/public/csp-alerts'
-    | '/api/public/csp-report'
-    | '/api/public/daily-digest'
-    | '/api/public/delete-account'
-    | '/api/public/dmarc-ingest'
-    | '/api/public/email-anomaly'
-    | '/api/public/email-auth-check'
-    | '/api/public/generate-application'
-    | '/api/public/get-paddle-price'
-    | '/api/public/interview-coach'
-    | '/api/public/interview-realtime-token'
-    | '/api/public/interview-report'
-    | '/api/public/interview-voice'
-    | '/api/public/jobs-apify'
-    | '/api/public/match-jobs'
-    | '/api/public/notify-policy-update'
-    | '/api/public/oauth-forensics'
-    | '/api/public/parse-job-url'
-    | '/api/public/payments-portal'
-    | '/api/public/payments-webhook'
-    | '/api/public/permission-denied'
-    | '/api/public/practice-plan'
-    | '/api/public/recommend-jobs'
-    | '/api/public/resolve-discount'
-    | '/api/public/revenuecat-sync'
-    | '/api/public/search-console'
-    | '/api/public/search-jobs'
-    | '/api/public/security-digest'
-    | '/api/public/security-scans'
-    | '/api/public/send-notification'
-    | '/api/public/seo-monitor'
-    | '/lovable/email/suppression'
     | '/_app/affiliate/'
     | '/_app/interview/'
-    | '/api/public/email/click'
-    | '/api/public/email/open'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
-    | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
-  AiInterviewCoachRoute: typeof AiInterviewCoachRoute
-  AiResumeBuilderRoute: typeof AiResumeBuilderRoute
   AtsResumeCheckerRoute: typeof AtsResumeCheckerRoute
   AuthRoute: typeof AuthRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
@@ -1422,66 +623,13 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   BlogAiResumeOptimizationRoute: typeof BlogAiResumeOptimizationRoute
   CareerAdviceSlugRoute: typeof CareerAdviceSlugRoute
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   JobSearchSlugRoute: typeof JobSearchSlugRoute
-  BlogIndexRoute: typeof BlogIndexRoute
   CareerAdviceIndexRoute: typeof CareerAdviceIndexRoute
   JobSearchIndexRoute: typeof JobSearchIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
-  ApiPublicAdminEmailOpsRoute: typeof ApiPublicAdminEmailOpsRoute
-  ApiPublicAdminEndpointPolicyRoute: typeof ApiPublicAdminEndpointPolicyRoute
-  ApiPublicAdminRpcRoute: typeof ApiPublicAdminRpcRoute
-  ApiPublicAdminWebhookReplayRoute: typeof ApiPublicAdminWebhookReplayRoute
-  ApiPublicAdminWebhookSimulateRoute: typeof ApiPublicAdminWebhookSimulateRoute
-  ApiPublicAffiliatePublicRoute: typeof ApiPublicAffiliatePublicRoute
-  ApiPublicAnalyzeResumeRoute: typeof ApiPublicAnalyzeResumeRoute
-  ApiPublicBrandMetadataRoute: typeof ApiPublicBrandMetadataRoute
-  ApiPublicCalendarSyncRoute: typeof ApiPublicCalendarSyncRoute
-  ApiPublicCareerPlanRoute: typeof ApiPublicCareerPlanRoute
-  ApiPublicCompanyResearchRoute: typeof ApiPublicCompanyResearchRoute
-  ApiPublicCspAlertsRoute: typeof ApiPublicCspAlertsRoute
-  ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
-  ApiPublicDailyDigestRoute: typeof ApiPublicDailyDigestRoute
-  ApiPublicDeleteAccountRoute: typeof ApiPublicDeleteAccountRoute
-  ApiPublicDmarcIngestRoute: typeof ApiPublicDmarcIngestRoute
-  ApiPublicEmailAnomalyRoute: typeof ApiPublicEmailAnomalyRoute
-  ApiPublicEmailAuthCheckRoute: typeof ApiPublicEmailAuthCheckRoute
-  ApiPublicGenerateApplicationRoute: typeof ApiPublicGenerateApplicationRoute
-  ApiPublicGetPaddlePriceRoute: typeof ApiPublicGetPaddlePriceRoute
-  ApiPublicInterviewCoachRoute: typeof ApiPublicInterviewCoachRoute
-  ApiPublicInterviewRealtimeTokenRoute: typeof ApiPublicInterviewRealtimeTokenRoute
-  ApiPublicInterviewReportRoute: typeof ApiPublicInterviewReportRoute
-  ApiPublicInterviewVoiceRoute: typeof ApiPublicInterviewVoiceRoute
-  ApiPublicJobsApifyRoute: typeof ApiPublicJobsApifyRoute
-  ApiPublicMatchJobsRoute: typeof ApiPublicMatchJobsRoute
-  ApiPublicNotifyPolicyUpdateRoute: typeof ApiPublicNotifyPolicyUpdateRoute
-  ApiPublicOauthForensicsRoute: typeof ApiPublicOauthForensicsRoute
-  ApiPublicParseJobUrlRoute: typeof ApiPublicParseJobUrlRoute
-  ApiPublicPaymentsPortalRoute: typeof ApiPublicPaymentsPortalRoute
-  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
-  ApiPublicPermissionDeniedRoute: typeof ApiPublicPermissionDeniedRoute
-  ApiPublicPracticePlanRoute: typeof ApiPublicPracticePlanRoute
-  ApiPublicRecommendJobsRoute: typeof ApiPublicRecommendJobsRoute
-  ApiPublicResolveDiscountRoute: typeof ApiPublicResolveDiscountRoute
-  ApiPublicRevenuecatSyncRoute: typeof ApiPublicRevenuecatSyncRoute
-  ApiPublicSearchConsoleRoute: typeof ApiPublicSearchConsoleRoute
-  ApiPublicSearchJobsRoute: typeof ApiPublicSearchJobsRoute
-  ApiPublicSecurityDigestRoute: typeof ApiPublicSecurityDigestRoute
-  ApiPublicSecurityScansRoute: typeof ApiPublicSecurityScansRoute
-  ApiPublicSendNotificationRoute: typeof ApiPublicSendNotificationRoute
-  ApiPublicSeoMonitorRoute: typeof ApiPublicSeoMonitorRoute
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
-  ApiPublicEmailClickRoute: typeof ApiPublicEmailClickRoute
-  ApiPublicEmailOpenRoute: typeof ApiPublicEmailOpenRoute
-  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
-  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
-  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1491,20 +639,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-interview-coach': {
-      id: '/ai-interview-coach'
-      path: '/ai-interview-coach'
-      fullPath: '/ai-interview-coach'
-      preLoaderRoute: typeof AiInterviewCoachRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-resume-builder': {
-      id: '/ai-resume-builder'
-      path: '/ai-resume-builder'
-      fullPath: '/ai-resume-builder'
-      preLoaderRoute: typeof AiResumeBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ats-resume-checker': {
@@ -1577,13 +711,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/status': {
-      id: '/status'
-      path: '/status'
-      fullPath: '/status'
-      preLoaderRoute: typeof StatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -1647,20 +774,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMatchRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/motion-playground': {
-      id: '/_app/motion-playground'
-      path: '/motion-playground'
-      fullPath: '/motion-playground'
-      preLoaderRoute: typeof AppMotionPlaygroundRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/onboarding': {
-      id: '/_app/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof AppOnboardingRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/pipeline': {
       id: '/_app/pipeline'
       path: '/pipeline'
@@ -1689,13 +802,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWelcomeRouteImport
       parentRoute: typeof AppRoute
     }
-    '/blog/': {
-      id: '/blog/'
-      path: '/blog'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/blog/ai-resume-optimization': {
       id: '/blog/ai-resume-optimization'
       path: '/blog/ai-resume-optimization'
@@ -1715,13 +821,6 @@ declare module '@tanstack/react-router' {
       path: '/career-advice/$slug'
       fullPath: '/career-advice/$slug'
       preLoaderRoute: typeof CareerAdviceSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/job-search/': {
@@ -1752,13 +851,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAffiliatesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin/api-health': {
-      id: '/_app/admin/api-health'
-      path: '/admin/api-health'
-      fullPath: '/admin/api-health'
-      preLoaderRoute: typeof AppAdminApiHealthRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/admin/audit-log': {
       id: '/_app/admin/audit-log'
       path: '/admin/audit-log'
@@ -1766,25 +858,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAuditLogRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin/auth-email-preview': {
-      id: '/_app/admin/auth-email-preview'
-      path: '/admin/auth-email-preview'
-      fullPath: '/admin/auth-email-preview'
-      preLoaderRoute: typeof AppAdminAuthEmailPreviewRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/admin/blog-analytics': {
       id: '/_app/admin/blog-analytics'
       path: '/admin/blog-analytics'
       fullPath: '/admin/blog-analytics'
       preLoaderRoute: typeof AppAdminBlogAnalyticsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/admin/brand-metadata': {
-      id: '/_app/admin/brand-metadata'
-      path: '/admin/brand-metadata'
-      fullPath: '/admin/brand-metadata'
-      preLoaderRoute: typeof AppAdminBrandMetadataRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/digest-preview': {
@@ -1801,13 +879,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminDiscountsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin/email-ops': {
-      id: '/_app/admin/email-ops'
-      path: '/admin/email-ops'
-      fullPath: '/admin/email-ops'
-      preLoaderRoute: typeof AppAdminEmailOpsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/admin/legal': {
       id: '/_app/admin/legal'
       path: '/admin/legal'
@@ -1820,13 +891,6 @@ declare module '@tanstack/react-router' {
       path: '/admin/nav-analytics'
       fullPath: '/admin/nav-analytics'
       preLoaderRoute: typeof AppAdminNavAnalyticsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/admin/oauth-forensics': {
-      id: '/_app/admin/oauth-forensics'
-      path: '/admin/oauth-forensics'
-      fullPath: '/admin/oauth-forensics'
-      preLoaderRoute: typeof AppAdminOauthForensicsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/paddle': {
@@ -1843,13 +907,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminPaymentsStatusRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin/rate-limits': {
-      id: '/_app/admin/rate-limits'
-      path: '/admin/rate-limits'
-      fullPath: '/admin/rate-limits'
-      preLoaderRoute: typeof AppAdminRateLimitsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/admin/search-console': {
       id: '/_app/admin/search-console'
       path: '/admin/search-console'
@@ -1864,25 +921,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminSecurityLogRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin/security-scans': {
-      id: '/_app/admin/security-scans'
-      path: '/admin/security-scans'
-      fullPath: '/admin/security-scans'
-      preLoaderRoute: typeof AppAdminSecurityScansRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/admin/seo-monitor': {
       id: '/_app/admin/seo-monitor'
       path: '/admin/seo-monitor'
       fullPath: '/admin/seo-monitor'
       preLoaderRoute: typeof AppAdminSeoMonitorRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/admin/seo-performance': {
-      id: '/_app/admin/seo-performance'
-      path: '/admin/seo-performance'
-      fullPath: '/admin/seo-performance'
-      preLoaderRoute: typeof AppAdminSeoPerformanceRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/verifications': {
@@ -1934,356 +977,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInterviewHistoryRouteImport
       parentRoute: typeof AppRoute
     }
-    '/api/public/admin-email-ops': {
-      id: '/api/public/admin-email-ops'
-      path: '/api/public/admin-email-ops'
-      fullPath: '/api/public/admin-email-ops'
-      preLoaderRoute: typeof ApiPublicAdminEmailOpsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/admin-endpoint-policy': {
-      id: '/api/public/admin-endpoint-policy'
-      path: '/api/public/admin-endpoint-policy'
-      fullPath: '/api/public/admin-endpoint-policy'
-      preLoaderRoute: typeof ApiPublicAdminEndpointPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/admin-rpc': {
-      id: '/api/public/admin-rpc'
-      path: '/api/public/admin-rpc'
-      fullPath: '/api/public/admin-rpc'
-      preLoaderRoute: typeof ApiPublicAdminRpcRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/admin-webhook-replay': {
-      id: '/api/public/admin-webhook-replay'
-      path: '/api/public/admin-webhook-replay'
-      fullPath: '/api/public/admin-webhook-replay'
-      preLoaderRoute: typeof ApiPublicAdminWebhookReplayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/admin-webhook-simulate': {
-      id: '/api/public/admin-webhook-simulate'
-      path: '/api/public/admin-webhook-simulate'
-      fullPath: '/api/public/admin-webhook-simulate'
-      preLoaderRoute: typeof ApiPublicAdminWebhookSimulateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/affiliate-public': {
-      id: '/api/public/affiliate-public'
-      path: '/api/public/affiliate-public'
-      fullPath: '/api/public/affiliate-public'
-      preLoaderRoute: typeof ApiPublicAffiliatePublicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/analyze-resume': {
-      id: '/api/public/analyze-resume'
-      path: '/api/public/analyze-resume'
-      fullPath: '/api/public/analyze-resume'
-      preLoaderRoute: typeof ApiPublicAnalyzeResumeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/brand-metadata': {
-      id: '/api/public/brand-metadata'
-      path: '/api/public/brand-metadata'
-      fullPath: '/api/public/brand-metadata'
-      preLoaderRoute: typeof ApiPublicBrandMetadataRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/calendar-sync': {
-      id: '/api/public/calendar-sync'
-      path: '/api/public/calendar-sync'
-      fullPath: '/api/public/calendar-sync'
-      preLoaderRoute: typeof ApiPublicCalendarSyncRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/career-plan': {
-      id: '/api/public/career-plan'
-      path: '/api/public/career-plan'
-      fullPath: '/api/public/career-plan'
-      preLoaderRoute: typeof ApiPublicCareerPlanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/company-research': {
-      id: '/api/public/company-research'
-      path: '/api/public/company-research'
-      fullPath: '/api/public/company-research'
-      preLoaderRoute: typeof ApiPublicCompanyResearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/csp-alerts': {
-      id: '/api/public/csp-alerts'
-      path: '/api/public/csp-alerts'
-      fullPath: '/api/public/csp-alerts'
-      preLoaderRoute: typeof ApiPublicCspAlertsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/csp-report': {
-      id: '/api/public/csp-report'
-      path: '/api/public/csp-report'
-      fullPath: '/api/public/csp-report'
-      preLoaderRoute: typeof ApiPublicCspReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/daily-digest': {
-      id: '/api/public/daily-digest'
-      path: '/api/public/daily-digest'
-      fullPath: '/api/public/daily-digest'
-      preLoaderRoute: typeof ApiPublicDailyDigestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/delete-account': {
-      id: '/api/public/delete-account'
-      path: '/api/public/delete-account'
-      fullPath: '/api/public/delete-account'
-      preLoaderRoute: typeof ApiPublicDeleteAccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/dmarc-ingest': {
-      id: '/api/public/dmarc-ingest'
-      path: '/api/public/dmarc-ingest'
-      fullPath: '/api/public/dmarc-ingest'
-      preLoaderRoute: typeof ApiPublicDmarcIngestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/email-anomaly': {
-      id: '/api/public/email-anomaly'
-      path: '/api/public/email-anomaly'
-      fullPath: '/api/public/email-anomaly'
-      preLoaderRoute: typeof ApiPublicEmailAnomalyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/email-auth-check': {
-      id: '/api/public/email-auth-check'
-      path: '/api/public/email-auth-check'
-      fullPath: '/api/public/email-auth-check'
-      preLoaderRoute: typeof ApiPublicEmailAuthCheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/generate-application': {
-      id: '/api/public/generate-application'
-      path: '/api/public/generate-application'
-      fullPath: '/api/public/generate-application'
-      preLoaderRoute: typeof ApiPublicGenerateApplicationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/get-paddle-price': {
-      id: '/api/public/get-paddle-price'
-      path: '/api/public/get-paddle-price'
-      fullPath: '/api/public/get-paddle-price'
-      preLoaderRoute: typeof ApiPublicGetPaddlePriceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/interview-coach': {
-      id: '/api/public/interview-coach'
-      path: '/api/public/interview-coach'
-      fullPath: '/api/public/interview-coach'
-      preLoaderRoute: typeof ApiPublicInterviewCoachRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/interview-realtime-token': {
-      id: '/api/public/interview-realtime-token'
-      path: '/api/public/interview-realtime-token'
-      fullPath: '/api/public/interview-realtime-token'
-      preLoaderRoute: typeof ApiPublicInterviewRealtimeTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/interview-report': {
-      id: '/api/public/interview-report'
-      path: '/api/public/interview-report'
-      fullPath: '/api/public/interview-report'
-      preLoaderRoute: typeof ApiPublicInterviewReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/interview-voice': {
-      id: '/api/public/interview-voice'
-      path: '/api/public/interview-voice'
-      fullPath: '/api/public/interview-voice'
-      preLoaderRoute: typeof ApiPublicInterviewVoiceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/jobs-apify': {
-      id: '/api/public/jobs-apify'
-      path: '/api/public/jobs-apify'
-      fullPath: '/api/public/jobs-apify'
-      preLoaderRoute: typeof ApiPublicJobsApifyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/match-jobs': {
-      id: '/api/public/match-jobs'
-      path: '/api/public/match-jobs'
-      fullPath: '/api/public/match-jobs'
-      preLoaderRoute: typeof ApiPublicMatchJobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/notify-policy-update': {
-      id: '/api/public/notify-policy-update'
-      path: '/api/public/notify-policy-update'
-      fullPath: '/api/public/notify-policy-update'
-      preLoaderRoute: typeof ApiPublicNotifyPolicyUpdateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/oauth-forensics': {
-      id: '/api/public/oauth-forensics'
-      path: '/api/public/oauth-forensics'
-      fullPath: '/api/public/oauth-forensics'
-      preLoaderRoute: typeof ApiPublicOauthForensicsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/parse-job-url': {
-      id: '/api/public/parse-job-url'
-      path: '/api/public/parse-job-url'
-      fullPath: '/api/public/parse-job-url'
-      preLoaderRoute: typeof ApiPublicParseJobUrlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/payments-portal': {
-      id: '/api/public/payments-portal'
-      path: '/api/public/payments-portal'
-      fullPath: '/api/public/payments-portal'
-      preLoaderRoute: typeof ApiPublicPaymentsPortalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/payments-webhook': {
-      id: '/api/public/payments-webhook'
-      path: '/api/public/payments-webhook'
-      fullPath: '/api/public/payments-webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/permission-denied': {
-      id: '/api/public/permission-denied'
-      path: '/api/public/permission-denied'
-      fullPath: '/api/public/permission-denied'
-      preLoaderRoute: typeof ApiPublicPermissionDeniedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/practice-plan': {
-      id: '/api/public/practice-plan'
-      path: '/api/public/practice-plan'
-      fullPath: '/api/public/practice-plan'
-      preLoaderRoute: typeof ApiPublicPracticePlanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/recommend-jobs': {
-      id: '/api/public/recommend-jobs'
-      path: '/api/public/recommend-jobs'
-      fullPath: '/api/public/recommend-jobs'
-      preLoaderRoute: typeof ApiPublicRecommendJobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/resolve-discount': {
-      id: '/api/public/resolve-discount'
-      path: '/api/public/resolve-discount'
-      fullPath: '/api/public/resolve-discount'
-      preLoaderRoute: typeof ApiPublicResolveDiscountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/revenuecat-sync': {
-      id: '/api/public/revenuecat-sync'
-      path: '/api/public/revenuecat-sync'
-      fullPath: '/api/public/revenuecat-sync'
-      preLoaderRoute: typeof ApiPublicRevenuecatSyncRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/search-console': {
-      id: '/api/public/search-console'
-      path: '/api/public/search-console'
-      fullPath: '/api/public/search-console'
-      preLoaderRoute: typeof ApiPublicSearchConsoleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/search-jobs': {
-      id: '/api/public/search-jobs'
-      path: '/api/public/search-jobs'
-      fullPath: '/api/public/search-jobs'
-      preLoaderRoute: typeof ApiPublicSearchJobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/security-digest': {
-      id: '/api/public/security-digest'
-      path: '/api/public/security-digest'
-      fullPath: '/api/public/security-digest'
-      preLoaderRoute: typeof ApiPublicSecurityDigestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/security-scans': {
-      id: '/api/public/security-scans'
-      path: '/api/public/security-scans'
-      fullPath: '/api/public/security-scans'
-      preLoaderRoute: typeof ApiPublicSecurityScansRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/send-notification': {
-      id: '/api/public/send-notification'
-      path: '/api/public/send-notification'
-      fullPath: '/api/public/send-notification'
-      preLoaderRoute: typeof ApiPublicSendNotificationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/seo-monitor': {
-      id: '/api/public/seo-monitor'
-      path: '/api/public/seo-monitor'
-      fullPath: '/api/public/seo-monitor'
-      preLoaderRoute: typeof ApiPublicSeoMonitorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/email/click': {
-      id: '/api/public/email/click'
-      path: '/api/public/email/click'
-      fullPath: '/api/public/email/click'
-      preLoaderRoute: typeof ApiPublicEmailClickRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/email/open': {
-      id: '/api/public/email/open'
-      path: '/api/public/email/open'
-      fullPath: '/api/public/email/open'
-      preLoaderRoute: typeof ApiPublicEmailOpenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -2295,33 +988,23 @@ interface AppRouteChildren {
   AppJobsRoute: typeof AppJobsRoute
   AppManageSubscriptionRoute: typeof AppManageSubscriptionRoute
   AppMatchRoute: typeof AppMatchRoute
-  AppMotionPlaygroundRoute: typeof AppMotionPlaygroundRoute
-  AppOnboardingRoute: typeof AppOnboardingRoute
   AppPipelineRoute: typeof AppPipelineRoute
   AppResumeRoute: typeof AppResumeRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppWelcomeRoute: typeof AppWelcomeRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAdminAffiliatesRoute: typeof AppAdminAffiliatesRoute
-  AppAdminApiHealthRoute: typeof AppAdminApiHealthRoute
   AppAdminAuditLogRoute: typeof AppAdminAuditLogRoute
-  AppAdminAuthEmailPreviewRoute: typeof AppAdminAuthEmailPreviewRoute
   AppAdminBlogAnalyticsRoute: typeof AppAdminBlogAnalyticsRoute
-  AppAdminBrandMetadataRoute: typeof AppAdminBrandMetadataRoute
   AppAdminDigestPreviewRoute: typeof AppAdminDigestPreviewRoute
   AppAdminDiscountsRoute: typeof AppAdminDiscountsRoute
-  AppAdminEmailOpsRoute: typeof AppAdminEmailOpsRoute
   AppAdminLegalRoute: typeof AppAdminLegalRoute
   AppAdminNavAnalyticsRoute: typeof AppAdminNavAnalyticsRoute
-  AppAdminOauthForensicsRoute: typeof AppAdminOauthForensicsRoute
   AppAdminPaddleRoute: typeof AppAdminPaddleRoute
   AppAdminPaymentsStatusRoute: typeof AppAdminPaymentsStatusRoute
-  AppAdminRateLimitsRoute: typeof AppAdminRateLimitsRoute
   AppAdminSearchConsoleRoute: typeof AppAdminSearchConsoleRoute
   AppAdminSecurityLogRoute: typeof AppAdminSecurityLogRoute
-  AppAdminSecurityScansRoute: typeof AppAdminSecurityScansRoute
   AppAdminSeoMonitorRoute: typeof AppAdminSeoMonitorRoute
-  AppAdminSeoPerformanceRoute: typeof AppAdminSeoPerformanceRoute
   AppAdminVerificationsRoute: typeof AppAdminVerificationsRoute
   AppAffiliateApplyRoute: typeof AppAffiliateApplyRoute
   AppAffiliateDashboardRoute: typeof AppAffiliateDashboardRoute
@@ -2339,33 +1022,23 @@ const AppRouteChildren: AppRouteChildren = {
   AppJobsRoute: AppJobsRoute,
   AppManageSubscriptionRoute: AppManageSubscriptionRoute,
   AppMatchRoute: AppMatchRoute,
-  AppMotionPlaygroundRoute: AppMotionPlaygroundRoute,
-  AppOnboardingRoute: AppOnboardingRoute,
   AppPipelineRoute: AppPipelineRoute,
   AppResumeRoute: AppResumeRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppWelcomeRoute: AppWelcomeRoute,
   AppIndexRoute: AppIndexRoute,
   AppAdminAffiliatesRoute: AppAdminAffiliatesRoute,
-  AppAdminApiHealthRoute: AppAdminApiHealthRoute,
   AppAdminAuditLogRoute: AppAdminAuditLogRoute,
-  AppAdminAuthEmailPreviewRoute: AppAdminAuthEmailPreviewRoute,
   AppAdminBlogAnalyticsRoute: AppAdminBlogAnalyticsRoute,
-  AppAdminBrandMetadataRoute: AppAdminBrandMetadataRoute,
   AppAdminDigestPreviewRoute: AppAdminDigestPreviewRoute,
   AppAdminDiscountsRoute: AppAdminDiscountsRoute,
-  AppAdminEmailOpsRoute: AppAdminEmailOpsRoute,
   AppAdminLegalRoute: AppAdminLegalRoute,
   AppAdminNavAnalyticsRoute: AppAdminNavAnalyticsRoute,
-  AppAdminOauthForensicsRoute: AppAdminOauthForensicsRoute,
   AppAdminPaddleRoute: AppAdminPaddleRoute,
   AppAdminPaymentsStatusRoute: AppAdminPaymentsStatusRoute,
-  AppAdminRateLimitsRoute: AppAdminRateLimitsRoute,
   AppAdminSearchConsoleRoute: AppAdminSearchConsoleRoute,
   AppAdminSecurityLogRoute: AppAdminSecurityLogRoute,
-  AppAdminSecurityScansRoute: AppAdminSecurityScansRoute,
   AppAdminSeoMonitorRoute: AppAdminSeoMonitorRoute,
-  AppAdminSeoPerformanceRoute: AppAdminSeoPerformanceRoute,
   AppAdminVerificationsRoute: AppAdminVerificationsRoute,
   AppAffiliateApplyRoute: AppAffiliateApplyRoute,
   AppAffiliateDashboardRoute: AppAffiliateDashboardRoute,
@@ -2379,8 +1052,6 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
-  AiInterviewCoachRoute: AiInterviewCoachRoute,
-  AiResumeBuilderRoute: AiResumeBuilderRoute,
   AtsResumeCheckerRoute: AtsResumeCheckerRoute,
   AuthRoute: AuthRoute,
   CookiePolicyRoute: CookiePolicyRoute,
@@ -2391,66 +1062,13 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   BlogAiResumeOptimizationRoute: BlogAiResumeOptimizationRoute,
   CareerAdviceSlugRoute: CareerAdviceSlugRoute,
-  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   JobSearchSlugRoute: JobSearchSlugRoute,
-  BlogIndexRoute: BlogIndexRoute,
   CareerAdviceIndexRoute: CareerAdviceIndexRoute,
   JobSearchIndexRoute: JobSearchIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
-  ApiPublicAdminEmailOpsRoute: ApiPublicAdminEmailOpsRoute,
-  ApiPublicAdminEndpointPolicyRoute: ApiPublicAdminEndpointPolicyRoute,
-  ApiPublicAdminRpcRoute: ApiPublicAdminRpcRoute,
-  ApiPublicAdminWebhookReplayRoute: ApiPublicAdminWebhookReplayRoute,
-  ApiPublicAdminWebhookSimulateRoute: ApiPublicAdminWebhookSimulateRoute,
-  ApiPublicAffiliatePublicRoute: ApiPublicAffiliatePublicRoute,
-  ApiPublicAnalyzeResumeRoute: ApiPublicAnalyzeResumeRoute,
-  ApiPublicBrandMetadataRoute: ApiPublicBrandMetadataRoute,
-  ApiPublicCalendarSyncRoute: ApiPublicCalendarSyncRoute,
-  ApiPublicCareerPlanRoute: ApiPublicCareerPlanRoute,
-  ApiPublicCompanyResearchRoute: ApiPublicCompanyResearchRoute,
-  ApiPublicCspAlertsRoute: ApiPublicCspAlertsRoute,
-  ApiPublicCspReportRoute: ApiPublicCspReportRoute,
-  ApiPublicDailyDigestRoute: ApiPublicDailyDigestRoute,
-  ApiPublicDeleteAccountRoute: ApiPublicDeleteAccountRoute,
-  ApiPublicDmarcIngestRoute: ApiPublicDmarcIngestRoute,
-  ApiPublicEmailAnomalyRoute: ApiPublicEmailAnomalyRoute,
-  ApiPublicEmailAuthCheckRoute: ApiPublicEmailAuthCheckRoute,
-  ApiPublicGenerateApplicationRoute: ApiPublicGenerateApplicationRoute,
-  ApiPublicGetPaddlePriceRoute: ApiPublicGetPaddlePriceRoute,
-  ApiPublicInterviewCoachRoute: ApiPublicInterviewCoachRoute,
-  ApiPublicInterviewRealtimeTokenRoute: ApiPublicInterviewRealtimeTokenRoute,
-  ApiPublicInterviewReportRoute: ApiPublicInterviewReportRoute,
-  ApiPublicInterviewVoiceRoute: ApiPublicInterviewVoiceRoute,
-  ApiPublicJobsApifyRoute: ApiPublicJobsApifyRoute,
-  ApiPublicMatchJobsRoute: ApiPublicMatchJobsRoute,
-  ApiPublicNotifyPolicyUpdateRoute: ApiPublicNotifyPolicyUpdateRoute,
-  ApiPublicOauthForensicsRoute: ApiPublicOauthForensicsRoute,
-  ApiPublicParseJobUrlRoute: ApiPublicParseJobUrlRoute,
-  ApiPublicPaymentsPortalRoute: ApiPublicPaymentsPortalRoute,
-  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
-  ApiPublicPermissionDeniedRoute: ApiPublicPermissionDeniedRoute,
-  ApiPublicPracticePlanRoute: ApiPublicPracticePlanRoute,
-  ApiPublicRecommendJobsRoute: ApiPublicRecommendJobsRoute,
-  ApiPublicResolveDiscountRoute: ApiPublicResolveDiscountRoute,
-  ApiPublicRevenuecatSyncRoute: ApiPublicRevenuecatSyncRoute,
-  ApiPublicSearchConsoleRoute: ApiPublicSearchConsoleRoute,
-  ApiPublicSearchJobsRoute: ApiPublicSearchJobsRoute,
-  ApiPublicSecurityDigestRoute: ApiPublicSecurityDigestRoute,
-  ApiPublicSecurityScansRoute: ApiPublicSecurityScansRoute,
-  ApiPublicSendNotificationRoute: ApiPublicSendNotificationRoute,
-  ApiPublicSeoMonitorRoute: ApiPublicSeoMonitorRoute,
-  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
-  ApiPublicEmailClickRoute: ApiPublicEmailClickRoute,
-  ApiPublicEmailOpenRoute: ApiPublicEmailOpenRoute,
-  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
-  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
-  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

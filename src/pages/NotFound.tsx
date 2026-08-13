@@ -1,4 +1,4 @@
-import { useLocation } from "@/lib/router-compat";
+import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 const NotFound = () => {
