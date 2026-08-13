@@ -163,10 +163,10 @@ type LayerProps = {
 export function DepthLayer({ children, className, z = 24, parallax }: LayerProps) {
   const stage = useContext(StageContext);
   const travel = parallax ?? z * 0.55;
-  const source = stage?.mx ?? useMotionValue(0);
-  const sourceY = stage?.my ?? useMotionValue(0);
-  const x = useTransform(source, [-1, 1], [-travel, travel]);
-  const y = useTransform(sourceY, [-1, 1], [-travel * 0.6, travel * 0.6]);
+  const fallbackX = useMotionValue(0);
+  const fallbackY = useMotionValue(0);
+  const x = useTransform(stage?.mx ?? fallbackX, [-1, 1], [-travel, travel]);
+  const y = useTransform(stage?.my ?? fallbackY, [-1, 1], [-travel * 0.6, travel * 0.6]);
 
   if (!stage?.active) {
     return <div className={className}>{children}</div>;
