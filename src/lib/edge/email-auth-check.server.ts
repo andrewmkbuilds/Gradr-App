@@ -142,13 +142,10 @@ export const handler = async (req: Request): Promise<Response> => {
 
   // Two callers are allowed: the scheduler (shared cron key) and a signed-in
   // admin pressing "Run check now". Everyone else is refused before any send.
+  // The publishable/anon key is public and must never authorize this endpoint.
   const cronKey = process.env["EMAIL_AUTH_CRON_KEY"];
   const presentedKey = req.headers.get("x-cron-key");
-  const anonKey = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
-  const apiKey = req.headers.get("apikey");
-  let authorized =
-    Boolean(cronKey && presentedKey && presentedKey === cronKey) ||
-    Boolean(anonKey && apiKey && apiKey === anonKey);
+  let authorized = Boolean(cronKey && presentedKey && presentedKey === cronKey);
 
 
   if (!authorized) {
