@@ -356,6 +356,19 @@
   /* Legacy stepper arrows are what makes the bar look broken/inset. */
   *::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
 
+  /* Global text selection: Yacht Club mahogany accent, never default blue. */
+  *::selection {
+    background-color: #733E24;
+    color: #FFFFFF;
+    text-shadow: none;
+  }
+  *::-moz-selection {
+    background-color: #733E24;
+    color: #FFFFFF;
+    text-shadow: none;
+  }
+
+
   /* Theme switch: colours cross-fade, nothing moves. */
   html.theme-transition,
   html.theme-transition *,
