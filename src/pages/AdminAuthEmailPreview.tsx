@@ -320,6 +320,49 @@ export default function AdminAuthEmailPreview() {
           Which dynamic action URL each authentication email was built with. Tokens are stored only
           as one-way fingerprints, so this record can never be used to sign in as someone.
         </p>
+
+        <div className="mb-4 flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="audit-from">From</Label>
+            <Input
+              id="audit-from"
+              type="date"
+              value={from}
+              max={to}
+              onChange={(e) => setFrom(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="audit-to">To</Label>
+            <Input
+              id="audit-to"
+              type="date"
+              value={to}
+              min={from}
+              onChange={(e) => setTo(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <Button variant="secondary" disabled={exporting !== null} onClick={() => download("json")}>
+            {exporting === "json" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Export JSON (email + audit)
+          </Button>
+          <Button variant="outline" disabled={exporting !== null} onClick={() => download("csv")}>
+            {exporting === "csv" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Export CSV (audit)
+          </Button>
+        </div>
+        {exportError && <p className="mb-3 text-sm text-destructive">{exportError}</p>}
+
         {(audit.data?.rows ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">No auth emails recorded in this window.</p>
         ) : (
@@ -333,6 +376,7 @@ export default function AdminAuthEmailPreview() {
                   <th className="py-2 pr-3">Link origin</th>
                   <th className="py-2 pr-3">Path</th>
                   <th className="py-2 pr-3">Redirect</th>
+                  <th className="py-2 pr-3">Allowlist</th>
                   <th className="py-2 pr-3">URL fingerprint</th>
                 </tr>
               </thead>
@@ -349,6 +393,18 @@ export default function AdminAuthEmailPreview() {
                     <td className="py-2 pr-3">{r.link_origin ?? "—"}</td>
                     <td className="py-2 pr-3">{r.link_path ?? "—"}</td>
                     <td className="py-2 pr-3 max-w-[16rem] truncate">{r.redirect_to ?? "—"}</td>
+                    <td className="py-2 pr-3">
+                      {r.allowlist_ok === false ? (
+                        <span
+                          className="text-destructive"
+                          title={(r.allowlist_reasons ?? []).join(" · ")}
+                        >
+                          {r.redirect_sanitized ? "Rewritten" : "Failed"}
+                        </span>
+                      ) : (
+                        <span className="text-success">Pass</span>
+                      )}
+                    </td>
                     <td className="py-2 pr-3 font-mono">{r.url_digest?.slice(0, 12) ?? "—"}</td>
                   </tr>
                 ))}
@@ -357,6 +413,7 @@ export default function AdminAuthEmailPreview() {
           </div>
         )}
       </Card>
+
     </div>
   );
 }
