@@ -73,6 +73,11 @@ const TRANSCRIPT = [
 
 const REPORT = {
   overallScore: 82,
+  communication: 84,
+  technicalDepth: 78,
+  structure: 80,
+  confidence: 76,
+  nextSteps: ["Draft two more impact stories."],
   summary: "Strong, specific answers with clear impact framing.",
   strengths: ["Quantified outcomes"],
   improvements: ["Tighten the setup of each story"],
@@ -118,12 +123,9 @@ describe("interview lifecycle: schedule -> setup -> debrief -> export", () => {
     await user.click(screen.getByRole("button", { name: /schedule/i }));
 
     await waitFor(() => expect(scheduleMock).toHaveBeenCalledTimes(1));
-    const payload = scheduleMock.mock.calls[0]![0] as {
-      title: string;
-      startsAt: string;
-      durationMin: number;
-      targetRole?: string;
-    };
+    const payload = (scheduleMock.mock.calls[0] as unknown as [
+      { title: string; startsAt: string; durationMin: number; targetRole?: string },
+    ])[0];
     expect(payload.targetRole).toBe("Senior Frontend Engineer");
     expect(Number.isNaN(Date.parse(payload.startsAt))).toBe(false);
     expect(payload.durationMin).toBeGreaterThan(0);
