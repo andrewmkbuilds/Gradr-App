@@ -133,6 +133,30 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
+        // Authorization: a valid JWT is not enough. Ordinary users may only mail
+        // themselves, only with self-service templates, and never with links
+        // pointing off Gradr's domains.
+        const authz = authorizeSend({
+          isSystem,
+          isAdmin,
+          callerEmail,
+          recipientEmail: effectiveRecipient,
+          recipientFixedByTemplate: Boolean(template.to),
+          templateName,
+          templateData,
+        })
+        if (!authz.ok) {
+          console.warn('Blocked transactional send', {
+            templateName,
+            recipient: redactEmail(effectiveRecipient),
+            caller: redactEmail(callerEmail),
+            reason: authz.error,
+          })
+          return Response.json({ error: authz.error }, { status: authz.status ?? 403 })
+        }
+
+
+
         // 1b. Idempotency guard — one send per idempotency key, forever.
         // Reserve the key first: a unique-violation means this exact email was
         // already accepted (webhook retry, double submit, queue reprocessing).
