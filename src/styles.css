@@ -165,8 +165,18 @@
     --accent: 195 20% 92%;
     --accent-foreground: 197 30% 18%;
 
+    /* ---------- Mahogany accent scale (light) ---------- */
+    --mahogany: 20 52% 30%;
+    --mahogany-foreground: 20 30% 97%;
+    --mahogany-hover: 20 56% 25%;
+    --mahogany-soft: 20 44% 92%;
+    --mahogany-tint: 20 46% 96%;
+    --mahogany-border: 20 34% 78%;
+    --mahogany-ink: 20 56% 26%;
+
     /* ---------- Status (harmonised, never neon) ---------- */
     --destructive: 6 56% 40%;
+
     --destructive-foreground: 20 20% 97%;
     --success: 166 44% 26%;
     --success-foreground: 20 20% 97%;
