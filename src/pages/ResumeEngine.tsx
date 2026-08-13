@@ -21,7 +21,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { handleAiFunctionError } from "@/lib/aiErrors";
 import { extractResumeText } from "@/lib/extractResumeText";
 import { ResumeVersions } from "@/components/resume/ResumeVersions";
 import { ResumeVersionDiff } from "@/components/resume/ResumeVersionDiff";
@@ -75,7 +74,7 @@ export default function ResumeEngine() {
 
   // Streamed analysis: milestones + an early partial result with the
   // deterministic scores, then the AI coaching notes.
-  const analysis_stream = useAiStream<AnalysisResult>({
+  const analysisStream = useAiStream<AnalysisResult>({
     fn: "analyze-resume",
     initialLabel: "Parsing your resume",
     onPartial: (partial) => setAnalysis(partial),
@@ -128,7 +127,7 @@ export default function ResumeEngine() {
 
       // Deterministic scores stream back first (as a `partial`), so the dials
       // fill in while the AI coaching notes are still being written.
-      const analysisData = await analysis_stream.start({
+      const analysisData = await analysisStream.start({
         resumeText: text,
         jobDescription,
         jobTitle,
@@ -174,7 +173,7 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(false);
     }
-  }, [user, jobDescription, jobTitle, analysis_stream]);
+  }, [user, jobDescription, jobTitle, analysisStream]);
 
   const handleRescan = async () => {
     if (!file) return;
@@ -309,6 +308,19 @@ export default function ResumeEngine() {
 
       {!uploading && !analyzing && <ResumeVersionDiff key={`diff-${versionsToken}`} />}
 
+      {/* Live analysis progress: cancel while it runs, retry if it fails. */}
+      <GenerationStream
+        status={analysisStream.status}
+        progress={analysisStream.progress}
+        label={analysisStream.label}
+        text={analysisStream.text}
+        error={analysisStream.error}
+        title="Resume analysis"
+        description="Scores and coaching notes are ready."
+        onCancel={analysisStream.cancel}
+        onRetry={analysisStream.retry}
+      />
+
       <AnimatePresence mode="wait">
         {!analysis && !uploading && !analyzing ? (
           <motion.div key="dropzone" {...stagger(0)} exit={{ opacity: 0 }}>
@@ -334,7 +346,7 @@ export default function ResumeEngine() {
               </label>
             </Magnetic>
           </motion.div>
-        ) : uploading || analyzing ? (
+        ) : uploading ? (
           <motion.div key="working" {...stagger(0)} exit={{ opacity: 0 }}>
             <Surface level={3} className="flex flex-col items-center justify-center gap-4 py-14 text-center">
               <div className="relative flex h-16 w-16 items-center justify-center">
@@ -348,11 +360,9 @@ export default function ResumeEngine() {
               </div>
               <div>
                 <h3 className="font-display text-lg text-foreground" role="status">
-                  {uploading ? "Uploading your resume" : "Scoring your resume"}
+                  Uploading your resume
                 </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {uploading ? "Encrypting and storing the file…" : "Parsing structure, keywords, impact and readability…"}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Encrypting and storing the file…</p>
               </div>
             </Surface>
           </motion.div>
