@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   CONTENT_SECURITY_POLICY,
+  CONTENT_SECURITY_POLICY_REPORT_ONLY,
+  CSP_REPORT_PATH,
+
   DISCLOSURE_HEADERS,
   OAUTH_SENSITIVE_PATHS,
   applySecurityHeaders,
