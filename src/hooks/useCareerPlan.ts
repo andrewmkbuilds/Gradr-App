@@ -87,7 +87,7 @@ export function useCareerPlan() {
         s.id === stepId ? { ...s, done, doneAt: done ? new Date().toISOString() : undefined } : s,
       );
       queryClient.setQueryData(key, { ...plan, steps });
-      const { error } = await supabase.from("career_plans").update({ steps }).eq("id", plan.id);
+      const { error } = await supabase.from("career_plans").update({ steps: steps as unknown as never }).eq("id", plan.id);
       if (error) {
         queryClient.setQueryData(key, plan);
         toast.error("Couldn't save that step");
