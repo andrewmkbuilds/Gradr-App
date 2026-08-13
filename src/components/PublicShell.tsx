@@ -56,7 +56,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
 
       <footer className="border-t border-border/60 py-8">
         <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Gradr — the AI career command center.</p>
+          <p>© {new Date().getFullYear()} Gradr — the AI career platform.</p>
           <nav aria-label="Footer" className="flex flex-wrap gap-4">
             {NAV.map((item) => (
               <Link key={item.to} to={item.to} className="hover:text-foreground">
