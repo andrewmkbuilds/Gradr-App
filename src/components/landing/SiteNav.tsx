@@ -244,8 +244,11 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
               <li key={n.label} className="relative">
                 <a
                   href={n.href}
+                  data-nav-item={n.href}
+                  data-active={isActive ? "true" : "false"}
                   aria-current={isActive ? "true" : undefined}
                   onClick={(e) => { if (goTo(n.href)) e.preventDefault(); }}
+                  onKeyDown={(e) => onItemKeyDown(e, n.href)}
                   className={`relative block rounded-full px-3 py-1.5 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -264,6 +267,7 @@ export function SiteNav({ items, authed, onStart, onLogin, onOpenApp }: Props) {
             );
           })}
         </ul>
+
 
         <div className="hidden shrink-0 items-center gap-2 md:flex">
           <MotionQuickToggle className="min-h-9 min-w-9" />
