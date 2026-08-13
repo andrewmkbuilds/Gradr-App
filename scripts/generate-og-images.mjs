@@ -82,7 +82,7 @@ function shell(inner, { pad = "68px 72px" } = {}) {
     -webkit-mask-image:radial-gradient(900px 520px at 78% 8%,#000 0%,transparent 78%)}
   .warm{position:absolute;inset:auto -170px -240px auto;width:560px;height:560px;border-radius:50%;
     background:radial-gradient(circle,${PALETTE.mahogany} 0%,rgba(115,62,36,0) 68%);
-    filter:blur(60px);opacity:.75}
+    filter:blur(60px);opacity:.9}
   .rule{position:absolute;left:0;right:0;bottom:0;height:6px;
     background:linear-gradient(90deg,${PALETTE.teal} 0%,${PALETTE.mahogany} 100%)}
   .top{display:flex;align-items:center;gap:16px;z-index:1}
@@ -150,7 +150,7 @@ const STATIC_CARDS = [
   {
     out: "og-image.jpg",
     root: true,
-    tagline: "AI career copilot for resumes, job matches and interviews — one workspace, offer to signed.",
+    tagline: "AI career copilot for resumes, job matches and interviews — one workspace, from first draft to signed offer.",
     pills: ["Resume intelligence", "Job matching", "Mock interviews", "Application pipeline"],
   },
   {
