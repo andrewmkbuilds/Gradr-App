@@ -36,6 +36,30 @@ export const CONTENT_SECURITY_POLICY = [
 export const STRICT_TRANSPORT_SECURITY = "max-age=63072000; includeSubDomains; preload";
 export const REFERRER_POLICY = "strict-origin-when-cross-origin";
 
+/**
+ * Paths that must never be indexed. `robots.txt` only asks politely and does not
+ * cover every crawler or the `/.lovable/*` and `/api/*` namespaces; the header
+ * is authoritative. Credential and third-party-authorization surfaces are the
+ * ones that get reported as deceptive when a crawler snapshots them.
+ */
+export const NOINDEX_PATH_PREFIXES = [
+  "/.lovable/",
+  "/api/",
+  "/auth",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/admin/",
+  "/mcp",
+] as const;
+
+export function shouldNoIndex(pathname: string): boolean {
+  return NOINDEX_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix),
+  );
+}
+
+
 /** Where browsers POST report-only CSP violations. */
 export const CSP_REPORT_PATH = "/api/public/csp-report";
 export const CSP_REPORT_GROUP = "csp-endpoint";
@@ -132,9 +156,14 @@ export function cspEnforcementEnabled(): boolean {
  */
 export function applySecurityHeaders(
   headers: Headers,
-  options: { secure: boolean; origin?: string; enforceCandidate?: boolean },
+  options: { secure: boolean; origin?: string; enforceCandidate?: boolean; pathname?: string },
 ): Headers {
   for (const name of DISCLOSURE_HEADERS) headers.delete(name);
+
+  if (options.pathname && shouldNoIndex(options.pathname) && !headers.has("x-robots-tag")) {
+    headers.set("x-robots-tag", "noindex, nofollow, noarchive");
+  }
+
 
   const reporting = [`report-uri ${CSP_REPORT_PATH}`, `report-to ${CSP_REPORT_GROUP}`].join("; ");
   const enforceCandidate = options.enforceCandidate ?? cspEnforcementEnabled();
