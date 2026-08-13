@@ -177,6 +177,7 @@ export default function AiInterviewCoach() {
       <JsonLd
         nodes={[
           softwareLd,
+          scoringLd,
           buildFaqLd(FAQS),
           buildBreadcrumbLd([
             { name: "Gradr", path: "/" },
