@@ -20,7 +20,7 @@ import {
 } from "@/components/motion";
 import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
 import {
-  HeroWorkspace, ResumeVisual, MatchVisual, ApplicationVisual,
+  ResumeVisual, MatchVisual, ApplicationVisual,
   InterviewVisual, AssistantVisual, AnalyticsVisual,
 } from "@/components/landing/visuals";
 
@@ -347,6 +347,8 @@ export default function Landing() {
           </div>
         )}
       </header>
+
+      <ScrollProgress />
 
       {/* -------------------------------- hero -------------------------------- */}
       <main id="hero">
