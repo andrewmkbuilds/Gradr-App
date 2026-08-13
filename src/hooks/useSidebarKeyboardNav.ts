@@ -31,7 +31,7 @@ export function useSidebarKeyboardNav<T extends HTMLElement>(
       // Skip rows inside a collapsed disclosure or an explicitly hidden subtree.
       // Checked structurally (not via offsetParent) so the order stays stable
       // while the accordion is mid-animation.
-      return !el.closest('[data-state="closed"],[hidden],[aria-hidden="true"]');
+      return !el.closest('[data-nav-panel][data-state="closed"],[hidden],[aria-hidden="true"]');
     });
   }, [containerRef]);
 

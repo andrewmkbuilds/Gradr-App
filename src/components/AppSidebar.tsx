@@ -187,6 +187,8 @@ export function AppSidebar() {
 
                         <CollapsibleContent
                           id={panelId}
+                          data-nav-panel=""
+
                           className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
                         >
                           <ul
