@@ -1061,7 +1061,7 @@ export default function Landing() {
       </main>
 
       {/* --------------------------------- footer ------------------------------ */}
-      <footer className="border-t border-border bg-card/40 px-5 py-14 sm:px-8">
+      <footer className="border-t border-border bg-card/40 py-14">
         <div className="page-shell grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
