@@ -8,6 +8,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { downloadCsv, downloadJson } from "@/lib/exportFile";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/app/PageHeader";
 
 
 interface SecurityEvent {
@@ -163,14 +164,13 @@ export default function AdminSecurityLog() {
   const selectCls = "px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="type-h1 text-foreground tracking-tight">Security Log</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Billing webhook events, entitlement checks, and AI-call authorization decisions, recorded per user.
-          Entries are written server-side only and cannot be edited or deleted.
-        </p>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Security log"
+        description="Billing webhook events, entitlement checks, and AI-call authorization decisions, recorded per user. Entries are written server-side only and cannot be edited or deleted."
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Tile label="Billing webhooks" value={counts.billing} icon={CreditCard} />

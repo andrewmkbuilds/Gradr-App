@@ -12,6 +12,7 @@ import {
   ScrollText,
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useAffiliate";
+import { PageHeader } from "@/components/app/PageHeader";
 import {
   useAdminAuditLog,
   useAuditActors,
@@ -79,14 +80,13 @@ export default function AdminAuditLog() {
     "px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="type-h1 text-foreground tracking-tight">Audit Log</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Every admin view, modification, and deletion of affiliate click and analytics event
-          records. Entries are append-only and cannot be edited or removed by anyone.
-        </p>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<ScrollText className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Audit log"
+        description="Every admin view, modification, and deletion of affiliate click and analytics event records. Entries are append-only and cannot be edited or removed by anyone."
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatTile label="Views" value={counts.view} icon={Eye} />

@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { currentPaymentsDiagnostics } from "@/lib/paymentsConfig";
 import { LEGAL_PAGES } from "@/content/legal";
 import { TIERS, CREDIT_PACKS } from "@/config/tiers";
+import { PageHeader } from "@/components/app/PageHeader";
+import { Activity } from "lucide-react";
 
 type CheckStatus = "pass" | "warn" | "fail";
 
@@ -165,18 +167,18 @@ export default function AdminPaymentsStatus() {
   const blocking = [...configRows, ...runtimeRows].filter((r) => r.status === "fail").length;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 py-8">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="type-h1 text-foreground">Payments status</h1>
-          <p className="text-muted-foreground">
-            Runtime verification of the Paddle configuration for this build.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<Activity className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Payments status"
+        description="Runtime verification of the Paddle configuration for this build."
+        meta={
           <Badge variant="outline" className={diag.ok ? "text-success" : "text-destructive"}>
             {diag.environment ? diag.environment.toUpperCase() : "UNCONFIGURED"}
           </Badge>
+        }
+        actions={
           <Button
             variant="outline"
             size="sm"
@@ -188,8 +190,8 @@ export default function AdminPaymentsStatus() {
             <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
             Re-check
           </Button>
-        </div>
-      </header>
+        }
+      />
 
       <Card
         className={`p-5 ${blocking ? "border-destructive/40 bg-destructive/5" : "border-success/40 bg-success/5"}`}

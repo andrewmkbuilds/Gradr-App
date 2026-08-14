@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BadgePercent, Check, Loader2, Plus, ShieldCheck, X } from "lucide-react";
+import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
 import { STATUS_COPY, type VerificationStatus } from "@/config/eligibility";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -185,13 +186,13 @@ export default function AdminDiscounts() {
   }, [redemptions.data, verifications.data]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 py-6">
-      <header>
-        <h1 className="type-h1 text-foreground">Discounts &amp; eligibility</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage verified-group pricing, campaigns and manual reviews.
-        </p>
-      </header>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<BadgePercent className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Discounts & eligibility"
+        description="Manage verified-group pricing, campaigns and manual reviews."
+      />
 
       <div className="grid gap-4 sm:grid-cols-4">
         {[

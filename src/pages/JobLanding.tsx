@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2, MapPin, Wifi } from "lucide-react";
 import { PublicShell } from "@/components/PublicShell";
+import { MarketingHero } from "@/components/marketing/MarketingHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FaqBlock } from "@/components/seo/FaqBlock";
 import { RelatedGuides } from "@/components/seo/RelatedGuides";
@@ -56,37 +57,39 @@ export default function JobLanding() {
           </Link>
         </nav>
 
-        <header className="space-y-4">
-          <p className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-            {location.remote ? (
-              <Wifi className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <MapPin className="h-4 w-4" aria-hidden="true" />
-            )}
-            {location.name}
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {landing.title}
-          </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground">{role.summary}</p>
-          <Link
-            to={ctaHref}
-            onClick={() =>
-              trackEvent("job_landing_cta_click", {
-                article: landing.slug,
-                location: "hero",
-                destination: "/auth",
-              })
-            }
-            className="inline-flex h-11 items-center gap-1.5 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground"
-          >
-            Match my resume to these roles
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </header>
+        <MarketingHero
+          above={
+            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-secondary">
+              {location.remote ? (
+                <Wifi className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <MapPin className="h-4 w-4" aria-hidden="true" />
+              )}
+              {location.name}
+            </p>
+          }
+          title={landing.title}
+          description={role.summary}
+          actions={
+            <Link
+              to={ctaHref}
+              onClick={() =>
+                trackEvent("job_landing_cta_click", {
+                  article: landing.slug,
+                  location: "hero",
+                  destination: "/auth",
+                })
+              }
+              className="inline-flex h-11 items-center gap-1.5 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground shadow-sm transition-transform hover:scale-[1.02] motion-reduce:transform-none"
+            >
+              Match my resume to these roles
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          }
+        />
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className="type-h2 text-foreground">
             Skills employers look for in {role.plural}
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -107,7 +110,7 @@ export default function JobLanding() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className="type-h2 text-foreground">
             What the role involves day to day
           </h2>
           <ul className="space-y-2">
@@ -121,7 +124,7 @@ export default function JobLanding() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className="type-h2 text-foreground">
             Searching {location.remote ? "remote roles" : `in ${location.name}`}
           </h2>
           <p className="text-muted-foreground">{location.blurb}</p>
@@ -138,7 +141,7 @@ export default function JobLanding() {
 
         {siblings.length > 0 && (
           <section className="space-y-3" aria-labelledby="other-locations">
-            <h2 id="other-locations" className="text-xl font-semibold text-foreground">
+            <h2 id="other-locations" className="type-h2 text-foreground">
               {role.name} jobs elsewhere
             </h2>
             <div className="flex flex-wrap gap-2">

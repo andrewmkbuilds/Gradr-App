@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Search } from "lucide-react";
 import { PublicShell } from "@/components/PublicShell";
+import { MarketingHero } from "@/components/marketing/MarketingHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FaqBlock } from "@/components/seo/FaqBlock";
 import { GUIDES, guidePath } from "@/content/guides";
@@ -84,16 +85,11 @@ export default function CareerAdvice() {
       <JsonLd nodes={jsonLd} label="career-advice-index" />
 
       <div className="space-y-10">
-        <header className="space-y-3">
-          <p className="text-sm font-medium text-primary">Career advice</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Guides for resumes, cover letters, and interviews
-          </h1>
-          <p className="max-w-2xl text-muted-foreground">
-            Straightforward, evidence-first advice for the three points where most applications are
-            won or lost. No filler, no invented statistics.
-          </p>
-        </header>
+        <MarketingHero
+          eyebrow="Career advice"
+          title="Guides for resumes, cover letters, and interviews"
+          description="Straightforward, evidence-first advice for the three points where most applications are won or lost. No filler, no invented statistics."
+        />
 
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />

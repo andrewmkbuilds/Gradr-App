@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { downloadCsv } from "@/lib/exportFile";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/app/PageHeader";
 
 /**
  * Navigation analytics for the sidebar, submenus, breadcrumbs and mobile nav.
@@ -155,19 +156,19 @@ export default function AdminNavAnalytics() {
   };
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Navigation analytics</h1>
-          <p className="text-sm text-muted-foreground">
-            Sidebar group opens, subtab click-through and the most-travelled navigation paths.
-          </p>
-        </div>
-        <Button onClick={exportCsv} variant="outline">
-          <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-          Export CSV
-        </Button>
-      </header>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<Compass className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Navigation analytics"
+        description="Sidebar group opens, subtab click-through and the most-travelled navigation paths."
+        actions={
+          <Button onClick={exportCsv} variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+            Export CSV
+          </Button>
+        }
+      />
 
       <Card>
         <CardContent className="flex flex-wrap items-end gap-4 pt-6">

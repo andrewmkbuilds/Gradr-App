@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Loader2, Check, X, Pause, Play, Search, ShieldAlert } from "lucide-react";
+import { Loader2, Check, X, Pause, Play, Search, ShieldAlert, Gift } from "lucide-react";
+import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,11 +31,13 @@ export default function AdminAffiliates() {
   if (!isAdmin) return <Navigate to="/" replace />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="type-h1 text-foreground tracking-tight">Affiliate Admin</h1>
-        <p className="text-sm text-muted-foreground mt-1">Review applications, manage affiliates, moderate commissions, and configure the program.</p>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<Gift className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Affiliate admin"
+        description="Review applications, manage affiliates, moderate commissions, and configure the program."
+      />
 
       <div className="flex gap-2 border-b border-border overflow-x-auto">
         {(["applications", "affiliates", "commissions", "payouts", "tiers", "settings"] as Tab[]).map((t) => (

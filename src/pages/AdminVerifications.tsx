@@ -33,6 +33,7 @@ import {
   type AdminVerificationRequest,
 } from "@/hooks/useAdminVerifications";
 import { REQUEST_STATUS_COPY, VERIFICATION_FORMS } from "@/config/verificationForms";
+import { PageHeader } from "@/components/app/PageHeader";
 
 const QUEUES = [
   { id: "pending", label: "Pending" },
@@ -52,18 +53,13 @@ export default function AdminVerifications() {
   const [open, setOpen] = useState<AdminVerificationRequest | null>(null);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 p-4 sm:p-6">
-      <header className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <ShieldCheck className="h-5 w-5 text-primary" aria-hidden="true" />
-        </span>
-        <div>
-          <h1 className="text-h2 text-foreground">Verification review</h1>
-          <p className="text-sm text-muted-foreground">
-            Approve, reject or ask for more information. Approving grants the discount immediately.
-          </p>
-        </div>
-      </header>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Verification review"
+        description="Approve, reject or ask for more information. Approving grants the discount immediately."
+      />
 
       <Tabs defaultValue="requests">
         <TabsList>

@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ArrowRight, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackEvent } from "@/lib/analytics";
 import { LEGAL_PAGES } from "@/content/legal";
+import { cn } from "@/lib/utils";
 
 interface PublicShellProps {
   children: React.ReactNode;
@@ -14,64 +16,179 @@ interface PublicShellProps {
 const NAV = [
   { label: "Career advice", to: "/career-advice" },
   { label: "Job search", to: "/job-search" },
+  { label: "ATS checker", to: "/ats-resume-checker" },
   { label: "Pricing", to: "/pricing" },
+];
+
+const PRODUCT_LINKS = [
+  { label: "Resume Intelligence", to: "/resume" },
+  { label: "AI Mock Interview", to: "/interview" },
+  { label: "Job matching", to: "/match" },
+  { label: "Application engine", to: "/apply" },
 ];
 
 /** Chrome for public, indexable pages (guides + job landing pages). */
 export function PublicShell({ children, source }: PublicShellProps) {
+  const { pathname } = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
-            <BrandLogo size={22} />
+    <div className="relative min-h-screen bg-background">
+      {/* Ambient Ocean Teal wash — decorative, sits behind everything. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[32rem] opacity-[0.14]"
+        style={{
+          background:
+            "radial-gradient(60rem 24rem at 20% -10%, hsl(var(--primary)) 0%, transparent 65%)",
+        }}
+      />
+
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+          <Link
+            to="/"
+            className="flex items-center gap-2 rounded-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <BrandLogo size={24} />
             Gradr
           </Link>
-          <nav aria-label="Primary" className="hidden items-center gap-5 sm:flex">
+
+          <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
             {NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                aria-current={isActive(item.to) ? "page" : undefined}
+                className={cn(
+                  "relative rounded-lg px-3 py-2 text-sm transition-colors",
+                  isActive(item.to)
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
               >
                 {item.label}
+                {isActive(item.to) && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-brand-secondary"
+                  />
+                )}
               </Link>
             ))}
           </nav>
+
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Link
+              to="/auth"
+              className="hidden h-10 items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+            >
+              Sign in
+            </Link>
+            <Link
               to="/auth?mode=signup"
               onClick={() => trackEvent("signup_cta_click", { source, location: "header" })}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] motion-reduce:transform-none"
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transform-none"
             >
               Get started
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Link>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground md:hidden"
+            >
+              {menuOpen ? <X className="h-4 w-4" aria-hidden="true" /> : <Menu className="h-4 w-4" aria-hidden="true" />}
+            </button>
           </div>
         </div>
+
+        {menuOpen && (
+          <nav aria-label="Mobile" className="border-t border-border/60 bg-background md:hidden">
+            <ul className="mx-auto max-w-6xl px-4 py-2">
+              {NAV.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    onClick={() => setMenuOpen(false)}
+                    className="block rounded-lg px-2 py-3 text-sm text-foreground hover:bg-muted"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 py-12 sm:py-16">{children}</main>
 
-      <footer className="border-t border-border/60 py-8">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Gradr — the AI career command center.</p>
-          <nav aria-label="Footer" className="flex flex-wrap gap-4">
-            {NAV.map((item) => (
-              <Link key={item.to} to={item.to} className="hover:text-foreground">
-                {item.label}
-              </Link>
-            ))}
-            {LEGAL_PAGES.map((page) => (
-              <Link key={page.path} to={page.path} className="hover:text-foreground">
-                {page.label}
-              </Link>
-            ))}
-            <Link to="/auth" className="hover:text-foreground">
-              Sign in
+      <footer className="border-t border-border/60 py-12">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-3">
+            <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
+              <BrandLogo size={22} />
+              Gradr
             </Link>
+            <p className="text-sm text-muted-foreground">
+              The AI career command center — resumes, matching, applications and interview practice
+              in one workflow.
+            </p>
+          </div>
+
+          <nav aria-label="Explore" className="space-y-3 text-sm">
+            <p className="type-overline text-muted-foreground">Explore</p>
+            <ul className="space-y-2">
+              {NAV.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="text-muted-foreground hover:text-foreground">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </nav>
+
+          <nav aria-label="Product" className="space-y-3 text-sm">
+            <p className="type-overline text-muted-foreground">Product</p>
+            <ul className="space-y-2">
+              {PRODUCT_LINKS.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="text-muted-foreground hover:text-foreground">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Legal" className="space-y-3 text-sm">
+            <p className="type-overline text-muted-foreground">Legal</p>
+            <ul className="space-y-2">
+              {LEGAL_PAGES.map((page) => (
+                <li key={page.path}>
+                  <Link to={page.path} className="text-muted-foreground hover:text-foreground">
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link to="/auth" className="text-muted-foreground hover:text-foreground">
+                  Sign in
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div className="mx-auto mt-10 max-w-6xl border-t border-border/60 px-4 pt-6 text-sm text-muted-foreground">
+          © {new Date().getFullYear()} Gradr. All rights reserved.
         </div>
       </footer>
     </div>
