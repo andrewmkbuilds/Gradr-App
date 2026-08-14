@@ -40,7 +40,7 @@ export const APP_URL = 'https://app.gradr.me'
 // at the CDN asset (content-addressed by id), not at /public/*, so a frontend
 // deploy or file rename can never break already-delivered mail.
 export const LOGO_URL =
-  'https://gradr.me/__l5e/assets-v1/344283be-10b7-4dab-8af4-1afe9b7233c3/gradr-email-logo-144.png'
+  'https://gradr.me/__l5e/assets-v1/7feb3a56-46b6-42eb-8c24-118235c86307/gradr-email-logo-144.png'
 export const SUPPORT_EMAIL = 'support@gradr.me'
 
 /** Append UTM params so email traffic is attributable in analytics. */
