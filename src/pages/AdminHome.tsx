@@ -74,6 +74,7 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
       { title: "Digest preview", description: "Render the daily briefing email.", url: "/admin/digest-preview", icon: Mail },
       { title: "Brand assets", description: "Logos, icons and social previews.", url: "/admin/brand-assets", icon: ImageIcon },
       { title: "Design system", description: "Tokens, elevation and components.", url: "/admin/design-system", icon: LayoutGrid },
+      { title: "QA checklist", description: "Loading, empty and error states per route.", url: "/admin/qa-checklist", icon: ClipboardCheck },
     ],
   },
 ];
