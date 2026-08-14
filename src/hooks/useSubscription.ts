@@ -190,6 +190,18 @@ export function useBillingActions() {
     toast.success("Purchase complete. Your plan is active.");
   }, [queryClient]);
 
+  /**
+   * Checkout outage handling: a dead upgrade button is the worst possible
+   * failure, so we always leave the user with a retry and a human to talk to.
+   */
+  const checkoutFailed = useCallback((retry: () => void) => {
+    toast.error("Checkout is temporarily unavailable", {
+      description: "The payment provider didn't respond. Retry, or email support@gradr.me and we'll set it up manually.",
+      duration: 12000,
+      action: { label: "Retry", onClick: retry },
+    });
+  }, []);
+
   const startSubscription = useCallback(
     async (interval: PlanInterval, plan: PlanKey = "pro") => {
       setPending(`${plan}-${interval}`);
@@ -197,13 +209,15 @@ export function useBillingActions() {
         const { url, completed } = await billingService.createCheckout({ plan, interval });
         if (url) openExternal(url);
         else if (completed) await refreshEntitlements();
-      } catch {
-        toast.error("Couldn't start checkout. Make sure billing is configured and try again.");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "";
+        if (message.toLowerCase().includes("sign in")) toast.error(message);
+        else checkoutFailed(() => void startSubscription(interval, plan));
       } finally {
         setPending(null);
       }
     },
-    [refreshEntitlements],
+    [refreshEntitlements, checkoutFailed],
   );
 
   const buyPack = useCallback(async (pack: string) => {
@@ -212,12 +226,15 @@ export function useBillingActions() {
       const { url, completed } = await billingService.createPackCheckout({ pack });
       if (url) openExternal(url);
       else if (completed) await refreshEntitlements();
-    } catch {
-      toast.error("Couldn't start checkout. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      if (message.toLowerCase().includes("sign in")) toast.error(message);
+      else checkoutFailed(() => void buyPack(pack));
     } finally {
       setPending(null);
     }
-  }, [refreshEntitlements]);
+  }, [refreshEntitlements, checkoutFailed]);
+
 
   const openPortal = useCallback(async () => {
     setPending("portal");
