@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { urlFor } from "@/config/domains";
 import { useNavigate } from "react-router-dom";
 import { identifyUser, setSessionContext } from "@/lib/telemetry/journey";
 import { setAnalyticsUserContext } from "@/lib/telemetry/events";
@@ -63,6 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Signing out always lands on the public site root, never on an
+    // authenticated route (and never on a product route of the marketing host).
+    if (typeof window !== "undefined") {
+      window.location.assign(urlFor("home", "/"));
+    }
   };
 
   return (

@@ -83,13 +83,30 @@ export function isProduction(host: string = currentHost()): boolean {
  * Whether the satellite subdomains (app/marketing/news/docs/affiliates) are
  * actually *served* by hosting rather than redirected to the primary domain.
  *
- * Lovable serves one primary custom domain and 302s every other connected
- * domain to it. Until each subdomain is served independently, production has
- * to route surfaces by path on the primary host — otherwise cross-surface
- * links bounce (gradr.me/docs → docs.gradr.me → gradr.me) in a loop.
- * Flip this to `true` once the subdomains stop redirecting.
+ * Hosting serves exactly one primary custom domain per deployment and 302s
+ * every other connected domain to it. While that is the case, production has
+ * to route surfaces by path on the primary host — otherwise the authenticated
+ * app becomes unreachable (gradr.me/dashboard → app.gradr.me/dashboard →
+ * gradr.me/, endlessly bounced back by the platform redirect).
+ *
+ * Set `VITE_APP_SUBDOMAIN_LIVE=true` for the deployment that actually serves
+ * app.gradr.me; from then on gradr.me is marketing-only and every product
+ * route lives on app.gradr.me.
  */
-export const SATELLITE_SUBDOMAINS_LIVE = false;
+export const SATELLITE_SUBDOMAINS_LIVE =
+  (import.meta.env?.VITE_APP_SUBDOMAIN_LIVE as string | undefined) === "true";
+
+/**
+ * True when the running bundle can prove subdomains are served independently:
+ * if this code is executing on `app.gradr.me` (or any satellite host), hosting
+ * did not redirect it away, so subdomain routing is live regardless of config.
+ */
+export function satelliteSubdomainsLive(host: string = currentHost()): boolean {
+  if (SATELLITE_SUBDOMAINS_LIVE) return true;
+  if (deployEnv(host) !== "production") return false;
+  const surface = surfaceFromHost(host);
+  return surface !== null && surface !== "home";
+}
 
 /**
  * True when one hostname has to serve every surface (dev + preview, and
@@ -98,7 +115,7 @@ export const SATELLITE_SUBDOMAINS_LIVE = false;
  * on the same origin, so previews never bounce to production.
  */
 export function isMultiSurfaceHost(host: string = currentHost()): boolean {
-  return deployEnv(host) !== "production" || !SATELLITE_SUBDOMAINS_LIVE;
+  return deployEnv(host) !== "production" || !satelliteSubdomainsLive(host);
 }
 
 
@@ -109,6 +126,8 @@ export function isWwwHost(host: string = currentHost()): boolean {
 
 /** Surface implied by a hostname, or null when the host is not a known subdomain. */
 export function surfaceFromHost(host: string = currentHost()): Surface | null {
+  // The apex is the public site itself.
+  if (host === ROOT_DOMAIN) return "home";
   if (!host.endsWith(`.${ROOT_DOMAIN}`)) {
     // Support `app.localhost`, `docs.localhost`, … for local subdomain testing.
     const [label, ...rest] = host.split(".");
