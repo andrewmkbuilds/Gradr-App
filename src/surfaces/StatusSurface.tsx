@@ -1,7 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
 import { SurfaceNotFound, CrossLink } from "@/components/surface/SurfaceLink";
-import { RouteSeo } from "@/components/seo/RouteSeo";
 import { CheckCircle2, Activity, AlertTriangle, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,13 +62,6 @@ function StatusHome() {
 
   return (
     <div className="page-shell py-12">
-      <RouteSeo
-        surface="status"
-        path="/"
-        title="Gradr Status — Live Service Health"
-        description="Real-time availability for the Gradr app, authentication, AI Mock Interview, resume tools, job matching and billing."
-      />
-
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-secondary">Status</p>
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-foreground">
