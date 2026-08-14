@@ -626,6 +626,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_rate_limits: {
+        Row: {
+          created_at: string
+          endpoint: string
+          hits: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          hits?: number
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          hits?: number
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           article: string | null
@@ -4294,6 +4318,15 @@ export type Database = {
         Args: { _actor: string; _limit?: number }
         Returns: undefined
       }
+      assert_ai_rate_limit: {
+        Args: {
+          _endpoint: string
+          _limit: number
+          _user_id: string
+          _window_seconds?: number
+        }
+        Returns: Json
+      }
       assert_not_anonymous: { Args: never; Returns: undefined }
       attribute_signup_referral: {
         Args: { _click_id?: string; _code: string }
@@ -4471,6 +4504,7 @@ export type Database = {
         Args: { _feature: string; _tier: string }
         Returns: number
       }
+      prune_ai_rate_limits: { Args: never; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
