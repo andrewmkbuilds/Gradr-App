@@ -118,7 +118,7 @@ export default function AdminVoiceSettings() {
         eyebrow="Admin"
         title="Interviewer voice"
         description="Credential health, entitlement standing and the voice configuration used by every mock interview."
-        icon={AudioLines}
+        icon={<AudioLines className="h-3.5 w-3.5" aria-hidden="true" />}
       />
 
       {loading ? (
