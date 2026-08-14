@@ -76,7 +76,7 @@ export function FollowUpReminders() {
     const [jobsRes, remRes, prefRes] = await Promise.all([
       supabase
         .from("tracked_jobs")
-        .select("id, title, company, status, applied_at, updated_at, created_at")
+        .select("id, title, company, status, applied_at, updated_at, created_at, last_touch_at, follow_up_days, follow_up_enabled")
         .eq("user_id", user.id)
         .in("status", ["saved", "applied", "interview", "offer"])
         .order("updated_at", { ascending: true })
