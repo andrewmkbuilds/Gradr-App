@@ -46,8 +46,15 @@ export const REQUIRED_HEADERS = [
   },
   {
     name: "content-security-policy-report-only",
-    test: (v) => Boolean(v) && /default-src/.test(v) && /(report-uri|report-to)/.test(v),
-    describe: "report-only policy with default-src and a reporting endpoint",
+    test: (v) =>
+      Boolean(v) &&
+      /default-src\s+'self'/.test(v) &&
+      /(report-uri|report-to)/.test(v) &&
+      // Directives that must be observed before we can ever enforce.
+      REPORT_ONLY_DIRECTIVES.every((d) => new RegExp(`(^|;)\\s*${d}\\s`).test(v)) &&
+      // Origins the app genuinely needs; a missing one would break at enforcement.
+      REPORT_ONLY_ORIGINS.every((o) => v.includes(o)),
+    describe: "report-only policy covering our directives, required origins and a reporting endpoint",
   },
   {
     name: "referrer-policy",
