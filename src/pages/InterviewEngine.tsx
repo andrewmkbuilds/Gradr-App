@@ -56,7 +56,9 @@ function InterviewEngineInner() {
   const [limits, setLimits] = useState<SessionLimits | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [streamFailed, setStreamFailed] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
+
   /** The interviewer's current turn, revealed only as fast as it is spoken. */
   const [spoken, setSpoken] = useState("");
 
