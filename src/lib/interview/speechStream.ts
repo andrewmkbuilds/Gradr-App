@@ -191,23 +191,24 @@ export class SpeechQueue {
         continue;
       }
 
-      let blob: Blob | null = null;
+      let result: AudioResult;
       try {
-        blob = await item.audio;
-      } catch {
-        blob = null;
+        result = await item.audio;
+      } catch (e: any) {
+        result = { error: String(e?.message ?? e) };
       }
       if (this.stopped) break;
+
+      if ("error" in result) {
+        // No substitute voice: end the turn and let the UI offer a retry.
+        this.failure = result.error;
+        break;
+      }
 
       this.opts.onChunkSpoken(item.text);
-
-      if (blob) {
-        await this.playBlob(blob);
-      } else {
-        this.opts.onDegraded?.("elevenlabs_unavailable");
-        await this.speakBrowser(item.text);
-      }
+      await this.playBlob(result.blob);
       if (this.stopped) break;
+
 
       await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));
     }
