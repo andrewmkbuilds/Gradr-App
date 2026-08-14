@@ -136,6 +136,11 @@ const META: Record<string, { title: string; description: string }> = {
     title: "ATS Resume Checker — Free Resume Scan & Score",
     description: "Free ATS resume checker: score your resume against any job description, spot formatting a parser can't read, and get the exact missing keywords.",
   },
+  "/job-application-tracker": {
+    title: "Job Application Tracker — Free AI Job Search Pipeline",
+    description:
+      "Track every job application in one AI pipeline: match scores, tailored resumes and cover letters, automatic follow-up reminders, and response-rate analytics.",
+  },
   "/ai-interview-coach": {
     title: "AI Interview Coach — Free Voice Mock Interviews",
     description:
