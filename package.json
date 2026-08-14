@@ -37,7 +37,8 @@
     "test:visual:routes": "node scripts/visual-regression.mjs",
     "check:design": "node scripts/check-legacy-design.mjs",
     "test:oauth-flow": "node scripts/test-oauth-flow.mjs",
-    "test:depth": "node scripts/depth-smoke.mjs"
+    "test:depth": "node scripts/depth-smoke.mjs",
+    "test:voice-e2e": "node scripts/voice-e2e.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
