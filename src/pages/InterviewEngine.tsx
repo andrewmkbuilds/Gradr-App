@@ -623,8 +623,11 @@ function InterviewEngineInner() {
       onReconnect={() => {
         setConnectionErrorDismissed(false);
         setStreamFailed(false);
+        setVoiceError(null);
+        interviewer.clearError();
         void runTurn(messagesRef.current);
       }}
+
       onEnd={() => void endAndScore()}
       onReset={resetInterview}
       onSnapshot={handleSnapshot}
