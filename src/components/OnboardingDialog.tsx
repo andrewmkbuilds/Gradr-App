@@ -107,7 +107,13 @@ export function OnboardingDialog({ open, onComplete }: Props) {
       },
       { onConflict: "user_id" },
     );
+
+    // Rebuild the 3-day plan against the new targets so the daily actions the
+    // user lands on already reflect the roles, industries and salary they chose.
+    void supabase.functions.invoke("career-plan", { body: {} }).catch(() => undefined);
+
     setSaving(false);
+
 
     onComplete({
       what: roles[0],
