@@ -176,6 +176,21 @@ export function PublicShell({ children, source }: PublicShellProps) {
             </ul>
           </nav>
 
+          <nav aria-label="Free tools" className="space-y-3 text-sm">
+            <p className="type-overline text-muted-foreground">Free tools</p>
+            <ul className="space-y-2">
+              {TOOL_LINKS.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="text-muted-foreground hover:text-foreground">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+
+
           <nav aria-label="Legal" className="space-y-3 text-sm">
             <p className="type-overline text-muted-foreground">Legal</p>
             <ul className="space-y-2">
