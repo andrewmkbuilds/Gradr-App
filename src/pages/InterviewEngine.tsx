@@ -16,6 +16,7 @@ import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
 import { useInterviewVoice } from "@/hooks/useInterviewVoice";
+import { reconnectVoiceSession } from "@/lib/interview/voiceStatus";
 import { useInterviewMetrics } from "@/hooks/useInterviewMetrics";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
