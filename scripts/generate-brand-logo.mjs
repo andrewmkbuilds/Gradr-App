@@ -101,7 +101,10 @@ const VARIANTS = {
   "gradr-logo-dark.svg": symbolSvg({ ring: SOFT_WHITE, bar: MAHOGANY_LIGHT, id: "dark" }),
   "gradr-logo-mono.svg": symbolSvg({ ring: "currentColor", bar: "currentColor", id: "mono" }),
   "gradr-symbol-compact.svg": symbolSvgCompact({ ring: TEAL, bar: MAHOGANY }),
+  // Safari pinned-tab mask: must be a single flat black shape.
+  "gradr-mask-icon.svg": symbolSvgCompact({ ring: "#000", bar: "#000", id: "mask" }),
 };
+
 
 const dataUri = (svg) => `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 
