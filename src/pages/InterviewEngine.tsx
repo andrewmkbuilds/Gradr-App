@@ -582,9 +582,10 @@ function InterviewEngineInner() {
       partialUser={voice.listening ? voice.transcript : ""}
       partialModel={spoken}
       interviewerState={interviewerState}
-      realtime={voiceMode && Boolean(limits?.studioVoice) && !interviewer.degraded}
+      realtime={voiceMode && Boolean(limits?.studioVoice) && !voiceError}
       connecting={connecting}
-      canReconnect={streamFailed}
+      canReconnect={streamFailed || Boolean(voiceError)}
+
       micMuted={!voice.listening}
       micLabel={micLabel}
       voiceOn={voiceMode}
