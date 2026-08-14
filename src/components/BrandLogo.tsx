@@ -55,14 +55,14 @@ export function BrandLogo({ size = 32, className, decorative = true, priority = 
       <img
         {...shared}
         src={BRAND_LOGO_URL}
-        className="col-start-1 row-start-1 block rounded-[22%] object-contain dark:hidden"
+        className="col-start-1 row-start-1 block object-contain dark:hidden"
       />
       <img
         {...shared}
         src={BRAND_LOGO_DARK_URL}
         alt=""
         aria-hidden
-        className="col-start-1 row-start-1 hidden rounded-[22%] object-contain dark:block"
+        className="col-start-1 row-start-1 hidden object-contain dark:block"
       />
     </span>
   );
