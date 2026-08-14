@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 /artifacts
+
+# Visual regression working captures (baselines are committed)
+tests/visual/current/
+tests/visual/diff/
