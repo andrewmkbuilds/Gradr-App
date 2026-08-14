@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Briefcase, GitCompare, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowRight, Briefcase, GitCompare, Lightbulb, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useResumeVersions, type ResumeVersion } from "@/hooks/useResumeVersions";
