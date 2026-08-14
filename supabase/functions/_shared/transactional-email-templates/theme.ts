@@ -33,6 +33,8 @@ export const displayStack =
   "Georgia, 'Times New Roman', 'Segoe UI', Helvetica, Arial, sans-serif"
 
 export const SITE_URL = 'https://gradr.me'
+/** Authenticated product surface. Never link signed-in destinations at the apex. */
+export const APP_URL = 'https://app.gradr.me'
 // Email images MUST be immutable, public, unauthenticated HTTPS URLs: Gmail
 // fetches them through its own proxy with no cookies and no session. This points
 // at the CDN asset (content-addressed by id), not at /public/*, so a frontend
