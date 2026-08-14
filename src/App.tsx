@@ -94,15 +94,18 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 const queryClient = new QueryClient();
 
-/** Lightweight placeholder shown while a route chunk streams in. */
+/**
+ * Route-shaped placeholder shown while a route chunk streams in.
+ *
+ * Instead of a spinner, we paint the skeleton of the page being navigated to,
+ * so the transition reads as instant: the layout is already correct and only
+ * the content fills in.
+ */
 function RouteFallback() {
-  return (
-    <div className="min-h-[60vh] flex items-center justify-center" role="status" aria-live="polite">
-      <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      <span className="sr-only">Loading page</span>
-    </div>
-  );
+  const location = useLocation();
+  return <RouteSkeleton pathname={location.pathname} />;
 }
+
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
