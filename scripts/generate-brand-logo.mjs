@@ -147,7 +147,7 @@ const LOCKUPS = [
   { file: "gradr-lockup.png", svg: () => VARIANTS["gradr-logo.svg"], color: DEEP },
   { file: "gradr-lockup-dark.png", svg: () => VARIANTS["gradr-logo-dark.svg"], color: SOFT_WHITE },
 ];
-const LOCKUP = { width: 1200, height: 320, mark: 208, gap: 56, type: 150 };
+const LOCKUP = { width: 1200, height: 320, mark: 184, gap: 48, type: 148 };
 
 function lockupHtml(svg, color) {
   const { width, height, mark, gap, type } = LOCKUP;
