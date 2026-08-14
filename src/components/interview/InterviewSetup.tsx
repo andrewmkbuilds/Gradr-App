@@ -185,7 +185,7 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         <div className="flex items-center gap-2 text-sm">
           <Radio className={`h-4 w-4 ${ent.realtimeVoice ? "text-primary" : "text-muted-foreground"}`} />
           <span className="text-foreground">
-            {ent.realtimeVoice ? "Realtime voice interview enabled" : "Realtime voice is a Starter & Pro feature"}
+            {ent.realtimeVoice ? "Studio voice interview enabled" : "Studio voice is a Starter & Pro feature"}
           </span>
           <Badge variant="outline" className="capitalize">{ent.label}</Badge>
         </div>
