@@ -19,6 +19,8 @@
 import { launchBrowser } from "./lib/browser.mjs";
 
 const BASE = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const IGNORED_CONSOLE =
+  /favicon|net::ERR_|Failed to load resource|^Warning:|React Router Future Flag|Download the React DevTools/i;
 const ROUTES = ["/landing", "/pricing", "/ats-resume-checker", "/career-advice", "/job-search", "/auth"];
 
 const results = [];
@@ -49,7 +51,8 @@ async function main() {
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (m) => {
-    if (m.type() === "error" && !/favicon|net::ERR_|Failed to load resource/i.test(m.text())) errors.push(m.text());
+    // React dev warnings and asset noise aren't render failures.
+    if (m.type() === "error" && !IGNORED_CONSOLE.test(m.text())) errors.push(m.text());
   });
 
   await page.goto(`${BASE}/landing`, { waitUntil: "domcontentloaded" });
