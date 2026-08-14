@@ -25,3 +25,6 @@ verify_jwt = false
 
 [functions.verify-academic-email]
 verify_jwt = true
+
+[functions.admin-metrics]
+verify_jwt = true
