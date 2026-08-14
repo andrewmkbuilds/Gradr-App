@@ -216,7 +216,7 @@ async function main() {
   };
 
   for (const t of TRANSPARENT_ICONS) {
-    await render(iconHtml(logo, t), {
+    await render(iconHtml(t.size <= 64 ? compact : logo, t), {
       width: t.size,
       height: t.size,
       file: t.file,
@@ -225,16 +225,17 @@ async function main() {
   }
   for (const t of APPLE_ICONS) {
     await render(
-      iconHtml(logo, { size: t.size, pad: 0.12, background: DEEP, radius: 0 }),
+      iconHtml(logoDark, { size: t.size, pad: 0.12, background: DEEP, radius: 0 }),
       { width: t.size, height: t.size, file: t.file, omitBackground: false },
     );
   }
   for (const t of MASKABLE_ICONS) {
     await render(
-      iconHtml(logo, { size: t.size, pad: 0.2, background: TEAL, radius: 0 }),
+      iconHtml(logoDark, { size: t.size, pad: 0.2, background: TEAL, radius: 0 }),
       { width: t.size, height: t.size, file: t.file, omitBackground: false },
     );
   }
+
   for (const t of SPLASH_SCREENS) {
     await render(splashHtml(logo, t), {
       width: t.width,
