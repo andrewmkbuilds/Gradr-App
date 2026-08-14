@@ -30,7 +30,7 @@ jobs:
 
       # Static suites: structured data, Paddle legal readiness, Auth hero layout.
       - name: Unit and guardrail tests
-        run: bunx vitest run src/test/structuredData.test.ts src/test/legalReadiness.test.ts src/test/authHeroLayout.test.ts
+        run: bunx vitest run src/test/structuredData.test.ts src/test/legalReadiness.test.ts src/test/authHeroLayout.test.ts src/test/seoShellHidden.test.ts
 
       - name: App icon, manifest and splash verification
         run: node scripts/generate-app-icons.mjs --check
@@ -59,6 +59,16 @@ jobs:
 
       - name: Smoke tests
         run: node scripts/smoke-test.mjs http://localhost:8080
+
+      - name: Critical page smoke (renders expected UI, no loading/SEO flash)
+        run: node scripts/smoke-critical-pages.mjs http://localhost:8080
+
+      - name: SEO fallback flash regression (light + dark, refresh + hard refresh)
+        run: node scripts/seo-flash-regression.mjs http://localhost:8080
+
+      # The built bundle exists at this point, so the scanner also sweeps dist/.
+      - name: Architecture guardrail on build artifacts and lockfiles
+        run: node scripts/check-no-tanstack.mjs
 
       - uses: actions/upload-artifact@v4
         if: always()
