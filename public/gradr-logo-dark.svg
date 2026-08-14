@@ -5,9 +5,11 @@
       <rect width="512" height="512" fill="#000"/>
       <path d="M 178 44 H 334 A 134 134 0 0 1 468 178 V 334 A 134 134 0 0 1 334 468 H 178 A 134 134 0 0 1 44 334 V 178 A 134 134 0 0 1 178 44 Z" fill="#fff"/>
       <path d="M 202 118 H 310 A 74 74 0 0 1 384 192 V 300 A 74 74 0 0 1 310 374 H 202 A 74 74 0 0 1 128 300 V 192 A 74 74 0 0 1 202 118 Z" fill="#000"/>
-      <path d="M 384 180 L 468 140 L 512 140 L 512 244 L 262 244 L 262 180 Z" fill="#000"/>
+      <path d="M 300 158 L 512 158 L 512 252 L 300 252 Z" fill="#000"/>
     </mask>
   </defs>
   <rect width="512" height="512" fill="#F2F0EF" mask="url(#dark-ring)"/>
-  <rect x="296" y="244" width="190" height="64" rx="10" fill="#A9663D"/>
+  <rect x="330" y="252" width="138" height="64" fill="#F2F0EF"/>
+  <rect x="258" y="220" width="86" height="64" rx="14" fill="#A9663D"/>
+  <rect x="330" y="220" width="14" height="64" fill="#A9663D"/>
 </svg>
