@@ -10,15 +10,22 @@ import { MobileTabBar } from "@/components/MobileTabBar";
 import { PolicyUpdateGate } from "@/components/legal/PolicyUpdateGate";
 import { NavBreadcrumb } from "@/components/NavBreadcrumb";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { useScrollTransform } from "@/hooks/useScrollTransform";
 import { duration, easeOut } from "@/lib/motion/tokens";
+import { cn } from "@/lib/utils";
 
 /**
  * The authenticated shell. A glass command bar over an ambient Yacht Club
  * wash, with the route canvas underneath handling its own transition
  * (see `AnimatedPage`). Timing comes from the shared motion tokens.
+ *
+ * The bar transforms on scroll: it compresses, deepens its glass and lights a
+ * hairline the moment the page moves, then relaxes back at the top.
  */
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const reduced = useReducedMotionPref();
+  const { scrolled } = useScrollTransform();
+
 
   return (
     <SidebarProvider>
