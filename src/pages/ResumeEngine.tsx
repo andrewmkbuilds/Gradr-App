@@ -29,12 +29,9 @@ import { ResumeVersions } from "@/components/resume/ResumeVersions";
 import { ResumeVersionDiff } from "@/components/resume/ResumeVersionDiff";
 import { GenerationStream } from "@/components/ai/GenerationStream";
 import { useAiStream } from "@/hooks/useAiStream";
+import { parseSuggestions, suggestionsToJson, type Suggestion } from "@/lib/resume/suggestions";
 
-interface Suggestion {
-  type: string;
-  text: string;
-  [key: string]: string;
-}
+
 
 interface Evidence {
   label: string;
@@ -141,7 +138,7 @@ export default function ResumeEngine() {
       // Canceled or failed — the hook has already surfaced the reason.
       if (!analysisData) return;
 
-      setAnalysis(analysisData);
+      setAnalysis({ ...analysisData, suggestions: parseSuggestions(analysisData.suggestions) });
 
       const versionLabel = jobTitle.trim()
         ? `${jobTitle.trim()} — ${selectedFile.name.replace(/\.[^.]+$/, "")}`
@@ -160,7 +157,7 @@ export default function ResumeEngine() {
           formatting_score: analysisData.formatting_score,
           impact_score: analysisData.impact_score,
           readability_score: analysisData.readability_score,
-          ai_suggestions: analysisData.suggestions,
+          ai_suggestions: suggestionsToJson(parseSuggestions(analysisData.suggestions)),
           parsed_text: text.substring(0, 10000),
         })
         .select("id")
@@ -303,7 +300,7 @@ export default function ResumeEngine() {
               formatting_score: v.formatting_score ?? 0,
               impact_score: v.impact_score ?? 0,
               readability_score: v.readability_score ?? 0,
-              suggestions: Array.isArray(v.ai_suggestions) ? (v.ai_suggestions as Suggestion[]) : [],
+              suggestions: parseSuggestions(v.ai_suggestions),
               tailoredTo: v.version_label,
             });
           }}
@@ -428,24 +425,51 @@ export default function ResumeEngine() {
                     {analysis.suggestions.length} items
                   </span>
                 </div>
-                <ul className="space-y-2.5">
+                {analysis.suggestions.length === 0 ? (
+                  <p className="rounded-xl bg-surface-secondary p-4 text-sm text-muted-foreground">
+                    No actionable fixes came back for this version. Re-scan with a job description for sharper guidance.
+                  </p>
+                ) : (
+                <ol className="space-y-2.5">
                   {analysis.suggestions.map((s, i) => {
                     const style = typeStyles[s.type] || typeStyles.improvement;
                     const Icon = style.icon;
                     return (
                       <motion.li
-                        key={i}
+                        key={`${s.type}-${i}`}
                         initial={reduced ? { opacity: 0 } : { opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={reduced ? { duration: 0.12 } : { duration: motionDuration.fast, ease: easeOut, delay: 0.04 * i }}
                         className="flex items-start gap-3 rounded-xl bg-surface-secondary p-3.5 transition-colors hover:bg-surface-secondary/70"
                       >
+                        <span className="mt-0.5 shrink-0 text-xs tabular-nums text-muted-foreground">{i + 1}.</span>
                         <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${style.color}`} aria-hidden="true" />
-                        <p className="text-sm leading-relaxed text-foreground/90">{s.text}</p>
+                        <div className="min-w-0 space-y-1.5">
+                          <p className="text-sm leading-relaxed text-foreground/90">{s.text}</p>
+                          {s.action && (
+                            <p className="flex items-start gap-1.5 text-sm leading-relaxed text-foreground">
+                              <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-secondary" aria-hidden="true" />
+                              <span>
+                                <span className="font-medium text-brand-secondary">Next: </span>
+                                {s.action}
+                              </span>
+                            </p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                            <span className={`rounded-full bg-surface-primary px-2 py-0.5 text-[0.68rem] uppercase tracking-wide ${style.color}`}>
+                              {s.type}
+                            </span>
+                            <span className="text-[0.68rem] text-muted-foreground">
+                              Source: {s.source ?? "Gradr resume analysis"}
+                            </span>
+                          </div>
+                        </div>
                       </motion.li>
                     );
                   })}
-                </ul>
+                </ol>
+                )}
+
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Button className="interactive press-scale" onClick={handleRescan}>
                     <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
