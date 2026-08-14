@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { SentenceChunker, SpeechQueue } from "@/lib/interview/speechStream";
+import { SentenceChunker, SpeechQueue, type AudioResult } from "@/lib/interview/speechStream";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
 
 /**
@@ -8,8 +8,8 @@ import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
  *
  * Consumes the reasoning model's text stream and speaks it through ElevenLabs
  * chunk by chunk, revealing the transcript only as each thought is actually
- * spoken. Degrades to browser speech synthesis if ElevenLabs fails, and stops
- * instantly on barge-in, session end or unmount.
+ * spoken. There is no substitute voice engine: if ElevenLabs fails the turn
+ * stops and `error` is set so the studio can offer an explicit retry.
  */
 
 const SPEECH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-speech`;
@@ -24,11 +24,14 @@ export interface UseInterviewVoiceOptions {
   onSpokenChunk: (text: string) => void;
   /** The interviewer finished the whole turn. */
   onTurnComplete: () => void;
+  /** ElevenLabs failed mid-turn — the turn was aborted. */
+  onVoiceError: (reason: string) => void;
 }
 
 export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   const [speaking, setSpeaking] = useState(false);
-  const [degraded, setDegraded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
 
   const optsRef = useRef(opts);
   optsRef.current = opts;
