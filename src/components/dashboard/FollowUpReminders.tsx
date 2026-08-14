@@ -20,6 +20,10 @@ interface ActiveJob {
   applied_at: string | null;
   updated_at: string;
   created_at: string;
+  last_touch_at: string | null;
+  /** Per-application cadence override. 0 = inherit the global cadence. */
+  follow_up_days: number | null;
+  follow_up_enabled: boolean | null;
 }
 
 interface Settings {
@@ -38,8 +42,14 @@ const STAGE_OPTIONS = [
 const CADENCES = [3, 5, 7, 10, 14];
 
 function lastTouch(job: ActiveJob) {
-  return new Date(job.applied_at ?? job.updated_at ?? job.created_at);
+  return new Date(job.last_touch_at ?? job.applied_at ?? job.updated_at ?? job.created_at);
 }
+
+/** Cadence actually applied to a job: its own override, else the global setting. */
+function cadenceFor(job: ActiveJob, fallback: number) {
+  return job.follow_up_days && job.follow_up_days > 0 ? job.follow_up_days : fallback;
+}
+
 
 /**
  * Follow-up reminders: reads each active application's last-touch date and
