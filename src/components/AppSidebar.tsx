@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { ChevronLeft, ChevronDown, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { cn } from "@/lib/utils";
+import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { springSmooth } from "@/lib/motion/tokens";
 import { dashboardItem, navGroups, type NavGroup, type NavItem } from "@/config/nav";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -41,7 +44,34 @@ const baseRow =
   "nav-item interactive depth-press group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors";
 const idleRow = "text-muted-foreground hover:bg-secondary hover:text-foreground";
 const activeRow =
-  "accent-marker bg-primary/10 pl-4 text-primary shadow-[0_6px_18px_-12px_hsl(var(--primary)/0.85),inset_0_1px_0_hsl(0_0%_100%/0.12)]";
+  "bg-primary/10 pl-4 text-primary shadow-[0_6px_18px_-12px_hsl(var(--primary)/0.85),inset_0_1px_0_hsl(0_0%_100%/0.12)]";
+
+/**
+ * The single active marker for the whole rail. Because every active row
+ * renders it with the same `layoutId`, Motion slides one physical bar between
+ * routes instead of cross-fading two — the nav reads as one continuous
+ * surface. Collapses to a static bar when motion is reduced.
+ */
+function ActiveIndicator({ reduced, inset = "18%" }: { reduced: boolean; inset?: string }) {
+  if (reduced) {
+    return (
+      <span
+        aria-hidden="true"
+        className="absolute left-0 w-[3px] rounded-full bg-mahogany"
+        style={{ top: inset, bottom: inset }}
+      />
+    );
+  }
+  return (
+    <motion.span
+      aria-hidden="true"
+      layoutId="sidebar-active-indicator"
+      transition={springSmooth}
+      className="absolute left-0 w-[3px] rounded-full bg-mahogany"
+      style={{ top: inset, bottom: inset }}
+    />
+  );
+}
 
 export function AppSidebar() {
   const { state, toggleSidebar, isMobile, setOpenMobile, openMobile } = useSidebar();
@@ -49,6 +79,7 @@ export function AppSidebar() {
   const { pathname, hash } = useLocation();
   const { signOut } = useAuth();
   const { data: isAdmin } = useIsAdmin();
+  const reduced = useReducedMotionPref();
   const navRef = useRef<HTMLElement>(null);
 
   // Admin links are only rendered for verified admins. This is presentation
@@ -126,8 +157,9 @@ export function AppSidebar() {
                         closeMobile();
                       }}
                       aria-current={pathname === "/" ? "page" : undefined}
-                      className={cn(baseRow, pathname === "/" ? activeRow : idleRow)}
+                      className={cn(baseRow, "relative", pathname === "/" ? activeRow : idleRow)}
                     >
+                      {pathname === "/" && <ActiveIndicator reduced={reduced} />}
                       <dashboardItem.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       {collapsed ? (
                         <span className="sr-only">{dashboardItem.title}</span>
@@ -152,8 +184,9 @@ export function AppSidebar() {
                             data-nav-focusable=""
                             onClick={() => trackNavGroupToggle(group, true, "sidebar_rail")}
                             aria-current={groupActive ? "page" : undefined}
-                            className={cn(baseRow, "justify-center px-0", groupActive ? activeRow : idleRow)}
+                            className={cn(baseRow, "relative justify-center px-0", groupActive ? activeRow : idleRow)}
                           >
+                            {groupActive && <ActiveIndicator reduced={reduced} />}
                             <group.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                             <span className="sr-only">{group.title}</span>
                           </Link>
@@ -176,10 +209,11 @@ export function AppSidebar() {
                             aria-controls={panelId}
                             className={cn(
                               baseRow,
-                              "press-scale",
+                              "press-scale relative",
                               groupActive && !open ? activeRow : "text-foreground/90 hover:bg-secondary",
                             )}
                           >
+                            {groupActive && !open && <ActiveIndicator reduced={reduced} />}
                             <group.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                             <span className="flex-1 text-left font-medium">{group.title}</span>
                             {groupActive && (
@@ -218,12 +252,13 @@ export function AppSidebar() {
                                     }}
                                     aria-current={active ? "page" : undefined}
                                     className={cn(
-                                      "interactive flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
+                                      "interactive relative flex min-h-[40px] items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
                                       active
-                                        ? "accent-marker bg-primary/10 pl-3.5 font-medium text-primary"
+                                        ? "bg-primary/10 pl-3.5 font-medium text-primary"
                                         : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                                     )}
                                   >
+                                    {active && <ActiveIndicator reduced={reduced} inset="22%" />}
                                     <item.icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                     <span className="truncate">{item.title}</span>
                                   </Link>

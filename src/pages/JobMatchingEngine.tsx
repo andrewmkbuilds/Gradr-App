@@ -9,6 +9,9 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 
 import { PageHeader } from "@/components/app/PageHeader";
+import { EngineCanvas } from "@/components/app/EngineCanvas";
+import { Progressive } from "@/components/app/Progressive";
+import { JobMatchDemo } from "@/components/demos/EngineDemos";
 import { MetricBar } from "@/components/app/MetricBar";
 import { StatTile } from "@/components/app/StatTile";
 import { SkeletonList } from "@/components/states";
@@ -169,7 +172,7 @@ export default function JobMatchingEngine() {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="mx-auto max-w-6xl space-y-6">
+      <EngineCanvas>
         <PageHeader
           eyebrow="Job Matching"
           icon={<Target className="h-3.5 w-3.5" aria-hidden="true" />}
@@ -429,9 +432,14 @@ export default function JobMatchingEngine() {
                   : "Enter a target role and we'll pull live listings and score each one against your resume."}
               </p>
             </Surface>
+
+            {/* Give the ranking behaviour away before the first search. */}
+            <Progressive minHeight={340} className="mt-5">
+              <JobMatchDemo />
+            </Progressive>
           </motion.div>
         )}
-      </div>
+      </EngineCanvas>
     </TooltipProvider>
   );
 }

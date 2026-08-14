@@ -1225,3 +1225,87 @@ html[data-motion="full"] *::after {
     box-shadow: 0 0 0 2px hsl(var(--mahogany-ring) / 0.35);
   }
 }
+
+/* ============================================================
+   Touch & compact-viewport interaction layer
+   ------------------------------------------------------------
+   Premium pointer choreography (lift, tilt, sheen, spotlight) is mouse-only.
+   On touch devices those effects either never fire or fire once and stick, so
+   here they are replaced with press feedback: the surface compresses under the
+   finger and releases. Hover-only affordances are made permanently visible so
+   nothing is unreachable, and heavy ambient animation is trimmed to protect
+   frame rate and battery.
+   ============================================================ */
+@media (hover: none), (pointer: coarse) {
+  .lift-card:hover,
+  .elev-interactive:hover,
+  .depth-hover:hover,
+  .interactive:hover,
+  .hover-scale:hover {
+    transform: none;
+  }
+
+  /* Touch-native feedback in place of hover. */
+  .lift-card:active,
+  .elev-interactive:active,
+  .depth-hover:active,
+  .depth-press:active,
+  .interactive:active,
+  .press-scale:active {
+    transform: scale(0.985);
+    transition-duration: 90ms;
+  }
+
+  /* Affordances that reveal on hover must be visible without one. */
+  .reveal-on-hover {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Ambient decoration is expensive on mobile GPUs — keep it, slow it down. */
+  .ambient-orb,
+  .aurora-bg,
+  .liquid-blob {
+    animation-duration: 40s !important;
+    filter: blur(60px);
+  }
+  .ambient-grid,
+  .grid-lines {
+    animation: none !important;
+    opacity: 0.18;
+  }
+  .sheen::after,
+  .shimmer {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Nothing may push the page sideways on a phone. Wide children (tables,
+     charts, code) scroll inside their own box instead of the document. */
+  main,
+  main > * {
+    max-width: 100%;
+  }
+  main table,
+  main pre {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Every tappable control clears the 44px target on touch. */
+  button,
+  [role="button"],
+  a[href],
+  summary {
+    touch-action: manipulation;
+  }
+
+  /* Trim blur radii: large backdrop/box blurs are the main mobile jank source. */
+  .glass-panel,
+  .glass-card {
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+  }
+}

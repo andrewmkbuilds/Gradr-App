@@ -8,6 +8,9 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 
 import { PageHeader } from "@/components/app/PageHeader";
+import { EngineCanvas } from "@/components/app/EngineCanvas";
+import { Progressive } from "@/components/app/Progressive";
+import { ResumeAnalysisDemo } from "@/components/demos/EngineDemos";
 import { MetricBar } from "@/components/app/MetricBar";
 import { ScoreDial } from "@/components/app/ScoreDial";
 import { Surface } from "@/components/ui/surface";
@@ -276,7 +279,7 @@ export default function ResumeEngine() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <EngineCanvas>
       <PageHeader
         eyebrow="Resume Intelligence"
         icon={<Gauge className="h-3.5 w-3.5" aria-hidden="true" />}
@@ -349,6 +352,12 @@ export default function ResumeEngine() {
                 </span>
               </label>
             </Magnetic>
+
+            {/* Nothing scored yet — let the user feel how the scorecard reacts
+                before they upload anything. Deferred so the dropzone paints first. */}
+            <Progressive minHeight={360} className="mt-5">
+              <ResumeAnalysisDemo />
+            </Progressive>
           </motion.div>
         ) : uploading ? (
           <motion.div key="working" {...stagger(0)} exit={{ opacity: 0 }}>
@@ -572,6 +581,6 @@ export default function ResumeEngine() {
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </div>
+    </EngineCanvas>
   );
 }

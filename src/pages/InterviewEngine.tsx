@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { useAiStream } from "@/hooks/useAiStream";
 import { GenerationStream } from "@/components/ai/GenerationStream";
 import { handleAiFunctionError } from "@/lib/aiErrors";
+import { Progressive } from "@/components/app/Progressive";
+import { InterviewCoachDemo } from "@/components/demos/EngineDemos";
 import { ProGate } from "@/components/ProGate";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { InterviewReportView, type InterviewReport } from "@/components/interview/InterviewReportView";
@@ -537,6 +539,12 @@ function InterviewEngineInner() {
         </div>
         <CreditsBalance only="interview" compact />
         <VoiceUsageMeter compact />
+
+        {stage === "setup" && (
+          <Progressive minHeight={380}>
+            <InterviewCoachDemo />
+          </Progressive>
+        )}
 
         {stage === "setup" ? (
           <InterviewSetup
