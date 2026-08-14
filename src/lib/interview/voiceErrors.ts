@@ -82,3 +82,104 @@ const COPY: Record<VoiceErrorCode, VoiceErrorCopy> = {
 export function voiceErrorCopy(code: VoiceErrorCode | null | undefined): VoiceErrorCopy {
   return code ? COPY[code] ?? DEFAULT_COPY : DEFAULT_COPY;
 }
+
+/**
+ * Enumerated provider reasons.
+ *
+ * The backend derives these from the speech provider's machine-readable status
+ * (never its prose) so the studio can explain *precisely* what went wrong —
+ * an entitlement/anti-abuse block reads very differently from a quota problem —
+ * while still keeping provider payloads server-side.
+ * Mirrored in supabase/functions/_shared/voiceProvider.ts.
+ */
+export const VOICE_PROVIDER_REASONS = [
+  "PROVIDER_CREDENTIAL_MISSING",
+  "PROVIDER_INVALID_KEY",
+  "PROVIDER_UNUSUAL_ACTIVITY",
+  "PROVIDER_QUOTA_EXCEEDED",
+  "PROVIDER_CONCURRENCY_LIMIT",
+  "PROVIDER_VOICE_NOT_FOUND",
+  "PROVIDER_MODEL_UNAVAILABLE",
+  "PROVIDER_TIMEOUT",
+  "PROVIDER_NETWORK",
+  "PROVIDER_SERVER_ERROR",
+  "PROVIDER_UNKNOWN",
+] as const;
+
+export type VoiceProviderReason = (typeof VOICE_PROVIDER_REASONS)[number];
+
+export function toVoiceProviderReason(value: unknown): VoiceProviderReason | null {
+  return typeof value === "string" && (VOICE_PROVIDER_REASONS as readonly string[]).includes(value)
+    ? (value as VoiceProviderReason)
+    : null;
+}
+
+interface VoiceReasonCopy {
+  label: string;
+  detail: string;
+  /** Whether reconnecting the session has a realistic chance of clearing it. */
+  reconnectHelps: boolean;
+}
+
+const REASON_COPY: Record<VoiceProviderReason, VoiceReasonCopy> = {
+  PROVIDER_CREDENTIAL_MISSING: {
+    label: "Voice service not configured",
+    detail: "Gradr's speech service has no credential configured right now. An admin needs to reconnect it.",
+    reconnectHelps: false,
+  },
+  PROVIDER_INVALID_KEY: {
+    label: "Voice service credential rejected",
+    detail: "The speech service refused Gradr's credential. An admin needs to reconnect it — nothing on your side is wrong.",
+    reconnectHelps: false,
+  },
+  PROVIDER_UNUSUAL_ACTIVITY: {
+    label: "Voice entitlement temporarily suspended",
+    detail:
+      "The speech service flagged unusual activity on Gradr's account and paused streaming (detected_unusual_activity). This is an account-level entitlement block, not a fault in your interview. Reconnecting re-checks entitlement; if it persists, an admin has to clear it with the provider.",
+    reconnectHelps: true,
+  },
+  PROVIDER_QUOTA_EXCEEDED: {
+    label: "Voice quota exhausted",
+    detail: "Gradr's speech quota for this period is used up. Reconnect to re-check, or carry on by typing.",
+    reconnectHelps: true,
+  },
+  PROVIDER_CONCURRENCY_LIMIT: {
+    label: "Too many voices at once",
+    detail: "The speech service is at its concurrent-stream limit. Waiting a moment and reconnecting usually clears it.",
+    reconnectHelps: true,
+  },
+  PROVIDER_VOICE_NOT_FOUND: {
+    label: "Interviewer voice unavailable",
+    detail: "The configured interviewer voice is no longer available on the speech account. An admin needs to pick another voice.",
+    reconnectHelps: false,
+  },
+  PROVIDER_MODEL_UNAVAILABLE: {
+    label: "Speech model unavailable",
+    detail: "The configured speech model isn't available on Gradr's speech account right now.",
+    reconnectHelps: false,
+  },
+  PROVIDER_TIMEOUT: {
+    label: "Speech service timed out",
+    detail: "The speech service didn't answer in time. Reconnecting normally recovers the turn.",
+    reconnectHelps: true,
+  },
+  PROVIDER_NETWORK: {
+    label: "Couldn't reach the speech service",
+    detail: "Gradr couldn't reach the speech service. Check your connection and reconnect.",
+    reconnectHelps: true,
+  },
+  PROVIDER_SERVER_ERROR: {
+    label: "Speech service error",
+    detail: "The speech service returned an error. Reconnecting usually recovers within a minute.",
+    reconnectHelps: true,
+  },
+  PROVIDER_UNKNOWN: {
+    label: "Unclassified speech failure",
+    detail: "The speech service failed for an unrecognised reason. Reconnect to try the turn again.",
+    reconnectHelps: true,
+  },
+};
+
+export function voiceReasonCopy(reason: VoiceProviderReason | null | undefined): VoiceReasonCopy | null {
+  return reason ? REASON_COPY[reason] ?? REASON_COPY.PROVIDER_UNKNOWN : null;
+}
