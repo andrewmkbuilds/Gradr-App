@@ -121,11 +121,21 @@ const affiliateEntries: SitemapEntry[] = [
   { path: "/join", changefreq: "monthly", priority: "0.6" },
 ];
 
+// Status and support are small public surfaces — every page is crawlable.
+const statusEntries: SitemapEntry[] = [{ path: "/", changefreq: "hourly", priority: "0.6" }];
+
+const supportEntries: SitemapEntry[] = [
+  { path: "/", changefreq: "weekly", priority: "0.8" },
+  { path: "/contact", changefreq: "monthly", priority: "0.6" },
+];
+
 const surfaceSitemaps: { file: string; origin: string; items: SitemapEntry[] }[] = [
   { file: "sitemap-marketing.xml", origin: PRODUCTION_ORIGIN.marketing, items: marketingEntries },
   { file: "sitemap-news.xml", origin: PRODUCTION_ORIGIN.news, items: newsEntries },
   { file: "sitemap-docs.xml", origin: PRODUCTION_ORIGIN.docs, items: docsEntries },
   { file: "sitemap-affiliates.xml", origin: PRODUCTION_ORIGIN.affiliates, items: affiliateEntries },
+  { file: "sitemap-status.xml", origin: PRODUCTION_ORIGIN.status, items: statusEntries },
+  { file: "sitemap-support.xml", origin: PRODUCTION_ORIGIN.support, items: supportEntries },
 ];
 
 for (const sitemap of surfaceSitemaps) {

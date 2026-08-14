@@ -22,6 +22,8 @@ const HOSTS = [
   { host: "docs.gradr.me", purpose: "Documentation" },
   { host: "news.gradr.me", purpose: "News / blog" },
   { host: "affiliates.gradr.me", purpose: "Affiliate portal" },
+  { host: "status.gradr.me", purpose: "Service status" },
+  { host: "support.gradr.me", purpose: "Support / help center" },
 ];
 
 async function resolve(host) {

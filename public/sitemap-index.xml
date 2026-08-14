@@ -15,4 +15,10 @@
   <sitemap>
     <loc>https://affiliates.gradr.me/sitemap-affiliates.xml</loc>
   </sitemap>
+  <sitemap>
+    <loc>https://status.gradr.me/sitemap-status.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://support.gradr.me/sitemap-support.xml</loc>
+  </sitemap>
 </sitemapindex>
