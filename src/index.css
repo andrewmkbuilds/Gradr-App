@@ -343,10 +343,6 @@
   @media (min-width: 640px) {
     .page-shell { padding-inline: 2rem; }
   }
-  /* Narrower reading column that stays on the same left edge as .page-shell. */
-  .page-shell-prose { max-width: 72rem; }
-  .page-shell-prose > * { max-width: 64rem; }
-
   /* Perfectly centred square box for icons, avatars and logo marks.
      Uses grid place-items so the glyph is centred on both axes regardless of
      line-height or the icon's own baseline. */

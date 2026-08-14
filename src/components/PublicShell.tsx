@@ -136,7 +136,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
         )}
       </header>
 
-      <main className="page-shell page-shell-prose py-12 sm:py-16">{children}</main>
+      <main className="page-shell py-12 sm:py-16">{children}</main>
 
       <footer className="border-t border-border/60 py-12">
         <div className="page-shell grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
