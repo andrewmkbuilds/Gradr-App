@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { scoreJobAgainstResume } from "../_shared/matching.ts";
+import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,11 +8,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const ENDPOINT = "match-jobs";
 const RATE_LIMIT = 15;
-const WINDOW_MS = 60_000;
-const userHits = new Map<string, number[]>();
+const WINDOW_SECONDS = 60;
 
-function checkRateLimit(userId: string): { ok: boolean; retryAfter?: number } {
+/** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
+async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter?: number }> {
+  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+  return { ok: r.allowed, retryAfter: r.retry_after };
+} {
   const now = Date.now();
   const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
   if (hits.length >= RATE_LIMIT) {
@@ -57,7 +62,7 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return json({ error: "Unauthorized" }, 401);
 
-    const rl = checkRateLimit(user.id);
+    const rl = await checkRateLimit(user.id);
     if (!rl.ok) return json({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }, 429);
 
     const body = await req.json().catch(() => ({}));

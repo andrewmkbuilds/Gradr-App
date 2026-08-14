@@ -1,23 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sseResponse, streamGatewayChat } from "../_shared/aiStream.ts";
+import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const ENDPOINT = "practice-plan";
 const RATE_LIMIT = 5;
-const WINDOW_MS = 60_000;
-const userHits = new Map<string, number[]>();
+const WINDOW_SECONDS = 60;
 
-function checkRateLimit(userId: string) {
-  const now = Date.now();
-  const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
-  if (hits.length >= RATE_LIMIT) return false;
-  hits.push(now);
-  userHits.set(userId, hits);
-  return true;
+/** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
+async function checkRateLimit(userId: string): Promise<boolean> {
+  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+  return r.allowed;
 }
 
 serve(async (req) => {
@@ -41,7 +39,7 @@ serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!checkRateLimit(user.id)) {
+    if (!await checkRateLimit(user.id)) {
       return new Response(JSON.stringify({ error: "Too many plan requests. Try again shortly." }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

@@ -4,6 +4,7 @@ import { scoreResume, deterministicSuggestions } from "../_shared/resumeScoring.
 import { consume, paymentRequired, refund, resolveEnv, type PaymentEnv } from "../_shared/entitlements.ts";
 import { logAiAuthorization } from "../_shared/securityAudit.ts";
 import { sseResponse, streamGatewayChat } from "../_shared/aiStream.ts";
+import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
 
 
 const corsHeaders = {
@@ -12,11 +13,15 @@ const corsHeaders = {
 };
 
 // Per-user sliding window rate limit (in-memory, per instance)
+const ENDPOINT = "analyze-resume";
 const RATE_LIMIT = 10;
-const WINDOW_MS = 60_000;
-const userHits = new Map<string, number[]>();
+const WINDOW_SECONDS = 60;
 
-function checkRateLimit(userId: string): { ok: boolean; retryAfter?: number } {
+/** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
+async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter?: number }> {
+  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+  return { ok: r.allowed, retryAfter: r.retry_after };
+} {
   const now = Date.now();
   const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
   if (hits.length >= RATE_LIMIT) {
@@ -55,7 +60,7 @@ serve(async (req) => {
       });
     }
 
-    const rl = checkRateLimit(user.id);
+    const rl = await checkRateLimit(user.id);
     if (!rl.ok) {
       return new Response(
         JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }),
