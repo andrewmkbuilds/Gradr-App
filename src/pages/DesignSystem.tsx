@@ -100,6 +100,12 @@ export default function DesignSystem() {
           description="Ocean Teal, Mahogany, Soft White and Cool Gray, extended with a restrained maritime support palette. Every component in Gradr resolves through these tokens — change the token, not the component."
         />
 
+        <Button variant="outline" size="sm" asChild>
+          <a href="/admin/design-system/color-usage">Read the mahogany vs teal guidelines</a>
+        </Button>
+
+
+
         <Section id="color" title="Color" blurb="Four foundation colors, derived surfaces, and status signals tuned to stay in the same family.">
           <div className="space-y-6">
             {[
