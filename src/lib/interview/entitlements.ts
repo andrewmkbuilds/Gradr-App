@@ -76,7 +76,7 @@ export function difficultyAllowed(ent: RealtimeEntitlement, difficultyId: string
 export function upgradeReason(ent: RealtimeEntitlement, kind: "voice" | "quota" | "persona" | "difficulty") {
   switch (kind) {
     case "voice":
-      return "Realtime voice interviews are available on Starter and Pro. On Free you can still run the full interview with browser voice.";
+      return "Studio voice interviews are available on Starter and Pro. On Free you can still run the full interview with browser voice.";
     case "quota":
       return `You've used all ${ent.sessionsPerMonth} realtime sessions included this month on ${ent.label}. Upgrade for more.`;
     case "persona":

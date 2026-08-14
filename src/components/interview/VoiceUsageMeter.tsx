@@ -31,7 +31,7 @@ function DetailRow({ term, value }: { term: string; value: string }) {
 }
 
 /**
- * Realtime voice usage for the current billing month: minutes spoken, sessions
+ * Studio voice usage for the current billing month: minutes spoken, sessions
  * used against the plan allowance, and what happens when the limit is hit.
  */
 export function VoiceUsageMeter({ compact = false }: { compact?: boolean }) {
@@ -82,7 +82,7 @@ export function VoiceUsageMeter({ compact = false }: { compact?: boolean }) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Mic className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold">Realtime voice</h3>
+            <h3 className="text-sm font-semibold">Studio voice</h3>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant={nearLimit ? "destructive" : "secondary"} className="text-[10px] capitalize">
