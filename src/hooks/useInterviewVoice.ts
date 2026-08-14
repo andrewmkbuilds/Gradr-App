@@ -38,9 +38,9 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   const spokenRef = useRef("");
 
   /** One authenticated ElevenLabs call per spoken thought. */
-  const fetchAudio = useCallback(async (text: string, signal: AbortSignal): Promise<Blob | null> => {
+  const fetchAudio = useCallback(async (text: string, signal: AbortSignal): Promise<AudioResult> => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) return null;
+    if (!session?.access_token) return { error: "You've been signed out. Sign in again to continue." };
 
     // Own controller so a slow chunk times out without killing the whole turn,
     // while still honouring the caller's abort (barge-in / session end).
@@ -65,16 +65,31 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
           previousText: spokenRef.current.slice(-400),
         }),
       });
-      if (!res.ok) return null;
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({} as any));
+        const reason = payload?.message || payload?.reason || payload?.error || `HTTP ${res.status}`;
+        console.error("[ElevenLabs] Audio stream: failed", { status: res.status, reason });
+        return { error: String(reason) };
+      }
+
       const blob = await res.blob();
-      return blob.size > 0 ? blob : null;
-    } catch {
-      return null;
+      if (!blob.size) {
+        console.error("[ElevenLabs] Audio stream: empty response");
+        return { error: "ElevenLabs returned no audio." };
+      }
+      return { blob };
+    } catch (e: any) {
+      if (signal.aborted) return { error: "aborted" };
+      const reason = e?.name === "AbortError" ? "The voice request timed out." : String(e?.message ?? e);
+      console.error("[ElevenLabs] Audio stream: failed", reason);
+      return { error: reason };
     } finally {
       window.clearTimeout(timeout);
       signal.removeEventListener("abort", relay);
     }
   }, []);
+
 
 
   const ensureQueue = useCallback(() => {
