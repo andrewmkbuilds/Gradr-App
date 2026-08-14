@@ -83,6 +83,7 @@ const CookiePolicy = lazy(() => import("./pages/legal/CookiePolicy"));
 const Dpa = lazy(() => import("./pages/legal/Dpa"));
 const AiResumeOptimization = lazy(() => import("./pages/blog/AiResumeOptimization"));
 const AtsResumeChecker = lazy(() => import("./pages/AtsResumeChecker"));
+const AiCoverLetterGenerator = lazy(() => import("./pages/AiCoverLetterGenerator"));
 const AiInterviewCoach = lazy(() => import("./pages/AiInterviewCoach"));
 const JobApplicationTracker = lazy(() => import("./pages/JobApplicationTracker"));
 const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
@@ -239,6 +240,7 @@ function AppRoutes() {
         <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
         <Route path="/ats-resume-checker" element={<AnimatedPage><AtsResumeChecker /></AnimatedPage>} />
+        <Route path="/ai-cover-letter-generator" element={<AnimatedPage><AiCoverLetterGenerator /></AnimatedPage>} />
         <Route path="/ai-interview-coach" element={<AnimatedPage><AiInterviewCoach /></AnimatedPage>} />
         <Route path="/job-application-tracker" element={<AnimatedPage><JobApplicationTracker /></AnimatedPage>} />
         {/* Duplicate URL variants collapse into the canonical path so only one
