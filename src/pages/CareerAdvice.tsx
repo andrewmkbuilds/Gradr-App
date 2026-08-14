@@ -136,6 +136,54 @@ export default function CareerAdvice() {
         <FaqBlock items={INDEX_FAQS} source="career-advice-index" />
 
         <section className="rounded-xl border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold text-foreground">Free tools that do the work</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Guides tell you what to change. These run it on your own documents and applications.
+          </p>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                to: "/job-application-tracker",
+                label: "Job application tracker",
+                note: "One AI pipeline for every role, follow-up and interview",
+              },
+              {
+                to: "/ats-resume-checker",
+                label: "ATS resume checker",
+                note: "Score your resume against any job description",
+              },
+              {
+                to: "/ai-interview-coach",
+                label: "AI interview coach",
+                note: "Voice mock interviews with scored feedback",
+              },
+            ].map((tool) => (
+              <li key={tool.to}>
+                <Link
+                  to={tool.to}
+                  onClick={() =>
+                    trackEvent("tool_card_click", {
+                      source: "career-advice-index",
+                      destination: tool.to,
+                    })
+                  }
+                  className="group block h-full rounded-lg border border-border/70 p-4 transition-colors hover:border-primary/50"
+                >
+                  <span className="flex items-center gap-1 text-sm font-medium text-foreground">
+                    {tool.label}
+                    <ArrowRight
+                      className="h-3.5 w-3.5 text-primary transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span className="mt-1 block text-sm text-muted-foreground">{tool.note}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold text-foreground">Looking for roles instead?</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Browse job search pages by role, location, and remote preference.
@@ -148,6 +196,7 @@ export default function CareerAdvice() {
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Link>
         </section>
+
       </div>
     </PublicShell>
   );

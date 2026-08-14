@@ -16,6 +16,9 @@ export const CANONICAL_ALIASES: Record<string, string> = {
   "/ai-interview-practice": "/ai-interview-coach",
   "/resume-checker": "/ats-resume-checker",
   "/ats-checker": "/ats-resume-checker",
+  "/job-tracker": "/job-application-tracker",
+  "/application-tracker": "/job-application-tracker",
+  "/job-application-tracking": "/job-application-tracker",
 };
 
 /** Lowercase, strip a trailing slash, then resolve any known alias. */

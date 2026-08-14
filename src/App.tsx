@@ -82,6 +82,7 @@ const Dpa = lazy(() => import("./pages/legal/Dpa"));
 const AiResumeOptimization = lazy(() => import("./pages/blog/AiResumeOptimization"));
 const AtsResumeChecker = lazy(() => import("./pages/AtsResumeChecker"));
 const AiInterviewCoach = lazy(() => import("./pages/AiInterviewCoach"));
+const JobApplicationTracker = lazy(() => import("./pages/JobApplicationTracker"));
 const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
 const GuideArticle = lazy(() => import("./pages/GuideArticle"));
 const JobSearchIndex = lazy(() => import("./pages/JobSearchIndex"));
@@ -234,6 +235,7 @@ function AppRoutes() {
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
         <Route path="/ats-resume-checker" element={<AnimatedPage><AtsResumeChecker /></AnimatedPage>} />
         <Route path="/ai-interview-coach" element={<AnimatedPage><AiInterviewCoach /></AnimatedPage>} />
+        <Route path="/job-application-tracker" element={<AnimatedPage><JobApplicationTracker /></AnimatedPage>} />
         {/* Duplicate URL variants collapse into the canonical path so only one
             version of each landing page can ever be indexed. */}
         {Object.keys(CANONICAL_ALIASES).map((alias) => (
