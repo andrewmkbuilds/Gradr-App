@@ -13,13 +13,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { CameraMonitor } from "@/components/interview/CameraMonitor";
 import { InterviewerOrb, type InterviewerState } from "@/components/interview/InterviewerOrb";
-import { ConnectionErrorOverlay } from "@/components/interview/ConnectionErrorOverlay";
+import { VoiceErrorPanel } from "@/components/interview/VoiceErrorPanel";
+import { VoiceHealthWidget } from "@/components/interview/VoiceHealthWidget";
 import { Surface } from "@/components/ui/surface";
 import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { SessionTimerRing } from "@/components/interview/SessionTimerRing";
 import { springSmooth, springSnappy, easeOut } from "@/lib/motion/tokens";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
-import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
+import type { VoiceErrorCode, VoiceProviderReason } from "@/lib/interview/voiceErrors";
 
 
 export type Msg = { role: "user" | "assistant"; content: string };
@@ -51,6 +52,8 @@ interface Props {
   connectionLost?: boolean;
   /** Sanitized Gradr voice error code — never provider wording. */
   voiceErrorCode?: VoiceErrorCode | null;
+  /** Enumerated provider reason behind the failure (entitlement, quota, …). */
+  voiceErrorReason?: VoiceProviderReason | null;
   onDismissConnectionError?: () => void;
 
 
@@ -101,7 +104,7 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
-    connectionLost, voiceErrorCode, onDismissConnectionError,
+    connectionLost, voiceErrorCode, voiceErrorReason, onDismissConnectionError,
 
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
@@ -160,11 +163,12 @@ export function InterviewStudio(props: Props) {
     <TooltipProvider delayDuration={200}>
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6">
         {connectionLost && onDismissConnectionError && (
-          <ConnectionErrorOverlay
+          <VoiceErrorPanel
             open
             code={voiceErrorCode}
+            reason={voiceErrorReason}
             retrying={connecting}
-            onRetry={onReconnect}
+            onRetryAfterReconnect={onReconnect}
             onDismiss={onDismissConnectionError}
           />
 
@@ -216,6 +220,7 @@ export function InterviewStudio(props: Props) {
           </div>
 
           <div className="flex items-center gap-2">
+            <VoiceHealthWidget className="hidden sm:inline-flex" />
             {canReconnect && (
               <Button variant="outline" size="sm" onClick={onReconnect} disabled={connecting}>
                 <Zap className="mr-2 h-4 w-4" aria-hidden="true" />

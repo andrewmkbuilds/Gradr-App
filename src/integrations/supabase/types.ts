@@ -3944,6 +3944,69 @@ export type Database = {
           },
         ]
       }
+      voice_provider_config: {
+        Row: {
+          id: boolean
+          model_id: string
+          output_format: string
+          updated_at: string
+          updated_by: string | null
+          voice_overrides: Json
+        }
+        Insert: {
+          id?: boolean
+          model_id?: string
+          output_format?: string
+          updated_at?: string
+          updated_by?: string | null
+          voice_overrides?: Json
+        }
+        Update: {
+          id?: boolean
+          model_id?: string
+          output_format?: string
+          updated_at?: string
+          updated_by?: string | null
+          voice_overrides?: Json
+        }
+        Relationships: []
+      }
+      voice_provider_events: {
+        Row: {
+          code: string | null
+          context: string
+          created_at: string
+          id: string
+          outcome: string
+          provider_reason: string | null
+          request_id: string | null
+          upstream_status: number | null
+          user_id: string | null
+        }
+        Insert: {
+          code?: string | null
+          context?: string
+          created_at?: string
+          id?: string
+          outcome: string
+          provider_reason?: string | null
+          request_id?: string | null
+          upstream_status?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          code?: string | null
+          context?: string
+          created_at?: string
+          id?: string
+          outcome?: string
+          provider_reason?: string | null
+          request_id?: string | null
+          upstream_status?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       webhook_deliveries: {
         Row: {
           attempts: number

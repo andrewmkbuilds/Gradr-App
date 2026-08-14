@@ -1,86 +1,44 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { planTier, resolveEnv } from "../_shared/entitlements.ts";
+import {
+  classifyProviderFailure,
+  corsHeaders,
+  jsonResponse as json,
+  loadVoiceConfig,
+  providerDetail,
+  recordVoiceEvent,
+  resolveProfile,
+  type VoiceConfig,
+  type VoiceErrorCode,
+  type VoiceProfile,
+  type VoiceProviderReason,
+} from "../_shared/voiceProvider.ts";
 
 /**
  * Interviewer speech (ElevenLabs).
  *
  * Voices one spoken thought at a time so the client can start playback while
  * the reasoning model is still generating the rest of the turn. The persona ->
- * voice mapping and the delivery settings are resolved here, server-side, so a
- * client can never point the interviewer at an arbitrary voice.
+ * voice mapping, model and delivery settings are resolved here, server-side
+ * (with admin overrides from voice_provider_config), so a client can never
+ * point the interviewer at an arbitrary voice.
  *
- * ELEVENLABS_API_KEY never leaves this function.
+ * ELEVENLABS_API_KEY never leaves this function. The client receives a Gradr
+ * error code plus a safe enumerated provider reason (e.g.
+ * PROVIDER_UNUSUAL_ACTIVITY) so the interview UI can explain entitlement
+ * problems precisely without ever surfacing provider prose.
  */
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-interface VoiceProfile {
-  voiceId: string;
-  stability: number;
-  similarityBoost: number;
-  style: number;
-  speed: number;
+function voiceError(
+  code: VoiceErrorCode,
+  status: number,
+  requestId: string,
+  reason?: VoiceProviderReason,
+) {
+  return json({ code, reason: reason ?? null, requestId }, status);
 }
 
-/**
- * Gradr voice error vocabulary. Mirrored in src/lib/interview/voiceErrors.ts.
- * The provider's own wording NEVER crosses this boundary — it is logged here
- * and the client only receives one of these codes.
- */
-type VoiceErrorCode =
-  | "VOICE_UNAVAILABLE"
-  | "VOICE_CONNECTION_FAILED"
-  | "VOICE_RATE_LIMITED"
-  | "VOICE_CONFIGURATION_ERROR"
-  | "VOICE_TIMEOUT"
-  | "VOICE_NOT_ENTITLED"
-  | "VOICE_SESSION_EXPIRED";
-
-/** Classifies an upstream provider failure into a Gradr code. */
-function classifyProviderFailure(status: number): { code: VoiceErrorCode; status: number } {
-  // 401/403 mean the provider rejected our credentials, key permissions or
-  // account standing — always an operator problem, never the candidate's.
-  if (status === 401 || status === 403) return { code: "VOICE_CONFIGURATION_ERROR", status: 503 };
-  if (status === 429) return { code: "VOICE_RATE_LIMITED", status: 429 };
-  if (status === 408 || status === 504) return { code: "VOICE_TIMEOUT", status: 504 };
-  if (status >= 500) return { code: "VOICE_UNAVAILABLE", status: 503 };
-  return { code: "VOICE_CONNECTION_FAILED", status: 502 };
-}
-
-function voiceError(code: VoiceErrorCode, status: number, requestId: string) {
-  return json({ code, requestId }, status);
-}
-
-function providerDetail(raw: string) {
-  if (!raw) return "No detail returned by the voice provider.";
-  try {
-    const parsed = JSON.parse(raw);
-    const detail = parsed?.detail;
-    if (typeof detail?.message === "string") return detail.message.slice(0, 300);
-    if (typeof detail === "string") return detail.slice(0, 300);
-    if (typeof parsed?.message === "string") return parsed.message.slice(0, 300);
-  } catch {
-    // Provider occasionally returns plain text. It never contains our API key.
-  }
-  return raw.slice(0, 300);
-}
-
-/** Mirrored in src/lib/interview/voiceProfiles.ts (UI labels only). */
-const VOICE_PROFILES: Record<string, VoiceProfile> = {
-  friendly: { voiceId: "EXAVITQu4vr4xnSDxMaL", stability: 0.42, similarityBoost: 0.78, style: 0.28, speed: 1.02 },
-  "hiring-manager": { voiceId: "nPczCjzI2devNBz1zQrb", stability: 0.5, similarityBoost: 0.75, style: 0.18, speed: 0.99 },
-  technical: { voiceId: "cjVigY5qzO86Huf0OWal", stability: 0.58, similarityBoost: 0.72, style: 0.12, speed: 0.97 },
-  executive: { voiceId: "JBFqnCBsd6RMkjVDRZzb", stability: 0.62, similarityBoost: 0.7, style: 0.1, speed: 0.94 },
-  stress: { voiceId: "iP95p4xoKVk53GoZ742B", stability: 0.38, similarityBoost: 0.8, style: 0.22, speed: 1.09 },
-};
-
-const MODEL_ID = "eleven_turbo_v2_5";
-const OUTPUT_FORMAT = "mp3_44100_128";
 const UPSTREAM_TIMEOUT_MS = 20_000;
 
 // Chunked speech means many small calls per turn — this cap is per user/minute.
@@ -97,17 +55,17 @@ function rateLimited(userId: string) {
   return false;
 }
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
-async function synthesize(apiKey: string, profile: VoiceProfile, text: string, previousText: string, nextText: string) {
+async function synthesize(
+  apiKey: string,
+  profile: VoiceProfile,
+  config: VoiceConfig,
+  text: string,
+  previousText: string,
+  nextText: string,
+) {
   const url =
     `https://api.elevenlabs.io/v1/text-to-speech/${profile.voiceId}/stream` +
-    `?output_format=${OUTPUT_FORMAT}&optimize_streaming_latency=3`;
+    `?output_format=${config.outputFormat}&optimize_streaming_latency=3`;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
@@ -118,7 +76,7 @@ async function synthesize(apiKey: string, profile: VoiceProfile, text: string, p
       headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
       body: JSON.stringify({
         text,
-        model_id: MODEL_ID,
+        model_id: config.modelId,
         // Request stitching keeps prosody continuous across chunks of one turn.
         ...(previousText ? { previous_text: previousText } : {}),
         ...(nextText ? { next_text: nextText } : {}),
@@ -168,30 +126,38 @@ serve(async (req) => {
     const tier = await planTier(user.id, resolveEnv(body.environment));
     if (!new Set(["starter", "pro", "advanced"]).has(tier)) {
       console.warn("[voice] denied — studio voice entitlement required", { requestId, userId: user.id, tier });
+      await recordVoiceEvent({ userId: user.id, outcome: "failure", code: "VOICE_NOT_ENTITLED", requestId });
       return voiceError("VOICE_NOT_ENTITLED", 403, requestId);
     }
     const text = typeof body.text === "string" ? body.text.trim().slice(0, 1200) : "";
     if (!text) return json({ code: "VOICE_UNAVAILABLE", requestId, error: "text is required" }, 400);
 
     const personaId = typeof body.personaId === "string" ? body.personaId : "hiring-manager";
-    const profile = VOICE_PROFILES[personaId] ?? VOICE_PROFILES["hiring-manager"];
-    console.info("[voice] persona resolved", { requestId, personaId, voiceConfigured: Boolean(profile.voiceId) });
+    const config = await loadVoiceConfig();
+    const profile = resolveProfile(personaId, config);
+    console.info("[voice] persona resolved", { requestId, personaId, model: config.modelId });
     const previousText = typeof body.previousText === "string" ? body.previousText.slice(-400) : "";
     const nextText = typeof body.nextText === "string" ? body.nextText.slice(0, 400) : "";
 
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) {
       console.error("[voice] provider credential missing — ELEVENLABS_API_KEY unavailable", { requestId });
-      return voiceError("VOICE_CONFIGURATION_ERROR", 503, requestId);
+      await recordVoiceEvent({
+        userId: user.id,
+        outcome: "failure",
+        code: "VOICE_CONFIGURATION_ERROR",
+        reason: "PROVIDER_CREDENTIAL_MISSING",
+        requestId,
+      });
+      return voiceError("VOICE_CONFIGURATION_ERROR", 503, requestId, "PROVIDER_CREDENTIAL_MISSING");
     }
-    console.info("[voice] provider credential present", { requestId });
 
     // One retry: transient 429/5xx from the provider shouldn't drop a thought.
     let res: Response | null = null;
     let networkError = false;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        res = await synthesize(apiKey, profile, text, previousText, nextText);
+        res = await synthesize(apiKey, profile, config, text, previousText, nextText);
       } catch (e) {
         networkError = true;
         console.error("[voice] provider request threw", { requestId, error: String(e) });
@@ -215,12 +181,21 @@ serve(async (req) => {
         providerDetail: providerDetail(rawDetail),
       });
       const mapped = networkError && !res
-        ? { code: "VOICE_CONNECTION_FAILED" as VoiceErrorCode, status: 502 }
-        : classifyProviderFailure(upstreamStatus);
-      return voiceError(mapped.code, mapped.status, requestId);
+        ? { code: "VOICE_CONNECTION_FAILED" as VoiceErrorCode, status: 502, reason: "PROVIDER_NETWORK" as VoiceProviderReason }
+        : classifyProviderFailure(upstreamStatus, rawDetail);
+      await recordVoiceEvent({
+        userId: user.id,
+        outcome: "failure",
+        code: mapped.code,
+        reason: mapped.reason,
+        upstreamStatus,
+        requestId,
+      });
+      return voiceError(mapped.code, mapped.status, requestId, mapped.reason);
     }
 
     console.info("[voice] audio stream started", { requestId, personaId });
+    await recordVoiceEvent({ userId: user.id, outcome: "ok", requestId });
 
     return new Response(res.body, {
       headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },

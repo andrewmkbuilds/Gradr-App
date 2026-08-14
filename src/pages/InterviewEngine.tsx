@@ -16,6 +16,7 @@ import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
 import { useInterviewVoice } from "@/hooks/useInterviewVoice";
+import { reconnectVoiceSession } from "@/lib/interview/voiceStatus";
 import { useInterviewMetrics } from "@/hooks/useInterviewMetrics";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
@@ -624,6 +625,7 @@ function InterviewEngineInner() {
       startedAt={startedAt.current}
       connectionLost={(streamFailed || Boolean(voiceError)) && !connectionErrorDismissed}
       voiceErrorCode={voiceError}
+      voiceErrorReason={interviewer.errorReason}
 
 
       onDismissConnectionError={() => setConnectionErrorDismissed(true)}
@@ -641,18 +643,27 @@ function InterviewEngineInner() {
         startListening();
       }}
       onReconnect={() => {
-        setConnectionErrorDismissed(false);
-        setStreamFailed(false);
-        setVoiceError(null);
-        interviewer.clearError();
-        const generatedTurn = generatedTurnRef.current.trim();
-        if (generatedTurn) {
-          spokenRef.current = "";
-          setSpoken("");
-          interviewer.retryTurn(generatedTurn);
-        } else {
-          void runTurn(messagesRef.current);
-        }
+        // "Retry after reconnect": re-establish the app session first so a stale
+        // token is never mistaken for a provider outage, then replay the same
+        // turn through the same voice provider — never a silent fallback.
+        setConnecting(true);
+        void reconnectVoiceSession()
+          .catch(() => null)
+          .finally(() => {
+            setConnecting(false);
+            setConnectionErrorDismissed(false);
+            setStreamFailed(false);
+            setVoiceError(null);
+            interviewer.clearError();
+            const generatedTurn = generatedTurnRef.current.trim();
+            if (generatedTurn) {
+              spokenRef.current = "";
+              setSpoken("");
+              interviewer.retryTurn(generatedTurn);
+            } else {
+              void runTurn(messagesRef.current);
+            }
+          });
       }}
 
       onEnd={() => void endAndScore()}
