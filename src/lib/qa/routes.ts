@@ -29,6 +29,7 @@ export const QA_ROUTES: QaRoute[] = [
   { id: "auth", label: "Sign in", path: "/auth", group: "Public", auth: false, states: ["default", "loading", "error"] },
   { id: "jobs-index", label: "Job search index", path: "/job-search", group: "Public", auth: false, states: STATIC },
   { id: "ats", label: "ATS resume checker", path: "/ats-resume-checker", group: "Public", auth: false, states: STATIC },
+  { id: "tracker", label: "Job application tracker", path: "/job-application-tracker", group: "Public", auth: false, states: STATIC },
   { id: "advice", label: "Career advice", path: "/career-advice", group: "Public", auth: false, states: STATIC },
   { id: "legal", label: "Privacy policy", path: "/privacy", group: "Public", auth: false, states: STATIC },
   { id: "notfound", label: "404", path: "/this-route-does-not-exist", group: "Public", auth: false, states: STATIC },
