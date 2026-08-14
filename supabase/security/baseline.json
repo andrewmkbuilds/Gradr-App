@@ -229,7 +229,7 @@
       "attribute_signup_referral",
       "entitlement_snapshot",
       "get_affiliate_public_settings",
-      "has_domain_proof",
+      
       "has_role",
       "is_admin",
       "is_anonymous_session",
