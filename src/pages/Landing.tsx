@@ -216,8 +216,8 @@ function Section({
   id, className = "", children,
 }: { id?: string; className?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className={`relative w-full scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 ${className}`}>
-      <div className="mx-auto w-full max-w-6xl">{children}</div>
+    <section id={id} className={`relative w-full scroll-mt-24 py-20 sm:py-28 ${className}`}>
+      <div className="page-shell">{children}</div>
     </section>
   );
 }
@@ -317,7 +317,7 @@ export default function Landing() {
       >
         <nav
           aria-label="Main"
-          className={`mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 transition-all sm:px-8 ${scrolled ? "h-14" : "h-16"}`}
+          className={`page-shell flex items-center justify-between gap-4 transition-all ${scrolled ? "h-14" : "h-16"}`}
         >
           <a href="#hero" className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <BrandLogo size={28} />
@@ -380,7 +380,7 @@ export default function Landing() {
             initial={heroReduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: easeOut }}
-            className="max-h-[calc(100vh-3.5rem)] overflow-y-auto border-t border-border bg-background/98 px-5 py-4 backdrop-blur-xl lg:hidden"
+            className="page-shell max-h-[calc(100vh-3.5rem)] overflow-y-auto border-t border-border bg-background/98 py-4 backdrop-blur-xl lg:hidden"
           >
             <motion.ul
               className="space-y-1"
@@ -1061,8 +1061,8 @@ export default function Landing() {
       </main>
 
       {/* --------------------------------- footer ------------------------------ */}
-      <footer className="border-t border-border bg-card/40 px-5 py-14 sm:px-8">
-        <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <footer className="border-t border-border bg-card/40 py-14">
+        <div className="page-shell grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <BrandLogo size={28} />
@@ -1092,7 +1092,7 @@ export default function Landing() {
           ))}
         </div>
 
-        <div className="mx-auto mt-12 flex max-w-6xl flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="page-shell mt-12 flex flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Gradr. All rights reserved.</p>
           <p className="text-xs text-muted-foreground">Built for people actively looking for their next role.</p>
         </div>
