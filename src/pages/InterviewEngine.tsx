@@ -56,7 +56,9 @@ function InterviewEngineInner() {
   const [limits, setLimits] = useState<SessionLimits | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [streamFailed, setStreamFailed] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
+
   /** The interviewer's current turn, revealed only as fast as it is spoken. */
   const [spoken, setSpoken] = useState("");
 
@@ -116,7 +118,15 @@ function InterviewEngineInner() {
         window.setTimeout(() => listenRef.current(), 420);
       }
     },
+    onVoiceError: (reason) => {
+      // No silent substitute voice — the candidate is told and can retry.
+      spokenRef.current = "";
+      setSpoken("");
+      setVoiceError(reason);
+      setConnectionErrorDismissed(false);
+    },
   });
+
 
   const interviewerRef = useRef(interviewer);
   interviewerRef.current = interviewer;
@@ -572,9 +582,10 @@ function InterviewEngineInner() {
       partialUser={voice.listening ? voice.transcript : ""}
       partialModel={spoken}
       interviewerState={interviewerState}
-      realtime={voiceMode && Boolean(limits?.studioVoice) && !interviewer.degraded}
+      realtime={voiceMode && Boolean(limits?.studioVoice) && !voiceError}
       connecting={connecting}
-      canReconnect={streamFailed}
+      canReconnect={streamFailed || Boolean(voiceError)}
+
       micMuted={!voice.listening}
       micLabel={micLabel}
       voiceOn={voiceMode}
@@ -592,7 +603,9 @@ function InterviewEngineInner() {
           : null
       }
       startedAt={startedAt.current}
-      connectionLost={streamFailed && !connectionErrorDismissed}
+      connectionLost={(streamFailed || Boolean(voiceError)) && !connectionErrorDismissed}
+      connectionErrorDetail={voiceError ?? undefined}
+
       onDismissConnectionError={() => setConnectionErrorDismissed(true)}
       onInputChange={setInput}
       onSubmit={() => void submitAnswer(input)}
@@ -610,8 +623,11 @@ function InterviewEngineInner() {
       onReconnect={() => {
         setConnectionErrorDismissed(false);
         setStreamFailed(false);
+        setVoiceError(null);
+        interviewer.clearError();
         void runTurn(messagesRef.current);
       }}
+
       onEnd={() => void endAndScore()}
       onReset={resetInterview}
       onSnapshot={handleSnapshot}

@@ -12,9 +12,11 @@
  *   pauses: each chunk is fetched while the previous one is still playing.
  * - The transcript only reveals a chunk when its audio actually starts, so the
  *   caption never runs ahead of the voice.
- * - Any chunk that fails after retries degrades to browser speech synthesis
- *   rather than dropping the interviewer's turn.
+ * - There is deliberately NO silent fallback to another voice engine. If
+ *   ElevenLabs fails, the turn stops and the caller surfaces a retryable error,
+ *   so a broken integration can never hide behind a robotic substitute voice.
  */
+
 
 const MAX_CHUNK_CHARS = 220;
 const MIN_CHUNK_CHARS = 12;
@@ -78,24 +80,27 @@ export function pauseAfter(text: string, beatMs: number): number {
   return beatMs;
 }
 
+export type AudioResult = { blob: Blob } | { error: string };
+
 export interface SpeechQueueOptions {
-  /** Fetches audio for one chunk. Resolve null to fall back to browser speech. */
-  fetchAudio: (text: string, signal: AbortSignal) => Promise<Blob | null>;
+  /** Fetches audio for one chunk from ElevenLabs. */
+  fetchAudio: (text: string, signal: AbortSignal) => Promise<AudioResult>;
   /** Fired the moment a chunk's audio starts — drives the live transcript. */
   onChunkSpoken: (text: string) => void;
   onSpeakingChange: (speaking: boolean) => void;
   /** Everything queued has been spoken and the input stream was closed. */
   onDrained: () => void;
-  /** Voice quality degraded (ElevenLabs failed for a chunk). */
-  onDegraded?: (reason: string) => void;
+  /** ElevenLabs failed — the turn is aborted and must be retried by the user. */
+  onFailure: (reason: string) => void;
   /** Extra silence between thoughts, from the persona profile. */
   beatMs?: number;
 }
 
 interface QueueItem {
   text: string;
-  audio: Promise<Blob | null>;
+  audio: Promise<AudioResult>;
 }
+
 
 /** Plays interviewer speech chunk by chunk, in order, with no overlap. */
 export class SpeechQueue {
@@ -106,6 +111,8 @@ export class SpeechQueue {
   private audio: HTMLAudioElement | null = null;
   private url: string | null = null;
   private controllers = new Set<AbortController>();
+  private failure: string | null = null;
+
 
   constructor(private opts: SpeechQueueOptions) {}
 
@@ -123,8 +130,9 @@ export class SpeechQueue {
     this.controllers.add(controller);
     const audio = this.opts
       .fetchAudio(clean, controller.signal)
-      .catch(() => null)
+      .catch((e): AudioResult => ({ error: String(e?.message ?? e) }))
       .finally(() => this.controllers.delete(controller));
+
 
     this.queue.push({ text: clean, audio });
     void this.pump();
@@ -185,32 +193,42 @@ export class SpeechQueue {
         continue;
       }
 
-      let blob: Blob | null = null;
+      let result: AudioResult;
       try {
-        blob = await item.audio;
-      } catch {
-        blob = null;
+        result = await item.audio;
+      } catch (e: any) {
+        result = { error: String(e?.message ?? e) };
       }
       if (this.stopped) break;
+
+      if ("error" in result) {
+        // No substitute voice: end the turn and let the UI offer a retry.
+        this.failure = result.error;
+        break;
+      }
 
       this.opts.onChunkSpoken(item.text);
-
-      if (blob) {
-        await this.playBlob(blob);
-      } else {
-        this.opts.onDegraded?.("elevenlabs_unavailable");
-        await this.speakBrowser(item.text);
-      }
+      await this.playBlob(result.blob);
       if (this.stopped) break;
+
 
       await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));
     }
 
     this.running = false;
-    if (!this.stopped) {
-      this.opts.onSpeakingChange(false);
-      if (this.closed && this.queue.length === 0) this.opts.onDrained();
+    if (this.stopped) return;
+    this.opts.onSpeakingChange(false);
+
+    if (this.failure) {
+      const reason = this.failure;
+      this.failure = null;
+      this.queue = [];
+      this.controllers.forEach((c) => c.abort());
+      this.controllers.clear();
+      this.opts.onFailure(reason);
+      return;
     }
+    if (this.closed && this.queue.length === 0) this.opts.onDrained();
   }
 
   private playBlob(blob: Blob): Promise<void> {
@@ -229,21 +247,8 @@ export class SpeechQueue {
       el.play().catch(done);
     });
   }
-
-  private speakBrowser(text: string): Promise<void> {
-    return new Promise((resolve) => {
-      if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-        resolve();
-        return;
-      }
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 1.0;
-      utter.onend = () => resolve();
-      utter.onerror = () => resolve();
-      window.speechSynthesis.speak(utter);
-    });
-  }
 }
+
 
 function delay(ms: number) {
   return new Promise<void>((resolve) => window.setTimeout(resolve, ms));

@@ -46,7 +46,10 @@ interface Props {
   limits: Limits | null;
   startedAt: number;
   connectionLost?: boolean;
+  /** Exact upstream reason (e.g. the ElevenLabs failure) shown to the candidate. */
+  connectionErrorDetail?: string;
   onDismissConnectionError?: () => void;
+
   onInputChange: (value: string) => void;
   onSubmit: () => void;
   onToggleMic: () => void;
@@ -94,7 +97,7 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
-    connectionLost, onDismissConnectionError,
+    connectionLost, connectionErrorDetail, onDismissConnectionError,
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
@@ -154,11 +157,18 @@ export function InterviewStudio(props: Props) {
         {connectionLost && onDismissConnectionError && (
           <ConnectionErrorOverlay
             open
+            title="Interviewer voice unavailable"
+            message={
+              connectionErrorDetail
+                ? `Your transcript is safe. The voice engine stopped this turn: ${connectionErrorDetail}. Retry the turn, or continue by typing.`
+                : "Your transcript is safe. Reconnect to carry on with voice, or keep going by typing your answers."
+            }
             retrying={connecting}
             onRetry={onReconnect}
             onDismiss={onDismissConnectionError}
           />
         )}
+
         {/* ---------- Header ---------- */}
         <motion.header
           initial={reduced ? false : { opacity: 0, y: -12 }}

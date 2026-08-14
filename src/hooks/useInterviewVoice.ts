@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { SentenceChunker, SpeechQueue } from "@/lib/interview/speechStream";
+import { SentenceChunker, SpeechQueue, type AudioResult } from "@/lib/interview/speechStream";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
 
 /**
@@ -8,8 +8,8 @@ import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
  *
  * Consumes the reasoning model's text stream and speaks it through ElevenLabs
  * chunk by chunk, revealing the transcript only as each thought is actually
- * spoken. Degrades to browser speech synthesis if ElevenLabs fails, and stops
- * instantly on barge-in, session end or unmount.
+ * spoken. There is no substitute voice engine: if ElevenLabs fails the turn
+ * stops and `error` is set so the studio can offer an explicit retry.
  */
 
 const SPEECH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-speech`;
@@ -24,11 +24,14 @@ export interface UseInterviewVoiceOptions {
   onSpokenChunk: (text: string) => void;
   /** The interviewer finished the whole turn. */
   onTurnComplete: () => void;
+  /** ElevenLabs failed mid-turn — the turn was aborted. */
+  onVoiceError: (reason: string) => void;
 }
 
 export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   const [speaking, setSpeaking] = useState(false);
-  const [degraded, setDegraded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
 
   const optsRef = useRef(opts);
   optsRef.current = opts;
@@ -38,9 +41,9 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   const spokenRef = useRef("");
 
   /** One authenticated ElevenLabs call per spoken thought. */
-  const fetchAudio = useCallback(async (text: string, signal: AbortSignal): Promise<Blob | null> => {
+  const fetchAudio = useCallback(async (text: string, signal: AbortSignal): Promise<AudioResult> => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) return null;
+    if (!session?.access_token) return { error: "You've been signed out. Sign in again to continue." };
 
     // Own controller so a slow chunk times out without killing the whole turn,
     // while still honouring the caller's abort (barge-in / session end).
@@ -65,16 +68,31 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
           previousText: spokenRef.current.slice(-400),
         }),
       });
-      if (!res.ok) return null;
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({} as any));
+        const reason = payload?.message || payload?.reason || payload?.error || `HTTP ${res.status}`;
+        console.error("[ElevenLabs] Audio stream: failed", { status: res.status, reason });
+        return { error: String(reason) };
+      }
+
       const blob = await res.blob();
-      return blob.size > 0 ? blob : null;
-    } catch {
-      return null;
+      if (!blob.size) {
+        console.error("[ElevenLabs] Audio stream: empty response");
+        return { error: "ElevenLabs returned no audio." };
+      }
+      return { blob };
+    } catch (e: any) {
+      if (signal.aborted) return { error: "aborted" };
+      const reason = e?.name === "AbortError" ? "The voice request timed out." : String(e?.message ?? e);
+      console.error("[ElevenLabs] Audio stream: failed", reason);
+      return { error: reason };
     } finally {
       window.clearTimeout(timeout);
       signal.removeEventListener("abort", relay);
     }
   }, []);
+
 
 
   const ensureQueue = useCallback(() => {
@@ -89,7 +107,13 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
       },
       onSpeakingChange: setSpeaking,
       onDrained: () => optsRef.current.onTurnComplete(),
-      onDegraded: () => setDegraded(true),
+      onFailure: (reason) => {
+        console.error("[ElevenLabs] Turn aborted:", reason);
+        setError(reason);
+        setSpeaking(false);
+        optsRef.current.onVoiceError(reason);
+      },
+
     });
     queueRef.current = q;
     return q;
@@ -97,11 +121,14 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
 
   /** Opens a new interviewer turn. */
   const beginTurn = useCallback(() => {
+    console.info("[ElevenLabs] Initializing voice turn — persona:", optsRef.current.personaId);
     chunkerRef.current = new SentenceChunker();
     spokenRef.current = "";
+    setError(null);
     const q = ensureQueue();
     q.reset();
   }, [ensureQueue]);
+
 
   /** Feeds a model delta; complete thoughts are queued for speech. */
   const pushDelta = useCallback((delta: string) => {
@@ -140,5 +167,5 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     queueRef.current = null;
   }, []);
 
-  return { speaking, degraded, beginTurn, pushDelta, endTurn, stop };
+  return { speaking, error, clearError: () => setError(null), beginTurn, pushDelta, endTurn, stop };
 }
