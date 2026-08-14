@@ -61,13 +61,15 @@ Deno.serve(async (req) => {
   const { data: isAdmin } = await admin.rpc('has_role', { _user_id: actor.id, _role: 'admin' })
   if (!isAdmin) return json({ error: 'Admin role required' }, 403)
 
-  // Decision + audit trail (runs as the admin so the DB records the actor).
-  const { error: rpcError } = await userClient.rpc('admin_review_verification_request', {
+  // Decision + audit trail. The RPC is backend-only (service_role EXECUTE); the
+  // verified admin id is passed explicitly so the DB still records the actor.
+  const { error: rpcError } = await admin.rpc('admin_review_verification_request', {
     _request_id: requestId,
     _decision: decision,
     _notes: notes || undefined,
     _discount_percentage:
       typeof payload.discountPercentage === 'number' ? payload.discountPercentage : undefined,
+    _actor_id: actor.id,
   })
   if (rpcError) {
     console.error('verification-review: decision failed', rpcError)
