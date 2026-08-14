@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Briefcase, GitCompare, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowRight, Briefcase, GitCompare, Lightbulb, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useResumeVersions, type ResumeVersion } from "@/hooks/useResumeVersions";
@@ -86,6 +86,82 @@ export function ResumeVersionDiff() {
     () => jobTypeDeltas(tokens(base?.parsed_text), tokens(compare?.parsed_text)),
     [base, compare],
   );
+
+  /**
+   * Plain-language impact statements: each observed change in the document is
+   * tied to the score it moved (ATS = parser readiness, match = role fit).
+   */
+  const impacts = useMemo<{ title: string; detail: string; direction: "up" | "down" | "flat" }[]>(() => {
+    if (!base || !compare) return [];
+    const out: { title: string; detail: string; direction: "up" | "down" | "flat" }[] = [];
+    const d = (k: keyof ResumeVersion) => ((compare[k] as number | null) ?? 0) - ((base[k] as number | null) ?? 0);
+    const dir = (n: number) => (n > 0 ? "up" : n < 0 ? "down" : "flat") as "up" | "down" | "flat";
+    const sign = (n: number) => `${n > 0 ? "+" : ""}${n}`;
+
+    const ats = d("ats_score");
+    out.push({
+      title: `ATS score ${ats === 0 ? "held steady" : ats > 0 ? `rose ${sign(ats)} points` : `fell ${ats} points`}`,
+      direction: dir(ats),
+      detail:
+        ats === 0
+          ? "Nothing in this revision changed how a parser reads the document."
+          : `Driven by formatting (${sign(d("formatting_score"))}), impact statements (${sign(d("impact_score"))}) and readability (${sign(d("readability_score"))}).`,
+    });
+
+    const km = d("keyword_match");
+    out.push({
+      title: `Match score ${km === 0 ? "unchanged" : km > 0 ? `improved ${sign(km)} points` : `dropped ${km} points`}`,
+      direction: dir(km),
+      detail:
+        keywordDiff.added.length || keywordDiff.removed.length
+          ? `${keywordDiff.added.length} term${keywordDiff.added.length === 1 ? "" : "s"} gained and ${keywordDiff.removed.length} lost against the target role's vocabulary.`
+          : "Keyword coverage against your target role is identical between these versions.",
+    });
+
+    const fmt = d("formatting_score");
+    if (fmt !== 0) {
+      out.push({
+        title: `Formatting ${fmt > 0 ? "cleaner" : "riskier"} (${sign(fmt)})`,
+        direction: dir(fmt),
+        detail:
+          fmt > 0
+            ? "Section headings, ordering and layout parse more reliably, which lifts the ATS composite."
+            : "New layout elements are harder for parsers to read, dragging the ATS composite down.",
+      });
+    }
+
+    const imp = d("impact_score");
+    if (imp !== 0) {
+      out.push({
+        title: `Impact statements ${imp > 0 ? "stronger" : "weaker"} (${sign(imp)})`,
+        direction: dir(imp),
+        detail:
+          imp > 0
+            ? "More quantified, verb-led achievements — recruiters and scoring models both weight these heavily."
+            : "Fewer measurable outcomes in the bullets reduced the impact component.",
+      });
+    }
+
+    const best = [...typeDeltas].sort((a, b) => b.delta - a.delta)[0];
+    const worst = [...typeDeltas].sort((a, b) => a.delta - b.delta)[0];
+    if (best && best.delta > 0) {
+      out.push({
+        title: `Best fit gain: ${best.profile.label} (${sign(best.delta)} coverage)`,
+        direction: "up",
+        detail: `Coverage moved ${best.baseScore}% → ${best.compareScore}%, so this version ranks higher for those roles.`,
+      });
+    }
+    if (worst && worst.delta < 0) {
+      out.push({
+        title: `Regression: ${worst.profile.label} (${sign(worst.delta)} coverage)`,
+        direction: "down",
+        detail: `Coverage slipped ${worst.baseScore}% → ${worst.compareScore}%. Keep a version tuned for those roles if you're still applying to them.`,
+      });
+    }
+    return out;
+  }, [base, compare, keywordDiff, typeDeltas]);
+
+
 
   if (loading) {
     return <div className="elev-2 h-40 animate-pulse rounded-xl" />;
@@ -199,6 +275,35 @@ export function ResumeVersionDiff() {
           </div>
         </div>
       </div>
+
+      <section className="mt-6" aria-labelledby="impact-heading">
+        <h4 id="impact-heading" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Lightbulb className="h-4 w-4 text-mahogany" aria-hidden="true" /> How these changes moved your scores
+        </h4>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Each line ties a change in the document to the score it moved — ATS on the parser side, match on the
+          role-fit side.
+        </p>
+        <ul className="mt-3 space-y-2">
+          {impacts.map((im) => (
+            <li key={im.title} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+              <span
+                className={cn(
+                  "mt-1 h-2 w-2 shrink-0 rounded-full",
+                  im.direction === "up" ? "bg-success" : im.direction === "down" ? "bg-destructive" : "bg-muted-foreground/50",
+                )}
+                aria-hidden="true"
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">{im.title}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{im.detail}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+
 
       <section className="mt-6" aria-labelledby="jobtype-delta-heading">
         <h4 id="jobtype-delta-heading" className="flex items-center gap-2 text-sm font-semibold text-foreground">

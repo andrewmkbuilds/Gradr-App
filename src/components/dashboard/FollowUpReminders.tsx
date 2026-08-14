@@ -20,6 +20,10 @@ interface ActiveJob {
   applied_at: string | null;
   updated_at: string;
   created_at: string;
+  last_touch_at: string | null;
+  /** Per-application cadence override. 0 = inherit the global cadence. */
+  follow_up_days: number | null;
+  follow_up_enabled: boolean | null;
 }
 
 interface Settings {
@@ -38,8 +42,14 @@ const STAGE_OPTIONS = [
 const CADENCES = [3, 5, 7, 10, 14];
 
 function lastTouch(job: ActiveJob) {
-  return new Date(job.applied_at ?? job.updated_at ?? job.created_at);
+  return new Date(job.last_touch_at ?? job.applied_at ?? job.updated_at ?? job.created_at);
 }
+
+/** Cadence actually applied to a job: its own override, else the global setting. */
+function cadenceFor(job: ActiveJob, fallback: number) {
+  return job.follow_up_days && job.follow_up_days > 0 ? job.follow_up_days : fallback;
+}
+
 
 /**
  * Follow-up reminders: reads each active application's last-touch date and
@@ -66,7 +76,7 @@ export function FollowUpReminders() {
     const [jobsRes, remRes, prefRes] = await Promise.all([
       supabase
         .from("tracked_jobs")
-        .select("id, title, company, status, applied_at, updated_at, created_at")
+        .select("id, title, company, status, applied_at, updated_at, created_at, last_touch_at, follow_up_days, follow_up_enabled")
         .eq("user_id", user.id)
         .in("status", ["saved", "applied", "interview", "offer"])
         .order("updated_at", { ascending: true })
@@ -103,15 +113,35 @@ export function FollowUpReminders() {
     if (error) toast.error("Couldn't save reminder settings");
   };
 
+  /** Applications eligible for per-application configuration. */
+  const trackedForConfig = useMemo(
+    () => jobs.filter((j) => settings.followup_stages.includes(j.status)).slice(0, 12),
+    [jobs, settings.followup_stages],
+  );
+
   const due = useMemo(() => {
     if (!settings.followup_enabled) return [];
-    const cutoff = Date.now() - settings.followup_days * 86_400_000;
     return jobs
       .filter((j) => settings.followup_stages.includes(j.status))
-      .filter((j) => lastTouch(j).getTime() <= cutoff)
+      .filter((j) => j.follow_up_enabled !== false)
+      .filter(
+        (j) =>
+          lastTouch(j).getTime() <= Date.now() - cadenceFor(j, settings.followup_days) * 86_400_000,
+      )
       .filter((j) => !existing.has(j.id))
       .slice(0, 6);
   }, [jobs, settings, existing]);
+
+  /** Per-application override: cadence in days, or 0 to inherit the global setting. */
+  const saveJobConfig = async (jobId: string, patch: { follow_up_days?: number; follow_up_enabled?: boolean }) => {
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...patch } : j)));
+    const { error } = await supabase.from("tracked_jobs").update(patch).eq("id", jobId);
+    if (error) {
+      toast.error("Couldn't save that application's reminder cadence");
+      void load();
+    }
+  };
+
 
   const createReminder = async (job: ActiveJob) => {
     if (!user) return;
@@ -212,7 +242,54 @@ export function FollowUpReminders() {
               })}
             </div>
           </div>
+
+          {trackedForConfig.length > 0 && (
+            <div>
+              <Label className="text-sm">Per-application cadence</Label>
+              <p className="text-xs text-muted-foreground">
+                Override the cadence for a specific application, or mute it entirely. Timing is measured from that
+                application&apos;s last-touch date.
+              </p>
+              <ul className="mt-2 divide-y divide-border/60 rounded-lg border border-border/60">
+                {trackedForConfig.map((job) => {
+                  const muted = job.follow_up_enabled === false;
+                  return (
+                    <li key={job.id} className="flex flex-wrap items-center gap-3 p-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-foreground">{job.title}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {job.company || "Unknown company"} · last touch{" "}
+                          {formatDistanceToNow(lastTouch(job), { addSuffix: true })}
+                          {!muted && ` · nudge after ${cadenceFor(job, settings.followup_days)}d`}
+                        </p>
+                      </div>
+                      <Select
+                        value={String(job.follow_up_days ?? 0)}
+                        onValueChange={(v) => saveJobConfig(job.id, { follow_up_days: Number(v) })}
+                      >
+                        <SelectTrigger className="h-9 w-[9.5rem]" aria-label={`Reminder cadence for ${job.title}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">Default ({settings.followup_days}d)</SelectItem>
+                          {CADENCES.map((d) => (
+                            <SelectItem key={d} value={String(d)}>{d} days</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Switch
+                        checked={!muted}
+                        aria-label={`Follow-up reminders for ${job.title}`}
+                        onCheckedChange={(v) => saveJobConfig(job.id, { follow_up_enabled: v })}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
+
       )}
 
       {loading ? (
