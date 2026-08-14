@@ -34,6 +34,25 @@ const record = (ok, label, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${label}${detail ? ` — ${detail}` : ""}`);
 };
 
+// Edge preflight runs before Chromium so a hosting alias redirect is reported
+// clearly even when the browser image is unavailable in a CI runner.
+const callbackProbe = await fetch(`${BASE}/~oauth/callback?gradr_probe=1`, { redirect: "manual" });
+const callbackLocation = callbackProbe.headers.get("location") ?? "";
+const callbackIsServed =
+  callbackProbe.status < 300 ||
+  callbackProbe.status >= 400 ||
+  (callbackLocation && new URL(callbackLocation, BASE).hostname === "app.gradr.me");
+record(
+  callbackIsServed,
+  "app.gradr.me serves the OAuth callback without an apex redirect",
+  `HTTP ${callbackProbe.status}${callbackLocation ? ` -> ${callbackLocation}` : ""}`,
+);
+
+if (!callbackIsServed) {
+  console.error("\nGoogle OAuth flow check FAILED: the hosting edge redirected the callback before app code ran.");
+  process.exit(1);
+}
+
 const browser = await chromium.launch();
 const storageState = process.env.GOOGLE_E2E_STORAGE_STATE;
 const context = await browser.newContext({
