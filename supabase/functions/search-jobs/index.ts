@@ -18,15 +18,6 @@ const WINDOW_SECONDS = 60;
 async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter?: number }> {
   const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
   return { ok: r.allowed, retryAfter: r.retry_after };
-} {
-  const now = Date.now();
-  const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
-  if (hits.length >= RATE_LIMIT) {
-    return { ok: false, retryAfter: Math.ceil((WINDOW_MS - (now - hits[0])) / 1000) };
-  }
-  hits.push(now);
-  userHits.set(userId, hits);
-  return { ok: true };
 }
 
 interface AdzunaResult {
