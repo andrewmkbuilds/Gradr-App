@@ -1,3 +1,4 @@
+import { scrollIntoViewSafely, scrollToSafely } from "@/lib/motion/scroll";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -124,7 +125,7 @@ export function InterviewStudio(props: Props) {
 
   useEffect(() => {
     if (query.trim()) return;
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (scrollRef.current) scrollToSafely({ top: scrollRef.current.scrollHeight }, scrollRef.current);
   }, [messages, partialUser, partialModel, query]);
 
   const matchIndexes = useMemo(() => {
@@ -141,7 +142,7 @@ export function InterviewStudio(props: Props) {
   useEffect(() => {
     const target = matchIndexes[activeMatch];
     if (target === undefined) return;
-    matchRefs.current[target]?.scrollIntoView({ block: "center", behavior: "smooth" });
+    scrollIntoViewSafely(matchRefs.current[target], { block: "center" });
   }, [activeMatch, matchIndexes]);
 
   const jump = (dir: 1 | -1) => {

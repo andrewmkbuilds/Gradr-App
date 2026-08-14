@@ -1,3 +1,4 @@
+import { scrollIntoViewSafely } from "@/lib/motion/scroll";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { useEffect, useState } from "react";
@@ -498,7 +499,7 @@ export default function Landing() {
                         type="button"
                         whileTap={{ scale: 0.97 }}
                         transition={springSnappy}
-                        onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+                        onClick={() => scrollIntoViewSafely("how-it-works")}
                       >
                         See how Gradr works
                       </motion.button>
@@ -1007,7 +1008,7 @@ export default function Landing() {
                 size="lg"
                 variant="outline"
                 className="h-12 px-7 text-base"
-                onClick={() => document.getElementById("product")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => scrollIntoViewSafely("product")}
               >
                 Explore Gradr
               </Button>

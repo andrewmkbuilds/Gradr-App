@@ -32,7 +32,8 @@
     "og:check": "node scripts/generate-og-images.mjs --check",
     "audit:a11y": "node scripts/a11y-audit.mjs",
     "test:visual:routes": "node scripts/visual-regression.mjs",
-    "check:design": "node scripts/check-legacy-design.mjs"
+    "check:design": "node scripts/check-legacy-design.mjs",
+    "test:oauth-flow": "node scripts/test-oauth-flow.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

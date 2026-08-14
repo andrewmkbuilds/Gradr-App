@@ -61,6 +61,7 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
     links: [
       { title: "Security findings", description: "Triage, diff and file scanner findings.", url: "/admin/security-findings", icon: ShieldCheck },
       { title: "Security log", description: "Authorization and billing decisions.", url: "/admin/security-log", icon: ShieldCheck },
+      { title: "OAuth forensics", description: "Google sign-in redirect chains and deviations.", url: "/admin/oauth-forensics", icon: ShieldCheck },
       { title: "Audit log", description: "Every privileged admin write.", url: "/admin/audit-log", icon: ScrollText },
       { title: "Verifications", description: "Student and institution eligibility.", url: "/admin/verifications", icon: ShieldCheck },
       { title: "Legal documents", description: "Policy versions and acceptance.", url: "/admin/legal", icon: ScrollText },

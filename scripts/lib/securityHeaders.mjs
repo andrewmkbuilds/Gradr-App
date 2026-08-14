@@ -24,6 +24,34 @@ export const DISCLOSURE_HEADERS = [
 /** `Server:` values we allow. A bare CDN token is fine; a version string is not. */
 const SERVER_VERSION_RE = /\d+\.\d+/;
 
+/** Directives the report-only policy must exercise before we consider enforcing. */
+export const REPORT_ONLY_DIRECTIVES = [
+  "default-src",
+  "script-src",
+  "style-src",
+  "font-src",
+  "img-src",
+  "media-src",
+  "connect-src",
+  "frame-src",
+  "worker-src",
+  "manifest-src",
+  "base-uri",
+  "form-action",
+  "object-src",
+];
+
+/** Origins the app actually talks to. Missing any of these breaks enforcement. */
+export const REPORT_ONLY_ORIGINS = [
+  "https://*.supabase.co",
+  "wss://*.supabase.co",
+  "https://*.lovable.cloud",
+  "https://accounts.google.com",
+  "https://*.paddle.com",
+  "https://fonts.gstatic.com",
+  "blob:",
+];
+
 /** Required headers and the predicate each must satisfy. */
 export const REQUIRED_HEADERS = [
   {
@@ -46,8 +74,15 @@ export const REQUIRED_HEADERS = [
   },
   {
     name: "content-security-policy-report-only",
-    test: (v) => Boolean(v) && /default-src/.test(v) && /(report-uri|report-to)/.test(v),
-    describe: "report-only policy with default-src and a reporting endpoint",
+    test: (v) =>
+      Boolean(v) &&
+      /default-src\s+'self'/.test(v) &&
+      /(report-uri|report-to)/.test(v) &&
+      // Directives that must be observed before we can ever enforce.
+      REPORT_ONLY_DIRECTIVES.every((d) => new RegExp(`(^|;)\\s*${d}\\s`).test(v)) &&
+      // Origins the app genuinely needs; a missing one would break at enforcement.
+      REPORT_ONLY_ORIGINS.every((o) => v.includes(o)),
+    describe: "report-only policy covering our directives, required origins and a reporting endpoint",
   },
   {
     name: "referrer-policy",

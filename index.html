@@ -52,6 +52,13 @@
     />
     <link rel="preconnect" href="https://xaeyjrekewnwjujnrqgu.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://xaeyjrekewnwjujnrqgu.supabase.co" />
+    <!--
+      Content Security Policy: delivered as a REPORT-ONLY *response header* by
+      the edge (see scripts/lib/securityHeaders.mjs for the contract we gate on
+      in CI). It intentionally lives there and not in a <meta> tag — browsers
+      ignore meta-delivered report-only policies. Violations are collected in
+      the client by src/lib/security/cspReport.ts.
+    -->
     <title>Gradr | AI Career Copilot for Resumes, Jobs &amp; Interviews</title>
     <meta name="description" content="Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace." />
     <link rel="canonical" href="https://gradr.me/" />
