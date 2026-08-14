@@ -167,7 +167,14 @@ export function surfaceFromHost(host: string = currentHost()): Surface | null {
 /** Surface implied by a path prefix on a shared host. */
 export function surfaceFromPath(pathname: string): Surface | null {
   const path = pathname.toLowerCase();
-  for (const surface of ["marketing", "news", "docs", "affiliates"] as Surface[]) {
+  for (const surface of [
+    "marketing",
+    "news",
+    "docs",
+    "affiliates",
+    "status",
+    "support",
+  ] as Surface[]) {
     const prefix = SURFACE_PATH_PREFIX[surface];
     if (prefix && (path === prefix || path.startsWith(`${prefix}/`))) return surface;
   }
