@@ -57,7 +57,7 @@ function voiceError(code: VoiceErrorCode, status: number, requestId: string) {
 }
 
 function providerDetail(raw: string) {
-  if (!raw) return "No error detail returned by ElevenLabs.";
+  if (!raw) return "No detail returned by the voice provider.";
   try {
     const parsed = JSON.parse(raw);
     const detail = parsed?.detail;
