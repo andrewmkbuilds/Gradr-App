@@ -32,17 +32,32 @@ export const SOFT_WHITE = "#F2F0EF";
 export const DEEP = "#0B1C22";
 
 /* ---------------------------------------------------------------- geometry */
-// 512 unit grid. Outer squircle 44..468 (424 module), counter offset up 10.
-const O = { x: 44, y: 44, s: 424, r: 134 };
-const I = { x: 128, y: 118, s: 256, r: 74 };
-// Aperture: a clean rectangular slot through the right stroke. Both terminals
-// are cut on the same vertical, so the opening reads machined, not drawn.
-const MOUTH = "M 300 158 L 512 158 L 512 252 L 300 252 Z";
-// Crossbar: one uninterrupted run from the counter's centre out to the outer
-// silhouette, capped on the left with the mahogany module — the accent is a
-// component of the bar, not decoration laid over it.
-const BAR = { x: 258, y: 252, w: 212, h: 64, r: 18 };
-const CAP = 88;
+/**
+ * 512 unit grid.
+ *  outer  — the squircle silhouette (never a circle: that is the ownable part)
+ *  inner  — the counter, deliberately off-centre (lifted) so the stroke gains
+ *           weight at the base and lightens as it rises
+ *  mouth  — a machined rectangular aperture through the right stroke, both
+ *           terminals cut on one vertical
+ *  bar    — a single crossbar run, capped by the mahogany module
+ */
+const PRIMARY = {
+  outer: { x: 44, y: 44, s: 424, r: 134 },
+  inner: { x: 128, y: 118, s: 256, r: 74 },
+  mouth: { x: 300, top: 158, bottom: 252 },
+  bar: { x: 258, y: 252, w: 210, h: 64, r: 18, cap: 88 },
+};
+
+/**
+ * Favicon / small-size build. Same construction, heavier strokes and a tighter
+ * aperture so the counter and the mouth still read at 16 px.
+ */
+const COMPACT = {
+  outer: { x: 26, y: 26, s: 460, r: 146 },
+  inner: { x: 122, y: 108, s: 268, r: 76 },
+  mouth: { x: 300, top: 150, bottom: 256 },
+  bar: { x: 250, y: 256, w: 236, h: 74, r: 20, cap: 100 },
+};
 
 function rounded({ x, y, s, r }) {
   return `M ${x + r} ${y} H ${x + s - r} A ${r} ${r} 0 0 1 ${x + s} ${y + r} V ${y + s - r} A ${r} ${r} 0 0 1 ${x + s - r} ${y + s} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + s - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
@@ -54,47 +69,31 @@ function leftRounded(x, y, w, h, r) {
 }
 
 /**
- * @param {{ ring: string, bar: string, id?: string, title?: string }} opts
+ * @param {{ ring: string, bar: string, id?: string, title?: string, geo?: typeof PRIMARY }} opts
  */
-export function symbolSvg({ ring, bar, id = "g", title = "Gradr" }) {
+export function symbolSvg({ ring, bar, id = "g", title = "Gradr", geo = PRIMARY }) {
+  const { outer, inner, mouth, bar: b } = geo;
+  const mouthPath = `M ${mouth.x} ${mouth.top} L 512 ${mouth.top} L 512 ${mouth.bottom} L ${mouth.x} ${mouth.bottom} Z`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="${title}">
   <title>${title}</title>
   <defs>
     <mask id="${id}-ring" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
       <rect width="512" height="512" fill="#000"/>
-      <path d="${rounded(O)}" fill="#fff"/>
-      <path d="${rounded(I)}" fill="#000"/>
-      <path d="${MOUTH}" fill="#000"/>
+      <path d="${rounded(outer)}" fill="#fff"/>
+      <path d="${rounded(inner)}" fill="#000"/>
+      <path d="${mouthPath}" fill="#000"/>
     </mask>
   </defs>
   <rect width="512" height="512" fill="${ring}" mask="url(#${id}-ring)"/>
-  <path d="${leftRounded(BAR.x, BAR.y, BAR.w, BAR.h, BAR.r)}" fill="${ring}"/>
-  <path d="${leftRounded(BAR.x, BAR.y, CAP, BAR.h, BAR.r)}" fill="${bar}"/>
+  <path d="${leftRounded(b.x, b.y, b.w, b.h, b.r)}" fill="${ring}"/>
+  <path d="${leftRounded(b.x, b.y, b.cap, b.h, b.r)}" fill="${bar}"/>
 </svg>`;
 }
 
-
-
-/** Favicon build: no overshoot tab, fatter counter — survives 16px. */
 export function symbolSvgCompact({ ring, bar, id = "gc" }) {
-  const o = { x: 24, y: 24, s: 464, r: 146 };
-  const i = { x: 116, y: 104, s: 280, r: 80 };
-  const mouth = "M 396 172 L 488 130 L 512 130 L 512 246 L 250 246 L 250 172 Z";
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Gradr">
-  <title>Gradr</title>
-  <defs>
-    <mask id="${id}-ring" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-      <rect width="512" height="512" fill="#000"/>
-      <path d="${rounded(o)}" fill="#fff"/>
-      <path d="${rounded(i)}" fill="#000"/>
-      <path d="${mouth}" fill="#000"/>
-    </mask>
-  </defs>
-  <rect width="512" height="512" fill="${ring}" mask="url(#${id}-ring)"/>
-  <rect x="276" y="246" width="212" height="78" rx="12" fill="${bar}"/>
-</svg>`;
-
+  return symbolSvg({ ring, bar, id, geo: COMPACT });
 }
+
 
 /* ------------------------------------------------------------------ output */
 const VARIANTS = {
