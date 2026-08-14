@@ -568,20 +568,46 @@ Deno.serve(async (req) => {
       source: "payments-webhook",
     });
 
+    if (deliveryEventId) {
+      await db().from("webhook_deliveries").update({
+        state: "processed",
+        processed_at: new Date().toISOString(),
+        last_error: null,
+        updated_at: new Date().toISOString(),
+      }).eq("event_id", deliveryEventId);
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Webhook error:", e);
+    const message = e instanceof Error ? e.message : String(e);
     await logSecurityEvent({
       category: "billing_webhook",
       event: "verification_or_handler_error",
       decision: "failed",
       env,
       source: "payments-webhook",
-      reason: e instanceof Error ? e.message : String(e),
+      reason: message,
     });
+    if (deliveryEventId) {
+      // Left in `failed` for payments-reconcile to repair from the Paddle API.
+      const { data: row } = await db()
+        .from("webhook_deliveries")
+        .select("attempts")
+        .eq("event_id", deliveryEventId)
+        .maybeSingle();
+      await db().from("webhook_deliveries").update({
+        state: "failed",
+        last_error: message.slice(0, 500),
+        attempts: Number(row?.attempts ?? 0) + 1,
+        updated_at: new Date().toISOString(),
+      }).eq("event_id", deliveryEventId);
+    }
+    // Non-2xx makes Paddle retry the delivery on its own schedule.
     return new Response("Webhook error", { status: 400 });
   }
+
 });
