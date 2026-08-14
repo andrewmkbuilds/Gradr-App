@@ -7,6 +7,7 @@ import {
   type PaddleEnv,
 } from "../_shared/paddle.ts";
 import { logSecurityEvent } from "../_shared/securityAudit.ts";
+import { capture as phCapture, setPerson as phSetPerson } from "../_shared/posthog.ts";
 import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
@@ -523,20 +524,50 @@ Deno.serve(async (req) => {
     });
 
     switch (event.eventType) {
-      case EventName.SubscriptionCreated:
+      case EventName.SubscriptionCreated: {
         await mirrorSubscription(event.data, env);
         await upsertSubscription(event.data, env);
+        // deno-lint-ignore no-explicit-any
+        const created = planFromItems(event.data as any);
+        const revenueProps = {
+          plan: created.plan?.tier ?? "unknown",
+          billing_period: created.plan?.interval ?? "unknown",
+          environment: env,
+          // deno-lint-ignore no-explicit-any
+          amount: Number((event.data as any)?.items?.[0]?.price?.unitPrice?.amount ?? 0) / 100,
+          // deno-lint-ignore no-explicit-any
+          currency: (event.data as any)?.currencyCode ?? null,
+        };
+        await phCapture("subscription_created", eventUserId, revenueProps);
+        await phCapture("payment_completed", eventUserId, revenueProps);
+        await phCapture("upgraded_to_premium", eventUserId, revenueProps);
+        await phSetPerson(eventUserId, {
+          plan: created.plan?.tier ?? "unknown",
+          billing_period: created.plan?.interval ?? "unknown",
+          is_paying: true,
+          subscription_status: "active",
+        });
         break;
+      }
       case EventName.SubscriptionUpdated:
         // A scheduled cancellation is NOT a cancellation: we mirror the
         // scheduled change but keep the status Paddle reports.
         await mirrorSubscription(event.data, env);
         await updateSubscription(event.data, env);
         break;
-      case EventName.SubscriptionCanceled:
+      case EventName.SubscriptionCanceled: {
         await mirrorSubscription({ ...event.data, status: "canceled" }, env);
         await updateSubscription({ ...event.data, status: "canceled" }, env);
+        // deno-lint-ignore no-explicit-any
+        const canceled = planFromItems(event.data as any);
+        await phCapture("subscription_cancelled", eventUserId, {
+          plan: canceled.plan?.tier ?? "unknown",
+          billing_period: canceled.plan?.interval ?? "unknown",
+          environment: env,
+        });
+        await phSetPerson(eventUserId, { is_paying: false, subscription_status: "canceled" });
         break;
+      }
       case EventName.CustomerCreated:
       case EventName.CustomerUpdated:
         await mirrorCustomer(event.data, env);
@@ -546,6 +577,15 @@ Deno.serve(async (req) => {
         await grantPackCredits(event.data, env);
         await recordDiscountUse(event.data, env);
         await recordAffiliateCommission(event.data, env);
+        await phCapture("payment_completed", eventUserId, {
+          environment: env,
+          // deno-lint-ignore no-explicit-any
+          amount: Number((event.data as any)?.details?.totals?.grandTotal ?? 0) / 100,
+          // deno-lint-ignore no-explicit-any
+          currency: (event.data as any)?.currencyCode ?? null,
+          // deno-lint-ignore no-explicit-any
+          product_type: (event.data as any)?.subscriptionId ? "subscription" : "pack",
+        });
         break;
       case EventName.TransactionPaymentFailed:
         await handlePaymentFailed(event.data, env);

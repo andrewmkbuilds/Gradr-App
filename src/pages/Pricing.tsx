@@ -1,4 +1,5 @@
 import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck } from "lucide-react";
+import { trackSignupCta, trackUpgradeCta } from "@/lib/telemetry/events";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,7 +78,20 @@ export default function Pricing() {
   const priceFor = (id: string) => prices[id]?.formattedTotal;
 
   const handleSelect = (tier: Tier | null) => {
+    trackUpgradeCta({
+      location: "pricing",
+      text: tier ? `Choose ${tier.name}` : "Stay on Free",
+      plan: tier?.key ?? "free",
+      billingPeriod: interval,
+    });
     if (!user) {
+      // Signup is the required next step before checkout can start.
+      trackSignupCta({
+        location: "pricing",
+        text: tier ? `Choose ${tier.name}` : "Stay on Free",
+        authenticated: false,
+        destination: "/auth?next=/pricing",
+      });
       navigate("/auth?next=/pricing");
       return;
     }
@@ -89,6 +103,7 @@ export default function Pricing() {
   };
 
   const handlePack = (key: string) => {
+    trackUpgradeCta({ location: "pricing", text: "Buy pack", plan: "credit_pack", feature: key });
     if (!user) {
       navigate("/auth?next=/pricing");
       return;

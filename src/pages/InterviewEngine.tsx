@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { track } from "@/lib/telemetry/events";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
@@ -294,6 +295,12 @@ function InterviewEngineInner() {
     if (blocked) toast.info(blocked);
 
     trackJourney("interview_started", { engine: "elevenlabs", has_role: Boolean(ctx.targetRole) });
+    track("mock_interview_started", {
+      persona: ctx.personaId,
+      difficulty: ctx.difficultyId,
+      has_target_role: Boolean(ctx.targetRole),
+      has_job_description: Boolean(ctx.jobDescription),
+    });
     void metrics.begin({ provider: "elevenlabs", targetRole: ctx.targetRole ?? null });
 
     await runTurn([
@@ -401,6 +408,11 @@ function InterviewEngineInner() {
         duration_sec: elapsed,
       });
       void metrics.finish("completed");
+      track("mock_interview_completed", {
+        duration_sec: elapsed,
+        turns: messages.length,
+        overall_score: Math.round(newReport.overallScore),
+      });
 
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {

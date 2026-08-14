@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { SkeletonList, SkeletonPanel } from "@/components/states";
+import { trackOnce } from "@/lib/telemetry/events";
 import { FileText, Target, Zap, Mic, TrendingUp, Briefcase, Bookmark, Send, CalendarCheck, Trophy, XCircle, Bell, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -67,6 +69,12 @@ function weakestResumeArea(s: DashboardStats) {
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Activation view: the signed-in home of the product.
+  useEffect(() => {
+    if (user) trackOnce("career_dashboard_viewed", {}, "dashboard");
+  }, [user]);
+
   const { data, isLoading: loading } = useQuery({
     queryKey: ["dashboard", user?.id],
     enabled: !!user,

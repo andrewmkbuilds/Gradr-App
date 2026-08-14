@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { trackJobSaved } from "@/lib/telemetry/activation";
+import { track } from "@/lib/telemetry/events";
 import { Link } from "react-router-dom";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import {
@@ -97,6 +99,7 @@ export default function JobMatchingEngine() {
       return;
     }
     setLoading(true);
+    track("job_search_started", { surface: "job_matching" });
     try {
       const [{ data: resumes }, { data: profile }, { data: prefs }] = await Promise.all([
         supabase.from("resumes").select("parsed_text").eq("user_id", user.id)
@@ -157,6 +160,12 @@ export default function JobMatchingEngine() {
         posted_at: job.posted_at,
       });
       if (error) throw error;
+      trackJobSaved(user.id, {
+        source: job.source,
+        match_score: Math.round(job.match.score),
+        remote: Boolean(job.remote),
+        has_salary: Boolean(job.salary_min || job.salary_max),
+      });
       toast.success("Saved to your pipeline");
     } catch {
       toast.error("Couldn't save this job");

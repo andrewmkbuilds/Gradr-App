@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { track } from "@/lib/telemetry/events";
+import { trackFirstTime, trackJobSaved } from "@/lib/telemetry/activation";
 import {
   DndContext,
   DragEndEvent,
@@ -162,6 +164,12 @@ export default function Pipeline() {
     const updates: { status: Status; applied_at?: string } = { status: newStatus };
     if (newStatus === "applied" && !job.applied_at) updates.applied_at = new Date().toISOString();
     const { error } = await supabase.from("tracked_jobs").update(updates).eq("id", id);
+    if (!error) {
+      track("job_application_tracked", { from_stage: job.status, to_stage: newStatus });
+      if (newStatus === "applied") {
+        trackFirstTime("first_job_saved", user?.id, { source: "pipeline" });
+      }
+    }
     if (error) {
       toast.error("Failed to update");
       load();
@@ -220,6 +228,7 @@ export default function Pipeline() {
         status: "saved",
       });
       if (insErr) throw insErr;
+      trackJobSaved(user?.id, { source: "manual" });
       setPasteUrl("");
       setPasteOpen(false);
       toast.success("Added to pipeline");

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { markSignupIntent } from "@/lib/telemetry/signup";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -148,6 +149,7 @@ export default function Auth() {
     if (!valid) return;
     const { email, password, fullName } = valid;
     setLoading(true);
+    if (isSignUp) markSignupIntent("email");
     try {
       if (isSignUp) {
         if (isGuest) {
@@ -194,6 +196,9 @@ export default function Auth() {
 
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
+    // Recorded before the redirect so the funnel survives the round trip.
+    if (isSignUp) markSignupIntent(provider);
+
     // Forensics: record the outbound hop before we hand control to the provider.
     void recordOAuthHop({
       provider,

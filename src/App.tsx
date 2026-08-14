@@ -22,6 +22,9 @@ import { AnimatePresence } from "motion/react";
 import { captureReferralFromUrl } from "@/lib/affiliateTracking";
 import { SentryErrorBoundary, addBreadcrumb } from "@/lib/telemetry/sentry";
 import { phPageview } from "@/lib/telemetry/posthog";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
+import { captureAttribution } from "@/lib/telemetry/attribution";
+import { trackOnce } from "@/lib/telemetry/events";
 
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -365,11 +368,26 @@ function ReferralCapture() {
   return null;
 }
 
+const HOMEPAGE_PATHS = new Set(["/", "/landing", "/home"]);
+
 function TelemetryRouteTracker() {
   const location = useLocation();
+
+  // First-touch campaign data has to be read before any in-app navigation
+  // rewrites the query string.
+  useEffect(() => { captureAttribution(); }, []);
+
   useEffect(() => {
     phPageview(location.pathname);
     addBreadcrumb("navigation", location.pathname);
+    // Funnel step 1. Guests land on /landing, members on / — both are the
+    // homepage for acquisition purposes, and each is counted once per visit.
+    if (HOMEPAGE_PATHS.has(location.pathname)) {
+      trackOnce("homepage_viewed", { path: location.pathname }, "route");
+    }
+    if (location.pathname === "/pricing") {
+      trackOnce("pricing_viewed", { path: location.pathname }, "route");
+    }
   }, [location.pathname]);
   return null;
 }
@@ -399,6 +417,7 @@ const App = () => (
           <ReferralCapture />
           <TelemetryRouteTracker />
           <AuthProvider>
+            <AnalyticsProvider />
             <RouteSeo />
             <Suspense fallback={<RouteFallback />}>
               <AppRoutes />
