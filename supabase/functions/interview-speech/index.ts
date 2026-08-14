@@ -114,7 +114,7 @@ serve(async (req) => {
       return voiceError("VOICE_SESSION_EXPIRED", 401, requestId);
     }
 
-    if (rateLimited(user.id)) {
+    if (await rateLimited(user.id)) {
       console.warn("[voice] local rate limit hit", { requestId, userId: user.id });
       return voiceError("VOICE_RATE_LIMITED", 429, requestId);
     }

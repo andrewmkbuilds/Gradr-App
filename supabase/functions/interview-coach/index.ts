@@ -57,7 +57,7 @@ serve(async (req) => {
         content: String(m.content).slice(0, 4000),
       }));
 
-    const rl = checkRateLimit(user.id);
+    const rl = await checkRateLimit(user.id);
     if (!rl.ok) {
       return new Response(
         JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }),
