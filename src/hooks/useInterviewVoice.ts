@@ -121,11 +121,14 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
 
   /** Opens a new interviewer turn. */
   const beginTurn = useCallback(() => {
+    console.info("[ElevenLabs] Initializing voice turn — persona:", optsRef.current.personaId);
     chunkerRef.current = new SentenceChunker();
     spokenRef.current = "";
+    setError(null);
     const q = ensureQueue();
     q.reset();
   }, [ensureQueue]);
+
 
   /** Feeds a model delta; complete thoughts are queued for speech. */
   const pushDelta = useCallback((delta: string) => {
