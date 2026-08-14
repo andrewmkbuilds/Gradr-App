@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/app/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -118,16 +119,13 @@ export default function AdminLegal() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
-      <header className="space-y-1">
-        <div className="flex items-center gap-2">
-          <ScrollText className="h-5 w-5 text-primary" />
-          <h1 className="type-h1">Legal documents</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Draft, preview, publish and track acceptance of the Terms & Conditions and Privacy Notice.
-        </p>
-      </header>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<ScrollText className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Legal documents"
+        description="Draft, preview, publish and track acceptance of the Terms & Conditions and Privacy Notice."
+      />
 
       <Tabs value={docType} onValueChange={(v) => { setDocType(v as LegalDocType); setDraftTitle(TYPES.find(t => t.id === v)!.label); }}>
         <TabsList>
