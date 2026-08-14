@@ -1,6 +1,6 @@
 ---
-name: Job Search MCP
-description: Search for jobs across LinkedIn, Indeed, Glassdoor, ZipRecruiter, Google Jobs, Bayt, Naukri, and BDJobs using the JobSpy MCP server.
+name: openclaw-skills-job-search-mcp
+description: Search and aggregate job listings across LinkedIn, Indeed, Glassdoor, ZipRecruiter, Google Jobs, Bayt, Naukri and BDJobs via the JobSpy MCP server. Use when asked to find, filter or compare job postings, salaries or recent openings across job boards.
 slug: job-search-mcp
 tags:
   - job-search
