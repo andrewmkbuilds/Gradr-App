@@ -116,7 +116,15 @@ function InterviewEngineInner() {
         window.setTimeout(() => listenRef.current(), 420);
       }
     },
+    onVoiceError: (reason) => {
+      // No silent substitute voice — the candidate is told and can retry.
+      spokenRef.current = "";
+      setSpoken("");
+      setVoiceError(reason);
+      setConnectionErrorDismissed(false);
+    },
   });
+
 
   const interviewerRef = useRef(interviewer);
   interviewerRef.current = interviewer;
