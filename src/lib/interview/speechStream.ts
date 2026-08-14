@@ -128,8 +128,9 @@ export class SpeechQueue {
     this.controllers.add(controller);
     const audio = this.opts
       .fetchAudio(clean, controller.signal)
-      .catch(() => null)
+      .catch((e): AudioResult => ({ error: String(e?.message ?? e) }))
       .finally(() => this.controllers.delete(controller));
+
 
     this.queue.push({ text: clean, audio });
     void this.pump();
