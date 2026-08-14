@@ -200,6 +200,35 @@ export function ResumeVersionDiff() {
         </div>
       </div>
 
+      <section className="mt-6" aria-labelledby="impact-heading">
+        <h4 id="impact-heading" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Lightbulb className="h-4 w-4 text-mahogany" aria-hidden="true" /> How these changes moved your scores
+        </h4>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Each line ties a change in the document to the score it moved — ATS on the parser side, match on the
+          role-fit side.
+        </p>
+        <ul className="mt-3 space-y-2">
+          {impacts.map((im) => (
+            <li key={im.title} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+              <span
+                className={cn(
+                  "mt-1 h-2 w-2 shrink-0 rounded-full",
+                  im.direction === "up" ? "bg-success" : im.direction === "down" ? "bg-destructive" : "bg-muted-foreground/50",
+                )}
+                aria-hidden="true"
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">{im.title}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{im.detail}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+
+
       <section className="mt-6" aria-labelledby="jobtype-delta-heading">
         <h4 id="jobtype-delta-heading" className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Briefcase className="h-4 w-4 text-accent" aria-hidden="true" /> What changed per job type
