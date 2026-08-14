@@ -7,6 +7,14 @@ import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
 import { legalJsonLd } from "@/lib/structuredData";
 import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
+import {
+  type Surface,
+  canonicalUrlFor,
+  currentSurface,
+  surfaceBase,
+} from "@/config/domains";
+import { DOCS_BY_SLUG } from "@/content/docs";
+import { NEWS_BY_SLUG } from "@/content/news";
 
 const SITE = "Gradr";
 const ORIGIN = "https://gradr.me";
@@ -231,9 +239,121 @@ function isNoIndex(pathname: string): boolean {
   return NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+/** Per-surface metadata for the marketing, news, docs and affiliate subdomains. */
+const SURFACE_META: Partial<Record<Surface, Record<string, { title: string; description: string }>>> = {
+  marketing: {
+    "/": {
+      title: "Gradr Product — One Workspace From Resume to Offer",
+      description:
+        "Explore the Gradr product: ATS resume scoring, live job matching, application strategy, AI mock interviews and career analytics in one workspace.",
+    },
+    "/features": {
+      title: "Features — Resume, Matching, Applications & Interviews",
+      description:
+        "Every Gradr module in detail: Resume Intelligence, job matching, application strategy, AI Mock Interview, networking and career analytics.",
+    },
+    "/use-cases": {
+      title: "Use Cases — Students, Switchers, Professionals & Cohorts",
+      description:
+        "How students, career switchers, experienced professionals and career-services teams use Gradr to run a measurable job search.",
+    },
+    "/pricing": {
+      title: "Pricing — Free, Starter, Pro & Advanced Plans",
+      description:
+        "Compare Gradr plans and monthly or yearly billing. Start free, upgrade when you need more AI resume scans, matches and interview minutes.",
+    },
+    "/testimonials": {
+      title: "Testimonials — What Candidates Say About Gradr",
+      description:
+        "Real outcomes from candidates who used Gradr to fix their resume, target better roles and rehearse interviews before the real thing.",
+    },
+    "/demos": {
+      title: "Product Demos — See Gradr Work in Three Steps",
+      description:
+        "Three short walkthroughs of Gradr: score a resume, match a live role, and run a voice mock interview — all on the free plan.",
+    },
+    "/about": {
+      title: "About Gradr — Feedback Loops for the Job Search",
+      description:
+        "Why Gradr exists, how we treat your data, and the principles behind objective resume scoring and realistic interview practice.",
+    },
+  },
+  news: {
+    "/": {
+      title: "Gradr News — Product Updates & Job-Market Analysis",
+      description:
+        "Product announcements, company updates and job-market analysis from the Gradr team, plus practical guides for candidates.",
+    },
+  },
+  docs: {
+    "/": {
+      title: "Gradr Documentation — Guides, Features & Troubleshooting",
+      description:
+        "Official Gradr documentation: quickstart, feature guides, AI Mock Interview reference, billing, API access and troubleshooting.",
+    },
+  },
+  affiliates: {
+    "/": {
+      title: "Gradr Affiliate Program — Earn Recurring Commission",
+      description:
+        "Join the Gradr affiliate program: recurring commission, transparent click and conversion tracking, monthly payouts and ready-made assets.",
+    },
+    "/join": {
+      title: "Apply to the Gradr Affiliate Program",
+      description:
+        "Tell us about your audience and apply to become a Gradr affiliate partner with recurring commission on every referred subscription.",
+    },
+  },
+};
+
+/** Metadata for a surface path, including dynamic docs and news articles. */
+function resolveSurfaceMeta(
+  surface: Surface,
+  path: string,
+): { title: string; description: string } | null {
+  const table = SURFACE_META[surface];
+  if (table?.[path]) return table[path];
+
+  if (surface === "docs") {
+    const doc = DOCS_BY_SLUG[path.replace(/^\//, "")];
+    if (doc) return { title: doc.metaTitle, description: doc.description };
+  }
+  if (surface === "news") {
+    const article = NEWS_BY_SLUG[path.replace(/^\//, "")];
+    if (article) return { title: article.metaTitle, description: article.description };
+  }
+  return null;
+}
+
+/**
+ * Robots policy per surface. Marketing, news and docs are fully public; the
+ * affiliate portal only exposes its program and application pages to crawlers;
+ * the home surface keeps the existing per-path rules.
+ */
+function isSurfaceNoIndex(surface: Surface, path: string): boolean {
+  if (surface === "marketing" || surface === "news" || surface === "docs") {
+    // Unknown paths render the in-surface 404 — never let those be indexed.
+    return resolveSurfaceMeta(surface, path) === null;
+  }
+  if (surface === "affiliates") return !(path === "/" || path === "/join");
+  return isNoIndex(path);
+}
+
 export function RouteSeo() {
-  const { pathname } = useLocation();
-  const meta = META[canonicalPath(pathname)] ??
+  const { pathname: rawPathname } = useLocation();
+
+  // Each subdomain is its own SEO surface: metadata, canonical host and robots
+  // behaviour are resolved from the surface, never hard-coded to gradr.me.
+  const surface = currentSurface(rawPathname);
+  const base = surfaceBase(surface);
+  // On shared hosts (dev/preview) surfaces sit behind a path prefix. Strip it so
+  // canonicals always describe the real production URL.
+  const pathname =
+    base && rawPathname.startsWith(base) ? rawPathname.slice(base.length) || "/" : rawPathname;
+
+  const surfaceMeta = resolveSurfaceMeta(surface, canonicalPath(pathname));
+  const meta = surfaceMeta ??
+    META[canonicalPath(pathname)] ??
     resolveDynamicMeta(canonicalPath(pathname)) ?? {
       title: "AI Career Copilot for Resumes, Jobs & Interviews",
       description:
@@ -242,13 +362,20 @@ export function RouteSeo() {
   // Only the homepage uses the brand-first title; every other route (including
   // /landing) gets its own distinct title so titles and og:title never collide.
   const fullTitle =
-    pathname === "/" ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews" : `${meta.title} — ${SITE}`;
+    pathname === "/" && surface === "home"
+      ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews"
+      : `${meta.title} — ${SITE}`;
   // Canonical always points at the normalised path (lowercase, no trailing
-  // slash, aliases resolved) so URL variants never split indexing signals.
+  // slash, aliases resolved) on this surface's own production origin, so
+  // docs.gradr.me never canonicalises to gradr.me and vice versa.
   const canonical = canonicalPath(pathname);
-  const url = `${ORIGIN}${canonical}`;
+  // app.gradr.me is a private product surface: it is fully noindexed, and any
+  // public page reachable there points its canonical at the public host.
+  const canonicalSurface: Surface = surface === "app" ? "home" : surface;
+  const url = canonicalUrlFor(canonicalSurface, canonical);
   const ogImage = resolveOgImage(canonical);
-  const noindex = isNoIndex(canonical);
+  const noindex = surface === "app" || isSurfaceNoIndex(surface, canonical);
+
 
   // index.html ships a full static SEO head so crawlers that never execute
   // JavaScript still read correct Gradr metadata. react-helmet-async only
@@ -286,7 +413,9 @@ export function RouteSeo() {
       })
     : null;
   const isArticle =
-    pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
+    pathname.startsWith("/career-advice/") ||
+    pathname.startsWith("/blog/") ||
+    (surface === "news" && pathname !== "/");
   return (
     <Helmet>
       <html lang="en" />

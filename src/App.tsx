@@ -30,9 +30,23 @@ import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import { authPath, nextFromLocation, resolveNext } from "./lib/nextRedirect";
 import RequireAdmin from "@/components/RequireAdmin";
+import {
+  type Surface,
+  SURFACE_PATH_PREFIX,
+  currentSurface,
+  isMultiSurfaceHost,
+  isWwwHost,
+  ROOT_DOMAIN,
+  urlFor,
+} from "@/config/domains";
+import { SurfaceProvider } from "@/components/surface/SurfaceLink";
 
 // Route-level code splitting: only the shell, dashboard, auth and landing
 // pages ship in the initial bundle. Everything else loads on navigation.
+const MarketingSurface = lazy(() => import("./surfaces/MarketingSurface"));
+const NewsSurface = lazy(() => import("./surfaces/NewsSurface"));
+const DocsSurface = lazy(() => import("./surfaces/DocsSurface"));
+const AffiliatesSurface = lazy(() => import("./surfaces/AffiliatesSurface"));
 const ResumeEngine = lazy(() => import("./pages/ResumeEngine"));
 const JobMatchingEngine = lazy(() => import("./pages/JobMatchingEngine"));
 const JobsFeed = lazy(() => import("./pages/JobsFeed"));
@@ -47,10 +61,6 @@ const Billing = lazy(() => import("./pages/Billing"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const AffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
-const AffiliateApply = lazy(() => import("./pages/AffiliateApply"));
-const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
-const AffiliateResources = lazy(() => import("./pages/AffiliateResources"));
 const AdminAffiliates = lazy(() => import("./pages/AdminAffiliates"));
 const AdminBlogAnalytics = lazy(() => import("./pages/AdminBlogAnalytics"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
@@ -186,10 +196,7 @@ function ProtectedRoutes() {
           <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/manage-subscription" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
-          <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
-          <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
-          <Route path="/affiliate/dashboard" element={<AnimatedPage><AffiliateDashboard /></AnimatedPage>} />
-          <Route path="/affiliate/resources" element={<AnimatedPage><AffiliateResources /></AnimatedPage>} />
+          {/* Affiliate pages live on affiliates.gradr.me (see SATELLITE_SURFACES). */}
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
@@ -230,16 +237,86 @@ function AuthRoute() {
 }
 
 
+/** Full-page redirect to another surface, preserving the remaining path. */
+function ExternalSurfaceRedirect({ surface, strip }: { surface: Surface; strip: string }) {
+  const location = useLocation();
+  useEffect(() => {
+    const rest = location.pathname.slice(strip.length) || "/";
+    window.location.replace(urlFor(surface, `${rest}${location.search}`));
+  }, [location.pathname, location.search, strip, surface]);
+  return null;
+}
+
+function SurfaceOutlet({ surface }: { surface: Surface }) {
+  const Component = {
+    marketing: MarketingSurface,
+    news: NewsSurface,
+    docs: DocsSurface,
+    affiliates: AffiliatesSurface,
+  }[surface as "marketing" | "news" | "docs" | "affiliates"];
+  return (
+    <SurfaceProvider surface={surface}>
+      <Component />
+    </SurfaceProvider>
+  );
+}
+
+const SATELLITE_SURFACES: Surface[] = ["marketing", "news", "docs", "affiliates"];
+
 function AppRoutes() {
   const location = useLocation();
+  const multiSurface = isMultiSurfaceHost();
+  const hostSurface = currentSurface(location.pathname);
+  // gradr.me is the public brand surface: authenticated product routes live on
+  // app.gradr.me, so anything product-shaped is handed over to that host.
+  const homeOnly = !multiSurface && hostSurface === "home";
+
+  // Production: a dedicated subdomain serves exactly one surface and mounts no
+  // product, account or admin routes at all.
+  if (!multiSurface && SATELLITE_SURFACES.includes(hostSurface)) {
+    return <SurfaceOutlet surface={hostSurface} />;
+  }
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        {/* Satellite surfaces: mounted under a path prefix on shared hosts
+            (local dev + previews), redirected to their real subdomain in
+            production so a URL only ever resolves in one place. */}
+        {SATELLITE_SURFACES.map((surface) =>
+          multiSurface ? (
+            <Route
+              key={surface}
+              path={`${SURFACE_PATH_PREFIX[surface]}/*`}
+              element={<SurfaceOutlet surface={surface} />}
+            />
+          ) : (
+            <Route
+              key={surface}
+              path={`${SURFACE_PATH_PREFIX[surface]}/*`}
+              element={
+                <ExternalSurfaceRedirect surface={surface} strip={SURFACE_PATH_PREFIX[surface]} />
+              }
+            />
+          ),
+        )}
+
         <Route path="/unsubscribe" element={<AnimatedPage><Unsubscribe /></AnimatedPage>} />
         <Route path="/landing" element={<AnimatedPage><Landing /></AnimatedPage>} />
-        <Route path="/auth" element={<AnimatedPage><AuthRoute /></AnimatedPage>} />
-        <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
-        <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
+        {homeOnly ? (
+          <>
+            <Route path="/" element={<AnimatedPage><Landing /></AnimatedPage>} />
+            <Route path="/auth" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
+            <Route path="/forgot-password" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
+            <Route path="/reset-password" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
+          </>
+        ) : (
+          <>
+            <Route path="/auth" element={<AnimatedPage><AuthRoute /></AnimatedPage>} />
+            <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
+            <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
+          </>
+        )}
         <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
         <Route path="/ats-resume-checker" element={<AnimatedPage><AtsResumeChecker /></AnimatedPage>} />
         <Route path="/ai-cover-letter-generator" element={<AnimatedPage><AiCoverLetterGenerator /></AnimatedPage>} />
@@ -261,10 +338,24 @@ function AppRoutes() {
         <Route path="/job-search" element={<AnimatedPage><JobSearchIndex /></AnimatedPage>} />
         <Route path="/job-search/:slug" element={<AnimatedPage><JobLanding /></AnimatedPage>} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
-        <Route path="/*" element={<ProtectedRoutes />} />
+        {homeOnly ? (
+          <Route path="/*" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
+        ) : (
+          <Route path="/*" element={<ProtectedRoutes />} />
+        )}
       </Routes>
     </AnimatePresence>
   );
+}
+
+/** www.gradr.me is a redirect-only host: bounce to the apex, keeping the path. */
+function WwwRedirect() {
+  useEffect(() => {
+    if (!isWwwHost()) return;
+    const { pathname, search, hash } = window.location;
+    window.location.replace(`https://${ROOT_DOMAIN}${pathname}${search}${hash}`);
+  }, []);
+  return null;
 }
 
 function ReferralCapture() {
@@ -301,6 +392,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <WwwRedirect />
           <ScrollToTop />
           <ReferralCapture />
           <TelemetryRouteTracker />

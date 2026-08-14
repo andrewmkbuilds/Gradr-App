@@ -29,9 +29,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+import { urlFor } from "@/config/domains";
+
 const itemPath = (url: string) => url.split("#")[0];
 
+/** Cross-surface items open the docs/news/affiliate origins, never a route. */
+const itemHref = (item: NavItem) => (item.surface ? urlFor(item.surface, item.url) : item.url);
+
 function isItemActive(item: NavItem, pathname: string) {
+  if (item.surface) return false;
   const path = itemPath(item.url);
   return item.matchPrefix ? pathname === path || pathname.startsWith(`${path}/`) : pathname === path;
 }
@@ -241,9 +247,12 @@ export function AppSidebar() {
                             {group.items.map((item) => {
                               const active = isItemActive(item, pathname);
                               return (
-                                <li key={item.url}>
+                                <li key={`${item.surface ?? ""}${item.url}`}>
                                   <Link
-                                    to={item.url}
+                                    to={itemHref(item)}
+                                    {...(item.surface
+                                      ? { target: "_self", reloadDocument: true }
+                                      : {})}
                                     data-nav-focusable=""
                                     data-nav-parent={group.id}
                                     onClick={() => {
