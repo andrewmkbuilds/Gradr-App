@@ -141,6 +141,11 @@ const META: Record<string, { title: string; description: string }> = {
     description:
       "Track every job application in one AI pipeline: match scores, tailored resumes and cover letters, automatic follow-up reminders, and response-rate analytics.",
   },
+  "/ai-cover-letter-generator": {
+    title: "AI Cover Letter Generator — Free & Tailored to Any Job",
+    description:
+      "Generate a tailored one-page cover letter from your resume and any job description. Grounded in your real experience, editable, and saved with each application.",
+  },
   "/ai-interview-coach": {
     title: "AI Interview Coach — Free Voice Mock Interviews",
     description:
