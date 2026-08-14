@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { jobmapsEnabled, searchJobMaps, type NormalizedJob } from "../_shared/jobmaps.ts";
+import { corviEnabled, searchCorvi } from "../_shared/corvi.ts";
 
 
 const corsHeaders = {
@@ -148,6 +149,25 @@ serve(async (req) => {
         total += jm.total;
       }
     }
+
+    // Corvi Careers is a global aggregator but requires a resolvable location.
+    // First page only, so pagination stays consistent with Adzuna.
+    if (page === 1 && where && corviEnabled()) {
+      const cv = await searchCorvi({ what: String(what), where: String(where), remoteOnly });
+      sources.corvi = { count: cv.jobs.length, status: cv.error ?? "ok" };
+      if (cv.jobs.length) {
+        const seen = new Set(jobs.map((j) => j.url));
+        for (const j of cv.jobs) {
+          if (!seen.has(j.url)) {
+            seen.add(j.url);
+            jobs.push(j);
+          }
+        }
+        total += cv.total;
+      }
+    }
+
+
 
     return new Response(JSON.stringify({ jobs, total, sources }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
