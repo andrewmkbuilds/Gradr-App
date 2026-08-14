@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { SentenceChunker, SpeechQueue, type AudioResult } from "@/lib/interview/speechStream";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
 
@@ -65,7 +66,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
         body: JSON.stringify({
           text,
           personaId: optsRef.current.personaId,
-          environment: import.meta.env.VITE_PAYMENTS_ENVIRONMENT === "live" ? "live" : "sandbox",
+          environment: getPaddleEnvironment(),
           previousText: spokenRef.current.slice(-400),
         }),
       });
