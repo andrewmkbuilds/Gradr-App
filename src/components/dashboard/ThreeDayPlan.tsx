@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { formatDistanceToNow } from "date-fns";
 import {
-  CalendarRange, Check, Loader2, RefreshCw, Sparkles, Send, FileText, Users, Mic, Search, ArrowRight,
+  CalendarRange, Check, CheckCircle2, Loader2, RefreshCw, Sparkles, Send, FileText, Users, Mic, Search, ArrowRight,
 } from "lucide-react";
+
 import { Surface, SurfaceHeader } from "@/components/ui/surface";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
