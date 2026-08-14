@@ -36,10 +36,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <GuestBanner />
 
           <motion.header
+            data-scrolled={scrolled ? "" : undefined}
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              height: reduced ? 56 : scrolled ? 52 : 60,
+            }}
             transition={{ duration: reduced ? duration.micro : duration.base, ease: easeOut }}
-            className="glass-bar sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border/70 px-4 backdrop-blur-xl"
+            className={cn(
+              "glass-bar sticky top-0 z-30 flex shrink-0 items-center justify-between gap-3 px-4 transition-[backdrop-filter,box-shadow,background-color] duration-300",
+              scrolled
+                ? "border-b border-border/80 shadow-[0_10px_30px_-24px_hsl(var(--foreground)/0.55)] backdrop-blur-2xl"
+                : "border-b border-transparent backdrop-blur-md",
+            )}
           >
             <div className="flex min-w-0 items-center gap-3">
               <SidebarTrigger className="interactive press-scale shrink-0 text-muted-foreground hover:text-foreground" />
@@ -49,12 +59,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <ThemeToggle />
               <NotificationsBell />
             </div>
-            {/* Hairline that catches the ambient light along the bar's edge. */}
-            <span
+            {/* Hairline that catches the ambient light along the bar's edge —
+                it only lights up once the page has actually moved. */}
+            <motion.span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent"
+              animate={{ opacity: scrolled ? 1 : 0 }}
+              transition={{ duration: reduced ? 0 : duration.fast, ease: easeOut }}
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent"
             />
           </motion.header>
+
 
           {/* No nested scroll container: the page scrolls with the document so
               there is only ever one vertical scrollbar. min-w-0 + overflow-x-clip
