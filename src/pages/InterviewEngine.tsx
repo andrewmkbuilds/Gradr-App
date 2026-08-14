@@ -12,6 +12,7 @@ import { InterviewReportView, type InterviewReport } from "@/components/intervie
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
+import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
 import { useInterviewVoice } from "@/hooks/useInterviewVoice";
 import { useInterviewMetrics } from "@/hooks/useInterviewMetrics";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
@@ -56,7 +57,7 @@ function InterviewEngineInner() {
   const [limits, setLimits] = useState<SessionLimits | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [streamFailed, setStreamFailed] = useState(false);
-  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [voiceError, setVoiceError] = useState<VoiceErrorCode | null>(null);
   const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
 
   /** The interviewer's current turn, revealed only as fast as it is spoken. */
@@ -120,9 +121,9 @@ function InterviewEngineInner() {
         window.setTimeout(() => listenRef.current(), 420);
       }
     },
-    onVoiceError: (reason) => {
+    onVoiceError: (code) => {
       // Preserve both the generated turn and already-spoken caption for exact retry.
-      setVoiceError(reason);
+      setVoiceError(code);
       setConnectionErrorDismissed(false);
     },
   });
@@ -613,7 +614,8 @@ function InterviewEngineInner() {
       }
       startedAt={startedAt.current}
       connectionLost={(streamFailed || Boolean(voiceError)) && !connectionErrorDismissed}
-      connectionErrorDetail={voiceError ?? undefined}
+      voiceErrorCode={voiceError}
+
 
       onDismissConnectionError={() => setConnectionErrorDismissed(true)}
       onInputChange={setInput}

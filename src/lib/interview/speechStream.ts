@@ -1,10 +1,11 @@
+import { VOICE_ABORTED, toVoiceErrorCode, type VoiceErrorCode } from "./voiceErrors";
 /**
  * Interviewer speech pipeline.
  *
  * The reasoning model streams text; this module turns that stream into speech
  * that starts almost immediately and stays in step with the transcript:
  *
- *   model deltas -> SentenceChunker -> SpeechQueue -> ElevenLabs audio -> playback
+ *   model deltas -> SentenceChunker -> SpeechQueue -> Gradr voice backend -> playback
  *                                                  -> onChunkSpoken (transcript)
  *
  * Design notes
@@ -13,7 +14,7 @@
  * - The transcript only reveals a chunk when its audio actually starts, so the
  *   caption never runs ahead of the voice.
  * - There is deliberately NO silent fallback to another voice engine. If
- *   ElevenLabs fails, the turn stops and the caller surfaces a retryable error,
+ *   the voice backend fails, the turn stops and the caller surfaces a retryable error,
  *   so a broken integration can never hide behind a robotic substitute voice.
  */
 
@@ -80,18 +81,18 @@ export function pauseAfter(text: string, beatMs: number): number {
   return beatMs;
 }
 
-export type AudioResult = { blob: Blob } | { error: string };
+export type AudioResult = { blob: Blob } | { error: VoiceErrorCode | typeof VOICE_ABORTED };
 
 export interface SpeechQueueOptions {
-  /** Fetches audio for one chunk from ElevenLabs. */
+  /** Fetches audio for one chunk from the Gradr voice backend. */
   fetchAudio: (text: string, signal: AbortSignal) => Promise<AudioResult>;
   /** Fired the moment a chunk's audio starts — drives the live transcript. */
   onChunkSpoken: (text: string) => void;
   onSpeakingChange: (speaking: boolean) => void;
   /** Everything queued has been spoken and the input stream was closed. */
   onDrained: () => void;
-  /** ElevenLabs failed — the turn is aborted and must be retried by the user. */
-  onFailure: (reason: string) => void;
+  /** Voice failed — the turn is aborted and must be retried by the user. */
+  onFailure: (code: VoiceErrorCode) => void;
   /** Extra silence between thoughts, from the persona profile. */
   beatMs?: number;
 }
@@ -111,7 +112,7 @@ export class SpeechQueue {
   private audio: HTMLAudioElement | null = null;
   private url: string | null = null;
   private controllers = new Set<AbortController>();
-  private failure: string | null = null;
+  private failure: VoiceErrorCode | null = null;
 
 
   constructor(private opts: SpeechQueueOptions) {}
@@ -130,7 +131,10 @@ export class SpeechQueue {
     this.controllers.add(controller);
     const audio = this.opts
       .fetchAudio(clean, controller.signal)
-      .catch((e): AudioResult => ({ error: String(e?.message ?? e) }))
+      .catch((e): AudioResult => {
+        console.error("[voice] chunk fetch failed", e);
+        return { error: "VOICE_CONNECTION_FAILED" };
+      })
       .finally(() => this.controllers.delete(controller));
 
 
@@ -196,13 +200,15 @@ export class SpeechQueue {
       let result: AudioResult;
       try {
         result = await item.audio;
-      } catch (e: any) {
-        result = { error: String(e?.message ?? e) };
+      } catch (e) {
+        console.error("[voice] chunk fetch rejected", e);
+        result = { error: "VOICE_CONNECTION_FAILED" };
       }
       if (this.stopped) break;
 
       if ("error" in result) {
         // No substitute voice: end the turn and let the UI offer a retry.
+        if (result.error === VOICE_ABORTED) break;
         this.failure = result.error;
         break;
       }
@@ -211,7 +217,8 @@ export class SpeechQueue {
       try {
         await this.playBlob(result.blob);
       } catch (error) {
-        this.failure = error instanceof Error ? error.message : "The browser could not play ElevenLabs audio.";
+        console.error("[voice] playback failed", error);
+        this.failure = playbackErrorCode(error);
         break;
       }
       if (this.stopped) break;
@@ -225,12 +232,12 @@ export class SpeechQueue {
     this.opts.onSpeakingChange(false);
 
     if (this.failure) {
-      const reason = this.failure;
+      const code = this.failure;
       this.failure = null;
       this.queue = [];
       this.controllers.forEach((c) => c.abort());
       this.controllers.clear();
-      this.opts.onFailure(reason);
+      this.opts.onFailure(code);
       return;
     }
     if (this.closed && this.queue.length === 0) this.opts.onDrained();
@@ -247,15 +254,15 @@ export class SpeechQueue {
         this.teardownAudio();
         resolve();
       };
-      const fail = (reason: string) => {
+      const fail = (code: VoiceErrorCode) => {
         this.teardownAudio();
-        reject(new Error(reason));
+        reject(new Error(code));
       };
       el.onended = finish;
-      el.onerror = () => fail("The browser could not decode the ElevenLabs audio stream.");
+      el.onerror = () => fail("VOICE_CONNECTION_FAILED");
       el.play().catch((error) => {
-        const message = error instanceof Error ? error.message : "Audio playback was blocked.";
-        fail(`ElevenLabs audio playback failed: ${message}`);
+        console.error("[voice] play() rejected", error);
+        fail(error?.name === "NotAllowedError" ? "VOICE_PERMISSION_DENIED" : "VOICE_CONNECTION_FAILED");
       });
     });
   }
@@ -264,4 +271,9 @@ export class SpeechQueue {
 
 function delay(ms: number) {
   return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+}
+
+/** Maps a thrown playback error back onto the Gradr voice vocabulary. */
+function playbackErrorCode(error: unknown): VoiceErrorCode {
+  return toVoiceErrorCode(error instanceof Error ? error.message : error);
 }

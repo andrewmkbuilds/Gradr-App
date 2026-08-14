@@ -18,6 +18,8 @@ import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { SessionTimerRing } from "@/components/interview/SessionTimerRing";
 import { springSmooth, springSnappy, easeOut } from "@/lib/motion/tokens";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
+import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
+
 
 export type Msg = { role: "user" | "assistant"; content: string };
 
@@ -46,9 +48,10 @@ interface Props {
   limits: Limits | null;
   startedAt: number;
   connectionLost?: boolean;
-  /** Exact upstream reason (e.g. the ElevenLabs failure) shown to the candidate. */
-  connectionErrorDetail?: string;
+  /** Sanitized Gradr voice error code — never provider wording. */
+  voiceErrorCode?: VoiceErrorCode | null;
   onDismissConnectionError?: () => void;
+
 
   onInputChange: (value: string) => void;
   onSubmit: () => void;
@@ -97,7 +100,8 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
-    connectionLost, connectionErrorDetail, onDismissConnectionError,
+    connectionLost, voiceErrorCode, onDismissConnectionError,
+
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
@@ -157,16 +161,12 @@ export function InterviewStudio(props: Props) {
         {connectionLost && onDismissConnectionError && (
           <ConnectionErrorOverlay
             open
-            title="Interviewer voice unavailable"
-            message={
-              connectionErrorDetail
-                ? `Your transcript is safe. The voice engine stopped this turn: ${connectionErrorDetail}. Retry the turn, or continue by typing.`
-                : "Your transcript is safe. Reconnect to carry on with voice, or keep going by typing your answers."
-            }
+            code={voiceErrorCode}
             retrying={connecting}
             onRetry={onReconnect}
             onDismiss={onDismissConnectionError}
           />
+
         )}
 
         {/* ---------- Header ---------- */}
