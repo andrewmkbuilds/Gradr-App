@@ -238,7 +238,17 @@ export function ThreeDayPlan() {
                               {step.target && (
                                 <p className="mt-0.5 text-[11px] text-muted-foreground/80">Target: {step.target}</p>
                               )}
+                              {step.done && (
+                                <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-success">
+                                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                                  Completed
+                                  {step.completed_at
+                                    ? ` ${formatDistanceToNow(new Date(step.completed_at), { addSuffix: true })}`
+                                    : ""}
+                                </p>
+                              )}
                             </div>
+
 
                             <Button
                               size="sm"
