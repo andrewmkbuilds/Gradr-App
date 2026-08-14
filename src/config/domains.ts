@@ -79,6 +79,8 @@ export const SURFACE_PATH_PREFIX: Record<Surface, string> = {
   news: "/news",
   docs: "/docs",
   affiliates: "/affiliate",
+  status: "/status",
+  support: "/support",
 };
 
 export type DeployEnv = "development" | "preview" | "production";
