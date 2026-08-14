@@ -17,6 +17,7 @@ export type Database = {
       academic_email_verifications: {
         Row: {
           attempts: number
+          category: string
           code_hash: string
           consumed_at: string | null
           created_at: string
@@ -25,11 +26,13 @@ export type Database = {
           expires_at: string
           id: string
           last_sent_at: string
+          purpose: string
           resend_count: number
           user_id: string
         }
         Insert: {
           attempts?: number
+          category?: string
           code_hash: string
           consumed_at?: string | null
           created_at?: string
@@ -38,11 +41,13 @@ export type Database = {
           expires_at: string
           id?: string
           last_sent_at?: string
+          purpose?: string
           resend_count?: number
           user_id: string
         }
         Update: {
           attempts?: number
+          category?: string
           code_hash?: string
           consumed_at?: string | null
           created_at?: string
@@ -51,6 +56,7 @@ export type Database = {
           expires_at?: string
           id?: string
           last_sent_at?: string
+          purpose?: string
           resend_count?: number
           user_id?: string
         }
@@ -3669,6 +3675,74 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_appeals: {
+        Row: {
+          created_at: string
+          document_path: string | null
+          id: string
+          message: string
+          request_id: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_path?: string | null
+          id?: string
+          message: string
+          request_id: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_path?: string | null
+          id?: string
+          message?: string
+          request_id?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_appeals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verification_email_claims: {
+        Row: {
+          domain: string
+          email: string
+          first_verified_at: string
+          last_verified_at: string
+          user_id: string
+        }
+        Insert: {
+          domain: string
+          email: string
+          first_verified_at?: string
+          last_verified_at?: string
+          user_id: string
+        }
+        Update: {
+          domain?: string
+          email?: string
+          first_verified_at?: string
+          last_verified_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       verification_institutions: {
         Row: {
           category: string | null
@@ -3725,15 +3799,72 @@ export type Database = {
           },
         ]
       }
+      verification_request_events: {
+        Row: {
+          actor_id: string | null
+          actor_role: string
+          created_at: string
+          event: string
+          from_status: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          request_id: string
+          to_status: string | null
+          user_id: string
+          visible_to_user: boolean
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string
+          created_at?: string
+          event: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          request_id: string
+          to_status?: string | null
+          user_id: string
+          visible_to_user?: boolean
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string
+          created_at?: string
+          event?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          request_id?: string
+          to_status?: string | null
+          user_id?: string
+          visible_to_user?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_request_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       verification_requests: {
         Row: {
+          appeal_count: number
           category: string
           country: string | null
           created_at: string
           discount_percentage: number
           document_path: string | null
           domain_matched: boolean
+          domain_proof_verified: boolean
           email: string
+          fraud_flags: Json
+          fraud_score: number
           full_name: string
           id: string
           organization: string | null
@@ -3750,13 +3881,17 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          appeal_count?: number
           category: string
           country?: string | null
           created_at?: string
           discount_percentage?: number
           document_path?: string | null
           domain_matched?: boolean
+          domain_proof_verified?: boolean
           email: string
+          fraud_flags?: Json
+          fraud_score?: number
           full_name: string
           id?: string
           organization?: string | null
@@ -3773,13 +3908,17 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          appeal_count?: number
           category?: string
           country?: string | null
           created_at?: string
           discount_percentage?: number
           document_path?: string | null
           domain_matched?: boolean
+          domain_proof_verified?: boolean
           email?: string
+          fraud_flags?: Json
+          fraud_score?: number
           full_name?: string
           id?: string
           organization?: string | null
@@ -4026,6 +4165,7 @@ export type Database = {
       admin_verification_requests: {
         Args: { _limit?: number; _status?: string }
         Returns: {
+          appeal_count: number
           applicant_name: string
           category: string
           category_label: string
@@ -4033,9 +4173,13 @@ export type Database = {
           discount_percentage: number
           document_path: string
           domain_matched: boolean
+          domain_proof_verified: boolean
           email: string
+          fraud_flags: Json
+          fraud_score: number
           full_name: string
           id: string
+          latest_appeal: string
           organization: string
           personal_email: string
           reviewed_at: string
@@ -4047,6 +4191,20 @@ export type Database = {
           supporting_information: string
           user_id: string
           website: string
+        }[]
+      }
+      admin_verification_timeline: {
+        Args: { _request_id: string }
+        Returns: {
+          actor_name: string
+          actor_role: string
+          created_at: string
+          event: string
+          from_status: string
+          id: string
+          metadata: Json
+          notes: string
+          to_status: string
         }[]
       }
       affiliate_click_is_valid: {
@@ -4115,6 +4273,20 @@ export type Database = {
         Returns: string
       }
       entitlement_snapshot: { Args: { _env?: string }; Returns: Json }
+      evaluate_verification_fraud: {
+        Args: {
+          _category: string
+          _domain_matched: boolean
+          _email: string
+          _full_name: string
+          _organization: string
+          _personal_email: string
+          _proof: boolean
+          _user_id: string
+          _website: string
+        }
+        Returns: Json
+      }
       expire_stale_verifications: { Args: never; Returns: number }
       generate_affiliate_code: { Args: never; Returns: string }
       get_affiliate_public_settings: {
@@ -4130,6 +4302,10 @@ export type Database = {
       }
       has_active_subscription: {
         Args: { _env?: string; _user_id: string }
+        Returns: boolean
+      }
+      has_domain_proof: {
+        Args: { _email: string; _user: string }
         Returns: boolean
       }
       has_role: {
@@ -4159,6 +4335,20 @@ export type Database = {
         Args: { _found?: boolean; _source?: string }
         Returns: undefined
       }
+      log_verification_event: {
+        Args: {
+          _actor_id?: string
+          _actor_role?: string
+          _event: string
+          _from_status?: string
+          _metadata?: Json
+          _notes?: string
+          _request_id: string
+          _to_status?: string
+          _visible?: boolean
+        }
+        Returns: string
+      }
       lookup_affiliate_by_code: {
         Args: { _code: string }
         Returns: {
@@ -4178,6 +4368,20 @@ export type Database = {
       }
       my_affiliate_overview: { Args: never; Returns: Json }
       my_eligibility_state: { Args: never; Returns: Json }
+      my_verification_timeline: {
+        Args: { _request_id: string }
+        Returns: {
+          actor_name: string
+          actor_role: string
+          created_at: string
+          event: string
+          from_status: string
+          id: string
+          metadata: Json
+          notes: string
+          to_status: string
+        }[]
+      }
       notify_admins: {
         Args: {
           _body?: string
@@ -4282,6 +4486,10 @@ export type Database = {
         Returns: number
       }
       security_scan_snapshot: { Args: never; Returns: Json }
+      submit_verification_appeal: {
+        Args: { _document_path?: string; _message: string; _request_id: string }
+        Returns: string
+      }
       submit_verification_request: {
         Args: {
           _category: string
