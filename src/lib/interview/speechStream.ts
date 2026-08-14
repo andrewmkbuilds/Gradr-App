@@ -216,10 +216,19 @@ export class SpeechQueue {
     }
 
     this.running = false;
-    if (!this.stopped) {
-      this.opts.onSpeakingChange(false);
-      if (this.closed && this.queue.length === 0) this.opts.onDrained();
+    if (this.stopped) return;
+    this.opts.onSpeakingChange(false);
+
+    if (this.failure) {
+      const reason = this.failure;
+      this.failure = null;
+      this.queue = [];
+      this.controllers.forEach((c) => c.abort());
+      this.controllers.clear();
+      this.opts.onFailure(reason);
+      return;
     }
+    if (this.closed && this.queue.length === 0) this.opts.onDrained();
   }
 
   private playBlob(blob: Blob): Promise<void> {
@@ -238,21 +247,8 @@ export class SpeechQueue {
       el.play().catch(done);
     });
   }
-
-  private speakBrowser(text: string): Promise<void> {
-    return new Promise((resolve) => {
-      if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-        resolve();
-        return;
-      }
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 1.0;
-      utter.onend = () => resolve();
-      utter.onerror = () => resolve();
-      window.speechSynthesis.speak(utter);
-    });
-  }
 }
+
 
 function delay(ms: number) {
   return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
