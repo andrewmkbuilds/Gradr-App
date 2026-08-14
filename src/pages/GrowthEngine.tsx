@@ -5,6 +5,9 @@ import { ArrowRight, Sparkles, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/surface";
 import { GetStartedState, SkeletonList } from "@/components/states";
+import { EngineCanvas } from "@/components/app/EngineCanvas";
+import { Progressive } from "@/components/app/Progressive";
+import { CareerRoadmapDemo } from "@/components/demos/EngineDemos";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -108,7 +111,7 @@ export default function GrowthEngine() {
   const hasData = gaps.length > 0 || resumeWeaknesses.length > 0;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <EngineCanvas>
       <div>
         <h1 className="type-h1 text-foreground">Growth &amp; Proof</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -136,6 +139,9 @@ export default function GrowthEngine() {
               </>
             }
           />
+          <Progressive minHeight={380} className="border-t border-border/60 p-4 sm:p-5">
+            <CareerRoadmapDemo />
+          </Progressive>
         </Surface>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -219,6 +225,6 @@ export default function GrowthEngine() {
           </div>
         </div>
       )}
-    </div>
+    </EngineCanvas>
   );
 }
