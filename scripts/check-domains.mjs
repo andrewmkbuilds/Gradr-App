@@ -52,9 +52,17 @@ async function check({ host, purpose, expectRedirect }) {
   try {
     const response = await fetch(`https://${host}/`, { redirect: "manual" });
     result.https = response.status;
+    const location = response.headers.get("location") ?? "";
     if (expectRedirect) {
       result.ok = response.status >= 300 && response.status < 400;
       if (!result.ok) result.notes.push(`Expected a redirect, got ${response.status}.`);
+      return result;
+    }
+    if (response.status >= 300 && response.status < 400 && /gradr\.me/.test(location)) {
+      result.notes.push(
+        `Redirects to ${location} — hosting treats this as an alias of the primary domain, not its own surface. ` +
+          `Serve it independently, or keep using path routing on gradr.me.`,
+      );
       return result;
     }
     const body = await response.text();
@@ -62,6 +70,7 @@ async function check({ host, purpose, expectRedirect }) {
     result.ok = response.ok && isGradr;
     if (!response.ok) result.notes.push(`HTTPS returned ${response.status}.`);
     else if (!isGradr) result.notes.push("Served HTML is not the Gradr bundle — domain points elsewhere.");
+
   } catch (error) {
     result.notes.push(`HTTPS failed: ${error instanceof Error ? error.message : String(error)}`);
   }
