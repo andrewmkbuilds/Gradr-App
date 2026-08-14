@@ -139,6 +139,31 @@ function pngHtml(svg, { size, background = "transparent", pad = 0.02, radius = 0
 </style></head><body><div class="plate"><img src="${dataUri(svg)}" alt=""/></div></body></html>`;
 }
 
+/**
+ * Horizontal lockup: symbol + GRADR wordmark. Bricolage Grotesque at 600 with
+ * open tracking — the wordmark stays quiet so the symbol carries the identity.
+ */
+const LOCKUPS = [
+  { file: "gradr-lockup.png", svg: () => VARIANTS["gradr-logo.svg"], color: DEEP },
+  { file: "gradr-lockup-dark.png", svg: () => VARIANTS["gradr-logo-dark.svg"], color: SOFT_WHITE },
+];
+const LOCKUP = { width: 1200, height: 320, mark: 208, gap: 56, type: 150 };
+
+function lockupHtml(svg, color) {
+  const { width, height, mark, gap, type } = LOCKUP;
+  return `<!doctype html><html><head><meta charset="utf-8"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&display=swap" rel="stylesheet">
+  <style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:${width}px;height:${height}px;background:transparent}
+  .row{width:${width}px;height:${height}px;display:flex;align-items:center;justify-content:center;gap:${gap}px}
+  img{width:${mark}px;height:${mark}px;display:block}
+  span{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:${type}px;
+    letter-spacing:0.02em;line-height:1;color:${color};padding-bottom:0.06em}
+</style></head><body><div class="row"><img src="${dataUri(svg)}" alt=""/><span>GRADR</span></div></body></html>`;
+}
+
 async function main() {
   mkdirSync(PUBLIC, { recursive: true });
   for (const [file, svg] of Object.entries(VARIANTS)) {
@@ -160,8 +185,21 @@ async function main() {
     await page.close();
     console.log(`wrote public/${target.file}`);
   }
+
+  for (const lock of LOCKUPS) {
+    const page = await browser.newPage({
+      viewport: { width: LOCKUP.width, height: LOCKUP.height },
+      deviceScaleFactor: 1,
+    });
+    await page.setContent(lockupHtml(lock.svg(), lock.color), { waitUntil: "networkidle" });
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: join(PUBLIC, lock.file), omitBackground: true });
+    await page.close();
+    console.log(`wrote public/${lock.file}`);
+  }
   await browser.close();
 }
+
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   await main();
