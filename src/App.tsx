@@ -51,6 +51,8 @@ const MarketingSurface = lazy(() => import("./surfaces/MarketingSurface"));
 const NewsSurface = lazy(() => import("./surfaces/NewsSurface"));
 const DocsSurface = lazy(() => import("./surfaces/DocsSurface"));
 const AffiliatesSurface = lazy(() => import("./surfaces/AffiliatesSurface"));
+const StatusSurface = lazy(() => import("./surfaces/StatusSurface"));
+const SupportSurface = lazy(() => import("./surfaces/SupportSurface"));
 const ResumeEngine = lazy(() => import("./pages/ResumeEngine"));
 const JobMatchingEngine = lazy(() => import("./pages/JobMatchingEngine"));
 const JobsFeed = lazy(() => import("./pages/JobsFeed"));
@@ -261,7 +263,9 @@ function SurfaceOutlet({ surface }: { surface: Surface }) {
     news: NewsSurface,
     docs: DocsSurface,
     affiliates: AffiliatesSurface,
-  }[surface as "marketing" | "news" | "docs" | "affiliates"];
+    status: StatusSurface,
+    support: SupportSurface,
+  }[surface as "marketing" | "news" | "docs" | "affiliates" | "status" | "support"];
   return (
     <SurfaceProvider surface={surface}>
       <Component />
@@ -269,7 +273,14 @@ function SurfaceOutlet({ surface }: { surface: Surface }) {
   );
 }
 
-const SATELLITE_SURFACES: Surface[] = ["marketing", "news", "docs", "affiliates"];
+const SATELLITE_SURFACES: Surface[] = [
+  "marketing",
+  "news",
+  "docs",
+  "affiliates",
+  "status",
+  "support",
+];
 
 function AppRoutes() {
   const location = useLocation();

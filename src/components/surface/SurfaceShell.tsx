@@ -19,6 +19,8 @@ const ECOSYSTEM: { label: string; surface: Surface; to?: string }[] = [
   { label: "News", surface: "news" },
   { label: "Docs", surface: "docs" },
   { label: "Affiliates", surface: "affiliates" },
+  { label: "Status", surface: "status" },
+  { label: "Support", surface: "support" },
 ];
 
 interface SurfaceShellProps {
