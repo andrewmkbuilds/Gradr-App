@@ -134,7 +134,7 @@ async function main() {
     console.log(`wrote public/${file}`);
   }
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ executablePath: process.env.OG_CHROMIUM_PATH || undefined });
   for (const target of PNGS) {
     const page = await browser.newPage({
       viewport: { width: target.size, height: target.size },
