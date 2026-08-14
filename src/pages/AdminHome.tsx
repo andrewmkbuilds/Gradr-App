@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
+  AudioLines,
   BadgePercent,
   BarChart3,
   Gauge,
@@ -63,6 +64,7 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
     group: "Platform operations",
     links: [
       { title: "API health", description: "Provider latency, errors and rate-limit backoff.", url: "/admin/api-health", icon: Activity },
+      { title: "Interviewer voice", description: "Speech credential health, entitlement and voice configuration.", url: "/admin/voice", icon: AudioLines },
       { title: "Webhook deliveries", description: "Paddle and RevenueCat payloads and signatures.", url: "/admin/webhook-logs", icon: Webhook },
       { title: "CSP violations", description: "Report-only policy blocks and spike alerts.", url: "/admin/csp-reports", icon: ShieldAlert },
     ],
