@@ -55,6 +55,7 @@ const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminSecurityLog = lazy(() => import("@/pages/AdminSecurityLog"));
 const MotionPlayground = lazy(() => import("@/pages/MotionPlayground"));
 const DesignSystem = lazy(() => import("@/pages/DesignSystem"));
+const AdminQaChecklist = lazy(() => import("@/pages/AdminQaChecklist"));
 const BrandAssets = lazy(() => import("@/pages/BrandAssets"));
 const AdminSecurityFindings = lazy(() => import("@/pages/AdminSecurityFindings"));
 const AdminNavAnalytics = lazy(() => import("@/pages/AdminNavAnalytics"));
@@ -146,6 +147,7 @@ function ProtectedRoutes() {
          <Route path="/admin/security-findings" element={<RequireAdmin><AnimatedPage><AdminSecurityFindings /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/brand-assets" element={<RequireAdmin><AnimatedPage><BrandAssets /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/design-system" element={<RequireAdmin><AnimatedPage><DesignSystem /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/qa-checklist" element={<RequireAdmin><AnimatedPage><AdminQaChecklist /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/motion-playground" element={<RequireAdmin><AnimatedPage><MotionPlayground /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/security-log" element={<RequireAdmin><AnimatedPage><AdminSecurityLog /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/seo-monitor" element={<RequireAdmin><AnimatedPage><AdminSeoMonitor /></AnimatedPage></RequireAdmin>} />
