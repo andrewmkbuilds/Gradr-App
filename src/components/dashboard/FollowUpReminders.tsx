@@ -113,15 +113,35 @@ export function FollowUpReminders() {
     if (error) toast.error("Couldn't save reminder settings");
   };
 
+  /** Applications eligible for per-application configuration. */
+  const trackedForConfig = useMemo(
+    () => jobs.filter((j) => settings.followup_stages.includes(j.status)).slice(0, 12),
+    [jobs, settings.followup_stages],
+  );
+
   const due = useMemo(() => {
     if (!settings.followup_enabled) return [];
-    const cutoff = Date.now() - settings.followup_days * 86_400_000;
     return jobs
       .filter((j) => settings.followup_stages.includes(j.status))
-      .filter((j) => lastTouch(j).getTime() <= cutoff)
+      .filter((j) => j.follow_up_enabled !== false)
+      .filter(
+        (j) =>
+          lastTouch(j).getTime() <= Date.now() - cadenceFor(j, settings.followup_days) * 86_400_000,
+      )
       .filter((j) => !existing.has(j.id))
       .slice(0, 6);
   }, [jobs, settings, existing]);
+
+  /** Per-application override: cadence in days, or 0 to inherit the global setting. */
+  const saveJobConfig = async (jobId: string, patch: { follow_up_days?: number; follow_up_enabled?: boolean }) => {
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...patch } : j)));
+    const { error } = await supabase.from("tracked_jobs").update(patch).eq("id", jobId);
+    if (error) {
+      toast.error("Couldn't save that application's reminder cadence");
+      void load();
+    }
+  };
+
 
   const createReminder = async (job: ActiveJob) => {
     if (!user) return;
