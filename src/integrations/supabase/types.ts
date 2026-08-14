@@ -4210,6 +4210,7 @@ export type Database = {
       }
       admin_review_verification_request: {
         Args: {
+          _actor_id?: string
           _decision: string
           _discount_percentage?: number
           _notes?: string
