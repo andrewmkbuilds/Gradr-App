@@ -30,6 +30,7 @@ import { useAiStream } from "@/hooks/useAiStream";
 interface Suggestion {
   type: string;
   text: string;
+  [key: string]: string;
 }
 
 interface Evidence {
