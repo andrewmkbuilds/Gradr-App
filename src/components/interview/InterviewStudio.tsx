@@ -97,7 +97,7 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
-    connectionLost, onDismissConnectionError,
+    connectionLost, connectionErrorDetail, onDismissConnectionError,
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
