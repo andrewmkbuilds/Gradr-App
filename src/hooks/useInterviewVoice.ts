@@ -42,15 +42,18 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) return null;
 
-    const timeout = window.setTimeout(() => {
-      // Abort only this chunk; the rest of the turn continues.
-      try { (signal as any).dispatchEvent?.(new Event("abort")); } catch { /* noop */ }
-    }, FETCH_TIMEOUT_MS);
+    // Own controller so a slow chunk times out without killing the whole turn,
+    // while still honouring the caller's abort (barge-in / session end).
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    const relay = () => controller.abort();
+    if (signal.aborted) controller.abort();
+    else signal.addEventListener("abort", relay, { once: true });
 
     try {
       const res = await fetch(SPEECH_URL, {
         method: "POST",
-        signal,
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
@@ -69,8 +72,10 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
       return null;
     } finally {
       window.clearTimeout(timeout);
+      signal.removeEventListener("abort", relay);
     }
   }, []);
+
 
   const ensureQueue = useCallback(() => {
     if (queueRef.current) return queueRef.current;
