@@ -47,10 +47,11 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   /** Chunks already fully spoken this turn — the finalized part of the caption. */
   const finalizedRef = useRef("");
   /** Paced (voice-off) reveal state. */
-  const pacedRef = useRef<{ reveal: TimedReveal | null; queue: string[]; running: boolean }>({
+  const pacedRef = useRef<{ reveal: TimedReveal | null; queue: string[]; running: boolean; ended: boolean }>({
     reveal: null,
     queue: [],
     running: false,
+    ended: false,
   });
 
   const emitCaption = useCallback((partial: string) => {
@@ -94,7 +95,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
 
   const stopPaced = useCallback(() => {
     pacedRef.current.reveal?.cancel();
-    pacedRef.current = { reveal: null, queue: [], running: false };
+    pacedRef.current = { reveal: null, queue: [], running: false, ended: false };
   }, []);
 
   /** One authenticated backend voice call per spoken thought. */
