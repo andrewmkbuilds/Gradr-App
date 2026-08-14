@@ -374,7 +374,7 @@ export default function Pricing() {
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <span className="type-h1 text-foreground">
-                    {priceFor(pack.priceId) ?? "—"}
+                    {priceFor(pack.priceId) ?? "Price shown at checkout"}
                   </span>
                 )}
               </div>
