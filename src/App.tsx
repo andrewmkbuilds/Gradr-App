@@ -200,10 +200,7 @@ function ProtectedRoutes() {
           <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/manage-subscription" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
-          <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
-          <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
-          <Route path="/affiliate/dashboard" element={<AnimatedPage><AffiliateDashboard /></AnimatedPage>} />
-          <Route path="/affiliate/resources" element={<AnimatedPage><AffiliateResources /></AnimatedPage>} />
+          {/* Affiliate pages live on affiliates.gradr.me (see SATELLITE_SURFACES). */}
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
