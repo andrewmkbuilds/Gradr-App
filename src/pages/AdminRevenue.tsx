@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, RefreshCw, TrendingUp, Users, Wallet } from "lucide-react";
+import { AlertTriangle, RefreshCw, ShieldCheck, TrendingUp, Users, Wallet } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -18,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { typography } from "@/lib/design/typography";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface RevenuePayload {
   activeCount: number;
@@ -55,6 +57,27 @@ function Metric({ label, value, hint, icon: Icon }: { label: string; value: stri
 /** Revenue health: recurring revenue, plan mix, and the payment-recovery queue. */
 export default function AdminRevenue() {
   const env = getPaddleEnvironment();
+  const [reconciling, setReconciling] = useState(false);
+
+  /** Pull authoritative state from Paddle and repair any webhook drift. */
+  const reconcile = async () => {
+    setReconciling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("payments-reconcile", {
+        body: { environment: env },
+      });
+      if (error) throw error;
+      const repaired = (data as { repaired?: number })?.repaired ?? 0;
+      toast.success(
+        repaired > 0 ? `Reconciled ${repaired} subscription${repaired === 1 ? "" : "s"}` : "Everything already in sync",
+      );
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Reconciliation failed");
+    } finally {
+      setReconciling(false);
+    }
+  };
 
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["admin-revenue", env],
@@ -76,10 +99,16 @@ export default function AdminRevenue() {
         description="Recurring revenue, plan mix and the accounts that need a nudge."
         meta={<Badge variant="secondary" className="uppercase tracking-wide">{env}</Badge>}
         actions={
-          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")} aria-hidden="true" />
-            Refresh
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+              <RefreshCw className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")} aria-hidden="true" />
+              Refresh
+            </Button>
+            <Button size="sm" onClick={reconcile} disabled={reconciling}>
+              <ShieldCheck className="mr-2 h-4 w-4" aria-hidden="true" />
+              {reconciling ? "Reconciling…" : "Reconcile with Paddle"}
+            </Button>
+          </div>
         }
       />
 
