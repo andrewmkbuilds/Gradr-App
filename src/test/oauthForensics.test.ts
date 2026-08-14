@@ -6,7 +6,14 @@
  */
 import { describe, it, expect } from "vitest";
 import { containsSensitive, redactMetadata, redactUrl } from "@/lib/oauth/redaction";
-import { buildTimelines, isDeviation, type OAuthFlowEvent } from "@/lib/oauth/forensics";
+import {
+  EXPECTED_CALLBACK_URL,
+  EXPECTED_FINAL_URL,
+  buildTimelines,
+  isDeviation,
+  oauthDeviationType,
+  type OAuthFlowEvent,
+} from "@/lib/oauth/forensics";
 import { filterTimelines } from "@/hooks/useOAuthForensics";
 import { buildTimelinePdf, timelinesToRows, TIMELINE_CSV_COLUMNS } from "@/lib/oauth/exports";
 import { toCsv } from "@/lib/exportFile";
@@ -69,10 +76,16 @@ describe("redaction", () => {
 
 describe("deviation detection", () => {
   it("accepts the expected final destination", () => {
-    expect(isDeviation("https://gradr.me/auth")).toBe(false);
+    expect(EXPECTED_CALLBACK_URL).toBe("https://app.gradr.me/~oauth/callback");
+    expect(EXPECTED_FINAL_URL).toBe("https://app.gradr.me/dashboard");
+    expect(isDeviation(EXPECTED_FINAL_URL)).toBe(false);
   });
-  it("flags a different path on the production host", () => {
-    expect(isDeviation("https://gradr.me/somewhere-else")).toBe(true);
+  it("flags any bounce to the apex domain", () => {
+    expect(oauthDeviationType("https://gradr.me/~oauth/callback", "callback")).toBe("apex_domain_bounce");
+    expect(isDeviation("https://gradr.me/dashboard")).toBe(true);
+  });
+  it("flags an incorrect app landing path", () => {
+    expect(isDeviation("https://app.gradr.me/auth")).toBe(true);
   });
   it("flags a malformed URL", () => {
     expect(isDeviation("not a url")).toBe(true);

@@ -77,10 +77,9 @@ export function authPath(next: string | null | undefined): string {
 /**
  * Absolute URL used for `emailRedirectTo` and OAuth `redirect_uri`.
  *
- * It always points at `/auth` on the **app surface** (app.gradr.me in
- * production, the current origin everywhere else) rather than at the
- * destination itself: the session has to be established from the URL
- * fragment/code first, and only then does the app forward to `next`.
+ * This is the public post-broker return page. The managed provider generates
+ * its own exact Google callback (`/~oauth/callback`) from this same origin,
+ * establishes the session there, then returns here before forwarding to `next`.
  */
 export function authCallbackUrl(next: string | null | undefined): string {
   if (typeof window === "undefined") return "/auth";

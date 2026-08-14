@@ -25,6 +25,7 @@ import { phPageview } from "@/lib/telemetry/posthog";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { captureAttribution } from "@/lib/telemetry/attribution";
 import { trackOnce } from "@/lib/telemetry/events";
+import { clearRequestId, pendingRequestId, recordOAuthHop } from "@/lib/oauth/forensics";
 
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -374,6 +375,7 @@ const HOMEPAGE_PATHS = new Set(["/", "/landing", "/home"]);
 
 function TelemetryRouteTracker() {
   const location = useLocation();
+  const { user, loading } = useAuth();
 
   // First-touch campaign data has to be read before any in-app navigation
   // rewrites the query string.
@@ -391,6 +393,25 @@ function TelemetryRouteTracker() {
       trackOnce("pricing_viewed", { path: location.pathname }, "route");
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (loading || !user || user.is_anonymous === true || !pendingRequestId()) return;
+    if (location.pathname === "/auth" || location.pathname === "/~oauth/callback") return;
+
+    const finalUrl = window.location.href;
+    void recordOAuthHop({
+      stage: "session",
+      sourceUrl: document.referrer || undefined,
+      destinationUrl: finalUrl,
+      finalUrl,
+      accountType: "existing",
+      note: "authenticated route rendered after OAuth",
+      metadata: {
+        origin: window.location.origin,
+        pathname: location.pathname,
+      },
+    }).finally(clearRequestId);
+  }, [loading, user, location.pathname]);
   return null;
 }
 
@@ -417,8 +438,8 @@ const App = () => (
           <WwwRedirect />
           <ScrollToTop />
           <ReferralCapture />
-          <TelemetryRouteTracker />
           <AuthProvider>
+            <TelemetryRouteTracker />
             <AnalyticsProvider />
             <RouteSeo />
             <Suspense fallback={<RouteFallback />}>

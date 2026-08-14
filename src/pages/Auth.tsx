@@ -13,7 +13,7 @@ import {
   consumeAuthCallbackError,
   readNext,
 } from "@/lib/nextRedirect";
-import { clearRequestId, recordOAuthHop } from "@/lib/oauth/forensics";
+import { EXPECTED_CALLBACK_URL, recordOAuthHop } from "@/lib/oauth/forensics";
 import { toast } from "sonner";
 import { z } from "zod";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
@@ -82,7 +82,7 @@ export default function Auth() {
       stateResult: has("state") ? "ok" : "missing",
       nonceResult: has("nonce") ? "ok" : "not_applicable",
       note: has("error") ? "provider returned an error parameter" : "provider callback received",
-    }).finally(clearRequestId);
+    });
   }, []);
 
 
@@ -92,7 +92,15 @@ export default function Auth() {
   // forward to the destination rather than stranding the user on the form.
   useEffect(() => {
     if (user && user.is_anonymous !== true) {
-      navigate(nextTarget, { replace: true });
+      const finalPath = nextTarget === "/" ? "/dashboard" : nextTarget;
+      const finalUrl = new URL(finalPath, "https://app.gradr.me").toString();
+      if (window.location.origin === "https://app.gradr.me") {
+        navigate(finalPath, { replace: true });
+      } else if (window.location.hostname.endsWith("gradr.me")) {
+        window.location.replace(finalUrl);
+      } else {
+        navigate(finalPath, { replace: true });
+      }
     }
   }, [user, nextTarget, navigate]);
 
@@ -204,8 +212,20 @@ export default function Auth() {
       provider,
       stage: "initiate",
       sourceUrl: window.location.href,
-      destinationUrl: postAuthUrl,
-      note: `redirect_uri=${postAuthUrl}`,
+      destinationUrl:
+        window.location.hostname === "app.gradr.me"
+          ? EXPECTED_CALLBACK_URL
+          : `${window.location.origin}/~oauth/callback`,
+      note: "managed auth callback requested",
+      metadata: {
+        origin: window.location.origin,
+        provider_callback:
+          window.location.hostname === "app.gradr.me"
+            ? EXPECTED_CALLBACK_URL
+            : `${window.location.origin}/~oauth/callback`,
+        post_auth_return: postAuthUrl,
+        final_landing: new URL(nextTarget === "/" ? "/dashboard" : nextTarget, "https://app.gradr.me").toString(),
+      },
     });
 
     const { error } = await lovable.auth.signInWithOAuth(provider, {

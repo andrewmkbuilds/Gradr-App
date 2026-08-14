@@ -2,9 +2,10 @@
 /**
  * Daily automated Google OAuth flow check.
  *
- * Runs headless against production (or OAUTH_FLOW_TARGET) and verifies the
- * *unauthenticated* half of the sign-in flow — the part that broke before and
- * that we can assert without any real Google credentials:
+ * Runs headless against production (or OAUTH_FLOW_TARGET). It always verifies
+ * the public provider request. When GOOGLE_E2E_STORAGE_STATE points to an
+ * approved Playwright storage-state file, it also completes sign-in and checks
+ * the authenticated landing.
  *
  *   1. /auth renders and exposes a "Continue with Google" control.
  *   2. Clicking it leaves Gradr and reaches Google's authorization endpoint
@@ -20,9 +21,10 @@
  */
 import { chromium } from "playwright";
 
-const BASE = (process.argv[2] || process.env.OAUTH_FLOW_TARGET || "https://gradr.me").replace(/\/$/, "");
-const NEXT = "/interview";
-const ALLOWED_REDIRECT_HOSTS = ["gradr.me", "www.gradr.me", "oauth.lovable.app", "accounts.google.com"];
+const BASE = (process.argv[2] || process.env.OAUTH_FLOW_TARGET || "https://app.gradr.me").replace(/\/$/, "");
+const NEXT = "/dashboard";
+const EXPECTED_CALLBACK = "https://app.gradr.me/~oauth/callback";
+const EXPECTED_LANDING = "https://app.gradr.me/dashboard";
 const PROVIDER_HOSTS = ["accounts.google.com", "oauth.lovable.app"];
 const SECRET_RE = /(access_token|id_token|refresh_token|client_secret)=/i;
 
@@ -32,8 +34,31 @@ const record = (ok, label, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${label}${detail ? ` — ${detail}` : ""}`);
 };
 
+// Edge preflight runs before Chromium so a hosting alias redirect is reported
+// clearly even when the browser image is unavailable in a CI runner.
+const callbackProbe = await fetch(`${BASE}/~oauth/callback?gradr_probe=1`, { redirect: "manual" });
+const callbackLocation = callbackProbe.headers.get("location") ?? "";
+const callbackIsServed =
+  callbackProbe.status < 300 ||
+  callbackProbe.status >= 400 ||
+  (callbackLocation && new URL(callbackLocation, BASE).hostname === "app.gradr.me");
+record(
+  callbackIsServed,
+  "app.gradr.me serves the OAuth callback without an apex redirect",
+  `HTTP ${callbackProbe.status}${callbackLocation ? ` -> ${callbackLocation}` : ""}`,
+);
+
+if (!callbackIsServed) {
+  console.error("\nGoogle OAuth flow check FAILED: the hosting edge redirected the callback before app code ran.");
+  process.exit(1);
+}
+
 const browser = await chromium.launch();
-const context = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+const storageState = process.env.GOOGLE_E2E_STORAGE_STATE;
+const context = await browser.newContext({
+  viewport: { width: 1280, height: 1000 },
+  ...(storageState ? { storageState } : {}),
+});
 const page = await context.newPage();
 
 const consoleErrors = [];
@@ -51,6 +76,7 @@ try {
   const authUrl = `${BASE}/auth?next=${encodeURIComponent(NEXT)}`;
   const response = await page.goto(authUrl, { waitUntil: "domcontentloaded", timeout: 45_000 });
   record((response?.status() ?? 0) < 400, "/auth responds", `HTTP ${response?.status()}`);
+  record(page.url().startsWith(`${BASE}/auth`), "app.gradr.me serves /auth without an apex bounce", page.url());
 
   const googleButton = page.getByRole("button", { name: /google/i }).first();
   const hasButton = (await googleButton.count()) > 0;
@@ -86,11 +112,7 @@ try {
       } catch {
         /* reported below */
       }
-      record(
-        ALLOWED_REDIRECT_HOSTS.includes(redirectHost),
-        "redirect_uri points at an allowed origin",
-        redirectHost || redirectUri,
-      );
+      record(redirectUri === EXPECTED_CALLBACK, "uses the exact app callback URI", redirectUri || "<missing>");
       record(
         params.get("scope")?.includes("email") ?? false,
         "requests the email scope",
@@ -102,6 +124,14 @@ try {
 
     const nextPreserved = chain.some((u) => decodeURIComponent(u).includes(NEXT));
     record(nextPreserved, "?next= destination survives the OAuth hop", NEXT);
+
+    if (storageState) {
+      await page.waitForURL(EXPECTED_LANDING, { timeout: 60_000 }).catch(() => {});
+      record(page.url() === EXPECTED_LANDING, "authenticated user lands on app dashboard", page.url());
+      record(!chain.some((u) => new URL(u).hostname === "gradr.me"), "redirect chain never bounces to gradr.me");
+    } else {
+      console.log("SKIP  authenticated landing (set GOOGLE_E2E_STORAGE_STATE to an approved Google test session)");
+    }
   }
 
   const leaked = chain.filter((u) => SECRET_RE.test(u));
