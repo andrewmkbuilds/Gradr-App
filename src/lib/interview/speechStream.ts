@@ -111,6 +111,8 @@ export class SpeechQueue {
   private audio: HTMLAudioElement | null = null;
   private url: string | null = null;
   private controllers = new Set<AbortController>();
+  private failure: string | null = null;
+
 
   constructor(private opts: SpeechQueueOptions) {}
 
