@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CalendarDays, Clock } from "lucide-react";
 import { PublicShell } from "@/components/PublicShell";
+import { MarketingHero } from "@/components/marketing/MarketingHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FaqBlock } from "@/components/seo/FaqBlock";
 import { RelatedGuides } from "@/components/seo/RelatedGuides";
@@ -44,28 +45,28 @@ export default function GuideArticle() {
           </Link>
         </nav>
 
-        <header className="space-y-4">
-          <p className="text-sm font-medium text-primary">{guide.category}</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {guide.title}
-          </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground">{guide.intro}</p>
-          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-              {guide.readMinutes} min read
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-              Updated{" "}
-              {new Date(guide.updated).toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-        </header>
+        <MarketingHero
+          eyebrow={guide.category}
+          title={guide.title}
+          description={guide.intro}
+          actions={
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                {guide.readMinutes} min read
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                Updated{" "}
+                {new Date(guide.updated).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+          }
+        />
 
         <nav aria-label="On this page" className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">On this page</p>

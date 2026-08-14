@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
+import { PageHeader } from "@/components/app/PageHeader";
 import {
   useCreateGithubIssue,
   useRunScan,
@@ -114,24 +115,23 @@ export default function AdminSecurityFindings() {
   const diffEntries = (diff?.entries ?? []).filter((e) => showUnchanged || e.status !== "unchanged");
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="type-h1 text-foreground">Security Findings</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Immutable scan history for Gradr's database access rules. Exports are delivered through signed,
-            single-use links and every privileged action is CSRF-protected and audit logged.
-          </p>
-        </div>
-        <Button onClick={handleScan} disabled={runScan.isPending}>
-          {runScan.isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="mr-2 h-4 w-4" />
-          )}
-          Run scan now
-        </Button>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Security findings"
+        description="Immutable scan history for Gradr's database access rules. Exports are delivered through signed, single-use links and every privileged action is CSRF-protected and audit logged."
+        actions={
+          <Button onClick={handleScan} disabled={runScan.isPending}>
+            {runScan.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Run scan now
+          </Button>
+        }
+      />
 
       {error && (
         <Card className="border-destructive/40">

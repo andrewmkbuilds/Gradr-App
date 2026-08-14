@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Search, Wifi } from "lucide-react";
 import { PublicShell } from "@/components/PublicShell";
+import { MarketingHero } from "@/components/marketing/MarketingHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FaqBlock } from "@/components/seo/FaqBlock";
 import { Input } from "@/components/ui/input";
@@ -94,16 +95,11 @@ export default function JobSearchIndex() {
       <JsonLd nodes={jsonLd} label="job-search-index" />
 
       <div className="space-y-10">
-        <header className="space-y-3">
-          <p className="text-sm font-medium text-primary">Job search</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Find jobs by role, location, and remote preference
-          </h1>
-          <p className="max-w-2xl text-muted-foreground">
-            Start from the role you want. Each page covers the skills that recur in those postings,
-            how to tailor a resume for them, and what to prepare for the interview.
-          </p>
-        </header>
+        <MarketingHero
+          eyebrow="Job search"
+          title="Find jobs by role, location, and remote preference"
+          description="Start from the role you want. Each page covers the skills that recur in those postings, how to tailor a resume for them, and what to prepare for the interview."
+        />
 
         <section aria-label="Filters" className="space-y-4 rounded-xl border border-border bg-card p-4">
           <div className="relative">
