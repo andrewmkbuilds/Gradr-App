@@ -17,9 +17,9 @@ const ACTORS: Record<string, string> = {
   indeed: Deno.env.get("APIFY_INDEED_ACTOR") || "misceres~indeed-scraper",
 };
 
+const ENDPOINT = "jobs-apify";
 const RATE_LIMIT = 6;
-const WINDOW_MS = 60_000;
-const hits = new Map<string, number[]>();
+const WINDOW_SECONDS = 60;
 
 interface NormalizedJob {
   dedupe_key: string;

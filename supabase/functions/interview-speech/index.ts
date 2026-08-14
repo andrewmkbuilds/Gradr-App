@@ -42,17 +42,14 @@ function voiceError(
 const UPSTREAM_TIMEOUT_MS = 20_000;
 
 // Chunked speech means many small calls per turn — this cap is per user/minute.
+// Durable + shared across instances (see _shared/rateLimit.ts); fails closed.
+const ENDPOINT = "interview-speech";
 const RATE_LIMIT = 180;
-const WINDOW_MS = 60_000;
-const hits = new Map<string, number[]>();
+const WINDOW_SECONDS = 60;
 
-function rateLimited(userId: string) {
-  const now = Date.now();
-  const list = (hits.get(userId) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (list.length >= RATE_LIMIT) return true;
-  list.push(now);
-  hits.set(userId, list);
-  return false;
+async function rateLimited(userId: string): Promise<boolean> {
+  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+  return !r.allowed;
 }
 
 async function synthesize(
