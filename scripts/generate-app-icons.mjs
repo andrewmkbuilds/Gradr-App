@@ -190,6 +190,11 @@ async function main() {
   const master = join(PUBLIC, "gradr-logo.png");
   if (!existsSync(master)) throw new Error("public/gradr-logo.png (icon master) is missing");
   const logo = `data:image/png;base64,${readFileSync(master).toString("base64")}`;
+  // Soft-white mark, for the opaque Deep Sea / Ocean Teal plates.
+  const logoDark = `data:image/png;base64,${readFileSync(join(PUBLIC, "gradr-logo-dark.png")).toString("base64")}`;
+  // Small-size build: heavier strokes, tighter aperture — used at 64px and below.
+  const compact = `data:image/svg+xml;base64,${Buffer.from(readFileSync(join(PUBLIC, "gradr-symbol-compact.svg"))).toString("base64")}`;
+
 
   mkdirSync(ICON_DIR, { recursive: true });
   mkdirSync(SPLASH_DIR, { recursive: true });
