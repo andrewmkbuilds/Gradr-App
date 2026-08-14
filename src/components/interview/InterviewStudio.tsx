@@ -46,9 +46,10 @@ interface Props {
   limits: Limits | null;
   startedAt: number;
   connectionLost?: boolean;
-  /** Exact upstream reason (e.g. the ElevenLabs failure) shown to the candidate. */
-  connectionErrorDetail?: string;
+  /** Sanitized Gradr voice error code — never provider wording. */
+  voiceErrorCode?: VoiceErrorCode | null;
   onDismissConnectionError?: () => void;
+
 
   onInputChange: (value: string) => void;
   onSubmit: () => void;
