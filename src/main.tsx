@@ -7,8 +7,10 @@ import App from "./App.tsx";
 import "./index.css";
 import { initTelemetry } from "./lib/telemetry/journey";
 import RootErrorBoundary from "./components/RootErrorBoundary";
+import { registerServiceWorker } from "./lib/offline/registerServiceWorker";
 
 initTelemetry();
+registerServiceWorker();
 
 createRoot(document.getElementById("root")!).render(
   <RootErrorBoundary>
