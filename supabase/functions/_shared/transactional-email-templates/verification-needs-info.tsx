@@ -40,7 +40,7 @@ const Email = ({ firstName, verificationType, reviewerNotes, reviewedAt }: Props
         ]}
       />
     </Card>
-    <Cta href="https://gradr.me/settings#eligibility" label="Update my request" />
+    <Cta href="https://gradr.me/settings#eligibility">Update my request</Cta>
   </EmailLayout>
 )
 
