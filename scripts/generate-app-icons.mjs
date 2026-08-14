@@ -257,9 +257,15 @@ function writeManifestModule() {
     ...APPLE_ICONS.map((t) => ({ ...t, group: "apple", width: t.size, height: t.size })),
     ...MASKABLE_ICONS.map((t) => ({ ...t, group: "maskable", width: t.size, height: t.size })),
     ...SPLASH_SCREENS.map((t) => ({ ...t, group: "splash" })),
-    { file: "gradr-logo.png", group: "logo", width: 512, height: 512, label: "Primary logo (light surfaces)" },
-    { file: "gradr-logo-dark.png", group: "logo", width: 512, height: 512, label: "Primary logo (dark surfaces)" },
-    { file: "gradr-logo.svg", group: "logo", width: 0, height: 0, label: "Vector logo (infinite scale)" },
+    { file: "gradr-logo.png", group: "logo", width: 512, height: 512, label: "Primary symbol (light surfaces)" },
+    { file: "gradr-logo-dark.png", group: "logo", width: 512, height: 512, label: "Primary symbol (dark surfaces)" },
+    { file: "gradr-logo.svg", group: "logo", width: 0, height: 0, label: "Vector symbol (infinite scale)" },
+    { file: "gradr-logo-mono.svg", group: "logo", width: 0, height: 0, label: "Monochrome symbol (currentColor)" },
+    { file: "gradr-symbol-compact.svg", group: "logo", width: 0, height: 0, label: "Small-size symbol (16–64px)" },
+    { file: "gradr-lockup.png", group: "logo", width: 1200, height: 320, label: "Symbol + GRADR lockup (light)" },
+    { file: "gradr-lockup-dark.png", group: "logo", width: 1200, height: 320, label: "Symbol + GRADR lockup (dark)" },
+    { file: "email-logo-144.png", group: "logo", width: 144, height: 144, label: "Email header mark" },
+
     { file: "og-image-v2.jpg", group: "social", width: 1200, height: 630, label: "Open Graph / Twitter card" },
     { file: "og/site-gradr.png", group: "social", width: 1200, height: 630, label: "Site social card (source)" },
   ].map((t) => {
