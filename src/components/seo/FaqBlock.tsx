@@ -32,12 +32,15 @@ export function FaqBlock({ items, title = "Frequently asked questions", source, 
         </h2>
       </div>
 
-      <dl className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+      {/* Disclosure list rather than <dl>: the answer panels expose
+          role="region" for screen-reader navigation, which would conflict with
+          the definition-list role contract. */}
+      <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
         {items.map((item, i) => {
           const expanded = open === i;
           return (
             <div key={item.question}>
-              <dt>
+              <h3 className="m-0">
                 <button
                   type="button"
                   aria-expanded={expanded}
@@ -59,8 +62,8 @@ export function FaqBlock({ items, title = "Frequently asked questions", source, 
                     )}
                   />
                 </button>
-              </dt>
-              <dd
+              </h3>
+              <div
                 id={`faq-answer-${i}`}
                 role="region"
                 aria-labelledby={`faq-question-${i}`}
@@ -68,11 +71,12 @@ export function FaqBlock({ items, title = "Frequently asked questions", source, 
                 className="px-4 pb-4 text-sm leading-relaxed text-muted-foreground"
               >
                 {item.answer}
-              </dd>
+              </div>
             </div>
           );
         })}
-      </dl>
+      </div>
+
     </section>
   );
 }

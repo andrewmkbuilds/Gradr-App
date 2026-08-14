@@ -242,7 +242,12 @@ export default function AtsResumeChecker() {
         <h2 id="score-bands" className="text-2xl font-semibold tracking-tight text-foreground">
           What your ATS score means
         </h2>
-        <div className="mt-6 overflow-x-auto">
+        <div
+          className="mt-6 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          tabIndex={0}
+          role="group"
+          aria-label="ATS score bands table, scrollable horizontally"
+        >
           <table className="w-full min-w-[420px] text-sm">
             <caption className="sr-only">ATS resume score bands and what each range means</caption>
             <thead>

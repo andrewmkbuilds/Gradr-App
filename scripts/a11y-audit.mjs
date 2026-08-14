@@ -79,6 +79,7 @@ try {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         colorScheme: theme,
+        reducedMotion: "reduce", // measure settled colors, not mid-animation frames
       });
       const page = await context.newPage();
       await page.addInitScript((t) => {
@@ -91,7 +92,7 @@ try {
 
       for (const route of ROUTES) {
         await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
-        await page.waitForTimeout(900);
+        await page.waitForTimeout(1800);
         await page.addScriptTag({ content: AXE });
         const run = await page.evaluate(async () => {
           // eslint-disable-next-line no-undef
