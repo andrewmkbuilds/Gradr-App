@@ -18,6 +18,8 @@ import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { SessionTimerRing } from "@/components/interview/SessionTimerRing";
 import { springSmooth, springSnappy, easeOut } from "@/lib/motion/tokens";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
+import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
+
 
 export type Msg = { role: "user" | "assistant"; content: string };
 
@@ -98,7 +100,8 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
-    connectionLost, connectionErrorDetail, onDismissConnectionError,
+    connectionLost, voiceErrorCode, onDismissConnectionError,
+
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
 
