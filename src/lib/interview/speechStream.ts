@@ -12,9 +12,11 @@
  *   pauses: each chunk is fetched while the previous one is still playing.
  * - The transcript only reveals a chunk when its audio actually starts, so the
  *   caption never runs ahead of the voice.
- * - Any chunk that fails after retries degrades to browser speech synthesis
- *   rather than dropping the interviewer's turn.
+ * - There is deliberately NO silent fallback to another voice engine. If
+ *   ElevenLabs fails, the turn stops and the caller surfaces a retryable error,
+ *   so a broken integration can never hide behind a robotic substitute voice.
  */
+
 
 const MAX_CHUNK_CHARS = 220;
 const MIN_CHUNK_CHARS = 12;
