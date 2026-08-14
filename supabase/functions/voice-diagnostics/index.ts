@@ -1,26 +1,55 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  classifyProviderFailure,
+  corsHeaders,
+  DEFAULT_MODEL_ID,
+  DEFAULT_OUTPUT_FORMAT,
+  jsonResponse as json,
+  loadVoiceConfig,
+  providerDetail,
+  recordVoiceEvent,
+  resolveProfile,
+  serviceClient,
+  VOICE_PROFILES,
+} from "../_shared/voiceProvider.ts";
 
 /**
- * Admin-only health probe for the interviewer voice provider.
+ * Admin console for the interviewer voice provider.
  *
- * Reports whether the credential is present and whether the provider account
- * can currently synthesise speech, without ever returning the credential or a
- * raw provider payload to the browser. Detailed provider output is logged
- * server-side only.
+ * Actions
+ *  - status        credential presence, provider account standing, entitlement
+ *                  (character quota) and the most recent failures
+ *  - stream-test   a real streaming synthesis with the *live* configuration:
+ *                  measures time-to-first-byte and total audio bytes and
+ *                  returns the clip so an admin can actually hear it
+ *  - save-config   model / output format / per-persona voice ids
+ *
+ * The credential itself is never returned, and provider prose never crosses
+ * this boundary — only Gradr codes and enumerated provider reasons.
  */
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+async function providerSubscription(apiKey: string) {
+  try {
+    const res = await fetch("https://api.elevenlabs.io/v1/user/subscription", {
+      headers: { "xi-api-key": apiKey },
+    });
+    if (!res.ok) {
+      const raw = await res.text().catch(() => "");
+      return { ok: false, ...classifyProviderFailure(res.status, raw) };
+    }
+    const data = await res.json();
+    return {
+      ok: true,
+      tier: String(data?.tier ?? "unknown"),
+      charactersUsed: Number(data?.character_count ?? 0),
+      characterLimit: Number(data?.character_limit ?? 0),
+      status: String(data?.status ?? "unknown"),
+    };
+  } catch (e) {
+    console.error("[voice-diagnostics] subscription probe threw", String(e));
+    return { ok: false, code: "VOICE_CONNECTION_FAILED", reason: "PROVIDER_NETWORK" };
+  }
 }
 
 serve(async (req) => {
@@ -40,41 +69,177 @@ serve(async (req) => {
   const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
   if (!isAdmin) return json({ error: "Forbidden" }, 403);
 
+  const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+  const action = typeof body.action === "string" ? body.action : "status";
   const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
-  if (!apiKey) {
-    console.error("[voice-diagnostics] credential missing");
-    return json({ credential: "missing", synthesis: "unavailable", code: "VOICE_CONFIGURATION_ERROR" });
+  const config = await loadVoiceConfig();
+
+  // ---- save-config --------------------------------------------------------
+  if (action === "save-config") {
+    const overrides: Record<string, string> = {};
+    const incoming = body.voiceOverrides ?? {};
+    for (const persona of Object.keys(VOICE_PROFILES)) {
+      const value = incoming?.[persona];
+      if (typeof value === "string" && /^[A-Za-z0-9]{8,64}$/.test(value.trim())) {
+        overrides[persona] = value.trim();
+      }
+    }
+    const modelId = typeof body.modelId === "string" && /^[a-z0-9_\-.]{3,64}$/.test(body.modelId)
+      ? body.modelId
+      : DEFAULT_MODEL_ID;
+    const outputFormat = typeof body.outputFormat === "string" && /^[a-z0-9_]{3,32}$/.test(body.outputFormat)
+      ? body.outputFormat
+      : DEFAULT_OUTPUT_FORMAT;
+
+    const { error } = await serviceClient().from("voice_provider_config").upsert({
+      id: true,
+      model_id: modelId,
+      output_format: outputFormat,
+      voice_overrides: overrides,
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) {
+      console.error("[voice-diagnostics] config save failed", error.message);
+      return json({ error: "Could not save voice configuration" }, 500);
+    }
+    console.info("[voice-diagnostics] config saved", { by: user.id, modelId, outputFormat });
+    return json({ saved: true, config: { modelId, outputFormat, voiceOverrides: overrides } });
   }
 
-  // Smallest possible real synthesis: proves credential + account standing.
-  const res = await fetch(
-    "https://api.elevenlabs.io/v1/text-to-speech/nPczCjzI2devNBz1zQrb/stream?output_format=mp3_22050_32",
-    {
-      method: "POST",
-      headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ text: "Voice check.", model_id: "eleven_turbo_v2_5" }),
-    },
-  ).catch((e) => {
-    console.error("[voice-diagnostics] provider request threw", String(e));
-    return null;
-  });
+  // ---- stream-test --------------------------------------------------------
+  if (action === "stream-test") {
+    if (!apiKey) {
+      return json({ ok: false, credential: "missing", code: "VOICE_CONFIGURATION_ERROR", reason: "PROVIDER_CREDENTIAL_MISSING" });
+    }
+    const personaId = typeof body.personaId === "string" ? body.personaId : "hiring-manager";
+    const profile = resolveProfile(personaId, config);
+    const text = typeof body.text === "string" && body.text.trim()
+      ? body.text.trim().slice(0, 240)
+      : "Thanks for making time today. Let's start with a quick introduction.";
 
-  if (!res || !res.ok) {
-    const detail = res ? await res.text().catch(() => "") : "no response";
-    console.error("[voice-diagnostics] provider failure", { status: res?.status ?? 0, detail: detail.slice(0, 500) });
+    const startedAt = Date.now();
+    const res = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${profile.voiceId}/stream` +
+        `?output_format=${config.outputFormat}&optimize_streaming_latency=3`,
+      {
+        method: "POST",
+        headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text,
+          model_id: config.modelId,
+          voice_settings: {
+            stability: profile.stability,
+            similarity_boost: profile.similarityBoost,
+            style: profile.style,
+            use_speaker_boost: true,
+            speed: profile.speed,
+          },
+        }),
+      },
+    ).catch((e) => {
+      console.error("[voice-diagnostics] stream test threw", String(e));
+      return null;
+    });
+
+    if (!res || !res.ok || !res.body) {
+      const raw = res ? await res.text().catch(() => "") : "";
+      console.error("[voice-diagnostics] stream test failed", {
+        status: res?.status ?? 0,
+        detail: providerDetail(raw),
+      });
+      const mapped = classifyProviderFailure(res?.status ?? 0, raw);
+      await recordVoiceEvent({
+        userId: user.id,
+        outcome: "failure",
+        code: mapped.code,
+        reason: mapped.reason,
+        upstreamStatus: res?.status ?? 0,
+        context: "diagnostics",
+      });
+      return json({ ok: false, credential: "present", upstreamStatus: res?.status ?? 0, code: mapped.code, reason: mapped.reason });
+    }
+
+    const reader = res.body.getReader();
+    const parts: Uint8Array[] = [];
+    let bytes = 0;
+    let ttfbMs = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        if (!bytes) ttfbMs = Date.now() - startedAt;
+        bytes += value.byteLength;
+        parts.push(value);
+      }
+    }
+
+    if (!bytes) {
+      await recordVoiceEvent({
+        userId: user.id,
+        outcome: "failure",
+        code: "VOICE_UNAVAILABLE",
+        reason: "PROVIDER_UNKNOWN",
+        context: "diagnostics",
+      });
+      return json({ ok: false, credential: "present", code: "VOICE_UNAVAILABLE", reason: "PROVIDER_UNKNOWN", bytes: 0 });
+    }
+
+    const merged = new Uint8Array(bytes);
+    let offset = 0;
+    for (const p of parts) {
+      merged.set(p, offset);
+      offset += p.byteLength;
+    }
+    let binary = "";
+    for (let i = 0; i < merged.length; i += 0x8000) {
+      binary += String.fromCharCode(...merged.subarray(i, i + 0x8000));
+    }
+
+    await recordVoiceEvent({ userId: user.id, outcome: "ok", context: "diagnostics" });
+    console.info("[voice-diagnostics] stream test ok", { bytes, ttfbMs, personaId });
     return json({
+      ok: true,
       credential: "present",
-      synthesis: "failing",
-      upstreamStatus: res?.status ?? 0,
-      code: (res?.status === 401 || res?.status === 403)
-        ? "VOICE_CONFIGURATION_ERROR"
-        : res?.status === 429
-        ? "VOICE_RATE_LIMITED"
-        : "VOICE_UNAVAILABLE",
+      bytes,
+      ttfbMs,
+      totalMs: Date.now() - startedAt,
+      personaId,
+      voiceId: profile.voiceId,
+      modelId: config.modelId,
+      audioBase64: btoa(binary),
     });
   }
 
-  await res.body?.cancel();
-  console.info("[voice-diagnostics] provider healthy");
-  return json({ credential: "present", synthesis: "ok" });
+  // ---- status -------------------------------------------------------------
+  const { data: recent } = await serviceClient()
+    .from("voice_provider_events")
+    .select("outcome, code, provider_reason, upstream_status, context, created_at")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (!apiKey) {
+    console.error("[voice-diagnostics] credential missing");
+    return json({
+      credential: "missing",
+      synthesis: "unavailable",
+      code: "VOICE_CONFIGURATION_ERROR",
+      reason: "PROVIDER_CREDENTIAL_MISSING",
+      config,
+      personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({ id, defaultVoiceId: p.voiceId })),
+      recent: recent ?? [],
+    });
+  }
+
+  const subscription = await providerSubscription(apiKey);
+  return json({
+    credential: "present",
+    synthesis: subscription.ok ? "ok" : "failing",
+    code: subscription.ok ? null : (subscription as any).code ?? "VOICE_UNAVAILABLE",
+    reason: subscription.ok ? null : (subscription as any).reason ?? "PROVIDER_UNKNOWN",
+    subscription: subscription.ok ? subscription : null,
+    config,
+    personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({ id, defaultVoiceId: p.voiceId })),
+    recent: recent ?? [],
+  });
 });
