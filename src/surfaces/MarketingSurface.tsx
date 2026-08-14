@@ -1,7 +1,7 @@
 import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
-import { CrossLink, SLink } from "@/components/surface/SurfaceLink";
+import { CrossLink, SLink, SurfaceNotFound } from "@/components/surface/SurfaceLink";
 import { SurfaceHome } from "@/components/surface/SurfaceLink";
 import { RouteSkeleton } from "@/components/states/PageSkeletons";
 import {
@@ -339,7 +339,7 @@ export default function MarketingSurface() {
           <Route path="testimonials" element={<Testimonials />} />
           <Route path="demos" element={<Demos />} />
           <Route path="about" element={<About />} />
-          <Route path="*" element={<SurfaceHome />} />
+          <Route path="*" element={<SurfaceNotFound label="the Gradr product site" />} />
         </Routes>
       </Suspense>
     </SurfaceShell>

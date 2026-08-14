@@ -68,3 +68,37 @@ export function SurfaceRedirect({ to }: { to: string }) {
 export function SurfaceHome() {
   return <SurfaceRedirect to="/" />;
 }
+
+/**
+ * In-surface 404. Keeps the visitor on the subdomain they asked for (docs,
+ * news, marketing, affiliates) instead of bouncing them to another host, and
+ * offers a way back into that surface.
+ */
+export function SurfaceNotFound({ label }: { label: string }) {
+  const path = useSurfacePath();
+  return (
+    <div className="page-shell flex min-h-[60vh] flex-col items-center justify-center py-24 text-center">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-mahogany">404</p>
+      <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        This page isn’t here
+      </h1>
+      <p className="mt-3 max-w-md text-sm text-muted-foreground">
+        The link you followed doesn’t match anything in {label}. It may have moved or never existed.
+      </p>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          to={path("/")}
+          className="interactive rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
+        >
+          Back to {label}
+        </Link>
+        <a
+          href={urlFor("home", "/")}
+          className="interactive rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground"
+        >
+          Gradr home
+        </a>
+      </div>
+    </div>
+  );
+}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
-import { CrossLink, SLink } from "@/components/surface/SurfaceLink";
+import { CrossLink, SLink, SurfaceNotFound } from "@/components/surface/SurfaceLink";
 import { SurfaceHome } from "@/components/surface/SurfaceLink";
 import { NEWS, NEWS_BY_SLUG, NEWS_CATEGORIES, type NewsCategory } from "@/content/news";
 import { cn } from "@/lib/utils";
@@ -193,7 +193,7 @@ export default function NewsSurface() {
       <Routes>
         <Route path="" element={<NewsIndex />} />
         <Route path=":slug" element={<NewsArticleRoute />} />
-        <Route path="*" element={<SurfaceHome />} />
+        <Route path="*" element={<SurfaceNotFound label="Gradr News" />} />
       </Routes>
     </SurfaceShell>
   );

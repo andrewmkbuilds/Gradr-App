@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
-import { SLink, useSurfacePath } from "@/components/surface/SurfaceLink";
+import { SLink, useSurfacePath, SurfaceNotFound } from "@/components/surface/SurfaceLink";
 import { SurfaceHome } from "@/components/surface/SurfaceLink";
 import { DOCS, DOCS_BY_SLUG, DOC_CATEGORIES, type DocArticle } from "@/content/docs";
 import { CrossLink } from "@/components/surface/SurfaceLink";
@@ -182,7 +182,7 @@ export default function DocsSurface() {
             </div>
           }
         />
-        <Route path="*" element={<SurfaceHome />} />
+        <Route path="*" element={<SurfaceNotFound label="Gradr Docs" />} />
       </Routes>
     </SurfaceShell>
   );
