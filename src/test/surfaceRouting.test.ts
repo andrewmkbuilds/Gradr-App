@@ -24,6 +24,16 @@ describe("surface routing", () => {
     expect(surfaceFromHost("news.gradr.me")).toBe("news");
     expect(surfaceFromHost("docs.gradr.me")).toBe("docs");
     expect(surfaceFromHost("affiliates.gradr.me")).toBe("affiliates");
+    expect(surfaceFromHost("status.gradr.me")).toBe("status");
+    expect(surfaceFromHost("support.gradr.me")).toBe("support");
+  });
+
+  it("gives status and support their own canonical origins", () => {
+    expect(PRODUCTION_ORIGIN.status).toBe("https://status.gradr.me");
+    expect(PRODUCTION_ORIGIN.support).toBe("https://support.gradr.me");
+    expect(canonicalUrlFor("support", "/contact")).toBe("https://support.gradr.me/contact");
+    expect(satelliteSubdomainsLive("status.gradr.me")).toBe(true);
+    expect(isMultiSurfaceHost("support.gradr.me")).toBe(false);
   });
 
   it("treats a satellite host that actually served the bundle as live", () => {
