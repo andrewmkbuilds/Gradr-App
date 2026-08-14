@@ -16,6 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/app/PageHeader";
+import { typography } from "@/lib/design/typography";
+import { cn } from "@/lib/utils";
 
 type Level = "error" | "warning" | "info";
 interface Alert {
@@ -150,22 +153,19 @@ export default function AdminSeoMonitor() {
   if (!isAdmin) return null;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold text-foreground">
-            <Activity className="h-6 w-6 text-primary" aria-hidden />
-            SEO Monitor
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Search Console performance, indexing and Lighthouse scores for gradr.me — with alerts when rankings or errors change.
-          </p>
-        </div>
-        <Button onClick={() => refresh.mutate()} disabled={refresh.isPending}>
-          {refresh.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-          Run scan
-        </Button>
-      </header>
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<Activity className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="SEO monitor"
+        description="Search Console performance, indexing and Lighthouse scores for gradr.me — with alerts when rankings or errors change."
+        actions={
+          <Button onClick={() => refresh.mutate()} disabled={refresh.isPending}>
+            {refresh.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+            Run scan
+          </Button>
+        }
+      />
 
       {data?.status === "selection_required" && (
         <div className="space-y-2 rounded-xl border border-border bg-card p-4">
@@ -211,12 +211,12 @@ export default function AdminSeoMonitor() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-foreground">Changes since the last scan</h2>
+            <h2 className={cn(typography.h3, "text-foreground")}>Changes since the last scan</h2>
             <AlertList items={snapshot.changes ?? []} empty="Nothing changed since the previous scan." />
           </section>
 
           <section className="space-y-3">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+            <h2 className={cn(typography.h3, "flex items-center gap-2 text-foreground")}>
               <Gauge className="h-5 w-5 text-primary" aria-hidden /> Lighthouse (mobile)
             </h2>
             <div className="grid gap-3 md:grid-cols-2">
@@ -254,12 +254,12 @@ export default function AdminSeoMonitor() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-foreground">Open issues</h2>
+            <h2 className={cn(typography.h3, "text-foreground")}>Open issues</h2>
             <AlertList items={snapshot.alerts ?? []} empty="No indexing, sitemap or performance issues detected." />
           </section>
 
           <section className="space-y-3">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+            <h2 className={cn(typography.h3, "flex items-center gap-2 text-foreground")}>
               <Search className="h-5 w-5 text-primary" aria-hidden /> Top queries
             </h2>
             <div className="overflow-x-auto rounded-xl border border-border">
@@ -296,7 +296,7 @@ export default function AdminSeoMonitor() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-foreground">Scan history</h2>
+            <h2 className={cn(typography.h3, "text-foreground")}>Scan history</h2>
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm">
                 <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
