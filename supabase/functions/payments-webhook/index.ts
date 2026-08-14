@@ -475,10 +475,33 @@ Deno.serve(async (req) => {
 
   const env = (new URL(req.url).searchParams.get("env") || "sandbox") as PaddleEnv;
 
+  // Delivery ledger id, so a handler failure can be retried/reconciled later.
+  let deliveryEventId: string | null = null;
+
   try {
     const event = await verifyWebhook(req, env);
     // deno-lint-ignore no-explicit-any
     const eventUserId = ((event.data as any)?.customData?.userId ?? null) as string | null;
+
+    // deno-lint-ignore no-explicit-any
+    deliveryEventId = ((event as any)?.eventId ?? null) as string | null;
+    if (deliveryEventId) {
+      await db().from("webhook_deliveries").upsert(
+        {
+          provider: "paddle",
+          event_id: deliveryEventId,
+          event_type: String(event.eventType),
+          environment: env,
+          signature_verified: true,
+          state: "processing",
+          payload: event.data as unknown as Record<string, unknown>,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "event_id" },
+      );
+    }
+
+
 
     await logSecurityEvent({
       category: "billing_webhook",
