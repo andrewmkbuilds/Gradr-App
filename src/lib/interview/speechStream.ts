@@ -208,7 +208,12 @@ export class SpeechQueue {
       }
 
       this.opts.onChunkSpoken(item.text);
-      await this.playBlob(result.blob);
+      try {
+        await this.playBlob(result.blob);
+      } catch (error) {
+        this.failure = error instanceof Error ? error.message : "The browser could not play ElevenLabs audio.";
+        break;
+      }
       if (this.stopped) break;
 
 
@@ -232,19 +237,26 @@ export class SpeechQueue {
   }
 
   private playBlob(blob: Blob): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.teardownAudio();
       const url = URL.createObjectURL(blob);
       this.url = url;
       const el = new Audio(url);
       this.audio = el;
-      const done = () => {
+      const finish = () => {
         this.teardownAudio();
         resolve();
       };
-      el.onended = done;
-      el.onerror = done;
-      el.play().catch(done);
+      const fail = (reason: string) => {
+        this.teardownAudio();
+        reject(new Error(reason));
+      };
+      el.onended = finish;
+      el.onerror = () => fail("The browser could not decode the ElevenLabs audio stream.");
+      el.play().catch((error) => {
+        const message = error instanceof Error ? error.message : "Audio playback was blocked.";
+        fail(`ElevenLabs audio playback failed: ${message}`);
+      });
     });
   }
 }
