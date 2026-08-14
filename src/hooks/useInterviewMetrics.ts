@@ -10,7 +10,7 @@ import { trackJourney } from "@/lib/telemetry/journey";
  */
 export interface InterviewMetricsSeed {
   sessionId?: string | null;
-  provider?: "gemini_live" | "fallback";
+  provider?: "elevenlabs" | "gemini_live" | "fallback";
   targetRole?: string | null;
 }
 
@@ -56,7 +56,7 @@ export function useInterviewMetrics() {
     rowId.current = null;
 
     trackJourney("realtime_session_started", {
-      provider: input.provider ?? "gemini_live",
+      provider: input.provider ?? "elevenlabs",
       has_role: Boolean(input.targetRole),
     });
 
@@ -68,7 +68,7 @@ export function useInterviewMetrics() {
       .insert({
         user_id: auth.user.id,
         session_id: input.sessionId ?? null,
-        provider: input.provider ?? "gemini_live",
+        provider: input.provider ?? "elevenlabs",
         target_role: input.targetRole ?? null,
       })
       .select("id")
