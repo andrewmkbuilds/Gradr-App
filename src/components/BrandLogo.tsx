@@ -41,21 +41,21 @@ export function BrandLogo({ size = 32, className, decorative = true, priority = 
 
   return (
     <span
-      className={cn("relative inline-flex shrink-0", className)}
+      className={cn("relative inline-grid shrink-0 place-items-center align-middle", className)}
       style={{ width: size, height: size }}
       data-brand-logo=""
     >
       <img
         {...shared}
         src={BRAND_LOGO_URL}
-        className="block rounded-[22%] object-contain dark:hidden"
+        className="col-start-1 row-start-1 block rounded-[22%] object-contain dark:hidden"
       />
       <img
         {...shared}
         src={BRAND_LOGO_DARK_URL}
         alt=""
         aria-hidden
-        className="hidden rounded-[22%] object-contain dark:block"
+        className="col-start-1 row-start-1 hidden rounded-[22%] object-contain dark:block"
       />
     </span>
   );

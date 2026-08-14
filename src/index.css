@@ -320,6 +320,16 @@
     transition-delay: 0s !important;
   }
 
+  /* Icons inside interactive controls are laid out as blocks so the SVG
+     baseline gap can never push a glyph 1-2px off centre inside its box. */
+  button svg,
+  a svg,
+  [role="button"] svg,
+  [role="tab"] svg,
+  label svg {
+    display: block;
+  }
+
   /* Visible, consistent keyboard focus across both themes. */
   :focus-visible {
     outline: 2px solid hsl(var(--ring));
