@@ -9,7 +9,6 @@
     </mask>
   </defs>
   <rect width="512" height="512" fill="#245F73" mask="url(#light-ring)"/>
-  <rect x="330" y="252" width="138" height="64" fill="#245F73"/>
-  <rect x="258" y="220" width="86" height="64" rx="14" fill="#733E24"/>
-  <rect x="330" y="220" width="14" height="64" fill="#733E24"/>
+  <path d="M 276 252 H 470 V 316 H 276 A 18 18 0 0 1 258 298 V 270 A 18 18 0 0 1 276 252 Z" fill="#245F73"/>
+  <path d="M 276 252 H 346 V 316 H 276 A 18 18 0 0 1 258 298 V 270 A 18 18 0 0 1 276 252 Z" fill="#733E24"/>
 </svg>
