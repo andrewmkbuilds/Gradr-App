@@ -12,6 +12,8 @@
  *  - bounded length, so a crafted link can't stuff the URL bar
  */
 
+import { urlFor } from "@/config/domains";
+
 const MAX_LENGTH = 512;
 
 /** Auth-owned routes are never valid destinations — they'd cause a redirect loop. */
@@ -75,13 +77,14 @@ export function authPath(next: string | null | undefined): string {
 /**
  * Absolute URL used for `emailRedirectTo` and OAuth `redirect_uri`.
  *
- * It always points at `/auth` (a public route) rather than the destination
- * itself: the session has to be established from the URL fragment/code first,
- * and only then does the app forward to `next`.
+ * It always points at `/auth` on the **app surface** (app.gradr.me in
+ * production, the current origin everywhere else) rather than at the
+ * destination itself: the session has to be established from the URL
+ * fragment/code first, and only then does the app forward to `next`.
  */
 export function authCallbackUrl(next: string | null | undefined): string {
   if (typeof window === "undefined") return "/auth";
-  return `${window.location.origin}${authPath(next)}`;
+  return urlFor("app", authPath(next));
 }
 
 /**

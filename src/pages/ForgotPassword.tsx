@@ -7,6 +7,7 @@ import { Mail, ArrowLeft, ArrowRight, CheckCircle, AlertCircle } from "lucide-re
 import { Link, useLocation } from "react-router-dom";
 import { authPath, readNext } from "@/lib/nextRedirect";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
+import { urlFor } from "@/config/domains";
 
 const RESEND_COOLDOWN = 45;
 
@@ -31,9 +32,12 @@ export default function ForgotPassword() {
     setError(null);
     setNotice(null);
     const { error: err } = await supabase.auth.resetPasswordForEmail(address, {
-      redirectTo: `${window.location.origin}/reset-password${
-        nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""
-      }`,
+      // Password recovery always lands on the app surface (app.gradr.me in
+      // production), never on the public marketing host.
+      redirectTo: urlFor(
+        "app",
+        `/reset-password${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""}`,
+      ),
     });
     setLoading(false);
     if (err) {
