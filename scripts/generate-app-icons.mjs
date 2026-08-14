@@ -190,6 +190,11 @@ async function main() {
   const master = join(PUBLIC, "gradr-logo.png");
   if (!existsSync(master)) throw new Error("public/gradr-logo.png (icon master) is missing");
   const logo = `data:image/png;base64,${readFileSync(master).toString("base64")}`;
+  // Soft-white mark, for the opaque Deep Sea / Ocean Teal plates.
+  const logoDark = `data:image/png;base64,${readFileSync(join(PUBLIC, "gradr-logo-dark.png")).toString("base64")}`;
+  // Small-size build: heavier strokes, tighter aperture — used at 64px and below.
+  const compact = `data:image/svg+xml;base64,${Buffer.from(readFileSync(join(PUBLIC, "gradr-symbol-compact.svg"))).toString("base64")}`;
+
 
   mkdirSync(ICON_DIR, { recursive: true });
   mkdirSync(SPLASH_DIR, { recursive: true });
@@ -211,7 +216,7 @@ async function main() {
   };
 
   for (const t of TRANSPARENT_ICONS) {
-    await render(iconHtml(logo, t), {
+    await render(iconHtml(t.size <= 64 ? compact : logo, t), {
       width: t.size,
       height: t.size,
       file: t.file,
@@ -220,16 +225,17 @@ async function main() {
   }
   for (const t of APPLE_ICONS) {
     await render(
-      iconHtml(logo, { size: t.size, pad: 0.12, background: DEEP, radius: 0 }),
+      iconHtml(logoDark, { size: t.size, pad: 0.12, background: DEEP, radius: 0 }),
       { width: t.size, height: t.size, file: t.file, omitBackground: false },
     );
   }
   for (const t of MASKABLE_ICONS) {
     await render(
-      iconHtml(logo, { size: t.size, pad: 0.2, background: TEAL, radius: 0 }),
+      iconHtml(logoDark, { size: t.size, pad: 0.2, background: TEAL, radius: 0 }),
       { width: t.size, height: t.size, file: t.file, omitBackground: false },
     );
   }
+
   for (const t of SPLASH_SCREENS) {
     await render(splashHtml(logo, t), {
       width: t.width,
@@ -251,9 +257,15 @@ function writeManifestModule() {
     ...APPLE_ICONS.map((t) => ({ ...t, group: "apple", width: t.size, height: t.size })),
     ...MASKABLE_ICONS.map((t) => ({ ...t, group: "maskable", width: t.size, height: t.size })),
     ...SPLASH_SCREENS.map((t) => ({ ...t, group: "splash" })),
-    { file: "gradr-logo.png", group: "logo", width: 512, height: 512, label: "Primary logo (light surfaces)" },
-    { file: "gradr-logo-dark.png", group: "logo", width: 512, height: 512, label: "Primary logo (dark surfaces)" },
-    { file: "gradr-logo.svg", group: "logo", width: 0, height: 0, label: "Vector logo (infinite scale)" },
+    { file: "gradr-logo.png", group: "logo", width: 512, height: 512, label: "Primary symbol (light surfaces)" },
+    { file: "gradr-logo-dark.png", group: "logo", width: 512, height: 512, label: "Primary symbol (dark surfaces)" },
+    { file: "gradr-logo.svg", group: "logo", width: 0, height: 0, label: "Vector symbol (infinite scale)" },
+    { file: "gradr-logo-mono.svg", group: "logo", width: 0, height: 0, label: "Monochrome symbol (currentColor)" },
+    { file: "gradr-symbol-compact.svg", group: "logo", width: 0, height: 0, label: "Small-size symbol (16–64px)" },
+    { file: "gradr-lockup.png", group: "logo", width: 1200, height: 320, label: "Symbol + GRADR lockup (light)" },
+    { file: "gradr-lockup-dark.png", group: "logo", width: 1200, height: 320, label: "Symbol + GRADR lockup (dark)" },
+    { file: "email-logo-144.png", group: "logo", width: 144, height: 144, label: "Email header mark" },
+
     { file: "og-image-v2.jpg", group: "social", width: 1200, height: 630, label: "Open Graph / Twitter card" },
     { file: "og/site-gradr.png", group: "social", width: 1200, height: 630, label: "Site social card (source)" },
   ].map((t) => {

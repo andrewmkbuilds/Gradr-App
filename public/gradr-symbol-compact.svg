@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Gradr">
+  <title>Gradr</title>
+  <defs>
+    <mask id="gc-ring" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="#000"/>
+      <path d="M 172 26 H 340 A 146 146 0 0 1 486 172 V 340 A 146 146 0 0 1 340 486 H 172 A 146 146 0 0 1 26 340 V 172 A 146 146 0 0 1 172 26 Z" fill="#fff"/>
+      <path d="M 198 108 H 314 A 76 76 0 0 1 390 184 V 300 A 76 76 0 0 1 314 376 H 198 A 76 76 0 0 1 122 300 V 184 A 76 76 0 0 1 198 108 Z" fill="#000"/>
+      <path d="M 300 150 L 512 150 L 512 256 L 300 256 Z" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="512" height="512" fill="#245F73" mask="url(#gc-ring)"/>
+  <path d="M 270 256 H 486 V 330 H 270 A 20 20 0 0 1 250 310 V 276 A 20 20 0 0 1 270 256 Z" fill="#245F73"/>
+  <path d="M 270 256 H 350 V 330 H 270 A 20 20 0 0 1 250 310 V 276 A 20 20 0 0 1 270 256 Z" fill="#733E24"/>
+</svg>
