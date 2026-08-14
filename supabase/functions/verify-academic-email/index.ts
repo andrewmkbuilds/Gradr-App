@@ -55,7 +55,13 @@ Deno.serve(async (req) => {
 
   const admin = createClient(url, serviceKey)
 
-  let payload: { action?: string; email?: string; code?: string }
+  let payload: {
+    action?: string
+    email?: string
+    code?: string
+    purpose?: string
+    category?: string
+  }
   try {
     payload = await req.json()
   } catch {
@@ -64,8 +70,22 @@ Deno.serve(async (req) => {
 
   const action = payload.action ?? 'status'
   const email = (payload.email ?? '').trim().toLowerCase()
+  // 'eligibility' grants the student discount straight away; 'domain_proof'
+  // only proves mailbox ownership so a reviewed category (educator) can be
+  // submitted to the manual queue.
+  const purpose = payload.purpose === 'domain_proof' ? 'domain_proof' : 'eligibility'
+  const category = payload.category === 'educator' ? 'educator' : 'student'
 
   try {
+    if (action === 'proof_status') {
+      const { data: proven, error: proofError } = await admin.rpc('has_domain_proof', {
+        _user: user.id,
+        _email: email,
+      })
+      if (proofError) throw proofError
+      return json({ ok: true, proven: Boolean(proven), email })
+    }
+
     if (action === 'status' || action === 'start') {
       const { data: status, error: statusError } = await admin.rpc('academic_domain_status', {
         _email: email,
@@ -89,10 +109,9 @@ Deno.serve(async (req) => {
 
       // One academic address can only ever unlock one account.
       const { data: claimed } = await admin
-        .from('academic_email_verifications')
+        .from('verification_email_claims')
         .select('user_id')
         .eq('email', email)
-        .not('consumed_at', 'is', null)
         .maybeSingle()
       if (claimed && claimed.user_id !== user.id) {
         return json({ ok: false, error: 'That school email is already linked to another Gradr account.' }, 409)
@@ -122,6 +141,8 @@ Deno.serve(async (req) => {
         email,
         domain: String(info.domain ?? email.split('@')[1]),
         code_hash: await sha256(`${user.id}:${email}:${code}`),
+        purpose,
+        category,
         expires_at: new Date(Date.now() + CODE_TTL_MINUTES * 60_000).toISOString(),
       })
       if (insertError) throw insertError
@@ -178,10 +199,27 @@ Deno.serve(async (req) => {
         )
       }
 
+      const consumedAt = new Date().toISOString()
       await admin
         .from('academic_email_verifications')
-        .update({ consumed_at: new Date().toISOString() })
+        .update({ consumed_at: consumedAt })
         .eq('id', row.id)
+
+      // Bind the address to this account for good.
+      await admin.from('verification_email_claims').upsert(
+        {
+          email: row.email,
+          user_id: user.id,
+          domain: row.domain,
+          last_verified_at: consumedAt,
+        },
+        { onConflict: 'email' },
+      )
+
+      if (purpose === 'domain_proof') {
+        // Ownership proven — the request itself still goes to a human reviewer.
+        return json({ ok: true, verified: true, proofOnly: true, email: row.email })
+      }
 
       const { data: category } = await admin
         .from('eligibility_categories')

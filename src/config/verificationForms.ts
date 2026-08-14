@@ -298,6 +298,11 @@ export const REQUEST_STATUS_COPY: Record<
     tone: "text-destructive border-destructive/40 bg-destructive/10",
     hint: "We couldn't confirm your eligibility from these details.",
   },
+  appealed: {
+    label: "Appeal under review",
+    tone: "text-primary border-primary/40 bg-primary/10",
+    hint: "We received your extra evidence — a reviewer is taking another look.",
+  },
   needs_more_information: {
     label: "More info needed",
     tone: "text-warning border-warning/40 bg-warning/10",

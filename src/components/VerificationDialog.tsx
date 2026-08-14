@@ -41,10 +41,15 @@ import {
   type VerificationField,
 } from "@/config/verificationForms";
 import {
+  checkDomainProof,
   uploadVerificationDocument,
   useMyVerificationRequests,
   useSubmitVerificationRequest,
+  useVerificationTimeline,
 } from "@/hooks/useVerificationRequests";
+import { VerificationTimeline } from "@/components/verification/VerificationTimeline";
+import { DomainProofStep } from "@/components/verification/DomainProofStep";
+import { AppealForm } from "@/components/verification/AppealForm";
 import { InstitutionRequestDialog } from "@/components/verification/InstitutionRequestDialog";
 import { StudentEmailVerification } from "@/components/verification/StudentEmailVerification";
 import { useAuth } from "@/hooks/useAuth";
@@ -78,6 +83,8 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [institutionOpen, setInstitutionOpen] = useState(false);
   const [institutionEmail, setInstitutionEmail] = useState("");
+  const [proven, setProven] = useState(false);
+  const [checkingProof, setCheckingProof] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -86,6 +93,7 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
       setConfirmed(false);
       setFile(null);
       setSubmittedId(null);
+      setProven(false);
     }
   }, [open, defaultType]);
 
@@ -104,12 +112,38 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
     setValues((v) => ({ ...v, [name]: value }));
 
   const emailValue = values.email ?? "";
+  // Institutional categories must prove mailbox ownership before submitting.
+  const needsDomainProof = form?.key === "educator";
+  const emailLooksValid = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(emailValue.trim());
+
+  useEffect(() => {
+    if (!needsDomainProof || !emailLooksValid) {
+      setProven(false);
+      return;
+    }
+    let cancelled = false;
+    setCheckingProof(true);
+    void checkDomainProof(emailValue.trim()).then((ok) => {
+      if (!cancelled) {
+        setProven(ok);
+        setCheckingProof(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsDomainProof, emailLooksValid, emailValue]);
   const missing = form
     ? form.fields.filter(
         (f) => f.required && f.type !== "file" && !(values[f.name] ?? "").trim(),
       )
     : [];
-  const canSubmit = Boolean(form) && confirmed && missing.length === 0 && !submit.isPending;
+  const canSubmit =
+    Boolean(form) &&
+    confirmed &&
+    missing.length === 0 &&
+    !submit.isPending &&
+    (!needsDomainProof || proven);
 
   const handleSubmit = async () => {
     if (!form || !user) return;
@@ -245,6 +279,8 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
                   Reviewer note: {submittedRequest.reviewer_notes}
                 </p>
               )}
+
+              <RequestActivity request={submittedRequest} />
             </div>
           )}
 
@@ -253,9 +289,12 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
 
             <div className="space-y-4 py-1 max-h-[60vh] overflow-y-auto pr-1">
               {latest && (
-                <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-                  Previous request: <strong>{REQUEST_STATUS_COPY[latest.status]?.label}</strong>
-                  {latest.reviewer_notes ? ` — ${latest.reviewer_notes}` : ""}
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+                    Previous request: <strong>{REQUEST_STATUS_COPY[latest.status]?.label}</strong>
+                    {latest.reviewer_notes ? ` — ${latest.reviewer_notes}` : ""}
+                  </div>
+                  <RequestActivity request={latest} />
                 </div>
               )}
 
@@ -269,6 +308,19 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
                   onFile={setFile}
                 />
               ))}
+
+              {needsDomainProof && (
+                <DomainProofStep
+                  email={emailValue.trim()}
+                  category="educator"
+                  proven={proven}
+                  onProven={() => setProven(true)}
+                  onRequestInstitution={(prefill) => {
+                    setInstitutionEmail(prefill);
+                    setInstitutionOpen(true);
+                  }}
+                />
+              )}
 
               {form.institutionRequest && (
                 <div className="rounded-lg border border-dashed border-border p-3">
@@ -372,6 +424,33 @@ export function VerificationDialog({ open, onOpenChange, defaultType = null }: P
         prefillEmail={institutionEmail}
       />
     </>
+  );
+}
+
+/** Audit trail + appeal entry point for one of the user's own requests. */
+function RequestActivity({
+  request,
+}: {
+  request: { id: string; status: string; appeal_count?: number };
+}) {
+  const { data: timeline = [], isLoading } = useVerificationTimeline(request.id);
+  const canAppeal =
+    request.status === "rejected" || request.status === "needs_more_information";
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-border bg-card/50 p-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Activity on this request
+        </p>
+        {isLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+        ) : (
+          <VerificationTimeline entries={timeline} />
+        )}
+      </div>
+      {canAppeal && <AppealForm requestId={request.id} />}
+    </div>
   );
 }
 

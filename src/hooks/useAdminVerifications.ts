@@ -17,7 +17,12 @@ export interface AdminVerificationRequest {
   supporting_information: string | null;
   document_path: string | null;
   domain_matched: boolean;
-  status: "pending" | "approved" | "rejected" | "needs_more_information";
+  domain_proof_verified: boolean;
+  fraud_score: number;
+  fraud_flags: { code: string; severity: string; label: string }[] | null;
+  appeal_count: number;
+  latest_appeal: string | null;
+  status: "pending" | "approved" | "rejected" | "needs_more_information" | "appealed";
   discount_percentage: number;
   submitted_at: string;
   reviewed_at: string | null;
@@ -48,16 +53,32 @@ export function useReviewVerificationRequest() {
       notes?: string | null;
       discountPercentage?: number | null;
     }) => {
-      const { error } = await supabase.rpc("admin_review_verification_request", {
-        _request_id: input.requestId,
-        _decision: input.decision,
-        _notes: input.notes ?? undefined,
-        _discount_percentage: input.discountPercentage ?? undefined,
+      // Routed through the edge function so the applicant also gets the
+      // branded status email and the audit trail records the notification.
+      const { data, error } = await supabase.functions.invoke("verification-review", {
+        body: {
+          requestId: input.requestId,
+          decision: input.decision,
+          notes: input.notes ?? undefined,
+          discountPercentage:
+            typeof input.discountPercentage === "number" ? input.discountPercentage : undefined,
+        },
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        let details = error.message;
+        try {
+          const ctx = (error as { context?: Response }).context;
+          if (ctx) details = (JSON.parse(await ctx.text()) as { error?: string }).error ?? details;
+        } catch {
+          /* keep the generic message */
+        }
+        throw new Error(details);
+      }
+      return data as { ok: boolean; emailed: boolean };
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["admin-verification-requests"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-verification-timeline"] });
     },
   });
 }
@@ -150,4 +171,31 @@ export async function verificationDocumentUrl(path: string): Promise<string | nu
     .createSignedUrl(path, 300);
   if (error) return null;
   return data?.signedUrl ?? null;
+}
+
+export interface AdminVerificationEvent {
+  id: string;
+  event: string;
+  actor_role: "user" | "admin" | "system";
+  actor_name: string | null;
+  from_status: string | null;
+  to_status: string | null;
+  notes: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+/** Every action taken on a request, including reviewer notes and timestamps. */
+export function useAdminVerificationTimeline(requestId: string | null) {
+  return useQuery({
+    queryKey: ["admin-verification-timeline", requestId],
+    enabled: Boolean(requestId),
+    queryFn: async (): Promise<AdminVerificationEvent[]> => {
+      const { data, error } = await supabase.rpc("admin_verification_timeline", {
+        _request_id: requestId as string,
+      });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as AdminVerificationEvent[];
+    },
+  });
 }

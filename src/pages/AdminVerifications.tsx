@@ -1,5 +1,14 @@
 import { useMemo, useState } from "react";
-import { BadgeCheck, ExternalLink, Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  BadgeCheck,
+  ExternalLink,
+  Loader2,
+  MessageSquare,
+  Plus,
+  ShieldAlert,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -25,6 +34,7 @@ import {
 import { toast } from "sonner";
 import {
   useAdminVerificationRequests,
+  useAdminVerificationTimeline,
   useDeleteInstitution,
   useInstitutions,
   useReviewVerificationRequest,
@@ -34,10 +44,12 @@ import {
 } from "@/hooks/useAdminVerifications";
 import { REQUEST_STATUS_COPY, VERIFICATION_FORMS } from "@/config/verificationForms";
 import { PageHeader } from "@/components/app/PageHeader";
+import { VerificationTimeline } from "@/components/verification/VerificationTimeline";
 
 const QUEUES = [
   { id: "pending", label: "Pending" },
   { id: "needs_more_information", label: "Needs info" },
+  { id: "appealed", label: "Appeals" },
   { id: "approved", label: "Approved" },
   { id: "rejected", label: "Rejected" },
   { id: "all", label: "All" },
@@ -108,6 +120,21 @@ export default function AdminVerifications() {
                         {r.organization ? ` · ${r.organization}` : ""} · {formatDate(r.submitted_at)}
                       </span>
                     </span>
+                    {r.fraud_score >= 40 && (
+                      <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
+                        <ShieldAlert className="h-3 w-3" aria-hidden="true" /> Risk {r.fraud_score}
+                      </Badge>
+                    )}
+                    {r.appeal_count > 0 && (
+                      <Badge variant="outline" className="gap-1">
+                        <MessageSquare className="h-3 w-3" aria-hidden="true" /> Appeal
+                      </Badge>
+                    )}
+                    {r.domain_proof_verified && (
+                      <Badge variant="secondary" className="gap-1">
+                        <ShieldCheck className="h-3 w-3" aria-hidden="true" /> Domain proven
+                      </Badge>
+                    )}
                     {r.domain_matched && (
                       <Badge variant="secondary" className="gap-1">
                         <BadgeCheck className="h-3 w-3" aria-hidden="true" /> Domain match
@@ -204,6 +231,10 @@ function ReviewDialog({
               <Row label="Role / status" value={request.role_or_status} />
               <Row label="Supporting info" value={request.supporting_information} />
               <Row label="Domain match" value={request.domain_matched ? "Yes" : "No"} />
+              <Row
+                label="Domain ownership proven"
+                value={request.domain_proof_verified ? "Yes — one-time code confirmed" : "No"}
+              />
               <Row label="Default discount" value={`${Number(request.discount_percentage)}%`} />
               {request.document_path && (
                 <div className="flex items-center justify-between gap-2">
@@ -216,6 +247,21 @@ function ReviewDialog({
                 </div>
               )}
             </dl>
+
+            <FraudPanel request={request} />
+
+            {request.latest_appeal && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                  Latest appeal ({request.appeal_count})
+                </p>
+                <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
+                  {request.latest_appeal}
+                </p>
+              </div>
+            )}
+
+            <AuditTrail requestId={request.id} />
 
             <div className="grid gap-3">
               <div className="space-y-1.5">
@@ -273,6 +319,64 @@ function ReviewDialog({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FraudPanel({ request }: { request: AdminVerificationRequest }) {
+  const flags = request.fraud_flags ?? [];
+  const tone =
+    request.fraud_score >= 40
+      ? "border-destructive/40 bg-destructive/5"
+      : request.fraud_score > 0
+        ? "border-warning/40 bg-warning/5"
+        : "border-border bg-muted/20";
+
+  return (
+    <div className={`rounded-lg border p-3 ${tone}`}>
+      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
+        Automatic fraud checks · risk {request.fraud_score}/100
+      </p>
+      {flags.length === 0 ? (
+        <p className="mt-1 text-xs text-muted-foreground">No signals recorded.</p>
+      ) : (
+        <ul className="mt-2 space-y-1">
+          {flags.map((f) => (
+            <li key={f.code} className="flex items-start gap-2 text-xs">
+              <Badge
+                variant="outline"
+                className={
+                  f.severity === "high"
+                    ? "border-destructive/40 text-destructive"
+                    : f.severity === "medium"
+                      ? "border-warning/40 text-warning"
+                      : "border-border text-muted-foreground"
+                }
+              >
+                {f.severity}
+              </Badge>
+              <span className="text-muted-foreground">{f.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function AuditTrail({ requestId }: { requestId: string }) {
+  const { data: events = [], isLoading } = useAdminVerificationTimeline(requestId);
+  return (
+    <div className="rounded-lg border border-border bg-card/50 p-3">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Admin audit trail
+      </p>
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+      ) : (
+        <VerificationTimeline entries={events} emptyLabel="No actions recorded yet." />
+      )}
+    </div>
   );
 }
 

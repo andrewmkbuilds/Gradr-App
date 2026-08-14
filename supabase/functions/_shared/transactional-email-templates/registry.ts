@@ -25,6 +25,7 @@ import { template as careerPlan } from './career-plan.tsx'
 import { template as verificationSubmitted } from './verification-submitted.tsx'
 import { template as verificationApproved } from './verification-approved.tsx'
 import { template as verificationRejected } from './verification-rejected.tsx'
+import { template as verificationNeedsInfo } from './verification-needs-info.tsx'
 import { template as studentVerificationCode } from './student-verification-code.tsx'
 
 export interface TemplateEntry {
@@ -68,6 +69,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'verification-submitted': verificationSubmitted,
   'verification-approved': verificationApproved,
   'verification-rejected': verificationRejected,
+  'verification-needs-info': verificationNeedsInfo,
   'student-verification-code': studentVerificationCode,
 }
 
