@@ -159,6 +159,8 @@ function ProtectedRoutes() {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><Dashboard /></AnimatedPage>} />
+          <Route path="/dashboard" element={<AnimatedPage><Dashboard /></AnimatedPage>} />
+          <Route path="/career" element={<Navigate to="/resume" replace />} />
           <Route path="/resume" element={<AnimatedPage><ResumeEngine /></AnimatedPage>} />
           <Route path="/jobs" element={<AnimatedPage><JobsFeed /></AnimatedPage>} />
           <Route path="/match" element={<AnimatedPage><JobMatchingEngine /></AnimatedPage>} />

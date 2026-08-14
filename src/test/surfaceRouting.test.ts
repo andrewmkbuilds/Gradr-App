@@ -12,9 +12,8 @@ import {
  * Production surface routing contract.
  *
  * The authenticated product is canonically served from app.gradr.me; gradr.me
- * is the public site. While hosting still 302s every non-primary domain to the
- * primary one, the app has to stay reachable on the primary host — hence the
- * "prove it by executing there" rule in `satelliteSubdomainsLive`.
+ * is the public site. Hosting must serve those hostnames independently for this
+ * contract to be achievable; an alias redirect happens before this code runs.
  */
 describe("surface routing", () => {
   it("maps each production hostname to its surface", () => {
