@@ -242,7 +242,54 @@ export function FollowUpReminders() {
               })}
             </div>
           </div>
+
+          {trackedForConfig.length > 0 && (
+            <div>
+              <Label className="text-sm">Per-application cadence</Label>
+              <p className="text-xs text-muted-foreground">
+                Override the cadence for a specific application, or mute it entirely. Timing is measured from that
+                application&apos;s last-touch date.
+              </p>
+              <ul className="mt-2 divide-y divide-border/60 rounded-lg border border-border/60">
+                {trackedForConfig.map((job) => {
+                  const muted = job.follow_up_enabled === false;
+                  return (
+                    <li key={job.id} className="flex flex-wrap items-center gap-3 p-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-foreground">{job.title}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {job.company || "Unknown company"} · last touch{" "}
+                          {formatDistanceToNow(lastTouch(job), { addSuffix: true })}
+                          {!muted && ` · nudge after ${cadenceFor(job, settings.followup_days)}d`}
+                        </p>
+                      </div>
+                      <Select
+                        value={String(job.follow_up_days ?? 0)}
+                        onValueChange={(v) => saveJobConfig(job.id, { follow_up_days: Number(v) })}
+                      >
+                        <SelectTrigger className="h-9 w-[9.5rem]" aria-label={`Reminder cadence for ${job.title}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">Default ({settings.followup_days}d)</SelectItem>
+                          {CADENCES.map((d) => (
+                            <SelectItem key={d} value={String(d)}>{d} days</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Switch
+                        checked={!muted}
+                        aria-label={`Follow-up reminders for ${job.title}`}
+                        onCheckedChange={(v) => saveJobConfig(job.id, { follow_up_enabled: v })}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
+
       )}
 
       {loading ? (
