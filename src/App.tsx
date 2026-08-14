@@ -155,6 +155,10 @@ function ProtectedRoutes() {
          <Route path="/admin/qa-checklist" element={<RequireAdmin><AnimatedPage><AdminQaChecklist /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/motion-playground" element={<RequireAdmin><AnimatedPage><MotionPlayground /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/oauth-forensics" element={<RequireAdmin><AnimatedPage><AdminOAuthForensics /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/api-health" element={<RequireAdmin><AnimatedPage><AdminApiHealth /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/webhook-logs" element={<RequireAdmin><AnimatedPage><AdminWebhookLogs /></AnimatedPage></RequireAdmin>} />
+         <Route path="/admin/csp-reports" element={<RequireAdmin><AnimatedPage><AdminCspReports /></AnimatedPage></RequireAdmin>} />
+
          <Route path="/admin/security-log" element={<RequireAdmin><AnimatedPage><AdminSecurityLog /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/seo-monitor" element={<RequireAdmin><AnimatedPage><AdminSeoMonitor /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/nav-analytics" element={<RequireAdmin><AnimatedPage><AdminNavAnalytics /></AnimatedPage></RequireAdmin>} />
