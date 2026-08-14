@@ -12,8 +12,7 @@ import { InterviewReportView, type InterviewReport } from "@/components/intervie
 import { PracticePlanView, type PracticePlan } from "@/components/interview/PracticePlanView";
 import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
-import { usePremiumVoice } from "@/hooks/usePremiumVoice";
-import { useRealtimeInterview } from "@/hooks/useRealtimeInterview";
+import { useInterviewVoice } from "@/hooks/useInterviewVoice";
 import { useInterviewMetrics } from "@/hooks/useInterviewMetrics";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { PreflightCheck } from "@/components/interview/PreflightCheck";
@@ -24,18 +23,26 @@ import { VoiceUsageMeter } from "@/components/interview/VoiceUsageMeter";
 import { SessionDebrief } from "@/components/interview/SessionDebrief";
 import type { InterviewerState } from "@/components/interview/InterviewerOrb";
 import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
+import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
 
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 import type { Json } from "@/integrations/supabase/types";
 import { trackJourney } from "@/lib/telemetry/journey";
 
-
-
 type Msg = { role: "user" | "assistant"; content: string };
-type Engine = "realtime" | "fallback";
 
+interface SessionLimits {
+  tier: string;
+  studioVoice: boolean;
+  sessionsPerMonth: number | null;
+  sessionsRemaining: number | null;
+  maxSessionMinutes: number;
+}
 
 const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
+
+/** How long the candidate can go quiet before their answer is submitted. */
+const ANSWER_SILENCE_MS = 1900;
 
 function InterviewEngineInner() {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -46,9 +53,12 @@ function InterviewEngineInner() {
   const [stage, setStage] = useState<"setup" | "preflight">("setup");
   const [sessionCtx, setSessionCtx] = useState<SessionContext | null>(null);
   const [voiceMode, setVoiceMode] = useState(true);
-  const [engine, setEngine] = useState<Engine>("fallback");
-  const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
+  const [limits, setLimits] = useState<SessionLimits | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [streamFailed, setStreamFailed] = useState(false);
+  const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
+  /** The interviewer's current turn, revealed only as fast as it is spoken. */
+  const [spoken, setSpoken] = useState("");
 
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [buildingReport, setBuildingReport] = useState(false);
@@ -56,8 +66,6 @@ function InterviewEngineInner() {
   const [plan, setPlan] = useState<PracticePlan | null>(null);
   const [planLoading, setPlanLoading] = useState(false);
 
-  // Streamed 7-day plan: real milestones from the edge function, plus a
-  // cancel/retry pair instead of an indeterminate spinner.
   const planStream = useAiStream<{ plan: PracticePlan }>({
     fn: "practice-plan",
     initialLabel: "Reading your scorecard",
@@ -66,73 +74,97 @@ function InterviewEngineInner() {
   const [durationSec, setDurationSec] = useState(0);
   const startedAt = useRef<number>(0);
   const integrityRef = useRef<IntegritySnapshot | null>(null);
-  
+
   const messagesRef = useRef<Msg[]>([]);
-  const fallbackHandled = useRef(false);
+  const spokenRef = useRef("");
+  const voiceModeRef = useRef(voiceMode);
+  const handsFreeRef = useRef(true);
+  const silenceTimer = useRef<number | null>(null);
   const navigate = useNavigate();
 
   const voice = useVoiceSession();
-  const { speak, stopSpeaking, ttsSupported } = voice;
-  const premium = usePremiumVoice();
-
-  messagesRef.current = messages;
-
-  const appendTurn = useCallback((turn: Msg) => {
-    setMessages((prev) => {
-      const last = prev[prev.length - 1];
-      // Realtime transcripts can arrive as a continuation of the same speaker.
-      if (last && last.role === turn.role && turn.content.startsWith(last.content)) {
-        return prev.map((m, i) => (i === prev.length - 1 ? turn : m));
-      }
-      return [...prev, turn];
-    });
-  }, []);
-
+  const { stopSpeaking } = voice;
   const metrics = useInterviewMetrics();
 
-  /** Switches from Gemini Live to the text coach + premium voice, keeping the transcript. */
-  const degradeToFallback = useCallback((reason: string) => {
-    if (fallbackHandled.current) return;
-    fallbackHandled.current = true;
-    metrics.markDropout(reason);
-    metrics.markFallback(reason);
-    setEngine("fallback");
-    setConnecting(false);
-    toast.info(`${reason} Continuing with standard voice — your transcript is preserved.`);
-  }, [metrics]);
+  messagesRef.current = messages;
+  voiceModeRef.current = voiceMode;
 
-  const realtime = useRealtimeInterview({
-    onTurn: (turn) => {
-      if (turn.role === "user") metrics.markUserTurnStart();
-      else metrics.markModelResponse();
-      appendTurn(turn);
+  const personaId = sessionCtx?.personaId ?? "hiring-manager";
+  const profile = voiceProfileFor(personaId);
+
+  const submitRef = useRef<(text: string) => void>(() => {});
+  const listenRef = useRef<() => void>(() => {});
+
+  // ---- Interviewer voice ---------------------------------------------------
+  const interviewer = useInterviewVoice({
+    personaId,
+    enabled: voiceMode,
+    onSpokenChunk: (text) => {
+      spokenRef.current = spokenRef.current ? `${spokenRef.current} ${text}` : text;
+      setSpoken(spokenRef.current);
     },
-    onFallback: degradeToFallback,
+    onTurnComplete: () => {
+      const finalText = spokenRef.current.trim();
+      spokenRef.current = "";
+      setSpoken("");
+      if (finalText) {
+        setMessages((prev) => [...prev, { role: "assistant", content: finalText }]);
+        metrics.markModelResponse();
+      }
+      // Natural hand-over: a short beat, then the interviewer starts listening.
+      if (handsFreeRef.current && voiceModeRef.current && voice.supported) {
+        window.setTimeout(() => listenRef.current(), 420);
+      }
+    },
   });
 
+  const interviewerRef = useRef(interviewer);
+  interviewerRef.current = interviewer;
 
+  // ---- Turn-taking: submit once the candidate has clearly stopped ----------
+  const clearSilenceTimer = useCallback(() => {
+    if (silenceTimer.current) {
+      window.clearTimeout(silenceTimer.current);
+      silenceTimer.current = null;
+    }
+  }, []);
 
+  const startListening = useCallback(() => {
+    if (!voice.supported || voice.listening) return;
+    interviewerRef.current.stop();
+    metrics.markUserTurnStart();
+    voice.startListening();
+  }, [metrics, voice]);
+  listenRef.current = startListening;
 
+  useEffect(() => {
+    if (!voice.listening || !voice.transcript.trim()) return;
+    clearSilenceTimer();
+    silenceTimer.current = window.setTimeout(() => {
+      const finalText = voice.stopListening();
+      if (finalText.trim()) submitRef.current(finalText);
+    }, ANSWER_SILENCE_MS);
+    return clearSilenceTimer;
+  }, [voice.transcript, voice.listening, voice.stopListening, clearSilenceTimer]);
+
+  useEffect(() => () => clearSilenceTimer(), [clearSilenceTimer]);
 
   const handleSnapshot = useCallback((s: IntegritySnapshot) => {
     integrityRef.current = s;
   }, []);
 
-  const speakReply = useCallback(
-    (text: string) => {
-      if (!voiceMode || !text) return;
-      if (realtime.limits?.premiumVoiceFallback) void premium.speak(text);
-      else if (ttsSupported) speak(text);
-    },
-    [premium, realtime.limits, speak, ttsSupported, voiceMode],
-  );
-
+  // ---- Reasoning stream ----------------------------------------------------
   const streamChat = async (allMessages: Msg[]) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
       toast.error("Please sign in to use the interview coach");
       return;
     }
+
+    spokenRef.current = "";
+    setSpoken("");
+    interviewerRef.current.beginTurn();
+
     const resp = await fetch(INTERVIEW_URL, {
       method: "POST",
       headers: {
@@ -146,7 +178,6 @@ function InterviewEngineInner() {
         targetRole,
         directive: sessionCtx ? buildSessionDirective(sessionCtx) : undefined,
       }),
-
     });
 
     if (resp.status === 401) { handleAiFunctionError({ status: 401 }, null); return; }
@@ -161,7 +192,6 @@ function InterviewEngineInner() {
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-    let assistantText = "";
 
     while (true) {
       const { done, value } = await reader.read();
@@ -179,173 +209,136 @@ function InterviewEngineInner() {
         try {
           const parsed = JSON.parse(json);
           const content = parsed.choices?.[0]?.delta?.content;
-          if (content) {
-            assistantText += content;
-            setMessages(prev => {
-              const last = prev[prev.length - 1];
-              if (last?.role === "assistant") {
-                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantText } : m);
-              }
-              return [...prev, { role: "assistant", content: assistantText }];
-            });
-          }
+          // Speech and captions both flow from here — nothing is revealed early.
+          if (content) interviewerRef.current.pushDelta(content);
         } catch { /* partial JSON */ }
       }
     }
 
-    if (assistantText) speakReply(assistantText);
+    interviewerRef.current.endTurn();
   };
 
-  const startInterview = async (kickoff?: string) => {
-    setStarted(true);
-    setEngine("fallback");
-    setReport(null);
-    setPlan(null);
-    setSessionId(null);
-    setMessages([]);
-    startedAt.current = Date.now();
-    trackJourney("interview_started", { engine: "fallback", has_role: Boolean(targetRole) });
-
+  const runTurn = async (nextMessages: Msg[]) => {
     setIsLoading(true);
+    setStreamFailed(false);
     try {
-      await streamChat([
-        {
-          role: "user",
-          content:
-            kickoff ??
-            "Start the mock interview. Introduce yourself and ask the first question.",
-        },
-      ]);
+      await streamChat(nextMessages);
     } catch (e: any) {
-      toast.error(e.message || "Failed to start interview");
+      setStreamFailed(true);
+      setConnectionErrorDismissed(false);
+      interviewerRef.current.stop();
+      toast.error(e?.message || "The interviewer lost connection.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  /** Opens the low-latency Gemini Live session, falling back to the text coach on any failure. */
-  const startRealtime = async (ctx: SessionContext) => {
-    fallbackHandled.current = false;
+  /** Reads plan limits so the studio can gate length, personas and voice. */
+  const loadLimits = async (ctx: SessionContext) => {
+    const { data, error } = await supabase.functions.invoke("interview-session", {
+      body: {
+        environment: getPaddleEnvironment(),
+        personaId: ctx.personaId,
+        difficultyId: ctx.difficultyId,
+      },
+    });
+    if (error) {
+      let payload: any = null;
+      try { payload = await (error as any)?.context?.json?.(); } catch { /* not json */ }
+      if (payload?.limits) {
+        setLimits({ ...payload.limits, sessionsRemaining: null });
+      }
+      return payload?.reason ? String(payload.reason) : null;
+    }
+    if (data?.limits) setLimits({ ...data.limits, sessionsRemaining: null });
+    return null;
+  };
+
+  const startSession = async (ctx: SessionContext, kickoff?: string) => {
     setStarted(true);
     setReport(null);
     setPlan(null);
     setSessionId(null);
     setMessages([]);
+    setSpoken("");
+    spokenRef.current = "";
     startedAt.current = Date.now();
-    trackJourney("interview_started", { engine: "realtime", has_role: Boolean(targetRole) });
-    void metrics.begin({ provider: "gemini_live", targetRole: ctx.targetRole ?? null });
-
     setConnecting(true);
 
-    const result = await realtime.start({
-      directive: buildSessionDirective(ctx),
-      personaId: ctx.personaId,
-      difficultyId: ctx.difficultyId,
-    });
+    const blocked = await loadLimits(ctx);
     setConnecting(false);
+    if (blocked) toast.info(blocked);
 
-    if (result.ok) {
-      fallbackHandled.current = false;
-      setEngine("realtime");
-      return;
-    }
-    // Entitlement blocks are informational; everything else silently degrades.
-    if (result.code === "realtime_not_entitled" || result.code === "quota_exceeded") {
-      trackJourney("plan_limit_reached", { feature: "interview_realtime", code: result.code });
-      toast.info(result.reason);
-    }
-    metrics.markFallback(result.code ?? "start_failed");
-    setEngine("fallback");
-    await startInterview();
+    trackJourney("interview_started", { engine: "elevenlabs", has_role: Boolean(ctx.targetRole) });
+    void metrics.begin({ provider: "elevenlabs", targetRole: ctx.targetRole ?? null });
+
+    await runTurn([
+      {
+        role: "user",
+        content:
+          kickoff ??
+          "Start the interview now. Introduce yourself in one short line, then ask your first question.",
+      },
+    ]);
   };
 
-
-  /** Reconnects realtime after a drop, replaying the transcript so context survives. */
-  const retryRealtime = async () => {
-    if (!sessionCtx) return;
-    fallbackHandled.current = false;
-    setConnecting(true);
-    const result = await realtime.start({
-      directive: buildSessionDirective(sessionCtx),
-      personaId: sessionCtx.personaId,
-      difficultyId: sessionCtx.difficultyId,
-      resumeTranscript: messagesRef.current,
-    });
-    setConnecting(false);
-    if (result.ok) {
-      setEngine("realtime");
-      metrics.markReconnect();
-      toast.success("Realtime voice reconnected — picking up where you left off.");
-    } else {
-      toast.error(result.reason);
-    }
-  };
-
-
-  /** Replays the same role question set with the report's next steps applied as coaching focus. */
   const rerunWithImprovements = () => {
-    if (!report) return;
+    if (!report || !sessionCtx) return;
     const questions = messages
       .filter((m) => m.role === "assistant")
       .map((m) => m.content.replace(/\s+/g, " ").trim())
       .slice(0, 12);
     const focus = [...(report.improvements ?? []), ...(report.nextSteps ?? [])].slice(0, 8);
     const kickoff = [
-      `Re-run the same mock interview for the role: ${targetRole || "the same role"}.`,
-      "Ask the SAME question set, in the same order, as this previous session:",
+      `Re-run the same interview for the role: ${targetRole || "the same role"}.`,
+      "Cover the SAME topics, in the same order, as this previous session:",
       questions.map((q, i) => `${i + 1}. ${q}`).join("\n"),
       "",
       "The candidate is retrying to apply this coaching feedback:",
       focus.map((f) => `- ${f}`).join("\n"),
       "",
-      "Before each question, add one short reminder (max 15 words) of the improvement to apply. Then ask the question. Start now with your introduction and the first question.",
+      "Start now with a one-line reintroduction and your first question.",
     ].join("\n");
     setDurationSec(0);
-    realtime.stop();
+    interviewer.stop();
     toast.success("Re-running the same question set with your improvements applied.");
-    void startInterview(kickoff);
+    void startSession(sessionCtx, kickoff);
   };
 
-  const submitAnswer = async (text: string) => {
-    const answer = text.trim();
-    if (!answer || isLoading) return;
+  const submitAnswer = useCallback(
+    async (text: string) => {
+      const answer = text.trim();
+      if (!answer || isLoading) return;
 
-    if (engine === "realtime" && realtime.isLive) {
-      appendTurn({ role: "user", content: answer });
-      realtime.sendText(answer);
-      setInput("");
-      return;
-    }
-
-    stopSpeaking();
-    premium.stop();
-    const newMessages: Msg[] = [...messages, { role: "user", content: answer }];
-    setMessages(newMessages);
-    setInput("");
-    voice.setTranscript("");
-    setIsLoading(true);
-    try {
-      await streamChat(newMessages);
-    } catch (e: any) {
-      toast.error(e.message || "Failed to get response");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const toggleMic = () => {
-    if (engine === "realtime") {
-      realtime.setMuted(!realtime.muted);
-      return;
-    }
-    if (voice.listening) {
-      const finalText = voice.stopListening();
-      void submitAnswer(finalText);
-    } else {
+      clearSilenceTimer();
+      interviewerRef.current.stop();
       stopSpeaking();
-      premium.stop();
-      voice.startListening();
+
+      const nextMessages: Msg[] = [...messagesRef.current, { role: "user", content: answer }];
+      setMessages(nextMessages);
+      setInput("");
+      voice.setTranscript("");
+      await runTurn(nextMessages);
+    },
+    // runTurn/streamChat read the latest state through refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [clearSilenceTimer, isLoading, stopSpeaking, voice.setTranscript],
+  );
+  submitRef.current = (text: string) => void submitAnswer(text);
+
+  /** Mic button: barge-in + push-to-talk on top of the hands-free loop. */
+  const toggleMic = () => {
+    if (voice.listening) {
+      handsFreeRef.current = false;
+      clearSilenceTimer();
+      const finalText = voice.stopListening();
+      if (finalText.trim()) void submitAnswer(finalText);
+      return;
     }
+    handsFreeRef.current = true;
+    interviewer.stop();
+    stopSpeaking();
+    startListening();
   };
 
   const endAndScore = async () => {
@@ -353,9 +346,10 @@ function InterviewEngineInner() {
       toast.info("Answer at least one question before ending the session.");
       return;
     }
+    handsFreeRef.current = false;
+    clearSilenceTimer();
+    interviewer.stop();
     stopSpeaking();
-    premium.stop();
-    realtime.stop();
     if (voice.listening) voice.stopListening();
     setBuildingReport(true);
     const elapsed = Math.round((Date.now() - startedAt.current) / 1000);
@@ -374,7 +368,7 @@ function InterviewEngineInner() {
       setReport(newReport);
       setDurationSec(elapsed);
       trackJourney("interview_completed", {
-        engine,
+        engine: "elevenlabs",
         duration_sec: elapsed,
         turns: messages.length,
       });
@@ -402,7 +396,6 @@ function InterviewEngineInner() {
         if (saved?.id) {
           setSessionId(saved.id);
           void metrics.linkSession(saved.id);
-          // Follow-up nudge with the scorecard + practice plan.
           void supabase.functions.invoke("send-notification", {
             body: {
               template: "interview_followup",
@@ -412,7 +405,6 @@ function InterviewEngineInner() {
           });
         }
       }
-
     } catch {
       toast.error("Couldn't generate your scorecard. Please try again.");
     } finally {
@@ -425,7 +417,6 @@ function InterviewEngineInner() {
     setPlanLoading(true);
     try {
       const streamed = await planStream.start({ report, targetRole });
-      // Canceled or failed — the stream surface shows why and offers a retry.
       if (!streamed?.plan) return;
 
       const newPlan = streamed.plan;
@@ -459,22 +450,23 @@ function InterviewEngineInner() {
   };
 
   const resetInterview = () => {
+    handsFreeRef.current = true;
+    clearSilenceTimer();
+    interviewer.stop();
     stopSpeaking();
-    premium.stop();
-    realtime.stop();
     if (voice.listening) voice.stopListening();
     setMessages([]);
+    setSpoken("");
+    spokenRef.current = "";
     setStarted(false);
     setStage("setup");
-    setEngine("fallback");
-
     setInput("");
     setReport(null);
     setPlan(null);
     setSessionId(null);
+    setStreamFailed(false);
     integrityRef.current = null;
   };
-
 
   if (report) {
     return (
@@ -514,14 +506,13 @@ function InterviewEngineInner() {
     );
   }
 
-
   if (!started) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
           <h1 className="type-h1 text-foreground tracking-tight">AI Mock Interview</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Realtime voice interview with live presence coaching and a scored report at the end
+            A live, spoken interview with a studio-voiced interviewer, presence coaching and a scored report at the end
           </p>
         </div>
         <CreditsBalance only="interview" compact />
@@ -539,7 +530,7 @@ function InterviewEngineInner() {
         ) : (
           <PreflightCheck
             onCancel={() => setStage("setup")}
-            onReady={() => (sessionCtx ? void startRealtime(sessionCtx) : void startInterview())}
+            onReady={() => sessionCtx && void startSession(sessionCtx)}
           />
         )}
 
@@ -551,7 +542,6 @@ function InterviewEngineInner() {
           />
         )}
 
-
         {!voice.supported && (
           <p className="text-xs text-muted-foreground">
             Speech input isn't supported in this browser — you can still type your answers.
@@ -561,65 +551,66 @@ function InterviewEngineInner() {
     );
   }
 
-
-  const liveRealtime = engine === "realtime" && realtime.isLive;
-  // Realtime streaming dropped mid-session: surface a retry overlay unless dismissed.
-  const connectionLost =
-    engine === "realtime" && !realtime.isLive && !connecting && !connectionErrorDismissed;
-
   const interviewerState: InterviewerState = connecting
     ? "connecting"
-    : realtime.speaking || premium.speaking || voice.speaking
+    : interviewer.speaking
       ? "speaking"
       : isLoading
         ? "thinking"
-        : liveRealtime && !realtime.muted
+        : voice.listening
           ? "listening"
-          : voice.listening
-            ? "listening"
-            : "idle";
+          : "idle";
 
-  const micMuted = liveRealtime ? realtime.muted : !voice.listening;
-  const micLabel = liveRealtime
-    ? realtime.muted
-      ? "Unmute your microphone"
-      : "Mute your microphone"
-    : voice.listening
-      ? "Stop recording and submit your answer"
-      : "Start recording your answer";
+  const micLabel = voice.listening
+    ? "Stop recording and send your answer"
+    : "Start answering";
 
   return (
     <InterviewStudio
       targetRole={targetRole}
       messages={messages}
-      partialUser={realtime.partialUser || (voice.listening ? voice.transcript : "")}
-      partialModel={realtime.partialModel}
+      partialUser={voice.listening ? voice.transcript : ""}
+      partialModel={spoken}
       interviewerState={interviewerState}
-      realtime={liveRealtime}
+      realtime={voiceMode && Boolean(limits?.studioVoice) && !interviewer.degraded}
       connecting={connecting}
-      canReconnect={!liveRealtime && !!realtime.limits?.realtimeVoice}
-      micMuted={micMuted}
+      canReconnect={streamFailed}
+      micMuted={!voice.listening}
       micLabel={micLabel}
       voiceOn={voiceMode}
-      thinking={isLoading && messages[messages.length - 1]?.role !== "assistant"}
+      thinking={isLoading && !interviewer.speaking}
       ending={buildingReport}
       input={input}
-      limits={realtime.limits}
+      limits={
+        limits
+          ? {
+              tier: limits.tier,
+              sessionsPerMonth: limits.sessionsPerMonth,
+              sessionsRemaining: limits.sessionsRemaining,
+              maxSessionMinutes: limits.maxSessionMinutes,
+            }
+          : null
+      }
       startedAt={startedAt.current}
-      connectionLost={connectionLost}
+      connectionLost={streamFailed && !connectionErrorDismissed}
       onDismissConnectionError={() => setConnectionErrorDismissed(true)}
       onInputChange={setInput}
       onSubmit={() => void submitAnswer(input)}
       onToggleMic={toggleMic}
       onToggleVoice={() => {
+        interviewer.stop();
         stopSpeaking();
-        premium.stop();
         setVoiceMode((v) => !v);
       }}
-      onInterrupt={() => realtime.interrupt()}
+      onInterrupt={() => {
+        interviewer.stop();
+        metrics.markInterruption();
+        startListening();
+      }}
       onReconnect={() => {
         setConnectionErrorDismissed(false);
-        void retryRealtime();
+        setStreamFailed(false);
+        void runTurn(messagesRef.current);
       }}
       onEnd={() => void endAndScore()}
       onReset={resetInterview}
@@ -627,7 +618,6 @@ function InterviewEngineInner() {
     />
   );
 }
-
 
 export default function InterviewEngine() {
   return (
