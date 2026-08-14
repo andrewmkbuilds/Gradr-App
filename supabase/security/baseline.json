@@ -219,7 +219,7 @@
       "admin_mark_payout_paid",
       "admin_publish_legal_document",
       "admin_review_verification",
-      "admin_review_verification_request",
+
       "admin_set_commission_status",
       "admin_verification_requests",
       "admin_verification_timeline",
