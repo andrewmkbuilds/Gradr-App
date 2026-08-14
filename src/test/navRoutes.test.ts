@@ -21,11 +21,16 @@ function routeExists(path: string) {
   });
 }
 
+// Cross-surface items (docs, news, marketing, affiliates) are resolved through
+// `urlFor(surface, url)`, so their `url` is relative to *that* surface's route
+// tree and never appears as a <Route> in the app surface.
+const inSurface = <T extends { surface?: string }>(items: T[]) => items.filter((i) => !i.surface);
+
 const allLinks = [
   { title: dashboardItem.title, url: dashboardItem.url, group: "root" },
   ...navGroups.flatMap((g) => [
     { title: `${g.title} (group header)`, url: g.url, group: g.id },
-    ...g.items.map((i) => ({ title: i.title, url: i.url, group: g.id })),
+    ...inSurface(g.items).map((i) => ({ title: i.title, url: i.url, group: g.id })),
   ]),
 ];
 
@@ -36,10 +41,11 @@ describe("navigation routes", () => {
 
   it("has no duplicate destinations within a group", () => {
     for (const group of navGroups) {
-      const urls = group.items.map((i) => i.url);
+      const urls = group.items.map((i) => `${i.surface ?? "app"}${i.url}`);
       expect(new Set(urls).size, `${group.id} has duplicate links`).toBe(urls.length);
     }
   });
+
 
   it("marks admin links adminOnly so they are filtered for regular users", () => {
     for (const group of navGroups) {

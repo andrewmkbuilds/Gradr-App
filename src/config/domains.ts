@@ -80,13 +80,27 @@ export function isProduction(host: string = currentHost()): boolean {
 }
 
 /**
- * True when one hostname has to serve every surface (dev + preview).
+ * Whether the satellite subdomains (app/marketing/news/docs/affiliates) are
+ * actually *served* by hosting rather than redirected to the primary domain.
+ *
+ * Lovable serves one primary custom domain and 302s every other connected
+ * domain to it. Until each subdomain is served independently, production has
+ * to route surfaces by path on the primary host — otherwise cross-surface
+ * links bounce (gradr.me/docs → docs.gradr.me → gradr.me) in a loop.
+ * Flip this to `true` once the subdomains stop redirecting.
+ */
+export const SATELLITE_SUBDOMAINS_LIVE = false;
+
+/**
+ * True when one hostname has to serve every surface (dev + preview, and
+ * production while the subdomains still redirect to the primary domain).
  * In that mode surfaces live behind path prefixes and cross-surface links stay
  * on the same origin, so previews never bounce to production.
  */
 export function isMultiSurfaceHost(host: string = currentHost()): boolean {
-  return deployEnv(host) !== "production";
+  return deployEnv(host) !== "production" || !SATELLITE_SUBDOMAINS_LIVE;
 }
+
 
 /** The `www.` host is a pure redirect target — never a surface of its own. */
 export function isWwwHost(host: string = currentHost()): boolean {
@@ -139,13 +153,15 @@ export function surfaceBase(surface: Surface, host: string = currentHost()): str
 
 /**
  * Origin a surface is served from on the current host.
- * Production returns the real subdomain; dev/preview return the current origin.
+ * Returns the real subdomain only when hosting actually serves it; otherwise
+ * (dev, preview, or production-with-redirecting-subdomains) the current origin.
  */
 export function surfaceOrigin(surface: Surface, host: string = currentHost()): string {
-  if (isProduction(host)) return PRODUCTION_ORIGIN[surface];
+  if (!isMultiSurfaceHost(host)) return PRODUCTION_ORIGIN[surface];
   if (typeof window === "undefined") return PRODUCTION_ORIGIN[surface];
   return window.location.origin;
 }
+
 
 /**
  * Absolute URL for a path on another surface.
