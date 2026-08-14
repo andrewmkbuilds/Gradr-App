@@ -164,6 +164,10 @@ const Sidebar = React.forwardRef<
           }
           side={side}
         >
+          {/* Radix requires an accessible name + description on every dialog;
+              the drawer is purely navigational, so both are screen-reader only. */}
+          <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+          <SheetDescription className="sr-only">Browse Gradr sections and account settings.</SheetDescription>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>
