@@ -352,6 +352,12 @@ export default function ResumeEngine() {
                 </span>
               </label>
             </Magnetic>
+
+            {/* Nothing scored yet — let the user feel how the scorecard reacts
+                before they upload anything. Deferred so the dropzone paints first. */}
+            <Progressive minHeight={360} className="mt-5">
+              <ResumeAnalysisDemo />
+            </Progressive>
           </motion.div>
         ) : uploading ? (
           <motion.div key="working" {...stagger(0)} exit={{ opacity: 0 }}>
