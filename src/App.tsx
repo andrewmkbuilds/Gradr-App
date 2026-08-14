@@ -15,6 +15,8 @@ import { CANONICAL_ALIASES } from "@/lib/seo/canonical";
 import { CookieConsent } from "@/components/CookieConsent";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { PublicShell } from "@/components/PublicShell";
+import { RouteSkeleton } from "@/components/states/PageSkeletons";
+
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { AnimatePresence } from "motion/react";
 import { captureReferralFromUrl } from "@/lib/affiliateTracking";
