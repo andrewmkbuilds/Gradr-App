@@ -103,8 +103,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground md:hidden"
             >
-              {menuOpen ? <Menu className="h-4 w-4" /> : <X className="hidden h-4 w-4" />}
-              {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {menuOpen ? <X className="h-4 w-4" aria-hidden="true" /> : <Menu className="h-4 w-4" aria-hidden="true" />}
             </button>
           </div>
         </div>

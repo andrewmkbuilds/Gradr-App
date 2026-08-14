@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { downloadCsv } from "@/lib/exportFile";
 import { format, formatDistanceToNow } from "date-fns";
+import { PageHeader } from "@/components/app/PageHeader";
+import { Link } from "react-router-dom";
 
 interface PaddleCustomer {
   customer_id: string;
@@ -174,69 +176,69 @@ export default function AdminPaddle() {
   const selectedSubs = selected ? subsByCustomer.get(selected.customer_id) ?? [] : [];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="type-h1 text-foreground tracking-tight">Paddle customers</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+    <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Operations"
+        icon={<CreditCard className="h-3.5 w-3.5" aria-hidden="true" />}
+        title="Paddle customers"
+        description={
+          <>
             Local mirror of Paddle customers and subscriptions, kept in sync by the billing webhook. Open a
-            customer to see their most recent webhook events.
-          </p>
-          <a href="/admin/payments-status" className="mt-1 inline-block text-sm text-primary underline">
-            Check payments configuration status
-          </a>
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={() => {
-              customersQuery.refetch();
-              subsQuery.refetch();
-            }}
-          >
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              downloadCsv(
-                `paddle-customers_${format(new Date(), "yyyy-MM-dd")}.csv`,
-                rows.map((c) => {
-                  const s = (subsByCustomer.get(c.customer_id) ?? [])[0];
-                  return {
-                    email: c.email,
-                    customer_id: c.customer_id,
-                    user_id: c.user_id ?? "",
-                    environment: c.environment,
-                    subscription_id: s?.subscription_id ?? "",
-                    status: s?.status ?? "",
-                    plan: s ? planFromPriceId(s.price_id) : "",
-                    current_period_end: s?.current_period_end ?? "",
-                    created_at: c.created_at,
-                  };
-                }),
-                [
-                  "email",
-                  "customer_id",
-                  "user_id",
-                  "environment",
-                  "subscription_id",
-                  "status",
-                  "plan",
-                  "current_period_end",
-                  "created_at",
-                ],
-              )
-            }
-          >
-            Export CSV
-          </Button>
-        </div>
-      </div>
+            customer to see their most recent webhook events. <Link to="/admin/payments-status" className="text-primary underline">Check payments configuration status</Link>
+          </>
+        }
+        actions={
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => {
+                customersQuery.refetch();
+                subsQuery.refetch();
+              }}
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                downloadCsv(
+                  `paddle-customers_${format(new Date(), "yyyy-MM-dd")}.csv`,
+                  rows.map((c) => {
+                    const s = (subsByCustomer.get(c.customer_id) ?? [])[0];
+                    return {
+                      email: c.email,
+                      customer_id: c.customer_id,
+                      user_id: c.user_id ?? "",
+                      environment: c.environment,
+                      subscription_id: s?.subscription_id ?? "",
+                      status: s?.status ?? "",
+                      plan: s ? planFromPriceId(s.price_id) : "",
+                      current_period_end: s?.current_period_end ?? "",
+                      created_at: c.created_at,
+                    };
+                  }),
+                  [
+                    "email",
+                    "customer_id",
+                    "user_id",
+                    "environment",
+                    "subscription_id",
+                    "status",
+                    "plan",
+                    "current_period_end",
+                    "created_at",
+                  ],
+                )
+              }
+            >
+              Export CSV
+            </Button>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Tile label="Customers" value={(customersQuery.data ?? []).length} icon={Users} />
