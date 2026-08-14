@@ -5,7 +5,7 @@ import { VOICE_ABORTED, toVoiceErrorCode, type VoiceErrorCode } from "./voiceErr
  * The reasoning model streams text; this module turns that stream into speech
  * that starts almost immediately and stays in step with the transcript:
  *
- *   model deltas -> SentenceChunker -> SpeechQueue -> ElevenLabs audio -> playback
+ *   model deltas -> SentenceChunker -> SpeechQueue -> Gradr voice backend -> playback
  *                                                  -> onChunkSpoken (transcript)
  *
  * Design notes
@@ -14,7 +14,7 @@ import { VOICE_ABORTED, toVoiceErrorCode, type VoiceErrorCode } from "./voiceErr
  * - The transcript only reveals a chunk when its audio actually starts, so the
  *   caption never runs ahead of the voice.
  * - There is deliberately NO silent fallback to another voice engine. If
- *   ElevenLabs fails, the turn stops and the caller surfaces a retryable error,
+ *   the voice backend fails, the turn stops and the caller surfaces a retryable error,
  *   so a broken integration can never hide behind a robotic substitute voice.
  */
 
