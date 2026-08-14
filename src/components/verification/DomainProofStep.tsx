@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { CheckCircle2, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { checkDomainProof } from "@/hooks/useVerificationRequests";
 
 interface Props {
   /** Institutional address the request will be submitted with. */
