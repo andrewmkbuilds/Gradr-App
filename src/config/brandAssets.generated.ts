@@ -20,7 +20,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Favicon (browser tab)",
     "width": 16,
     "height": 16,
-    "bytes": 511
+    "bytes": 576
   },
   {
     "file": "/icons/favicon-32.png",
@@ -28,7 +28,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Favicon (retina tab)",
     "width": 32,
     "height": 32,
-    "bytes": 823
+    "bytes": 979
   },
   {
     "file": "/icons/favicon-48.png",
@@ -36,7 +36,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Favicon (Windows tile)",
     "width": 48,
     "height": 48,
-    "bytes": 1202
+    "bytes": 1553
   },
   {
     "file": "/favicon.png",
@@ -44,7 +44,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Favicon (default)",
     "width": 64,
     "height": 64,
-    "bytes": 1450
+    "bytes": 1982
   },
   {
     "file": "/icons/icon-96.png",
@@ -52,7 +52,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Android launcher (ldpi)",
     "width": 96,
     "height": 96,
-    "bytes": 2321
+    "bytes": 3325
   },
   {
     "file": "/icons/icon-128.png",
@@ -60,7 +60,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Chrome Web Store / desktop",
     "width": 128,
     "height": 128,
-    "bytes": 3435
+    "bytes": 5375
   },
   {
     "file": "/icons/icon-256.png",
@@ -68,7 +68,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Desktop app icon",
     "width": 256,
     "height": 256,
-    "bytes": 7005
+    "bytes": 10613
   },
   {
     "file": "/icons/icon-384.png",
@@ -76,7 +76,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Android launcher (xxhdpi)",
     "width": 384,
     "height": 384,
-    "bytes": 8981
+    "bytes": 13655
   },
   {
     "file": "/icon-192.png",
@@ -84,7 +84,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "PWA icon (Android home screen)",
     "width": 192,
     "height": 192,
-    "bytes": 4396
+    "bytes": 6616
   },
   {
     "file": "/icon-512.png",
@@ -92,7 +92,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "PWA icon (splash + store listing)",
     "width": 512,
     "height": 512,
-    "bytes": 14713
+    "bytes": 21375
   },
   {
     "file": "/icons/apple-touch-icon-120.png",
@@ -100,7 +100,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPhone home screen (@2x)",
     "width": 120,
     "height": 120,
-    "bytes": 2356
+    "bytes": 3272
   },
   {
     "file": "/icons/apple-touch-icon-152.png",
@@ -108,7 +108,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPad home screen (@2x)",
     "width": 152,
     "height": 152,
-    "bytes": 3332
+    "bytes": 4622
   },
   {
     "file": "/icons/apple-touch-icon-167.png",
@@ -116,7 +116,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPad Pro home screen",
     "width": 167,
     "height": 167,
-    "bytes": 3745
+    "bytes": 5449
   },
   {
     "file": "/apple-touch-icon.png",
@@ -124,7 +124,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPhone home screen (@3x)",
     "width": 180,
     "height": 180,
-    "bytes": 2978
+    "bytes": 4340
   },
   {
     "file": "/icons/maskable-192.png",
@@ -132,7 +132,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Android maskable (adaptive)",
     "width": 192,
     "height": 192,
-    "bytes": 3541
+    "bytes": 4891
   },
   {
     "file": "/icons/maskable-512.png",
@@ -140,7 +140,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Android maskable (large)",
     "width": 512,
     "height": 512,
-    "bytes": 7826
+    "bytes": 11033
   },
   {
     "file": "/splash/splash-1290x2796.png",
@@ -148,7 +148,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPhone 15/16 Pro Max",
     "width": 1290,
     "height": 2796,
-    "bytes": 877125
+    "bytes": 883571
   },
   {
     "file": "/splash/splash-1179x2556.png",
@@ -156,7 +156,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPhone 15/16",
     "width": 1179,
     "height": 2556,
-    "bytes": 749869
+    "bytes": 755133
   },
   {
     "file": "/splash/splash-1170x2532.png",
@@ -164,7 +164,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPhone 12–14",
     "width": 1170,
     "height": 2532,
-    "bytes": 735621
+    "bytes": 742016
   },
   {
     "file": "/splash/splash-1125x2436.png",
@@ -172,7 +172,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPhone X/XS/11 Pro",
     "width": 1125,
     "height": 2436,
-    "bytes": 693090
+    "bytes": 698774
   },
   {
     "file": "/splash/splash-1536x2048.png",
@@ -180,7 +180,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPad 9.7\"",
     "width": 1536,
     "height": 2048,
-    "bytes": 739769
+    "bytes": 750588
   },
   {
     "file": "/splash/splash-1668x2388.png",
@@ -188,7 +188,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPad Pro 11\"",
     "width": 1668,
     "height": 2388,
-    "bytes": 915269
+    "bytes": 928031
   },
   {
     "file": "/splash/splash-2048x2732.png",
@@ -196,7 +196,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "iPad Pro 12.9\"",
     "width": 2048,
     "height": 2732,
-    "bytes": 1233863
+    "bytes": 1251992
   },
   {
     "file": "/gradr-logo.png",
@@ -204,7 +204,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Primary symbol (light surfaces)",
     "width": 512,
     "height": 512,
-    "bytes": 10487
+    "bytes": 16432
   },
   {
     "file": "/gradr-logo-dark.png",
@@ -212,7 +212,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Primary symbol (dark surfaces)",
     "width": 512,
     "height": 512,
-    "bytes": 10200
+    "bytes": 15897
   },
   {
     "file": "/gradr-logo.svg",
@@ -220,7 +220,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Vector symbol (infinite scale)",
     "width": 0,
     "height": 0,
-    "bytes": 998
+    "bytes": 374
   },
   {
     "file": "/gradr-logo-mono.svg",
@@ -228,7 +228,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Monochrome symbol (currentColor)",
     "width": 0,
     "height": 0,
-    "bytes": 1011
+    "bytes": 384
   },
   {
     "file": "/gradr-symbol-compact.svg",
@@ -236,7 +236,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Small-size symbol (16–64px)",
     "width": 0,
     "height": 0,
-    "bytes": 992
+    "bytes": 372
   },
   {
     "file": "/gradr-lockup.png",
@@ -244,7 +244,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Symbol + GRADR lockup (light)",
     "width": 1200,
     "height": 320,
-    "bytes": 17305
+    "bytes": 19267
   },
   {
     "file": "/gradr-lockup-dark.png",
@@ -252,7 +252,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Symbol + GRADR lockup (dark)",
     "width": 1200,
     "height": 320,
-    "bytes": 16730
+    "bytes": 18628
   },
   {
     "file": "/email-logo-144.png",
@@ -260,7 +260,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Email header mark",
     "width": 144,
     "height": 144,
-    "bytes": 3395
+    "bytes": 4227
   },
   {
     "file": "/og-image-v2.jpg",
@@ -268,7 +268,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Open Graph / Twitter card",
     "width": 1200,
     "height": 630,
-    "bytes": 82470
+    "bytes": 82406
   },
   {
     "file": "/og/site-gradr.png",
@@ -276,6 +276,6 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Site social card (source)",
     "width": 1200,
     "height": 630,
-    "bytes": 152405
+    "bytes": 151669
   }
 ];
