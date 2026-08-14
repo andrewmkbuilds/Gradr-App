@@ -105,13 +105,11 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await scoped.auth.getUser();
     if (authError || !user) return json({ error: "Unauthorized", code: "unauthorized" }, 401);
 
-    const now = Date.now();
-    const recent = (hits.get(user.id) || []).filter((t) => now - t < WINDOW_MS);
-    if (recent.length >= RATE_LIMIT) {
+    // Durable, cross-instance limit; fails closed (see _shared/rateLimit.ts).
+    const rl = await durableRateLimit(user.id, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+    if (!rl.allowed) {
       return json({ error: "Too many job searches. Try again in a minute.", code: "rate_limited" }, 429);
     }
-    recent.push(now);
-    hits.set(user.id, recent);
 
     if (!connectorConfigured(KEY)) {
       return json({ error: "Job scraping isn't configured yet.", code: "not_configured" }, 503);
