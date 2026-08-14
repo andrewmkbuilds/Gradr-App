@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, GitCompare, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowRight, Briefcase, GitCompare, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useResumeVersions, type ResumeVersion } from "@/hooks/useResumeVersions";
+import { jobTypeDeltas } from "@/lib/resume/jobTypeProfiles";
 import { cn } from "@/lib/utils";
 
 interface MetricRow {
@@ -80,6 +81,11 @@ export function ResumeVersionDiff() {
     a.forEach((w) => { if (!b.has(w)) removed.push(w); });
     return { added: added.sort().slice(0, 24), removed: removed.sort().slice(0, 24), hasText: a.size > 0 || b.size > 0 };
   }, [base, compare]);
+
+  const typeDeltas = useMemo(
+    () => jobTypeDeltas(tokens(base?.parsed_text), tokens(compare?.parsed_text)),
+    [base, compare],
+  );
 
   if (loading) {
     return <div className="elev-2 h-40 animate-pulse rounded-xl" />;
