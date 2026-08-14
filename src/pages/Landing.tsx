@@ -34,6 +34,7 @@ import {
   MagneticButton, SceneBackground, ScrollFloat, MagicBento,
 } from "@/components/effects";
 import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
+import { trackSignupCta, trackUpgradeCta, type CtaLocation } from "@/lib/telemetry/events";
 import { DepthShowcase } from "@/components/landing/DepthShowcase";
 import {
   ApplicationVisual, AssistantVisual,
@@ -295,7 +296,15 @@ export default function Landing() {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
-  const start = () => navigate(user ? "/" : "/auth");
+  /**
+   * Primary "create account" CTA. Every call site names where it sits and what
+   * it says, so `homepage_viewed → signup_cta_clicked` stays a real intent
+   * signal instead of counting generic navigation.
+   */
+  const start = (location: CtaLocation, text: string) => () => {
+    trackSignupCta({ location, text, authenticated: Boolean(user), destination: user ? "/" : "/auth" });
+    navigate(user ? "/" : "/auth");
+  };
   const login = () => navigate(user ? "/" : "/auth");
 
   return (
@@ -359,7 +368,7 @@ export default function Landing() {
             ) : (
               <>
                 <Button variant="ghost" size="sm" onClick={login}>Log in</Button>
-                <MagneticButton size="sm" strength={6} onClick={start}>Get started</MagneticButton>
+                <MagneticButton size="sm" strength={6} onClick={start("navbar", "Get started")}>Get started</MagneticButton>
               </>
             )}
           </div>
@@ -412,7 +421,7 @@ export default function Landing() {
               ) : (
                 <>
                   <Button variant="outline" className="flex-1" onClick={login}>Log in</Button>
-                  <Button className="flex-1" onClick={start}>Get started</Button>
+                  <Button className="flex-1" onClick={start("mobile_menu", "Get started")}>Get started</Button>
                 </>
               )}
             </div>
@@ -487,7 +496,7 @@ export default function Landing() {
                   transition={{ duration: 0.7, ease: easeOut, delay: 0.62 }}
                   className="flex flex-col gap-3 sm:flex-row"
                 >
-                  <MagneticButton size="lg" className="group h-12 px-6 text-base" onClick={start}>
+                  <MagneticButton size="lg" className="group h-12 px-6 text-base" onClick={start("hero", "Get started free")}>
                     Get started free
                     <ArrowRight
                       className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -625,7 +634,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" className="h-11" onClick={start}>
+              <Button size="lg" className="h-11" onClick={start("feature_section", "Optimize my resume")}>
                 Optimize my resume
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
@@ -672,7 +681,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" variant="outline" className="h-11" onClick={start}>
+              <Button size="lg" variant="outline" className="h-11" onClick={start("feature_section", "Find my matches")}>
                 <Search className="mr-2 h-4 w-4" aria-hidden />
                 Find my matches
               </Button>
@@ -694,7 +703,7 @@ export default function Landing() {
                 Everything stays editable. Gradr drafts the first version so you spend your time on judgment, not
                 formatting.
               </p>
-              <Button size="lg" className="h-11" onClick={start}>
+              <Button size="lg" className="h-11" onClick={start("feature_section", "Build an application")}>
                 Build an application
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
@@ -739,7 +748,7 @@ export default function Landing() {
 
           <Reveal delay={80} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <SpatialCta>
-              <Button size="lg" className="h-12 px-6" onClick={start}>
+              <Button size="lg" className="h-12 px-6" onClick={start("feature_section", "Run a mock interview")}>
                 Run a mock interview
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
@@ -834,7 +843,7 @@ export default function Landing() {
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Not sure where you fit? Start free — Gradr adapts to the stage you're actually at.
               </p>
-              <Button variant="outline" className="mt-4 h-11 w-full sm:w-auto" onClick={start}>
+              <Button variant="outline" className="mt-4 h-11 w-full sm:w-auto" onClick={start("pricing", "Get started free")}>
                 Get started free
               </Button>
             </Reveal>
@@ -861,7 +870,7 @@ export default function Landing() {
           </ol>
 
           <Reveal delay={80} className="mt-8">
-            <Button size="lg" className="h-12 px-6" onClick={start}>
+            <Button size="lg" className="h-12 px-6" onClick={start("feature_section", "Start building your career system")}>
               Start building your career system
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
             </Button>
@@ -997,7 +1006,19 @@ export default function Landing() {
                   <Button
                     className="mt-6 h-11 w-full"
                     variant={p.highlight ? "default" : "outline"}
-                    onClick={() => (p.name === "Free" ? start() : navigate(user ? "/pricing" : "/auth"))}
+                    onClick={() => {
+                      if (p.name === "Free") {
+                        start("pricing", p.cta)();
+                        return;
+                      }
+                      trackUpgradeCta({
+                        location: "pricing",
+                        text: p.cta,
+                        plan: p.name.toLowerCase(),
+                        billingPeriod: "annual",
+                      });
+                      navigate(user ? "/pricing" : "/auth?next=/pricing");
+                    }}
                   >
                     {p.cta}
                   </Button>
@@ -1043,7 +1064,7 @@ export default function Landing() {
               Build a smarter career system with Gradr.
             </p>
             <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" className="h-12 px-7 text-base" onClick={start}>
+              <Button size="lg" className="h-12 px-7 text-base" onClick={start("final_cta", "Get started free")}>
                 Get started free
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>

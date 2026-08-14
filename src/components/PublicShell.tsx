@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { trackEvent } from "@/lib/analytics";
+import { trackSignupCta } from "@/lib/telemetry/events";
 import { LEGAL_PAGES } from "@/content/legal";
 import { cn } from "@/lib/utils";
 
@@ -99,7 +99,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
             </Link>
             <Link
               to="/auth?mode=signup"
-              onClick={() => trackEvent("signup_cta_click", { source, location: "header" })}
+              onClick={() => trackSignupCta({ location: "navbar", text: "Get started", authenticated: false, destination: "/auth?mode=signup" })}
               className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transform-none"
             >
               Get started

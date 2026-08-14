@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { trackJobSaved } from "@/lib/telemetry/activation";
 import { supabase } from "@/integrations/supabase/client";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 import { getPaddleEnvironment } from "@/lib/paddle";
@@ -380,6 +381,7 @@ export default function JobsFeed() {
       setPasteUrl("");
       const missing: string[] = Array.isArray(data.missingFields) ? data.missingFields : [];
       const notable = missing.filter((f) => ["company", "salary_min", "description", "requirements"].includes(f));
+      trackJobSaved(user.id, { source: "manual_url" });
       trackJourney("job_url_import_completed", {
         host,
         missing_fields: missing.length,

@@ -3,6 +3,8 @@ import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { identifyUser, setSessionContext } from "@/lib/telemetry/journey";
+import { setAnalyticsUserContext } from "@/lib/telemetry/events";
+import { completeSignupTracking, resetSignupTracking } from "@/lib/telemetry/signup";
 
 
 interface AuthContextType {
@@ -25,9 +27,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setSession(session);
         setLoading(false);
+        // Analytics only — never block or await inside the auth callback.
+        if (event === "SIGNED_OUT") {
+          resetSignupTracking();
+          return;
+        }
+        if (session?.user && (event === "SIGNED_IN" || event === "USER_UPDATED")) {
+          queueMicrotask(() => completeSignupTracking(session.user));
+        }
       }
     );
 
@@ -40,9 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    identifyUser(session?.user?.id ?? null);
+    const user = session?.user ?? null;
+    // Identity is the Gradr user id, so the anonymous pre-signup journey and
+    // every later paid event belong to one person in PostHog.
+    identifyUser(user?.id ?? null);
+    setAnalyticsUserContext({
+      status: !user ? "anonymous" : user.is_anonymous ? "guest" : "authenticated",
+    });
     setSessionContext(session?.user?.id ? session.access_token.slice(-8) : null);
-  }, [session?.user?.id]);
+  }, [session?.user?.id, session?.user?.is_anonymous]);
 
 
   const signOut = async () => {

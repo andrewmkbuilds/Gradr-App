@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { track, trackOnce } from "@/lib/telemetry/events";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +58,11 @@ export function OnboardingDialog({ open, onComplete }: Props) {
   const reduced = useReducedMotionPref();
   const [step, setStep] = useState(0);
 
+  // Funnel step: the dialog only mounts open for users who have not onboarded.
+  useEffect(() => {
+    if (open) trackOnce("onboarding_started", {}, "dialog");
+  }, [open]);
+
   const [roles, setRoles] = useState<string[]>([]);
   const [roleDraft, setRoleDraft] = useState("");
   const [industries, setIndustries] = useState<string[]>([]);
@@ -113,6 +119,16 @@ export function OnboardingDialog({ open, onComplete }: Props) {
     void supabase.functions.invoke("career-plan", { body: {} }).catch(() => undefined);
 
     setSaving(false);
+
+    track("onboarding_completed", {
+      target_role_count: roles.length,
+      industry_count: industries.length,
+      experience_level: experience,
+      has_location: Boolean(location.trim()),
+      has_salary_target: Boolean(min || max),
+      identity: identity || undefined,
+    });
+    track("career_preferences_completed", { experience_level: experience });
 
 
     onComplete({

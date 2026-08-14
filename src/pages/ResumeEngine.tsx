@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { track } from "@/lib/telemetry/events";
 import { Link } from "react-router-dom";
 import {
   Upload, FileText, CheckCircle, AlertTriangle, Sparkles, RefreshCw, Loader2, BookOpen,
@@ -112,6 +113,12 @@ export default function ResumeEngine() {
     setFile(selectedFile);
     setFileName(selectedFile.name);
     setUploading(true);
+    const startedAt = Date.now();
+    track("resume_uploaded", {
+      file_type: selectedFile.name.split(".").pop()?.toLowerCase(),
+      file_size_kb: Math.round(selectedFile.size / 1024),
+      has_target_role: Boolean(jobTitle.trim()),
+    });
 
     try {
       const filePath = `${user.id}/${Date.now()}_${selectedFile.name}`;
@@ -166,8 +173,18 @@ export default function ResumeEngine() {
       setActiveVersionId(saved?.id ?? null);
       setVersionsToken((t) => t + 1);
 
+      // Activation moment: the user has seen real output from the product.
+      track("resume_analyzed", {
+        ats_score: analysisData.ats_score,
+        keyword_match: analysisData.keyword_match,
+        suggestion_count: parseSuggestions(analysisData.suggestions).length,
+        duration_ms: Date.now() - startedAt,
+        has_target_role: Boolean(jobTitle.trim()),
+      });
+
       toast.success("Resume analyzed and saved as a version");
     } catch (error: any) {
+      track("resume_analysis_failed", { reason: String(error?.message ?? "unknown").slice(0, 120) });
       toast.error(error.message || "Failed to analyze resume");
       console.error(error);
     } finally {

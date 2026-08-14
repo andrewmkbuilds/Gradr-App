@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useCallback, useState } from "react";
 import { billingService, type PlanInterval, type PlanKey } from "@/lib/billing";
 import { getPaddleEnvironment } from "@/lib/paddle";
+import { track } from "@/lib/telemetry/events";
 
 export interface SubscriptionState {
   subscribed: boolean;
@@ -205,6 +206,9 @@ export function useBillingActions() {
   const startSubscription = useCallback(
     async (interval: PlanInterval, plan: PlanKey = "pro") => {
       setPending(`${plan}-${interval}`);
+      // Intent to pay. The paid conversion itself is only ever recorded from
+      // the provider webhook — a click is not a payment.
+      track("checkout_started", { plan, billing_period: interval, product_type: "subscription" });
       try {
         const { url, completed } = await billingService.createCheckout({ plan, interval });
         if (url) openExternal(url);
@@ -222,6 +226,7 @@ export function useBillingActions() {
 
   const buyPack = useCallback(async (pack: string) => {
     setPending(pack);
+    track("checkout_started", { plan: "credit_pack", feature: pack, product_type: "pack" });
     try {
       const { url, completed } = await billingService.createPackCheckout({ pack });
       if (url) openExternal(url);
