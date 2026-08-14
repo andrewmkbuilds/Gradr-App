@@ -7,6 +7,14 @@ import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
 import { legalJsonLd } from "@/lib/structuredData";
 import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
+import {
+  type Surface,
+  canonicalUrlFor,
+  currentSurface,
+  surfaceBase,
+} from "@/config/domains";
+import { DOCS_BY_SLUG } from "@/content/docs";
+import { NEWS_BY_SLUG } from "@/content/news";
 
 const SITE = "Gradr";
 const ORIGIN = "https://gradr.me";
@@ -229,6 +237,103 @@ const NOINDEX_PREFIXES = ["/admin", "/interview/", "/oauth", "/mcp"];
 function isNoIndex(pathname: string): boolean {
   if (NOINDEX_EXACT.has(pathname)) return true;
   return NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+/** Per-surface metadata for the marketing, news, docs and affiliate subdomains. */
+const SURFACE_META: Partial<Record<Surface, Record<string, { title: string; description: string }>>> = {
+  marketing: {
+    "/": {
+      title: "Gradr Product — One Workspace From Resume to Offer",
+      description:
+        "Explore the Gradr product: ATS resume scoring, live job matching, application strategy, AI mock interviews and career analytics in one workspace.",
+    },
+    "/features": {
+      title: "Features — Resume, Matching, Applications & Interviews",
+      description:
+        "Every Gradr module in detail: Resume Intelligence, job matching, application strategy, AI Mock Interview, networking and career analytics.",
+    },
+    "/use-cases": {
+      title: "Use Cases — Students, Switchers, Professionals & Cohorts",
+      description:
+        "How students, career switchers, experienced professionals and career-services teams use Gradr to run a measurable job search.",
+    },
+    "/pricing": {
+      title: "Pricing — Free, Starter, Pro & Advanced Plans",
+      description:
+        "Compare Gradr plans and monthly or yearly billing. Start free, upgrade when you need more AI resume scans, matches and interview minutes.",
+    },
+    "/testimonials": {
+      title: "Testimonials — What Candidates Say About Gradr",
+      description:
+        "Real outcomes from candidates who used Gradr to fix their resume, target better roles and rehearse interviews before the real thing.",
+    },
+    "/demos": {
+      title: "Product Demos — See Gradr Work in Three Steps",
+      description:
+        "Three short walkthroughs of Gradr: score a resume, match a live role, and run a voice mock interview — all on the free plan.",
+    },
+    "/about": {
+      title: "About Gradr — Feedback Loops for the Job Search",
+      description:
+        "Why Gradr exists, how we treat your data, and the principles behind objective resume scoring and realistic interview practice.",
+    },
+  },
+  news: {
+    "/": {
+      title: "Gradr News — Product Updates & Job-Market Analysis",
+      description:
+        "Product announcements, company updates and job-market analysis from the Gradr team, plus practical guides for candidates.",
+    },
+  },
+  docs: {
+    "/": {
+      title: "Gradr Documentation — Guides, Features & Troubleshooting",
+      description:
+        "Official Gradr documentation: quickstart, feature guides, AI Mock Interview reference, billing, API access and troubleshooting.",
+    },
+  },
+  affiliates: {
+    "/": {
+      title: "Gradr Affiliate Program — Earn Recurring Commission",
+      description:
+        "Join the Gradr affiliate program: recurring commission, transparent click and conversion tracking, monthly payouts and ready-made assets.",
+    },
+    "/apply": {
+      title: "Apply to the Gradr Affiliate Program",
+      description:
+        "Tell us about your audience and apply to become a Gradr affiliate partner with recurring commission on every referred subscription.",
+    },
+  },
+};
+
+/** Metadata for a surface path, including dynamic docs and news articles. */
+function resolveSurfaceMeta(
+  surface: Surface,
+  path: string,
+): { title: string; description: string } | null {
+  const table = SURFACE_META[surface];
+  if (table?.[path]) return table[path];
+
+  if (surface === "docs") {
+    const doc = DOCS_BY_SLUG[path.replace(/^\//, "")];
+    if (doc) return { title: doc.metaTitle, description: doc.description };
+  }
+  if (surface === "news") {
+    const article = NEWS_BY_SLUG[path.replace(/^\//, "")];
+    if (article) return { title: article.metaTitle, description: article.description };
+  }
+  return null;
+}
+
+/**
+ * Robots policy per surface. Marketing, news and docs are fully public; the
+ * affiliate portal only exposes its program and application pages to crawlers;
+ * the home surface keeps the existing per-path rules.
+ */
+function isSurfaceNoIndex(surface: Surface, path: string): boolean {
+  if (surface === "marketing" || surface === "news" || surface === "docs") return false;
+  if (surface === "affiliates") return !(path === "/" || path === "/apply");
+  return isNoIndex(path);
 }
 
 export function RouteSeo() {
