@@ -35,12 +35,14 @@ export const DEEP = "#0B1C22";
 // 512 unit grid. Outer squircle 44..468 (424 module), counter offset up 10.
 const O = { x: 44, y: 44, s: 424, r: 134 };
 const I = { x: 128, y: 118, s: 256, r: 74 };
-// Mouth: opens the right side. The upper arm terminates on a rising slope
-// (low inside, high at the outer edge) — the ascent cue, read as craft not arrow.
-const MOUTH = "M 384 180 L 468 140 L 512 140 L 512 244 L 262 244 L 262 180 Z";
-// Crossbar: overshoots the outer edge (468) by one module — the interruption.
-const BAR = { x: 296, y: 244, w: 190, h: 64, r: 10 };
-
+// Aperture: a clean rectangular slot through the right stroke. Both terminals
+// are cut on the same vertical, so the opening reads machined, not drawn.
+const MOUTH = "M 300 158 L 512 158 L 512 252 L 300 252 Z";
+// Crossbar, built as a step: the outer run sits on the aperture line, the inner
+// run lifts one module and carries the mahogany accent — the ascent, hidden in
+// the counter rather than bolted on as an arrow.
+const BAR = { x: 330, y: 252, w: 138, h: 64 };
+const STEP = { x: 258, y: 220, w: 86, h: 64, r: 14 };
 
 function rounded({ x, y, s, r }) {
   return `M ${x + r} ${y} H ${x + s - r} A ${r} ${r} 0 0 1 ${x + s} ${y + r} V ${y + s - r} A ${r} ${r} 0 0 1 ${x + s - r} ${y + s} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + s - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
@@ -61,9 +63,12 @@ export function symbolSvg({ ring, bar, id = "g", title = "Gradr" }) {
     </mask>
   </defs>
   <rect width="512" height="512" fill="${ring}" mask="url(#${id}-ring)"/>
-  <rect x="${BAR.x}" y="${BAR.y}" width="${BAR.w}" height="${BAR.h}" rx="${BAR.r}" fill="${bar}"/>
+  <rect x="${BAR.x}" y="${BAR.y}" width="${BAR.w}" height="${BAR.h}" fill="${ring}"/>
+  <rect x="${STEP.x}" y="${STEP.y}" width="${STEP.w}" height="${STEP.h}" rx="${STEP.r}" fill="${bar}"/>
+  <rect x="${STEP.x + STEP.w - STEP.r}" y="${STEP.y}" width="${STEP.r}" height="${STEP.h}" fill="${bar}"/>
 </svg>`;
 }
+
 
 /** Favicon build: no overshoot tab, fatter counter — survives 16px. */
 export function symbolSvgCompact({ ring, bar, id = "gc" }) {
