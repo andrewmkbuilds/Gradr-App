@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { SentenceChunker, SpeechQueue, TimedReveal, cleanForSpeech, estimatedSpeechMs, type AudioResult } from "@/lib/interview/speechStream";
-import { VOICE_ABORTED, toVoiceErrorCode, type VoiceErrorCode } from "@/lib/interview/voiceErrors";
+import { VOICE_ABORTED, toVoiceErrorCode, toVoiceProviderReason, type VoiceErrorCode, type VoiceProviderReason } from "@/lib/interview/voiceErrors";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
 
 /**
@@ -36,6 +36,9 @@ export interface UseInterviewVoiceOptions {
 export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   const [speaking, setSpeaking] = useState(false);
   const [error, setError] = useState<VoiceErrorCode | null>(null);
+  /** Enumerated provider reason for the last failure — safe to display. */
+  const [errorReason, setErrorReason] = useState<VoiceProviderReason | null>(null);
+  const reasonRef = useRef<VoiceProviderReason | null>(null);
 
 
   const optsRef = useRef(opts);
@@ -132,7 +135,8 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
         // The backend only ever returns sanitized Gradr codes.
         const payload = await res.json().catch(() => ({} as Record<string, unknown>));
         const code = toVoiceErrorCode(payload?.code);
-        console.error("[voice] request failed", { status: res.status, code });
+        reasonRef.current = toVoiceProviderReason(payload?.reason);
+        console.error("[voice] request failed", { status: res.status, code, reason: reasonRef.current });
         return { error: code };
       }
 
@@ -176,6 +180,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
       onFailure: (code) => {
         console.error("[voice] turn aborted:", code);
         setError(code);
+        setErrorReason(reasonRef.current);
         setSpeaking(false);
         optsRef.current.onVoiceError(code);
       },
@@ -194,6 +199,8 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     stopPaced();
     optsRef.current.onCaption("");
     setError(null);
+    setErrorReason(null);
+    reasonRef.current = null;
     const q = ensureQueue();
     q.reset();
   }, [ensureQueue, stopPaced]);
@@ -246,5 +253,5 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     queueRef.current = null;
   }, []);
 
-  return { speaking, error, clearError: () => setError(null), beginTurn, pushDelta, endTurn, retryTurn, stop };
+  return { speaking, error, errorReason, clearError: () => { setError(null); setErrorReason(null); }, beginTurn, pushDelta, endTurn, retryTurn, stop };
 }
