@@ -138,7 +138,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
       <main className="mx-auto max-w-5xl px-4 py-12 sm:py-16">{children}</main>
 
       <footer className="border-t border-border/60 py-12">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="space-y-3">
             <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
               <BrandLogo size={22} />
