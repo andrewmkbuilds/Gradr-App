@@ -7,6 +7,7 @@ import {
   Gauge,
   Gift,
   Image as ImageIcon,
+  ClipboardCheck,
   LayoutGrid,
   Mail,
   ScrollText,
