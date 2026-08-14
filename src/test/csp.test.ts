@@ -1,82 +1,86 @@
 /**
  * Content Security Policy contract.
  *
- * The policy is deliberately REPORT-ONLY: it must be present, must cover the
- * directives we care about, must whitelist every origin the app genuinely
- * needs, and must never be flipped to enforcing accidentally.
+ * The policy is delivered as a REPORT-ONLY response header by the edge (a
+ * <meta>-delivered report-only policy is ignored by browsers, so it must never
+ * come back). These tests pin the shared CI contract in
+ * scripts/lib/securityHeaders.mjs, guard against an accidental flip to
+ * enforcing, and cover the client-side violation summariser.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import {
+  REQUIRED_HEADERS,
+  REPORT_ONLY_DIRECTIVES,
+  REPORT_ONLY_ORIGINS,
+} from "../../scripts/lib/securityHeaders.mjs";
 import { summarizeViolation } from "@/lib/security/cspReport";
 
 const HTML = readFileSync(join(process.cwd(), "index.html"), "utf8");
 
-function policy(): string {
-  const match = /http-equiv="Content-Security-Policy-Report-Only"\s+content="([^"]+)"/.exec(HTML);
-  return match?.[1] ?? "";
-}
+const reportOnlyRule = (REQUIRED_HEADERS as { name: string; test: (v: string) => boolean }[]).find(
+  (r) => r.name === "content-security-policy-report-only",
+)!;
 
-function directive(name: string): string {
-  const found = policy()
-    .split(";")
-    .map((d) => d.trim())
-    .find((d) => d.startsWith(`${name} `) || d === name);
-  return found ?? "";
-}
+/** A policy shaped like the one production serves. */
+const VALID_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "script-src 'self' 'unsafe-inline' https://*.paddle.com https://accounts.google.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: data:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "connect-src 'self' blob: https://*.supabase.co wss://*.supabase.co https://*.lovable.cloud https://*.paddle.com https://accounts.google.com",
+  "frame-src 'self' https://*.paddle.com https://accounts.google.com",
+  "form-action 'self' https://accounts.google.com",
+  "report-uri /api/public/csp-report",
+].join("; ");
 
-describe("CSP meta policy", () => {
-  it("ships a report-only policy", () => {
-    expect(policy()).not.toBe("");
+describe("CSP delivery", () => {
+  it("is never delivered via a meta tag", () => {
+    expect(HTML).not.toMatch(/http-equiv=["']Content-Security-Policy/i);
   });
 
-  it("is NOT enforcing", () => {
-    expect(HTML).not.toMatch(/http-equiv="Content-Security-Policy"/);
+  it("documents where the policy actually lives", () => {
+    expect(HTML).toMatch(/REPORT-ONLY/);
+  });
+});
+
+describe("report-only policy contract", () => {
+  it("accepts a complete policy", () => {
+    expect(reportOnlyRule.test(VALID_POLICY)).toBe(true);
   });
 
-  it.each([
-    "default-src",
-    "script-src",
-    "style-src",
-    "img-src",
-    "connect-src",
-    "frame-src",
-    "worker-src",
-    "base-uri",
-    "form-action",
-    "object-src",
-  ])("declares %s", (name) => {
-    expect(directive(name)).not.toBe("");
+  it("requires a reporting endpoint", () => {
+    expect(reportOnlyRule.test(VALID_POLICY.replace("; report-uri /api/public/csp-report", ""))).toBe(false);
   });
 
-  it("locks down the dangerous directives", () => {
-    expect(directive("default-src")).toContain("'self'");
-    expect(directive("base-uri")).toBe("base-uri 'self'");
-    expect(directive("object-src")).toBe("object-src 'none'");
+  it("requires default-src 'self'", () => {
+    expect(reportOnlyRule.test(VALID_POLICY.replace("default-src 'self'", "default-src *"))).toBe(false);
   });
 
-  it("allows the backend, auth, payment and telemetry origins the app calls", () => {
-    const connect = directive("connect-src");
-    for (const origin of [
-      "https://*.supabase.co",
-      "wss://*.supabase.co",
-      "https://*.lovable.cloud",
-      "https://accounts.google.com",
-      "https://*.paddle.com",
-    ]) {
-      expect(connect, `connect-src is missing ${origin}`).toContain(origin);
-    }
-    expect(directive("frame-src")).toContain("https://*.paddle.com");
-    expect(directive("worker-src")).toContain("blob:"); // service worker + audio worklets
-    expect(directive("media-src")).toContain("blob:"); // ElevenLabs interview audio
-    expect(directive("font-src")).toContain("https://fonts.gstatic.com");
+  it.each(REPORT_ONLY_DIRECTIVES as string[])("fails when %s is dropped", (name) => {
+    const stripped = VALID_POLICY.split("; ")
+      .filter((d) => !d.startsWith(`${name} `))
+      .join("; ");
+    expect(reportOnlyRule.test(stripped)).toBe(false);
+  });
+
+  it.each(REPORT_ONLY_ORIGINS as string[])("fails when the %s origin is dropped", (origin) => {
+    expect(reportOnlyRule.test(VALID_POLICY.split(origin).join("https://example.invalid"))).toBe(false);
   });
 });
 
 describe("violation reporting", () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it("reduces a violation to an origin-level summary", () => {
+  it("reduces a violation to an origin-level summary with no secrets", () => {
     const summary = summarizeViolation({
       effectiveDirective: "script-src",
       violatedDirective: "script-src",
@@ -101,5 +105,15 @@ describe("violation reporting", () => {
     } as SecurityPolicyViolationEvent);
     expect(summary.blockedOrigin).toBe("inline");
     expect(summary.sample).toBe("body{}");
+  });
+
+  it("truncates long samples", () => {
+    const summary = summarizeViolation({
+      effectiveDirective: "script-src",
+      blockedURI: "eval",
+      documentURI: "https://gradr.me/",
+      sample: "x".repeat(500),
+    } as SecurityPolicyViolationEvent);
+    expect(summary.sample!.length).toBe(120);
   });
 });
