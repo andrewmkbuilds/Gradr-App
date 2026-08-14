@@ -20,7 +20,7 @@ import { DepthStage, DepthLayer } from "@/components/motion/Depth";
 import { SessionTimerRing } from "@/components/interview/SessionTimerRing";
 import { springSmooth, springSnappy, easeOut } from "@/lib/motion/tokens";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
-import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
+import type { VoiceErrorCode, VoiceProviderReason } from "@/lib/interview/voiceErrors";
 
 
 export type Msg = { role: "user" | "assistant"; content: string };
