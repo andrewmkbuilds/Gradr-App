@@ -302,9 +302,28 @@ const SURFACE_META: Partial<Record<Surface, Record<string, { title: string; desc
       title: "Apply to the Gradr Affiliate Program",
       description:
         "Tell us about your audience and apply to become a Gradr affiliate partner with recurring commission on every referred subscription.",
+  },
+  status: {
+    "/": {
+      title: "Gradr Status — Live Service Health & Incidents",
+      description:
+        "Real-time availability for the Gradr app, authentication, AI Mock Interview, resume tools, job matching, billing and email delivery.",
+    },
+  },
+  support: {
+    "/": {
+      title: "Gradr Support — Help Center & Contact",
+      description:
+        "Get help with Gradr: browse answers to common questions about accounts, billing, resumes and interviews, or contact the support team.",
+    },
+    "/contact": {
+      title: "Contact Gradr Support",
+      description:
+        "Reach the Gradr support team. Send us the details of your issue and we'll get back to you by email.",
     },
   },
 };
+
 
 /** Metadata for a surface path, including dynamic docs and news articles. */
 function resolveSurfaceMeta(
