@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
-import { SentenceChunker, SpeechQueue, type AudioResult } from "@/lib/interview/speechStream";
+import { SentenceChunker, SpeechQueue, TimedReveal, cleanForSpeech, estimatedSpeechMs, type AudioResult } from "@/lib/interview/speechStream";
 import { VOICE_ABORTED, toVoiceErrorCode, type VoiceErrorCode } from "@/lib/interview/voiceErrors";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
 
@@ -22,8 +22,11 @@ export interface UseInterviewVoiceOptions {
   personaId: string;
   /** Speech is skipped entirely when voice is off (transcript still streams). */
   enabled: boolean;
-  /** Fired as each thought starts being spoken — drives the live caption. */
-  onSpokenChunk: (text: string) => void;
+  /**
+   * Live caption for the current interviewer turn: everything spoken so far,
+   * revealed word by word in sync with the audio. Never runs ahead of the voice.
+   */
+  onCaption: (fullText: string) => void;
   /** The interviewer finished the whole turn. */
   onTurnComplete: () => void;
   /** Voice failed mid-turn — the turn was aborted. Sanitized Gradr code only. */
@@ -41,6 +44,58 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   const queueRef = useRef<SpeechQueue | null>(null);
   const chunkerRef = useRef(new SentenceChunker());
   const spokenRef = useRef("");
+  /** Chunks already fully spoken this turn — the finalized part of the caption. */
+  const finalizedRef = useRef("");
+  /** Paced (voice-off) reveal state. */
+  const pacedRef = useRef<{ reveal: TimedReveal | null; queue: string[]; running: boolean }>({
+    reveal: null,
+    queue: [],
+    running: false,
+  });
+
+  const emitCaption = useCallback((partial: string) => {
+    const full = `${finalizedRef.current} ${partial}`.trim();
+    optsRef.current.onCaption(full);
+  }, []);
+
+  /** Voice off: still reveal word by word, at a natural speaking pace. */
+  const pumpPaced = useCallback(() => {
+    const state = pacedRef.current;
+    if (state.running) return;
+    const next = state.queue.shift();
+    if (!next) {
+      if (state.ended) {
+        state.ended = false;
+        optsRef.current.onTurnComplete();
+      }
+      return;
+    }
+    state.running = true;
+    const reveal = new TimedReveal(next, (revealed) => emitCaption(revealed));
+    state.reveal = reveal;
+    reveal.startPaced();
+    window.setTimeout(() => {
+      reveal.finish();
+      finalizedRef.current = `${finalizedRef.current} ${next}`.trim();
+      spokenRef.current = finalizedRef.current;
+      emitCaption("");
+      state.running = false;
+      state.reveal = null;
+      pumpPaced();
+    }, estimatedSpeechMs(next) + 120);
+  }, [emitCaption]);
+
+  const queuePaced = useCallback((text: string) => {
+    const clean = cleanForSpeech(text);
+    if (!clean) return;
+    pacedRef.current.queue.push(clean);
+    pumpPaced();
+  }, [pumpPaced]);
+
+  const stopPaced = useCallback(() => {
+    pacedRef.current.reveal?.cancel();
+    pacedRef.current = { reveal: null, queue: [], running: false };
+  }, []);
 
   /** One authenticated backend voice call per spoken thought. */
   const fetchAudio = useCallback(async (text: string, signal: AbortSignal): Promise<AudioResult> => {
@@ -105,9 +160,15 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     const q = new SpeechQueue({
       fetchAudio,
       beatMs: profile.beatMs,
+      onChunkStart: () => {
+        // New thought: the caption starts empty and fills in as it is spoken.
+        emitCaption("");
+      },
+      onChunkReveal: (revealed) => emitCaption(revealed),
       onChunkSpoken: (text) => {
-        spokenRef.current = `${spokenRef.current} ${text}`.trim();
-        optsRef.current.onSpokenChunk(text);
+        finalizedRef.current = `${finalizedRef.current} ${text}`.trim();
+        spokenRef.current = finalizedRef.current;
+        emitCaption("");
       },
       onSpeakingChange: setSpeaking,
       onDrained: () => optsRef.current.onTurnComplete(),
@@ -121,17 +182,20 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     });
     queueRef.current = q;
     return q;
-  }, [fetchAudio]);
+  }, [fetchAudio, emitCaption]);
 
   /** Opens a new interviewer turn. */
   const beginTurn = useCallback(() => {
     console.info("[voice] starting turn — persona:", optsRef.current.personaId);
     chunkerRef.current = new SentenceChunker();
     spokenRef.current = "";
+    finalizedRef.current = "";
+    stopPaced();
+    optsRef.current.onCaption("");
     setError(null);
     const q = ensureQueue();
     q.reset();
-  }, [ensureQueue]);
+  }, [ensureQueue, stopPaced]);
 
 
   /** Feeds a model delta; complete thoughts are queued for speech. */
@@ -139,32 +203,34 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     const chunks = chunkerRef.current.push(delta);
     if (!chunks.length) return;
     if (!optsRef.current.enabled) {
-      // Voice off: reveal the transcript at the same thought cadence.
-      chunks.forEach((c) => optsRef.current.onSpokenChunk(c));
+      // Voice off: reveal word by word at a natural reading/speaking pace.
+      chunks.forEach(queuePaced);
       return;
     }
     const q = ensureQueue();
     chunks.forEach((c) => q.push(c));
-  }, [ensureQueue]);
+  }, [ensureQueue, queuePaced]);
 
   /** No more deltas — flush the tail and let playback finish. */
   const endTurn = useCallback(() => {
     const tail = chunkerRef.current.flush();
     if (!optsRef.current.enabled) {
-      tail.forEach((c) => optsRef.current.onSpokenChunk(c));
-      optsRef.current.onTurnComplete();
+      tail.forEach(queuePaced);
+      pacedRef.current.ended = true;
+      pumpPaced();
       return;
     }
     const q = ensureQueue();
     tail.forEach((c) => q.push(c));
     q.end();
-  }, [ensureQueue]);
+  }, [ensureQueue, queuePaced, pumpPaced]);
 
   /** Barge-in / end of session: silence the interviewer immediately. */
   const stop = useCallback(() => {
     queueRef.current?.stop();
+    stopPaced();
     setSpeaking(false);
-  }, []);
+  }, [stopPaced]);
 
   /** Replays already-generated interviewer text without making another AI call. */
   const retryTurn = useCallback((text: string) => {
@@ -174,6 +240,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   }, [beginTurn, endTurn, pushDelta]);
 
   useEffect(() => () => {
+    pacedRef.current.reveal?.cancel();
     queueRef.current?.stop();
     queueRef.current = null;
   }, []);
