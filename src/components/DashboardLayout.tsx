@@ -52,7 +52,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             }}
             transition={{ duration: reduced ? duration.micro : duration.base, ease: easeOut }}
             className={cn(
-              "glass-bar sticky top-0 z-30 flex shrink-0 items-center justify-between gap-3 px-4 transition-[backdrop-filter,box-shadow,background-color] duration-300",
+              "glass-bar sticky top-0 z-30 flex shrink-0 items-center justify-between gap-3 px-4 sm:px-6 transition-[backdrop-filter,box-shadow,background-color] duration-300",
               scrolled
                 ? "border-b border-border/80 shadow-[0_10px_30px_-24px_hsl(var(--foreground)/0.55)] backdrop-blur-2xl"
                 : "border-b border-transparent backdrop-blur-md",
