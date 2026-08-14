@@ -35,10 +35,12 @@ export const DEEP = "#0B1C22";
 // 512 unit grid. Outer squircle 44..468 (424 module), counter offset up 10.
 const O = { x: 44, y: 44, s: 424, r: 134 };
 const I = { x: 128, y: 118, s: 256, r: 74 };
-// Mouth: removes the upper-right arm, terminating on a 34° slope.
-const MOUTH = "M 262 214 L 352 150 L 512 150 L 512 268 L 262 268 Z";
-// Crossbar: y 268..330, overshooting the outer edge (468) to 496.
-const BAR = { x: 296, y: 268, w: 200, h: 62, r: 10 };
+// Mouth: opens the right side. The upper arm terminates on a rising slope
+// (low inside, high at the outer edge) — the ascent cue, read as craft not arrow.
+const MOUTH = "M 384 180 L 468 140 L 512 140 L 512 244 L 262 244 L 262 180 Z";
+// Crossbar: overshoots the outer edge (468) by one module — the interruption.
+const BAR = { x: 296, y: 244, w: 190, h: 64, r: 10 };
+
 
 function rounded({ x, y, s, r }) {
   return `M ${x + r} ${y} H ${x + s - r} A ${r} ${r} 0 0 1 ${x + s} ${y + r} V ${y + s - r} A ${r} ${r} 0 0 1 ${x + s - r} ${y + s} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + s - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
