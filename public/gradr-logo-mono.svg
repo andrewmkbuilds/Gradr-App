@@ -9,6 +9,6 @@
     </mask>
   </defs>
   <rect width="512" height="512" fill="currentColor" mask="url(#mono-ring)"/>
-  <path d="M 276 252 H 470 V 316 H 276 A 18 18 0 0 1 258 298 V 270 A 18 18 0 0 1 276 252 Z" fill="currentColor"/>
+  <path d="M 276 252 H 468 V 316 H 276 A 18 18 0 0 1 258 298 V 270 A 18 18 0 0 1 276 252 Z" fill="currentColor"/>
   <path d="M 276 252 H 346 V 316 H 276 A 18 18 0 0 1 258 298 V 270 A 18 18 0 0 1 276 252 Z" fill="currentColor"/>
 </svg>
