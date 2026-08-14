@@ -646,18 +646,23 @@ function InterviewEngineInner() {
         // token is never mistaken for a provider outage, then replay the same
         // turn through the same voice provider — never a silent fallback.
         setConnecting(true);
-        setConnectionErrorDismissed(false);
-        setStreamFailed(false);
-        setVoiceError(null);
-        interviewer.clearError();
-        const generatedTurn = generatedTurnRef.current.trim();
-        if (generatedTurn) {
-          spokenRef.current = "";
-          setSpoken("");
-          interviewer.retryTurn(generatedTurn);
-        } else {
-          void runTurn(messagesRef.current);
-        }
+        void reconnectVoiceSession()
+          .catch(() => null)
+          .finally(() => {
+            setConnecting(false);
+            setConnectionErrorDismissed(false);
+            setStreamFailed(false);
+            setVoiceError(null);
+            interviewer.clearError();
+            const generatedTurn = generatedTurnRef.current.trim();
+            if (generatedTurn) {
+              spokenRef.current = "";
+              setSpoken("");
+              interviewer.retryTurn(generatedTurn);
+            } else {
+              void runTurn(messagesRef.current);
+            }
+          });
       }}
 
       onEnd={() => void endAndScore()}
