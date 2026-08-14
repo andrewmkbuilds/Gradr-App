@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none" role="img" aria-label="Gradr">
   <title>Gradr</title>
   <defs>
-    <clipPath id="gradr-summit-a"><path d="M -520 8 L -64 8 L -64 -80 L 64 -80 L 64 -168 L 520 -168 L 520 -620 L -520 -620 Z"/></clipPath>
-    <mask id="gradr-channel-a" maskUnits="userSpaceOnUse" x="-300" y="-300" width="600" height="600">
+    <clipPath id="gradr-summit-b"><path d="M -520 8 L -64 8 L -64 -80 L 64 -80 L 64 -168 L 520 -168 L 520 -620 L -520 -620 Z"/></clipPath>
+    <mask id="gradr-channel-b" maskUnits="userSpaceOnUse" x="-300" y="-300" width="600" height="600">
       <rect x="-300" y="-300" width="600" height="600" fill="#fff"/>
       <path d="M -520 23 L -64 23 L -64 -65 L 64 -65 L 64 -153 L 520 -153 L 520 -183 L 64 -183 L 64 -95 L -64 -95 L -64 -7 L -520 -7 Z" fill="#000"/>
     </mask>
   </defs>
   <g transform="translate(512 0) scale(-1 1)">
     <g transform="translate(256 256)">
-      <g mask="url(#gradr-channel-a)">
-        <rect x="-230" y="-230" width="460" height="460" rx="116" ry="116" fill="#245F73"/>
-        <g clip-path="url(#gradr-summit-a)"><rect x="-230" y="-230" width="460" height="460" rx="116" ry="116" fill="#733E24"/></g>
+      <g mask="url(#gradr-channel-b)">
+        <rect x="-230" y="-230" width="460" height="460" rx="116" ry="116" fill="#3A8AA3"/>
+        <g clip-path="url(#gradr-summit-b)"><rect x="-230" y="-230" width="460" height="460" rx="116" ry="116" fill="#A2593A"/></g>
       </g>
     </g>
   </g>
