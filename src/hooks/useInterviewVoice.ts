@@ -65,6 +65,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
         body: JSON.stringify({
           text,
           personaId: optsRef.current.personaId,
+          environment: import.meta.env.VITE_PAYMENTS_ENVIRONMENT === "live" ? "live" : "sandbox",
           previousText: spokenRef.current.slice(-400),
         }),
       });
@@ -162,10 +163,17 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     setSpeaking(false);
   }, []);
 
+  /** Replays already-generated interviewer text without making another AI call. */
+  const retryTurn = useCallback((text: string) => {
+    beginTurn();
+    pushDelta(text);
+    endTurn();
+  }, [beginTurn, endTurn, pushDelta]);
+
   useEffect(() => () => {
     queueRef.current?.stop();
     queueRef.current = null;
   }, []);
 
-  return { speaking, error, clearError: () => setError(null), beginTurn, pushDelta, endTurn, stop };
+  return { speaking, error, clearError: () => setError(null), beginTurn, pushDelta, endTurn, retryTurn, stop };
 }

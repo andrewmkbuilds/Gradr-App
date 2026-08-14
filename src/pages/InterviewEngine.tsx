@@ -79,6 +79,8 @@ function InterviewEngineInner() {
 
   const messagesRef = useRef<Msg[]>([]);
   const spokenRef = useRef("");
+  const generatedTurnRef = useRef("");
+  const studioVoiceAllowedRef = useRef(false);
   const voiceModeRef = useRef(voiceMode);
   const handsFreeRef = useRef(true);
   const silenceTimer = useRef<number | null>(null);
@@ -100,7 +102,7 @@ function InterviewEngineInner() {
   // ---- Interviewer voice ---------------------------------------------------
   const interviewer = useInterviewVoice({
     personaId,
-    enabled: voiceMode,
+    enabled: voiceMode && studioVoiceAllowedRef.current,
     onSpokenChunk: (text) => {
       spokenRef.current = spokenRef.current ? `${spokenRef.current} ${text}` : text;
       setSpoken(spokenRef.current);
@@ -119,9 +121,7 @@ function InterviewEngineInner() {
       }
     },
     onVoiceError: (reason) => {
-      // No silent substitute voice — the candidate is told and can retry.
-      spokenRef.current = "";
-      setSpoken("");
+      // Preserve both the generated turn and already-spoken caption for exact retry.
       setVoiceError(reason);
       setConnectionErrorDismissed(false);
     },
@@ -172,6 +172,7 @@ function InterviewEngineInner() {
     }
 
     spokenRef.current = "";
+    generatedTurnRef.current = "";
     setSpoken("");
     interviewerRef.current.beginTurn();
 
@@ -220,7 +221,10 @@ function InterviewEngineInner() {
           const parsed = JSON.parse(json);
           const content = parsed.choices?.[0]?.delta?.content;
           // Speech and captions both flow from here — nothing is revealed early.
-          if (content) interviewerRef.current.pushDelta(content);
+          if (content) {
+            generatedTurnRef.current += content;
+            interviewerRef.current.pushDelta(content);
+          }
         } catch { /* partial JSON */ }
       }
     }
@@ -257,10 +261,14 @@ function InterviewEngineInner() {
       try { payload = await (error as any)?.context?.json?.(); } catch { /* not json */ }
       if (payload?.limits) {
         setLimits({ ...payload.limits, sessionsRemaining: null });
+        studioVoiceAllowedRef.current = Boolean(payload.limits.studioVoice);
       }
       return payload?.reason ? String(payload.reason) : null;
     }
-    if (data?.limits) setLimits({ ...data.limits, sessionsRemaining: null });
+    if (data?.limits) {
+      setLimits({ ...data.limits, sessionsRemaining: null });
+      studioVoiceAllowedRef.current = Boolean(data.limits.studioVoice);
+    }
     return null;
   };
 
@@ -625,7 +633,14 @@ function InterviewEngineInner() {
         setStreamFailed(false);
         setVoiceError(null);
         interviewer.clearError();
-        void runTurn(messagesRef.current);
+        const generatedTurn = generatedTurnRef.current.trim();
+        if (generatedTurn) {
+          spokenRef.current = "";
+          setSpoken("");
+          interviewer.retryTurn(generatedTurn);
+        } else {
+          void runTurn(messagesRef.current);
+        }
       }}
 
       onEnd={() => void endAndScore()}

@@ -53,6 +53,14 @@ const ENTITLEMENTS: Record<string, Entitlement> = {
     personas: null,
     difficulties: null,
   },
+  advanced: {
+    tier: "pro",
+    studioVoice: true,
+    sessionsPerMonth: null,
+    maxSessionMinutes: 45,
+    personas: null,
+    difficulties: null,
+  },
 };
 
 function json(body: unknown, status = 200) {

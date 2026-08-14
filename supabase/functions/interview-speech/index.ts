@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { planTier, resolveEnv } from "../_shared/entitlements.ts";
 
 /**
  * Interviewer speech (ElevenLabs).
@@ -110,7 +111,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    console.info("[ElevenLabs] Initializing realtime session");
+    console.info("[ElevenLabs] Initializing streamed TTS request");
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       console.error("[ElevenLabs] Session creation: failed — missing app authorization");
@@ -131,6 +132,11 @@ serve(async (req) => {
     if (rateLimited(user.id)) return json({ error: "rate_limited" }, 429);
 
     const body = await req.json().catch(() => ({}));
+    const tier = await planTier(user.id, resolveEnv(body.environment));
+    if (!new Set(["starter", "pro", "advanced"]).has(tier)) {
+      console.warn("[ElevenLabs] Speech denied — studio voice entitlement required", { userId: user.id, tier });
+      return json({ error: "studio_voice_not_entitled", reason: "Studio voice requires a paid plan." }, 403);
+    }
     const text = typeof body.text === "string" ? body.text.trim().slice(0, 1200) : "";
     if (!text) return json({ error: "text is required" }, 400);
 
@@ -168,7 +174,7 @@ serve(async (req) => {
       const detail = safeProviderDetail(rawDetail);
       console.error("[ElevenLabs] API authentication:", status === 401 ? "failure" : "provider responded");
       console.error("[ElevenLabs] Session creation: failure", { status, detail });
-      console.error("[ElevenLabs] WebSocket connection: failed — streaming HTTP request did not open");
+      console.error("[ElevenLabs] HTTP stream: failed to open");
       console.error("[ElevenLabs] Audio stream: failed", { status, detail });
       return json(
         { error: "tts_failed", status, reason: detail },
@@ -178,7 +184,7 @@ serve(async (req) => {
 
     console.info("[ElevenLabs] API authentication: success");
     console.info("[ElevenLabs] Session creation: success");
-    console.info("[ElevenLabs] WebSocket connection: connected (HTTP streaming transport)");
+    console.info("[ElevenLabs] HTTP stream: connected");
     console.info("[ElevenLabs] Audio stream: started");
 
     return new Response(res.body, {
