@@ -331,7 +331,10 @@ function resolveSurfaceMeta(
  * the home surface keeps the existing per-path rules.
  */
 function isSurfaceNoIndex(surface: Surface, path: string): boolean {
-  if (surface === "marketing" || surface === "news" || surface === "docs") return false;
+  if (surface === "marketing" || surface === "news" || surface === "docs") {
+    // Unknown paths render the in-surface 404 — never let those be indexed.
+    return resolveSurfaceMeta(surface, path) === null;
+  }
   if (surface === "affiliates") return !(path === "/" || path === "/join");
   return isNoIndex(path);
 }
