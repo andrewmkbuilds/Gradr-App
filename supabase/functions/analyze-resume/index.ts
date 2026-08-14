@@ -4,6 +4,7 @@ import { scoreResume, deterministicSuggestions } from "../_shared/resumeScoring.
 import { consume, paymentRequired, refund, resolveEnv, type PaymentEnv } from "../_shared/entitlements.ts";
 import { logAiAuthorization } from "../_shared/securityAudit.ts";
 import { sseResponse, streamGatewayChat } from "../_shared/aiStream.ts";
+import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
 
 
 const corsHeaders = {
@@ -11,21 +12,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Per-user sliding window rate limit (in-memory, per instance)
+// Per-user sliding window rate limit (durable, shared across instances)
+const ENDPOINT = "analyze-resume";
 const RATE_LIMIT = 10;
-const WINDOW_MS = 60_000;
-const userHits = new Map<string, number[]>();
+const WINDOW_SECONDS = 60;
 
-function checkRateLimit(userId: string): { ok: boolean; retryAfter?: number } {
-  const now = Date.now();
-  const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
-  if (hits.length >= RATE_LIMIT) {
-    const retryAfter = Math.ceil((WINDOW_MS - (now - hits[0])) / 1000);
-    return { ok: false, retryAfter };
-  }
-  hits.push(now);
-  userHits.set(userId, hits);
-  return { ok: true };
+/** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
+async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter?: number }> {
+  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+  return { ok: r.allowed, retryAfter: r.retry_after };
 }
 
 serve(async (req) => {
@@ -55,7 +50,7 @@ serve(async (req) => {
       });
     }
 
-    const rl = checkRateLimit(user.id);
+    const rl = await checkRateLimit(user.id);
     if (!rl.ok) {
       return new Response(
         JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }),

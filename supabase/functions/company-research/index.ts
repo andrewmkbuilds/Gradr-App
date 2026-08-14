@@ -10,9 +10,9 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+const ENDPOINT = "company-research";
 const RATE_LIMIT = 10;
-const WINDOW_MS = 60_000;
-const hitsByUser = new Map<string, number[]>();
+const WINDOW_SECONDS = 60;
 
 const RESEARCH_SCHEMA = {
   type: "object",
@@ -44,13 +44,11 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return json({ error: "Unauthorized", code: "unauthorized" }, 401);
 
-    const now = Date.now();
-    const hits = (hitsByUser.get(user.id) || []).filter((t) => now - t < WINDOW_MS);
-    if (hits.length >= RATE_LIMIT) {
+    // Durable, cross-instance limit; fails closed (see _shared/rateLimit.ts).
+    const rl = await durableRateLimit(user.id, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+    if (!rl.allowed) {
       return json({ error: "Too many research requests. Try again in a minute.", code: "rate_limited" }, 429);
     }
-    hits.push(now);
-    hitsByUser.set(user.id, hits);
 
     const body = await req.json().catch(() => ({}));
     const company = typeof body.company === "string" ? body.company.trim().slice(0, 120) : "";

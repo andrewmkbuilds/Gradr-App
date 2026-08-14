@@ -1,20 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const ENDPOINT = "recommend-jobs";
 const RATE_LIMIT = 10;
-const WINDOW_MS = 60_000;
-const userHits = new Map<string, number[]>();
-function checkRateLimit(userId: string) {
-  const now = Date.now();
-  const hits = (userHits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
-  if (hits.length >= RATE_LIMIT) return { ok: false, retryAfter: Math.ceil((WINDOW_MS - (now - hits[0])) / 1000) };
-  hits.push(now); userHits.set(userId, hits);
-  return { ok: true as const };
+const WINDOW_SECONDS = 60;
+
+/** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
+async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter?: number }> {
+  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+  return { ok: r.allowed, retryAfter: r.retry_after };
 }
 
 serve(async (req) => {
@@ -32,7 +32,7 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const rl = checkRateLimit(user.id);
+    const rl = await checkRateLimit(user.id);
     if (!rl.ok) return new Response(JSON.stringify({ error: `Rate limit. Retry in ${rl.retryAfter}s.` }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const { jobs, resumeText } = await req.json();
