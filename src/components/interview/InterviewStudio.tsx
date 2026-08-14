@@ -157,11 +157,18 @@ export function InterviewStudio(props: Props) {
         {connectionLost && onDismissConnectionError && (
           <ConnectionErrorOverlay
             open
+            title="Interviewer voice unavailable"
+            message={
+              connectionErrorDetail
+                ? `Your transcript is safe. The voice engine stopped this turn: ${connectionErrorDetail}. Retry the turn, or continue by typing.`
+                : "Your transcript is safe. Reconnect to carry on with voice, or keep going by typing your answers."
+            }
             retrying={connecting}
             onRetry={onReconnect}
             onDismiss={onDismissConnectionError}
           />
         )}
+
         {/* ---------- Header ---------- */}
         <motion.header
           initial={reduced ? false : { opacity: 0, y: -12 }}
