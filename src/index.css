@@ -328,6 +328,36 @@
 }
 
 @layer utilities {
+  /* ---------- Alignment system ----------
+     One horizontal rhythm for the whole site. Every header, section, footer
+     and page body uses the same max width AND the same gutters, so logos,
+     headings and content share one optical left/right edge at every
+     breakpoint. Padding lives INSIDE the max-width box on purpose — putting
+     it outside shifts content relative to containers that don't. */
+  .page-shell {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 72rem; /* = max-w-6xl */
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .page-shell { padding-inline: 2rem; }
+  }
+  /* Narrower reading column that stays on the same left edge as .page-shell. */
+  .page-shell-prose { max-width: 72rem; }
+  .page-shell-prose > * { max-width: 64rem; }
+
+  /* Perfectly centred square box for icons, avatars and logo marks.
+     Uses grid place-items so the glyph is centred on both axes regardless of
+     line-height or the icon's own baseline. */
+  .icon-box {
+    display: grid;
+    place-items: center;
+    flex: none;
+    line-height: 1;
+  }
+  .icon-box > svg { display: block; }
+
   /* ---------- Typography scale ---------- */
   .text-display {
     font-size: clamp(2.5rem, 6vw, 4.25rem);
