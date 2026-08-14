@@ -257,7 +257,7 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
   await billingEmail("payment-failed", await emailFor(target, env), `pay-failed-${data?.id ?? subscriptionId}`, {
     amount: formatMoney(data?.details?.totals?.total, data?.currencyCode ?? "USD"),
     failedAt: formatDate(data?.updatedAt ?? new Date().toISOString()),
-    updatePaymentUrl: "https://gradr.me/billing",
+    updatePaymentUrl: "https://app.gradr.me/billing",
   });
 }
 
