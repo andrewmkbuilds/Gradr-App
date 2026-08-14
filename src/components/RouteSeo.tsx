@@ -232,8 +232,20 @@ function isNoIndex(pathname: string): boolean {
 }
 
 export function RouteSeo() {
-  const { pathname } = useLocation();
-  const meta = META[canonicalPath(pathname)] ??
+  const { pathname: rawPathname } = useLocation();
+
+  // Each subdomain is its own SEO surface: metadata, canonical host and robots
+  // behaviour are resolved from the surface, never hard-coded to gradr.me.
+  const surface = currentSurface(rawPathname);
+  const base = surfaceBase(surface);
+  // On shared hosts (dev/preview) surfaces sit behind a path prefix. Strip it so
+  // canonicals always describe the real production URL.
+  const pathname =
+    base && rawPathname.startsWith(base) ? rawPathname.slice(base.length) || "/" : rawPathname;
+
+  const surfaceMeta = resolveSurfaceMeta(surface, canonicalPath(pathname));
+  const meta = surfaceMeta ??
+    META[canonicalPath(pathname)] ??
     resolveDynamicMeta(canonicalPath(pathname)) ?? {
       title: "AI Career Copilot for Resumes, Jobs & Interviews",
       description:
@@ -242,13 +254,20 @@ export function RouteSeo() {
   // Only the homepage uses the brand-first title; every other route (including
   // /landing) gets its own distinct title so titles and og:title never collide.
   const fullTitle =
-    pathname === "/" ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews" : `${meta.title} — ${SITE}`;
+    pathname === "/" && surface === "home"
+      ? "Gradr | AI Career Copilot for Resumes, Jobs & Interviews"
+      : `${meta.title} — ${SITE}`;
   // Canonical always points at the normalised path (lowercase, no trailing
-  // slash, aliases resolved) so URL variants never split indexing signals.
+  // slash, aliases resolved) on this surface's own production origin, so
+  // docs.gradr.me never canonicalises to gradr.me and vice versa.
   const canonical = canonicalPath(pathname);
-  const url = `${ORIGIN}${canonical}`;
+  // app.gradr.me is a private product surface: it is fully noindexed, and any
+  // public page reachable there points its canonical at the public host.
+  const canonicalSurface: Surface = surface === "app" ? "home" : surface;
+  const url = canonicalUrlFor(canonicalSurface, canonical);
   const ogImage = resolveOgImage(canonical);
-  const noindex = isNoIndex(canonical);
+  const noindex = surface === "app" || isSurfaceNoIndex(surface, canonical);
+
 
   // index.html ships a full static SEO head so crawlers that never execute
   // JavaScript still read correct Gradr metadata. react-helmet-async only
