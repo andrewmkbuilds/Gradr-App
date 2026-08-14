@@ -119,21 +119,25 @@ export default function AdminHome() {
     refetchInterval: 60_000,
     queryFn: async () => {
       const since = new Date(Date.now() - 7 * 864e5).toISOString();
-      const [subs, pastDue, findings, verifications, deliveries, lastScan] = await Promise.all([
+      const lastScan = await supabase.from("security_scan_runs")
+        .select("id, scanned_at, finding_count")
+        .order("scanned_at", { ascending: false }).limit(1).maybeSingle();
+
+      const [subs, pastDue, findings, verifications, deliveries] = await Promise.all([
         supabase.from("subscribers").select("user_id", { count: "exact", head: true })
           .eq("environment", env).eq("subscribed", true),
         supabase.from("subscribers").select("user_id", { count: "exact", head: true })
           .eq("environment", env).in("subscription_status", ["past_due", "unpaid"]),
-        supabase.from("security_scan_findings").select("internal_id, level, status"),
+        lastScan.data?.id
+          ? supabase.from("security_scan_findings").select("level").eq("run_id", lastScan.data.id)
+          : Promise.resolve({ data: [] as { level: string }[] }),
         supabase.from("eligibility_verifications").select("id", { count: "exact", head: true })
           .eq("status", "pending"),
         supabase.from("webhook_deliveries").select("state").gte("created_at", since),
-        supabase.from("security_scan_runs").select("scanned_at, finding_count")
-          .order("scanned_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
 
       const openCritical = (findings.data ?? []).filter(
-        (f) => f.level === "error" && f.status !== "resolved" && f.status !== "ignored",
+        (f) => f.level === "error",
       ).length;
       const failedWebhooks = (deliveries.data ?? []).filter((d) => d.state === "failed").length;
 
@@ -190,7 +194,7 @@ export default function AdminHome() {
 
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div>
-          <p className={typography.cardTitle}>Security scan</p>
+          <p className={typography.h4}>Security scan</p>
           <p className="text-sm text-muted-foreground">
             {data?.lastScanAt
               ? `Last run ${formatDistanceToNow(new Date(data.lastScanAt), { addSuffix: true })} · ${data.lastScanFindings ?? 0} findings`
@@ -207,7 +211,7 @@ export default function AdminHome() {
 
       {SECTIONS.map((section) => (
         <section key={section.group} className="space-y-3">
-          <h2 className={cn(typography.sectionTitle, "text-foreground")}>{section.group}</h2>
+          <h2 className={cn(typography.h3, "text-foreground")}>{section.group}</h2>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {section.links.map((link) => (
               <Link key={link.url} to={link.url} className="group focus-visible:outline-none">
