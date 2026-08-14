@@ -52,6 +52,17 @@
     />
     <link rel="preconnect" href="https://xaeyjrekewnwjujnrqgu.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://xaeyjrekewnwjujnrqgu.supabase.co" />
+    <!--
+      Content Security Policy — REPORT-ONLY.
+      Scoped to the origins Gradr actually uses (Supabase/Cloud, Google OAuth,
+      Paddle, PostHog, Sentry, Google Fonts, PWA worker/blob URLs). Violations
+      are surfaced through src/lib/security/cspReport.ts. Do NOT switch this to
+      enforcing before the reports are clean for a full release cycle.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy-Report-Only"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.paddle.com https://sandbox-cdn.paddle.com https://*.paddle.com https://*.posthog.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: data: https:; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://*.lovable.cloud wss://*.lovable.cloud https://oauth.lovable.app https://accounts.google.com https://*.paddle.com https://*.posthog.com https://*.ingest.sentry.io https://*.sentry.io; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'self' https://*.paddle.com https://accounts.google.com https://oauth.lovable.app; manifest-src 'self'; base-uri 'self'; form-action 'self' https://accounts.google.com; object-src 'none'"
+    />
     <title>Gradr | AI Career Copilot for Resumes, Jobs &amp; Interviews</title>
     <meta name="description" content="Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace." />
     <link rel="canonical" href="https://gradr.me/" />

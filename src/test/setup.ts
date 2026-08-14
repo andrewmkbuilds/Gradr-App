@@ -13,3 +13,8 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+
+// jsdom does not implement scrolling; nav/motion code calls it imperatively.
+if (!Element.prototype.scrollIntoView) Element.prototype.scrollIntoView = () => {};
+if (!Element.prototype.scrollTo) Element.prototype.scrollTo = () => {};
+if (typeof window !== "undefined") window.scrollTo = () => {};

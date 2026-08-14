@@ -2388,6 +2388,66 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_flow_events: {
+        Row: {
+          account_type: string
+          created_at: string
+          destination_url: string | null
+          deviation: boolean
+          deviation_type: string | null
+          final_url: string | null
+          hop_index: number
+          id: string
+          metadata: Json
+          nonce_result: string
+          note: string | null
+          provider: string
+          request_id: string
+          source_url: string | null
+          stage: string
+          state_result: string
+          user_id: string | null
+        }
+        Insert: {
+          account_type?: string
+          created_at?: string
+          destination_url?: string | null
+          deviation?: boolean
+          deviation_type?: string | null
+          final_url?: string | null
+          hop_index?: number
+          id?: string
+          metadata?: Json
+          nonce_result?: string
+          note?: string | null
+          provider?: string
+          request_id: string
+          source_url?: string | null
+          stage: string
+          state_result?: string
+          user_id?: string | null
+        }
+        Update: {
+          account_type?: string
+          created_at?: string
+          destination_url?: string | null
+          deviation?: boolean
+          deviation_type?: string | null
+          final_url?: string | null
+          hop_index?: number
+          id?: string
+          metadata?: Json
+          nonce_result?: string
+          note?: string | null
+          provider?: string
+          request_id?: string
+          source_url?: string | null
+          stage?: string
+          state_result?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       oauth_header_checks: {
         Row: {
           created_at: string
@@ -4123,6 +4183,7 @@ export type Database = {
         }
         Returns: string
       }
+      redact_oauth_url: { Args: { _url: string }; Returns: string }
       refund_entitlement: {
         Args: {
           _amount?: number

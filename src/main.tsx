@@ -8,8 +8,10 @@ import "./index.css";
 import { initTelemetry } from "./lib/telemetry/journey";
 import RootErrorBoundary from "./components/RootErrorBoundary";
 import { registerServiceWorker } from "./lib/offline/registerServiceWorker";
+import { initCspReporting } from "./lib/security/cspReport";
 
 initTelemetry();
+initCspReporting();
 registerServiceWorker();
 
 createRoot(document.getElementById("root")!).render(

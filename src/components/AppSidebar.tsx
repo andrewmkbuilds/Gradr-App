@@ -46,7 +46,7 @@ const activeRow =
 export function AppSidebar() {
   const { state, toggleSidebar, isMobile, setOpenMobile, openMobile } = useSidebar();
   const collapsed = state === "collapsed" && !isMobile;
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const { signOut } = useAuth();
   const { data: isAdmin } = useIsAdmin();
   const navRef = useRef<HTMLElement>(null);
@@ -65,6 +65,15 @@ export function AppSidebar() {
     const active = navGroups.find((g) => isGroupActive(g, pathname));
     if (active) setOpenGroups((prev) => (prev.includes(active.id) ? prev : [...prev, active.id]));
   }, [pathname]);
+
+  // Close the mobile drawer whenever the location actually changes. The click
+  // handlers below also close it, but this makes the behaviour race-free for
+  // keyboard activation, rapid consecutive taps and browser back/forward:
+  // the drawer state is driven by the URL, never by a single event.
+  useEffect(() => {
+    if (isMobile) setOpenMobile(false);
+    // `location.key` would remount-loop; pathname+hash is the navigation signal.
+  }, [pathname, hash, isMobile, setOpenMobile]);
 
   const setGroupOpen = (groupId: string, open: boolean) => {
     const group = navGroups.find((g) => g.id === groupId);

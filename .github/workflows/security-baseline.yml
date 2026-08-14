@@ -55,3 +55,24 @@ jobs:
           RUN_HEADER_CHECKS: "1"
           SECURITY_HEADERS_TARGET: https://gradr.me
         run: bunx vitest run src/test/securityHeaders.test.ts
+
+  oauth-flow:
+    name: Daily Google OAuth flow check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Verify the Google sign-in flow end to end (unauthenticated half)
+        env:
+          OAUTH_FLOW_TARGET: https://gradr.me
+        run: node scripts/test-oauth-flow.mjs

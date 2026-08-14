@@ -12,6 +12,7 @@ import {
   consumeAuthCallbackError,
   readNext,
 } from "@/lib/nextRedirect";
+import { clearRequestId, recordOAuthHop } from "@/lib/oauth/forensics";
 import { toast } from "sonner";
 import { z } from "zod";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
@@ -61,6 +62,29 @@ export default function Auth() {
     const message = consumeAuthCallbackError();
     if (message) toast.error(message);
   }, []);
+
+  // Forensics: record where the provider actually landed us, and whether the
+  // state/nonce parameters survived the round trip. Runs once per mount, before
+  // `consumeAuthCallbackError` strips anything from the address bar.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+    const has = (key: string) => url.searchParams.has(key) || hash.has(key);
+    const isOAuthLanding = has("code") || has("access_token") || has("state") || has("error");
+    if (!isOAuthLanding) return;
+
+    void recordOAuthHop({
+      stage: "callback",
+      sourceUrl: document.referrer || undefined,
+      destinationUrl: `${url.origin}${url.pathname}`,
+      finalUrl: `${url.origin}${url.pathname}`,
+      stateResult: has("state") ? "ok" : "missing",
+      nonceResult: has("nonce") ? "ok" : "not_applicable",
+      note: has("error") ? "provider returned an error parameter" : "provider callback received",
+    }).finally(clearRequestId);
+  }, []);
+
+
 
   // Belt and braces: AuthRoute redirects once a real session exists, but if this
   // page is ever rendered with one (e.g. session restored after confirmation),
@@ -170,10 +194,28 @@ export default function Auth() {
 
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
+    // Forensics: record the outbound hop before we hand control to the provider.
+    void recordOAuthHop({
+      provider,
+      stage: "initiate",
+      sourceUrl: window.location.href,
+      destinationUrl: postAuthUrl,
+      note: `redirect_uri=${postAuthUrl}`,
+    });
+
     const { error } = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: postAuthUrl,
     });
-    if (error) toast.error(`${provider} sign-in failed`);
+    if (error) {
+      void recordOAuthHop({
+        provider,
+        stage: "deviation",
+        sourceUrl: window.location.href,
+        deviationType: "provider_error",
+        note: "provider sign-in request failed",
+      });
+      toast.error(`${provider} sign-in failed`);
+    }
   };
 
   const handleGuest = async () => {

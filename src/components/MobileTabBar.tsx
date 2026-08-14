@@ -1,7 +1,8 @@
+import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { dashboardItem, navGroups } from "@/config/nav";
-import { trackMobileTab } from "@/lib/navAnalytics";
+import { navPath, trackMobileTab } from "@/lib/navAnalytics";
 
 const primaryIds = ["career", "interview", "growth", "account"];
 
@@ -10,19 +11,32 @@ const primaryIds = ["career", "interview", "growth", "account"];
  * Everything else (More / Admin) stays reachable through the sidebar drawer.
  */
 export function MobileTabBar() {
+  // Active state is derived from the router location on every render, so it is
+  // always in sync with the URL — including back/forward and rapid taps.
   const { pathname } = useLocation();
-  const groups = navGroups.filter((g) => primaryIds.includes(g.id));
+  const groups = useMemo(() => navGroups.filter((g) => primaryIds.includes(g.id)), []);
 
-  const tabs = [
-    { id: "dashboard", title: dashboardItem.title, url: dashboardItem.url, icon: dashboardItem.icon, paths: ["/"] },
-    ...groups.map((g) => ({
-      id: g.id,
-      title: g.title,
-      url: g.url,
-      icon: g.icon,
-      paths: g.items.map((i) => i.url.split("#")[0]),
-    })),
-  ];
+  const tabs = useMemo(
+    () => [
+      {
+        id: "dashboard",
+        title: dashboardItem.title,
+        url: dashboardItem.url,
+        icon: dashboardItem.icon,
+        paths: ["/"],
+      },
+      ...groups.map((g) => ({
+        id: g.id,
+        title: g.title,
+        url: g.url,
+        icon: g.icon,
+        // Hash-only subtabs share their parent route, so compare paths only.
+        paths: [navPath(g.url), ...g.items.map((i) => navPath(i.url))],
+      })),
+    ],
+    [groups],
+  );
+
 
   return (
     <nav
