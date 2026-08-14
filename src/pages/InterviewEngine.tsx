@@ -249,6 +249,7 @@ function InterviewEngineInner() {
 
   /** Reads plan limits so the studio can gate length, personas and voice. */
   const loadLimits = async (ctx: SessionContext) => {
+    studioVoiceAllowedRef.current = false;
     const { data, error } = await supabase.functions.invoke("interview-session", {
       body: {
         environment: getPaddleEnvironment(),
