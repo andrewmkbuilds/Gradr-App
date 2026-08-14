@@ -529,9 +529,17 @@ export default function JobsFeed() {
                           ${job.salary_min ? Math.round(job.salary_min / 1000) + "k" : "?"} – ${job.salary_max ? Math.round(job.salary_max / 1000) + "k" : "?"}
                         </Badge>
                       )}
-                      <Badge variant="outline" className="text-xs">
-                        {formatDistanceToNow(new Date(job.posted_at), { addSuffix: true })}
-                      </Badge>
+                      {job.posted_at && !Number.isNaN(new Date(job.posted_at).getTime()) && (
+                        <Badge variant="outline" className="text-xs">
+                          {formatDistanceToNow(new Date(job.posted_at), { addSuffix: true })}
+                        </Badge>
+                      )}
+                      {job.source === "jobmaps" && (
+                        <Badge variant="outline" className="text-xs border-accent/40 text-accent">
+                          JobMaps · CH
+                        </Badge>
+                      )}
+
                       {typeof job.match_score === "number" && (
                         <Badge className="text-xs bg-primary/15 text-primary border-primary/30 hover:bg-primary/20">
                           <Sparkles className="h-3 w-3 mr-1" /> {job.match_score}% match
