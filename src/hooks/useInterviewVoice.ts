@@ -167,5 +167,5 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     queueRef.current = null;
   }, []);
 
-  return { speaking, degraded, beginTurn, pushDelta, endTurn, stop };
+  return { speaking, error, clearError: () => setError(null), beginTurn, pushDelta, endTurn, stop };
 }
