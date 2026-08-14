@@ -475,10 +475,33 @@ Deno.serve(async (req) => {
 
   const env = (new URL(req.url).searchParams.get("env") || "sandbox") as PaddleEnv;
 
+  // Delivery ledger id, so a handler failure can be retried/reconciled later.
+  let deliveryEventId: string | null = null;
+
   try {
     const event = await verifyWebhook(req, env);
     // deno-lint-ignore no-explicit-any
     const eventUserId = ((event.data as any)?.customData?.userId ?? null) as string | null;
+
+    // deno-lint-ignore no-explicit-any
+    deliveryEventId = ((event as any)?.eventId ?? null) as string | null;
+    if (deliveryEventId) {
+      await db().from("webhook_deliveries").upsert(
+        {
+          provider: "paddle",
+          event_id: deliveryEventId,
+          event_type: String(event.eventType),
+          environment: env,
+          signature_verified: true,
+          state: "processing",
+          payload: event.data as unknown as Record<string, unknown>,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "event_id" },
+      );
+    }
+
+
 
     await logSecurityEvent({
       category: "billing_webhook",
@@ -545,20 +568,46 @@ Deno.serve(async (req) => {
       source: "payments-webhook",
     });
 
+    if (deliveryEventId) {
+      await db().from("webhook_deliveries").update({
+        state: "processed",
+        processed_at: new Date().toISOString(),
+        last_error: null,
+        updated_at: new Date().toISOString(),
+      }).eq("event_id", deliveryEventId);
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Webhook error:", e);
+    const message = e instanceof Error ? e.message : String(e);
     await logSecurityEvent({
       category: "billing_webhook",
       event: "verification_or_handler_error",
       decision: "failed",
       env,
       source: "payments-webhook",
-      reason: e instanceof Error ? e.message : String(e),
+      reason: message,
     });
+    if (deliveryEventId) {
+      // Left in `failed` for payments-reconcile to repair from the Paddle API.
+      const { data: row } = await db()
+        .from("webhook_deliveries")
+        .select("attempts")
+        .eq("event_id", deliveryEventId)
+        .maybeSingle();
+      await db().from("webhook_deliveries").update({
+        state: "failed",
+        last_error: message.slice(0, 500),
+        attempts: Number(row?.attempts ?? 0) + 1,
+        updated_at: new Date().toISOString(),
+      }).eq("event_id", deliveryEventId);
+    }
+    // Non-2xx makes Paddle retry the delivery on its own schedule.
     return new Response("Webhook error", { status: 400 });
   }
+
 });

@@ -24,6 +24,7 @@ import {
   BarChart3,
   Wallet,
   Activity,
+  Gauge,
   type LucideIcon,
 } from "lucide-react";
 
@@ -114,9 +115,12 @@ export const navGroups: NavGroup[] = [
     id: "admin",
     title: "Admin",
     icon: ShieldCheck,
-    url: "/admin/affiliates",
+    url: "/admin",
     adminOnly: true,
     items: [
+      { title: "Control Room", url: "/admin", icon: LayoutDashboard },
+      { title: "Revenue", url: "/admin/revenue", icon: Wallet },
+      { title: "Usage & AI Cost", url: "/admin/usage", icon: Gauge },
       { title: "Affiliate Admin", url: "/admin/affiliates", icon: Gift },
       { title: "Verifications", url: "/admin/verifications", icon: ShieldCheck },
       { title: "Discounts", url: "/admin/discounts", icon: BadgePercent },

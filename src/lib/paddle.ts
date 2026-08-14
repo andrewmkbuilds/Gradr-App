@@ -134,9 +134,34 @@ export function formatMinorAmount(minor: number, currencyCode: string): string {
  * Localized prices for a set of human-readable price IDs.
  * Returns a map keyed by the human-readable ID.
  */
+/**
+ * Retries a transient payments read a couple of times before giving up.
+ * Pricing must never be blocked by one flaky network hop — callers fall back
+ * to the static USD catalog when this still fails.
+ */
+async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastError: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i < attempts - 1) await new Promise((r) => setTimeout(r, 300 * 2 ** i));
+    }
+  }
+  throw lastError;
+}
+
 export async function previewPrices(
   priceIds: string[],
 ): Promise<Record<string, PreviewedPrice>> {
+  return withRetry(() => previewPricesOnce(priceIds));
+}
+
+async function previewPricesOnce(
+  priceIds: string[],
+): Promise<Record<string, PreviewedPrice>> {
+
   const paddle = await getPaddle();
   const resolved = await Promise.all(
     priceIds.map(async (id) => [id, await getPaddlePriceId(id)] as const),
