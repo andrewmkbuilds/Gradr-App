@@ -33,66 +33,109 @@ export const DEEP = "#0B1C22";
 
 /* ---------------------------------------------------------------- geometry */
 /**
- * 512 unit grid.
- *  outer  — the squircle silhouette (never a circle: that is the ownable part)
- *  inner  — the counter, deliberately off-centre (lifted) so the stroke gains
- *           weight at the base and lightens as it rises
- *  mouth  — a machined rectangular aperture through the right stroke, both
- *           terminals cut on one vertical
- *  bar    — a single crossbar run, capped by the mahogany module
+ * 512 unit grid, optically centred on (256, 256).
+ *
+ *  ring   — a constant-weight annulus cut open on the right. The two terminals
+ *           are radial cuts on a single pair of angles, so the aperture reads
+ *           as machined rather than drawn.
+ *  bar    — the mahogany crossbar of the G, which does not stop at the counter:
+ *           it drives left and resolves into an arrowhead. Its tail exits
+ *           through the aperture and is cut on the ring's own outer curve, so
+ *           the arrow is the G's crossbar rather than a shape laid over it.
  */
 const PRIMARY = {
-  outer: { x: 44, y: 44, s: 424, r: 134 },
-  inner: { x: 128, y: 118, s: 256, r: 74 },
-  mouth: { x: 300, top: 158, bottom: 252 },
-  bar: { x: 258, y: 252, w: 210, h: 64, r: 18, cap: 88 },
+  cx: 256,
+  cy: 256,
+  rOuter: 200,
+  rInner: 133,
+  /** Aperture, in degrees (0° = east, counter-clockwise). */
+  gap: { from: -9.21, to: 40 }, // lower terminal cut flush with the crossbar
+  bar: {
+    half: 32, // shaft half-height
+    tip: 146, // arrowhead tip x
+    wingX: 220, // where the arrowhead meets the shaft
+    wingHalf: 62, // arrowhead half-height
+    tailTop: 418, // tail, upper cut
+    tailBottom: 453.4, // tail, lower cut (sits on the ring's outer curve)
+  },
 };
 
 /**
- * Favicon / small-size build. Same construction, heavier strokes and a tighter
- * aperture so the counter and the mouth still read at 16 px.
+ * Favicon / small-size build. Same construction: heavier stroke, wider
+ * aperture and a broader arrowhead so both still read at 16 px.
  */
 const COMPACT = {
-  outer: { x: 26, y: 26, s: 460, r: 146 },
-  inner: { x: 122, y: 108, s: 268, r: 76 },
-  mouth: { x: 300, top: 150, bottom: 256 },
-  bar: { x: 250, y: 256, w: 236, h: 74, r: 20, cap: 100 },
+  cx: 256,
+  cy: 256,
+  rOuter: 208,
+  rInner: 124,
+  gap: { from: -10.52, to: 44 },
+  bar: {
+    half: 38,
+    tip: 136,
+    wingX: 218,
+    wingHalf: 72,
+    tailTop: 412,
+    tailBottom: 460.5,
+  },
 };
 
-function rounded({ x, y, s, r }) {
-  return `M ${x + r} ${y} H ${x + s - r} A ${r} ${r} 0 0 1 ${x + s} ${y + r} V ${y + s - r} A ${r} ${r} 0 0 1 ${x + s - r} ${y + s} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + s - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
+const pt = (cx, cy, r, deg) => {
+  const a = (deg * Math.PI) / 180;
+  return [cx + r * Math.cos(a), cy - r * Math.sin(a)];
+};
+const n = (v) => Math.round(v * 100) / 100;
+
+/**
+ * Open annulus swept counter-clockwise from `from` to `to`, with flat radial
+ * terminals at both ends.
+ */
+function ringPath({ cx, cy, rOuter, rInner, gap }) {
+  const from = gap.to;
+  const to = gap.from + 360;
+  const large = to - from > 180 ? 1 : 0;
+  const [ox0, oy0] = pt(cx, cy, rOuter, from);
+  const [ox1, oy1] = pt(cx, cy, rOuter, to);
+  const [ix1, iy1] = pt(cx, cy, rInner, to);
+  const [ix0, iy0] = pt(cx, cy, rInner, from);
+  return [
+    `M ${n(ox0)} ${n(oy0)}`,
+    `A ${rOuter} ${rOuter} 0 ${large} 0 ${n(ox1)} ${n(oy1)}`,
+    `L ${n(ix1)} ${n(iy1)}`,
+    `A ${rInner} ${rInner} 0 ${large} 1 ${n(ix0)} ${n(iy0)}`,
+    "Z",
+  ].join(" ");
 }
 
-/** Rect with only its left corners rounded — used for the crossbar runs. */
-function leftRounded(x, y, w, h, r) {
-  return `M ${x + r} ${y} H ${x + w} V ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
+/** The crossbar: left-pointing arrowhead, shaft, angled tail. */
+function arrowPath({ cy, bar: b }) {
+  return [
+    `M ${b.tip} ${cy}`,
+    `L ${b.wingX} ${cy - b.wingHalf}`,
+    `L ${b.wingX} ${cy - b.half}`,
+    `L ${b.tailTop} ${cy - b.half}`,
+    `L ${b.tailBottom} ${cy + b.half}`,
+    `L ${b.wingX} ${cy + b.half}`,
+    `L ${b.wingX} ${cy + b.wingHalf}`,
+    "Z",
+  ].join(" ");
 }
 
 /**
  * @param {{ ring: string, bar: string, id?: string, title?: string, geo?: typeof PRIMARY }} opts
  */
-export function symbolSvg({ ring, bar, id = "g", title = "Gradr", geo = PRIMARY }) {
-  const { outer, inner, mouth, bar: b } = geo;
-  const mouthPath = `M ${mouth.x} ${mouth.top} L 512 ${mouth.top} L 512 ${mouth.bottom} L ${mouth.x} ${mouth.bottom} Z`;
+export function symbolSvg({ ring, bar, title = "Gradr", geo = PRIMARY }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="${title}">
   <title>${title}</title>
-  <defs>
-    <mask id="${id}-ring" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-      <rect width="512" height="512" fill="#000"/>
-      <path d="${rounded(outer)}" fill="#fff"/>
-      <path d="${rounded(inner)}" fill="#000"/>
-      <path d="${mouthPath}" fill="#000"/>
-    </mask>
-  </defs>
-  <rect width="512" height="512" fill="${ring}" mask="url(#${id}-ring)"/>
-  <path d="${leftRounded(b.x, b.y, b.w, b.h, b.r)}" fill="${ring}"/>
-  <path d="${leftRounded(b.x, b.y, b.cap, b.h, b.r)}" fill="${bar}"/>
+  <path d="${ringPath(geo)}" fill="${ring}"/>
+  <path d="${arrowPath(geo)}" fill="${bar}"/>
 </svg>`;
 }
 
 export function symbolSvgCompact({ ring, bar, id = "gc" }) {
   return symbolSvg({ ring, bar, id, geo: COMPACT });
 }
+
 
 
 /* ------------------------------------------------------------------ output */
