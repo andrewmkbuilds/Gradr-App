@@ -47,6 +47,15 @@ export function initPostHog() {
 
   applyConsent();
   window.addEventListener("gradr:consent", applyConsent);
+
+  // Verification hook: lets the smoke test (and a developer in the console)
+  // confirm consent state and see the exact events being emitted.
+  (window as unknown as Record<string, unknown>).__gradrAnalytics = {
+    get started() { return started; },
+    get capturing() { return optedIn; },
+    get buffered() { return buffer.map((b) => b.event); },
+    recent: recentEvents,
+  };
 }
 
 function applyConsent() {
@@ -113,8 +122,13 @@ export function phReset() {
   posthog.reset();
 }
 
+/** Rolling in-memory log of emitted events, for local verification only. */
+const recentEvents: { event: string; props?: Record<string, unknown> }[] = [];
+
 export function phCapture(event: string, props?: Record<string, unknown>) {
   if (!started) return;
+  recentEvents.push({ event, props });
+  if (recentEvents.length > 100) recentEvents.shift();
   if (!optedIn) {
     if (buffer.length < BUFFER_LIMIT) buffer.push({ event, props });
     return;
