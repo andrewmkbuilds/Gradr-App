@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { CheckCircle2, Loader2, Mail, ShieldCheck } from "lucide-react";
@@ -182,12 +181,3 @@ export function DomainProofStep({ email, category, proven, onProven, onRequestIn
     </div>
   );
 }
-
-/** Convenience wrapper so callers can await the current proof state. */
-export { checkDomainProof };
-
-/** Hidden input element is unnecessary — kept for API symmetry. */
-export type { Props as DomainProofStepProps };
-
-/** Text input helper reused for tests. */
-export const ProofEmailInput = Input;
