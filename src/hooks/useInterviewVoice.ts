@@ -107,7 +107,13 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
       },
       onSpeakingChange: setSpeaking,
       onDrained: () => optsRef.current.onTurnComplete(),
-      onDegraded: () => setDegraded(true),
+      onFailure: (reason) => {
+        console.error("[ElevenLabs] Turn aborted:", reason);
+        setError(reason);
+        setSpeaking(false);
+        optsRef.current.onVoiceError(reason);
+      },
+
     });
     queueRef.current = q;
     return q;
