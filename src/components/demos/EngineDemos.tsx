@@ -4,11 +4,10 @@ import {
   Award, Braces, Check, FileText, Gauge, Layers, MapPin, Mic, Plus, Rocket,
   Sparkles, Target, TrendingUp, Wand2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/surface";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { usePremiumInteractions } from "@/hooks/usePointerCapability";
-import { duration, easeOut, listItem, springSmooth, springSnappy } from "@/lib/motion/tokens";
+import { duration, easeOut, springSmooth, springSnappy } from "@/lib/motion/tokens";
 import { cn } from "@/lib/utils";
 
 /**
