@@ -25,15 +25,25 @@ import {
   Wallet,
   Activity,
   Gauge,
+  Globe,
+  Newspaper,
   type LucideIcon,
 } from "lucide-react";
+import type { Surface } from "@/config/domains";
 
 export type NavItem = {
   title: string;
+  /** In-surface route path, or the path on `surface` when that is set. */
   url: string;
   icon: LucideIcon;
   /** match nested routes as active */
   matchPrefix?: boolean;
+  /**
+   * Renders the item as a cross-surface link (docs, news, affiliate portal…).
+   * The href is resolved with `urlFor()` so it stays on the current origin in
+   * dev/preview and points at the real subdomain in production.
+   */
+  surface?: Surface;
 };
 
 export type NavGroup = {
@@ -104,11 +114,13 @@ export const navGroups: NavGroup[] = [
     id: "more",
     title: "More",
     icon: Gift,
-    url: "/affiliate",
+    url: "/pricing",
     items: [
-      { title: "Affiliate Program", url: "/affiliate", icon: Gift },
-      { title: "Affiliate Dashboard", url: "/affiliate/dashboard", icon: BarChart3 },
-      { title: "Affiliate Resources", url: "/affiliate/resources", icon: BookOpen },
+      { title: "Affiliate Program", url: "/", icon: Gift, surface: "affiliates" },
+      { title: "Affiliate Dashboard", url: "/dashboard", icon: BarChart3, surface: "affiliates" },
+      { title: "Documentation", url: "/", icon: BookOpen, surface: "docs" },
+      { title: "Gradr News", url: "/", icon: Newspaper, surface: "news" },
+      { title: "Product site", url: "/", icon: Globe, surface: "marketing" },
     ],
   },
   {
