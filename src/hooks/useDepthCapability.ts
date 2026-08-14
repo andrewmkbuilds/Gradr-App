@@ -1,50 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { depthManager, type DepthLevel } from "@/lib/motion/depthManager";
 
-export type DepthLevel = "off" | "lite" | "full";
-
-interface NavigatorWithHints extends Navigator {
-  deviceMemory?: number;
-  connection?: { saveData?: boolean };
-}
-
-function detect(): DepthLevel {
-  if (typeof window === "undefined") return "lite";
-  const nav = navigator as NavigatorWithHints;
-  const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
-  const narrow = window.innerWidth < 768;
-  const lowCores = (nav.hardwareConcurrency ?? 8) <= 4;
-  const lowMemory = (nav.deviceMemory ?? 8) <= 4;
-  const saveData = nav.connection?.saveData === true;
-
-  if (saveData) return "off";
-  if (coarse || narrow || lowCores || lowMemory) return "lite";
-  return "full";
-}
+export type { DepthLevel };
 
 /**
- * How much spatial depth this device should render.
+ * How much spatial depth this device should render right now.
  *
  * `full`  — pointer tilt, layered translateZ parallax, dynamic shadows.
  * `lite`  — static depth (shadows, layering) but no pointer/scroll 3D work.
- * `off`   — flat surfaces only (reduced motion, data saver).
+ * `off`   — flat surfaces only (reduced motion, data saver, low frame rate).
  *
- * Always resolves to `off` when the user has motion reduced, so the whole 3D
- * layer degrades from a single switch.
+ * Backed by the runtime depth manager, so a device that starts dropping frames
+ * — or a user who turns motion off — flattens every spatial surface at once.
  */
 export function useDepthCapability(): DepthLevel {
   const reduced = useReducedMotionPref();
-  const [level, setLevel] = useState<DepthLevel>("lite");
 
   useEffect(() => {
-    const update = () => setLevel(detect());
-    update();
-    window.addEventListener("resize", update, { passive: true });
-    return () => window.removeEventListener("resize", update);
-  }, []);
+    depthManager.setReducedMotion(reduced);
+  }, [reduced]);
 
-  if (reduced) return "off";
-  return level;
+  const level = useSyncExternalStore(
+    depthManager.subscribe,
+    () => depthManager.getLevel(),
+    () => "lite" as DepthLevel,
+  );
+
+  return reduced ? "off" : level;
 }
 
 /** Convenience: is pointer-driven 3D allowed right now? */

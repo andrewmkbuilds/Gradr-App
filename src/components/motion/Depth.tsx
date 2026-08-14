@@ -97,14 +97,20 @@ export function DepthStage({
   const value = useMemo<StageValue>(() => ({ mx, my, active: depth === "full" }), [mx, my, depth]);
 
   if (depth === "off") {
-    return <div className={cn("relative", className)}>{children}</div>;
+    return (
+      <div data-depth-stage="off" className={cn("relative", className)}>
+        {children}
+      </div>
+    );
   }
 
   if (depth === "lite") {
     // Static depth: layering and shadows survive, pointer maths does not.
     return (
       <StageContext.Provider value={{ mx, my, active: false }}>
-        <div className={cn("relative", className)}>{children}</div>
+        <div data-depth-stage="lite" className={cn("relative", className)}>
+          {children}
+        </div>
       </StageContext.Provider>
     );
   }
@@ -113,6 +119,7 @@ export function DepthStage({
     <StageContext.Provider value={value}>
       <div
         ref={ref}
+        data-depth-stage="full"
         className={cn("relative [transform-style:preserve-3d]", className)}
         style={{ perspective } as CSSProperties}
         onPointerMove={onMove}
