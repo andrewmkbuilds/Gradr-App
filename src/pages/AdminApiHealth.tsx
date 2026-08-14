@@ -193,7 +193,7 @@ export default function AdminApiHealth() {
         eyebrow="Operations"
         title="API health"
         description="Availability, latency and rate-limit pressure across every provider Gradr calls."
-        icon={Activity}
+        icon={<Activity className="h-5 w-5" aria-hidden="true" />}
       />
 
       <div className="flex flex-wrap items-center gap-2">
