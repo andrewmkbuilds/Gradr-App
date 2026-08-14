@@ -6,7 +6,26 @@ export type VerificationRequestStatus =
   | "pending"
   | "approved"
   | "rejected"
-  | "needs_more_information";
+  | "needs_more_information"
+  | "appealed";
+
+export interface VerificationFraudFlag {
+  code: string;
+  severity: "info" | "low" | "medium" | "high";
+  label: string;
+}
+
+export interface VerificationTimelineEntry {
+  id: string;
+  event: string;
+  actor_role: "user" | "admin" | "system";
+  actor_name: string | null;
+  from_status: string | null;
+  to_status: string | null;
+  notes: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
 
 export interface VerificationRequest {
   id: string;
@@ -21,6 +40,8 @@ export interface VerificationRequest {
   supporting_information: string | null;
   document_path: string | null;
   domain_matched: boolean;
+  domain_proof_verified: boolean;
+  appeal_count: number;
   status: VerificationRequestStatus;
   discount_percentage: number;
   submitted_at: string;
@@ -52,7 +73,7 @@ export function useMyVerificationRequests() {
       const { data, error } = await supabase
         .from("verification_requests")
         .select(
-          "id, category, full_name, organization, website, email, personal_email, country, role_or_status, supporting_information, document_path, domain_matched, status, discount_percentage, submitted_at, reviewed_at, reviewer_notes",
+          "id, category, full_name, organization, website, email, personal_email, country, role_or_status, supporting_information, document_path, domain_matched, domain_proof_verified, appeal_count, status, discount_percentage, submitted_at, reviewed_at, reviewer_notes",
         )
         .order("submitted_at", { ascending: false });
       if (error) throw error;
@@ -123,4 +144,53 @@ export function useRequestInstitution() {
       return data as string;
     },
   });
+}
+
+/** Full, user-visible audit trail for one of my verification requests. */
+export function useVerificationTimeline(requestId: string | null) {
+  return useQuery({
+    queryKey: ["verification-timeline", requestId],
+    enabled: Boolean(requestId),
+    staleTime: 10_000,
+    queryFn: async (): Promise<VerificationTimelineEntry[]> => {
+      const { data, error } = await supabase.rpc("my_verification_timeline", {
+        _request_id: requestId as string,
+      });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as VerificationTimelineEntry[];
+    },
+  });
+}
+
+/** Appeals a rejected request with extra evidence (and an optional document). */
+export function useSubmitVerificationAppeal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      requestId: string;
+      message: string;
+      documentPath?: string | null;
+    }) => {
+      const { data, error } = await supabase.rpc("submit_verification_appeal", {
+        _request_id: input.requestId,
+        _message: input.message,
+        _document_path: input.documentPath ?? undefined,
+      });
+      if (error) throw new Error(error.message);
+      return data as string;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["verification-requests"] });
+      void queryClient.invalidateQueries({ queryKey: ["verification-timeline"] });
+    },
+  });
+}
+
+/** Has this account already proven it can receive mail at `email`? */
+export async function checkDomainProof(email: string): Promise<boolean> {
+  const { data, error } = await supabase.functions.invoke("verify-academic-email", {
+    body: { action: "proof_status", email },
+  });
+  if (error) return false;
+  return Boolean((data as { proven?: boolean } | null)?.proven);
 }
