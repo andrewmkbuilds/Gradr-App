@@ -20,9 +20,26 @@
  * analytics) is shared — surfaces are route trees, not separate apps.
  */
 
-export type Surface = "home" | "app" | "marketing" | "news" | "docs" | "affiliates";
+export type Surface =
+  | "home"
+  | "app"
+  | "marketing"
+  | "news"
+  | "docs"
+  | "affiliates"
+  | "status"
+  | "support";
 
-export const SURFACES: Surface[] = ["home", "app", "marketing", "news", "docs", "affiliates"];
+export const SURFACES: Surface[] = [
+  "home",
+  "app",
+  "marketing",
+  "news",
+  "docs",
+  "affiliates",
+  "status",
+  "support",
+];
 
 export const ROOT_DOMAIN = "gradr.me";
 
@@ -34,6 +51,8 @@ export const PRODUCTION_ORIGIN: Record<Surface, string> = {
   news: `https://news.${ROOT_DOMAIN}`,
   docs: `https://docs.${ROOT_DOMAIN}`,
   affiliates: `https://affiliates.${ROOT_DOMAIN}`,
+  status: `https://status.${ROOT_DOMAIN}`,
+  support: `https://support.${ROOT_DOMAIN}`,
 };
 
 /** Hostname label → surface (production hostname routing). */
@@ -43,6 +62,8 @@ const SUBDOMAIN_TO_SURFACE: Record<string, Surface> = {
   news: "news",
   docs: "docs",
   affiliates: "affiliates",
+  status: "status",
+  support: "support",
 };
 
 /**
