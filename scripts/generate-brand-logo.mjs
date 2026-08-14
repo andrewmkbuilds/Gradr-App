@@ -69,7 +69,7 @@ export function symbolSvg({ ring, bar, id = "g", title = "Gradr" }) {
 export function symbolSvgCompact({ ring, bar, id = "gc" }) {
   const o = { x: 24, y: 24, s: 464, r: 146 };
   const i = { x: 116, y: 104, s: 280, r: 80 };
-  const mouth = "M 250 206 L 348 136 L 512 136 L 512 272 L 250 272 Z";
+  const mouth = "M 396 172 L 488 130 L 512 130 L 512 246 L 250 246 L 250 172 Z";
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Gradr">
   <title>Gradr</title>
   <defs>
@@ -81,8 +81,9 @@ export function symbolSvgCompact({ ring, bar, id = "gc" }) {
     </mask>
   </defs>
   <rect width="512" height="512" fill="${ring}" mask="url(#${id}-ring)"/>
-  <rect x="284" y="272" width="204" height="72" rx="12" fill="${bar}"/>
+  <rect x="276" y="246" width="212" height="78" rx="12" fill="${bar}"/>
 </svg>`;
+
 }
 
 /* ------------------------------------------------------------------ output */
