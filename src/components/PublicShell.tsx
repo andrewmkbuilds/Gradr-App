@@ -27,6 +27,14 @@ const PRODUCT_LINKS = [
   { label: "Application engine", to: "/apply" },
 ];
 
+/** Public, indexable tool landing pages — kept crawlable from every footer. */
+const TOOL_LINKS = [
+  { label: "Job application tracker", to: "/job-application-tracker" },
+  { label: "ATS resume checker", to: "/ats-resume-checker" },
+  { label: "AI interview coach", to: "/ai-interview-coach" },
+  { label: "Career advice hub", to: "/career-advice" },
+];
+
 /** Chrome for public, indexable pages (guides + job landing pages). */
 export function PublicShell({ children, source }: PublicShellProps) {
   const { pathname } = useLocation();
