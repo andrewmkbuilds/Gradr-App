@@ -6,235 +6,235 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://gradr.me/pricing</loc>
+    <loc>https://gradr.me/pricing/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://gradr.me/affiliate</loc>
+    <loc>https://gradr.me/affiliate/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://gradr.me/ats-resume-checker</loc>
+    <loc>https://gradr.me/ats-resume-checker/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://gradr.me/ai-interview-coach</loc>
+    <loc>https://gradr.me/ai-interview-coach/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-application-tracker</loc>
+    <loc>https://gradr.me/job-application-tracker/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://gradr.me/blog/ai-resume-optimization</loc>
+    <loc>https://gradr.me/blog/ai-resume-optimization/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gradr.me/career-advice</loc>
+    <loc>https://gradr.me/career-advice/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search</loc>
+    <loc>https://gradr.me/job-search/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://gradr.me/terms</loc>
+    <loc>https://gradr.me/terms/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://gradr.me/privacy</loc>
+    <loc>https://gradr.me/privacy/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://gradr.me/refund-policy</loc>
+    <loc>https://gradr.me/refund-policy/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://gradr.me/cookie-policy</loc>
+    <loc>https://gradr.me/cookie-policy/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://gradr.me/dpa</loc>
+    <loc>https://gradr.me/dpa/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://gradr.me/career-advice/cover-letter-guide</loc>
+    <loc>https://gradr.me/career-advice/cover-letter-guide/</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gradr.me/career-advice/interview-questions</loc>
+    <loc>https://gradr.me/career-advice/interview-questions/</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gradr.me/career-advice/resume-optimization-checklist</loc>
+    <loc>https://gradr.me/career-advice/resume-optimization-checklist/</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/frontend-developer-remote</loc>
+    <loc>https://gradr.me/job-search/frontend-developer-remote/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/frontend-developer-london</loc>
+    <loc>https://gradr.me/job-search/frontend-developer-london/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/frontend-developer-new-york</loc>
+    <loc>https://gradr.me/job-search/frontend-developer-new-york/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/frontend-developer-berlin</loc>
+    <loc>https://gradr.me/job-search/frontend-developer-berlin/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/frontend-developer-dubai</loc>
+    <loc>https://gradr.me/job-search/frontend-developer-dubai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/data-analyst-remote</loc>
+    <loc>https://gradr.me/job-search/data-analyst-remote/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/data-analyst-london</loc>
+    <loc>https://gradr.me/job-search/data-analyst-london/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/data-analyst-new-york</loc>
+    <loc>https://gradr.me/job-search/data-analyst-new-york/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/data-analyst-berlin</loc>
+    <loc>https://gradr.me/job-search/data-analyst-berlin/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/data-analyst-dubai</loc>
+    <loc>https://gradr.me/job-search/data-analyst-dubai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/product-manager-remote</loc>
+    <loc>https://gradr.me/job-search/product-manager-remote/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/product-manager-london</loc>
+    <loc>https://gradr.me/job-search/product-manager-london/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/product-manager-new-york</loc>
+    <loc>https://gradr.me/job-search/product-manager-new-york/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/product-manager-berlin</loc>
+    <loc>https://gradr.me/job-search/product-manager-berlin/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/product-manager-dubai</loc>
+    <loc>https://gradr.me/job-search/product-manager-dubai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/ux-designer-remote</loc>
+    <loc>https://gradr.me/job-search/ux-designer-remote/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/ux-designer-london</loc>
+    <loc>https://gradr.me/job-search/ux-designer-london/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/ux-designer-new-york</loc>
+    <loc>https://gradr.me/job-search/ux-designer-new-york/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/ux-designer-berlin</loc>
+    <loc>https://gradr.me/job-search/ux-designer-berlin/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/ux-designer-dubai</loc>
+    <loc>https://gradr.me/job-search/ux-designer-dubai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/software-engineer-remote</loc>
+    <loc>https://gradr.me/job-search/software-engineer-remote/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/software-engineer-london</loc>
+    <loc>https://gradr.me/job-search/software-engineer-london/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/software-engineer-new-york</loc>
+    <loc>https://gradr.me/job-search/software-engineer-new-york/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/software-engineer-berlin</loc>
+    <loc>https://gradr.me/job-search/software-engineer-berlin/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/software-engineer-dubai</loc>
+    <loc>https://gradr.me/job-search/software-engineer-dubai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/marketing-manager-remote</loc>
+    <loc>https://gradr.me/job-search/marketing-manager-remote/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/marketing-manager-london</loc>
+    <loc>https://gradr.me/job-search/marketing-manager-london/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/marketing-manager-new-york</loc>
+    <loc>https://gradr.me/job-search/marketing-manager-new-york/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/marketing-manager-berlin</loc>
+    <loc>https://gradr.me/job-search/marketing-manager-berlin/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gradr.me/job-search/marketing-manager-dubai</loc>
+    <loc>https://gradr.me/job-search/marketing-manager-dubai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

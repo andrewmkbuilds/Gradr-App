@@ -3,6 +3,9 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { GUIDES, guidePath } from "../src/content/guides";
 import { JOB_LANDINGS, jobLandingPath } from "../src/content/jobLandings";
+import { DOCS } from "../src/content/docs";
+import { NEWS } from "../src/content/news";
+import { PRODUCTION_ORIGIN } from "../src/config/domains";
 
 const BASE_URL = "https://gradr.me";
 
@@ -54,11 +57,11 @@ const entries: SitemapEntry[] = [
 
 
 
-function generateSitemap(items: SitemapEntry[]) {
+function generateSitemap(items: SitemapEntry[], origin: string = BASE_URL) {
   const urls = items.map((e) =>
     [
       `  <url>`,
-      `    <loc>${BASE_URL}${e.path}</loc>`,
+      `    <loc>${origin}${e.path === "/" ? "" : e.path}/</loc>`.replace("//</loc>", "/</loc>"),
       e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
       e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
       e.priority ? `    <priority>${e.priority}</priority>` : null,
@@ -77,3 +80,69 @@ function generateSitemap(items: SitemapEntry[]) {
 
 writeFileSync(resolve("public/sitemap.xml"), generateSitemap(entries));
 console.log(`sitemap.xml written (${entries.length} entries)`);
+
+/**
+ * Per-subdomain sitemaps. Every Gradr surface is its own SEO property, so each
+ * gets a sitemap whose <loc> values live on that surface's own origin.
+ * app.gradr.me is intentionally absent: it is a private product surface.
+ */
+const marketingEntries: SitemapEntry[] = [
+  { path: "/", changefreq: "weekly", priority: "1.0" },
+  { path: "/features", changefreq: "monthly", priority: "0.9" },
+  { path: "/use-cases", changefreq: "monthly", priority: "0.8" },
+  { path: "/pricing", changefreq: "monthly", priority: "0.9" },
+  { path: "/testimonials", changefreq: "monthly", priority: "0.6" },
+  { path: "/demos", changefreq: "monthly", priority: "0.7" },
+  { path: "/about", changefreq: "yearly", priority: "0.5" },
+];
+
+const newsEntries: SitemapEntry[] = [
+  { path: "/", changefreq: "daily", priority: "0.9" },
+  ...NEWS.map((article) => ({
+    path: `/${article.slug}`,
+    lastmod: article.updated,
+    changefreq: "monthly" as const,
+    priority: "0.8",
+  })),
+];
+
+const docsEntries: SitemapEntry[] = [
+  { path: "/", changefreq: "weekly", priority: "0.9" },
+  ...DOCS.map((doc) => ({
+    path: `/${doc.slug}`,
+    lastmod: doc.updated,
+    changefreq: "monthly" as const,
+    priority: "0.7",
+  })),
+];
+
+// Only the two crawlable affiliate pages; the dashboard and resources are gated.
+const affiliateEntries: SitemapEntry[] = [
+  { path: "/", changefreq: "monthly", priority: "0.7" },
+  { path: "/apply", changefreq: "monthly", priority: "0.6" },
+];
+
+const surfaceSitemaps: { file: string; origin: string; items: SitemapEntry[] }[] = [
+  { file: "sitemap-marketing.xml", origin: PRODUCTION_ORIGIN.marketing, items: marketingEntries },
+  { file: "sitemap-news.xml", origin: PRODUCTION_ORIGIN.news, items: newsEntries },
+  { file: "sitemap-docs.xml", origin: PRODUCTION_ORIGIN.docs, items: docsEntries },
+  { file: "sitemap-affiliates.xml", origin: PRODUCTION_ORIGIN.affiliates, items: affiliateEntries },
+];
+
+for (const sitemap of surfaceSitemaps) {
+  writeFileSync(resolve(`public/${sitemap.file}`), generateSitemap(sitemap.items, sitemap.origin));
+  console.log(`${sitemap.file} written (${sitemap.items.length} entries)`);
+}
+
+// Sitemap index so one submission covers every Gradr surface.
+const index = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+  ...[
+    `${BASE_URL}/sitemap.xml`,
+    ...surfaceSitemaps.map((s) => `${s.origin}/${s.file}`),
+  ].map((loc) => `  <sitemap>\n    <loc>${loc}</loc>\n  </sitemap>`),
+  `</sitemapindex>`,
+].join("\n");
+writeFileSync(resolve("public/sitemap-index.xml"), index);
+console.log("sitemap-index.xml written");
