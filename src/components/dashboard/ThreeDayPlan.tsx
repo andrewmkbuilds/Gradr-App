@@ -171,7 +171,20 @@ export function ThreeDayPlan() {
             )}
           </div>
 
+          {total > 0 && completed === total && (
+            <div
+              role="status"
+              className="mt-3 flex items-start gap-2 rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-foreground"
+            >
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+              <span>
+                All {total} steps confirmed complete. Rebuild the plan to sequence your next three days.
+              </span>
+            </div>
+          )}
+
           {plan.summary && <p className="mt-3 text-sm text-muted-foreground">{plan.summary}</p>}
+
 
           <div className="mt-4 space-y-5">
             {[1, 2, 3].map((day) =>
