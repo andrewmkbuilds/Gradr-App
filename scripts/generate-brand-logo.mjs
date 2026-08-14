@@ -49,7 +49,7 @@ const PRIMARY = {
   rOuter: 200,
   rInner: 133,
   /** Aperture, in degrees (0° = east, counter-clockwise). */
-  gap: { from: -21, to: 41 },
+  gap: { from: -11, to: 40 },
   bar: {
     half: 32, // shaft half-height
     tip: 146, // arrowhead tip x
@@ -69,7 +69,7 @@ const COMPACT = {
   cy: 256,
   rOuter: 208,
   rInner: 124,
-  gap: { from: -24, to: 44 },
+  gap: { from: -13, to: 44 },
   bar: {
     half: 38,
     tip: 136,
