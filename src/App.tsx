@@ -59,6 +59,10 @@ const AdminQaChecklist = lazy(() => import("@/pages/AdminQaChecklist"));
 const BrandAssets = lazy(() => import("@/pages/BrandAssets"));
 const AdminSecurityFindings = lazy(() => import("@/pages/AdminSecurityFindings"));
 const AdminOAuthForensics = lazy(() => import("@/pages/AdminOAuthForensics"));
+const AdminApiHealth = lazy(() => import("@/pages/AdminApiHealth"));
+const AdminWebhookLogs = lazy(() => import("@/pages/AdminWebhookLogs"));
+const AdminCspReports = lazy(() => import("@/pages/AdminCspReports"));
+
 const AdminNavAnalytics = lazy(() => import("@/pages/AdminNavAnalytics"));
 const AdminSeoMonitor = lazy(() => import("@/pages/AdminSeoMonitor"));
 const AdminPaddle = lazy(() => import("@/pages/AdminPaddle"));
