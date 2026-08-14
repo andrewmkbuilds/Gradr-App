@@ -61,7 +61,7 @@ function generateSitemap(items: SitemapEntry[], origin: string = BASE_URL) {
   const urls = items.map((e) =>
     [
       `  <url>`,
-      `    <loc>${origin}${e.path === "/" ? "" : e.path}/</loc>`.replace("//</loc>", "/</loc>"),
+      `    <loc>${origin}${e.path}</loc>`,
       e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
       e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
       e.priority ? `    <priority>${e.priority}</priority>` : null,
