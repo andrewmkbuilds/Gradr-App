@@ -153,13 +153,15 @@ export function surfaceBase(surface: Surface, host: string = currentHost()): str
 
 /**
  * Origin a surface is served from on the current host.
- * Production returns the real subdomain; dev/preview return the current origin.
+ * Returns the real subdomain only when hosting actually serves it; otherwise
+ * (dev, preview, or production-with-redirecting-subdomains) the current origin.
  */
 export function surfaceOrigin(surface: Surface, host: string = currentHost()): string {
-  if (isProduction(host)) return PRODUCTION_ORIGIN[surface];
+  if (!isMultiSurfaceHost(host)) return PRODUCTION_ORIGIN[surface];
   if (typeof window === "undefined") return PRODUCTION_ORIGIN[surface];
   return window.location.origin;
 }
+
 
 /**
  * Absolute URL for a path on another surface.
