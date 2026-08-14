@@ -603,7 +603,9 @@ function InterviewEngineInner() {
           : null
       }
       startedAt={startedAt.current}
-      connectionLost={streamFailed && !connectionErrorDismissed}
+      connectionLost={(streamFailed || Boolean(voiceError)) && !connectionErrorDismissed}
+      connectionErrorDetail={voiceError ?? undefined}
+
       onDismissConnectionError={() => setConnectionErrorDismissed(true)}
       onInputChange={setInput}
       onSubmit={() => void submitAnswer(input)}
