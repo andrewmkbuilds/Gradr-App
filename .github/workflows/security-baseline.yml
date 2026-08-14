@@ -72,7 +72,8 @@ jobs:
       - name: Install Playwright Chromium
         run: bunx playwright install --with-deps chromium
 
-      - name: Verify the Google sign-in flow end to end (unauthenticated half)
+      - name: Verify Google callback and app-domain redirect chain
         env:
-          OAUTH_FLOW_TARGET: https://gradr.me
+          OAUTH_FLOW_TARGET: https://app.gradr.me
+          GOOGLE_E2E_STORAGE_STATE: ${{ secrets.GOOGLE_E2E_STORAGE_STATE }}
         run: node scripts/test-oauth-flow.mjs

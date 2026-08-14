@@ -6,9 +6,12 @@
  * reports a suspicious flow. Everything is redacted before it leaves the tab.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { captureError } from "@/lib/telemetry/sentry";
 import { redactMetadata, redactUrl } from "./redaction";
 
-export const EXPECTED_FINAL_URL = "https://gradr.me/auth";
+export const PRODUCTION_APP_ORIGIN = "https://app.gradr.me";
+export const EXPECTED_CALLBACK_URL = `${PRODUCTION_APP_ORIGIN}/~oauth/callback`;
+export const EXPECTED_FINAL_URL = `${PRODUCTION_APP_ORIGIN}/dashboard`;
 
 export type OAuthStage = "initiate" | "provider_redirect" | "callback" | "session" | "deviation";
 export type ValidationOutcome = "ok" | "missing" | "mismatch" | "not_applicable";
@@ -35,6 +38,15 @@ export interface OAuthFlowEvent {
 }
 
 const STORAGE_KEY = "gradr-oauth-request-id";
+
+/** Returns the active OAuth attempt without creating a new one. */
+export function pendingRequestId(): string | null {
+  try {
+    return sessionStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
 
 /** Stable id for the current sign-in attempt, shared across the redirect. */
 export function currentRequestId(): string {
@@ -73,18 +85,26 @@ export interface RecordArgs {
   provider?: string;
 }
 
-/** Is this landing URL the one we promised Google we would end on? */
-export function isDeviation(finalUrl: string | undefined): boolean {
-  if (!finalUrl) return false;
+/** Classifies production-domain violations without exposing callback secrets. */
+export function oauthDeviationType(urlValue: string | undefined, stage: OAuthStage): string | null {
+  if (!urlValue) return null;
   try {
-    const url = new URL(finalUrl);
-    const expected = new URL(EXPECTED_FINAL_URL);
-    // Any Gradr-owned host is fine in preview/dev; production must land on /auth.
-    if (url.hostname === expected.hostname) return url.pathname !== expected.pathname;
-    return false;
+    const url = new URL(urlValue);
+    if (url.hostname === "gradr.me" || url.hostname === "www.gradr.me") return "apex_domain_bounce";
+    if (url.hostname !== "app.gradr.me") return null;
+    if (stage === "callback" && url.pathname !== "/~oauth/callback" && url.pathname !== "/auth") {
+      return "unexpected_callback_url";
+    }
+    if (stage === "session" && url.pathname !== "/dashboard") return "unexpected_final_url";
+    return null;
   } catch {
-    return true;
+    return "malformed_url";
   }
+}
+
+/** Is this final landing the production dashboard on the authenticated origin? */
+export function isDeviation(finalUrl: string | undefined): boolean {
+  return oauthDeviationType(finalUrl, "session") !== null;
 }
 
 /**
@@ -92,7 +112,10 @@ export function isDeviation(finalUrl: string | undefined): boolean {
  * did. Values are redacted client-side and again by a database trigger.
  */
 export async function recordOAuthHop(args: RecordArgs): Promise<void> {
-  const deviation = args.deviationType ? true : isDeviation(args.finalUrl);
+  const inspectedUrl = args.finalUrl ?? args.destinationUrl;
+  const derivedDeviation = oauthDeviationType(inspectedUrl, args.stage);
+  const deviationType = args.deviationType ?? derivedDeviation;
+  const deviation = Boolean(deviationType);
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     await supabase.from("oauth_flow_events").insert({
@@ -108,10 +131,21 @@ export async function recordOAuthHop(args: RecordArgs): Promise<void> {
       state_result: args.stateResult ?? "not_applicable",
       nonce_result: args.nonceResult ?? "not_applicable",
       deviation,
-      deviation_type: args.deviationType ?? (deviation ? "unexpected_final_url" : null),
+      deviation_type: deviationType,
       note: args.note ? redactUrl(args.note) : null,
       metadata: (redactMetadata(args.metadata ?? {}) ?? {}) as Record<string, never>,
     });
+
+    if (deviationType) {
+      captureError(new Error(`OAuth redirect deviation: ${deviationType}`), {
+        request_id: currentRequestId(),
+        stage: args.stage,
+        deviation_type: deviationType,
+        source_url: redactUrl(args.sourceUrl),
+        destination_url: redactUrl(args.destinationUrl),
+        final_url: redactUrl(args.finalUrl),
+      });
+    }
   } catch {
     /* never block auth on logging */
   }
