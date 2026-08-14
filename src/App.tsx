@@ -82,6 +82,7 @@ const Dpa = lazy(() => import("./pages/legal/Dpa"));
 const AiResumeOptimization = lazy(() => import("./pages/blog/AiResumeOptimization"));
 const AtsResumeChecker = lazy(() => import("./pages/AtsResumeChecker"));
 const AiInterviewCoach = lazy(() => import("./pages/AiInterviewCoach"));
+const JobApplicationTracker = lazy(() => import("./pages/JobApplicationTracker"));
 const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
 const GuideArticle = lazy(() => import("./pages/GuideArticle"));
 const JobSearchIndex = lazy(() => import("./pages/JobSearchIndex"));
