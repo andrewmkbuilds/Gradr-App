@@ -151,7 +151,6 @@ export class SpeechQueue {
     this.controllers.forEach((c) => c.abort());
     this.controllers.clear();
     this.teardownAudio();
-    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
     if (this.running) {
       this.running = false;
       this.opts.onSpeakingChange(false);
@@ -163,6 +162,7 @@ export class SpeechQueue {
     this.stop();
     this.stopped = false;
     this.closed = false;
+    this.failure = null;
   }
 
   private teardownAudio() {

@@ -202,7 +202,7 @@ export function InterviewStudio(props: Props) {
                 ) : (
                   <Badge variant="secondary" className="gap-1.5 font-medium">
                     <WifiOff className="h-3 w-3" aria-hidden="true" />
-                    Standard voice
+                    Voice unavailable
                   </Badge>
                 )}
                 {limits && (
@@ -218,8 +218,8 @@ export function InterviewStudio(props: Props) {
             {canReconnect && (
               <Button variant="outline" size="sm" onClick={onReconnect} disabled={connecting}>
                 <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Reconnect realtime</span>
-                <span className="sm:hidden">Reconnect</span>
+                <span className="hidden sm:inline">Retry studio voice</span>
+                <span className="sm:hidden">Retry voice</span>
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={onEnd} disabled={ending}>

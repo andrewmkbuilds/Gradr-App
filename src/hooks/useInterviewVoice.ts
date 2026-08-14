@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { SentenceChunker, SpeechQueue, type AudioResult } from "@/lib/interview/speechStream";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
 
@@ -65,6 +66,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
         body: JSON.stringify({
           text,
           personaId: optsRef.current.personaId,
+          environment: getPaddleEnvironment(),
           previousText: spokenRef.current.slice(-400),
         }),
       });
@@ -162,10 +164,17 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     setSpeaking(false);
   }, []);
 
+  /** Replays already-generated interviewer text without making another AI call. */
+  const retryTurn = useCallback((text: string) => {
+    beginTurn();
+    pushDelta(text);
+    endTurn();
+  }, [beginTurn, endTurn, pushDelta]);
+
   useEffect(() => () => {
     queueRef.current?.stop();
     queueRef.current = null;
   }, []);
 
-  return { speaking, error, clearError: () => setError(null), beginTurn, pushDelta, endTurn, stop };
+  return { speaking, error, clearError: () => setError(null), beginTurn, pushDelta, endTurn, retryTurn, stop };
 }
