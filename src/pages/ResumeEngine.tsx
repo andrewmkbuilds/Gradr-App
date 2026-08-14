@@ -29,12 +29,9 @@ import { ResumeVersions } from "@/components/resume/ResumeVersions";
 import { ResumeVersionDiff } from "@/components/resume/ResumeVersionDiff";
 import { GenerationStream } from "@/components/ai/GenerationStream";
 import { useAiStream } from "@/hooks/useAiStream";
+import { parseSuggestions, suggestionsToJson, type Suggestion } from "@/lib/resume/suggestions";
 
-interface Suggestion {
-  type: string;
-  text: string;
-  [key: string]: string;
-}
+
 
 interface Evidence {
   label: string;
@@ -141,7 +138,7 @@ export default function ResumeEngine() {
       // Canceled or failed — the hook has already surfaced the reason.
       if (!analysisData) return;
 
-      setAnalysis(analysisData);
+      setAnalysis({ ...analysisData, suggestions: parseSuggestions(analysisData.suggestions) });
 
       const versionLabel = jobTitle.trim()
         ? `${jobTitle.trim()} — ${selectedFile.name.replace(/\.[^.]+$/, "")}`
@@ -160,7 +157,7 @@ export default function ResumeEngine() {
           formatting_score: analysisData.formatting_score,
           impact_score: analysisData.impact_score,
           readability_score: analysisData.readability_score,
-          ai_suggestions: analysisData.suggestions,
+          ai_suggestions: suggestionsToJson(parseSuggestions(analysisData.suggestions)),
           parsed_text: text.substring(0, 10000),
         })
         .select("id")
@@ -303,7 +300,7 @@ export default function ResumeEngine() {
               formatting_score: v.formatting_score ?? 0,
               impact_score: v.impact_score ?? 0,
               readability_score: v.readability_score ?? 0,
-              suggestions: Array.isArray(v.ai_suggestions) ? (v.ai_suggestions as Suggestion[]) : [],
+              suggestions: parseSuggestions(v.ai_suggestions),
               tailoredTo: v.version_label,
             });
           }}
