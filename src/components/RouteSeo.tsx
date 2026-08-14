@@ -302,6 +302,7 @@ const SURFACE_META: Partial<Record<Surface, Record<string, { title: string; desc
       title: "Apply to the Gradr Affiliate Program",
       description:
         "Tell us about your audience and apply to become a Gradr affiliate partner with recurring commission on every referred subscription.",
+    },
   },
   status: {
     "/": {
