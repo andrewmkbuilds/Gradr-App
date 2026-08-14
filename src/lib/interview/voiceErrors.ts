@@ -64,8 +64,8 @@ const COPY: Record<VoiceErrorCode, VoiceErrorCopy> = {
   },
   VOICE_CONFIGURATION_ERROR: {
     title: "Interviewer voice temporarily unavailable",
-    message: "The interviewer voice is offline while we sort it out. Your interview and transcript are safe — carry on by typing.",
-    retryable: false,
+    message: "We couldn't connect to the interviewer voice right now. Your interview and transcript are safe — retry, or carry on by typing.",
+    retryable: true,
   },
   VOICE_NOT_ENTITLED: {
     title: "Interviewer voice not included in your plan",
