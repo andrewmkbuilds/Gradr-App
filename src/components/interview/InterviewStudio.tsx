@@ -46,7 +46,10 @@ interface Props {
   limits: Limits | null;
   startedAt: number;
   connectionLost?: boolean;
+  /** Exact upstream reason (e.g. the ElevenLabs failure) shown to the candidate. */
+  connectionErrorDetail?: string;
   onDismissConnectionError?: () => void;
+
   onInputChange: (value: string) => void;
   onSubmit: () => void;
   onToggleMic: () => void;
