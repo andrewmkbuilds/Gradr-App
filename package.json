@@ -36,7 +36,8 @@
     "audit:a11y": "node scripts/a11y-audit.mjs",
     "test:visual:routes": "node scripts/visual-regression.mjs",
     "check:design": "node scripts/check-legacy-design.mjs",
-    "test:oauth-flow": "node scripts/test-oauth-flow.mjs"
+    "test:oauth-flow": "node scripts/test-oauth-flow.mjs",
+    "test:depth": "node scripts/depth-smoke.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

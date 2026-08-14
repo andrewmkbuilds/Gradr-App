@@ -1,4 +1,5 @@
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
+import { useDepthCapability } from "@/hooks/useDepthCapability";
 import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
 import { Activity, Bot, Check, FileText, Mic, Sparkles, Target } from "lucide-react";
@@ -176,7 +177,11 @@ function InsightChip() {
  * at a different rate so it reads as a real 3D command center.
  */
 export function HeroCommandCenter() {
-  const reduced = useReducedMotionPref();
+  // Depth manager decides how much 3D this device can afford; `off` also
+  // covers reduced motion, so both switches flatten the composition.
+  const depth = useDepthCapability();
+  const spatial = depth === "full";
+  const reduced = depth === "off";
   const ref = useRef<HTMLDivElement>(null);
   const mx = useSpring(useMotionValue(0), springPointer);
   const my = useSpring(useMotionValue(0), springPointer);
@@ -207,9 +212,11 @@ export function HeroCommandCenter() {
   return (
     <div
       ref={ref}
+      data-depth-stage={depth}
+      data-hero-stage="true"
       className="relative mx-auto w-full max-w-[560px] [perspective:1400px] [perspective-origin:50%_40%]"
       onPointerMove={(e) => {
-        if (reduced || e.pointerType !== "mouse") return;
+        if (!spatial || e.pointerType !== "mouse") return;
         const rect = ref.current?.getBoundingClientRect();
         if (!rect) return;
         mx.set(((e.clientX - rect.left) / rect.width - 0.5) * 2);
@@ -229,7 +236,7 @@ export function HeroCommandCenter() {
       />
 
       <motion.div
-        style={reduced ? undefined : { rotateX, rotateY, transformStyle: "preserve-3d" }}
+        style={spatial ? { rotateX, rotateY, transformStyle: "preserve-3d" } : undefined}
         className="relative"
       >
         {/* main frame */}
@@ -237,7 +244,7 @@ export function HeroCommandCenter() {
           initial={{ opacity: 0, y: 26, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ ...springSoft, delay: 0.15 }}
-          style={reduced ? undefined : { ...far, boxShadow: frameShadow, transformStyle: "preserve-3d" }}
+          style={spatial ? { ...far, boxShadow: frameShadow, transformStyle: "preserve-3d" } : undefined}
           className="depth-surface overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/80 p-4 shadow-[var(--shadow-elevated)] backdrop-blur-xl"
         >
           <div className="flex items-center justify-between border-b border-border/60 pb-3">
@@ -279,7 +286,7 @@ export function HeroCommandCenter() {
           initial={{ opacity: 0, x: 30, y: 10 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ ...springSoft, delay: 0.45 }}
-          style={reduced ? undefined : near}
+          style={spatial ? near : undefined}
         >
           <motion.div
             animate={reduced ? undefined : { y: [0, -8, 0] }}
@@ -292,7 +299,7 @@ export function HeroCommandCenter() {
         {/* floating insight chip */}
         <motion.div
           className="absolute -left-4 -bottom-6 hidden sm:block lg:-left-14"
-          style={reduced ? undefined : mid}
+          style={spatial ? mid : undefined}
         >
           <motion.div
             animate={reduced ? undefined : { y: [0, 9, 0] }}

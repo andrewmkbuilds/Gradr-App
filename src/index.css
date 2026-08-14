@@ -359,6 +359,41 @@
   .surface-elevated { background: hsl(var(--surface-elevated)); box-shadow: var(--shadow-elevated); }
   .divider { border-color: hsl(var(--border-subtle)); }
 
+  /* ---------- Spatial lighting ----------
+     A lit top rim + soft floor glow so overlays, nav bars and important
+     surfaces read as physical planes. Purely decorative: it degrades to a
+     plain surface when depth is disabled. */
+  .depth-lit {
+    position: relative;
+    isolation: isolate;
+  }
+  .depth-lit::before {
+    content: "";
+    position: absolute;
+    inset-inline: 1.25rem;
+    top: 0;
+    height: 1px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.45), transparent);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .depth-lit::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(120% 90% at 50% -20%, hsl(var(--primary) / 0.09), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  html[data-depth="off"] .depth-lit::before,
+  html[data-depth="off"] .depth-lit::after {
+    display: none;
+  }
+
+
+
   /* ---------- Elevation levels ----------
      Level 1 = canvas, 2 = resting card, 3 = feature panel, 4 = floating/overlay. */
   .elev-1 {

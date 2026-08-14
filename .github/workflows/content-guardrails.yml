@@ -63,6 +63,9 @@ jobs:
       - name: Critical page smoke (renders expected UI, no loading/SEO flash)
         run: node scripts/smoke-critical-pages.mjs http://localhost:8080
 
+      - name: 3D depth smoke (stages render, no blank route transitions)
+        run: node scripts/depth-smoke.mjs http://localhost:8080
+
       - name: SEO fallback flash regression (light + dark, refresh + hard refresh)
         run: node scripts/seo-flash-regression.mjs http://localhost:8080
 

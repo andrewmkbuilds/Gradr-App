@@ -26,7 +26,7 @@ import { Reveal } from "@/components/landing/Reveal";
 import { motion, useScroll, useTransform } from "motion/react";
 import {
   Atmosphere, CountUp, Magnetic, Parallax, ScrollProgress,
-  DepthStage, DepthLayer, ScrollDepth, FloatPanel,
+  DepthStage, DepthLayer, ScrollDepth, FloatPanel, SpatialCard, SpatialCta, ScrollCue,
   easeOut, viewportOnce, springSnappy,
 } from "@/components/motion";
 import {
@@ -34,6 +34,7 @@ import {
   MagneticButton, SceneBackground, ScrollFloat, MagicBento,
 } from "@/components/effects";
 import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
+import { DepthShowcase } from "@/components/landing/DepthShowcase";
 import {
   ApplicationVisual, AssistantVisual,
 } from "@/components/landing/visuals";
@@ -311,7 +312,7 @@ export default function Landing() {
       {/* --------------------------------- nav -------------------------------- */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          scrolled ? "border-b border-border bg-background/80 backdrop-blur-xl" : "border-b border-transparent"
+          scrolled ? "depth-lit border-b border-border bg-background/80 backdrop-blur-xl" : "border-b border-transparent"
         }`}
       >
         <nav
@@ -533,6 +534,9 @@ export default function Landing() {
 
               <div className="lg:pl-4">
                 <HeroCommandCenter />
+                <div className="mt-8 flex justify-center lg:justify-start">
+                  <ScrollCue targetId="product" label="Continue" />
+                </div>
               </div>
             </motion.div>
           </Section>
@@ -626,7 +630,16 @@ export default function Landing() {
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
             </Reveal>
-            <Reveal delay={100}><ResumeIntelligenceDemo /></Reveal>
+            <Reveal delay={100}>
+              <DepthShowcase
+                highlights={[
+                  { icon: Check, label: "ATS score 92", at: "tl" },
+                  { icon: Sparkles, label: "6 rewrites suggested", at: "br" },
+                ]}
+              >
+                <ResumeIntelligenceDemo />
+              </DepthShowcase>
+            </Reveal>
           </div>
         </Section>
 
@@ -635,7 +648,14 @@ export default function Landing() {
           <SceneBackground variant="threads" intensity={0.4} />
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
             <Reveal delay={100} className="lg:order-2 lg:pl-4">
-              <JobMatchingDemo />
+              <DepthShowcase
+                highlights={[
+                  { icon: Target, label: "94% role fit", at: "tr" },
+                  { icon: Search, label: "Live listings", at: "bl" },
+                ]}
+              >
+                <JobMatchingDemo />
+              </DepthShowcase>
             </Reveal>
             <Reveal className="space-y-5 lg:order-1">
               <Eyebrow>02 — Job matching</Eyebrow>
@@ -695,7 +715,17 @@ export default function Landing() {
             </Lede>
           </Reveal>
 
-          <Reveal delay={100} className="mt-10"><InterviewCoachDemo /></Reveal>
+          <Reveal delay={100} className="mt-10">
+            <DepthShowcase
+              tilt={5}
+              highlights={[
+                { icon: Mic, label: "Real-time voice", at: "tl" },
+                { icon: LineChart, label: "Scored debrief", at: "br" },
+              ]}
+            >
+              <InterviewCoachDemo />
+            </DepthShowcase>
+          </Reveal>
 
           <MagicBento
             className="mt-10"
@@ -708,10 +738,12 @@ export default function Landing() {
           />
 
           <Reveal delay={80} className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" className="h-12 px-6" onClick={start}>
-              Run a mock interview
-              <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-            </Button>
+            <SpatialCta>
+              <Button size="lg" className="h-12 px-6" onClick={start}>
+                Run a mock interview
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+              </Button>
+            </SpatialCta>
             <Button size="lg" variant="outline" className="h-12 px-6" onClick={() => navigate("/pricing")}>
               See interview plans
             </Button>
@@ -765,7 +797,16 @@ export default function Landing() {
                 ))}
               </ul>
             </Reveal>
-            <Reveal delay={100}><CareerIntelligenceDemo /></Reveal>
+            <Reveal delay={100}>
+              <DepthShowcase
+                highlights={[
+                  { icon: LineChart, label: "Readiness trend", at: "tr" },
+                  { icon: Layers, label: "Pipeline health", at: "bl" },
+                ]}
+              >
+                <CareerIntelligenceDemo />
+              </DepthShowcase>
+            </Reveal>
           </div>
         </Section>
 
@@ -779,12 +820,14 @@ export default function Landing() {
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {AUDIENCE.map((a, i) => (
               <Reveal key={a.title} delay={i * 50}>
+                <SpatialCard className="group/spatial h-full rounded-2xl" tilt={3} lift={5}>
                 <SpotlightCard className="h-full p-6">
                   <div id={a.id} className="scroll-mt-28" />
                   <a.icon className="h-5 w-5 text-primary" aria-hidden />
                   <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
                 </SpotlightCard>
+                </SpatialCard>
               </Reveal>
             ))}
             <Reveal delay={250} className="flex flex-col justify-center rounded-2xl border border-border bg-card p-6">

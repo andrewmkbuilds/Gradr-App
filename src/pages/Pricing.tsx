@@ -2,7 +2,7 @@ import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { TiltCard } from "@/components/motion";
+import { SpatialCard } from "@/components/motion";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
@@ -269,7 +269,8 @@ export default function Pricing() {
 
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            <Card className="relative p-6 flex flex-col border-border">
+            <SpatialCard className="group/spatial h-full rounded-xl" tilt={4}>
+            <Card className="relative h-full p-6 flex flex-col border-border">
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -297,6 +298,7 @@ export default function Pricing() {
                 {currentPlan === "free" ? "Current plan" : "Get started"}
               </Button>
             </Card>
+            </SpatialCard>
 
             {TIERS.map((tier) => {
               const Icon = TIER_ICONS[tier.name] ?? Rocket;
@@ -304,7 +306,7 @@ export default function Pricing() {
               const pendingKey = `${tier.key}-${interval}`;
               const current = currentPlan === tier.key && billingInterval === interval;
               return (
-                <TiltCard key={tier.name} className="group h-full rounded-xl" tilt={4}>
+                <SpatialCard key={tier.name} className="group/spatial h-full rounded-xl" tilt={4} featured={tier.highlighted}>
                 <Card
                   className={`relative h-full p-6 flex flex-col ${
                     tier.highlighted ? "accent-card border-mahogany-border shadow-lg shadow-mahogany/10 xl:scale-[1.02]" : "border-border"
@@ -355,7 +357,7 @@ export default function Pricing() {
                     )}
                   </Button>
                 </Card>
-                </TiltCard>
+                </SpatialCard>
               );
             })}
           </div>
@@ -363,7 +365,8 @@ export default function Pricing() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CREDIT_PACKS.map((pack) => (
-            <Card key={pack.priceId} className="p-5 flex flex-col">
+            <SpatialCard key={pack.priceId} className="group/spatial h-full rounded-xl" tilt={3}>
+            <Card className="h-full p-5 flex flex-col">
               <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <Zap className="h-4 w-4 text-primary" />
               </div>
@@ -387,6 +390,7 @@ export default function Pricing() {
                 {pending === pack.priceId ? "Opening checkout…" : "Buy pack"}
               </Button>
             </Card>
+            </SpatialCard>
           ))}
         </div>
       )}
