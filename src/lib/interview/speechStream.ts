@@ -81,12 +81,96 @@ export function pauseAfter(text: string, beatMs: number): number {
   return beatMs;
 }
 
+/**
+ * Live-caption reveal layer.
+ *
+ * The AI response arrives in whole chunks, but a caption must never show text
+ * the interviewer hasn't said yet. `TimedReveal` re-emits a chunk word by word,
+ * either synced to the chunk's actual audio playback position, or — when voice
+ * is off — at a natural speaking pace.
+ */
+export class TimedReveal {
+  private words: string[];
+  private shown = 0;
+  private timer: number | null = null;
+  private raf: number | null = null;
+  private done = false;
+
+  constructor(private text: string, private onReveal: (revealed: string) => void) {
+    this.words = text.split(/\s+/).filter(Boolean);
+  }
+
+  private emit(count: number) {
+    const next = Math.min(this.words.length, Math.max(this.shown, count));
+    if (next === this.shown) return;
+    this.shown = next;
+    this.onReveal(this.words.slice(0, next).join(" "));
+  }
+
+  /** Syncs the caption to an audio element's playback position. */
+  syncTo(audio: HTMLAudioElement) {
+    this.cancel();
+    const started = Date.now();
+    const tick = () => {
+      if (this.done) return;
+      const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+      // Before metadata lands, fall back to an estimated speaking pace so the
+      // caption still moves instead of sitting empty.
+      const progress = duration
+        ? audio.currentTime / duration
+        : (Date.now() - started) / Math.max(600, estimatedSpeechMs(this.text));
+      this.emit(Math.ceil(Math.min(1, Math.max(0, progress)) * this.words.length));
+      this.raf = window.requestAnimationFrame(tick);
+    };
+    this.raf = window.requestAnimationFrame(tick);
+  }
+
+  /** Reveals at a natural speaking pace (voice muted / no audio). */
+  startPaced() {
+    this.cancel();
+    const step = () => {
+      if (this.done || this.shown >= this.words.length) return;
+      this.emit(this.shown + 1);
+      const word = this.words[this.shown - 1] ?? "";
+      this.timer = window.setTimeout(step, wordDurationMs(word));
+    };
+    step();
+  }
+
+  /** Chunk finished: show all of it and stop scheduling. */
+  finish() {
+    this.cancel();
+    this.done = true;
+    this.emit(this.words.length);
+  }
+
+  cancel() {
+    if (this.timer !== null) window.clearTimeout(this.timer);
+    if (this.raf !== null) window.cancelAnimationFrame(this.raf);
+    this.timer = null;
+    this.raf = null;
+  }
+}
+
+/** ~165 wpm, weighted by word length. */
+export function wordDurationMs(word: string) {
+  return Math.min(700, Math.max(130, 90 + word.length * 42));
+}
+
+export function estimatedSpeechMs(text: string) {
+  return text.split(/\s+/).filter(Boolean).reduce((sum, w) => sum + wordDurationMs(w), 0);
+}
+
 export type AudioResult = { blob: Blob } | { error: VoiceErrorCode | typeof VOICE_ABORTED };
 
 export interface SpeechQueueOptions {
   /** Fetches audio for one chunk from the Gradr voice backend. */
   fetchAudio: (text: string, signal: AbortSignal) => Promise<AudioResult>;
-  /** Fired the moment a chunk's audio starts — drives the live transcript. */
+  /** Fired the moment a chunk's audio starts — the caption begins empty. */
+  onChunkStart: (text: string) => void;
+  /** Word-by-word reveal of the chunk currently being spoken. */
+  onChunkReveal: (revealed: string) => void;
+  /** The chunk has been fully spoken and is now finalized transcript. */
   onChunkSpoken: (text: string) => void;
   onSpeakingChange: (speaking: boolean) => void;
   /** Everything queued has been spoken and the input stream was closed. */
@@ -113,6 +197,8 @@ export class SpeechQueue {
   private url: string | null = null;
   private controllers = new Set<AbortController>();
   private failure: VoiceErrorCode | null = null;
+  /** Caption scheduler for the chunk currently playing. */
+  private reveal: TimedReveal | null = null;
 
 
   constructor(private opts: SpeechQueueOptions) {}
@@ -170,6 +256,7 @@ export class SpeechQueue {
   }
 
   private teardownAudio() {
+    this.reveal?.cancel();
     if (this.audio) {
       this.audio.onended = null;
       this.audio.onerror = null;
@@ -213,9 +300,10 @@ export class SpeechQueue {
         break;
       }
 
-      this.opts.onChunkSpoken(item.text);
+      this.opts.onChunkStart(item.text);
       try {
-        await this.playBlob(result.blob);
+        await this.playBlob(result.blob, item.text);
+        this.opts.onChunkSpoken(item.text);
       } catch (error) {
         console.error("[voice] playback failed", error);
         this.failure = playbackErrorCode(error);
@@ -243,24 +331,29 @@ export class SpeechQueue {
     if (this.closed && this.queue.length === 0) this.opts.onDrained();
   }
 
-  private playBlob(blob: Blob): Promise<void> {
+  private playBlob(blob: Blob, text: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.teardownAudio();
+      this.reveal?.cancel();
+      const reveal = new TimedReveal(text, (revealed) => this.opts.onChunkReveal(revealed));
+      this.reveal = reveal;
       const url = URL.createObjectURL(blob);
       this.url = url;
       const el = new Audio(url);
       this.audio = el;
       const finish = () => {
+        reveal.finish();
         this.teardownAudio();
         resolve();
       };
       const fail = (code: VoiceErrorCode) => {
+        reveal.cancel();
         this.teardownAudio();
         reject(new Error(code));
       };
       el.onended = finish;
       el.onerror = () => fail("VOICE_CONNECTION_FAILED");
-      el.play().catch((error) => {
+      el.play().then(() => reveal.syncTo(el)).catch((error) => {
         console.error("[voice] play() rejected", error);
         fail(error?.name === "NotAllowedError" ? "VOICE_PERMISSION_DENIED" : "VOICE_CONNECTION_FAILED");
       });

@@ -106,9 +106,10 @@ function InterviewEngineInner() {
   const interviewer = useInterviewVoice({
     personaId,
     enabled: voiceMode && studioVoiceAllowedRef.current,
-    onSpokenChunk: (text) => {
-      spokenRef.current = spokenRef.current ? `${spokenRef.current} ${text}` : text;
-      setSpoken(spokenRef.current);
+    onCaption: (text) => {
+      // Live captions: only what the interviewer has actually spoken so far.
+      spokenRef.current = text;
+      setSpoken(text);
     },
     onTurnComplete: () => {
       const finalText = spokenRef.current.trim();
