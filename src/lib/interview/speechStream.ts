@@ -80,24 +80,27 @@ export function pauseAfter(text: string, beatMs: number): number {
   return beatMs;
 }
 
+export type AudioResult = { blob: Blob } | { error: string };
+
 export interface SpeechQueueOptions {
-  /** Fetches audio for one chunk. Resolve null to fall back to browser speech. */
-  fetchAudio: (text: string, signal: AbortSignal) => Promise<Blob | null>;
+  /** Fetches audio for one chunk from ElevenLabs. */
+  fetchAudio: (text: string, signal: AbortSignal) => Promise<AudioResult>;
   /** Fired the moment a chunk's audio starts — drives the live transcript. */
   onChunkSpoken: (text: string) => void;
   onSpeakingChange: (speaking: boolean) => void;
   /** Everything queued has been spoken and the input stream was closed. */
   onDrained: () => void;
-  /** Voice quality degraded (ElevenLabs failed for a chunk). */
-  onDegraded?: (reason: string) => void;
+  /** ElevenLabs failed — the turn is aborted and must be retried by the user. */
+  onFailure: (reason: string) => void;
   /** Extra silence between thoughts, from the persona profile. */
   beatMs?: number;
 }
 
 interface QueueItem {
   text: string;
-  audio: Promise<Blob | null>;
+  audio: Promise<AudioResult>;
 }
+
 
 /** Plays interviewer speech chunk by chunk, in order, with no overlap. */
 export class SpeechQueue {
