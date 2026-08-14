@@ -107,7 +107,7 @@ serve(async (req) => {
     const data = await res.json();
     const results: AdzunaResult[] = data.results || [];
 
-    const jobs = results
+    const jobs: NormalizedJob[] = results
       .map((r) => {
         const desc = r.description || "";
         const isRemote = /\bremote\b|\bwork from home\b|\bwfh\b/i.test(`${r.title} ${desc}`);
@@ -127,9 +127,32 @@ serve(async (req) => {
       })
       .filter((j) => !remoteOnly || j.remote);
 
-    return new Response(JSON.stringify({ jobs, total: data.count ?? jobs.length }), {
+    let total = data.count ?? jobs.length;
+    const sources: Record<string, { count: number; status: string }> = {
+      adzuna: { count: jobs.length, status: "ok" },
+    };
+
+    // JobMaps covers Switzerland / Liechtenstein — only worth calling for `ch`,
+    // and only on the first page so pagination stays consistent with Adzuna.
+    if (country === "ch" && page === 1 && jobmapsEnabled()) {
+      const jm = await searchJobMaps({ what: String(what), where: String(where), remoteOnly });
+      sources.jobmaps = { count: jm.jobs.length, status: jm.error ?? "ok" };
+      if (jm.jobs.length) {
+        const seen = new Set(jobs.map((j) => j.url));
+        for (const j of jm.jobs) {
+          if (!seen.has(j.url)) {
+            seen.add(j.url);
+            jobs.push(j);
+          }
+        }
+        total += jm.total;
+      }
+    }
+
+    return new Response(JSON.stringify({ jobs, total, sources }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (e) {
     console.error("search-jobs error:", e);
     return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
