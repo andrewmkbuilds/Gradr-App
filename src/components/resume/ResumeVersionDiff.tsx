@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, GitCompare, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowRight, Briefcase, GitCompare, Minus, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useResumeVersions, type ResumeVersion } from "@/hooks/useResumeVersions";
+import { jobTypeDeltas } from "@/lib/resume/jobTypeProfiles";
 import { cn } from "@/lib/utils";
 
 interface MetricRow {
@@ -80,6 +81,11 @@ export function ResumeVersionDiff() {
     a.forEach((w) => { if (!b.has(w)) removed.push(w); });
     return { added: added.sort().slice(0, 24), removed: removed.sort().slice(0, 24), hasText: a.size > 0 || b.size > 0 };
   }, [base, compare]);
+
+  const typeDeltas = useMemo(
+    () => jobTypeDeltas(tokens(base?.parsed_text), tokens(compare?.parsed_text)),
+    [base, compare],
+  );
 
   if (loading) {
     return <div className="elev-2 h-40 animate-pulse rounded-xl" />;
@@ -193,6 +199,54 @@ export function ResumeVersionDiff() {
           </div>
         </div>
       </div>
+
+      <section className="mt-6" aria-labelledby="jobtype-delta-heading">
+        <h4 id="jobtype-delta-heading" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Briefcase className="h-4 w-4 text-accent" aria-hidden="true" /> What changed per job type
+        </h4>
+        <p className="mt-1 text-xs text-muted-foreground">
+          The same edit reads differently to different screens. Coverage is the share of each family's screening
+          vocabulary present in the document.
+        </p>
+
+        {!keywordDiff.hasText ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Re-analyse both versions to unlock per-job-type comparison.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {typeDeltas.map((d) => (
+              <li key={d.profile.id} className="rounded-lg border border-border/60 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-foreground">{d.profile.label}</span>
+                  <span className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground">
+                    <span>{d.baseScore}% → <span className="text-foreground">{d.compareScore}%</span></span>
+                    <DeltaPill delta={d.delta} />
+                  </span>
+                </div>
+                <div
+                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
+                  role="img"
+                  aria-label={`${d.profile.label} coverage ${d.compareScore} percent, ${d.delta >= 0 ? "up" : "down"} ${Math.abs(d.delta)} points`}
+                >
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${d.compareScore}%` }} />
+                </div>
+                {(d.gained.length > 0 || d.lost.length > 0) && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {d.gained.slice(0, 8).map((w) => (
+                      <span key={`g-${w}`} className="rounded-full bg-success/10 px-2 py-0.5 text-[11px] text-success">+{w}</span>
+                    ))}
+                    {d.lost.slice(0, 8).map((w) => (
+                      <span key={`l-${w}`} className="rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] text-destructive">−{w}</span>
+                    ))}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
     </div>
   );
 }

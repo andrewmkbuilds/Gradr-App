@@ -12,8 +12,11 @@ import {
   Mail,
   ScrollText,
   Search,
+  ShieldAlert,
   ShieldCheck,
   Wallet,
+  Webhook,
+
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +60,14 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
     ],
   },
   {
+    group: "Platform operations",
+    links: [
+      { title: "API health", description: "Provider latency, errors and rate-limit backoff.", url: "/admin/api-health", icon: Activity },
+      { title: "Webhook deliveries", description: "Paddle and RevenueCat payloads and signatures.", url: "/admin/webhook-logs", icon: Webhook },
+      { title: "CSP violations", description: "Report-only policy blocks and spike alerts.", url: "/admin/csp-reports", icon: ShieldAlert },
+    ],
+  },
+  {
     group: "Trust & safety",
     links: [
       { title: "Security findings", description: "Triage, diff and file scanner findings.", url: "/admin/security-findings", icon: ShieldCheck },
@@ -67,6 +78,7 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
       { title: "Legal documents", description: "Policy versions and acceptance.", url: "/admin/legal", icon: ScrollText },
     ],
   },
+
   {
     group: "Growth & brand",
     links: [

@@ -718,6 +718,7 @@ export type Database = {
       }
       api_health_events: {
         Row: {
+          attempt: number
           created_at: string
           duration_ms: number
           endpoint: string
@@ -726,10 +727,14 @@ export type Database = {
           id: string
           method: string
           outcome: string
+          provider: string
+          rate_limited: boolean
+          retry_after_ms: number | null
           status_code: number
           user_id: string | null
         }
         Insert: {
+          attempt?: number
           created_at?: string
           duration_ms?: number
           endpoint: string
@@ -738,10 +743,14 @@ export type Database = {
           id?: string
           method: string
           outcome: string
+          provider?: string
+          rate_limited?: boolean
+          retry_after_ms?: number | null
           status_code: number
           user_id?: string | null
         }
         Update: {
+          attempt?: number
           created_at?: string
           duration_ms?: number
           endpoint?: string
@@ -750,6 +759,9 @@ export type Database = {
           id?: string
           method?: string
           outcome?: string
+          provider?: string
+          rate_limited?: boolean
+          retry_after_ms?: number | null
           status_code?: number
           user_id?: string | null
         }
@@ -3854,6 +3866,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      webhook_delivery_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          environment: string | null
+          error: string | null
+          event_id: string | null
+          event_type: string | null
+          http_status: number | null
+          id: string
+          payload_digest: string | null
+          payload_preview: Json | null
+          provider: string
+          signature_present: boolean
+          signature_valid: boolean | null
+          source: string
+          status: string
+          verification_error: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          environment?: string | null
+          error?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          http_status?: number | null
+          id?: string
+          payload_digest?: string | null
+          payload_preview?: Json | null
+          provider: string
+          signature_present?: boolean
+          signature_valid?: boolean | null
+          source?: string
+          status?: string
+          verification_error?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          environment?: string | null
+          error?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          http_status?: number | null
+          id?: string
+          payload_digest?: string | null
+          payload_preview?: Json | null
+          provider?: string
+          signature_present?: boolean
+          signature_valid?: boolean | null
+          source?: string
+          status?: string
+          verification_error?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
