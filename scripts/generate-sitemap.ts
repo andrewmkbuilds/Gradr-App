@@ -24,7 +24,6 @@ interface SitemapEntry {
 const entries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
-  { path: "/affiliate", changefreq: "monthly", priority: "0.6" },
   { path: "/ats-resume-checker", changefreq: "monthly", priority: "0.9" },
   { path: "/ai-interview-coach", changefreq: "monthly", priority: "0.9" },
   { path: "/job-application-tracker", changefreq: "monthly", priority: "0.9" },
@@ -119,7 +118,7 @@ const docsEntries: SitemapEntry[] = [
 // Only the two crawlable affiliate pages; the dashboard and resources are gated.
 const affiliateEntries: SitemapEntry[] = [
   { path: "/", changefreq: "monthly", priority: "0.7" },
-  { path: "/apply", changefreq: "monthly", priority: "0.6" },
+  { path: "/join", changefreq: "monthly", priority: "0.6" },
 ];
 
 const surfaceSitemaps: { file: string; origin: string; items: SitemapEntry[] }[] = [

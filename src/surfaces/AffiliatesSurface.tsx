@@ -56,7 +56,7 @@ export default function AffiliatesSurface() {
       eyebrow="Affiliates"
       nav={[
         { label: "Program", to: "/" },
-        { label: "Apply", to: "/apply" },
+        { label: "Apply", to: "/join" },
         { label: "Dashboard", to: "/dashboard" },
         { label: "Resources", to: "/resources" },
       ]}
@@ -64,7 +64,8 @@ export default function AffiliatesSurface() {
       <Suspense fallback={<RouteSkeleton pathname="/affiliate" />}>
         <Routes>
           <Route path="" element={<AffiliateProgram />} />
-          <Route path="apply" element={<AffiliateApply />} />
+          <Route path="join" element={<AffiliateApply />} />
+          <Route path="apply" element={<SurfaceRedirect to="/join" />} />
           <Route
             path="dashboard"
             element={

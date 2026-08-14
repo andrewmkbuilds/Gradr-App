@@ -298,7 +298,7 @@ const SURFACE_META: Partial<Record<Surface, Record<string, { title: string; desc
       description:
         "Join the Gradr affiliate program: recurring commission, transparent click and conversion tracking, monthly payouts and ready-made assets.",
     },
-    "/apply": {
+    "/join": {
       title: "Apply to the Gradr Affiliate Program",
       description:
         "Tell us about your audience and apply to become a Gradr affiliate partner with recurring commission on every referred subscription.",
@@ -332,7 +332,7 @@ function resolveSurfaceMeta(
  */
 function isSurfaceNoIndex(surface: Surface, path: string): boolean {
   if (surface === "marketing" || surface === "news" || surface === "docs") return false;
-  if (surface === "affiliates") return !(path === "/" || path === "/apply");
+  if (surface === "affiliates") return !(path === "/" || path === "/join");
   return isNoIndex(path);
 }
 
@@ -410,7 +410,9 @@ export function RouteSeo() {
       })
     : null;
   const isArticle =
-    pathname.startsWith("/career-advice/") || pathname.startsWith("/blog/");
+    pathname.startsWith("/career-advice/") ||
+    pathname.startsWith("/blog/") ||
+    (surface === "news" && pathname !== "/");
   return (
     <Helmet>
       <html lang="en" />
