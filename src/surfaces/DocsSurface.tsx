@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
 import { SLink, useSurfacePath, SurfaceNotFound } from "@/components/surface/SurfaceLink";
-import { SurfaceHome } from "@/components/surface/SurfaceLink";
 import { DOCS, DOCS_BY_SLUG, DOC_CATEGORIES, type DocArticle } from "@/content/docs";
 import { CrossLink } from "@/components/surface/SurfaceLink";
 import { useLocation } from "react-router-dom";

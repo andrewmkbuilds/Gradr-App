@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
 import { CrossLink, SLink, SurfaceNotFound } from "@/components/surface/SurfaceLink";
-import { SurfaceHome } from "@/components/surface/SurfaceLink";
 import { NEWS, NEWS_BY_SLUG, NEWS_CATEGORIES, type NewsCategory } from "@/content/news";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Clock } from "lucide-react";

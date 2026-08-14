@@ -2,7 +2,7 @@ import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
 import { SLink, useSurfacePath } from "@/components/surface/SurfaceLink";
-import { SurfaceHome, SurfaceRedirect } from "@/components/surface/SurfaceLink";
+import { SurfaceHome, SurfaceNotFound, SurfaceRedirect } from "@/components/surface/SurfaceLink";
 import { RouteSkeleton } from "@/components/states/PageSkeletons";
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/BrandLogo";

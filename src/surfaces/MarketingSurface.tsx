@@ -2,7 +2,6 @@ import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { SurfaceShell } from "@/components/surface/SurfaceShell";
 import { CrossLink, SLink, SurfaceNotFound } from "@/components/surface/SurfaceLink";
-import { SurfaceHome } from "@/components/surface/SurfaceLink";
 import { RouteSkeleton } from "@/components/states/PageSkeletons";
 import {
   ArrowRight,
