@@ -72,27 +72,22 @@ export async function captureReferralFromUrl() {
 
     setCookie(COOKIE_NAME, code, days);
 
-    // Log click
-    const utm_source = params.get("utm_source");
-    const utm_medium = params.get("utm_medium");
-    const utm_campaign = params.get("utm_campaign");
-
-    const { data: click } = await supabase
-      .from("affiliate_clicks")
-      .insert({
-        affiliate_profile_id: hit.profile_id,
-        affiliate_code: code,
+    // Log the click server-side. The browser only reports the referral code —
+    // the edge function resolves which affiliate gets credited, so a visitor
+    // can never attribute their own click to an arbitrary affiliate, and the
+    // table stays closed to client writes.
+    const { data: click } = await supabase.functions.invoke("affiliate-track-click", {
+      body: {
+        code,
         landing_page: window.location.pathname + window.location.search,
-        utm_source,
-        utm_medium,
-        utm_campaign,
+        utm_source: params.get("utm_source"),
+        utm_medium: params.get("utm_medium"),
+        utm_campaign: params.get("utm_campaign"),
         visitor_key: getVisitorKey(),
-        user_agent: navigator.userAgent.slice(0, 500),
-      })
-      .select("id")
-      .single();
+      },
+    });
 
-    if (click?.id) setCookie(CLICK_COOKIE_NAME, click.id, days);
+    if (click?.click_id) setCookie(CLICK_COOKIE_NAME, click.click_id, days);
   } catch (e) {
     // Tracking is best-effort — never block the app
     console.warn("[affiliate] capture failed", e);
