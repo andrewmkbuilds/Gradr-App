@@ -262,7 +262,11 @@ export function urlFor(surface: Surface, path = "/"): string {
 /** Canonical *production* URL for a path on a surface (SEO only, host-independent). */
 export function canonicalUrlFor(surface: Surface, path = "/"): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${PRODUCTION_ORIGIN[surface]}${normalized === "/" ? "" : normalized}` || PRODUCTION_ORIGIN[surface];
+  // The homepage canonical keeps its trailing slash so it matches the static
+  // <link rel="canonical"> and og:url in index.html exactly — crawlers treat
+  // "https://gradr.me" and "https://gradr.me/" as the same URL only when we
+  // advertise one spelling consistently.
+  return `${PRODUCTION_ORIGIN[surface]}${normalized === "/" ? "/" : normalized}`;
 }
 
 /** Convenience: absolute URL of the authenticated app, optionally deep-linked. */

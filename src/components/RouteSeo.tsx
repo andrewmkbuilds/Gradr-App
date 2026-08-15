@@ -18,7 +18,7 @@ import { NEWS_BY_SLUG } from "@/content/news";
 
 const SITE = "Gradr";
 const ORIGIN = "https://gradr.me";
-const OG_IMAGE = `${ORIGIN}/og-image-v2.jpg`;
+const OG_IMAGE = `${ORIGIN}/og.png`;
 
 const META: Record<string, { title: string; description: string }> = {
   // "/" renders the public Gradr landing page for signed-out visitors (and the

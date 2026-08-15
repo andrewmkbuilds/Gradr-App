@@ -12,7 +12,7 @@ import { jobLandingFaqs } from "@/content/jobLandings";
 
 export const SITE_NAME = "Gradr";
 export const SITE_ORIGIN = "https://gradr.me";
-export const OG_IMAGE = `${SITE_ORIGIN}/og-image-v2.jpg`;
+export const OG_IMAGE = `${SITE_ORIGIN}/og.png`;
 
 export type JsonLd = Record<string, unknown>;
 

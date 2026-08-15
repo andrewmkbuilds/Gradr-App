@@ -266,7 +266,7 @@ function writeManifestModule() {
     { file: "gradr-lockup-dark.png", group: "logo", width: 1200, height: 320, label: "Symbol + GRADR lockup (dark)" },
     { file: "email-logo-144.png", group: "logo", width: 144, height: 144, label: "Email header mark" },
 
-    { file: "og-image-v2.jpg", group: "social", width: 1200, height: 630, label: "Open Graph / Twitter card" },
+    { file: "og.png", group: "social", width: 1200, height: 630, label: "Open Graph / Twitter card" },
     { file: "og/site-gradr.png", group: "social", width: 1200, height: 630, label: "Site social card (source)" },
   ].map((t) => {
     const abs = join(PUBLIC, t.file);
