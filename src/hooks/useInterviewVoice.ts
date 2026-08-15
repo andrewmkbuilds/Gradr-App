@@ -39,6 +39,9 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   /** Enumerated provider reason for the last failure — safe to display. */
   const [errorReason, setErrorReason] = useState<VoiceProviderReason | null>(null);
   const reasonRef = useRef<VoiceProviderReason | null>(null);
+  /** Backend request id for the failing turn — quoted to support for lookup. */
+  const [errorRequestId, setErrorRequestId] = useState<string | null>(null);
+  const requestIdRef = useRef<string | null>(null);
 
 
   const optsRef = useRef(opts);
@@ -136,7 +139,13 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
         const payload = await res.json().catch(() => ({} as Record<string, unknown>));
         const code = toVoiceErrorCode(payload?.code);
         reasonRef.current = toVoiceProviderReason(payload?.reason);
-        console.error("[voice] request failed", { status: res.status, code, reason: reasonRef.current });
+        requestIdRef.current = typeof payload?.requestId === "string" ? payload.requestId : null;
+        console.error("[voice] request failed", {
+          status: res.status,
+          code,
+          reason: reasonRef.current,
+          requestId: requestIdRef.current,
+        });
         return { error: code };
       }
 
@@ -181,6 +190,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
         console.error("[voice] turn aborted:", code);
         setError(code);
         setErrorReason(reasonRef.current);
+        setErrorRequestId(requestIdRef.current);
         setSpeaking(false);
         optsRef.current.onVoiceError(code);
       },
@@ -200,7 +210,9 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     optsRef.current.onCaption("");
     setError(null);
     setErrorReason(null);
+    setErrorRequestId(null);
     reasonRef.current = null;
+    requestIdRef.current = null;
     const q = ensureQueue();
     q.reset();
   }, [ensureQueue, stopPaced]);
@@ -253,5 +265,17 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     queueRef.current = null;
   }, []);
 
-  return { speaking, error, errorReason, clearError: () => { setError(null); setErrorReason(null); }, beginTurn, pushDelta, endTurn, retryTurn, stop };
+  return {
+    speaking,
+    error,
+    errorReason,
+    errorRequestId,
+    clearError: () => {
+      setError(null);
+      setErrorReason(null);
+      setErrorRequestId(null);
+      reasonRef.current = null;
+      requestIdRef.current = null;
+    },
+    beginTurn, pushDelta, endTurn, retryTurn, stop };
 }
