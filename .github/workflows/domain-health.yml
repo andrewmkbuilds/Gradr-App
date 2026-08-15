@@ -29,3 +29,6 @@ jobs:
 
       - name: Production app-surface smoke (fails on any cross-domain redirect)
         run: node scripts/smoke-production-app.mjs
+
+      - name: app.gradr.me must serve 200 (never 301/302 to gradr.me)
+        run: node scripts/check-app-serving.mjs
