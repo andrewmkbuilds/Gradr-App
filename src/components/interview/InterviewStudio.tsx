@@ -54,6 +54,12 @@ interface Props {
   voiceErrorCode?: VoiceErrorCode | null;
   /** Enumerated provider reason behind the failure (entitlement, quota, …). */
   voiceErrorReason?: VoiceProviderReason | null;
+  /** Backend request id for the failed turn — quotable to support. */
+  voiceErrorRequestId?: string | null;
+  /** False when the account's plan doesn't include studio voice. */
+  voiceAvailable?: boolean;
+  /** A background health check is currently probing for voice recovery. */
+  voiceRecovering?: boolean;
   onDismissConnectionError?: () => void;
 
 
@@ -104,7 +110,8 @@ export function InterviewStudio(props: Props) {
   const {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
-    connectionLost, voiceErrorCode, voiceErrorReason, onDismissConnectionError,
+    connectionLost, voiceErrorCode, voiceErrorReason, voiceErrorRequestId,
+    voiceAvailable = true, voiceRecovering = false, onDismissConnectionError,
 
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
@@ -167,7 +174,8 @@ export function InterviewStudio(props: Props) {
             open
             code={voiceErrorCode}
             reason={voiceErrorReason}
-            retrying={connecting}
+            requestId={voiceErrorRequestId}
+            retrying={connecting || voiceRecovering}
             onRetryAfterReconnect={onReconnect}
             onDismiss={onDismissConnectionError}
           />
@@ -573,14 +581,31 @@ export function InterviewStudio(props: Props) {
                     variant="outline"
                     size="icon"
                     onClick={onToggleVoice}
-                    aria-label={voiceOn ? "Mute interviewer audio" : "Unmute interviewer audio"}
-                    aria-pressed={voiceOn}
+                    disabled={!voiceAvailable}
+                    aria-label={
+                      !voiceAvailable
+                        ? "Interviewer audio is not included in your plan"
+                        : voiceOn
+                          ? "Mute interviewer audio"
+                          : "Unmute interviewer audio"
+                    }
+                    aria-pressed={voiceAvailable && voiceOn}
                     className="min-h-11 min-w-11 shrink-0"
                   >
-                    {voiceOn ? <Volume2 className="h-4 w-4" aria-hidden="true" /> : <VolumeX className="h-4 w-4" aria-hidden="true" />}
+                    {voiceOn && voiceAvailable
+                      ? <Volume2 className="h-4 w-4" aria-hidden="true" />
+                      : <VolumeX className="h-4 w-4" aria-hidden="true" />}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{voiceOn ? "Interviewer audio on" : "Interviewer audio off"}</TooltipContent>
+                <TooltipContent>
+                  {!voiceAvailable
+                    ? "Voice interviews are a Pro feature — you can keep typing"
+                    : voiceRecovering
+                      ? "Checking whether interviewer audio is back…"
+                      : voiceOn
+                        ? "Interviewer audio on"
+                        : "Interviewer audio off"}
+                </TooltipContent>
               </Tooltip>
 
               <label htmlFor="interview-answer" className="sr-only">

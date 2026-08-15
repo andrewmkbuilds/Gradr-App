@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AudioLines, ExternalLink, Loader2, PlayCircle, RefreshCw, Save, ShieldAlert, ShieldCheck } from "lucide-react";
+import { AudioLines, ExternalLink, Loader2, PlayCircle, RefreshCw, Save, Search, ShieldAlert, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageHeader";
@@ -37,8 +37,25 @@ interface StatusPayload {
     provider_reason: string | null;
     upstream_status: number | null;
     context: string;
+    request_id?: string | null;
+    persona_id?: string | null;
     created_at: string;
   }>;
+}
+
+interface LookupEvent {
+  id: string;
+  user_id: string | null;
+  outcome: string;
+  code: string | null;
+  provider_reason: string | null;
+  upstream_status: number | null;
+  /** Server-side provider detail. Admin-only — never shown to candidates. */
+  provider_detail: string | null;
+  persona_id: string | null;
+  context: string;
+  request_id: string | null;
+  created_at: string;
 }
 
 async function callDiagnostics(body: Record<string, unknown>) {
@@ -57,6 +74,9 @@ export default function AdminVoiceSettings() {
   const [outputFormat, setOutputFormat] = useState("mp3_44100_128");
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [lookupId, setLookupId] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupResult, setLookupResult] = useState<{ requestId: string; events: LookupEvent[] } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -106,6 +126,23 @@ export default function AdminVoiceSettings() {
       toast.error(e?.message ?? "Stream test failed");
     } finally {
       setTesting(false);
+    }
+  };
+
+  /** Resolve a candidate-quoted request id to the full server-side story. */
+  const runLookup = async () => {
+    const requestId = lookupId.trim();
+    if (!requestId) return;
+    setLookupLoading(true);
+    setLookupResult(null);
+    try {
+      const data = await callDiagnostics({ action: "lookup", requestId });
+      setLookupResult({ requestId: data.requestId, events: data.events ?? [] });
+      if (!data.events?.length) toast.info("No voice events recorded for that request id");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Lookup failed");
+    } finally {
+      setLookupLoading(false);
     }
   };
 
@@ -253,6 +290,84 @@ export default function AdminVoiceSettings() {
         )}
       </Card>
 
+      <Card className="space-y-4 p-6">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-foreground">Search by request id</h2>
+          <p className="text-sm text-muted-foreground">
+            Paste the reference a candidate quoted from the voice error panel to see the sanitized
+            error they were shown alongside the provider detail recorded server-side.
+          </p>
+        </div>
+        <form
+          className="flex flex-col gap-2 sm:flex-row"
+          onSubmit={(e) => { e.preventDefault(); void runLookup(); }}
+        >
+          <Label htmlFor="voice-request-id" className="sr-only">Request id</Label>
+          <Input
+            id="voice-request-id"
+            value={lookupId}
+            onChange={(e) => setLookupId(e.target.value)}
+            placeholder="e.g. 3f1c9a12-77b4-4f0a-9b1e-0f2c4d8a6e55"
+            className="font-mono"
+          />
+          <Button type="submit" disabled={lookupLoading || !lookupId.trim()} className="shrink-0">
+            {lookupLoading
+              ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              : <Search className="mr-2 h-4 w-4" aria-hidden="true" />}
+            Look up
+          </Button>
+        </form>
+
+        {lookupResult && (
+          lookupResult.events.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nothing recorded for <span className="font-mono">{lookupResult.requestId}</span>.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {lookupResult.events.map((e) => (
+                <li key={e.id} className="rounded-xl border border-border/60 bg-muted/30 p-4 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={e.outcome === "ok" ? "outline" : "destructive"}>{e.outcome}</Badge>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {[e.code, e.provider_reason, e.upstream_status ? `HTTP ${e.upstream_status}` : null]
+                        .filter(Boolean).join(" · ") || "—"}
+                    </span>
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {new Date(e.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <dl className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                    <div>
+                      <dt className="font-medium text-foreground">Candidate shown</dt>
+                      <dd>{voiceReasonCopy(toVoiceProviderReason(e.provider_reason))?.label ?? e.code ?? "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-foreground">Persona</dt>
+                      <dd className="font-mono">{e.persona_id ?? "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-foreground">User</dt>
+                      <dd className="font-mono break-all">{e.user_id ?? "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-foreground">Context</dt>
+                      <dd>{e.context}</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-foreground">Provider detail (server-side)</p>
+                    <p className="mt-1 whitespace-pre-wrap break-words rounded-lg bg-background/60 p-2 font-mono text-[11px] text-muted-foreground">
+                      {e.provider_detail ?? "No detail recorded."}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )
+        )}
+      </Card>
+
       <Card className="space-y-3 p-6">
         <h2 className="font-display text-lg font-semibold text-foreground">Recent voice events</h2>
         {(status?.recent ?? []).length === 0 ? (
@@ -265,6 +380,15 @@ export default function AdminVoiceSettings() {
                 <span className="font-mono text-xs text-muted-foreground">
                   {[e.code, e.provider_reason, e.upstream_status ? `HTTP ${e.upstream_status}` : null].filter(Boolean).join(" · ") || "—"}
                 </span>
+                {e.request_id && (
+                  <button
+                    type="button"
+                    onClick={() => { setLookupId(e.request_id!); void 0; }}
+                    className="font-mono text-[11px] text-brand-secondary underline-offset-2 hover:underline"
+                  >
+                    {e.request_id.slice(0, 8)}…
+                  </button>
+                )}
                 <span className="ml-auto text-xs text-muted-foreground">
                   {e.context} · {new Date(e.created_at).toLocaleString()}
                 </span>

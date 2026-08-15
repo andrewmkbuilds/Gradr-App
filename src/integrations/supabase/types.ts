@@ -4002,6 +4002,8 @@ export type Database = {
           created_at: string
           id: string
           outcome: string
+          persona_id: string | null
+          provider_detail: string | null
           provider_reason: string | null
           request_id: string | null
           upstream_status: number | null
@@ -4013,6 +4015,8 @@ export type Database = {
           created_at?: string
           id?: string
           outcome: string
+          persona_id?: string | null
+          provider_detail?: string | null
           provider_reason?: string | null
           request_id?: string | null
           upstream_status?: number | null
@@ -4024,6 +4028,8 @@ export type Database = {
           created_at?: string
           id?: string
           outcome?: string
+          persona_id?: string | null
+          provider_detail?: string | null
           provider_reason?: string | null
           request_id?: string | null
           upstream_status?: number | null

@@ -123,7 +123,13 @@ serve(async (req) => {
     const tier = await planTier(user.id, resolveEnv(body.environment));
     if (!new Set(["starter", "pro", "advanced"]).has(tier)) {
       console.warn("[voice] denied — studio voice entitlement required", { requestId, userId: user.id, tier });
-      await recordVoiceEvent({ userId: user.id, outcome: "failure", code: "VOICE_NOT_ENTITLED", requestId });
+      await recordVoiceEvent({
+        userId: user.id,
+        outcome: "failure",
+        code: "VOICE_NOT_ENTITLED",
+        requestId,
+        providerDetail: `Plan tier "${tier}" does not include studio voice.`,
+      });
       return voiceError("VOICE_NOT_ENTITLED", 403, requestId);
     }
     const text = typeof body.text === "string" ? body.text.trim().slice(0, 1200) : "";
@@ -145,6 +151,8 @@ serve(async (req) => {
         code: "VOICE_CONFIGURATION_ERROR",
         reason: "PROVIDER_CREDENTIAL_MISSING",
         requestId,
+        personaId,
+        providerDetail: "No speech credential configured in the workspace.",
       });
       return voiceError("VOICE_CONFIGURATION_ERROR", 503, requestId, "PROVIDER_CREDENTIAL_MISSING");
     }
@@ -187,12 +195,14 @@ serve(async (req) => {
         reason: mapped.reason,
         upstreamStatus,
         requestId,
+        personaId,
+        providerDetail: providerDetail(rawDetail),
       });
       return voiceError(mapped.code, mapped.status, requestId, mapped.reason);
     }
 
     console.info("[voice] audio stream started", { requestId, personaId });
-    await recordVoiceEvent({ userId: user.id, outcome: "ok", requestId });
+    await recordVoiceEvent({ userId: user.id, outcome: "ok", requestId, personaId });
 
     return new Response(res.body, {
       headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },

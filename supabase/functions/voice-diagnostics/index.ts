@@ -74,6 +74,33 @@ serve(async (req) => {
   const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
   const config = await loadVoiceConfig();
 
+  // ---- lookup -------------------------------------------------------------
+  // Resolve a candidate-reported requestId to the sanitized Gradr error the
+  // studio showed *and* the server-side provider detail behind it. Admin-only
+  // (enforced above) — the detail never leaves this action.
+  if (action === "lookup") {
+    const requestId = typeof body.requestId === "string" ? body.requestId.trim() : "";
+    if (!/^[A-Za-z0-9-]{6,64}$/.test(requestId)) {
+      return json({ error: "Enter a valid request id" }, 400);
+    }
+
+    const { data: events, error } = await serviceClient()
+      .from("voice_provider_events")
+      .select("id, user_id, outcome, code, provider_reason, upstream_status, provider_detail, persona_id, context, request_id, created_at")
+      .eq("request_id", requestId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error("[voice-diagnostics] lookup failed", error.message);
+      return json({ error: "Lookup failed" }, 500);
+    }
+
+    console.info("[voice-diagnostics] lookup", { by: user.id, requestId, hits: events?.length ?? 0 });
+    return json({ requestId, events: events ?? [] });
+  }
+
+
   // ---- save-config --------------------------------------------------------
   if (action === "save-config") {
     const overrides: Record<string, string> = {};
@@ -214,7 +241,7 @@ serve(async (req) => {
   // ---- status -------------------------------------------------------------
   const { data: recent } = await serviceClient()
     .from("voice_provider_events")
-    .select("outcome, code, provider_reason, upstream_status, context, created_at")
+    .select("outcome, code, provider_reason, upstream_status, context, request_id, persona_id, created_at")
     .order("created_at", { ascending: false })
     .limit(20);
 
