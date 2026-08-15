@@ -549,7 +549,7 @@ export default function Landing() {
                     beveled tiles that lean into perspective and rise toward
                     the cursor. The headline column beside it stays flat DOM so
                     the copy and CTAs are never rendered through a shader. */}
-                <CanvasFxFrame glow="strong" marks={false}>
+                <CanvasFxFrame glow="strong" marks={false} clip={false}>
                   <HexFloatFx
                     className="w-full"
                     activeClassName="h-[520px] overflow-hidden lg:h-[560px]"

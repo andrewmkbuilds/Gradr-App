@@ -18,6 +18,8 @@ export interface CanvasFxFrameProps {
   glow?: "none" | "soft" | "strong";
   /** Draw the corner registration marks that tie the surfaces together. */
   marks?: boolean;
+  /** Clip children to the surface. Disable when content intentionally overhangs. */
+  clip?: boolean;
   /** Short caption describing the interaction, e.g. "Move your cursor". */
   hint?: ReactNode;
 }
@@ -33,6 +35,7 @@ export function CanvasFxFrame({
   className,
   glow = "soft",
   marks = true,
+  clip = true,
   hint,
 }: CanvasFxFrameProps) {
   return (
@@ -51,7 +54,11 @@ export function CanvasFxFrame({
 
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border border-border/70",
+          "relative rounded-2xl border border-border/70",
+          // Slots whose children deliberately overhang the surface (the hero
+          // command centre floats a card past its edge) opt out of clipping.
+          // Canvas mode does its own clipping on the effect shell.
+          clip && "overflow-hidden",
           "bg-surface/40 backdrop-blur-[2px]",
           "shadow-[0_30px_80px_-40px_hsl(var(--primary)/0.45)]",
         )}
