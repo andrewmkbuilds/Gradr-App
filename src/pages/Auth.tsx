@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { markSignupIntent } from "@/lib/telemetry/signup";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { urlFor } from "@/config/domains";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
