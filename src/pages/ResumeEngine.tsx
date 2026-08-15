@@ -260,6 +260,14 @@ export default function ResumeEngine() {
     };
   }, [user, file]);
 
+  // Reconnected with an unscored offline upload — run the analysis now.
+  useEffect(() => {
+    if (!online || !file || analysis || uploading || analyzing) return;
+    toast.message("Back online", { description: "Scoring the resume you saved offline…" });
+    void handleFileUpload(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online]);
+
   const handleRescan = async () => {
     if (!file) return;
     setAnalysis(null);
