@@ -43,7 +43,8 @@
     "check:domains": "node scripts/check-domains.mjs",
     "check:domain-health": "node scripts/domain-healthcheck.mjs",
     "test:smoke:app": "node scripts/smoke-production-app.mjs",
-    "check:app-serving": "node scripts/check-app-serving.mjs"
+    "check:app-serving": "node scripts/check-app-serving.mjs",
+    "check:oauth-callback": "node scripts/preflight-oauth-callback.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -15,6 +15,7 @@ import {
   readNext,
 } from "@/lib/nextRedirect";
 import { EXPECTED_CALLBACK_URL, recordOAuthHop } from "@/lib/oauth/forensics";
+import { OAuthHostMismatchNotice } from "@/components/auth/OAuthHostMismatchNotice";
 import { toast } from "sonner";
 import { z } from "zod";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
@@ -323,6 +324,8 @@ export default function Auth() {
 
   return (
     <AuthLayout>
+      <OAuthHostMismatchNotice />
+
 
       <div className="space-y-2">
         <h1 className="text-xl font-semibold text-foreground">

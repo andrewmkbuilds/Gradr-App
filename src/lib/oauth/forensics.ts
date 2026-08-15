@@ -202,3 +202,48 @@ export function buildTimelines(rows: OAuthFlowEvent[]): OAuthTimeline[] {
     })
     .sort((a, b) => (a.startedAt < b.startedAt ? 1 : -1));
 }
+
+/**
+ * Host-mismatch detection for the auth callback.
+ *
+ * The provider issues its authorization code for the origin that started the
+ * flow (app.gradr.me in production). If hosting bounces the browser to the
+ * apex, the code arrives on a host that cannot exchange it — the user sees a
+ * silent failure. This spots that case so the UI can explain it and offer a
+ * one-click retry on the correct host.
+ */
+export interface OAuthHostMismatch {
+  /** Host the callback actually landed on. */
+  actualHost: string;
+  /** Host the callback should have landed on. */
+  expectedHost: string;
+  /** Where to restart the sign-in so the code is issued for the right origin. */
+  retryUrl: string;
+}
+
+export function detectOAuthHostMismatch(href: string): OAuthHostMismatch | null {
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    return null;
+  }
+
+  // Only meaningful on the production domain family — previews and localhost
+  // legitimately serve every surface from a single host.
+  if (!/(^|\.)gradr\.me$/.test(url.hostname)) return null;
+
+  const expected = new URL(PRODUCTION_APP_ORIGIN);
+  if (url.hostname === expected.hostname) return null;
+
+  const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+  const has = (key: string) => url.searchParams.has(key) || hash.has(key);
+  const isOAuthLanding = has("code") || has("access_token") || has("state") || has("error");
+  if (!isOAuthLanding) return null;
+
+  const retry = new URL("/auth", PRODUCTION_APP_ORIGIN);
+  const next = url.searchParams.get("next");
+  if (next && next.startsWith("/") && !next.startsWith("//")) retry.searchParams.set("next", next);
+
+  return { actualHost: url.hostname, expectedHost: expected.hostname, retryUrl: retry.toString() };
+}
