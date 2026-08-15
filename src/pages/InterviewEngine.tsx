@@ -17,6 +17,7 @@ import { exportReportPdf, downloadBlob } from "@/lib/interview/reportPdf";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
 import { useInterviewVoice } from "@/hooks/useInterviewVoice";
+import { useVoiceHealthWatch } from "@/hooks/useVoiceHealthWatch";
 import { reconnectVoiceSession } from "@/lib/interview/voiceStatus";
 import { useInterviewMetrics } from "@/hooks/useInterviewMetrics";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
@@ -147,6 +148,29 @@ function InterviewEngineInner() {
     },
   });
 
+
+  /**
+   * Server-side voice faults can heal on their own (key rotated, quota reset).
+   * Watch quietly in the background and re-arm voice in place — the candidate
+   * keeps typing and the transcript is never touched.
+   */
+  const serverVoiceFault =
+    voiceError === "VOICE_CONFIGURATION_ERROR" ||
+    voiceError === "VOICE_RATE_LIMITED" ||
+    voiceError === "VOICE_CONNECTION_FAILED" ||
+    voiceError === "VOICE_UNAVAILABLE";
+
+  const { checking: voiceRecovering } = useVoiceHealthWatch({
+    active: serverVoiceFault,
+    onRecovered: () => {
+      studioVoiceAllowedRef.current = true;
+      setVoiceEntitled(true);
+      setVoiceError(null);
+      setConnectionErrorDismissed(true);
+      interviewerRef.current?.clearError();
+      toast.success("Interviewer voice is back — it'll speak the next question.");
+    },
+  });
 
   const interviewerRef = useRef(interviewer);
   interviewerRef.current = interviewer;
