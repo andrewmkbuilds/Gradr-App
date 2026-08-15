@@ -211,6 +211,38 @@ export function HexFloatFx({
   );
 }
 
+/**
+ * Whether a slot of the given demand will actually run its effect here.
+ * Lets callers tailor affordance copy — telling someone to "peel" a sheet
+ * that is rendering as a static comparison is worse than saying nothing.
+ */
+export function useCanvasFxEnabled(demand: CanvasFxDemand): boolean {
+  const reducedMotion = useReducedMotionPref();
+  const [enabled, setEnabled] = useState(() =>
+    typeof window === "undefined"
+      ? false
+      : tierSatisfies(
+          resolveCanvasFxTier({ reducedMotion, width: window.innerWidth }),
+          demand,
+        ),
+  );
+
+  useEffect(() => {
+    const sync = () =>
+      setEnabled(
+        tierSatisfies(
+          resolveCanvasFxTier({ reducedMotion, width: window.innerWidth }),
+          demand,
+        ),
+      );
+    sync();
+    window.addEventListener("resize", sync, { passive: true });
+    return () => window.removeEventListener("resize", sync);
+  }, [demand, reducedMotion]);
+
+  return enabled;
+}
+
 /* ----------------------------- ParticleScroll ----------------------------- */
 
 export interface ParticleScrollFxProps extends BaseFxProps {

@@ -13,7 +13,7 @@
 
 import { ArrowLeftRight, Check, Sparkles, X } from "lucide-react";
 
-import { PeelFx } from "@/components/canvasui/CanvasFx";
+import { PeelFx, useCanvasFxEnabled } from "@/components/canvasui/CanvasFx";
 import { CanvasFxFrame } from "@/components/canvasui/CanvasFxFrame";
 import { cn } from "@/lib/utils";
 
@@ -185,6 +185,8 @@ function ComparisonFallback() {
 /* --------------------------------- export --------------------------------- */
 
 export function ResumeTransform({ className }: { className?: string }) {
+  const peelable = useCanvasFxEnabled("full");
+
   return (
     <CanvasFxFrame
       className={className}
@@ -192,12 +194,17 @@ export function ResumeTransform({ className }: { className?: string }) {
       hint={
         <>
           <Sparkles className="h-3 w-3 text-primary" aria-hidden />
-          Move your cursor to the right edge to peel
+          {peelable
+            ? "Move your cursor to the right edge to peel"
+            : "Your draft, and the same role after Gradr"}
         </>
       }
     >
       <PeelFx
-        className="h-[340px] w-full sm:h-[300px]"
+        // Height only in canvas mode: the peel needs a fixed box, the static
+        // comparison should size to its own content instead of clipping it.
+        className="w-full"
+        activeClassName="h-[340px] sm:h-[300px]"
         options={{
           side: "right",
           mode: "cursor",
