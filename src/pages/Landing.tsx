@@ -552,7 +552,7 @@ export default function Landing() {
                 <CanvasFxFrame glow="strong" marks={false}>
                   <HexFloatFx
                     className="w-full"
-                    activeClassName="h-[520px] lg:h-[560px]"
+                    activeClassName="h-[520px] overflow-hidden lg:h-[560px]"
                     options={{
                       size: 150,
                       gap: 1,
@@ -580,9 +580,7 @@ export default function Landing() {
                       grain: 0,
                     }}
                   >
-                    <div className="h-full w-full overflow-hidden">
-                      <HeroCommandCenter />
-                    </div>
+                    <HeroCommandCenter />
                   </HexFloatFx>
                 </CanvasFxFrame>
                 <div className="mt-8 flex justify-center lg:justify-start">
