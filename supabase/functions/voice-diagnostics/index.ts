@@ -241,7 +241,7 @@ serve(async (req) => {
   // ---- status -------------------------------------------------------------
   const { data: recent } = await serviceClient()
     .from("voice_provider_events")
-    .select("outcome, code, provider_reason, upstream_status, context, created_at")
+    .select("outcome, code, provider_reason, upstream_status, context, request_id, persona_id, created_at")
     .order("created_at", { ascending: false })
     .limit(20);
 
