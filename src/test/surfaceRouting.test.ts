@@ -58,6 +58,7 @@ describe("surface routing", () => {
   it("canonicalises product URLs to app.gradr.me regardless of host", () => {
     expect(PRODUCTION_ORIGIN.app).toBe("https://app.gradr.me");
     expect(canonicalUrlFor("app", "/dashboard")).toBe("https://app.gradr.me/dashboard");
-    expect(canonicalUrlFor("home", "/")).toBe("https://gradr.me");
+    // Homepage canonical keeps the trailing slash so it matches index.html.
+    expect(canonicalUrlFor("home", "/")).toBe("https://gradr.me/");
   });
 });
