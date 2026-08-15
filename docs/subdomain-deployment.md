@@ -90,8 +90,9 @@ those only when a subdomain earns it.
 | --- | --- |
 | `bun run check:domain-health` | Every hostname (`gradr.me`, `app`, `marketing`, `docs`, `news`, `affiliates`) resolves in DNS, negotiates TLS, and serves the Gradr bundle. Prints the full hop-by-hop HTTP status chain. Fails when `app.gradr.me` redirects to the apex. |
 | `bun run test:smoke:app` | Hard-refreshes `https://app.gradr.me/dashboard`, `/auth` and `/career` and fails if any hop crosses to `gradr.me`. |
+| `bun run check:app-serving` | The go/no-go gate: `https://app.gradr.me/` must answer **200 with a rendered HTML document from `app.gradr.me` itself**, and `https://app.gradr.me/~oauth/callback` must reach the managed OAuth broker. **Any 301/302 whose `Location` is `gradr.me` fails the check**, including intermediate hops — a callback that detours through the apex loses the authorization code. Run it against the apex (`--host gradr.me`) as a control; that passes today. |
 
-Both run in `.github/workflows/domain-health.yml` (daily plus `workflow_dispatch`).
+All three run in `.github/workflows/domain-health.yml` (daily plus `workflow_dispatch`).
 They are deliberately **not** on the PR job: the app-surface result depends on
 hosting configuration rather than on the contents of a pull request, and it
 stays red until `app.gradr.me` is served as a Primary domain (see
