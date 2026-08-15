@@ -120,11 +120,33 @@ export const SATELLITE_SUBDOMAINS_LIVE =
   (import.meta.env?.VITE_APP_SUBDOMAIN_LIVE as string | undefined) === "true";
 
 /**
+ * Build-time surface pin — the mechanism for one-project-per-domain hosting.
+ *
+ * Hosting serves exactly one primary domain per project, so the only way to get
+ * `app.gradr.me` served directly is a project whose primary domain *is*
+ * `app.gradr.me`. Set `VITE_GRADR_SURFACE=app` in that project and the bundle
+ * renders the app surface at `/` on every host it runs on — including its
+ * `*.lovable.app` preview URL, so the surface can be verified before DNS moves.
+ *
+ * Unset (the default, and this project) keeps today's behaviour: hostname
+ * routing in production, path prefixes everywhere else.
+ */
+export function pinnedSurface(): Surface | null {
+  const raw = (import.meta.env?.VITE_GRADR_SURFACE as string | undefined)
+    ?.trim()
+    .toLowerCase();
+  if (!raw) return null;
+  return (SURFACES as string[]).includes(raw) ? (raw as Surface) : null;
+}
+
+/**
  * True when the running bundle can prove subdomains are served independently:
  * if this code is executing on `app.gradr.me` (or any satellite host), hosting
  * did not redirect it away, so subdomain routing is live regardless of config.
  */
 export function satelliteSubdomainsLive(host: string = currentHost()): boolean {
+  // A pinned build is by definition a dedicated per-domain deployment.
+  if (pinnedSurface()) return true;
   if (SATELLITE_SUBDOMAINS_LIVE) return true;
   if (deployEnv(host) !== "production") return false;
   const surface = surfaceFromHost(host);
