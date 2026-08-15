@@ -60,8 +60,8 @@ describe("cross-surface navigation", () => {
   });
 
   it("never forwards an off-site next= target", () => {
-    expect(sanitizeNext("https://evil.example/phish")).toBe("/");
-    expect(sanitizeNext("//evil.example")).toBe("/");
+    expect(sanitizeNext("https://evil.example/phish")).toBeNull();
+    expect(sanitizeNext("//evil.example")).toBeNull();
     expect(sanitizeNext("/dashboard")).toBe("/dashboard");
   });
 });
