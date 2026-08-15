@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { track } from "@/lib/telemetry/events";
 import { Link } from "react-router-dom";
 import {
@@ -31,6 +31,8 @@ import { ResumeVersionDiff } from "@/components/resume/ResumeVersionDiff";
 import { GenerationStream } from "@/components/ai/GenerationStream";
 import { useAiStream } from "@/hooks/useAiStream";
 import { parseSuggestions, suggestionsToJson, type Suggestion } from "@/lib/resume/suggestions";
+import { cacheResumeFile, cacheVersion, latestCachedResumeFile } from "@/lib/offline/resumeCache";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 
 
@@ -69,6 +71,7 @@ const typeStyles: Record<string, { icon: typeof CheckCircle; color: string }> = 
 
 export default function ResumeEngine() {
   const { user } = useAuth();
+  const online = useOnlineStatus();
   const reduced = useReducedMotionPref();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -113,6 +116,30 @@ export default function ResumeEngine() {
     setFile(selectedFile);
     setFileName(selectedFile.name);
     setUploading(true);
+
+    // Keep a local copy first so the resume survives a dropped connection.
+    let extractedText = "";
+    try {
+      extractedText = await extractResumeText(selectedFile);
+      await cacheResumeFile({
+        id: `draft:${user.id}`,
+        user_id: user.id,
+        file_name: selectedFile.name,
+        file_type: selectedFile.type,
+        blob: selectedFile,
+        text: extractedText,
+      });
+    } catch (cacheError) {
+      console.warn("Could not cache resume locally", cacheError);
+    }
+
+    if (!online) {
+      setUploading(false);
+      toast.message("Saved offline", {
+        description: "Your resume is stored on this device. Scoring runs as soon as you reconnect.",
+      });
+      return;
+    }
     const startedAt = Date.now();
     track("resume_uploaded", {
       file_type: selectedFile.name.split(".").pop()?.toLowerCase(),
@@ -128,7 +155,7 @@ export default function ResumeEngine() {
 
       if (uploadError) throw uploadError;
 
-      const text = await extractResumeText(selectedFile);
+      const text = extractedText || (await extractResumeText(selectedFile));
 
       setUploading(false);
       setAnalyzing(true);
@@ -173,6 +200,32 @@ export default function ResumeEngine() {
       setActiveVersionId(saved?.id ?? null);
       setVersionsToken((t) => t + 1);
 
+      if (saved?.id) {
+        // Mirror the new version (and its file bytes) into IndexedDB.
+        await cacheVersion(user.id, {
+          id: saved.id,
+          file_name: selectedFile.name,
+          file_path: filePath,
+          version_label: versionLabel,
+          ats_score: analysisData.ats_score,
+          keyword_match: analysisData.keyword_match,
+          formatting_score: analysisData.formatting_score,
+          impact_score: analysisData.impact_score,
+          readability_score: analysisData.readability_score,
+          ai_suggestions: suggestionsToJson(parseSuggestions(analysisData.suggestions)),
+          parsed_text: text.substring(0, 10000),
+          created_at: new Date().toISOString(),
+        });
+        await cacheResumeFile({
+          id: saved.id,
+          user_id: user.id,
+          file_name: selectedFile.name,
+          file_type: selectedFile.type,
+          blob: selectedFile,
+          text,
+        });
+      }
+
       // Activation moment: the user has seen real output from the product.
       track("resume_analyzed", {
         ats_score: analysisData.ats_score,
@@ -191,7 +244,29 @@ export default function ResumeEngine() {
       setUploading(false);
       setAnalyzing(false);
     }
-  }, [user, jobDescription, jobTitle, analysisStream]);
+  }, [user, jobDescription, jobTitle, analysisStream, online]);
+
+  // Restore the last resume held on this device (survives reloads and offline).
+  useEffect(() => {
+    if (!user || file) return;
+    let cancelled = false;
+    void (async () => {
+      const cached = await latestCachedResumeFile(user.id);
+      if (!cached || cancelled) return;
+      setFileName((current) => current || cached.file_name);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, file]);
+
+  // Reconnected with an unscored offline upload — run the analysis now.
+  useEffect(() => {
+    if (!online || !file || analysis || uploading || analyzing) return;
+    toast.message("Back online", { description: "Scoring the resume you saved offline…" });
+    void handleFileUpload(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online]);
 
   const handleRescan = async () => {
     if (!file) return;

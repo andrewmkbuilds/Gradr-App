@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 
-/** Tracks browser connectivity so surfaces can degrade gracefully when offline. */
-export function useOnlineStatus(): boolean {
+/** Live browser connectivity flag. Defaults to online when unavailable. */
+export function useOnlineStatus() {
   const [online, setOnline] = useState(() =>
-    typeof navigator === "undefined" ? true : navigator.onLine,
+    typeof navigator === "undefined" ? true : navigator.onLine !== false,
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const up = () => setOnline(true);
     const down = () => setOnline(false);
     window.addEventListener("online", up);
