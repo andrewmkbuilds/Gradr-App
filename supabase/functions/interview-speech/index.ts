@@ -151,6 +151,8 @@ serve(async (req) => {
         code: "VOICE_CONFIGURATION_ERROR",
         reason: "PROVIDER_CREDENTIAL_MISSING",
         requestId,
+        personaId,
+        providerDetail: "No speech credential configured in the workspace.",
       });
       return voiceError("VOICE_CONFIGURATION_ERROR", 503, requestId, "PROVIDER_CREDENTIAL_MISSING");
     }
@@ -193,12 +195,14 @@ serve(async (req) => {
         reason: mapped.reason,
         upstreamStatus,
         requestId,
+        personaId,
+        providerDetail: providerDetail(rawDetail),
       });
       return voiceError(mapped.code, mapped.status, requestId, mapped.reason);
     }
 
     console.info("[voice] audio stream started", { requestId, personaId });
-    await recordVoiceEvent({ userId: user.id, outcome: "ok", requestId });
+    await recordVoiceEvent({ userId: user.id, outcome: "ok", requestId, personaId });
 
     return new Response(res.body, {
       headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
