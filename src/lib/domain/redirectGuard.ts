@@ -16,6 +16,7 @@ import {
   ROOT_DOMAIN,
   type Surface,
   isProduction,
+  satelliteSubdomainsLive,
   surfaceFromHost,
 } from "@/config/domains";
 
@@ -114,7 +115,10 @@ export function assertRedirectTarget(target: string, { context, expectSurface }:
   }
 
   const current = host();
-  if (expectSurface && isProduction(parsed.hostname)) {
+  // While hosting still aliases the satellite subdomains to the primary
+  // domain, every surface legitimately lives on the primary host and is routed
+  // by path — surface assertions only apply once subdomains are served.
+  if (expectSurface && isProduction(parsed.hostname) && satelliteSubdomainsLive(parsed.hostname)) {
     const landing = surfaceFromHost(parsed.hostname);
     if (landing !== expectSurface) {
       throw new RedirectDomainError(
@@ -130,6 +134,7 @@ export function assertRedirectTarget(target: string, { context, expectSurface }:
   if (
     current &&
     isProduction(current) &&
+    satelliteSubdomainsLive(current) &&
     current !== ROOT_DOMAIN &&
     parsed.hostname === ROOT_DOMAIN &&
     (expectSurface ?? surfaceFromHost(current)) !== "home"
