@@ -583,7 +583,7 @@ export default function Landing() {
                     <HeroCommandCenter />
                   </HexFloatFx>
                 </CanvasFxFrame>
-                <div className="mt-8 flex justify-center lg:justify-start">
+                <div className="mt-14 flex justify-center lg:justify-start">
                   <ScrollCue targetId="product" label="Continue" />
                 </div>
               </div>
