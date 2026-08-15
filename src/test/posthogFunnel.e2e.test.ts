@@ -165,9 +165,8 @@ describe("PostHog growth funnels — end to end", () => {
   });
 
   it("keeps the provisioning script's funnel definitions inside the typed event vocabulary", async () => {
-    const source = await import("node:fs/promises").then((fs) =>
-      fs.readFile(new URL("../lib/telemetry/events.ts", import.meta.url), "utf8"),
-    );
+    const fs = await import("node:fs/promises");
+    const source = await fs.readFile("src/lib/telemetry/events.ts", "utf8");
     for (const steps of Object.values(FUNNELS)) {
       for (const step of steps) {
         expect(source, `${step} is not declared in GradrEvent`).toContain(`| "${step}"`);
