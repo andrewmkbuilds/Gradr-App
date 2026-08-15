@@ -115,6 +115,75 @@ function cardHtml({ title, description, eyebrow }, logoDataUri) {
 </body></html>`;
 }
 
+/**
+ * The flagship site-wide Open Graph card served at /og.png.
+ *
+ * This is the image every social platform shows for gradr.me and for any
+ * public page without its own per-article card, so it is rendered from a
+ * richer layout than the generic article template: full brand lockup,
+ * value proposition, and the four product pillars.
+ */
+function rootCardHtml(logoDataUri) {
+  const pillars = [
+    ["ATS resume scoring", "Beat the filters"],
+    ["Live job matching", "Roles that fit"],
+    ["Application engine", "Tailored in a click"],
+    ["AI mock interviews", "Practice out loud"],
+  ];
+  return `<!doctype html><html><head><meta charset="utf-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1200px;height:630px;font-family:Inter,system-ui,sans-serif;overflow:hidden;
+    background:radial-gradient(900px 560px at 88% -18%, #2f7a92 0%, transparent 60%),
+               radial-gradient(680px 500px at -8% 118%, #733E24 0%, transparent 58%),
+               #0b1c22;color:#F2F0EF;position:relative;
+    display:flex;flex-direction:column;justify-content:space-between;padding:64px 72px 58px}
+  .rule{position:absolute;left:0;right:0;top:0;height:9px;
+    background:linear-gradient(90deg,#245F73 0%,#2f7a92 58%,#733E24 58%,#8d4c2c 100%)}
+  .grid{position:absolute;inset:0;opacity:.055;
+    background-image:linear-gradient(#F2F0EF 1px,transparent 1px),linear-gradient(90deg,#F2F0EF 1px,transparent 1px);
+    background-size:60px 60px;
+    -webkit-mask-image:radial-gradient(760px 520px at 24% 40%, #000 0%, transparent 78%)}
+  .glow{position:absolute;width:520px;height:520px;right:-120px;bottom:-220px;border-radius:50%;
+    background:radial-gradient(circle,rgba(47,122,146,.45) 0%,transparent 68%);filter:blur(12px)}
+  .top{display:flex;align-items:center;gap:18px;z-index:1}
+  .top img{height:62px;width:auto}
+  .brand{font-family:'Bricolage Grotesque',Inter,sans-serif;font-weight:800;font-size:38px;
+    letter-spacing:-.03em;color:#F2F0EF}
+  .badge{margin-left:auto;font-size:19px;font-weight:600;letter-spacing:.02em;color:#F2F0EF;
+    border:1px solid rgba(242,240,239,.26);border-radius:999px;padding:10px 24px;
+    background:linear-gradient(90deg,rgba(36,95,115,.6),rgba(115,62,36,.5))}
+  h1{z-index:1;font-family:'Bricolage Grotesque',Inter,sans-serif;font-size:74px;line-height:1.03;
+    font-weight:800;letter-spacing:-.035em;max-width:1000px}
+  h1 .accent{background:linear-gradient(90deg,#7fc4d8 0%,#d99a72 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  p.lede{z-index:1;margin-top:22px;font-size:28px;line-height:1.4;color:#c6cbcc;max-width:940px}
+  .pillars{z-index:1;display:flex;gap:14px}
+  .pillar{flex:1;border:1px solid rgba(242,240,239,.16);border-radius:16px;padding:16px 18px;
+    background:rgba(242,240,239,.055)}
+  .pillar .k{font-size:19px;font-weight:700;color:#F2F0EF;letter-spacing:-.01em}
+  .pillar .v{margin-top:5px;font-size:16px;color:#9fb0b5}
+  .foot{z-index:1;display:flex;align-items:center;gap:12px;font-size:22px;font-weight:600;color:#c6cbcc}
+  .dot{width:10px;height:10px;border-radius:50%;background:#d99a72}
+</style></head><body>
+<div class="grid"></div><div class="glow"></div><div class="rule"></div>
+<div class="top">
+  ${logoDataUri ? `<img src="${logoDataUri}" alt=""/>` : ""}
+  <span class="brand">Gradr</span>
+  <span class="badge">AI Career Command Center</span>
+</div>
+<div>
+  <h1>Build your career with <span class="accent">AI that actually helps</span></h1>
+  <p class="lede">Better resumes, matched jobs, tracked applications, and realtime mock interviews — in one workspace.</p>
+</div>
+<div class="pillars">
+  ${pillars.map(([k, v]) => `<div class="pillar"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("")}
+</div>
+<div class="foot"><span class="dot"></span><span>gradr.me</span></div>
+</body></html>`;
+}
+
 async function main() {
   const targets = ogTargets();
   const check = process.argv.includes("--check");
@@ -123,6 +192,10 @@ async function main() {
     const missing = targets.filter(
       (t) => !existsSync(join(ROOT, "public", "og", `${t.kind}-${t.slug}.png`)),
     );
+    if (!existsSync(join(ROOT, "public", "og.png"))) {
+      console.log("FAIL missing site Open Graph image public/og.png");
+      missing.push({ kind: "site", slug: "og.png" });
+    }
     for (const t of missing) console.log(`FAIL missing OG image for ${t.kind}/${t.slug}`);
     console.log(
       missing.length
@@ -150,6 +223,12 @@ async function main() {
     await page.screenshot({ path: out });
     console.log(`wrote og/${t.kind}-${t.slug}.png`);
   }
+
+  // Flagship site card -> /og.png (referenced by index.html and RouteSeo).
+  await page.setContent(rootCardHtml(logoDataUri), { waitUntil: "networkidle" });
+  await page.screenshot({ path: join(ROOT, "public", "og.png") });
+  console.log("wrote og.png");
+
   await browser.close();
   console.log(`\n${targets.length} Open Graph image(s) generated.`);
 }
