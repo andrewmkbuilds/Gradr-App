@@ -126,7 +126,11 @@ export async function latestCachedResumeFile(userId: string) {
 
 /* -------------------------------- pending ops -------------------------------- */
 
-export async function queueOp(op: Omit<PendingOp, "id" | "queued_at">) {
+type PendingOpInput =
+  | { kind: "rename"; versionId: string; label: string | null }
+  | { kind: "delete"; versionId: string; filePath: string };
+
+export async function queueOp(op: PendingOpInput) {
   const entry = { ...op, id: opId(), queued_at: Date.now() } as PendingOp;
   await idbPut<PendingOp>(STORES.pendingOps, entry);
   return entry;
