@@ -263,12 +263,12 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "bytes": 4227
   },
   {
-    "file": "/og-image-v2.jpg",
+    "file": "/og.png",
     "group": "social",
     "label": "Open Graph / Twitter card",
     "width": 1200,
     "height": 630,
-    "bytes": 82406
+    "bytes": 66692
   },
   {
     "file": "/og/site-gradr.png",
