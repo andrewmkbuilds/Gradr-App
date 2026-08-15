@@ -112,7 +112,7 @@ async function trace(url) {
   return { hops, final: null };
 }
 
-async function checkTarget({ path, label }) {
+async function checkTarget({ path, label, expect, allowRedirectHosts = [], allowStatuses = [200] }) {
   const url = `https://${HOST}${path}`;
   const { hops, final } = await trace(url);
   const failures = [];
@@ -131,19 +131,37 @@ async function checkTarget({ path, label }) {
         `${hop.status} redirect to ${ROOT_DOMAIN} (${hop.url} -> ${hop.location}) — ` +
           `app.${ROOT_DOMAIN} is an alias of the primary domain, not a served host`,
       );
-    } else if ([301, 302, 307, 308].includes(hop.status)) {
+    } else if (!allowRedirectHosts.includes(target)) {
       failures.push(`unexpected ${hop.status} redirect: ${hop.url} -> ${hop.location}`);
     }
   }
 
   if (final) {
-    if (final.status !== 200) failures.push(`expected 200, got ${final.status}`);
-    if (final.bytes < MIN_BODY_BYTES) {
-      failures.push(`response body is ${final.bytes} bytes — expected a rendered document`);
+    const finalHost = hostOf(final.url);
+
+    if (expect === "document") {
+      if (final.status !== 200) failures.push(`expected 200, got ${final.status}`);
+      if (final.bytes < MIN_BODY_BYTES) {
+        failures.push(`response body is ${final.bytes} bytes — expected a rendered document`);
+      }
+      if (!final.html) failures.push("response is not an HTML document");
+      if (finalHost !== HOST) failures.push(`served from ${finalHost}, expected ${HOST}`);
     }
-    if (!final.html) failures.push("response is not an HTML document");
-    if (hostOf(final.url) !== HOST) {
-      failures.push(`served from ${hostOf(final.url)}, expected ${HOST}`);
+
+    if (expect === "broker") {
+      // Either the app itself renders the callback route, or the managed
+      // broker answers it. Both are fine; the apex is not.
+      const servedByApp = finalHost === HOST;
+      const servedByBroker = allowRedirectHosts.includes(finalHost);
+      if (!servedByApp && !servedByBroker) {
+        failures.push(`served from ${finalHost}, expected ${HOST} or the managed OAuth broker`);
+      }
+      if (servedByApp && final.status !== 200) {
+        failures.push(`expected 200 from ${HOST}, got ${final.status}`);
+      }
+      if (servedByBroker && !allowStatuses.includes(final.status)) {
+        failures.push(`broker answered ${final.status}, expected one of [${allowStatuses}]`);
+      }
     }
   }
 
