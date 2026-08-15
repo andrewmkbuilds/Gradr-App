@@ -32,7 +32,6 @@ function Harness({ initialError }: { initialError: VoiceErrorCode | null }) {
   const [dismissed, setDismissed] = useState(initialError === "VOICE_NOT_ENTITLED");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(TRANSCRIPT);
-  const [retries, setRetries] = useState(0);
   const entitled = voiceError !== "VOICE_NOT_ENTITLED";
 
   return (
@@ -69,14 +68,12 @@ function Harness({ initialError }: { initialError: VoiceErrorCode | null }) {
       onInterrupt={() => {}}
       onReconnect={() => {
         // Recovery never rebuilds the session: transcript and draft survive.
-        setRetries((n) => n + 1);
         setVoiceError(null);
         setDismissed(true);
       }}
       onEnd={() => {}}
       onReset={() => {}}
       onSnapshot={() => null}
-      data-retries={retries}
     />
   );
 }
