@@ -1,3 +1,5 @@
+import { useAnime } from "@/hooks/useAnime";
+
 interface ScoreRingProps {
   score: number;
   size?: number;
@@ -9,6 +11,13 @@ export function ScoreRing({ score, size = 120, label }: ScoreRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
+
+  // Anime.js drives the SVG attribute directly — no React re-render per frame,
+  // and reduced-motion users land on the final offset instantly.
+  const arc = useAnime<SVGCircleElement>(
+    { strokeDashoffset: [circumference, offset] },
+    { duration: "slow", ease: "out", deps: [offset, circumference] },
+  );
 
   const color = score >= 80 ? "hsl(var(--success))" : score >= 50 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
 
@@ -31,10 +40,10 @@ export function ScoreRing({ score, size = 120, label }: ScoreRingProps) {
             fill="none"
             stroke={color}
             strokeWidth={strokeWidth}
+            ref={arc}
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className="transition-all duration-1000 ease-out"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
