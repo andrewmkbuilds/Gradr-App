@@ -244,7 +244,7 @@ export type Database = {
       affiliate_clicks: {
         Row: {
           affiliate_code: string
-          affiliate_profile_id: string | null
+          affiliate_profile_id: string
           clicked_at: string
           id: string
           ip_hash: string | null
@@ -258,7 +258,7 @@ export type Database = {
         }
         Insert: {
           affiliate_code: string
-          affiliate_profile_id?: string | null
+          affiliate_profile_id: string
           clicked_at?: string
           id?: string
           ip_hash?: string | null
@@ -272,7 +272,7 @@ export type Database = {
         }
         Update: {
           affiliate_code?: string
-          affiliate_profile_id?: string | null
+          affiliate_profile_id?: string
           clicked_at?: string
           id?: string
           ip_hash?: string | null
