@@ -160,6 +160,8 @@ export function satelliteSubdomainsLive(host: string = currentHost()): boolean {
  * on the same origin, so previews never bounce to production.
  */
 export function isMultiSurfaceHost(host: string = currentHost()): boolean {
+  // A pinned build serves exactly one surface at the root, on every host.
+  if (pinnedSurface()) return false;
   return deployEnv(host) !== "production" || !satelliteSubdomainsLive(host);
 }
 
@@ -206,11 +208,14 @@ export function surfaceFromPath(pathname: string): Surface | null {
 /**
  * The surface being rendered right now.
  *
- * Production resolves purely from the hostname. On shared hosts the path
- * prefix decides, defaulting to the combined home+app surface so previews and
- * local development keep working exactly as before.
+ * A pinned build always renders its one surface. Otherwise production resolves
+ * purely from the hostname, and on shared hosts the path prefix decides,
+ * defaulting to the combined home+app surface so previews and local
+ * development keep working exactly as before.
  */
 export function currentSurface(pathname?: string): Surface {
+  const pinned = pinnedSurface();
+  if (pinned) return pinned;
   const host = currentHost();
   if (isProduction(host)) return surfaceFromHost(host) ?? "home";
   const path = pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname);
@@ -228,6 +233,13 @@ export function surfaceBase(surface: Surface, host: string = currentHost()): str
  * (dev, preview, or production-with-redirecting-subdomains) the current origin.
  */
 export function surfaceOrigin(surface: Surface, host: string = currentHost()): string {
+  // In a pinned build, links to the pinned surface stay on whatever host the
+  // bundle is running on, so its preview URL stays self-contained instead of
+  // bouncing to production. Other surfaces genuinely live on other origins.
+  const pinned = pinnedSurface();
+  if (pinned && surface === pinned && typeof window !== "undefined") {
+    return window.location.origin;
+  }
   if (!isMultiSurfaceHost(host)) return PRODUCTION_ORIGIN[surface];
   if (typeof window === "undefined") return PRODUCTION_ORIGIN[surface];
   return window.location.origin;
