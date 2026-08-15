@@ -13,6 +13,8 @@ interface Props {
   code?: VoiceErrorCode | null;
   /** Enumerated provider reason — e.g. an entitlement block. */
   reason?: VoiceProviderReason | null;
+  /** Backend request id — quote it to support for an exact diagnosis. */
+  requestId?: string | null;
   retrying?: boolean;
   onRetryAfterReconnect: () => void;
   onDismiss: () => void;
@@ -26,7 +28,7 @@ interface Props {
  * offers a single recovery action: reconnect the session and retry the same
  * turn — never a silent switch to a different voice provider.
  */
-export function VoiceErrorPanel({ open, code, reason, retrying, onRetryAfterReconnect, onDismiss }: Props) {
+export function VoiceErrorPanel({ open, code, reason, requestId, retrying, onRetryAfterReconnect, onDismiss }: Props) {
   if (!open) return null;
   const copy = voiceErrorCopy(code);
   const reasonCopy = voiceReasonCopy(reason);
@@ -59,9 +61,9 @@ export function VoiceErrorPanel({ open, code, reason, retrying, onRetryAfterReco
           Your interview and transcript are safe.
         </p>
 
-        {(code || reason) && (
+        {(code || reason || requestId) && (
           <p className="mt-4 rounded-lg bg-muted/50 px-3 py-2 font-mono text-[11px] text-muted-foreground">
-            {[code, reason].filter(Boolean).join(" · ")}
+            {[code, reason, requestId].filter(Boolean).join(" · ")}
           </p>
         )}
 
