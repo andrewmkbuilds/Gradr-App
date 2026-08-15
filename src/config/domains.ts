@@ -120,11 +120,33 @@ export const SATELLITE_SUBDOMAINS_LIVE =
   (import.meta.env?.VITE_APP_SUBDOMAIN_LIVE as string | undefined) === "true";
 
 /**
+ * Build-time surface pin — the mechanism for one-project-per-domain hosting.
+ *
+ * Hosting serves exactly one primary domain per project, so the only way to get
+ * `app.gradr.me` served directly is a project whose primary domain *is*
+ * `app.gradr.me`. Set `VITE_GRADR_SURFACE=app` in that project and the bundle
+ * renders the app surface at `/` on every host it runs on — including its
+ * `*.lovable.app` preview URL, so the surface can be verified before DNS moves.
+ *
+ * Unset (the default, and this project) keeps today's behaviour: hostname
+ * routing in production, path prefixes everywhere else.
+ */
+export function pinnedSurface(): Surface | null {
+  const raw = (import.meta.env?.VITE_GRADR_SURFACE as string | undefined)
+    ?.trim()
+    .toLowerCase();
+  if (!raw) return null;
+  return (SURFACES as string[]).includes(raw) ? (raw as Surface) : null;
+}
+
+/**
  * True when the running bundle can prove subdomains are served independently:
  * if this code is executing on `app.gradr.me` (or any satellite host), hosting
  * did not redirect it away, so subdomain routing is live regardless of config.
  */
 export function satelliteSubdomainsLive(host: string = currentHost()): boolean {
+  // A pinned build is by definition a dedicated per-domain deployment.
+  if (pinnedSurface()) return true;
   if (SATELLITE_SUBDOMAINS_LIVE) return true;
   if (deployEnv(host) !== "production") return false;
   const surface = surfaceFromHost(host);
@@ -138,6 +160,8 @@ export function satelliteSubdomainsLive(host: string = currentHost()): boolean {
  * on the same origin, so previews never bounce to production.
  */
 export function isMultiSurfaceHost(host: string = currentHost()): boolean {
+  // A pinned build serves exactly one surface at the root, on every host.
+  if (pinnedSurface()) return false;
   return deployEnv(host) !== "production" || !satelliteSubdomainsLive(host);
 }
 
@@ -184,11 +208,14 @@ export function surfaceFromPath(pathname: string): Surface | null {
 /**
  * The surface being rendered right now.
  *
- * Production resolves purely from the hostname. On shared hosts the path
- * prefix decides, defaulting to the combined home+app surface so previews and
- * local development keep working exactly as before.
+ * A pinned build always renders its one surface. Otherwise production resolves
+ * purely from the hostname, and on shared hosts the path prefix decides,
+ * defaulting to the combined home+app surface so previews and local
+ * development keep working exactly as before.
  */
 export function currentSurface(pathname?: string): Surface {
+  const pinned = pinnedSurface();
+  if (pinned) return pinned;
   const host = currentHost();
   if (isProduction(host)) return surfaceFromHost(host) ?? "home";
   const path = pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname);
@@ -206,6 +233,13 @@ export function surfaceBase(surface: Surface, host: string = currentHost()): str
  * (dev, preview, or production-with-redirecting-subdomains) the current origin.
  */
 export function surfaceOrigin(surface: Surface, host: string = currentHost()): string {
+  // In a pinned build, links to the pinned surface stay on whatever host the
+  // bundle is running on, so its preview URL stays self-contained instead of
+  // bouncing to production. Other surfaces genuinely live on other origins.
+  const pinned = pinnedSurface();
+  if (pinned && surface === pinned && typeof window !== "undefined") {
+    return window.location.origin;
+  }
   if (!isMultiSurfaceHost(host)) return PRODUCTION_ORIGIN[surface];
   if (typeof window === "undefined") return PRODUCTION_ORIGIN[surface];
   return window.location.origin;
