@@ -63,6 +63,12 @@ function InterviewEngineInner() {
   const [streamFailed, setStreamFailed] = useState(false);
   const [voiceError, setVoiceError] = useState<VoiceErrorCode | null>(null);
   const [connectionErrorDismissed, setConnectionErrorDismissed] = useState(false);
+  /**
+   * Subscription-aware voice availability. Mirrors `studioVoiceAllowedRef` in
+   * state so the studio can grey out the voice affordances the instant the
+   * backend says this tier can't speak — without touching the interview.
+   */
+  const [voiceEntitled, setVoiceEntitled] = useState(false);
 
   /** The interviewer's current turn, revealed only as fast as it is spoken. */
   const [spoken, setSpoken] = useState("");
@@ -129,6 +135,14 @@ function InterviewEngineInner() {
     onVoiceError: (code) => {
       // Preserve both the generated turn and already-spoken caption for exact retry.
       setVoiceError(code);
+      if (code === "VOICE_NOT_ENTITLED") {
+        // Plan-level, not an outage: drop to text for the rest of the session
+        // silently. No overlay, no lost turn — typing stays live immediately.
+        studioVoiceAllowedRef.current = false;
+        setVoiceEntitled(false);
+        setConnectionErrorDismissed(true);
+        return;
+      }
       setConnectionErrorDismissed(false);
     },
   });
@@ -256,6 +270,7 @@ function InterviewEngineInner() {
   /** Reads plan limits so the studio can gate length, personas and voice. */
   const loadLimits = async (ctx: SessionContext) => {
     studioVoiceAllowedRef.current = false;
+    setVoiceEntitled(false);
     const { data, error } = await supabase.functions.invoke("interview-session", {
       body: {
         environment: getPaddleEnvironment(),
@@ -269,12 +284,14 @@ function InterviewEngineInner() {
       if (payload?.limits) {
         setLimits({ ...payload.limits, sessionsRemaining: null });
         studioVoiceAllowedRef.current = Boolean(payload.limits.studioVoice);
+        setVoiceEntitled(Boolean(payload.limits.studioVoice));
       }
       return payload?.reason ? String(payload.reason) : null;
     }
     if (data?.limits) {
       setLimits({ ...data.limits, sessionsRemaining: null });
       studioVoiceAllowedRef.current = Boolean(data.limits.studioVoice);
+      setVoiceEntitled(Boolean(data.limits.studioVoice));
     }
     return null;
   };
@@ -614,13 +631,16 @@ function InterviewEngineInner() {
       partialUser={voice.listening ? voice.transcript : ""}
       partialModel={spoken}
       interviewerState={interviewerState}
-      realtime={voiceMode && Boolean(limits?.studioVoice) && !voiceError}
+      realtime={voiceMode && voiceEntitled && !voiceError}
       connecting={connecting}
-      canReconnect={streamFailed || Boolean(voiceError)}
+      canReconnect={streamFailed || (Boolean(voiceError) && voiceError !== "VOICE_NOT_ENTITLED")}
+      voiceAvailable={voiceEntitled}
+      voiceRecovering={voiceRecovering}
+      voiceErrorRequestId={interviewer.errorRequestId}
 
       micMuted={!voice.listening}
       micLabel={micLabel}
-      voiceOn={voiceMode}
+      voiceOn={voiceMode && voiceEntitled}
       thinking={isLoading && !interviewer.speaking}
       ending={buildingReport}
       input={input}
@@ -635,7 +655,10 @@ function InterviewEngineInner() {
           : null
       }
       startedAt={startedAt.current}
-      connectionLost={(streamFailed || Boolean(voiceError)) && !connectionErrorDismissed}
+      connectionLost={
+        (streamFailed || (Boolean(voiceError) && voiceError !== "VOICE_NOT_ENTITLED")) &&
+        !connectionErrorDismissed
+      }
       voiceErrorCode={voiceError}
       voiceErrorReason={interviewer.errorReason}
 
@@ -645,6 +668,7 @@ function InterviewEngineInner() {
       onSubmit={() => void submitAnswer(input)}
       onToggleMic={toggleMic}
       onToggleVoice={() => {
+        if (!voiceEntitled) return;
         interviewer.stop();
         stopSpeaking();
         setVoiceMode((v) => !v);
