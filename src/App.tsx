@@ -284,6 +284,15 @@ const SATELLITE_SURFACES: Surface[] = [
   "support",
 ];
 
+/**
+ * On the app surface, public marketing pages are not ours to serve — they are
+ * indexed on gradr.me and duplicating them here would split ranking signals
+ * across two hosts. Hand them back to the home surface, keeping the path.
+ */
+function publicPage(appOnly: boolean, element: JSX.Element): JSX.Element {
+  return appOnly ? <ExternalSurfaceRedirect surface="home" strip="" /> : element;
+}
+
 function AppRoutes() {
   const location = useLocation();
   const multiSurface = isMultiSurfaceHost();
@@ -291,6 +300,10 @@ function AppRoutes() {
   // gradr.me is the public brand surface: authenticated product routes live on
   // app.gradr.me, so anything product-shaped is handed over to that host.
   const homeOnly = !multiSurface && hostSurface === "home";
+  // app.gradr.me is the mirror image: only the authenticated product, its auth
+  // routes and the OAuth callback/consent live here. Marketing, news, docs and
+  // affiliates stay on their own surfaces.
+  const appOnly = !multiSurface && hostSurface === "app";
 
   // Production: a dedicated subdomain serves exactly one surface and mounts no
   // product, account or admin routes at all.
