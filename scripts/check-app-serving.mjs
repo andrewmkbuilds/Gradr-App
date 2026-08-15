@@ -37,9 +37,23 @@ const MAX_HOPS = 5;
 /** Below this, the response is a stub or an error page rather than the app. */
 const MIN_BODY_BYTES = 500;
 
+/** The managed OAuth broker legitimately terminates the callback path. */
+const OAUTH_BROKER_HOST = "oauth.lovable.app";
+
 const TARGETS = [
-  { path: "/", label: "app root" },
-  { path: "/~oauth/callback", label: "Google OAuth callback" },
+  { path: "/", label: "app root", expect: "document" },
+  {
+    path: "/~oauth/callback",
+    label: "Google OAuth callback",
+    // The callback is handled by the managed broker, so a hop to
+    // oauth.lovable.app is correct — what must never happen is a hop to the
+    // apex, which would strip the app origin the code was issued for. A bare
+    // probe carries no `code`, so the broker answers 400: that still proves
+    // the URL is reachable from the app host.
+    expect: "broker",
+    allowRedirectHosts: [OAUTH_BROKER_HOST],
+    allowStatuses: [200, 400, 401],
+  },
 ];
 
 function hostOf(url) {
