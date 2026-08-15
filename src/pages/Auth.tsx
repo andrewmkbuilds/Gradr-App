@@ -323,6 +323,8 @@ export default function Auth() {
 
   return (
     <AuthLayout>
+      <OAuthHostMismatchNotice />
+
 
       <div className="space-y-2">
         <h1 className="text-xl font-semibold text-foreground">
