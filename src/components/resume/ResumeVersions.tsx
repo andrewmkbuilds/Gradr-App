@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Loader2, Pencil, Trash2, Check, X, Layers } from "lucide-react";
+import { FileText, Loader2, Pencil, Trash2, Check, X, Layers, CloudOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useResumeVersions, type ResumeVersion } from "@/hooks/useResumeVersions";
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function ResumeVersions({ activeId, onSelect }: Props) {
-  const { versions, loading, rename, remove } = useResumeVersions();
+  const { versions, loading, rename, remove, online, fromCache, pendingCount } = useResumeVersions();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
 
@@ -42,7 +42,21 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Layers className="h-4 w-4 text-primary" /> Resume versions
         </h3>
-        <span className="text-xs text-muted-foreground">{versions.length} saved</span>
+        <div className="flex items-center gap-2">
+          {(!online || fromCache) && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <CloudOff className="h-3 w-3" aria-hidden="true" />
+              Offline copy
+            </span>
+          )}
+          {pendingCount > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand-secondary/12 px-2 py-0.5 text-[10px] font-medium text-brand-secondary">
+              <RefreshCw className="h-3 w-3" aria-hidden="true" />
+              {pendingCount} to sync
+            </span>
+          )}
+          <span className="text-xs text-muted-foreground">{versions.length} saved</span>
+        </div>
       </div>
 
       <ul className="mt-4 space-y-2">
