@@ -323,7 +323,7 @@ function AppRoutes() {
         )}
 
         <Route path="/unsubscribe" element={<AnimatedPage><Unsubscribe /></AnimatedPage>} />
-        <Route path="/landing" element={<AnimatedPage><Landing /></AnimatedPage>} />
+        <Route path="/landing" element={publicPage(appOnly, <AnimatedPage><Landing /></AnimatedPage>)} />
         {homeOnly ? (
           <>
             <Route path="/" element={<AnimatedPage><Landing /></AnimatedPage>} />
@@ -338,26 +338,26 @@ function AppRoutes() {
             <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
           </>
         )}
-        <Route path="/blog/ai-resume-optimization" element={<AnimatedPage><AiResumeOptimization /></AnimatedPage>} />
-        <Route path="/ats-resume-checker" element={<AnimatedPage><AtsResumeChecker /></AnimatedPage>} />
-        <Route path="/ai-cover-letter-generator" element={<AnimatedPage><AiCoverLetterGenerator /></AnimatedPage>} />
-        <Route path="/ai-interview-coach" element={<AnimatedPage><AiInterviewCoach /></AnimatedPage>} />
-        <Route path="/job-application-tracker" element={<AnimatedPage><JobApplicationTracker /></AnimatedPage>} />
+        <Route path="/blog/ai-resume-optimization" element={publicPage(appOnly, <AnimatedPage><AiResumeOptimization /></AnimatedPage>)} />
+        <Route path="/ats-resume-checker" element={publicPage(appOnly, <AnimatedPage><AtsResumeChecker /></AnimatedPage>)} />
+        <Route path="/ai-cover-letter-generator" element={publicPage(appOnly, <AnimatedPage><AiCoverLetterGenerator /></AnimatedPage>)} />
+        <Route path="/ai-interview-coach" element={publicPage(appOnly, <AnimatedPage><AiInterviewCoach /></AnimatedPage>)} />
+        <Route path="/job-application-tracker" element={publicPage(appOnly, <AnimatedPage><JobApplicationTracker /></AnimatedPage>)} />
         {/* Duplicate URL variants collapse into the canonical path so only one
             version of each landing page can ever be indexed. */}
         {Object.keys(CANONICAL_ALIASES).map((alias) => (
           <Route key={alias} path={alias} element={<Navigate to={CANONICAL_ALIASES[alias]} replace />} />
         ))}
-        <Route path="/career-advice" element={<AnimatedPage><CareerAdvice /></AnimatedPage>} />
-        <Route path="/career-advice/:slug" element={<AnimatedPage><GuideArticle /></AnimatedPage>} />
+        <Route path="/career-advice" element={publicPage(appOnly, <AnimatedPage><CareerAdvice /></AnimatedPage>)} />
+        <Route path="/career-advice/:slug" element={publicPage(appOnly, <AnimatedPage><GuideArticle /></AnimatedPage>)} />
         <Route path="/pricing" element={<PricingRoute />} />
-        <Route path="/privacy" element={<AnimatedPage><Privacy /></AnimatedPage>} />
-        <Route path="/terms" element={<AnimatedPage><Terms /></AnimatedPage>} />
-        <Route path="/refund-policy" element={<AnimatedPage><RefundPolicy /></AnimatedPage>} />
-        <Route path="/cookie-policy" element={<AnimatedPage><CookiePolicy /></AnimatedPage>} />
-        <Route path="/dpa" element={<AnimatedPage><Dpa /></AnimatedPage>} />
-        <Route path="/job-search" element={<AnimatedPage><JobSearchIndex /></AnimatedPage>} />
-        <Route path="/job-search/:slug" element={<AnimatedPage><JobLanding /></AnimatedPage>} />
+        <Route path="/privacy" element={publicPage(appOnly, <AnimatedPage><Privacy /></AnimatedPage>)} />
+        <Route path="/terms" element={publicPage(appOnly, <AnimatedPage><Terms /></AnimatedPage>)} />
+        <Route path="/refund-policy" element={publicPage(appOnly, <AnimatedPage><RefundPolicy /></AnimatedPage>)} />
+        <Route path="/cookie-policy" element={publicPage(appOnly, <AnimatedPage><CookiePolicy /></AnimatedPage>)} />
+        <Route path="/dpa" element={publicPage(appOnly, <AnimatedPage><Dpa /></AnimatedPage>)} />
+        <Route path="/job-search" element={publicPage(appOnly, <AnimatedPage><JobSearchIndex /></AnimatedPage>)} />
+        <Route path="/job-search/:slug" element={publicPage(appOnly, <AnimatedPage><JobLanding /></AnimatedPage>)} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
         {homeOnly ? (
           <Route path="/*" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
