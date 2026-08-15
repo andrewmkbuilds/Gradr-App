@@ -83,3 +83,34 @@ from the authenticated product and unblocks OAuth. The other five surfaces are
 content and work fine as path prefixes on `gradr.me` today; each additional
 project is a full duplicate deployment to keep in sync on every change. Split
 those only when a subdomain earns it.
+
+## Domain healthchecks and production smoke tests
+
+| Command | What it asserts |
+| --- | --- |
+| `bun run check:domain-health` | Every hostname (`gradr.me`, `app`, `marketing`, `docs`, `news`, `affiliates`) resolves in DNS, negotiates TLS, and serves the Gradr bundle. Prints the full hop-by-hop HTTP status chain. Fails when `app.gradr.me` redirects to the apex. |
+| `bun run test:smoke:app` | Hard-refreshes `https://app.gradr.me/dashboard`, `/auth` and `/career` and fails if any hop crosses to `gradr.me`. |
+
+Both run in `.github/workflows/domain-health.yml` (daily plus `workflow_dispatch`).
+They are deliberately **not** on the PR job: the app-surface result depends on
+hosting configuration rather than on the contents of a pull request, and it
+stays red until `app.gradr.me` is served as a Primary domain (see
+`mem://architecture/subdomain-hosting-limit`). Pass `--allow-app-alias` to the
+healthcheck to report the alias without failing.
+
+## Redirect safety in the client
+
+`src/lib/domain/redirectGuard.ts` is the single place that decides which
+absolute URLs the app is allowed to produce:
+
+- `internalUrl(path)` / `preferActiveHost(url)` — build links on the **active**
+  hostname, so a session on `app.gradr.me` is never handed a `https://gradr.me`
+  URL.
+- `assertOAuthCallback(url)` / `assertPasswordResetTarget(url)` — throw
+  `RedirectDomainError` when an auth redirect target is not a Gradr hostname,
+  is insecure, or would cross surfaces. Wired into `authCallbackUrl()`
+  (`src/lib/nextRedirect.ts`) and the password-reset flow.
+
+Surface assertions are skipped while `satelliteSubdomainsLive()` is false,
+because today every surface legitimately runs on the primary host by path.
+Covered by `src/test/redirectGuard.test.ts` and `src/test/crossSurfaceNav.test.ts`.

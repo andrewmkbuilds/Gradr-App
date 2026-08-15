@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { markSignupIntent } from "@/lib/telemetry/signup";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { urlFor } from "@/config/domains";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
@@ -93,8 +94,10 @@ export default function Auth() {
   useEffect(() => {
     if (user && user.is_anonymous !== true) {
       const finalPath = nextTarget === "/" ? "/dashboard" : nextTarget;
-      const finalUrl = new URL(finalPath, "https://app.gradr.me").toString();
-      if (window.location.origin === "https://app.gradr.me") {
+      // Resolved against the *active* hostname: on app.gradr.me this stays a
+      // client-side navigation, and it never hardcodes the apex origin.
+      const finalUrl = urlFor("app", finalPath);
+      if (finalUrl.startsWith(window.location.origin)) {
         navigate(finalPath, { replace: true });
       } else if (window.location.hostname.endsWith("gradr.me")) {
         window.location.replace(finalUrl);
@@ -103,6 +106,7 @@ export default function Auth() {
       }
     }
   }, [user, nextTarget, navigate]);
+
 
   // Countdown for the "resend verification email" cooldown.
   useEffect(() => {
