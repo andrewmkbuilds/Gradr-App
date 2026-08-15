@@ -12,6 +12,7 @@
  *  - bounded length, so a crafted link can't stuff the URL bar
  */
 
+import { assertOAuthCallback } from "@/lib/domain/redirectGuard";
 import { urlFor } from "@/config/domains";
 
 const MAX_LENGTH = 512;
@@ -83,7 +84,9 @@ export function authPath(next: string | null | undefined): string {
  */
 export function authCallbackUrl(next: string | null | undefined): string {
   if (typeof window === "undefined") return "/auth";
-  return urlFor("app", authPath(next));
+  // Validated so a wrong-domain callback fails loudly here instead of being
+  // sent to the identity provider and bouncing the user across surfaces.
+  return assertOAuthCallback(urlFor("app", authPath(next)));
 }
 
 /**
