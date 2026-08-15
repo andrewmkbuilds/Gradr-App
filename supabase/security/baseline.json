@@ -180,6 +180,12 @@
       "authenticated": [
         "SELECT"
       ]
+    },
+    "affiliate_clicks": {
+      "anon": [],
+      "authenticated": [
+        "SELECT"
+      ]
     }
   },
   "auditTriggers": [
@@ -202,6 +208,10 @@
     {
       "table": "user_preferences",
       "trigger": "audit_user_preferences_write"
+    },
+    {
+      "table": "affiliate_clicks",
+      "trigger": "affiliate_clicks_enforce_ownership"
     }
   ],
   "functionExecute": {
@@ -219,7 +229,6 @@
       "admin_mark_payout_paid",
       "admin_publish_legal_document",
       "admin_review_verification",
-
       "admin_set_commission_status",
       "admin_verification_requests",
       "admin_verification_timeline",
@@ -229,7 +238,6 @@
       "attribute_signup_referral",
       "entitlement_snapshot",
       "get_affiliate_public_settings",
-      
       "has_role",
       "is_admin",
       "is_anonymous_session",
@@ -293,6 +301,20 @@
       "internalId": "SUPA_authenticated_security_definer_function_executable",
       "description": "Only allowlisted SECURITY DEFINER functions may be executable by authenticated.",
       "functionExecuteRole": "authenticated"
+    },
+    {
+      "internalId": "affiliate_clicks_no_insert_policy",
+      "description": "Affiliate clicks are written only by the affiliate-track-click edge function (service_role). Clients must hold no INSERT grant, the INSERT policy must deny outright, and the ownership trigger must verify code/profile pairing.",
+      "table": "affiliate_clicks",
+      "policyRoles": [
+        "authenticated"
+      ],
+      "requiredCmds": [
+        "INSERT"
+      ],
+      "predicateMustContain": [
+        "false"
+      ]
     }
   ]
 }
