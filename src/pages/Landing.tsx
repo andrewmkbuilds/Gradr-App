@@ -34,6 +34,9 @@ import {
   MagneticButton, SceneBackground, ScrollFloat, MagicBento,
 } from "@/components/effects";
 import { HeroCommandCenter } from "@/components/landing/HeroCommandCenter";
+import { HexFloatFx, ParticleScrollFx } from "@/components/canvasui/CanvasFx";
+import { CanvasFxFrame } from "@/components/canvasui/CanvasFxFrame";
+import { ResumeTransform } from "@/components/landing/ResumeTransform";
 import { trackSignupCta, trackUpgradeCta, type CtaLocation } from "@/lib/telemetry/events";
 import { DepthShowcase } from "@/components/landing/DepthShowcase";
 import {
@@ -542,8 +545,45 @@ export default function Landing() {
               </div>
 
               <div className="lg:pl-4">
-                <HeroCommandCenter />
-                <div className="mt-8 flex justify-center lg:justify-start">
+                {/* Hex Float renders the live command centre onto a floor of
+                    beveled tiles that lean into perspective and rise toward
+                    the cursor. The headline column beside it stays flat DOM so
+                    the copy and CTAs are never rendered through a shader. */}
+                <CanvasFxFrame glow="strong" marks={false} clip={false}>
+                  <HexFloatFx
+                    className="w-full"
+                    activeClassName="h-[520px] overflow-hidden lg:h-[560px]"
+                    options={{
+                      size: 150,
+                      gap: 1,
+                      bevel: 1.5,
+                      tilt: 16,
+                      perspective: 0.42,
+                      float: 0.22,
+                      speed: 0.55,
+                      shine: 0.5,
+                      lift: 0.35,
+                      radius: 620,
+                      flow: 0.9,
+                      swirl: 3,
+                      trail: 0.55,
+                      iridescence: 0.5,
+                      bloom: 0.25,
+                      grain: 0.25,
+                    }}
+                    liteOptions={{
+                      size: 190,
+                      float: 0.12,
+                      flow: 0.5,
+                      swirl: 0,
+                      bloom: 0,
+                      grain: 0,
+                    }}
+                  >
+                    <HeroCommandCenter />
+                  </HexFloatFx>
+                </CanvasFxFrame>
+                <div className="mt-14 flex justify-center lg:justify-start">
                   <ScrollCue targetId="product" label="Continue" />
                 </div>
               </div>
@@ -640,14 +680,37 @@ export default function Landing() {
               </Button>
             </Reveal>
             <Reveal delay={100}>
-              <DepthShowcase
-                highlights={[
-                  { icon: Check, label: "ATS score 92", at: "tl" },
-                  { icon: Sparkles, label: "6 rewrites suggested", at: "br" },
-                ]}
+              {/* Particle Scroll: the analysis arrives as drifting sand and
+                  condenses into the real report as the section scrolls up —
+                  the transformation the section is describing, made literal. */}
+              <ParticleScrollFx
+                className="w-full"
+                activeClassName="h-[560px]"
+                options={{
+                  point: 0.62,
+                  band: 380,
+                  density: 2,
+                  size: 1.2,
+                  spread: 190,
+                  gravity: 0.28,
+                  drift: 0.5,
+                  swirl: 48,
+                  stagger: 0.65,
+                  fade: 0.8,
+                  settle: 1,
+                  smoothing: 0.55,
+                }}
+                liteOptions={{ density: 3, spread: 120, swirl: 24, drift: 0.3 }}
               >
-                <ResumeIntelligenceDemo />
-              </DepthShowcase>
+                <DepthShowcase
+                  highlights={[
+                    { icon: Check, label: "ATS score 92", at: "tl" },
+                    { icon: Sparkles, label: "6 rewrites suggested", at: "br" },
+                  ]}
+                >
+                  <ResumeIntelligenceDemo />
+                </DepthShowcase>
+              </ParticleScrollFx>
             </Reveal>
           </div>
         </Section>
@@ -920,6 +983,36 @@ export default function Landing() {
         </Section>
 
         {/* --------------------------------- pricing ---------------------------- */}
+        {/* --------------------------- the transformation ----------------------- */}
+        <Section id="transformation" className="relative border-t border-border/60">
+          <div className="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
+            <Reveal className="space-y-5">
+              <Eyebrow>The difference</Eyebrow>
+              <Heading>Same experience. Rewritten so a machine can read it.</Heading>
+              <Lede>
+                Most resumes get filtered before a person ever opens them. Gradr keeps your history
+                honest and rewrites how it is stated — measurable outcomes, active verbs, the
+                keywords the posting actually uses.
+              </Lede>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {["Quantified impact", "Active phrasing", "Keyword coverage", "Parser-safe structure"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button size="lg" className="h-11" onClick={start("feature_section", "Rewrite my resume")}>
+                Rewrite my resume
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+              </Button>
+            </Reveal>
+            <Reveal delay={100}>
+              <ResumeTransform />
+            </Reveal>
+          </div>
+        </Section>
+
         <Section id="pricing" className="relative border-t border-border/60 bg-card/30">
           <SceneBackground variant="aurora" intensity={0.35} />
           <Reveal className="space-y-5">
