@@ -68,13 +68,38 @@ Unset (this project) keeps the existing behaviour: hostname routing in
 production, path prefixes on shared hosts. Nothing regresses if the split is
 never done.
 
-### Auth note
+### Auth and environment configuration for the app project
 
-OAuth and post-login redirects already resolve through `urlFor("app", …)`, so
-they follow the app surface automatically. Once `app.gradr.me` is served
-directly, the Google redirect URI `https://app.gradr.me/~oauth/callback` will
-stop bouncing to the apex and the end-to-end sign-in test
-(`scripts/test-oauth-flow.mjs`) should pass.
+`.env.app.example` is the complete environment for the app project — copy it,
+fill in the shared backend/Paddle/PostHog values, and keep these two pins:
+
+```
+VITE_GRADR_SURFACE=app       # render the authenticated product at "/"
+VITE_APP_SUBDOMAIN_LIVE=true # app.gradr.me is genuinely served, not aliased
+```
+
+Do **not** set either variable in the apex project: while `app.gradr.me` is an
+alias, they would send every product route to a host that hosting immediately
+redirects back, producing a bounce loop.
+
+Client code needs no change. `authCallbackUrl()` builds `emailRedirectTo` and
+the OAuth `redirect_uri` from `urlFor("app", …)` and validates the result with
+`assertOAuthCallback()`, so with the pins set both resolve to
+`https://app.gradr.me/…` and the post-login landing stays on the app host.
+
+Backend configuration in the shared Lovable Cloud project, once the app project
+is live:
+
+- Auth **Site URL**: `https://app.gradr.me`
+- Redirect allow-list: `https://app.gradr.me/**`,
+  `https://app.gradr.me/~oauth/callback`, `https://gradr.me/**` (marketing
+  sign-in entry points), `http://localhost:8080/**`
+- Google OAuth client → Authorised redirect URIs: the managed broker callback
+  plus `https://app.gradr.me/~oauth/callback`
+
+Verify the end state with `bun run check:app-serving` and
+`node scripts/test-oauth-flow.mjs`.
+
 
 ## Recommended scope
 
