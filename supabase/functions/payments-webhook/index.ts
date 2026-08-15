@@ -538,9 +538,12 @@ Deno.serve(async (req) => {
           // deno-lint-ignore no-explicit-any
           currency: (event.data as any)?.currencyCode ?? null,
         };
-        await phCapture("subscription_created", eventUserId, revenueProps);
-        await phCapture("payment_completed", eventUserId, revenueProps);
-        await phCapture("upgraded_to_premium", eventUserId, revenueProps);
+        // Ledgered against the Paddle event id so a missing or duplicated
+        // conversion event is detectable, not just invisible.
+        const analyticsCtx = { providerEventId: deliveryEventId, source: "payments-webhook", environment: env };
+        await phCapture("subscription_created", eventUserId, revenueProps, analyticsCtx);
+        await phCapture("payment_completed", eventUserId, revenueProps, analyticsCtx);
+        await phCapture("upgraded_to_premium", eventUserId, revenueProps, analyticsCtx);
         await phSetPerson(eventUserId, {
           plan: created.plan?.tier ?? "unknown",
           billing_period: created.plan?.interval ?? "unknown",
@@ -564,7 +567,7 @@ Deno.serve(async (req) => {
           plan: canceled.plan?.tier ?? "unknown",
           billing_period: canceled.plan?.interval ?? "unknown",
           environment: env,
-        });
+        }, { providerEventId: deliveryEventId, source: "payments-webhook", environment: env });
         await phSetPerson(eventUserId, { is_paying: false, subscription_status: "canceled" });
         break;
       }
@@ -585,7 +588,7 @@ Deno.serve(async (req) => {
           currency: (event.data as any)?.currencyCode ?? null,
           // deno-lint-ignore no-explicit-any
           product_type: (event.data as any)?.subscriptionId ? "subscription" : "pack",
-        });
+        }, { providerEventId: deliveryEventId, source: "payments-webhook", environment: env });
         break;
       case EventName.TransactionPaymentFailed:
         await handlePaymentFailed(event.data, env);

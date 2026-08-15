@@ -650,6 +650,93 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_alerts: {
+        Row: {
+          created_at: string
+          detail: Json
+          event_name: string | null
+          id: string
+          kind: string
+          notified_at: string | null
+          resolved_at: string | null
+          severity: string
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          event_name?: string | null
+          id?: string
+          kind: string
+          notified_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          event_name?: string | null
+          id?: string
+          kind?: string
+          notified_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      analytics_event_deliveries: {
+        Row: {
+          created_at: string
+          dedupe_key: string | null
+          distinct_id: string | null
+          environment: string | null
+          error: string | null
+          event_name: string
+          http_status: number | null
+          id: string
+          latency_ms: number | null
+          occurred_at: string
+          provider_event_id: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          dedupe_key?: string | null
+          distinct_id?: string | null
+          environment?: string | null
+          error?: string | null
+          event_name: string
+          http_status?: number | null
+          id?: string
+          latency_ms?: number | null
+          occurred_at?: string
+          provider_event_id?: string | null
+          source?: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          dedupe_key?: string | null
+          distinct_id?: string | null
+          environment?: string | null
+          error?: string | null
+          event_name?: string
+          http_status?: number | null
+          id?: string
+          latency_ms?: number | null
+          occurred_at?: string
+          provider_event_id?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           article: string | null
@@ -4358,6 +4445,10 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      detect_analytics_regressions: {
+        Args: { p_window?: string }
+        Returns: number
       }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
