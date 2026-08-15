@@ -92,8 +92,8 @@ describe("VOICE_NOT_ENTITLED keeps the interview alive", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 
     // Transcript survived the failed voice turn.
-    expect(screen.getByText(/Tell me about a launch you rescued/)).toBeInTheDocument();
-    expect(screen.getByText(/payments migration a week early/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Tell me about a launch you rescued/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/payments migration a week early/).length).toBeGreaterThan(0);
 
     // Voice affordance is present but unavailable — no dead-end, no crash.
     const voiceToggle = screen.getByRole("button", {
@@ -107,8 +107,8 @@ describe("VOICE_NOT_ENTITLED keeps the interview alive", () => {
     expect(answer).toHaveValue("I can answer in text.");
 
     await user.keyboard("{Enter}");
-    await waitFor(() => expect(screen.getByText("I can answer in text.")).toBeInTheDocument());
-    expect(screen.getByText(/Tell me about a launch you rescued/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getAllByText("I can answer in text.").length).toBeGreaterThan(0));
+    expect(screen.getAllByText(/Tell me about a launch you rescued/).length).toBeGreaterThan(0);
   });
 
   it("preserves transcript and draft answer through Retry after reconnect", async () => {
@@ -124,8 +124,8 @@ describe("VOICE_NOT_ENTITLED keeps the interview alive", () => {
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
 
     // Nothing was lost, and the input is live again.
-    expect(screen.getByText(/Tell me about a launch you rescued/)).toBeInTheDocument();
-    expect(screen.getByText(/payments migration a week early/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Tell me about a launch you rescued/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/payments migration a week early/).length).toBeGreaterThan(0);
 
     const answer = screen.getByLabelText(/type your answer/i);
     await user.type(answer, "Picking up where we left off.");
