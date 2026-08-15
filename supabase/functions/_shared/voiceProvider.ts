@@ -185,6 +185,13 @@ export interface VoiceEvent {
   upstreamStatus?: number | null;
   requestId?: string | null;
   context?: string;
+  /** Interviewer persona in play — admin diagnostics only. */
+  personaId?: string | null;
+  /**
+   * Truncated provider detail. Server-side only: it is stored for admin
+   * diagnostics and never returned on any candidate-facing response.
+   */
+  providerDetail?: string | null;
 }
 
 /** Best-effort: recording health must never break a live interview turn. */
@@ -197,6 +204,8 @@ export async function recordVoiceEvent(ev: VoiceEvent) {
       provider_reason: ev.reason ?? null,
       upstream_status: ev.upstreamStatus ?? null,
       request_id: ev.requestId ?? null,
+      persona_id: ev.personaId ?? null,
+      provider_detail: ev.providerDetail ? ev.providerDetail.slice(0, 300) : null,
       context: ev.context ?? "interview",
     });
   } catch (e) {
