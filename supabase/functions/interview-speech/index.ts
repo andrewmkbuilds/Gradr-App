@@ -92,6 +92,46 @@ async function synthesize(
   }
 }
 
+/**
+ * Fish Audio fallback.
+ *
+ * ElevenLabs can hard-fail for account-level reasons (401
+ * `PROVIDER_UNUSUAL_ACTIVITY`, exhausted quota, suspended key) that no retry
+ * fixes. Rather than leaving the interviewer mute, we synthesise the same
+ * sentence through Fish Audio when FISH_AUDIO_API_KEY is configured.
+ */
+async function synthesizeFallback(text: string, profile: VoiceProfile): Promise<Response | null> {
+  const key = Deno.env.get("FISH_AUDIO_API_KEY");
+  if (!key) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+  try {
+    return await fetch("https://api.fish.audio/v1/tts", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        model: Deno.env.get("FISH_AUDIO_MODEL") ?? "speech-1.6",
+      },
+      body: JSON.stringify({
+        text,
+        format: "mp3",
+        latency: "balanced",
+        ...(profile.fallbackVoiceId ? { reference_id: profile.fallbackVoiceId } : {}),
+      }),
+    });
+  } catch (e) {
+    console.error("[voice] fallback provider request threw", String(e));
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
