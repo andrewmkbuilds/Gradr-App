@@ -207,7 +207,7 @@ async function main() {
 
   mkdirSync(OUT_DIR, { recursive: true });
   let logoDataUri = "";
-  const logo = join(ROOT, "public", "gradr-logo-dark.png");
+  const logo = join(ROOT, "public", "brand", "gradr-official-app-icon-grey.png");
   if (existsSync(logo)) {
     logoDataUri = `data:image/png;base64,${readFileSync(logo).toString("base64")}`;
   }
