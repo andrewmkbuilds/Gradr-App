@@ -337,7 +337,7 @@ function AppRoutes() {
         )}
 
         <Route path="/unsubscribe" element={<AnimatedPage><Unsubscribe /></AnimatedPage>} />
-        <Route path="/landing" element={publicPage(appOnly, <AnimatedPage><Landing /></AnimatedPage>)} />
+        <Route path="/landing" element={<Navigate to="/" replace />} />
         {homeOnly ? (
           <>
             <Route path="/" element={<AnimatedPage><Landing /></AnimatedPage>} />
