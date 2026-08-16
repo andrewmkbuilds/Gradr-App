@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PaddleEventLedger } from "@/components/admin/PaddleEventLedger";
 import { downloadCsvWithManifest } from "@/lib/admin/auditManifest";
 import { cn } from "@/lib/utils";
 
@@ -195,6 +196,10 @@ export default function AdminWebhookLogs() {
           </Card>
         ))}
       </div>
+
+      <PaddleEventLedger />
+
+
 
       <Card className="p-4">
         <h2 className="flex items-center gap-2 text-sm font-semibold">

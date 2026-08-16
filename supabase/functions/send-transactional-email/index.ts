@@ -133,11 +133,14 @@ Deno.serve(async (req) => {
   }
 
   // Enforce the trust model described at the top of this file.
-  const claims = decodeJwtClaims(
-    (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
-  )
+  const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
+  const claims = decodeJwtClaims(bearer)
   const callerRole = String(claims?.role ?? '')
-  const isService = callerRole === 'service_role'
+  // Newer Supabase secret keys (`sb_secret_...`) are opaque, not JWTs, so the
+  // claim check alone would misclassify server callers as end users.
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  const isService = callerRole === 'service_role' || (!!bearer && !!serviceKey && bearer === serviceKey)
+
 
   if (!isService) {
     if (!USER_SENDABLE.has(templateName)) {

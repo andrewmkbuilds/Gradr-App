@@ -15,6 +15,8 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useBillingActions, useCredits, usePurchases, useSubscription } from "@/hooks/useSubscription";
+import { useRealtimeBilling } from "@/hooks/useRealtimeBilling";
+import { PLAN_PRICING, formatUsd, type PlanId } from "@/config/pricing";
 import { Seo } from "@/components/Seo";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
@@ -34,6 +36,7 @@ export default function Billing() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const sub = useSubscription();
+  useRealtimeBilling();
   const { data: credits } = useCredits();
   const { data: purchases } = usePurchases();
   const { pending, openPortal, restorePurchases } = useBillingActions();
@@ -86,6 +89,13 @@ export default function Billing() {
 
 
 
+  // Next charge: the plan's own list price for the interval it renews on. A
+  // cancelled plan bills nothing further, so show that instead of a price.
+  const planId = (sub.plan ?? "free") as PlanId;
+  const nextAmount = sub.isSubscribed && !sub.cancelAtPeriodEnd && planId !== "free"
+    ? formatUsd(sub.billingInterval === "annual" ? PLAN_PRICING[planId].annual : PLAN_PRICING[planId].monthly)
+    : null;
+
   const renews = sub.currentPeriodEnd
     ? new Date(sub.currentPeriodEnd).toLocaleDateString(undefined, {
         year: "numeric",
@@ -131,7 +141,7 @@ export default function Billing() {
             <div className="flex items-center gap-2">
               <span className="type-h1 text-foreground">
                 {sub.isSubscribed
-                  ? `Gradr ${sub.isPro ? "Pro" : "Starter"} (${sub.billingInterval === "annual" ? "Annual" : "Monthly"})`
+                  ? `Gradr ${PLAN_PRICING[planId].name} (${sub.billingInterval === "annual" ? "Annual" : "Monthly"})`
                   : "Free plan"}
               </span>
               {sub.status && sub.status !== "none" && (
@@ -141,6 +151,7 @@ export default function Billing() {
             {sub.isSubscribed && renews && (
               <p className="text-sm text-muted-foreground">
                 {sub.cancelAtPeriodEnd ? `Cancels on ${renews}` : `Renews on ${renews}`}
+                {nextAmount ? ` · next charge ${nextAmount}` : ""}
               </p>
             )}
             {!sub.isSubscribed && (
@@ -184,6 +195,9 @@ export default function Billing() {
           </div>
           <div className="type-h1 text-foreground">{credits?.interview_credits ?? 0}</div>
         </Card>
+        <Button variant="ghost" size="sm" className="sm:col-span-2" onClick={() => navigate("/credits")}>
+          View credits &amp; usage in detail
+        </Button>
       </div>
 
       <Card className="p-6">
