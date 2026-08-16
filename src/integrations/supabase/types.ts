@@ -14,142 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      activity_logs: {
-        Row: {
-          created_at: string
-          entity_id: string | null
-          entity_type: string | null
-          event_name: string
-          id: string
-          metadata: Json
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          entity_id?: string | null
-          entity_type?: string | null
-          event_name: string
-          id?: string
-          metadata?: Json
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          entity_id?: string | null
-          entity_type?: string | null
-          event_name?: string
-          id?: string
-          metadata?: Json
-          user_id?: string
-        }
-        Relationships: []
-      }
-      admin_users: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          role: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          role?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          role?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      affiliate_clicks: {
-        Row: {
-          affiliate_code: string
-          created_at: string
-          destination: string | null
-          id: string
-          visitor_hash: string | null
-        }
-        Insert: {
-          affiliate_code: string
-          created_at?: string
-          destination?: string | null
-          id?: string
-          visitor_hash?: string | null
-        }
-        Update: {
-          affiliate_code?: string
-          created_at?: string
-          destination?: string | null
-          id?: string
-          visitor_hash?: string | null
-        }
-        Relationships: []
-      }
-      ai_credits: {
-        Row: {
-          application_credits: number
-          created_at: string
-          id: string
-          interview_credits: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          application_credits?: number
-          created_at?: string
-          id?: string
-          interview_credits?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          application_credits?: number
-          created_at?: string
-          id?: string
-          interview_credits?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      analytics_events: {
-        Row: {
-          created_at: string
-          event_name: string
-          id: string
-          metadata: Json
-          source: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          event_name: string
-          id?: string
-          metadata?: Json
-          source?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          event_name?: string
-          id?: string
-          metadata?: Json
-          source?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      audit_logs: {
+      admin_audit_log: {
         Row: {
           action: string
           actor_id: string | null
@@ -182,368 +47,1086 @@ export type Database = {
         }
         Relationships: []
       }
-      career_roadmaps: {
+      affiliate_applications: {
+        Row: {
+          admin_notes: string | null
+          agreed_to_terms: boolean
+          audience_size: string | null
+          audience_type: string | null
+          brand_name: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          payout_details: Json
+          promotion_plan: string | null
+          rejection_reason: string | null
+          reviewed_by: string | null
+          reviewed_date: string | null
+          social_links: Json
+          status: Database["public"]["Enums"]["affiliate_application_status"]
+          updated_at: string
+          user_id: string
+          website: string | null
+          why_join: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          agreed_to_terms?: boolean
+          audience_size?: string | null
+          audience_type?: string | null
+          brand_name?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          payout_details?: Json
+          promotion_plan?: string | null
+          rejection_reason?: string | null
+          reviewed_by?: string | null
+          reviewed_date?: string | null
+          social_links?: Json
+          status?: Database["public"]["Enums"]["affiliate_application_status"]
+          updated_at?: string
+          user_id: string
+          website?: string | null
+          why_join?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          agreed_to_terms?: boolean
+          audience_size?: string | null
+          audience_type?: string | null
+          brand_name?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          payout_details?: Json
+          promotion_plan?: string | null
+          rejection_reason?: string | null
+          reviewed_by?: string | null
+          reviewed_date?: string | null
+          social_links?: Json
+          status?: Database["public"]["Enums"]["affiliate_application_status"]
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+          why_join?: string | null
+        }
+        Relationships: []
+      }
+      affiliate_campaigns: {
+        Row: {
+          affiliate_profile_id: string
+          click_count: number
+          created_at: string
+          id: string
+          landing_path: string
+          name: string
+          notes: string | null
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          affiliate_profile_id: string
+          click_count?: number
+          created_at?: string
+          id?: string
+          landing_path?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          affiliate_profile_id?: string
+          click_count?: number
+          created_at?: string
+          id?: string
+          landing_path?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_campaigns_affiliate_profile_id_fkey"
+            columns: ["affiliate_profile_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_clicks: {
+        Row: {
+          affiliate_code: string
+          affiliate_profile_id: string | null
+          clicked_at: string
+          id: string
+          ip_hash: string | null
+          landing_page: string | null
+          session_id: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          visitor_key: string | null
+        }
+        Insert: {
+          affiliate_code: string
+          affiliate_profile_id?: string | null
+          clicked_at?: string
+          id?: string
+          ip_hash?: string | null
+          landing_page?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_key?: string | null
+        }
+        Update: {
+          affiliate_code?: string
+          affiliate_profile_id?: string | null
+          clicked_at?: string
+          id?: string
+          ip_hash?: string | null
+          landing_page?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_clicks_affiliate_profile_id_fkey"
+            columns: ["affiliate_profile_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_commissions: {
+        Row: {
+          affiliate_profile_id: string
+          affiliate_referral_id: string | null
+          approved_date: string | null
+          commission_amount: number
+          commission_rate: number
+          commission_type: Database["public"]["Enums"]["affiliate_commission_type"]
+          created_at: string
+          created_date: string
+          id: string
+          notes: string | null
+          paid_date: string | null
+          reversed_date: string | null
+          source_amount: number | null
+          status: Database["public"]["Enums"]["affiliate_commission_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_profile_id: string
+          affiliate_referral_id?: string | null
+          approved_date?: string | null
+          commission_amount: number
+          commission_rate: number
+          commission_type: Database["public"]["Enums"]["affiliate_commission_type"]
+          created_at?: string
+          created_date?: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          reversed_date?: string | null
+          source_amount?: number | null
+          status?: Database["public"]["Enums"]["affiliate_commission_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_profile_id?: string
+          affiliate_referral_id?: string | null
+          approved_date?: string | null
+          commission_amount?: number
+          commission_rate?: number
+          commission_type?: Database["public"]["Enums"]["affiliate_commission_type"]
+          created_at?: string
+          created_date?: string
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          reversed_date?: string | null
+          source_amount?: number | null
+          status?: Database["public"]["Enums"]["affiliate_commission_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_commissions_affiliate_profile_id_fkey"
+            columns: ["affiliate_profile_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_commissions_affiliate_referral_id_fkey"
+            columns: ["affiliate_referral_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_payouts: {
+        Row: {
+          affiliate_profile_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payout_date: string | null
+          payout_method: string | null
+          payout_reference: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["affiliate_payout_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_profile_id: string
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payout_date?: string | null
+          payout_method?: string | null
+          payout_reference?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["affiliate_payout_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_profile_id?: string
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payout_date?: string | null
+          payout_method?: string | null
+          payout_reference?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["affiliate_payout_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_payouts_affiliate_profile_id_fkey"
+            columns: ["affiliate_profile_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_profiles: {
+        Row: {
+          affiliate_code: string
+          approval_date: string
+          created_at: string
+          custom_commission_rate: number | null
+          default_commission_type:
+            | Database["public"]["Enums"]["affiliate_commission_type"]
+            | null
+          id: string
+          notes: string | null
+          payout_email: string | null
+          payout_method: string | null
+          status: Database["public"]["Enums"]["affiliate_profile_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          affiliate_code: string
+          approval_date?: string
+          created_at?: string
+          custom_commission_rate?: number | null
+          default_commission_type?:
+            | Database["public"]["Enums"]["affiliate_commission_type"]
+            | null
+          id?: string
+          notes?: string | null
+          payout_email?: string | null
+          payout_method?: string | null
+          status?: Database["public"]["Enums"]["affiliate_profile_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          affiliate_code?: string
+          approval_date?: string
+          created_at?: string
+          custom_commission_rate?: number | null
+          default_commission_type?:
+            | Database["public"]["Enums"]["affiliate_commission_type"]
+            | null
+          id?: string
+          notes?: string | null
+          payout_email?: string | null
+          payout_method?: string | null
+          status?: Database["public"]["Enums"]["affiliate_profile_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      affiliate_referrals: {
+        Row: {
+          affiliate_click_id: string | null
+          affiliate_profile_id: string
+          attribution_status: Database["public"]["Enums"]["affiliate_referral_status"]
+          conversion_date: string | null
+          conversion_type:
+            | Database["public"]["Enums"]["affiliate_conversion_type"]
+            | null
+          created_at: string
+          id: string
+          notes: string | null
+          referral_code: string
+          referred_user_id: string
+          signup_date: string
+          source_record_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          affiliate_click_id?: string | null
+          affiliate_profile_id: string
+          attribution_status?: Database["public"]["Enums"]["affiliate_referral_status"]
+          conversion_date?: string | null
+          conversion_type?:
+            | Database["public"]["Enums"]["affiliate_conversion_type"]
+            | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          referral_code: string
+          referred_user_id: string
+          signup_date?: string
+          source_record_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          affiliate_click_id?: string | null
+          affiliate_profile_id?: string
+          attribution_status?: Database["public"]["Enums"]["affiliate_referral_status"]
+          conversion_date?: string | null
+          conversion_type?:
+            | Database["public"]["Enums"]["affiliate_conversion_type"]
+            | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          referral_code?: string
+          referred_user_id?: string
+          signup_date?: string
+          source_record_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_referrals_affiliate_click_id_fkey"
+            columns: ["affiliate_click_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_clicks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_referrals_affiliate_profile_id_fkey"
+            columns: ["affiliate_profile_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_settings: {
+        Row: {
+          affiliate_terms: string
+          auto_approve: boolean
+          cookie_duration_days: number
+          created_at: string
+          default_commission_rate: number
+          default_commission_type: Database["public"]["Enums"]["affiliate_commission_type"]
+          id: number
+          last_touch_attribution_enabled: boolean
+          minimum_payout_threshold: number
+          payout_instructions: string
+          program_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          affiliate_terms?: string
+          auto_approve?: boolean
+          cookie_duration_days?: number
+          created_at?: string
+          default_commission_rate?: number
+          default_commission_type?: Database["public"]["Enums"]["affiliate_commission_type"]
+          id?: number
+          last_touch_attribution_enabled?: boolean
+          minimum_payout_threshold?: number
+          payout_instructions?: string
+          program_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          affiliate_terms?: string
+          auto_approve?: boolean
+          cookie_duration_days?: number
+          created_at?: string
+          default_commission_rate?: number
+          default_commission_type?: Database["public"]["Enums"]["affiliate_commission_type"]
+          id?: number
+          last_touch_attribution_enabled?: boolean
+          minimum_payout_threshold?: number
+          payout_instructions?: string
+          program_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      analytics_events: {
+        Row: {
+          article: string | null
+          created_at: string
+          destination: string | null
+          event_name: string
+          id: string
+          location: string | null
+          metadata: Json
+          path: string | null
+          referrer: string | null
+          session_id: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          article?: string | null
+          created_at?: string
+          destination?: string | null
+          event_name: string
+          id?: string
+          location?: string | null
+          metadata?: Json
+          path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          article?: string | null
+          created_at?: string
+          destination?: string | null
+          event_name?: string
+          id?: string
+          location?: string | null
+          metadata?: Json
+          path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
+      company_research: {
+        Row: {
+          cache_key: string
+          company: string
+          created_at: string
+          id: string
+          payload: Json
+          provider: string
+          role: string | null
+          sources: Json
+        }
+        Insert: {
+          cache_key: string
+          company: string
+          created_at?: string
+          id?: string
+          payload: Json
+          provider: string
+          role?: string | null
+          sources?: Json
+        }
+        Update: {
+          cache_key?: string
+          company?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          provider?: string
+          role?: string | null
+          sources?: Json
+        }
+        Relationships: []
+      }
+      digest_send_logs: {
         Row: {
           created_at: string
-          goal: string | null
+          error_message: string | null
           id: string
-          milestones: Json
+          jobs_count: number
+          preview: Json
+          reminders_count: number
+          sent_at: string
           status: string
-          title: string
-          updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          goal?: string | null
+          error_message?: string | null
           id?: string
-          milestones?: Json
+          jobs_count?: number
+          preview?: Json
+          reminders_count?: number
+          sent_at?: string
           status?: string
-          title: string
-          updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          goal?: string | null
+          error_message?: string | null
           id?: string
-          milestones?: Json
+          jobs_count?: number
+          preview?: Json
+          reminders_count?: number
+          sent_at?: string
           status?: string
-          title?: string
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
       }
-      cover_letters: {
+      discovered_jobs: {
         Row: {
-          application_id: string | null
-          content: string
-          created_at: string
-          id: string
-          resume_id: string | null
-          storage_path: string | null
-          title: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          application_id?: string | null
-          content: string
-          created_at?: string
-          id?: string
-          resume_id?: string | null
-          storage_path?: string | null
-          title?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          application_id?: string | null
-          content?: string
-          created_at?: string
-          id?: string
-          resume_id?: string | null
-          storage_path?: string | null
-          title?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cover_letters_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "job_applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cover_letters_resume_id_fkey"
-            columns: ["resume_id"]
-            isOneToOne: false
-            referencedRelation: "resumes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      feature_flags: {
-        Row: {
-          created_at: string
+          company: string | null
+          currency: string | null
+          dedupe_key: string
           description: string | null
+          external_id: string | null
+          first_seen_at: string
           id: string
-          is_enabled: boolean
-          key: string
-          rollout_percentage: number
-          updated_at: string
+          last_seen_at: string
+          location: string | null
+          posted_at: string | null
+          raw: Json
+          remote: boolean | null
+          salary_max: number | null
+          salary_min: number | null
+          source: string
+          title: string
+          url: string
         }
         Insert: {
-          created_at?: string
+          company?: string | null
+          currency?: string | null
+          dedupe_key: string
           description?: string | null
+          external_id?: string | null
+          first_seen_at?: string
           id?: string
-          is_enabled?: boolean
-          key: string
-          rollout_percentage?: number
-          updated_at?: string
+          last_seen_at?: string
+          location?: string | null
+          posted_at?: string | null
+          raw?: Json
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source: string
+          title: string
+          url: string
         }
         Update: {
-          created_at?: string
+          company?: string | null
+          currency?: string | null
+          dedupe_key?: string
           description?: string | null
+          external_id?: string | null
+          first_seen_at?: string
           id?: string
-          is_enabled?: boolean
-          key?: string
-          rollout_percentage?: number
-          updated_at?: string
+          last_seen_at?: string
+          location?: string | null
+          posted_at?: string | null
+          raw?: Json
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string
+          title?: string
+          url?: string
         }
         Relationships: []
       }
-      interview_feedback: {
+      email_notification_log: {
         Row: {
           created_at: string
-          detailed_feedback: Json
+          error: string | null
           id: string
-          improvements: Json
-          overall_score: number | null
-          session_id: string
-          strengths: Json
+          idempotency_key: string
+          metadata: Json
+          provider_message_id: string | null
+          recipient: string
+          status: string
+          subject: string
+          template: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          detailed_feedback?: Json
+          error?: string | null
           id?: string
-          improvements?: Json
-          overall_score?: number | null
-          session_id: string
-          strengths?: Json
+          idempotency_key: string
+          metadata?: Json
+          provider_message_id?: string | null
+          recipient: string
+          status?: string
+          subject: string
+          template: string
           user_id: string
         }
         Update: {
           created_at?: string
-          detailed_feedback?: Json
+          error?: string | null
           id?: string
-          improvements?: Json
-          overall_score?: number | null
-          session_id?: string
-          strengths?: Json
+          idempotency_key?: string
+          metadata?: Json
+          provider_message_id?: string | null
+          recipient?: string
+          status?: string
+          subject?: string
+          template?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "interview_feedback_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: true
-            referencedRelation: "interview_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      interview_sessions: {
+      feature_usage: {
         Row: {
-          completed_at: string | null
           created_at: string
+          credits_used: number
+          environment: string
+          feature: string
           id: string
-          job_application_id: string | null
-          started_at: string | null
+          period_start: string
+          updated_at: string
+          used: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_used?: number
+          environment?: string
+          feature: string
+          id?: string
+          period_start: string
+          updated_at?: string
+          used?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_used?: number
+          environment?: string
+          feature?: string
+          id?: string
+          period_start?: string
+          updated_at?: string
+          used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interview_session_metrics: {
+        Row: {
+          avg_latency_ms: number | null
+          barge_in_count: number
+          created_at: string
+          details: Json
+          dropout_count: number
+          duration_sec: number
+          end_reason: string | null
+          ended_at: string | null
+          first_token_latency_ms: number | null
+          id: string
+          input_tokens: number
+          interruption_count: number
+          minutes_used: number
+          output_tokens: number
+          p95_latency_ms: number | null
+          provider: string
+          reconnect_count: number
+          session_id: string | null
+          started_at: string
+          target_role: string | null
+          turn_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_latency_ms?: number | null
+          barge_in_count?: number
+          created_at?: string
+          details?: Json
+          dropout_count?: number
+          duration_sec?: number
+          end_reason?: string | null
+          ended_at?: string | null
+          first_token_latency_ms?: number | null
+          id?: string
+          input_tokens?: number
+          interruption_count?: number
+          minutes_used?: number
+          output_tokens?: number
+          p95_latency_ms?: number | null
+          provider?: string
+          reconnect_count?: number
+          session_id?: string | null
+          started_at?: string
+          target_role?: string | null
+          turn_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_latency_ms?: number | null
+          barge_in_count?: number
+          created_at?: string
+          details?: Json
+          dropout_count?: number
+          duration_sec?: number
+          end_reason?: string | null
+          ended_at?: string | null
+          first_token_latency_ms?: number | null
+          id?: string
+          input_tokens?: number
+          interruption_count?: number
+          minutes_used?: number
+          output_tokens?: number
+          p95_latency_ms?: number | null
+          provider?: string
+          reconnect_count?: number
+          session_id?: string | null
+          started_at?: string
+          target_role?: string | null
+          turn_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interview_session_state: {
+        Row: {
+          context: Json
+          created_at: string
+          difficulty: string | null
+          elapsed_sec: number
+          id: string
+          interviewer_state: string
+          last_heartbeat_at: string
+          persona: string | null
+          session_key: string
           status: string
           target_role: string | null
           transcript: Json
+          turn_index: number
           updated_at: string
           user_id: string
         }
         Insert: {
-          completed_at?: string | null
+          context?: Json
           created_at?: string
+          difficulty?: string | null
+          elapsed_sec?: number
           id?: string
-          job_application_id?: string | null
-          started_at?: string | null
+          interviewer_state?: string
+          last_heartbeat_at?: string
+          persona?: string | null
+          session_key: string
           status?: string
           target_role?: string | null
           transcript?: Json
+          turn_index?: number
           updated_at?: string
           user_id: string
         }
         Update: {
-          completed_at?: string | null
+          context?: Json
           created_at?: string
+          difficulty?: string | null
+          elapsed_sec?: number
           id?: string
-          job_application_id?: string | null
-          started_at?: string | null
+          interviewer_state?: string
+          last_heartbeat_at?: string
+          persona?: string | null
+          session_key?: string
           status?: string
           target_role?: string | null
           transcript?: Json
+          turn_index?: number
           updated_at?: string
           user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "interview_sessions_job_application_id_fkey"
-            columns: ["job_application_id"]
-            isOneToOne: false
-            referencedRelation: "job_applications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      job_applications: {
-        Row: {
-          applied_at: string | null
-          created_at: string
-          deleted_at: string | null
-          id: string
-          job_id: string | null
-          match_score: number | null
-          next_action_at: string | null
-          notes: string | null
-          rationale: string | null
-          resume_id: string | null
-          stage: Database["public"]["Enums"]["application_stage"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          applied_at?: string | null
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          job_id?: string | null
-          match_score?: number | null
-          next_action_at?: string | null
-          notes?: string | null
-          rationale?: string | null
-          resume_id?: string | null
-          stage?: Database["public"]["Enums"]["application_stage"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          applied_at?: string | null
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          job_id?: string | null
-          match_score?: number | null
-          next_action_at?: string | null
-          notes?: string | null
-          rationale?: string | null
-          resume_id?: string | null
-          stage?: Database["public"]["Enums"]["application_stage"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "job_applications_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "job_applications_resume_id_fkey"
-            columns: ["resume_id"]
-            isOneToOne: false
-            referencedRelation: "resumes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      jobs: {
-        Row: {
-          company: string | null
-          company_logo_path: string | null
-          created_at: string
-          currency: string
-          description: string | null
-          expires_at: string | null
-          external_id: string | null
-          id: string
-          is_public: boolean
-          location: string | null
-          published_at: string | null
-          salary_max: number | null
-          salary_min: number | null
-          skills: string[]
-          title: string
-          updated_at: string
-          url: string | null
-          user_id: string | null
-          workplace_type: string | null
-        }
-        Insert: {
-          company?: string | null
-          company_logo_path?: string | null
-          created_at?: string
-          currency?: string
-          description?: string | null
-          expires_at?: string | null
-          external_id?: string | null
-          id?: string
-          is_public?: boolean
-          location?: string | null
-          published_at?: string | null
-          salary_max?: number | null
-          salary_min?: number | null
-          skills?: string[]
-          title: string
-          updated_at?: string
-          url?: string | null
-          user_id?: string | null
-          workplace_type?: string | null
-        }
-        Update: {
-          company?: string | null
-          company_logo_path?: string | null
-          created_at?: string
-          currency?: string
-          description?: string | null
-          expires_at?: string | null
-          external_id?: string | null
-          id?: string
-          is_public?: boolean
-          location?: string | null
-          published_at?: string | null
-          salary_max?: number | null
-          salary_min?: number | null
-          skills?: string[]
-          title?: string
-          updated_at?: string
-          url?: string | null
-          user_id?: string | null
-          workplace_type?: string | null
         }
         Relationships: []
       }
-      messages: {
+      interview_sessions: {
         Row: {
-          body: string
           created_at: string
+          duration_sec: number
+          focus_areas: string[] | null
           id: string
-          sender_id: string
-          thread_id: string
+          integrity: Json | null
+          overall_score: number | null
+          pdf_path: string | null
+          practice_plan: Json | null
+          report: Json
+          target_role: string | null
+          transcript: Json | null
+          user_id: string
         }
         Insert: {
-          body: string
           created_at?: string
+          duration_sec?: number
+          focus_areas?: string[] | null
           id?: string
-          sender_id: string
-          thread_id: string
+          integrity?: Json | null
+          overall_score?: number | null
+          pdf_path?: string | null
+          practice_plan?: Json | null
+          report: Json
+          target_role?: string | null
+          transcript?: Json | null
+          user_id: string
         }
         Update: {
-          body?: string
           created_at?: string
+          duration_sec?: number
+          focus_areas?: string[] | null
           id?: string
-          sender_id?: string
-          thread_id?: string
+          integrity?: Json | null
+          overall_score?: number | null
+          pdf_path?: string | null
+          practice_plan?: Json | null
+          report?: Json
+          target_role?: string | null
+          transcript?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      job_matches: {
+        Row: {
+          ai_strategy: string | null
+          company: string | null
+          created_at: string
+          description: string | null
+          id: string
+          job_title: string
+          location: string | null
+          match_score: number | null
+          matched_skills: string[] | null
+          missing_skills: string[] | null
+          salary_range: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_strategy?: string | null
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_title: string
+          location?: string | null
+          match_score?: number | null
+          matched_skills?: string[] | null
+          missing_skills?: string[] | null
+          salary_range?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_strategy?: string | null
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          job_title?: string
+          location?: string | null
+          match_score?: number | null
+          matched_skills?: string[] | null
+          missing_skills?: string[] | null
+          salary_range?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      job_reminders: {
+        Row: {
+          created_at: string
+          done: boolean
+          due_at: string
+          id: string
+          title: string
+          tracked_job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          due_at: string
+          id?: string
+          title: string
+          tracked_job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          due_at?: string
+          id?: string
+          title?: string
+          tracked_job_id?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "messages_thread_id_fkey"
-            columns: ["thread_id"]
+            foreignKeyName: "job_reminders_tracked_job_id_fkey"
+            columns: ["tracked_job_id"]
             isOneToOne: false
-            referencedRelation: "threads"
+            referencedRelation: "tracked_jobs"
             referencedColumns: ["id"]
           },
         ]
+      }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          created_at: string
+          doc_type: string
+          document_id: string
+          id: string
+          ip_hash: string | null
+          user_agent: string | null
+          user_id: string
+          version: number
+        }
+        Insert: {
+          accepted_at?: string
+          created_at?: string
+          doc_type: string
+          document_id: string
+          id?: string
+          ip_hash?: string | null
+          user_agent?: string | null
+          user_id: string
+          version: number
+        }
+        Update: {
+          accepted_at?: string
+          created_at?: string
+          doc_type?: string
+          document_id?: string
+          id?: string
+          ip_hash?: string | null
+          user_agent?: string | null
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_acceptances_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_documents: {
+        Row: {
+          content: string | null
+          content_key: string | null
+          created_at: string
+          created_by: string | null
+          doc_type: string
+          effective_date: string
+          id: string
+          published_at: string | null
+          requires_acceptance: boolean
+          status: string
+          summary_of_changes: string | null
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content?: string | null
+          content_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type: string
+          effective_date?: string
+          id?: string
+          published_at?: string | null
+          requires_acceptance?: boolean
+          status?: string
+          summary_of_changes?: string | null
+          title: string
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          content?: string | null
+          content_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type?: string
+          effective_date?: string
+          id?: string
+          published_at?: string | null
+          requires_acceptance?: boolean
+          status?: string
+          summary_of_changes?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -551,6 +1134,7 @@ export type Database = {
           created_at: string
           id: string
           link: string | null
+          metadata: Json | null
           read_at: string | null
           title: string
           type: string
@@ -561,6 +1145,7 @@ export type Database = {
           created_at?: string
           id?: string
           link?: string | null
+          metadata?: Json | null
           read_at?: string | null
           title: string
           type: string
@@ -571,6 +1156,7 @@ export type Database = {
           created_at?: string
           id?: string
           link?: string | null
+          metadata?: Json | null
           read_at?: string | null
           title?: string
           type?: string
@@ -578,118 +1164,458 @@ export type Database = {
         }
         Relationships: []
       }
-      payments: {
+      paddle_customers: {
         Row: {
-          amount_cents: number
           created_at: string
-          currency: string
-          failed_at: string | null
-          failure_action_url: string | null
-          failure_code: string | null
-          failure_message: string | null
+          customer_id: string
+          email: string
+          environment: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          email: string
+          environment?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          email?: string
+          environment?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      paddle_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          customer_id: string
+          environment: string
+          price_id: string
+          product_id: string
+          scheduled_change_action: string | null
+          scheduled_change_at: string | null
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          customer_id: string
+          environment?: string
+          price_id: string
+          product_id: string
+          scheduled_change_action?: string | null
+          scheduled_change_at?: string | null
+          status: string
+          subscription_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          customer_id?: string
+          environment?: string
+          price_id?: string
+          product_id?: string
+          scheduled_change_action?: string | null
+          scheduled_change_at?: string | null
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          career_stage: string | null
+          created_at: string
+          display_name: string | null
           id: string
-          paid_at: string | null
-          product_code: string
-          provider: string
-          provider_checkout_id: string | null
-          provider_event_id: string | null
-          provider_invoice_id: string | null
-          provider_payment_id: string | null
-          purchase_kind: string
-          refunded_at: string | null
-          status: Database["public"]["Enums"]["payment_state"]
-          subscription_id: string | null
+          skills: string[] | null
+          target_industry: string | null
+          target_job_title: string | null
+          target_salary: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          amount_cents?: number
+          avatar_url?: string | null
+          career_stage?: string | null
           created_at?: string
-          currency?: string
-          failed_at?: string | null
-          failure_action_url?: string | null
-          failure_code?: string | null
-          failure_message?: string | null
+          display_name?: string | null
           id?: string
-          paid_at?: string | null
-          product_code: string
-          provider: string
-          provider_checkout_id?: string | null
-          provider_event_id?: string | null
-          provider_invoice_id?: string | null
-          provider_payment_id?: string | null
-          purchase_kind: string
-          refunded_at?: string | null
-          status?: Database["public"]["Enums"]["payment_state"]
-          subscription_id?: string | null
+          skills?: string[] | null
+          target_industry?: string | null
+          target_job_title?: string | null
+          target_salary?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          amount_cents?: number
+          avatar_url?: string | null
+          career_stage?: string | null
           created_at?: string
-          currency?: string
-          failed_at?: string | null
-          failure_action_url?: string | null
-          failure_code?: string | null
-          failure_message?: string | null
+          display_name?: string | null
           id?: string
-          paid_at?: string | null
-          product_code?: string
-          provider?: string
-          provider_checkout_id?: string | null
-          provider_event_id?: string | null
-          provider_invoice_id?: string | null
-          provider_payment_id?: string | null
-          purchase_kind?: string
-          refunded_at?: string | null
-          status?: Database["public"]["Enums"]["payment_state"]
-          subscription_id?: string | null
+          skills?: string[] | null
+          target_industry?: string | null
+          target_job_title?: string | null
+          target_salary?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "payments_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "user_subscriptions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      portfolios: {
+      purchases: {
         Row: {
-          assets: Json
+          amount_total: number
           created_at: string
-          deleted_at: string | null
+          credits_granted: number
+          currency: string
+          environment: string
           id: string
-          is_public: boolean
-          summary: string | null
+          pack_key: string
+          pack_label: string | null
+          quantity: number
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_total?: number
+          created_at?: string
+          credits_granted?: number
+          currency?: string
+          environment?: string
+          id?: string
+          pack_key: string
+          pack_label?: string | null
+          quantity?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_total?: number
+          created_at?: string
+          credits_granted?: number
+          currency?: string
+          environment?: string
+          id?: string
+          pack_key?: string
+          pack_label?: string | null
+          quantity?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          ai_suggestions: Json | null
+          ats_score: number | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string
+          formatting_score: number | null
+          id: string
+          impact_score: number | null
+          keyword_match: number | null
+          parsed_text: string | null
+          readability_score: number | null
+          updated_at: string
+          user_id: string
+          version_label: string | null
+        }
+        Insert: {
+          ai_suggestions?: Json | null
+          ats_score?: number | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type: string
+          formatting_score?: number | null
+          id?: string
+          impact_score?: number | null
+          keyword_match?: number | null
+          parsed_text?: string | null
+          readability_score?: number | null
+          updated_at?: string
+          user_id: string
+          version_label?: string | null
+        }
+        Update: {
+          ai_suggestions?: Json | null
+          ats_score?: number | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          formatting_score?: number | null
+          id?: string
+          impact_score?: number | null
+          keyword_match?: number | null
+          parsed_text?: string | null
+          readability_score?: number | null
+          updated_at?: string
+          user_id?: string
+          version_label?: string | null
+        }
+        Relationships: []
+      }
+      scheduled_interviews: {
+        Row: {
+          calendar_id: string | null
+          company: string | null
+          created_at: string
+          ends_at: string | null
+          external_event_id: string | null
+          followup_sent_at: string | null
+          html_link: string | null
+          id: string
+          kind: string
+          location: string | null
+          notes: string | null
+          reminder_sent_at: string | null
+          source: string
+          starts_at: string
+          status: string
+          target_role: string | null
+          timezone: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calendar_id?: string | null
+          company?: string | null
+          created_at?: string
+          ends_at?: string | null
+          external_event_id?: string | null
+          followup_sent_at?: string | null
+          html_link?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          source?: string
+          starts_at: string
+          status?: string
+          target_role?: string | null
+          timezone?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calendar_id?: string | null
+          company?: string | null
+          created_at?: string
+          ends_at?: string | null
+          external_event_id?: string | null
+          followup_sent_at?: string | null
+          html_link?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          source?: string
+          starts_at?: string
+          status?: string
+          target_role?: string | null
+          timezone?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          category: string
+          created_at: string
+          decision: string
+          details: Json
+          environment: string | null
+          event: string
+          feature: string | null
+          id: string
+          reason: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          decision: string
+          details?: Json
+          environment?: string | null
+          event: string
+          feature?: string | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          decision?: string
+          details?: Json
+          environment?: string | null
+          event?: string
+          feature?: string | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      subscribers: {
+        Row: {
+          billing_interval: string | null
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          email: string
+          environment: string
+          id: string
+          price_id: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscribed: boolean
+          subscription_status: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          email: string
+          environment?: string
+          id?: string
+          price_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscribed?: boolean
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          email?: string
+          environment?: string
+          id?: string
+          price_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscribed?: boolean
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tracked_jobs: {
+        Row: {
+          application_pack: Json | null
+          applied_at: string | null
+          company: string | null
+          created_at: string
+          description: string | null
+          details: Json | null
+          external_id: string | null
+          id: string
+          location: string | null
+          match_score: number | null
+          notes: string | null
+          position: number | null
+          posted_at: string | null
+          remote: boolean | null
+          salary_max: number | null
+          salary_min: number | null
+          source: string | null
+          status: string
           title: string
           updated_at: string
           url: string | null
           user_id: string
         }
         Insert: {
-          assets?: Json
+          application_pack?: Json | null
+          applied_at?: string | null
+          company?: string | null
           created_at?: string
-          deleted_at?: string | null
+          description?: string | null
+          details?: Json | null
+          external_id?: string | null
           id?: string
-          is_public?: boolean
-          summary?: string | null
+          location?: string | null
+          match_score?: number | null
+          notes?: string | null
+          position?: number | null
+          posted_at?: string | null
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string | null
+          status?: string
           title: string
           updated_at?: string
           url?: string | null
           user_id: string
         }
         Update: {
-          assets?: Json
+          application_pack?: Json | null
+          applied_at?: string | null
+          company?: string | null
           created_at?: string
-          deleted_at?: string | null
+          description?: string | null
+          details?: Json | null
+          external_id?: string | null
           id?: string
-          is_public?: boolean
-          summary?: string | null
+          location?: string | null
+          match_score?: number | null
+          notes?: string | null
+          position?: number | null
+          posted_at?: string | null
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string | null
+          status?: string
           title?: string
           updated_at?: string
           url?: string | null
@@ -697,425 +1623,272 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      usage_credits: {
         Row: {
-          avatar_path: string | null
-          career_stage: string | null
+          application_credits: number
           created_at: string
-          deleted_at: string | null
-          display_name: string | null
-          email: string | null
+          environment: string
           id: string
-          is_onboarded: boolean
-          remote_preference: string
-          skills: string[]
-          target_industry: string | null
-          target_location: string | null
+          interview_credits: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_credits?: number
+          created_at?: string
+          environment?: string
+          id?: string
+          interview_credits?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_credits?: number
+          created_at?: string
+          environment?: string
+          id?: string
+          interview_credits?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_integrations: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          metadata: Json
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          metadata?: Json
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          metadata?: Json
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          country: string | null
+          created_at: string
+          digest_enabled: boolean
+          digest_send_time: string
+          digest_timezone: string
+          experience_level: string | null
+          id: string
+          keywords: string[] | null
+          locations: string[] | null
+          onboarded: boolean
+          remote_preference: string | null
+          salary_min: number | null
           target_role: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          avatar_path?: string | null
-          career_stage?: string | null
+          country?: string | null
           created_at?: string
-          deleted_at?: string | null
-          display_name?: string | null
-          email?: string | null
+          digest_enabled?: boolean
+          digest_send_time?: string
+          digest_timezone?: string
+          experience_level?: string | null
           id?: string
-          is_onboarded?: boolean
-          remote_preference?: string
-          skills?: string[]
-          target_industry?: string | null
-          target_location?: string | null
+          keywords?: string[] | null
+          locations?: string[] | null
+          onboarded?: boolean
+          remote_preference?: string | null
+          salary_min?: number | null
           target_role?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          avatar_path?: string | null
-          career_stage?: string | null
+          country?: string | null
           created_at?: string
-          deleted_at?: string | null
-          display_name?: string | null
-          email?: string | null
+          digest_enabled?: boolean
+          digest_send_time?: string
+          digest_timezone?: string
+          experience_level?: string | null
           id?: string
-          is_onboarded?: boolean
-          remote_preference?: string
-          skills?: string[]
-          target_industry?: string | null
-          target_location?: string | null
+          keywords?: string[] | null
+          locations?: string[] | null
+          onboarded?: boolean
+          remote_preference?: string | null
+          salary_min?: number | null
           target_role?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
       }
-      resume_versions: {
+      user_roles: {
         Row: {
-          change_summary: string | null
-          content: Json
           created_at: string
           id: string
-          label: string
-          resume_id: string
-          storage_path: string | null
-          user_id: string
-          version_number: number
-        }
-        Insert: {
-          change_summary?: string | null
-          content?: Json
-          created_at?: string
-          id?: string
-          label?: string
-          resume_id: string
-          storage_path?: string | null
-          user_id: string
-          version_number: number
-        }
-        Update: {
-          change_summary?: string | null
-          content?: Json
-          created_at?: string
-          id?: string
-          label?: string
-          resume_id?: string
-          storage_path?: string | null
-          user_id?: string
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "resume_versions_resume_id_fkey"
-            columns: ["resume_id"]
-            isOneToOne: false
-            referencedRelation: "resumes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      resumes: {
-        Row: {
-          analysis: Json
-          ats_score: number | null
-          created_at: string
-          deleted_at: string | null
-          file_name: string
-          formatting_score: number | null
-          id: string
-          impact_score: number | null
-          is_primary: boolean
-          keyword_score: number | null
-          mime_type: string
-          parsed_text: string | null
-          readability_score: number | null
-          storage_path: string
-          updated_at: string
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
-          analysis?: Json
-          ats_score?: number | null
           created_at?: string
-          deleted_at?: string | null
-          file_name: string
-          formatting_score?: number | null
           id?: string
-          impact_score?: number | null
-          is_primary?: boolean
-          keyword_score?: number | null
-          mime_type: string
-          parsed_text?: string | null
-          readability_score?: number | null
-          storage_path: string
-          updated_at?: string
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
-          analysis?: Json
-          ats_score?: number | null
           created_at?: string
-          deleted_at?: string | null
-          file_name?: string
-          formatting_score?: number | null
           id?: string
-          impact_score?: number | null
-          is_primary?: boolean
-          keyword_score?: number | null
-          mime_type?: string
-          parsed_text?: string | null
-          readability_score?: number | null
-          storage_path?: string
-          updated_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
-      }
-      saved_jobs: {
-        Row: {
-          created_at: string
-          id: string
-          job_id: string
-          notes: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          job_id: string
-          notes?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          job_id?: string
-          notes?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "saved_jobs_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      settings: {
-        Row: {
-          created_at: string
-          digest_enabled: boolean
-          digest_time: string
-          email_notifications: boolean
-          id: string
-          locale: string
-          push_notifications: boolean
-          timezone: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          digest_enabled?: boolean
-          digest_time?: string
-          email_notifications?: boolean
-          id?: string
-          locale?: string
-          push_notifications?: boolean
-          timezone?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          digest_enabled?: boolean
-          digest_time?: string
-          email_notifications?: boolean
-          id?: string
-          locale?: string
-          push_notifications?: boolean
-          timezone?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      skill_assessments: {
-        Row: {
-          created_at: string
-          evidence: Json
-          id: string
-          proficiency: number | null
-          skill_name: string
-          target_proficiency: number | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          evidence?: Json
-          id?: string
-          proficiency?: number | null
-          skill_name: string
-          target_proficiency?: number | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          evidence?: Json
-          id?: string
-          proficiency?: number | null
-          skill_name?: string
-          target_proficiency?: number | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      subscription_plans: {
-        Row: {
-          amount_cents: number
-          code: string
-          created_at: string
-          currency: string
-          entitlement_identifier: string | null
-          features: Json
-          id: string
-          interval: Database["public"]["Enums"]["subscription_interval"] | null
-          is_active: boolean
-          is_recommended: boolean
-          name: string
-          revenuecat_product_identifier: string | null
-          stripe_lookup_key: string | null
-          tier: string
-          updated_at: string
-        }
-        Insert: {
-          amount_cents?: number
-          code: string
-          created_at?: string
-          currency?: string
-          entitlement_identifier?: string | null
-          features?: Json
-          id?: string
-          interval?: Database["public"]["Enums"]["subscription_interval"] | null
-          is_active?: boolean
-          is_recommended?: boolean
-          name: string
-          revenuecat_product_identifier?: string | null
-          stripe_lookup_key?: string | null
-          tier: string
-          updated_at?: string
-        }
-        Update: {
-          amount_cents?: number
-          code?: string
-          created_at?: string
-          currency?: string
-          entitlement_identifier?: string | null
-          features?: Json
-          id?: string
-          interval?: Database["public"]["Enums"]["subscription_interval"] | null
-          is_active?: boolean
-          is_recommended?: boolean
-          name?: string
-          revenuecat_product_identifier?: string | null
-          stripe_lookup_key?: string | null
-          tier?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      thread_members: {
-        Row: {
-          created_at: string
-          thread_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          thread_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          thread_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "thread_members_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "threads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      threads: {
-        Row: {
-          created_at: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-        }
-        Relationships: []
-      }
-      user_subscriptions: {
-        Row: {
-          cancel_at_period_end: boolean
-          created_at: string
-          current_period_end: string | null
-          entitlement_identifier: string
-          grace_period_end: string | null
-          id: string
-          last_verified_at: string | null
-          plan_id: string | null
-          provider: string
-          provider_customer_id: string | null
-          provider_subscription_id: string | null
-          status: Database["public"]["Enums"]["subscription_state"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          cancel_at_period_end?: boolean
-          created_at?: string
-          current_period_end?: string | null
-          entitlement_identifier?: string
-          grace_period_end?: string | null
-          id?: string
-          last_verified_at?: string | null
-          plan_id?: string | null
-          provider?: string
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_state"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          cancel_at_period_end?: boolean
-          created_at?: string
-          current_period_end?: string | null
-          entitlement_identifier?: string
-          grace_period_end?: string | null
-          id?: string
-          last_verified_at?: string | null
-          plan_id?: string | null
-          provider?: string
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_state"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      is_admin: { Args: { _user_id?: string }; Returns: boolean }
+      accept_legal_document: {
+        Args: { _document_id: string; _user_agent?: string }
+        Returns: string
+      }
+      admin_audit_actors: {
+        Args: never
+        Returns: {
+          display_name: string
+          user_id: string
+        }[]
+      }
+      admin_create_payout: {
+        Args: {
+          _affiliate_profile_id: string
+          _amount: number
+          _commission_ids?: string[]
+          _notes?: string
+          _payout_method: string
+          _reference?: string
+        }
+        Returns: string
+      }
+      admin_legal_document_stats: {
+        Args: never
+        Returns: {
+          accepted_count: number
+          doc_type: string
+          document_id: string
+          status: string
+          total_users: number
+          version: number
+        }[]
+      }
+      admin_legal_pending_users: {
+        Args: { _document_id: string; _limit?: number }
+        Returns: {
+          display_name: string
+          joined_at: string
+          user_id: string
+        }[]
+      }
+      admin_mark_payout_paid: {
+        Args: {
+          _payout_id: string
+          _payout_method?: string
+          _reference?: string
+        }
+        Returns: undefined
+      }
+      admin_publish_legal_document: {
+        Args: { _document_id: string }
+        Returns: string
+      }
+      affiliate_click_is_valid: {
+        Args: { _code: string; _profile_id: string }
+        Returns: boolean
+      }
+      approve_affiliate_application: {
+        Args: { _application_id: string }
+        Returns: string
+      }
+      assert_admin_write_rate_limit: {
+        Args: { _actor: string; _limit?: number }
+        Returns: undefined
+      }
+      attribute_signup_referral: {
+        Args: { _click_id?: string; _code: string }
+        Returns: string
+      }
+      consume_entitlement: {
+        Args: {
+          _amount?: number
+          _env?: string
+          _feature: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      current_plan_tier: {
+        Args: { _env?: string; _user_id: string }
+        Returns: string
+      }
+      enqueue_notification: {
+        Args: {
+          _body?: string
+          _link?: string
+          _metadata?: Json
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: string
+      }
+      entitlement_snapshot: { Args: { _env?: string }; Returns: Json }
+      generate_affiliate_code: { Args: never; Returns: string }
+      get_affiliate_public_settings: {
+        Args: never
+        Returns: {
+          affiliate_terms: string
+          cookie_duration_days: number
+          default_commission_rate: number
+          default_commission_type: Database["public"]["Enums"]["affiliate_commission_type"]
+          minimum_payout_threshold: number
+          program_enabled: boolean
+        }[]
+      }
+      has_active_subscription: {
+        Args: { _env?: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       log_admin_access: {
         Args: {
           _action: string
@@ -1126,24 +1899,98 @@ export type Database = {
         }
         Returns: string
       }
+      lookup_affiliate_by_code: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          is_active: boolean
+          profile_id: string
+        }[]
+      }
+      notify_admins: {
+        Args: {
+          _body?: string
+          _link?: string
+          _metadata?: Json
+          _title: string
+          _type: string
+        }
+        Returns: number
+      }
+      pending_legal_acceptances: {
+        Args: never
+        Returns: {
+          doc_type: string
+          document_id: string
+          effective_date: string
+          summary_of_changes: string
+          title: string
+          version: number
+        }[]
+      }
+      plan_allowance: {
+        Args: { _feature: string; _tier: string }
+        Returns: number
+      }
+      record_conversion_commission: {
+        Args: {
+          _conversion_type?: Database["public"]["Enums"]["affiliate_conversion_type"]
+          _referred_user_id: string
+          _source_amount: number
+          _source_record_id?: string
+        }
+        Returns: string
+      }
+      record_security_event: {
+        Args: {
+          _category: string
+          _decision: string
+          _details?: Json
+          _env?: string
+          _event: string
+          _feature?: string
+          _reason?: string
+          _source?: string
+          _user_id?: string
+        }
+        Returns: string
+      }
+      refund_entitlement: {
+        Args: {
+          _amount?: number
+          _env?: string
+          _feature: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      reject_affiliate_application: {
+        Args: { _application_id: string; _reason?: string }
+        Returns: undefined
+      }
+      subscription_grants_access: {
+        Args: { _current_period_end: string; _status: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      application_stage:
-        | "saved"
-        | "applied"
-        | "interview"
-        | "offer"
+      affiliate_application_status:
+        | "pending"
+        | "approved"
         | "rejected"
-        | "withdrawn"
-      payment_state: "pending" | "paid" | "failed" | "refunded" | "void"
-      subscription_interval: "month" | "year" | "lifetime"
-      subscription_state:
-        | "active"
-        | "trialing"
-        | "past_due"
+        | "suspended"
+      affiliate_commission_status:
+        | "pending"
+        | "approved"
+        | "paid"
+        | "reversed"
         | "canceled"
-        | "expired"
-        | "none"
+      affiliate_commission_type: "percentage" | "flat"
+      affiliate_conversion_type: "signup" | "paid_upgrade" | "custom"
+      affiliate_payout_status: "pending" | "paid" | "failed" | "canceled"
+      affiliate_profile_status: "active" | "suspended" | "revoked"
+      affiliate_referral_status: "pending" | "confirmed" | "rejected"
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1271,24 +2118,25 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      application_stage: [
-        "saved",
-        "applied",
-        "interview",
-        "offer",
+      affiliate_application_status: [
+        "pending",
+        "approved",
         "rejected",
-        "withdrawn",
+        "suspended",
       ],
-      payment_state: ["pending", "paid", "failed", "refunded", "void"],
-      subscription_interval: ["month", "year", "lifetime"],
-      subscription_state: [
-        "active",
-        "trialing",
-        "past_due",
+      affiliate_commission_status: [
+        "pending",
+        "approved",
+        "paid",
+        "reversed",
         "canceled",
-        "expired",
-        "none",
       ],
+      affiliate_commission_type: ["percentage", "flat"],
+      affiliate_conversion_type: ["signup", "paid_upgrade", "custom"],
+      affiliate_payout_status: ["pending", "paid", "failed", "canceled"],
+      affiliate_profile_status: ["active", "suspended", "revoked"],
+      affiliate_referral_status: ["pending", "confirmed", "rejected"],
+      app_role: ["admin", "user"],
     },
   },
 } as const
