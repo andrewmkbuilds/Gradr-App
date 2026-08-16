@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  const secret = Deno.env.get("CRON_SECRET");
+  const secret = Deno.env.get("CATALOG_SEED_SECRET");
   const body = await req.json().catch(() => ({}));
   if (!secret || body?.secret !== secret) return json({ error: "Unauthorized" }, 401);
 
