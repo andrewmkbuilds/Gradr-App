@@ -231,7 +231,7 @@ async function main() {
   }
   for (const t of MASKABLE_ICONS) {
     await render(
-      iconHtml(logoDark, { size: t.size, pad: 0.2, background: TEAL, radius: 0 }),
+      iconHtml(logoDark, { size: t.size, pad: 0.2, background: DEEP, radius: 0 }),
       { width: t.size, height: t.size, file: t.file, omitBackground: false },
     );
   }
