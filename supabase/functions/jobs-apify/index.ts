@@ -118,7 +118,13 @@ function normalize(source: string, item: Record<string, any>): NormalizedJob | n
 
 function actorInput(source: string, query: string, location: string, limit: number) {
   if (source === "indeed") {
-    return { position: query, location, country: "us", maxItems: limit, parseCompanyDetails: false };
+    return {
+      position: query,
+      location,
+      country: resolveCountry(location),
+      maxItems: limit,
+      parseCompanyDetails: false,
+    };
   }
   return { title: query, location, rows: limit, proxy: { useApifyProxy: true } };
 }
