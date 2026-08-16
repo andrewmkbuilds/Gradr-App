@@ -1929,6 +1929,57 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_snapshots: {
+        Row: {
+          alerts: Json
+          avg_position: number | null
+          captured_at: string
+          changes: Json
+          clicks: number
+          ctr: number
+          id: string
+          impressions: number
+          inspections: Json
+          lighthouse: Json
+          property: string | null
+          sitemaps: Json
+          top_pages: Json
+          top_queries: Json
+        }
+        Insert: {
+          alerts?: Json
+          avg_position?: number | null
+          captured_at?: string
+          changes?: Json
+          clicks?: number
+          ctr?: number
+          id?: string
+          impressions?: number
+          inspections?: Json
+          lighthouse?: Json
+          property?: string | null
+          sitemaps?: Json
+          top_pages?: Json
+          top_queries?: Json
+        }
+        Update: {
+          alerts?: Json
+          avg_position?: number | null
+          captured_at?: string
+          changes?: Json
+          clicks?: number
+          ctr?: number
+          id?: string
+          impressions?: number
+          inspections?: Json
+          lighthouse?: Json
+          property?: string | null
+          sitemaps?: Json
+          top_pages?: Json
+          top_queries?: Json
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           billing_interval: string | null
@@ -2202,6 +2253,142 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_institutions: {
+        Row: {
+          category: string | null
+          country: string | null
+          created_at: string
+          email_domain: string
+          id: string
+          name: string
+          notes: string | null
+          requested_by: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          category?: string | null
+          country?: string | null
+          created_at?: string
+          email_domain: string
+          id?: string
+          name: string
+          notes?: string | null
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          category?: string | null
+          country?: string | null
+          created_at?: string
+          email_domain?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_institutions_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "eligibility_categories"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      verification_requests: {
+        Row: {
+          category: string
+          country: string | null
+          created_at: string
+          discount_percentage: number
+          document_path: string | null
+          domain_matched: boolean
+          email: string
+          full_name: string
+          id: string
+          organization: string | null
+          personal_email: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          role_or_status: string | null
+          status: string
+          submitted_at: string
+          supporting_information: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          category: string
+          country?: string | null
+          created_at?: string
+          discount_percentage?: number
+          document_path?: string | null
+          domain_matched?: boolean
+          email: string
+          full_name: string
+          id?: string
+          organization?: string | null
+          personal_email?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          role_or_status?: string | null
+          status?: string
+          submitted_at?: string
+          supporting_information?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          category?: string
+          country?: string | null
+          created_at?: string
+          discount_percentage?: number
+          document_path?: string | null
+          domain_matched?: boolean
+          email?: string
+          full_name?: string
+          id?: string
+          organization?: string | null
+          personal_email?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          role_or_status?: string | null
+          status?: string
+          submitted_at?: string
+          supporting_information?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_requests_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "eligibility_categories"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2283,6 +2470,15 @@ export type Database = {
         Args: { _reason?: string; _status: string; _verification_id: string }
         Returns: undefined
       }
+      admin_review_verification_request: {
+        Args: {
+          _decision: string
+          _discount_percentage?: number
+          _notes?: string
+          _request_id: string
+        }
+        Returns: undefined
+      }
       admin_set_commission_status: {
         Args: {
           _commission_ids: string[]
@@ -2290,6 +2486,32 @@ export type Database = {
           _status: Database["public"]["Enums"]["affiliate_commission_status"]
         }
         Returns: number
+      }
+      admin_verification_requests: {
+        Args: { _limit?: number; _status?: string }
+        Returns: {
+          applicant_name: string
+          category: string
+          category_label: string
+          country: string
+          discount_percentage: number
+          document_path: string
+          domain_matched: boolean
+          email: string
+          full_name: string
+          id: string
+          organization: string
+          personal_email: string
+          reviewed_at: string
+          reviewer_name: string
+          reviewer_notes: string
+          role_or_status: string
+          status: string
+          submitted_at: string
+          supporting_information: string
+          user_id: string
+          website: string
+        }[]
       }
       affiliate_click_is_valid: {
         Args: { _code: string; _profile_id: string }
@@ -2372,6 +2594,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_anonymous_session: { Args: never; Returns: boolean }
       log_admin_access: {
         Args: {
           _action: string
@@ -2381,6 +2604,14 @@ export type Database = {
           _resource_type: string
         }
         Returns: string
+      }
+      log_admin_access_denied: {
+        Args: { _reason?: string; _route: string }
+        Returns: undefined
+      }
+      log_user_preferences_read: {
+        Args: { _found?: boolean; _source?: string }
+        Returns: undefined
       }
       lookup_affiliate_by_code: {
         Args: { _code: string }
@@ -2471,9 +2702,35 @@ export type Database = {
         Args: { _application_id: string; _reason?: string }
         Returns: undefined
       }
+      request_institution: {
+        Args: {
+          _category?: string
+          _country?: string
+          _email_domain: string
+          _name: string
+          _notes?: string
+          _website?: string
+        }
+        Returns: string
+      }
       reverse_commission_for_source: {
         Args: { _reason?: string; _source_record_id: string }
         Returns: number
+      }
+      submit_verification_request: {
+        Args: {
+          _category: string
+          _country?: string
+          _document_path?: string
+          _email: string
+          _full_name: string
+          _organization?: string
+          _personal_email?: string
+          _role_or_status?: string
+          _supporting_information?: string
+          _website?: string
+        }
+        Returns: string
       }
       subscription_grants_access: {
         Args: { _current_period_end: string; _status: string }
