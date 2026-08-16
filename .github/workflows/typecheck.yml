@@ -1,0 +1,27 @@
+name: Typecheck
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  typecheck:
+    name: TypeScript type checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Fails the build on any new type error in app or node configs.
+      - name: Typecheck (app + node)
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
