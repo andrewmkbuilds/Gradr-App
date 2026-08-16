@@ -180,7 +180,7 @@ const PNGS = [
 function pngHtml(svg, { size, background = "transparent", pad = 0.02, radius = 0 }) {
   return `<!doctype html><html><head><meta charset="utf-8"/><style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{width:${size}px;height:${size}px;background:transparent}
+  html,body{width:${size}px;height:${size}px;background:${background}}
   .plate{width:${size}px;height:${size}px;background:${background};border-radius:${radius}px;
     display:flex;align-items:center;justify-content:center;padding:${Math.round(size * pad)}px}
   img{width:100%;height:100%;object-fit:contain}
