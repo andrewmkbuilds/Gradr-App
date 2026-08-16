@@ -187,7 +187,7 @@ var get_profile_default = defineTool5({
 });
 
 // src/lib/mcp/index.ts
-var projectRef = "xaeyjrekewnwjujnrqgu";
+var projectRef = "gadtpumcxorpvwoiidqw";
 var mcp_default = defineMcp({
   name: "gradr-mcp",
   title: "Gradr",
