@@ -581,13 +581,36 @@ Deno.serve(async (req) => {
           environment: env,
         }, { providerEventId: deliveryEventId, source: "payments-webhook", environment: env });
         await phSetPerson(eventUserId, { is_paying: false, subscription_status: "canceled" });
+        if (eventUserId) {
+          // deno-lint-ignore no-explicit-any
+          const cancelData = event.data as any;
+          await db().rpc("enqueue_notification", {
+            _user_id: eventUserId,
+            _type: "billing_subscription_cancelled",
+            _title: "Your subscription was cancelled",
+            _body: "You keep full access until the end of the paid period.",
+            _link: "/billing",
+            _metadata: { subscription_id: cancelData?.id ?? null },
+          });
+          // Keyed on the subscription id so Paddle retries never re-send it.
+          await billingEmail(
+            "subscription-cancelled",
+            await emailFor(eventUserId, env),
+            `sub-cancelled-${cancelData?.id}`,
+            {
+              planName: planLabel(canceled.plan?.tier, canceled.plan?.interval),
+              cancelledAt: formatDate(cancelData?.canceledAt ?? new Date().toISOString()),
+              accessUntil: formatDate(cancelData?.currentBillingPeriod?.endsAt),
+            },
+          );
+        }
         break;
       }
       case EventName.CustomerCreated:
       case EventName.CustomerUpdated:
         await mirrorCustomer(event.data, env);
         break;
-      case EventName.TransactionCompleted:
+      case EventName.TransactionCompleted: {
         await clearPaymentIssue(event.data, env);
         await grantPackCredits(event.data, env);
         await recordDiscountUse(event.data, env);
@@ -601,7 +624,26 @@ Deno.serve(async (req) => {
           // deno-lint-ignore no-explicit-any
           product_type: (event.data as any)?.subscriptionId ? "subscription" : "pack",
         }, { providerEventId: deliveryEventId, source: "payments-webhook", environment: env });
+
+        // Receipt for every successful charge — subscription renewals and
+        // one-off credit packs alike. Idempotent on the transaction id.
+        // deno-lint-ignore no-explicit-any
+        const txn = event.data as any;
+        const paidTotal = Number(txn?.details?.totals?.grandTotal ?? txn?.details?.totals?.total ?? 0);
+        if (eventUserId && paidTotal > 0) {
+          const paidPlan = planFromItems(txn).plan;
+          const packKey = priceExternalId(txn?.items?.[0]);
+          const pack = packKey ? CREDIT_PACKS[packKey] : undefined;
+          await billingEmail("payment-successful", await emailFor(eventUserId, env), `txn-paid-${txn?.id}`, {
+            planName: pack?.label ?? planLabel(paidPlan?.tier, paidPlan?.interval),
+            interval: pack ? "one-time" : paidPlan?.interval ?? undefined,
+            amount: formatMoney(paidTotal, txn?.currencyCode ?? "USD"),
+            paidAt: formatDate(txn?.billedAt ?? txn?.createdAt ?? new Date().toISOString()),
+            nextBillingDate: formatDate(txn?.billingPeriod?.endsAt),
+          });
+        }
         break;
+      }
       case EventName.TransactionPaymentFailed:
         await handlePaymentFailed(event.data, env);
         break;
