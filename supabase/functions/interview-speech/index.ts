@@ -229,6 +229,31 @@ serve(async (req) => {
       const mapped = networkError && !res
         ? { code: "VOICE_CONNECTION_FAILED" as VoiceErrorCode, status: 502, reason: "PROVIDER_NETWORK" as VoiceProviderReason }
         : classifyProviderFailure(upstreamStatus, rawDetail);
+
+      // Primary provider is down for this account — try the secondary before
+      // leaving the interviewer silent.
+      const fallback = await synthesizeFallback(text, profile);
+      if (fallback?.ok && fallback.body) {
+        console.warn("[voice] primary failed, served via fallback provider", { requestId, upstreamStatus });
+        await recordVoiceEvent({
+          userId: user.id,
+          outcome: "ok",
+          requestId,
+          personaId,
+          providerDetail: `fallback:fish-audio (primary ${upstreamStatus})`,
+        });
+        return new Response(fallback.body, {
+          headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
+        });
+      }
+      if (fallback && !fallback.ok) {
+        console.error("[voice] fallback provider failure", {
+          requestId,
+          status: fallback.status,
+          detail: providerDetail(await fallback.text().catch(() => "")),
+        });
+      }
+
       await recordVoiceEvent({
         userId: user.id,
         outcome: "failure",
