@@ -9,7 +9,9 @@ import { initTelemetry } from "./lib/telemetry/journey";
 import RootErrorBoundary from "./components/RootErrorBoundary";
 import { registerServiceWorker } from "./lib/offline/registerServiceWorker";
 import { initCspReporting } from "./lib/security/cspReport";
+import { initSentry } from "./lib/telemetry/sentry";
 
+initSentry();
 initTelemetry();
 initCspReporting();
 registerServiceWorker();
