@@ -133,7 +133,10 @@ export default function AdminDiscounts() {
 
   const saveSettings = useMutation({
     mutationFn: async (patch: DiscountSettingsPatch) => {
-      const { error } = await supabase.from("discount_settings").update(patch).eq("id", 1);
+      const { error } = await supabase
+        .from("discount_settings")
+        .update(patch as never)
+        .eq("id", 1);
       if (error) throw error;
     },
     onSuccess: () => {
