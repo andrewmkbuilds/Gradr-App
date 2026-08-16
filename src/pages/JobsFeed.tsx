@@ -454,7 +454,7 @@ export default function JobsFeed() {
 
       <div>
         <h1 className="type-h1">Job Feed</h1>
-        <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
+        <p className="text-sm text-muted-foreground mt-1">Search live listings from Adzuna and Indeed with AI match scoring.</p>
       </div>
 
       <Card className="p-4 space-y-3">
