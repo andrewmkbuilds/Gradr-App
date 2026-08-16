@@ -584,6 +584,11 @@ export default function JobsFeed() {
                           JobMaps · CH
                         </Badge>
                       )}
+                      {job.source === "indeed" && (
+                        <Badge variant="outline" className="text-xs border-accent/40 text-accent">
+                          Indeed
+                        </Badge>
+                      )}
 
                       {typeof job.match_score === "number" && (
                         <Badge className="text-xs bg-primary/15 text-primary border-primary/30 hover:bg-primary/20">
