@@ -161,7 +161,7 @@ const PNGS = [
     file: "gradr-avatar-256.png",
     size: 256,
     svg: VARIANTS["gradr-logo-dark.svg"],
-    background: TEAL,
+    background: DEEP,
     pad: 0.18,
     radius: 60,
   },
