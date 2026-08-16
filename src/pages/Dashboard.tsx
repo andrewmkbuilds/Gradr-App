@@ -132,7 +132,7 @@ export default function Dashboard() {
       if (t.applied_at && new Date(t.applied_at) >= weekAgo) appliedThisWeek++;
     });
 
-    const allReminders = (remindersRes.data || []) as ReminderRow[];
+    const allReminders = (remindersRes.data || []) as unknown as ReminderRow[];
     const overdue = allReminders.filter((r) => new Date(r.due_at) < now).length;
 
     const stats: DashboardStats = {
