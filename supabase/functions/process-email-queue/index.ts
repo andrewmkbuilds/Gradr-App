@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
   //  - service-role bearer (JWT claim, or an opaque `sb_secret_...` key that
   //    matches SUPABASE_SERVICE_ROLE_KEY exactly)
   //  - the scheduler, which presents CRON_SECRET in a header
-  const cronSecret = Deno.env.get('CRON_SECRET')
+  const cronSecret = Deno.env.get('EMAIL_QUEUE_CRON_SECRET')
   const presentedCronSecret = req.headers.get('x-cron-secret')
   const isCron = !!cronSecret && presentedCronSecret === cronSecret
 
