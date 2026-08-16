@@ -13,7 +13,7 @@
  *   node scripts/generate-app-icons.mjs            # render everything
  *   node scripts/generate-app-icons.mjs --check    # CI guard, no render
  */
-import { chromium } from "playwright";
+import { execFileSync } from "child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -187,67 +187,45 @@ async function main() {
   }
 
 
-  const master = join(PUBLIC, "gradr-logo.png");
-  if (!existsSync(master)) throw new Error("public/gradr-logo.png (icon master) is missing");
-  const logo = `data:image/png;base64,${readFileSync(master).toString("base64")}`;
-  // Soft-white mark, for the opaque Deep Sea / Ocean Teal plates.
-  const logoDark = `data:image/png;base64,${readFileSync(join(PUBLIC, "gradr-logo-dark.png")).toString("base64")}`;
-  // Small-size build: heavier strokes, tighter aperture — used at 64px and below.
-  const compact = `data:image/svg+xml;base64,${Buffer.from(readFileSync(join(PUBLIC, "gradr-symbol-compact.svg"))).toString("base64")}`;
-
+  // Official, approved artwork — scaled only, never redrawn or recoloured.
+  const APP_ICON = join(PUBLIC, "brand/gradr-official-app-icon.png");
+  const SPLASH_MARK = join(PUBLIC, "brand/gradr-official-app-icon-grey.png");
+  if (!existsSync(APP_ICON)) throw new Error("public/brand/gradr-official-app-icon.png is missing");
 
   mkdirSync(ICON_DIR, { recursive: true });
   mkdirSync(SPLASH_DIR, { recursive: true });
 
-  const browser = await chromium.launch({
-    channel: process.env.OG_CHROMIUM_CHANNEL || undefined,
-    executablePath: process.env.OG_CHROMIUM_PATH || undefined,
-  });
+  const magick = (args) => execFileSync("magick", args, { stdio: "inherit" });
 
-  const render = async (html, { width, height, file, omitBackground }) => {
-    const page = await browser.newPage({
-      viewport: { width, height },
-      deviceScaleFactor: 1,
-    });
-    await page.setContent(html, { waitUntil: "networkidle" });
-    await page.screenshot({ path: join(PUBLIC, file), omitBackground });
-    await page.close();
-    console.log(`wrote public/${file}`);
-  };
-
-  for (const t of TRANSPARENT_ICONS) {
-    await render(iconHtml(t.size <= 64 ? compact : logo, t), {
-      width: t.size,
-      height: t.size,
-      file: t.file,
-      omitBackground: true,
-    });
-  }
-  for (const t of APPLE_ICONS) {
-    await render(
-      iconHtml(logoDark, { size: t.size, pad: 0.12, background: DEEP, radius: 0 }),
-      { width: t.size, height: t.size, file: t.file, omitBackground: false },
-    );
-  }
-  for (const t of MASKABLE_ICONS) {
-    await render(
-      iconHtml(logoDark, { size: t.size, pad: 0.2, background: DEEP, radius: 0 }),
-      { width: t.size, height: t.size, file: t.file, omitBackground: false },
-    );
+  // Every icon surface uses the official app icon at its own size.
+  for (const t of [...TRANSPARENT_ICONS, ...APPLE_ICONS, ...MASKABLE_ICONS]) {
+    magick([APP_ICON, "-resize", `${t.size}x${t.size}`, join(PUBLIC, t.file)]);
+    console.log(`wrote public/${t.file}`);
   }
 
+  // Splash: the untouched transparent mark centred on a Deep Sea canvas.
   for (const t of SPLASH_SCREENS) {
-    await render(splashHtml(logo, t), {
-      width: t.width,
-      height: t.height,
-      file: t.file,
-      omitBackground: false,
-    });
+    const mark = Math.round(Math.min(t.width, t.height) * 0.28);
+    magick([
+      "-size",
+      `${t.width}x${t.height}`,
+      `xc:${DEEP}`,
+      "(",
+      SPLASH_MARK,
+      "-resize",
+      `${mark}x${mark}`,
+      ")",
+      "-gravity",
+      "center",
+      "-composite",
+      join(PUBLIC, t.file),
+    ]);
+    console.log(`wrote public/${t.file}`);
   }
 
-  await browser.close();
   writeManifestModule();
   console.log(`\n${all.length} icon/splash asset(s) generated.`);
+
 }
 
 /** Emit the typed registry consumed by /admin/brand-assets. */
