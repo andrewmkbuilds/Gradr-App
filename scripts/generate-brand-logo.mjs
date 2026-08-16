@@ -16,6 +16,7 @@
  * Usage: node scripts/generate-brand-logo.mjs
  */
 import { chromium } from "playwright";
+import { markShapes } from "./lib/brandMark.mjs";
 import { mkdirSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
