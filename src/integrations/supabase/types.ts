@@ -240,6 +240,7 @@ export type Database = {
           paid_date: string | null
           reversed_date: string | null
           source_amount: number | null
+          source_record_id: string | null
           status: Database["public"]["Enums"]["affiliate_commission_status"]
           updated_at: string
         }
@@ -257,6 +258,7 @@ export type Database = {
           paid_date?: string | null
           reversed_date?: string | null
           source_amount?: number | null
+          source_record_id?: string | null
           status?: Database["public"]["Enums"]["affiliate_commission_status"]
           updated_at?: string
         }
@@ -274,6 +276,7 @@ export type Database = {
           paid_date?: string | null
           reversed_date?: string | null
           source_amount?: number | null
+          source_record_id?: string | null
           status?: Database["public"]["Enums"]["affiliate_commission_status"]
           updated_at?: string
         }
@@ -512,6 +515,48 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_tiers: {
+        Row: {
+          active: boolean
+          bonus_rate: number
+          color: string
+          created_at: string
+          id: string
+          key: string
+          min_referrals: number
+          name: string
+          perks: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          bonus_rate?: number
+          color?: string
+          created_at?: string
+          id?: string
+          key: string
+          min_referrals?: number
+          name: string
+          perks?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          bonus_rate?: number
+          color?: string
+          created_at?: string
+          id?: string
+          key?: string
+          min_referrals?: number
+          name?: string
+          perks?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           article: string | null
@@ -635,6 +680,188 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_redemptions: {
+        Row: {
+          created_at: string
+          currency: string | null
+          discount_amount: number | null
+          discount_rule_id: string | null
+          eligibility_type: string | null
+          environment: string
+          gross_amount: number | null
+          id: string
+          interval: string | null
+          net_amount: number | null
+          percentage: number
+          plan: string | null
+          subscription_id: string | null
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          discount_amount?: number | null
+          discount_rule_id?: string | null
+          eligibility_type?: string | null
+          environment?: string
+          gross_amount?: number | null
+          id?: string
+          interval?: string | null
+          net_amount?: number | null
+          percentage: number
+          plan?: string | null
+          subscription_id?: string | null
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          discount_amount?: number | null
+          discount_rule_id?: string | null
+          eligibility_type?: string | null
+          environment?: string
+          gross_amount?: number | null
+          id?: string
+          interval?: string | null
+          net_amount?: number | null
+          percentage?: number
+          plan?: string | null
+          subscription_id?: string | null
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_discount_rule_id_fkey"
+            columns: ["discount_rule_id"]
+            isOneToOne: false
+            referencedRelation: "discount_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_rules: {
+        Row: {
+          active: boolean
+          advertised: boolean
+          applicable_intervals: string[]
+          applicable_plans: string[]
+          created_at: string
+          created_by: string | null
+          eligibility_type: string | null
+          ends_at: string | null
+          id: string
+          kind: string
+          max_redemptions: number | null
+          name: string
+          organization_id: string | null
+          percentage: number
+          redemption_count: number
+          requires_verification: boolean
+          stackable: boolean
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          advertised?: boolean
+          applicable_intervals?: string[]
+          applicable_plans?: string[]
+          created_at?: string
+          created_by?: string | null
+          eligibility_type?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          max_redemptions?: number | null
+          name: string
+          organization_id?: string | null
+          percentage: number
+          redemption_count?: number
+          requires_verification?: boolean
+          stackable?: boolean
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          advertised?: boolean
+          applicable_intervals?: string[]
+          applicable_plans?: string[]
+          created_at?: string
+          created_by?: string | null
+          eligibility_type?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          max_redemptions?: number | null
+          name?: string
+          organization_id?: string | null
+          percentage?: number
+          redemption_count?: number
+          requires_verification?: boolean
+          stackable?: boolean
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_rules_eligibility_type_fkey"
+            columns: ["eligibility_type"]
+            isOneToOne: false
+            referencedRelation: "eligibility_categories"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "discount_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_settings: {
+        Row: {
+          affiliate_commission_basis: string
+          allow_stacking: boolean
+          created_at: string
+          expiry_reminder_days: number[]
+          id: number
+          notify_expired: boolean
+          notify_expiring: boolean
+          notify_failed: boolean
+          notify_verified: boolean
+          updated_at: string
+        }
+        Insert: {
+          affiliate_commission_basis?: string
+          allow_stacking?: boolean
+          created_at?: string
+          expiry_reminder_days?: number[]
+          id?: number
+          notify_expired?: boolean
+          notify_expiring?: boolean
+          notify_failed?: boolean
+          notify_verified?: boolean
+          updated_at?: string
+        }
+        Update: {
+          affiliate_commission_basis?: string
+          allow_stacking?: boolean
+          created_at?: string
+          expiry_reminder_days?: number[]
+          id?: number
+          notify_expired?: boolean
+          notify_expiring?: boolean
+          notify_failed?: boolean
+          notify_verified?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discovered_jobs: {
         Row: {
           company: string | null
@@ -694,6 +921,107 @@ export type Database = {
           url?: string
         }
         Relationships: []
+      }
+      eligibility_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          default_discount_percent: number
+          description: string | null
+          key: string
+          label: string
+          requires_verification: boolean
+          self_serve: boolean
+          sort_order: number
+          updated_at: string
+          verification_validity_days: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          default_discount_percent?: number
+          description?: string | null
+          key: string
+          label: string
+          requires_verification?: boolean
+          self_serve?: boolean
+          sort_order?: number
+          updated_at?: string
+          verification_validity_days?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          default_discount_percent?: number
+          description?: string | null
+          key?: string
+          label?: string
+          requires_verification?: boolean
+          self_serve?: boolean
+          sort_order?: number
+          updated_at?: string
+          verification_validity_days?: number
+        }
+        Relationships: []
+      }
+      eligibility_verifications: {
+        Row: {
+          created_at: string
+          eligibility_type: string
+          expires_at: string | null
+          failure_reason: string | null
+          id: string
+          last_checked_at: string | null
+          metadata: Json
+          provider: string
+          provider_reference_id: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          eligibility_type: string
+          expires_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          provider?: string
+          provider_reference_id?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          eligibility_type?: string
+          expires_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          provider?: string
+          provider_reference_id?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eligibility_verifications_eligibility_type_fkey"
+            columns: ["eligibility_type"]
+            isOneToOne: false
+            referencedRelation: "eligibility_categories"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       email_notification_log: {
         Row: {
@@ -1164,6 +1492,86 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          active: boolean
+          contact_email: string | null
+          created_at: string
+          created_by: string | null
+          discount_percent: number
+          email_domains: string[]
+          id: string
+          name: string
+          notes: string | null
+          org_type: string
+          seats: number | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          email_domains?: string[]
+          id?: string
+          name: string
+          notes?: string | null
+          org_type?: string
+          seats?: number | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          email_domains?: string[]
+          id?: string
+          name?: string
+          notes?: string | null
+          org_type?: string
+          seats?: number | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       paddle_customers: {
         Row: {
           created_at: string
@@ -1188,6 +1596,33 @@ export type Database = {
           environment?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      paddle_discounts: {
+        Row: {
+          created_at: string
+          environment: string
+          id: string
+          paddle_discount_id: string
+          percentage: number
+          recurring: boolean
+        }
+        Insert: {
+          created_at?: string
+          environment: string
+          id?: string
+          paddle_discount_id: string
+          percentage: number
+          recurring?: boolean
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          id?: string
+          paddle_discount_id?: string
+          percentage?: number
+          recurring?: boolean
         }
         Relationships: []
       }
@@ -1776,6 +2211,25 @@ export type Database = {
         Args: { _document_id: string; _user_agent?: string }
         Returns: string
       }
+      admin_affiliate_overview: {
+        Args: never
+        Returns: {
+          affiliate_code: string
+          approved_amount: number
+          clicks: number
+          conversions: number
+          created_at: string
+          display_name: string
+          paid_amount: number
+          pending_amount: number
+          profile_id: string
+          referrals: number
+          reversed_amount: number
+          status: Database["public"]["Enums"]["affiliate_profile_status"]
+          suspicious: boolean
+          user_id: string
+        }[]
+      }
       admin_audit_actors: {
         Args: never
         Returns: {
@@ -1825,9 +2279,32 @@ export type Database = {
         Args: { _document_id: string }
         Returns: string
       }
+      admin_review_verification: {
+        Args: { _reason?: string; _status: string; _verification_id: string }
+        Returns: undefined
+      }
+      admin_set_commission_status: {
+        Args: {
+          _commission_ids: string[]
+          _reason?: string
+          _status: Database["public"]["Enums"]["affiliate_commission_status"]
+        }
+        Returns: number
+      }
       affiliate_click_is_valid: {
         Args: { _code: string; _profile_id: string }
         Returns: boolean
+      }
+      affiliate_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          alias: string
+          confirmed_referrals: number
+          is_me: boolean
+          rank: number
+          tier_color: string
+          tier_name: string
+        }[]
       }
       approve_affiliate_application: {
         Args: { _application_id: string }
@@ -1840,6 +2317,10 @@ export type Database = {
       attribute_signup_referral: {
         Args: { _click_id?: string; _code: string }
         Returns: string
+      }
+      best_discount_for: {
+        Args: { _interval?: string; _plan?: string; _user_id: string }
+        Returns: Json
       }
       consume_entitlement: {
         Args: {
@@ -1866,6 +2347,7 @@ export type Database = {
         Returns: string
       }
       entitlement_snapshot: { Args: { _env?: string }; Returns: Json }
+      expire_stale_verifications: { Args: never; Returns: number }
       generate_affiliate_code: { Args: never; Returns: string }
       get_affiliate_public_settings: {
         Args: never
@@ -1889,6 +2371,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       log_admin_access: {
         Args: {
           _action: string
@@ -1907,6 +2390,8 @@ export type Database = {
           profile_id: string
         }[]
       }
+      my_affiliate_overview: { Args: never; Returns: Json }
+      my_eligibility_state: { Args: never; Returns: Json }
       notify_admins: {
         Args: {
           _body?: string
@@ -1941,6 +2426,24 @@ export type Database = {
         }
         Returns: string
       }
+      record_discount_redemption: {
+        Args: {
+          _currency: string
+          _discount: number
+          _eligibility_type: string
+          _env: string
+          _gross: number
+          _interval: string
+          _net: number
+          _percentage: number
+          _plan: string
+          _rule_id: string
+          _subscription_id: string
+          _transaction_id: string
+          _user_id: string
+        }
+        Returns: string
+      }
       record_security_event: {
         Args: {
           _category: string
@@ -1967,6 +2470,10 @@ export type Database = {
       reject_affiliate_application: {
         Args: { _application_id: string; _reason?: string }
         Returns: undefined
+      }
+      reverse_commission_for_source: {
+        Args: { _reason?: string; _source_record_id: string }
+        Returns: number
       }
       subscription_grants_access: {
         Args: { _current_period_end: string; _status: string }
