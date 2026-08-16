@@ -102,8 +102,8 @@ async function mirrorSubscription(data: any, env: PaddleEnv) {
     subscription_id: data.id,
     customer_id: data.customerId ?? "unknown",
     status: data.status ?? "active",
-    price_id: item?.price?.importMeta?.externalId ?? item?.price?.id ?? "unknown",
-    product_id: item?.product?.importMeta?.externalId ?? item?.price?.productId ?? "unknown",
+    price_id: priceExternalId(item) ?? item?.price?.id ?? "unknown",
+    product_id: item?.product?.customData?.external_id ?? item?.product?.importMeta?.externalId ?? item?.price?.productId ?? "unknown",
     scheduled_change_action: data.scheduledChange?.action ?? null,
     scheduled_change_at: data.scheduledChange?.effectiveAt ?? null,
     current_period_end: data.currentBillingPeriod?.endsAt ?? null,
@@ -129,10 +129,22 @@ function isEntitled(status: string, periodEnd: string | null): boolean {
   return false;
 }
 
+/**
+ * Human-readable price id for a line item. Catalog prices created in-app carry
+ * it in `custom_data.external_id`; prices imported into Paddle carry it in
+ * `import_meta.external_id`. Support both so either catalog resolves.
+ */
+// deno-lint-ignore no-explicit-any
+function priceExternalId(item: any): string | undefined {
+  return (item?.price?.customData?.external_id ??
+    item?.price?.custom_data?.external_id ??
+    item?.price?.importMeta?.externalId) as string | undefined;
+}
+
 // deno-lint-ignore no-explicit-any
 function planFromItems(data: any) {
   const item = data?.items?.[0];
-  const externalPriceId = item?.price?.importMeta?.externalId as string | undefined;
+  const externalPriceId = priceExternalId(item);
   return { externalPriceId, plan: externalPriceId ? PLAN_PRICES[externalPriceId] : undefined };
 }
 
@@ -287,7 +299,7 @@ async function recordDiscountUse(data: any, env: PaddleEnv) {
   if (!userId || !data?.id || discountAmount <= 0) return;
 
   const item = data.items?.[0];
-  const externalPriceId = item?.price?.importMeta?.externalId as string | undefined;
+  const externalPriceId = priceExternalId(item);
   const plan = externalPriceId ? PLAN_PRICES[externalPriceId] : undefined;
 
   const { data: entitled } = await db().rpc("best_discount_for", {
@@ -421,7 +433,7 @@ async function grantPackCredits(data: any, env: PaddleEnv) {
   if (!userId) return;
 
   for (const item of data.items ?? []) {
-    const priceId = item?.price?.importMeta?.externalId as string | undefined;
+    const priceId = priceExternalId(item);
     const pack = priceId ? CREDIT_PACKS[priceId] : undefined;
     if (!pack) continue;
 
