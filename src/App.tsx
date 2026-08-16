@@ -7,6 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import SentryUserSync from "@/components/telemetry/SentryUserSync";
+import DashboardErrorBoundary from "@/components/DashboardErrorBoundary";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { MotionPreferenceProvider } from "@/hooks/useMotionPreference";
 import { AnimatedPage } from "@/components/AnimatedPage";
@@ -161,6 +163,7 @@ function ProtectedRoutes() {
 
   return (
     <DashboardLayout>
+      <DashboardErrorBoundary resetKey={location.pathname}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><Dashboard /></AnimatedPage>} />
@@ -213,6 +216,7 @@ function ProtectedRoutes() {
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
+      </DashboardErrorBoundary>
     </DashboardLayout>
   );
 }
@@ -466,6 +470,7 @@ const App = () => (
           <ScrollToTop />
           <ReferralCapture />
           <AuthProvider>
+            <SentryUserSync />
             <TelemetryRouteTracker />
             <AnalyticsProvider />
             <RouteSeo />
