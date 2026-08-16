@@ -32,27 +32,42 @@ Deno.serve(async (req) => {
 
     if (action === "create") {
       const created: unknown[] = [];
+      const existing = await gatewayFetch(environment, "/products?per_page=100").then((r) =>
+        r.json()
+      );
+      const byExternal = new Map<string, string>(
+        (existing?.data ?? [])
+          .filter((p: { custom_data?: { external_id?: string } }) => p?.custom_data?.external_id)
+          .map((p: { id: string; custom_data: { external_id: string } }) => [
+            p.custom_data.external_id,
+            p.id,
+          ]),
+      );
+
       for (const item of body.items ?? []) {
-        const pRes = await gatewayFetch(environment, "/products", {
-          method: "POST",
-          body: JSON.stringify({
-            name: item.productName,
-            tax_category: "standard",
-            custom_data: { external_id: item.externalId },
-          }),
-        });
-        const product = await pRes.json();
-        const productId = product?.data?.id;
+        let productId = byExternal.get(item.externalId);
         if (!productId) {
-          created.push({ externalId: item.externalId, error: product });
-          continue;
+          const pRes = await gatewayFetch(environment, "/products", {
+            method: "POST",
+            body: JSON.stringify({
+              name: item.productName,
+              tax_category: "standard",
+              custom_data: { external_id: item.externalId },
+            }),
+          });
+          const product = await pRes.json();
+          productId = product?.data?.id;
+          if (!productId) {
+            created.push({ externalId: item.externalId, error: product });
+            continue;
+          }
         }
         const priceRes = await gatewayFetch(environment, "/prices", {
           method: "POST",
           body: JSON.stringify({
             product_id: productId,
             description: item.priceDescription,
-            external_id: item.externalId,
+            custom_data: { external_id: item.externalId },
             unit_price: { amount: String(item.amount), currency_code: "USD" },
             ...(item.interval
               ? { billing_cycle: { interval: item.interval, frequency: 1 } }
