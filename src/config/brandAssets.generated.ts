@@ -132,7 +132,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Android maskable (adaptive)",
     "width": 192,
     "height": 192,
-    "bytes": 4891
+    "bytes": 4888
   },
   {
     "file": "/icons/maskable-512.png",
@@ -140,7 +140,7 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Android maskable (large)",
     "width": 512,
     "height": 512,
-    "bytes": 11033
+    "bytes": 11035
   },
   {
     "file": "/splash/splash-1290x2796.png",
@@ -276,6 +276,6 @@ export const BRAND_ASSETS: BrandAsset[] = [
     "label": "Site social card (source)",
     "width": 1200,
     "height": 630,
-    "bytes": 151669
+    "bytes": 152329
   }
 ];
