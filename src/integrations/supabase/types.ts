@@ -635,6 +635,108 @@ export type Database = {
         }
         Relationships: []
       }
+      discovered_jobs: {
+        Row: {
+          company: string | null
+          currency: string | null
+          dedupe_key: string
+          description: string | null
+          external_id: string | null
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          location: string | null
+          posted_at: string | null
+          raw: Json
+          remote: boolean | null
+          salary_max: number | null
+          salary_min: number | null
+          source: string
+          title: string
+          url: string
+        }
+        Insert: {
+          company?: string | null
+          currency?: string | null
+          dedupe_key: string
+          description?: string | null
+          external_id?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          location?: string | null
+          posted_at?: string | null
+          raw?: Json
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source: string
+          title: string
+          url: string
+        }
+        Update: {
+          company?: string | null
+          currency?: string | null
+          dedupe_key?: string
+          description?: string | null
+          external_id?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          location?: string | null
+          posted_at?: string | null
+          raw?: Json
+          remote?: boolean | null
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      email_notification_log: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          idempotency_key: string
+          metadata: Json
+          provider_message_id: string | null
+          recipient: string
+          status: string
+          subject: string
+          template: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key: string
+          metadata?: Json
+          provider_message_id?: string | null
+          recipient: string
+          status?: string
+          subject: string
+          template: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key?: string
+          metadata?: Json
+          provider_message_id?: string | null
+          recipient?: string
+          status?: string
+          subject?: string
+          template?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feature_usage: {
         Row: {
           created_at: string
@@ -667,6 +769,138 @@ export type Database = {
           period_start?: string
           updated_at?: string
           used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interview_session_metrics: {
+        Row: {
+          avg_latency_ms: number | null
+          barge_in_count: number
+          created_at: string
+          details: Json
+          dropout_count: number
+          duration_sec: number
+          end_reason: string | null
+          ended_at: string | null
+          first_token_latency_ms: number | null
+          id: string
+          input_tokens: number
+          interruption_count: number
+          minutes_used: number
+          output_tokens: number
+          p95_latency_ms: number | null
+          provider: string
+          reconnect_count: number
+          session_id: string | null
+          started_at: string
+          target_role: string | null
+          turn_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_latency_ms?: number | null
+          barge_in_count?: number
+          created_at?: string
+          details?: Json
+          dropout_count?: number
+          duration_sec?: number
+          end_reason?: string | null
+          ended_at?: string | null
+          first_token_latency_ms?: number | null
+          id?: string
+          input_tokens?: number
+          interruption_count?: number
+          minutes_used?: number
+          output_tokens?: number
+          p95_latency_ms?: number | null
+          provider?: string
+          reconnect_count?: number
+          session_id?: string | null
+          started_at?: string
+          target_role?: string | null
+          turn_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_latency_ms?: number | null
+          barge_in_count?: number
+          created_at?: string
+          details?: Json
+          dropout_count?: number
+          duration_sec?: number
+          end_reason?: string | null
+          ended_at?: string | null
+          first_token_latency_ms?: number | null
+          id?: string
+          input_tokens?: number
+          interruption_count?: number
+          minutes_used?: number
+          output_tokens?: number
+          p95_latency_ms?: number | null
+          provider?: string
+          reconnect_count?: number
+          session_id?: string | null
+          started_at?: string
+          target_role?: string | null
+          turn_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interview_session_state: {
+        Row: {
+          context: Json
+          created_at: string
+          difficulty: string | null
+          elapsed_sec: number
+          id: string
+          interviewer_state: string
+          last_heartbeat_at: string
+          persona: string | null
+          session_key: string
+          status: string
+          target_role: string | null
+          transcript: Json
+          turn_index: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          difficulty?: string | null
+          elapsed_sec?: number
+          id?: string
+          interviewer_state?: string
+          last_heartbeat_at?: string
+          persona?: string | null
+          session_key: string
+          status?: string
+          target_role?: string | null
+          transcript?: Json
+          turn_index?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          difficulty?: string | null
+          elapsed_sec?: number
+          id?: string
+          interviewer_state?: string
+          last_heartbeat_at?: string
+          persona?: string | null
+          session_key?: string
+          status?: string
+          target_role?: string | null
+          transcript?: Json
+          turn_index?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -799,6 +1033,101 @@ export type Database = {
           },
         ]
       }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          created_at: string
+          doc_type: string
+          document_id: string
+          id: string
+          ip_hash: string | null
+          user_agent: string | null
+          user_id: string
+          version: number
+        }
+        Insert: {
+          accepted_at?: string
+          created_at?: string
+          doc_type: string
+          document_id: string
+          id?: string
+          ip_hash?: string | null
+          user_agent?: string | null
+          user_id: string
+          version: number
+        }
+        Update: {
+          accepted_at?: string
+          created_at?: string
+          doc_type?: string
+          document_id?: string
+          id?: string
+          ip_hash?: string | null
+          user_agent?: string | null
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_acceptances_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_documents: {
+        Row: {
+          content: string | null
+          content_key: string | null
+          created_at: string
+          created_by: string | null
+          doc_type: string
+          effective_date: string
+          id: string
+          published_at: string | null
+          requires_acceptance: boolean
+          status: string
+          summary_of_changes: string | null
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content?: string | null
+          content_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type: string
+          effective_date?: string
+          id?: string
+          published_at?: string | null
+          requires_acceptance?: boolean
+          status?: string
+          summary_of_changes?: string | null
+          title: string
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          content?: string | null
+          content_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type?: string
+          effective_date?: string
+          id?: string
+          published_at?: string | null
+          requires_acceptance?: boolean
+          status?: string
+          summary_of_changes?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -832,6 +1161,78 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      paddle_customers: {
+        Row: {
+          created_at: string
+          customer_id: string
+          email: string
+          environment: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          email: string
+          environment?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          email?: string
+          environment?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      paddle_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          customer_id: string
+          environment: string
+          price_id: string
+          product_id: string
+          scheduled_change_action: string | null
+          scheduled_change_at: string | null
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          customer_id: string
+          environment?: string
+          price_id: string
+          product_id: string
+          scheduled_change_action?: string | null
+          scheduled_change_at?: string | null
+          status: string
+          subscription_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          customer_id?: string
+          environment?: string
+          price_id?: string
+          product_id?: string
+          scheduled_change_action?: string | null
+          scheduled_change_at?: string | null
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -979,6 +1380,117 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version_label?: string | null
+        }
+        Relationships: []
+      }
+      scheduled_interviews: {
+        Row: {
+          calendar_id: string | null
+          company: string | null
+          created_at: string
+          ends_at: string | null
+          external_event_id: string | null
+          followup_sent_at: string | null
+          html_link: string | null
+          id: string
+          kind: string
+          location: string | null
+          notes: string | null
+          reminder_sent_at: string | null
+          source: string
+          starts_at: string
+          status: string
+          target_role: string | null
+          timezone: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calendar_id?: string | null
+          company?: string | null
+          created_at?: string
+          ends_at?: string | null
+          external_event_id?: string | null
+          followup_sent_at?: string | null
+          html_link?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          source?: string
+          starts_at: string
+          status?: string
+          target_role?: string | null
+          timezone?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calendar_id?: string | null
+          company?: string | null
+          created_at?: string
+          ends_at?: string | null
+          external_event_id?: string | null
+          followup_sent_at?: string | null
+          html_link?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          source?: string
+          starts_at?: string
+          status?: string
+          target_role?: string | null
+          timezone?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          category: string
+          created_at: string
+          decision: string
+          details: Json
+          environment: string | null
+          event: string
+          feature: string | null
+          id: string
+          reason: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          decision: string
+          details?: Json
+          environment?: string | null
+          event: string
+          feature?: string | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          decision?: string
+          details?: Json
+          environment?: string | null
+          event?: string
+          feature?: string | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1260,6 +1772,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_legal_document: {
+        Args: { _document_id: string; _user_agent?: string }
+        Returns: string
+      }
       admin_audit_actors: {
         Args: never
         Returns: {
@@ -1278,6 +1794,25 @@ export type Database = {
         }
         Returns: string
       }
+      admin_legal_document_stats: {
+        Args: never
+        Returns: {
+          accepted_count: number
+          doc_type: string
+          document_id: string
+          status: string
+          total_users: number
+          version: number
+        }[]
+      }
+      admin_legal_pending_users: {
+        Args: { _document_id: string; _limit?: number }
+        Returns: {
+          display_name: string
+          joined_at: string
+          user_id: string
+        }[]
+      }
       admin_mark_payout_paid: {
         Args: {
           _payout_id: string
@@ -1285,6 +1820,10 @@ export type Database = {
           _reference?: string
         }
         Returns: undefined
+      }
+      admin_publish_legal_document: {
+        Args: { _document_id: string }
+        Returns: string
       }
       affiliate_click_is_valid: {
         Args: { _code: string; _profile_id: string }
@@ -1378,6 +1917,17 @@ export type Database = {
         }
         Returns: number
       }
+      pending_legal_acceptances: {
+        Args: never
+        Returns: {
+          doc_type: string
+          document_id: string
+          effective_date: string
+          summary_of_changes: string
+          title: string
+          version: number
+        }[]
+      }
       plan_allowance: {
         Args: { _feature: string; _tier: string }
         Returns: number
@@ -1391,9 +1941,36 @@ export type Database = {
         }
         Returns: string
       }
+      record_security_event: {
+        Args: {
+          _category: string
+          _decision: string
+          _details?: Json
+          _env?: string
+          _event: string
+          _feature?: string
+          _reason?: string
+          _source?: string
+          _user_id?: string
+        }
+        Returns: string
+      }
+      refund_entitlement: {
+        Args: {
+          _amount?: number
+          _env?: string
+          _feature: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       reject_affiliate_application: {
         Args: { _application_id: string; _reason?: string }
         Returns: undefined
+      }
+      subscription_grants_access: {
+        Args: { _current_period_end: string; _status: string }
+        Returns: boolean
       }
     }
     Enums: {
