@@ -6,7 +6,7 @@
  * no longer be exchanged — instead of a blank form, explain what happened and
  * offer a single action that restarts the flow on the correct domain.
  */
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { AlertTriangle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import {
   type OAuthHostMismatch,
 } from "@/lib/oauth/forensics";
 
-export function OAuthHostMismatchNotice() {
+export const OAuthHostMismatchNotice = forwardRef<HTMLDivElement>(function OAuthHostMismatchNotice(_props, ref) {
   const [mismatch, setMismatch] = useState<OAuthHostMismatch | null>(null);
 
   useEffect(() => {
@@ -36,6 +36,7 @@ export function OAuthHostMismatchNotice() {
 
   return (
     <div
+      ref={ref}
       role="alert"
       className="mb-6 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-left"
     >
@@ -65,4 +66,4 @@ export function OAuthHostMismatchNotice() {
       </div>
     </div>
   );
-}
+});
