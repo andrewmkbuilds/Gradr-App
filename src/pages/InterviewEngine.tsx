@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { track } from "@/lib/telemetry/events";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_FUNCTIONS_BASE } from "@/lib/supabaseEndpoints";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { toast } from "sonner";
 import { useAiStream } from "@/hooks/useAiStream";
@@ -45,7 +46,7 @@ interface SessionLimits {
   maxSessionMinutes: number;
 }
 
-const INTERVIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-coach`;
+const INTERVIEW_URL = `${SUPABASE_FUNCTIONS_BASE}/interview-coach`;
 
 /** How long the candidate can go quiet before their answer is submitted. */
 const ANSWER_SILENCE_MS = 1900;

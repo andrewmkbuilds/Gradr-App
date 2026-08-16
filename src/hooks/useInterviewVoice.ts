@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_FUNCTIONS_BASE } from "@/lib/supabaseEndpoints";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { SentenceChunker, SpeechQueue, TimedReveal, cleanForSpeech, estimatedSpeechMs, type AudioResult } from "@/lib/interview/speechStream";
 import { VOICE_ABORTED, toVoiceErrorCode, toVoiceProviderReason, type VoiceErrorCode, type VoiceProviderReason } from "@/lib/interview/voiceErrors";
@@ -14,7 +15,7 @@ import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
  * hook only ever sees sanitized Gradr voice error codes.
  */
 
-const SPEECH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-speech`;
+const SPEECH_URL = `${SUPABASE_FUNCTIONS_BASE}/interview-speech`;
 const FETCH_TIMEOUT_MS = 25_000;
 
 export interface UseInterviewVoiceOptions {

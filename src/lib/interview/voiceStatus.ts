@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_FUNCTIONS_BASE } from "@/lib/supabaseEndpoints";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { toVoiceErrorCode, toVoiceProviderReason, type VoiceErrorCode, type VoiceProviderReason } from "./voiceErrors";
 
@@ -25,7 +26,7 @@ export async function fetchVoiceHealth(): Promise<VoiceHealth | null> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) return null;
 
-  const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-status`, {
+  const res = await fetch(`${SUPABASE_FUNCTIONS_BASE}/voice-status`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
