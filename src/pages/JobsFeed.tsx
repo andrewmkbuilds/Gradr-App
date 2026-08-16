@@ -158,23 +158,66 @@ export default function JobsFeed() {
     );
   };
 
+  /**
+   * Board-scraped listings (Indeed via Apify) that complement the Adzuna feed.
+   * Best-effort: a scraper failure must never take the main results down.
+   */
+  const fetchScrapedJobs = async (q: string, loc: string, ctry: string, remote: boolean): Promise<FeedJob[]> => {
+    try {
+      const countryLabel = COUNTRIES.find((c) => c.code === ctry)?.label ?? "";
+      const { data, error } = await supabase.functions.invoke("jobs-apify", {
+        body: { query: q, location: [loc, countryLabel].filter(Boolean).join(", "), limit: 20 },
+      });
+      if (error || !data?.ok) return [];
+      return (data.jobs ?? [])
+        .map((j: Partial<FeedJob> & { dedupe_key?: string }): FeedJob => ({
+          external_id: j.external_id || j.dedupe_key || j.url || "",
+          source: j.source || "indeed",
+          title: j.title || "",
+          company: j.company ?? null,
+          location: j.location ?? null,
+          remote: Boolean(j.remote),
+          url: j.url || "",
+          salary_min: j.salary_min ?? null,
+          salary_max: j.salary_max ?? null,
+          description: j.description || "",
+          posted_at: j.posted_at || new Date().toISOString(),
+        }))
+        .filter((j: FeedJob) => j.title && j.url && (!remote || j.remote));
+    } catch {
+      return [];
+    }
+  };
+
   const runSearch = async (q: string, loc: string, ctry: string, remote: boolean) => {
     if (!user) return;
     setLoading(true);
     setJobs([]);
     try {
-      const { data, error } = await supabase.functions.invoke("search-jobs", {
-        body: { what: q, where: loc, country: ctry, remoteOnly: remote, sortBy },
-      });
+      const [primary, scraped] = await Promise.all([
+        supabase.functions.invoke("search-jobs", {
+          body: { what: q, where: loc, country: ctry, remoteOnly: remote, sortBy },
+        }),
+        fetchScrapedJobs(q, loc, ctry, remote),
+      ]);
+      const { data, error } = primary;
       if (error || data?.error) {
         if (!handleAiFunctionError(error, data)) toast.error(data?.error || "Search failed");
         return;
       }
-      setJobs(data.jobs || []);
-      prefetchLogos((data.jobs || []).map((j: FeedJob) => j.company));
-      trackJourney("job_match_started", { results: (data.jobs || []).length, remote_only: remote });
+      const merged: FeedJob[] = [...(data.jobs || [])];
+      const seen = new Set(merged.map((j) => j.url));
+      for (const j of scraped) {
+        if (!seen.has(j.url)) {
+          seen.add(j.url);
+          merged.push(j);
+        }
+      }
+      setJobs(merged);
+      prefetchLogos(merged.map((j: FeedJob) => j.company));
+      trackJourney("job_match_started", { results: merged.length, remote_only: remote });
       void savePrefs({ what: q, where: loc, country: ctry, remoteOnly: remote });
-      void scoreJobs(data.jobs || []);
+      void scoreJobs(merged);
 
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Search failed");
@@ -411,7 +454,7 @@ export default function JobsFeed() {
 
       <div>
         <h1 className="type-h1">Job Feed</h1>
-        <p className="text-sm text-muted-foreground mt-1">Search live job listings powered by Adzuna with AI match scoring.</p>
+        <p className="text-sm text-muted-foreground mt-1">Search live listings from Adzuna and Indeed with AI match scoring.</p>
       </div>
 
       <Card className="p-4 space-y-3">
@@ -539,6 +582,11 @@ export default function JobsFeed() {
                       {job.source === "jobmaps" && (
                         <Badge variant="outline" className="text-xs border-accent/40 text-accent">
                           JobMaps · CH
+                        </Badge>
+                      )}
+                      {job.source === "indeed" && (
+                        <Badge variant="outline" className="text-xs border-accent/40 text-accent">
+                          Indeed
                         </Badge>
                       )}
 

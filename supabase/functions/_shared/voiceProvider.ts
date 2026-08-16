@@ -23,6 +23,8 @@ export interface VoiceProfile {
   similarityBoost: number;
   style: number;
   speed: number;
+  /** Optional Fish Audio reference id used when the primary provider fails. */
+  fallbackVoiceId?: string;
 }
 
 /** Mirrored in src/lib/interview/voiceProfiles.ts (UI labels only). */

@@ -92,6 +92,46 @@ async function synthesize(
   }
 }
 
+/**
+ * Fish Audio fallback.
+ *
+ * ElevenLabs can hard-fail for account-level reasons (401
+ * `PROVIDER_UNUSUAL_ACTIVITY`, exhausted quota, suspended key) that no retry
+ * fixes. Rather than leaving the interviewer mute, we synthesise the same
+ * sentence through Fish Audio when FISH_AUDIO_API_KEY is configured.
+ */
+async function synthesizeFallback(text: string, profile: VoiceProfile): Promise<Response | null> {
+  const key = Deno.env.get("FISH_AUDIO_API_KEY");
+  if (!key) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+  try {
+    return await fetch("https://api.fish.audio/v1/tts", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        model: Deno.env.get("FISH_AUDIO_MODEL") ?? "speech-1.6",
+      },
+      body: JSON.stringify({
+        text,
+        format: "mp3",
+        latency: "balanced",
+        ...(profile.fallbackVoiceId ? { reference_id: profile.fallbackVoiceId } : {}),
+      }),
+    });
+  } catch (e) {
+    console.error("[voice] fallback provider request threw", String(e));
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -189,6 +229,31 @@ serve(async (req) => {
       const mapped = networkError && !res
         ? { code: "VOICE_CONNECTION_FAILED" as VoiceErrorCode, status: 502, reason: "PROVIDER_NETWORK" as VoiceProviderReason }
         : classifyProviderFailure(upstreamStatus, rawDetail);
+
+      // Primary provider is down for this account — try the secondary before
+      // leaving the interviewer silent.
+      const fallback = await synthesizeFallback(text, profile);
+      if (fallback?.ok && fallback.body) {
+        console.warn("[voice] primary failed, served via fallback provider", { requestId, upstreamStatus });
+        await recordVoiceEvent({
+          userId: user.id,
+          outcome: "ok",
+          requestId,
+          personaId,
+          providerDetail: `fallback:fish-audio (primary ${upstreamStatus})`,
+        });
+        return new Response(fallback.body, {
+          headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
+        });
+      }
+      if (fallback && !fallback.ok) {
+        console.error("[voice] fallback provider failure", {
+          requestId,
+          status: fallback.status,
+          detail: providerDetail(await fallback.text().catch(() => "")),
+        });
+      }
+
       await recordVoiceEvent({
         userId: user.id,
         outcome: "failure",

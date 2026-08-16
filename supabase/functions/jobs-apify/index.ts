@@ -12,11 +12,42 @@ const json = (body: unknown, status = 200) =>
 
 const KEY = "APIFY_API_KEY";
 
-/** Actor ids are tilde-separated (username~actor-name). */
+/**
+ * Actor ids are tilde-separated (username~actor-name).
+ *
+ * The LinkedIn scraper is a *rented* (paid) Apify actor — running it on an
+ * account that has not rented it fails with `actor-is-not-rented`, which made
+ * every search look broken. It is therefore opt-in: set APIFY_LINKEDIN_ACTOR
+ * once the actor is rented on the connected Apify account.
+ */
+const LINKEDIN_ACTOR = Deno.env.get("APIFY_LINKEDIN_ACTOR");
 const ACTORS: Record<string, string> = {
-  linkedin: Deno.env.get("APIFY_LINKEDIN_ACTOR") || "bebity~linkedin-jobs-scraper",
+  ...(LINKEDIN_ACTOR ? { linkedin: LINKEDIN_ACTOR } : {}),
   indeed: Deno.env.get("APIFY_INDEED_ACTOR") || "misceres~indeed-scraper",
 };
+const DEFAULT_SOURCES = Object.keys(ACTORS);
+
+/**
+ * The Indeed actor validates `country` against an uppercase ISO-3166 list, so
+ * a lowercase or unknown value fails the whole run with `invalid-input`.
+ */
+const COUNTRY_BY_HINT: Record<string, string> = {
+  "united states": "US", usa: "US", us: "US", remote: "US",
+  "united kingdom": "GB", uk: "GB", england: "GB", london: "GB",
+  canada: "CA", australia: "AU", germany: "DE", france: "FR", india: "IN",
+  netherlands: "NL", ireland: "IE", spain: "ES", italy: "IT", singapore: "SG",
+  "united arab emirates": "AE", uae: "AE", dubai: "AE", switzerland: "CH",
+};
+
+function resolveCountry(location: string): string {
+  const l = location.toLowerCase();
+  for (const [hint, code] of Object.entries(COUNTRY_BY_HINT)) {
+    if (l.includes(hint)) return code;
+  }
+  const tail = l.split(",").pop()?.trim() ?? "";
+  if (/^[a-z]{2}$/.test(tail)) return tail.toUpperCase();
+  return "US";
+}
 
 const ENDPOINT = "jobs-apify";
 const RATE_LIMIT = 6;
@@ -87,7 +118,13 @@ function normalize(source: string, item: Record<string, any>): NormalizedJob | n
 
 function actorInput(source: string, query: string, location: string, limit: number) {
   if (source === "indeed") {
-    return { position: query, location, country: "us", maxItems: limit, parseCompanyDetails: false };
+    return {
+      position: query,
+      location,
+      country: resolveCountry(location),
+      maxItems: limit,
+      parseCompanyDetails: false,
+    };
   }
   return { title: query, location, rows: limit, proxy: { useApifyProxy: true } };
 }
@@ -121,9 +158,13 @@ serve(async (req) => {
     if (!query) return json({ error: "A search query is required.", code: "invalid_input" }, 400);
     const location = clean(body.location, 120) ?? "";
     const limit = Math.min(Math.max(Number(body.limit) || 20, 1), 50);
-    const sources: string[] = Array.isArray(body.sources) && body.sources.length
+    const requested: string[] = Array.isArray(body.sources) && body.sources.length
       ? body.sources.filter((s: string) => s in ACTORS)
-      : ["linkedin", "indeed"];
+      : DEFAULT_SOURCES;
+    const sources = requested.length ? requested : DEFAULT_SOURCES;
+    if (!sources.length) {
+      return json({ error: "No job scraping sources are configured.", code: "not_configured" }, 503);
+    }
 
     const results = await Promise.allSettled(
       sources.map(async (source) => {

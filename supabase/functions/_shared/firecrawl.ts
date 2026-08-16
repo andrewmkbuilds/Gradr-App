@@ -125,8 +125,20 @@ export async function search(
     tbs: opts.tbs,
     scrapeOptions: opts.scrape ? { formats: ["markdown"] } : undefined,
   });
-  const hits = (result.data ?? result.web ?? []) as SearchHit[];
-  return Array.isArray(hits) ? hits : [];
+  // Firecrawl v2 /search returns { success, data: { web: [...], news?, images? } }.
+  // Older/other shapes return a bare array in `data` (or a top-level `web`).
+  // Accept all three, otherwise every search silently reads as "no results".
+  const data = result.data as unknown;
+  const buckets: unknown[] = [];
+  if (Array.isArray(data)) buckets.push(...data);
+  else if (data && typeof data === "object") {
+    for (const key of ["web", "news"] as const) {
+      const bucket = (data as Record<string, unknown>)[key];
+      if (Array.isArray(bucket)) buckets.push(...bucket);
+    }
+  }
+  if (!buckets.length && Array.isArray(result.web)) buckets.push(...(result.web as unknown[]));
+  return buckets.filter((h): h is SearchHit => Boolean(h) && typeof (h as SearchHit).url === "string");
 }
 
 /** SSRF-safe validation for user-supplied URLs. */
