@@ -1,6 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Gradr">
-  <title>Gradr</title>
-  <g transform="translate(-25.113 -24.015) scale(0.27466)" fill="currentColor"><g transform="translate(0.000000,2048.000000) scale(0.100000,-0.100000)">
+/**
+ * Official Gradr mark geometry — vectorised from the supplied master artwork
+ * (Gradr Official Logo.png). Two flat shapes, no gradients:
+ *   • teal open "G" bowl
+ *   • mahogany crossbar arrow that sweeps under the bowl and points left
+ *
+ * Coordinates are normalised into a 512 unit square, optically centred.
+ * Do not hand-edit: regenerate from the master artwork if the brand changes.
+ */
+export const MARK_VIEWBOX = 512;
+const FIT = "translate(-25.113 -24.015) scale(0.27466)";
+
+const TEAL_SHAPE = `<g transform="translate(0.000000,2048.000000) scale(0.100000,-0.100000)">
 <path d="M10275 18853 c-624 -21 -1270 -117 -1842 -274 -950 -260 -1909 -735
 -2733 -1355 -902 -679 -1697 -1592 -2248 -2581 -616 -1105 -961 -2214 -1077
 -3458 -52 -561 -44 -1264 21 -1865 118 -1105 408 -2102 892 -3070 l107 -215
@@ -14,8 +24,8 @@
 283 86 64 157 119 157 122 0 3 -40 79 -88 168 -317 581 -662 1039 -1138 1508
 -288 283 -520 476 -855 710 -305 212 -525 342 -897 528 -602 302 -1276 517
 -2022 645 -566 98 -1352 150 -1955 129z"/>
-</g></g>
-  <g transform="translate(-25.113 -24.015) scale(0.27466)" fill="currentColor"><g transform="translate(0.000000,2048.000000) scale(0.100000,-0.100000)">
+</g>`;
+const MAHOGANY_SHAPE = `<g transform="translate(0.000000,2048.000000) scale(0.100000,-0.100000)">
 <path d="M11579 11679 c-338 -304 -832 -749 -1099 -988 -598 -538 -1468 -1320
 -1538 -1383 -29 -25 -52 -50 -52 -56 0 -9 1023 -933 3185 -2873 66 -60 121
 -106 123 -105 1 2 -9 34 -23 72 -15 38 -123 323 -240 634 -117 311 -256 678
@@ -30,5 +40,12 @@
 1374 2720 l419 829 -2 2206 -3 2207 -3307 3 c-2019 1 -3308 6 -3308 11 0 5 66
 182 146 393 80 211 206 543 279 738 73 195 161 427 194 514 34 88 59 161 57
 163 -2 2 -279 -245 -617 -548z"/>
-</g></g>
-</svg>
+</g>`;
+
+/** Returns the two mark shapes filled with the given colours. */
+export function markShapes(ringFill, barFill) {
+  return [
+    `<g transform="${FIT}" fill="${ringFill}">${TEAL_SHAPE}</g>`,
+    `<g transform="${FIT}" fill="${barFill}">${MAHOGANY_SHAPE}</g>`,
+  ].join("\n  ");
+}
