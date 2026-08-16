@@ -1162,14 +1162,8 @@ html[data-motion="reduced"] *::after {
   scroll-behavior: auto !important;
 }
 
-/* When the user explicitly asks for full motion, ignore the OS media query. */
-html[data-motion="full"] *,
-html[data-motion="full"] *::before,
-html[data-motion="full"] *::after {
-  animation-duration: revert-layer;
-  animation-iteration-count: revert-layer;
-  transition-duration: revert-layer;
-}
+/* Full motion is handled by scoping the reduced-motion blocks above to
+   html:not([data-motion="full"]) — no re-enabling override needed here. */
 
 /* ============================================================
    MAHOGANY ACCENT UTILITIES
