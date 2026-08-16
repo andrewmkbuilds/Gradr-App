@@ -1,11 +1,13 @@
 /**
  * Canonical Supabase endpoints for the browser bundle.
  *
- * These intentionally do NOT read `import.meta.env.VITE_SUPABASE_URL`: the build
- * environment can inject a stale value that overrides `.env`, which would point
- * edge-function calls at a different project than the Supabase client itself.
- * Keep this file as the single source of truth for the project URL.
+ * Reads VITE_SUPABASE_URL from the environment (the same source the Supabase
+ * client uses), with a fallback to the current Lovable Cloud project URL so
+ * edge-function calls never drift to a different project than the client.
  */
-export const SUPABASE_PROJECT_URL = "https://xaeyjrekewnwjujnrqgu.supabase.co";
+const ENV_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const FALLBACK_URL = "https://zdlajleqgmmbfsdnelch.supabase.co";
+
+export const SUPABASE_PROJECT_URL = ENV_URL || FALLBACK_URL;
 
 export const SUPABASE_FUNCTIONS_BASE = `${SUPABASE_PROJECT_URL}/functions/v1`;
