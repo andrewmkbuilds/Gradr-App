@@ -43,12 +43,13 @@ export default function Settings() {
       .maybeSingle();
 
     if (data) {
-      setDisplayName(data.display_name || "");
-      setTargetJobTitle(data.target_job_title || "");
-      setTargetSalary(data.target_salary || "");
-      setTargetIndustry(data.target_industry || "");
-      setCareerStage(data.career_stage || "");
-      setSkills(data.skills?.join(", ") || "");
+      const p = data as any;
+      setDisplayName(p.display_name || "");
+      setTargetJobTitle(p.target_job_title || "");
+      setTargetSalary(p.target_salary || "");
+      setTargetIndustry(p.target_industry || "");
+      setCareerStage(p.career_stage || "");
+      setSkills(p.skills?.join(", ") || "");
     }
 
     const { data: prefs } = await (supabase as any)
