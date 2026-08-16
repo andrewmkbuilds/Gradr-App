@@ -16,12 +16,16 @@ Deno.serve(async (req) => {
     const environment: PaddleEnv = body?.environment === "live" ? "live" : "sandbox";
     if (!priceId || priceId.length > 64) return json({ error: "Invalid priceId" }, 400);
 
-    const res = await gatewayFetch(
-      environment,
-      `/prices?external_id=${encodeURIComponent(priceId)}`,
-    );
+    // The catalog tags each price with `custom_data.external_id` (the
+    // human-readable id used across the app), so resolve by scanning active
+    // prices rather than a server-side filter Paddle does not support.
+    const res = await gatewayFetch(environment, "/prices?per_page=200&status=active");
     const data = await res.json();
-    const paddleId = data?.data?.[0]?.id;
+    const match = (data?.data ?? []).find(
+      (p: { custom_data?: { external_id?: string } }) =>
+        p?.custom_data?.external_id === priceId,
+    );
+    const paddleId = match?.id;
     if (!paddleId) return json({ error: "Price not found" }, 404);
 
     return json({ paddleId });
