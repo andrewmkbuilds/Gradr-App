@@ -13,7 +13,7 @@
  *   node scripts/generate-app-icons.mjs            # render everything
  *   node scripts/generate-app-icons.mjs --check    # CI guard, no render
  */
-import { chromium } from "playwright";
+import { execFileSync } from "child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -189,7 +189,7 @@ async function main() {
 
   // Official, approved artwork — scaled only, never redrawn or recoloured.
   const APP_ICON = join(PUBLIC, "brand/gradr-official-app-icon.png");
-  const LOGO = join(PUBLIC, "brand/gradr-official-logo.png");
+  const SPLASH_MARK = join(PUBLIC, "brand/gradr-official-app-icon-grey.png");
   if (!existsSync(APP_ICON)) throw new Error("public/brand/gradr-official-app-icon.png is missing");
 
   mkdirSync(ICON_DIR, { recursive: true });
@@ -211,7 +211,7 @@ async function main() {
       `${t.width}x${t.height}`,
       `xc:${DEEP}`,
       "(",
-      LOGO,
+      SPLASH_MARK,
       "-resize",
       `${mark}x${mark}`,
       ")",
