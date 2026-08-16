@@ -91,25 +91,33 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Two accepted caller shapes:
+  //  - service-role bearer (JWT claim, or an opaque `sb_secret_...` key that
+  //    matches SUPABASE_SERVICE_ROLE_KEY exactly)
+  //  - the scheduler, which presents CRON_SECRET in a header
+  const cronSecret = Deno.env.get('CRON_SECRET')
+  const presentedCronSecret = req.headers.get('x-cron-secret')
+  const isCron = !!cronSecret && presentedCronSecret === cronSecret
+
   const authHeader = req.headers.get('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    return new Response(
-      JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    )
+  if (!isCron) {
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const token = authHeader.slice('Bearer '.length).trim()
+    const claims = parseJwtClaims(token)
+    if (claims?.role !== 'service_role' && token !== supabaseServiceKey) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
   }
 
-  // Defense in depth: verify_jwt=true already requires a valid JWT at the
-  // gateway layer. This adds an explicit role check so only service-role
-  // callers can trigger queue processing.
-  const token = authHeader.slice('Bearer '.length).trim()
-  const claims = parseJwtClaims(token)
-  if (claims?.role !== 'service_role') {
-    return new Response(
-      JSON.stringify({ error: 'Forbidden' }),
-      { status: 403, headers: { 'Content-Type': 'application/json' } }
-    )
-  }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
