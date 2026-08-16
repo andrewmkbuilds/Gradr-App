@@ -20,9 +20,9 @@ import { BadgePercent, Check, Loader2, Plus, ShieldCheck, X } from "lucide-react
 import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
 import { STATUS_COPY, type VerificationStatus } from "@/config/eligibility";
-import type { TablesUpdate } from "@/integrations/supabase/types";
 
-type DiscountSettingsPatch = TablesUpdate<"discount_settings">;
+// `discount_settings` is not present in the currently generated Database types.
+type DiscountSettingsPatch = Record<string, unknown>;
 
 const money = (n: number | null) => (n == null ? "—" : `$${Number(n).toFixed(2)}`);
 const date = (iso: string | null) =>
