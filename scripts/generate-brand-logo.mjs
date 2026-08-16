@@ -122,19 +122,20 @@ function arrowPath({ cy, bar: b }) {
 }
 
 /**
- * @param {{ ring: string, bar: string, id?: string, title?: string, geo?: typeof PRIMARY }} opts
+ * The official mark, rendered from the vectorised master artwork.
+ * @param {{ ring: string, bar: string, id?: string, title?: string }} opts
  */
-export function symbolSvg({ ring, bar, title = "Gradr", geo = PRIMARY }) {
+export function symbolSvg({ ring, bar, title = "Gradr" }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="${title}">
   <title>${title}</title>
-  <path d="${ringPath(geo)}" fill="${ring}"/>
-  <path d="${arrowPath(geo)}" fill="${bar}"/>
+  ${markShapes(ring, bar)}
 </svg>`;
 }
 
 export function symbolSvgCompact({ ring, bar, id = "gc" }) {
-  return symbolSvg({ ring, bar, id, geo: COMPACT });
+  return symbolSvg({ ring, bar, id });
 }
+
 
 
 
