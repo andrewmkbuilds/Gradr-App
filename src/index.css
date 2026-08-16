@@ -1087,25 +1087,28 @@
   @keyframes skeleton-sweep { to { transform: translateX(100%); } }
 }
 
+/* OS reduced-motion. Skipped entirely when the user has explicitly chosen
+   full motion in-app (html[data-motion="full"]). */
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .aurora-bg, .float-slow, .float-mid, .liquid-blob, .marquee, .conic-spin, .shimmer,
-  .ambient-orb, .ambient-grid, .enter-up, .stagger-children > *, .skeleton-sheen::after {
+  html:not([data-motion="full"]) .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  html:not([data-motion="full"]) :is(.aurora-bg, .float-slow, .float-mid, .liquid-blob, .marquee, .conic-spin, .shimmer,
+  .ambient-orb, .ambient-grid, .enter-up, .stagger-children > *, .skeleton-sheen::after) {
     animation: none !important;
   }
-  .interactive, .lift-card, .field-motion, .sheen::after, .nav-item::before, .nav-underline::after {
+  html:not([data-motion="full"]) :is(.interactive, .lift-card, .field-motion, .sheen::after, .nav-item::before, .nav-underline::after) {
     transition: none !important;
   }
-  .lift-card:hover, .press-scale:active { transform: none !important; }
-  html.theme-transition, html.theme-transition * { transition: none !important; }
+  html:not([data-motion="full"]) :is(.lift-card:hover, .press-scale:active) { transform: none !important; }
+  html.theme-transition:not([data-motion="full"]),
+  html.theme-transition:not([data-motion="full"]) * { transition: none !important; }
 }
 
 /* Reduced-motion safety net: anything not covered by the named rules above
    still collapses to a single frame instead of animating. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
