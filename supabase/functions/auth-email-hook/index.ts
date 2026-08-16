@@ -15,7 +15,7 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "job-ace-system"
+const SITE_NAME = "Gradr"
 const SENDER_DOMAIN = "notify.gradr.me"
 const ROOT_DOMAIN = "gradr.me"
 const FROM_DOMAIN = "notify.gradr.me"
