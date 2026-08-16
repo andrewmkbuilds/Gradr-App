@@ -144,10 +144,11 @@ function ProtectedRoutes() {
   }
 
   if (!user) {
-    if (location.pathname === "/") return <Landing />;
-    // Preserve query + hash so deep links (e.g. /match?job=123) survive the bounce.
+    // No marketing landing page in the app surface: unauthenticated visitors go
+    // straight to sign-in, preserving query + hash so deep links survive.
     return <Navigate to={authPath(nextFromLocation(location))} replace />;
   }
+
 
   // Email/password accounts must confirm their address before using the app.
   // Anonymous guests and OAuth identities have no unverified state.
