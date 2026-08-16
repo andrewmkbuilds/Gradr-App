@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_PROJECT_URL } from "@/lib/supabaseEndpoints";
 
 type State = "loading" | "valid" | "already" | "invalid" | "submitting" | "done" | "error";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_URL = SUPABASE_PROJECT_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 /** Token-based unsubscribe landing page linked from every Gradr email footer. */

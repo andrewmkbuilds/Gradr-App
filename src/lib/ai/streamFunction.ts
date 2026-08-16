@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_FUNCTIONS_BASE } from "@/lib/supabaseEndpoints";
 
 /**
  * Client half of the streamed-generation protocol implemented in
@@ -34,7 +35,7 @@ export class AiStreamError extends Error {
   }
 }
 
-const FUNCTIONS_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+const FUNCTIONS_BASE = SUPABASE_FUNCTIONS_BASE;
 
 /**
  * Invoke an edge function in streaming mode and dispatch its SSE events.
