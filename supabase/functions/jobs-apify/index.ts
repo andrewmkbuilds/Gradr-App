@@ -158,9 +158,13 @@ serve(async (req) => {
     if (!query) return json({ error: "A search query is required.", code: "invalid_input" }, 400);
     const location = clean(body.location, 120) ?? "";
     const limit = Math.min(Math.max(Number(body.limit) || 20, 1), 50);
-    const sources: string[] = Array.isArray(body.sources) && body.sources.length
+    const requested: string[] = Array.isArray(body.sources) && body.sources.length
       ? body.sources.filter((s: string) => s in ACTORS)
-      : ["linkedin", "indeed"];
+      : DEFAULT_SOURCES;
+    const sources = requested.length ? requested : DEFAULT_SOURCES;
+    if (!sources.length) {
+      return json({ error: "No job scraping sources are configured.", code: "not_configured" }, 503);
+    }
 
     const results = await Promise.allSettled(
       sources.map(async (source) => {
