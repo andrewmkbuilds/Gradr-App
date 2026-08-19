@@ -125,6 +125,13 @@ async function runSmokeTest(): Promise<{ ok: boolean; steps: Step[] }> {
         customer_id: `ctm_smoke_${runId}`,
         custom_data: { userId },
         currency_code: "USD",
+        collection_mode: "automatic",
+        // The Paddle SDK unmarshals these into typed entities; omitting
+        // billing_cycle makes it throw before the handler ever runs.
+        billing_cycle: { interval: "year", frequency: 1 },
+        started_at: now.toISOString(),
+        first_billed_at: now.toISOString(),
+        next_billed_at: periodEnd,
         current_billing_period: { starts_at: now.toISOString(), ends_at: periodEnd },
         items: [{
           quantity: 1,
