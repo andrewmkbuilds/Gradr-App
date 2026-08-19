@@ -9,6 +9,8 @@
     "dev": "vite",
     "prebuild": "node scripts/generate-app-icons.mjs --check && node scripts/check-no-tanstack.mjs && node scripts/check-tailwind-classes.mjs && node scripts/check-legacy-design.mjs && bun run scripts/generate-sitemap.ts",
     "typecheck": "tsgo -p tsconfig.app.json && tsgo -p tsconfig.node.json",
+    "types:generate": "node scripts/generate-db-types.mjs",
+    "types:check": "node scripts/check-type-drift.mjs",
     "build": "bun run typecheck && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
