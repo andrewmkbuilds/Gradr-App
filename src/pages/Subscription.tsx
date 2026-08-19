@@ -1,0 +1,243 @@
+import { useState } from "react";
+import { AlertTriangle, CalendarClock, CreditCard, Loader2, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Seo } from "@/components/Seo";
+import { useRealtimeBilling } from "@/hooks/useRealtimeBilling";
+import { useSubscriptionActions, useSubscriptionDetails } from "@/hooks/useSubscriptionManagement";
+import { PLAN_PRICING, type PlanId } from "@/config/pricing";
+
+function formatDay(value: string | null | undefined) {
+  if (!value) return null;
+  return new Date(value).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function formatAmount(minor: string | number | null | undefined, currency: string | null | undefined) {
+  const value = Number(minor ?? 0);
+  if (!value) return null;
+  return new Intl.NumberFormat(undefined, { style: "currency", currency: (currency ?? "USD").toUpperCase() })
+    .format(value / 100);
+}
+
+export default function Subscription() {
+  const navigate = useNavigate();
+  useRealtimeBilling();
+  const { data, isLoading } = useSubscriptionDetails();
+  const { updatePaymentMethod, cancel, resume } = useSubscriptionActions();
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [immediate, setImmediate] = useState(false);
+  const [reason, setReason] = useState("");
+
+  const planId = (data?.tier ?? "free") as PlanId;
+  const planName = PLAN_PRICING[planId]?.name ?? "Free";
+  const card = data?.paymentMethod?.card;
+  const renews = formatDay(data?.nextBilledAt ?? data?.currentPeriodEnd);
+  const nextCharge = formatAmount(data?.nextChargeAmount, data?.currency);
+  const dunningActive = data?.dunning?.status === "active";
+
+  const openCancel = (immediateCancel: boolean) => {
+    setImmediate(immediateCancel);
+    setCancelOpen(true);
+  };
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      <Seo
+        title="Manage subscription"
+        description="Update your payment method, review renewal details, or cancel your Gradr plan."
+        path="/subscription"
+      />
+
+      <header>
+        <h1 className="type-h1 text-foreground">Manage subscription</h1>
+        <p className="text-sm text-muted-foreground">
+          Everything about your plan — renewal, payment method and cancellation — in one place.
+        </p>
+      </header>
+
+      {isLoading ? (
+        <Card className="space-y-4 p-6">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-72" />
+          <Skeleton className="h-10 w-40" />
+        </Card>
+      ) : !data?.hasSubscription ? (
+        <Card className="space-y-4 p-6">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" aria-hidden />
+            <h2 className="text-sm font-semibold text-foreground">You're on the Free plan</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Upgrade to unlock unlimited AI analysis, mock interviews and coaching.
+          </p>
+          <Button className="gap-2 self-start" onClick={() => navigate("/pricing")}>
+            <Sparkles className="h-4 w-4" aria-hidden />
+            View plans
+          </Button>
+        </Card>
+      ) : (
+        <>
+          {dunningActive && (
+            <Card className="border-destructive/40 bg-destructive/5 p-5">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 text-destructive" aria-hidden />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">We couldn't take your last payment</p>
+                  <p className="text-sm text-muted-foreground">
+                    Attempt {data.dunning?.attempt_count} of {data.dunning?.max_attempts}
+                    {data.dunning?.next_retry_at ? ` · next retry ${formatDay(data.dunning.next_retry_at)}` : ""}.
+                    Update your card to settle it instantly and keep your plan active.
+                  </p>
+                  <Button
+                    size="sm"
+                    className="mt-2 gap-2"
+                    onClick={() => updatePaymentMethod.mutate()}
+                    disabled={updatePaymentMethod.isPending}
+                  >
+                    {updatePaymentMethod.isPending
+                      ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      : <CreditCard className="h-4 w-4" aria-hidden />}
+                    Update payment method
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          <Card className="space-y-5 p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-primary" aria-hidden />
+                  <h2 className="text-sm font-semibold text-foreground">Current plan</h2>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="type-h1 text-foreground">
+                    Gradr {planName} {data.interval === "annual" ? "(Annual)" : "(Monthly)"}
+                  </span>
+                  {data.status && <Badge variant={data.status === "active" ? "default" : "secondary"}>{data.status}</Badge>}
+                  {data.cancelAtPeriodEnd && <Badge variant="outline">Cancels at period end</Badge>}
+                </div>
+              </div>
+              <Button variant="outline" className="gap-2" onClick={() => navigate("/pricing")}>
+                Change plan
+              </Button>
+            </div>
+
+            <dl className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-border/70 p-4">
+                <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <CalendarClock className="h-3.5 w-3.5" aria-hidden />
+                  {data.cancelAtPeriodEnd ? "Access until" : "Renews"}
+                </dt>
+                <dd className="mt-1 text-sm text-foreground">
+                  {renews ?? "—"}
+                  {!data.cancelAtPeriodEnd && nextCharge ? ` · ${nextCharge}` : ""}
+                </dd>
+              </div>
+              <div className="rounded-lg border border-border/70 p-4">
+                <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <CreditCard className="h-3.5 w-3.5" aria-hidden />
+                  Payment method
+                </dt>
+                <dd className="mt-1 text-sm text-foreground">
+                  {card?.last4
+                    ? `${(card.type ?? "card").toUpperCase()} ···· ${card.last4}${
+                      card.expiry_month ? ` · exp ${String(card.expiry_month).padStart(2, "0")}/${card.expiry_year}` : ""
+                    }`
+                    : data.paymentMethod?.type ?? "—"}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => updatePaymentMethod.mutate()}
+                disabled={updatePaymentMethod.isPending}
+              >
+                {updatePaymentMethod.isPending
+                  ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  : <CreditCard className="h-4 w-4" aria-hidden />}
+                Update payment method
+              </Button>
+
+              {data.cancelAtPeriodEnd
+                ? (
+                  <Button className="gap-2" onClick={() => resume.mutate()} disabled={resume.isPending}>
+                    {resume.isPending
+                      ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      : <RotateCcw className="h-4 w-4" aria-hidden />}
+                    Keep my subscription
+                  </Button>
+                )
+                : (
+                  <Button variant="ghost" className="text-muted-foreground" onClick={() => openCancel(false)}>
+                    Cancel at period end
+                  </Button>
+                )}
+              <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => openCancel(true)}>
+                Cancel immediately
+              </Button>
+            </div>
+          </Card>
+        </>
+      )}
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {immediate ? "Cancel and lose access now?" : "Cancel at the end of your period?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {immediate
+                ? "Your plan ends straight away and premium features lock immediately. This can't be undone — you'd need to subscribe again."
+                : `You keep everything until ${renews ?? "the end of your paid period"}. You can undo this any time before then.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason" className="text-xs text-muted-foreground">
+              Anything we could have done better? (optional)
+            </Label>
+            <Textarea
+              id="cancel-reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              placeholder="Too expensive, missing a feature, found another tool…"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep my plan</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                cancel.mutate({ immediate, reason });
+                setCancelOpen(false);
+                setReason("");
+              }}
+            >
+              {immediate ? "Cancel now" : "Schedule cancellation"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

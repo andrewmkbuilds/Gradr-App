@@ -108,6 +108,8 @@ export const navGroups: NavGroup[] = [
       { title: "Profile & Settings", url: "/settings", icon: Settings },
       { title: "Billing & Subscription", url: "/billing", icon: CreditCard },
       { title: "Credits & Usage", url: "/credits", icon: Zap },
+      { title: "Manage Subscription", url: "/subscription", icon: CreditCard },
+      { title: "Billing History", url: "/billing/history", icon: CreditCard },
       { title: "Pricing & Plans", url: "/pricing", icon: Sparkles },
     ],
   },

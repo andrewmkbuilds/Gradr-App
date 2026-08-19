@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
 import { VerificationDialog } from "@/components/VerificationDialog";
 import { useDiscountPrograms, useMyEligibility } from "@/hooks/useEligibility";
+import { PromoCodeField, type AppliedPromo } from "@/components/billing/PromoCodeField";
 
 const TIER_ICONS: Record<string, typeof Sparkles> = {
   Starter: Zap,
@@ -41,6 +42,7 @@ export default function Pricing() {
   const [tab, setTab] = useState<"plans" | "packs">("plans");
   const [interval, setInterval] = useState<"monthly" | "annual">("annual");
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [promo, setPromo] = useState<AppliedPromo | null>(null);
 
   const { discountPercent } = useMyEligibility();
   const { data: programs } = useDiscountPrograms();
@@ -99,7 +101,7 @@ export default function Pricing() {
       toast.success("You're on the Free plan!");
       return;
     }
-    void startSubscription(interval, tier.key as PlanKey);
+    void startSubscription(interval, tier.key as PlanKey, promo?.discountId ?? null);
   };
 
   const handlePack = (key: string) => {
@@ -108,7 +110,7 @@ export default function Pricing() {
       navigate("/auth?next=/pricing");
       return;
     }
-    void buyPack(key);
+    void buyPack(key, promo?.discountId ?? null);
   };
 
   /**
@@ -280,7 +282,11 @@ export default function Pricing() {
               <BadgePercent className="h-3.5 w-3.5" aria-hidden="true" />
               {ANNUAL_SAVINGS_MESSAGE}
             </p>
+            {user && (
+              <PromoCodeField applied={promo} onApply={setPromo} className="w-full max-w-xs" />
+            )}
           </div>
+
 
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">

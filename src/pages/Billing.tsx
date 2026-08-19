@@ -161,10 +161,16 @@ export default function Billing() {
 
           <div className="flex gap-2">
             {sub.isSubscribed ? (
-              <Button className="gap-2" onClick={() => void openPortal()} disabled={pending === "portal"}>
-                <ExternalLink className="h-4 w-4" />
-                Manage subscription
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button className="gap-2" onClick={() => navigate("/subscription")}>
+                  <CreditCard className="h-4 w-4" />
+                  Manage subscription
+                </Button>
+                <Button variant="outline" className="gap-2" onClick={() => void openPortal()} disabled={pending === "portal"}>
+                  <ExternalLink className="h-4 w-4" />
+                  Billing portal
+                </Button>
+              </div>
             ) : (
               <Button className="gap-2" onClick={() => navigate("/pricing")}>
                 <Sparkles className="h-4 w-4" />
@@ -175,7 +181,9 @@ export default function Billing() {
         </div>
         {sub.isSubscribed && (
           <p className="text-xs text-muted-foreground mt-4">
-            Switch between monthly and annual billing, update your card, or cancel from the Paddle billing portal.
+            Update your card, review renewal details or cancel from{" "}
+            <Link to="/subscription" className="underline underline-offset-2">Manage subscription</Link>, and see every
+            invoice in your <Link to="/billing/history" className="underline underline-offset-2">billing history</Link>.
           </p>
         )}
       </Card>

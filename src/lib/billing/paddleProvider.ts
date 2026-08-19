@@ -61,15 +61,18 @@ export async function openPaddleCheckout(
 export const paddleBillingProvider: BillingProvider = {
   id: "paddle",
 
-  async createCheckout({ plan, interval }: CheckoutRequest): Promise<CheckoutResult> {
+  async createCheckout({ plan, interval, promoDiscountId }: CheckoutRequest): Promise<CheckoutResult> {
     const priceId = PLAN_PRICE_IDS[`${plan}-${interval}`];
     if (!priceId) throw new Error(`Unknown plan: ${plan} ${interval}`);
-    const discount = await resolveCheckoutDiscount(plan, interval);
-    return openPaddleCheckout(priceId, "/welcome", discount.discountId ?? null);
+    // A promo code the customer typed wins over the automatic eligibility
+    // discount: Paddle applies one discount per checkout, and an explicitly
+    // entered code should never be silently ignored.
+    const discount = promoDiscountId ? null : await resolveCheckoutDiscount(plan, interval);
+    return openPaddleCheckout(priceId, "/welcome", promoDiscountId ?? discount?.discountId ?? null);
   },
 
-  async createPackCheckout({ pack }: PackCheckoutRequest): Promise<CheckoutResult> {
-    return openPaddleCheckout(pack, "/welcome?purchase=pack");
+  async createPackCheckout({ pack, promoDiscountId }: PackCheckoutRequest): Promise<CheckoutResult> {
+    return openPaddleCheckout(pack, "/welcome?purchase=pack", promoDiscountId ?? null);
   },
 
   async openCustomerPortal(): Promise<CheckoutResult> {
