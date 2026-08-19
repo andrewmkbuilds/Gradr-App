@@ -384,7 +384,7 @@ export default function Auth() {
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t border-border" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase tracking-wider">
+        <div className="relative flex justify-center text-overline">
           <span className="bg-background px-3 text-muted-foreground">or</span>
         </div>
       </div>
@@ -515,24 +515,25 @@ export default function Auth() {
       <Button
         type="button"
         variant="ghost"
-        className="w-full h-11 text-muted-foreground hover:text-foreground"
+        size="lg"
+        className="w-full"
         onClick={handleGuest}
         disabled={loading}
       >
         Continue as guest
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <Text variant="body-sm" tone="muted" className="text-center">
         {isSignUp ? "Already have an account?" : "No account yet?"}{" "}
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="inline"
           onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); }}
-          className="text-primary hover:underline font-medium"
-
         >
           {isSignUp ? "Sign in" : "Create one"}
-        </button>
-      </p>
+        </Button>
+      </Text>
     </AuthLayout>
   );
 }
