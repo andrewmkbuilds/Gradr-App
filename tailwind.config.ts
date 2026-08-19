@@ -19,20 +19,20 @@ export default {
       },
       colors: {
         border: {
-          DEFAULT: "hsl(var(--border))",
+          DEFAULT: "hsl(var(--border) / <alpha-value>)",
           subtle: "hsl(var(--border-subtle))",
           strong: "hsl(var(--border-strong))",
         },
         input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        ring: "hsl(var(--ring) / <alpha-value>)",
         background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
         surface: {
-          DEFAULT: "hsl(var(--surface))",
-          secondary: "hsl(var(--surface-secondary))",
+          DEFAULT: "hsl(var(--surface) / <alpha-value>)",
+          secondary: "hsl(var(--surface-secondary) / <alpha-value>)",
           elevated: "hsl(var(--surface-elevated))",
           // Gradr design-system role: inset / hover fills.
-          muted: "hsl(var(--surface-secondary))",
+          muted: "hsl(var(--surface-secondary) / <alpha-value>)",
         },
         // Gradr design-system brand palette (src/styles/gradr-design-system.css).
         shell: "var(--color-shell)",
@@ -48,7 +48,7 @@ export default {
         ink: "var(--color-ink)",
         slate: "var(--color-slate)",
         // Gradr design-system semantic alias (components use `text-muted-foreground`).
-        "muted-foreground": "hsl(var(--muted-foreground))",
+        "muted-foreground": "hsl(var(--muted-foreground) / <alpha-value>)",
         overlay: "hsl(var(--overlay))",
         info: {
           DEFAULT: "hsl(var(--info))",
@@ -64,7 +64,7 @@ export default {
           6: "hsl(var(--chart-6))",
         },
         brand: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
           hover: "hsl(var(--primary-hover))",
           soft: "hsl(var(--primary-soft))",
           glow: "hsl(var(--primary-glow))",
@@ -84,8 +84,8 @@ export default {
           border: "hsl(var(--mahogany-border))",
         },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
           hover: "hsl(var(--primary-hover))",
           soft: "hsl(var(--primary-soft))",
         },
@@ -94,17 +94,17 @@ export default {
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
           soft: "hsl(var(--destructive-soft))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
