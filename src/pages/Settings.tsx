@@ -264,7 +264,10 @@ export default function Settings() {
 
       <IntegrationsPanel />
 
+      <NotificationPreferencesPanel />
+
       <EligibilityPanel />
+
 
       <AccountDataPanel />
 
