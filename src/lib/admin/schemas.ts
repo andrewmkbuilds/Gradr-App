@@ -191,6 +191,6 @@ function reportDrift(context: string, issues: string[], dropped: number) {
   const message = `Schema drift in ${context}: ${dropped} row(s) dropped`;
   // Field paths and messages only — never row values, which can be PII.
   console.warn(message, issues);
-  addBreadcrumb({ category: "schema", message, level: "warning", data: { issues: issues.join("; ") } });
-  captureError(new Error(message), { context: "admin-schema-drift", extra: { source: context, issues, dropped } });
+  addBreadcrumb("schema", message, { issues: issues.join("; ") });
+  captureError(new Error(message), { source: context, issues, dropped });
 }
