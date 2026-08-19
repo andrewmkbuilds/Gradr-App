@@ -159,7 +159,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="lg:hidden text-center space-y-3">
             <div className="relative h-14 w-14 mx-auto">
               <div className="conic-spin absolute inset-0 rounded-2xl opacity-90" />
-              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl" />
+              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl bg-shell" />
             </div>
             <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
             <p
