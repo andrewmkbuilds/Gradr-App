@@ -66,6 +66,7 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
       { title: "API health", description: "Provider latency, errors and rate-limit backoff.", url: "/admin/api-health", icon: Activity },
       { title: "Interviewer voice", description: "Speech credential health, entitlement and voice configuration.", url: "/admin/voice", icon: AudioLines },
       { title: "Webhook deliveries", description: "Paddle and RevenueCat payloads and signatures.", url: "/admin/webhook-logs", icon: Webhook },
+      { title: "Billing operations", description: "Alerts, webhook retries and sandbox failure simulations.", url: "/admin/billing-ops", icon: Webhook },
       { title: "Conversion tracking", description: "Are revenue events reaching PostHog once each, on time?", url: "/admin/analytics-health", icon: Activity },
       { title: "CSP violations", description: "Report-only policy blocks and spike alerts.", url: "/admin/csp-reports", icon: ShieldAlert },
     ],
