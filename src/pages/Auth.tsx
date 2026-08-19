@@ -405,7 +405,7 @@ export default function Auth() {
                 onChange={(e) => { setFullName(e.target.value); setFieldErrors((p) => ({ ...p, fullName: undefined })); }}
                 aria-invalid={!!fieldErrors.fullName}
                 aria-describedby={fieldErrors.fullName ? "error-fullName" : undefined}
-                className="h-12 pl-10"
+                className="pl-10"
               />
             </div>
             {fieldErrors.fullName && (
