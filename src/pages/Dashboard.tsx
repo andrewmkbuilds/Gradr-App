@@ -325,7 +325,7 @@ export default function Dashboard() {
           title="Pipeline by Stage"
           icon={Briefcase}
           action={
-            <Button onClick={() => navigate("/pipeline")} variant="link" size="inline" className="text-caption">
+            <Button onClick={() => navigate("/pipeline")} variant="link" size="inline">
               View pipeline →
             </Button>
           }
