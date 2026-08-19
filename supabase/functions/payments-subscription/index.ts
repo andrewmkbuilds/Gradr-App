@@ -13,7 +13,17 @@
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { gatewayFetch, type PaddleEnv } from "../_shared/paddle.ts";
+import { gatewayFetch, PLAN_PRICES, type PaddleEnv } from "../_shared/paddle.ts";
+
+const TIER_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, advanced: 3 };
+
+/** Resolve a human-readable price id (e.g. `pro_annual`) to Paddle's `pri_...`. */
+async function resolvePriceId(env: PaddleEnv, externalId: string): Promise<string | null> {
+  const res = await gatewayFetch(env, `/prices?external_id=${encodeURIComponent(externalId)}&status=active`);
+  if (!res.ok) return null;
+  const rows = (await res.json())?.data ?? [];
+  return rows[0]?.id ?? null;
+}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -96,6 +106,16 @@ Deno.serve(async (req) => {
           .limit(1)
           .maybeSingle();
 
+        const { data: pendingChange } = await db
+          .from("scheduled_plan_changes")
+          .select("target_tier, target_interval, target_price_id, effective_at")
+          .eq("user_id", user.id)
+          .eq("environment", env)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
         // deno-lint-ignore no-explicit-any
         let remote: any = null;
         if (subscriptionId) {
@@ -117,6 +137,7 @@ Deno.serve(async (req) => {
           currency: remote?.currency_code ?? null,
           paymentMethod: remote?.payment_method ?? null,
           dunning: dunning ?? null,
+          pendingPlanChange: pendingChange ?? null,
         });
       }
 
@@ -188,6 +209,116 @@ Deno.serve(async (req) => {
           description: "Your subscription will renew as normal.",
           subscription_id: subscriptionId,
         });
+        return json({ ok: true });
+      }
+
+      /**
+       * Plan changes. Upgrades apply immediately with proration; downgrades are
+       * queued for the next renewal so the customer keeps the tier they already
+       * paid for until the period ends.
+       */
+      case "change_plan": {
+        if (!subscriptionId) return json({ error: "no_subscription" }, 404);
+        const targetPriceId = String(body?.priceId ?? "");
+        const target = PLAN_PRICES[targetPriceId];
+        if (!target) return json({ error: "unknown_plan" }, 400);
+
+        const currentTier = String(sub?.subscription_tier ?? "free").toLowerCase();
+        const currentInterval = String(sub?.billing_interval ?? "monthly");
+        if (currentTier === target.tier && currentInterval === target.interval) {
+          return json({ error: "already_on_plan" }, 400);
+        }
+
+        const isUpgrade = TIER_RANK[target.tier] > (TIER_RANK[currentTier] ?? 0) ||
+          (TIER_RANK[target.tier] === (TIER_RANK[currentTier] ?? 0) &&
+            target.interval === "annual" && currentInterval === "monthly");
+
+        if (!isUpgrade) {
+          const effectiveAt = sub?.current_period_end ?? null;
+          if (!effectiveAt) return json({ error: "no_renewal_date" }, 409);
+
+          await db.from("scheduled_plan_changes")
+            .delete()
+            .eq("subscription_id", subscriptionId)
+            .eq("environment", env)
+            .eq("status", "pending");
+
+          await db.from("scheduled_plan_changes").insert({
+            user_id: user.id,
+            environment: env,
+            subscription_id: subscriptionId,
+            target_price_id: targetPriceId,
+            target_tier: target.tier,
+            target_interval: target.interval,
+            effective_at: effectiveAt,
+          });
+
+          await db.from("billing_events").insert({
+            user_id: user.id,
+            environment: env,
+            event_type: "plan_change_scheduled",
+            title: `Downgrade to ${target.tier} scheduled`,
+            description: `Your current plan stays active until ${effectiveAt}, then switches to ${target.tier} (${target.interval}).`,
+            subscription_id: subscriptionId,
+            metadata: { target_price_id: targetPriceId },
+          });
+
+          return json({ ok: true, applied: false, scheduled: true, effectiveAt });
+        }
+
+        const paddlePriceId = await resolvePriceId(env, targetPriceId);
+        if (!paddlePriceId) return json({ error: "price_unavailable" }, 502);
+
+        const res = await gatewayFetch(env, `/subscriptions/${subscriptionId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            items: [{ price_id: paddlePriceId, quantity: 1 }],
+            proration_billing_mode: "prorated_immediately",
+            on_payment_failure: "prevent_change",
+          }),
+        });
+        if (!res.ok) {
+          console.error("plan change failed", res.status, await res.text());
+          return json({ error: "change_failed" }, 502);
+        }
+        const updated = (await res.json())?.data ?? {};
+
+        // Cancel any pending downgrade: the customer just moved up instead.
+        await db.from("scheduled_plan_changes")
+          .update({ status: "superseded" })
+          .eq("subscription_id", subscriptionId)
+          .eq("environment", env)
+          .eq("status", "pending");
+
+        // Reflect locally; the webhook confirms moments later.
+        await db.from("subscribers").update({
+          subscription_tier: target.tier,
+          billing_interval: target.interval,
+          price_id: targetPriceId,
+          current_period_end: updated?.current_billing_period?.ends_at ?? sub?.current_period_end ?? null,
+        }).eq("user_id", user.id).eq("environment", env);
+
+        await db.from("billing_events").insert({
+          user_id: user.id,
+          environment: env,
+          event_type: "plan_upgraded",
+          title: `Upgraded to ${target.tier}`,
+          description: "The new plan is active now; the difference was charged pro rata.",
+          subscription_id: subscriptionId,
+          metadata: { target_price_id: targetPriceId, interval: target.interval },
+        });
+
+        return json({ ok: true, applied: true, scheduled: false });
+      }
+
+      case "cancel_scheduled_plan_change": {
+        if (!subscriptionId) return json({ error: "no_subscription" }, 404);
+        await db.from("scheduled_plan_changes")
+          .update({ status: "canceled" })
+          .eq("subscription_id", subscriptionId)
+          .eq("environment", env)
+          .eq("user_id", user.id)
+          .eq("status", "pending");
         return json({ ok: true });
       }
 
