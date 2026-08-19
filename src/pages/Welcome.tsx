@@ -43,7 +43,10 @@ export default function Welcome() {
   const [params] = useSearchParams();
   const isPack = params.get("purchase") === "pack";
   const queryClient = useQueryClient();
-  const { tier, interval, isSubscribed } = useSubscription();
+  const { plan, billingInterval, subscribed } = useSubscription();
+  const tier = plan;
+  const interval = billingInterval;
+  const isSubscribed = subscribed;
 
   // The webhook writes entitlements a moment after redirect — poll briefly.
   useEffect(() => {
