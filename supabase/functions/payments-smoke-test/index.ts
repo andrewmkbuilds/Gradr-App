@@ -104,11 +104,15 @@ async function runSmokeTest(): Promise<{ ok: boolean; steps: Step[] }> {
         collection_mode: "automatic",
       }),
     });
-    const txBody = await txRes.json().catch(() => null);
+    const txText = await txRes.text();
+    let txBody: { data?: { id?: string } } | null = null;
+    try {
+      txBody = JSON.parse(txText);
+    } catch { /* non-JSON gateway error, surfaced verbatim below */ }
     step(
       "create checkout transaction",
       txRes.ok && Boolean(txBody?.data?.id),
-      txRes.ok ? `transaction ${txBody?.data?.id}` : JSON.stringify(txBody).slice(0, 300),
+      txRes.ok ? `transaction ${txBody?.data?.id}` : `HTTP ${txRes.status} ${txText.slice(0, 400)}`,
     );
 
     // ---- 3. Webhook -------------------------------------------------------
