@@ -64,11 +64,14 @@ export const affiliateCommissionSchema = z.object({
 /** `affiliate_tiers` — commission ladder shown in settings. */
 export const affiliateTierSchema = z.object({
   id: z.string(),
+  key: z.string().catch(""),
   name: z.string().catch("Tier"),
-  color: nullableText,
   min_referrals: z.coerce.number().catch(0),
-  commission_rate: z.coerce.number().catch(0),
-  is_active: z.boolean().catch(true),
+  bonus_rate: z.coerce.number().catch(0),
+  color: z.string().catch("#245F73"),
+  perks: nullableText,
+  sort_order: z.coerce.number().catch(0),
+  active: z.boolean().catch(true),
 }).passthrough();
 
 /** Result rows of the `admin_verification_requests` RPC. */

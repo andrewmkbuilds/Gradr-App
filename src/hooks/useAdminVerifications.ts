@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { adminVerificationRequestSchema, parseAdminRows } from "@/lib/admin/schemas";
 
 export interface AdminVerificationRequest {
   id: string;
@@ -39,7 +40,13 @@ export function useAdminVerificationRequests(status: string | null) {
         _limit: 200,
       });
       if (error) throw new Error(error.message);
-      return (data ?? []) as AdminVerificationRequest[];
+      // Rows that no longer match the contract are dropped and reported
+      // rather than crashing the review queue mid-render.
+      return parseAdminRows(
+        adminVerificationRequestSchema,
+        data,
+        "admin_verification_requests",
+      ).rows as AdminVerificationRequest[];
     },
   });
 }

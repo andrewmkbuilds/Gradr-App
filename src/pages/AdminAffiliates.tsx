@@ -5,6 +5,12 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  affiliateApplicationSchema,
+  affiliateCommissionSchema,
+  affiliateProfileSchema,
+  parseAdminRows,
+} from "@/lib/admin/schemas";
 import { useIsAdmin, useFullAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
 import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
@@ -67,7 +73,7 @@ function ApplicationsPanel() {
     queryKey: ["adminApplications"],
     queryFn: async () => {
       const { data } = await supabase.from("affiliate_applications").select("*").order("created_at", { ascending: false });
-      return data || [];
+      return parseAdminRows(affiliateApplicationSchema, data, "affiliate_applications").rows;
     },
   });
 
@@ -188,7 +194,7 @@ function AffiliatesPanel() {
     queryKey: ["adminAffiliates"],
     queryFn: async () => {
       const { data } = await supabase.from("affiliate_profiles").select("*").order("approval_date", { ascending: false });
-      return data || [];
+      return parseAdminRows(affiliateProfileSchema, data, "affiliate_profiles").rows;
     },
   });
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
@@ -243,7 +249,7 @@ function CommissionsPanel() {
     queryKey: ["adminCommissions"],
     queryFn: async () => {
       const { data } = await supabase.from("affiliate_commissions").select("*, affiliate_profiles(affiliate_code)").order("created_date", { ascending: false }).limit(200);
-      return data || [];
+      return parseAdminRows(affiliateCommissionSchema, data, "affiliate_commissions").rows;
     },
   });
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
