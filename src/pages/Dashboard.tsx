@@ -13,6 +13,7 @@ import { CreditsBalance } from "@/components/CreditsBalance";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 import { UsageBars } from "@/components/UsageBars";
 import { Surface, SurfaceHeader } from "@/components/ui/surface";
+import { Badge, Button, Text } from "@/design-system/gradr-9b9b95";
 import { CareerReadiness, type ReadinessPillar } from "@/components/dashboard/CareerReadiness";
 import { ActivityChart, PipelineFunnelChart, type ActivityPoint } from "@/components/dashboard/DashboardCharts";
 import { CountUp } from "@/components/motion";
@@ -326,7 +327,7 @@ export default function Dashboard() {
           action={
             <Button onClick={() => navigate("/pipeline")} variant="link" size="inline" className="text-caption">
               View pipeline →
-            </button>
+            </Button>
           }
         />
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
@@ -389,7 +390,7 @@ export default function Dashboard() {
             </h3>
             <Button onClick={() => navigate("/pipeline")} variant="link" size="inline" className="text-caption">
               Manage →
-            </button>
+            </Button>
           </div>
           {reminders.length === 0 ? (
             <p className="text-body-sm text-muted-foreground py-8 text-center">
@@ -444,7 +445,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span >{match.match_score ?? 0}% match</span>
+                  <Badge variant="accent" className="tabular-nums">{match.match_score ?? 0}% match</Badge>
                 </div>
               </div>
             ))}
