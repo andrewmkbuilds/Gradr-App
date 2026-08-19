@@ -385,7 +385,7 @@ export default function Auth() {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-overline">
-          <span className="bg-background px-3 text-muted-foreground">or</span>
+          <span className="bg-surface px-3 text-muted-foreground">or</span>
         </div>
       </div>
 
