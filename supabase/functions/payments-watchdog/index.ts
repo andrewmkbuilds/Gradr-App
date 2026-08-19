@@ -428,10 +428,14 @@ async function applyScheduledPlanChanges(): Promise<{ applied: number; failed: n
       await raiseAlert({
         alertType: "plan_change_failed",
         severity: "warning",
+        environment: env,
+        subject: "Scheduled plan change failed",
         dedupeKey: `plan-change-${row.id}`,
-        title: "Scheduled plan change failed",
-        body: `Could not apply the queued downgrade for subscription ${row.subscription_id}.`,
-        details: { subscription_id: row.subscription_id, error: String(err).slice(0, 300) },
+        details: {
+          subscription_id: row.subscription_id,
+          target_price_id: row.target_price_id,
+          error: String(err).slice(0, 300),
+        },
       });
     }
   }
