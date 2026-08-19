@@ -71,7 +71,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="flex items-center gap-4">
             <div className="relative h-14 w-14 shrink-0">
               <div className="conic-spin absolute inset-0 rounded-2xl opacity-90" />
-              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl" />
+              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl bg-shell" />
             </div>
             {/* Brand mark, not a heading — each auth page owns the single page <h1>. */}
             <div className="text-3xl font-bold tracking-tight kinetic-text">{TITLE}</div>
