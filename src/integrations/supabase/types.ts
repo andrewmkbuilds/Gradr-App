@@ -3122,6 +3122,54 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_plan_changes: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          effective_at: string
+          environment: string
+          id: string
+          last_error: string | null
+          status: string
+          subscription_id: string
+          target_interval: string
+          target_price_id: string
+          target_tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          effective_at: string
+          environment?: string
+          id?: string
+          last_error?: string | null
+          status?: string
+          subscription_id: string
+          target_interval: string
+          target_price_id: string
+          target_tier: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          effective_at?: string
+          environment?: string
+          id?: string
+          last_error?: string | null
+          status?: string
+          subscription_id?: string
+          target_interval?: string
+          target_price_id?: string
+          target_tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           category: string
