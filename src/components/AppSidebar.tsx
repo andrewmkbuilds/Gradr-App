@@ -63,7 +63,7 @@ function ActiveIndicator({ reduced, inset = "18%" }: { reduced: boolean; inset?:
     return (
       <span
         aria-hidden="true"
-        className="absolute left-0 w-[3px] rounded-full bg-mahogany"
+        className="absolute left-0 w-1 rounded-full bg-accent"
         style={{ top: inset, bottom: inset }}
       />
     );
@@ -73,7 +73,7 @@ function ActiveIndicator({ reduced, inset = "18%" }: { reduced: boolean; inset?:
       aria-hidden="true"
       layoutId="sidebar-active-indicator"
       transition={springSmooth}
-      className="absolute left-0 w-[3px] rounded-full bg-mahogany"
+      className="absolute left-0 w-1 rounded-full bg-accent"
       style={{ top: inset, bottom: inset }}
     />
   );
@@ -139,7 +139,7 @@ export function AppSidebar() {
               <BrandLogo size={32} />
               <div>
                 <div className="text-sm font-bold tracking-tight text-foreground">Gradr</div>
-                <p className="text-[10px] text-muted-foreground">AI Career System</p>
+                <p className="text-overline text-muted-foreground">AI Career System</p>
               </div>
             </>
           )}
@@ -261,7 +261,7 @@ export function AppSidebar() {
                                     }}
                                     aria-current={active ? "page" : undefined}
                                     className={cn(
-                                      "interactive relative flex min-h-[40px] items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
+                                      "interactive relative flex min-h-10 items-center gap-2.5 rounded-md px-2.5 py-2 text-body-sm transition-colors",
                                       active
                                         ? "bg-primary/10 pl-3.5 font-medium text-primary"
                                         : "text-muted-foreground hover:bg-secondary hover:text-foreground",
