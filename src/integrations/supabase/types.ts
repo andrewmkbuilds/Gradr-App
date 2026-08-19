@@ -1978,6 +1978,7 @@ export type Database = {
           feature: string
           id: string
           period_start: string
+          rollover: number
           updated_at: string
           used: number
           user_id: string
@@ -1989,6 +1990,7 @@ export type Database = {
           feature: string
           id?: string
           period_start: string
+          rollover?: number
           updated_at?: string
           used?: number
           user_id: string
@@ -2000,6 +2002,7 @@ export type Database = {
           feature?: string
           id?: string
           period_start?: string
+          rollover?: number
           updated_at?: string
           used?: number
           user_id?: string
@@ -3114,6 +3117,54 @@ export type Database = {
           target_role?: string | null
           timezone?: string | null
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scheduled_plan_changes: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          effective_at: string
+          environment: string
+          id: string
+          last_error: string | null
+          status: string
+          subscription_id: string
+          target_interval: string
+          target_price_id: string
+          target_tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          effective_at: string
+          environment?: string
+          id?: string
+          last_error?: string | null
+          status?: string
+          subscription_id: string
+          target_interval: string
+          target_price_id: string
+          target_tier: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          effective_at?: string
+          environment?: string
+          id?: string
+          last_error?: string | null
+          status?: string
+          subscription_id?: string
+          target_interval?: string
+          target_price_id?: string
+          target_tier?: string
           updated_at?: string
           user_id?: string
         }
@@ -4391,6 +4442,16 @@ export type Database = {
       }
       reverse_commission_for_source: {
         Args: { _reason?: string; _source_record_id: string }
+        Returns: number
+      }
+      rollover_for: {
+        Args: {
+          _env: string
+          _feature: string
+          _period: string
+          _tier: string
+          _user_id: string
+        }
         Returns: number
       }
       submit_verification_appeal: {

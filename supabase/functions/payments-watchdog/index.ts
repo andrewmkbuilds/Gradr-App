@@ -18,6 +18,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
 import { DUNNING_MAX_ATTEMPTS, nextDunningRetry } from "../_shared/billingLedger.ts";
+import { gatewayFetch, type PaddleEnv } from "../_shared/paddle.ts";
 
 const MAX_REPLAY_ATTEMPTS = 5;
 /** Backoff per attempt, in minutes. */
@@ -355,6 +356,93 @@ async function runDunning(): Promise<{ notified: number; paused: number }> {
   return { notified, paused };
 }
 
+/**
+ * Applies downgrades that were queued for the next renewal. Runs after the
+ * paid period ends, so the customer always keeps the tier they paid for.
+ */
+async function applyScheduledPlanChanges(): Promise<{ applied: number; failed: number }> {
+  const db = admin();
+  const { data: due } = await db
+    .from("scheduled_plan_changes")
+    .select("id, user_id, environment, subscription_id, target_price_id, target_tier, target_interval")
+    .eq("status", "pending")
+    .lte("effective_at", new Date().toISOString())
+    .limit(50);
+
+  let applied = 0;
+  let failed = 0;
+
+  for (const row of due ?? []) {
+    const env = (row.environment === "live" ? "live" : "sandbox") as PaddleEnv;
+    try {
+      const lookup = await gatewayFetch(
+        env,
+        `/prices?external_id=${encodeURIComponent(row.target_price_id)}&status=active`,
+      );
+      const paddlePriceId = lookup.ok ? (await lookup.json())?.data?.[0]?.id : null;
+      if (!paddlePriceId) throw new Error(`price_unavailable:${row.target_price_id}`);
+
+      const res = await gatewayFetch(env, `/subscriptions/${row.subscription_id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          items: [{ price_id: paddlePriceId, quantity: 1 }],
+          proration_billing_mode: "do_not_bill",
+        }),
+      });
+      if (!res.ok) throw new Error(`paddle_${res.status}:${await res.text()}`);
+
+      await db.from("scheduled_plan_changes")
+        .update({ status: "applied", applied_at: new Date().toISOString(), last_error: null })
+        .eq("id", row.id);
+
+      await db.from("subscribers").update({
+        subscription_tier: row.target_tier,
+        billing_interval: row.target_interval,
+        price_id: row.target_price_id,
+      }).eq("user_id", row.user_id).eq("environment", env);
+
+      await db.from("billing_events").insert({
+        user_id: row.user_id,
+        environment: env,
+        event_type: "plan_downgraded",
+        title: `Switched to ${row.target_tier}`,
+        description: "The scheduled plan change took effect at the start of this billing period.",
+        subscription_id: row.subscription_id,
+      });
+
+      await db.rpc("enqueue_notification", {
+        _user_id: row.user_id,
+        _type: "billing_plan_changed",
+        _title: `You're now on ${row.target_tier}`,
+        _body: "Your scheduled plan change is live. Purchased credits are unaffected.",
+        _link: "/subscription",
+        _metadata: { subscription_id: row.subscription_id },
+      });
+
+      applied += 1;
+    } catch (err) {
+      failed += 1;
+      await db.from("scheduled_plan_changes")
+        .update({ last_error: String(err).slice(0, 500) })
+        .eq("id", row.id);
+      await raiseAlert({
+        alertType: "plan_change_failed",
+        severity: "warning",
+        environment: env,
+        subject: "Scheduled plan change failed",
+        dedupeKey: `plan-change-${row.id}`,
+        details: {
+          subscription_id: row.subscription_id,
+          target_price_id: row.target_price_id,
+          error: String(err).slice(0, 300),
+        },
+      });
+    }
+  }
+
+  return { applied, failed };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -383,7 +471,8 @@ Deno.serve(async (req) => {
     const retry = await runRetryQueue();
     const delayed = await checkDelayedEntitlements();
     const dunning = await runDunning();
-    return json({ ok: true, retry, delayedEntitlements: delayed, dunning });
+    const planChanges = await applyScheduledPlanChanges();
+    return json({ ok: true, retry, delayedEntitlements: delayed, dunning, planChanges });
   } catch (err) {
     console.error("payments-watchdog error", err);
     return json({ error: "watchdog_failed", message: String(err) }, 500);

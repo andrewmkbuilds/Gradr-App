@@ -82,3 +82,16 @@ export const CREDIT_PACKS: Record<
   interview_pack_3: { label: "Interview Prep Pack (3 sessions)", credits: 3, kind: "interview" },
   interview_pack_10: { label: "Interview Prep Pack (10 sessions)", credits: 10, kind: "interview" },
 };
+
+/**
+ * One-time thank-you credits for committing to a yearly plan. Granted once per
+ * subscription (keyed on the Paddle subscription id) when an annual plan starts.
+ */
+export const ANNUAL_BONUS: Record<
+  "starter" | "pro" | "advanced",
+  { application: number; interview: number }
+> = {
+  starter: { application: 10, interview: 3 },
+  pro: { application: 25, interview: 6 },
+  advanced: { application: 50, interview: 12 },
+};

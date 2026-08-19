@@ -18,6 +18,12 @@ export interface SubscriptionDetails {
     type?: string;
     card?: { type?: string; last4?: string; expiry_month?: number; expiry_year?: number };
   } | null;
+  pendingPlanChange: {
+    target_tier: string;
+    target_interval: string;
+    target_price_id: string;
+    effective_at: string;
+  } | null;
   dunning: {
     status: string;
     attempt_count: number;
@@ -136,5 +142,34 @@ export function useSubscriptionActions() {
     onError: () => toast.error("We couldn't restore your subscription. Try again shortly."),
   });
 
-  return { updatePaymentMethod, cancel, resume };
+  const changePlan = useMutation({
+    mutationFn: (vars: { priceId: string; tier: string; interval: string }) =>
+      callSubscriptionFn<{ ok: boolean; applied: boolean; scheduled: boolean; effectiveAt?: string }>(
+        "change_plan",
+        { priceId: vars.priceId },
+      ),
+    onSuccess: (data) => {
+      if (data?.applied) toast.success("Upgraded — your new plan is active right away.");
+      else if (data?.scheduled) {
+        toast.success(
+          data.effectiveAt
+            ? `Change scheduled for ${new Date(data.effectiveAt).toLocaleDateString()} — you keep your current plan until then.`
+            : "Change scheduled for your next renewal.",
+        );
+      }
+      invalidate();
+    },
+    onError: () => toast.error("We couldn't change your plan right now. Try again shortly."),
+  });
+
+  const cancelScheduledPlanChange = useMutation({
+    mutationFn: () => callSubscriptionFn<{ ok: boolean }>("cancel_scheduled_plan_change"),
+    onSuccess: () => {
+      toast.success("Scheduled plan change cancelled.");
+      invalidate();
+    },
+    onError: () => toast.error("We couldn't cancel the scheduled change. Try again shortly."),
+  });
+
+  return { updatePaymentMethod, cancel, resume, changePlan, cancelScheduledPlanChange };
 }

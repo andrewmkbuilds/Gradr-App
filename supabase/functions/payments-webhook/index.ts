@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
+  ANNUAL_BONUS,
   CREDIT_PACKS,
   EventName,
   PLAN_PRICES,
@@ -192,6 +193,10 @@ async function upsertSubscription(data: any, env: PaddleEnv) {
     { onConflict: "user_id,environment" },
   );
 
+  if (entitled && plan?.interval === "annual" && plan.tier) {
+    await grantAnnualBonus(userId, String(data.id), plan.tier, env);
+  }
+
   if (entitled) {
     // Idempotency is keyed on the subscription id so Paddle retries of the same
     // created event never double-send the welcome-to-Pro mail.
@@ -230,6 +235,13 @@ async function updateSubscription(data: any, env: PaddleEnv) {
     .eq("stripe_subscription_id", data.id)
     .eq("environment", env)
     .select("user_id");
+
+  // Switching to yearly billing earns the annual bonus too (granted once per
+  // subscription, so a renewal or a later change never repeats it).
+  const changedUser = (updated?.[0]?.user_id as string | undefined) ?? data?.customData?.userId ?? null;
+  if (entitled && changedUser && plan?.interval === "annual" && plan.tier) {
+    await grantAnnualBonus(changedUser, String(data.id), plan.tier, env);
+  }
 
   // Out-of-order delivery: an update can arrive before the created event.
   // Rebuild the row from the event rather than dropping the entitlement.
@@ -484,6 +496,79 @@ async function reverseAffiliateCommission(data: any, env: PaddleEnv, reason: str
 }
 
 
+
+/**
+ * Annual-plan bonus credits. Idempotent: the grant is recorded in `purchases`
+ * under a synthetic id derived from the subscription, so webhook retries and
+ * renewals of the same subscription never grant twice.
+ */
+async function grantAnnualBonus(
+  userId: string,
+  subscriptionId: string,
+  tier: "starter" | "pro" | "advanced",
+  env: PaddleEnv,
+) {
+  const bonus = ANNUAL_BONUS[tier];
+  if (!bonus) return;
+  const grantId = `annual-bonus-${subscriptionId}`;
+
+  const { data: existing } = await db()
+    .from("purchases")
+    .select("id")
+    .eq("stripe_session_id", grantId)
+    .eq("environment", env)
+    .maybeSingle();
+  if (existing) return;
+
+  await db().from("purchases").insert({
+    user_id: userId,
+    stripe_session_id: grantId,
+    environment: env,
+    pack_key: "annual_bonus",
+    pack_label: `Annual plan bonus (${tier})`,
+    quantity: 1,
+    credits_granted: bonus.application + bonus.interview,
+    amount_total: 0,
+    currency: "usd",
+    status: "paid",
+  });
+
+  const { data: current } = await db()
+    .from("usage_credits")
+    .select("application_credits, interview_credits")
+    .eq("user_id", userId)
+    .eq("environment", env)
+    .maybeSingle();
+
+  await db().from("usage_credits").upsert(
+    {
+      user_id: userId,
+      environment: env,
+      application_credits: Number(current?.application_credits ?? 0) + bonus.application,
+      interview_credits: Number(current?.interview_credits ?? 0) + bonus.interview,
+    },
+    { onConflict: "user_id,environment" },
+  );
+
+  await db().rpc("enqueue_notification", {
+    _user_id: userId,
+    _type: "credits_bonus",
+    _title: "Annual plan bonus credits added",
+    _body: `${bonus.application} extra application credits and ${bonus.interview} interview credits are in your account.`,
+    _link: "/credits",
+    _metadata: { subscription_id: subscriptionId, tier },
+  });
+
+  await recordBillingEvent({
+    userId,
+    environment: env,
+    eventType: "credits_granted",
+    title: "Annual plan bonus credits",
+    description: `${bonus.application} application + ${bonus.interview} interview credits for choosing yearly billing.`,
+    subscriptionId,
+    metadata: { tier, ...bonus },
+  });
+}
 
 /** One-off credit packs are granted from completed transactions. */
 // deno-lint-ignore no-explicit-any

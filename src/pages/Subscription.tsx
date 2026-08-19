@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, CalendarClock, CreditCard, Loader2, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, CalendarClock, CreditCard, Loader2, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,6 +22,8 @@ import { useRealtimeBilling } from "@/hooks/useRealtimeBilling";
 import { useSubscriptionActions, useSubscriptionDetails } from "@/hooks/useSubscriptionManagement";
 import { PLAN_PRICING, type PlanId } from "@/config/pricing";
 
+const TIER_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, advanced: 3 };
+
 function formatDay(value: string | null | undefined) {
   if (!value) return null;
   return new Date(value).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -38,7 +40,7 @@ export default function Subscription() {
   const navigate = useNavigate();
   useRealtimeBilling();
   const { data, isLoading } = useSubscriptionDetails();
-  const { updatePaymentMethod, cancel, resume } = useSubscriptionActions();
+  const { updatePaymentMethod, cancel, resume, changePlan, cancelScheduledPlanChange } = useSubscriptionActions();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [immediate, setImmediate] = useState(false);
   const [reason, setReason] = useState("");
@@ -49,6 +51,23 @@ export default function Subscription() {
   const renews = formatDay(data?.nextBilledAt ?? data?.currentPeriodEnd);
   const nextCharge = formatAmount(data?.nextChargeAmount, data?.currency);
   const dunningActive = data?.dunning?.status === "active";
+  const pending = data?.pendingPlanChange ?? null;
+
+  const currentRank = TIER_RANK[planId] ?? 0;
+  const currentInterval = data?.interval === "annual" ? "annual" : "monthly";
+
+  /** Every other plan/interval combination the customer can move to. */
+  const switchOptions = (["starter", "pro", "advanced"] as const).flatMap((tier) =>
+    (["monthly", "annual"] as const).map((interval) => ({
+      tier,
+      interval,
+      priceId: PLAN_PRICING[tier].priceId![interval],
+      name: PLAN_PRICING[tier].name,
+      amount: interval === "annual" ? PLAN_PRICING[tier].annual : PLAN_PRICING[tier].monthly,
+      isUpgrade: TIER_RANK[tier] > currentRank ||
+        (TIER_RANK[tier] === currentRank && interval === "annual" && currentInterval === "monthly"),
+    })),
+  ).filter((o) => !(o.tier === planId && o.interval === currentInterval));
 
   const openCancel = (immediateCancel: boolean) => {
     setImmediate(immediateCancel);
@@ -134,8 +153,8 @@ export default function Subscription() {
                   {data.cancelAtPeriodEnd && <Badge variant="outline">Cancels at period end</Badge>}
                 </div>
               </div>
-              <Button variant="outline" className="gap-2" onClick={() => navigate("/pricing")}>
-                Change plan
+              <Button variant="ghost" className="gap-2" onClick={() => navigate("/pricing")}>
+                Compare plans
               </Button>
             </div>
 
@@ -195,6 +214,77 @@ export default function Subscription() {
               <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => openCancel(true)}>
                 Cancel immediately
               </Button>
+            </div>
+          </Card>
+
+          {pending && (
+            <Card className="border-primary/30 bg-primary/5 p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Switching to {PLAN_PRICING[pending.target_tier as PlanId]?.name ?? pending.target_tier}
+                    {pending.target_interval === "annual" ? " (Annual)" : " (Monthly)"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    You keep your current plan until {formatDay(pending.effective_at) ?? "your renewal date"} — the change
+                    applies then, so nothing you paid for is lost.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => cancelScheduledPlanChange.mutate()}
+                  disabled={cancelScheduledPlanChange.isPending}
+                >
+                  {cancelScheduledPlanChange.isPending
+                    ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                    : null}
+                  Keep current plan
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          <Card className="space-y-4 p-6">
+            <div className="space-y-1">
+              <h2 className="text-sm font-semibold text-foreground">Change plan</h2>
+              <p className="text-sm text-muted-foreground">
+                Upgrades start immediately and are charged pro rata. Downgrades take effect at your next renewal, so you
+                keep the plan you paid for until then.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {switchOptions.map((option) => (
+                <div
+                  key={option.priceId}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-4"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      Gradr {option.name} {option.interval === "annual" ? "(Annual)" : "(Monthly)"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatAmount(option.amount, "USD")} / {option.interval === "annual" ? "year" : "month"}
+                      {option.interval === "annual" ? " · includes bonus credits" : ""}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={option.isUpgrade ? "default" : "outline"}
+                    className="gap-1.5 whitespace-nowrap"
+                    onClick={() =>
+                      changePlan.mutate({ priceId: option.priceId, tier: option.tier, interval: option.interval })}
+                    disabled={changePlan.isPending}
+                  >
+                    {changePlan.isPending
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                      : option.isUpgrade
+                        ? <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+                        : <ArrowDownRight className="h-3.5 w-3.5" aria-hidden />}
+                    {option.isUpgrade ? "Upgrade now" : "Switch at renewal"}
+                  </Button>
+                </div>
+              ))}
             </div>
           </Card>
         </>
