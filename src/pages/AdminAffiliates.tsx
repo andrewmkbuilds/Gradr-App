@@ -150,7 +150,7 @@ function ApplicationsPanel() {
                     a.status === "suspended" ? "bg-warning/10 text-warning" :
                     "bg-primary/10 text-primary"
                   }`}>{a.status}</span>
-                  <span className="text-xs text-muted-foreground">{format(new Date(a.created_at), "MMM d")}</span>
+                  <span className="text-xs text-muted-foreground">{a.created_at ? format(new Date(a.created_at), "MMM d") : "—"}</span>
                 </div>
               </summary>
               <div className="px-4 pb-4 space-y-3 border-t border-border pt-4">
@@ -232,7 +232,7 @@ function AffiliatesPanel() {
               <td>
                 <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
               </td>
-              <td className="text-xs text-muted-foreground">{format(new Date(p.approval_date), "MMM d, yyyy")}</td>
+              <td className="text-xs text-muted-foreground">{p.approval_date ? format(new Date(p.approval_date), "MMM d, yyyy") : "—"}</td>
               <td></td>
             </tr>
           ))}
