@@ -405,7 +405,7 @@ export default function Auth() {
                 onChange={(e) => { setFullName(e.target.value); setFieldErrors((p) => ({ ...p, fullName: undefined })); }}
                 aria-invalid={!!fieldErrors.fullName}
                 aria-describedby={fieldErrors.fullName ? "error-fullName" : undefined}
-                className="h-12 pl-10"
+                className="pl-10"
               />
             </div>
             {fieldErrors.fullName && (
@@ -427,7 +427,7 @@ export default function Auth() {
               onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }}
               aria-invalid={!!fieldErrors.email || !!formError}
               aria-describedby={fieldErrors.email ? "error-email" : undefined}
-              className="h-12 pl-10"
+              className="pl-10"
             />
           </div>
           {fieldErrors.email && (
@@ -447,7 +447,7 @@ export default function Auth() {
               onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }}
               aria-invalid={!!fieldErrors.password}
               aria-describedby={fieldErrors.password ? "error-password" : undefined}
-              className="h-12 pl-10"
+              className="pl-10"
             />
           </div>
           {fieldErrors.password && (

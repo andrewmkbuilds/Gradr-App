@@ -70,8 +70,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           {/* Animated logo: conic-spin ring + center mark + stop-motion sparkle */}
           <div className="flex items-center gap-4">
             <div className="relative h-14 w-14 shrink-0">
-              <div className="conic-spin absolute inset-0 rounded-2xl opacity-90" />
-              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl" />
+              <div className="conic-spin absolute inset-0 rounded-control opacity-90" />
+              <BrandLogo size={52} className="absolute inset-[2px] rounded-control bg-shell" />
             </div>
             {/* Brand mark, not a heading — each auth page owns the single page <h1>. */}
             <div className="text-3xl font-bold tracking-tight kinetic-text">{TITLE}</div>
@@ -158,8 +158,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               so the headline must render here or it disappears entirely). */}
           <div className="lg:hidden text-center space-y-3">
             <div className="relative h-14 w-14 mx-auto">
-              <div className="conic-spin absolute inset-0 rounded-2xl opacity-90" />
-              <BrandLogo size={52} className="absolute inset-[2px] rounded-2xl" />
+              <div className="conic-spin absolute inset-0 rounded-control opacity-90" />
+              <BrandLogo size={52} className="absolute inset-[2px] rounded-control bg-shell" />
             </div>
             <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
             <p
