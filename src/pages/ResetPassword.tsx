@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input, Text } from "@/design-system/gradr-9b9b95";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -60,7 +59,7 @@ export default function ResetPassword() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-4">
           <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-muted-foreground">Verifying reset link...</p>
+          <p className="text-body-sm text-muted-foreground">Verifying reset link...</p>
         </div>
       </div>
     );
@@ -69,10 +68,10 @@ export default function ResetPassword() {
   return (
     <AuthLayout>
       <div className="space-y-2">
-        <h1 className="text-xl font-semibold text-foreground">Set a new password</h1>
-        <p className="text-sm text-muted-foreground">
+        <Text variant="h4" as="h1">Set a new password</Text>
+        <Text variant="body-sm" tone="muted">
           Choose a strong password for your account.
-        </p>
+        </Text>
       </div>
 
       <form onSubmit={handleUpdate} className="space-y-3.5">
@@ -85,7 +84,7 @@ export default function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            className="pl-10 h-11 bg-secondary border-border"
+            className="h-12 pl-10"
           />
         </div>
         <div className="relative">
@@ -97,12 +96,13 @@ export default function ResetPassword() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength={6}
-            className="pl-10 h-11 bg-secondary border-border"
+            className="h-12 pl-10"
           />
         </div>
         <Button
           type="submit"
-          className="w-full h-11 bg-primary text-primary-foreground font-medium gap-2"
+          size="lg"
+          className="w-full"
           disabled={loading}
         >
           {loading ? (

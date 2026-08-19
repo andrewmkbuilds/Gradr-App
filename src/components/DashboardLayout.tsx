@@ -32,7 +32,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <AmbientBackground />
       <a
         href="#main-content"
-        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-50 focus-visible:rounded-md focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-medium focus-visible:text-primary-foreground"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-50 focus-visible:rounded-control focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-button focus-visible:font-medium focus-visible:text-primary-foreground"
       >
         Skip to main content
       </a>
@@ -54,7 +54,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             className={cn(
               "glass-bar sticky top-0 z-30 flex shrink-0 items-center justify-between gap-3 px-4 sm:px-6 transition-[backdrop-filter,box-shadow,background-color] duration-300",
               scrolled
-                ? "border-b border-border/80 shadow-[0_10px_30px_-24px_hsl(var(--foreground)/0.55)] backdrop-blur-2xl"
+                ? "border-b border-border/80 shadow-float backdrop-blur-2xl"
                 : "border-b border-transparent backdrop-blur-md",
             )}
           >

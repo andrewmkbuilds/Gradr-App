@@ -49,3 +49,43 @@ Run the whole guard locally before shipping a wave:
 ```bash
 bun run check:no-tanstack && bun run lint && bunx vitest run src/test/architectureGuard.test.tsx src/test/navRoutes.test.ts
 ```
+
+## Design system (Gradr)
+
+The attached Gradr design system is vendored at `src/design-system/gradr-9b9b95/`.
+An in-app reference with live examples lives at `/admin/design-system/usage`.
+
+### Importing components
+
+```tsx
+import { Alert, Badge, Button, Card, CardDescription, CardTitle, FormField, Input, Label, Text, Textarea } from "@/design-system/gradr-9b9b95";
+```
+
+Always import from the package root — never from a nested file path.
+
+| Component | Key props |
+| --- | --- |
+| `Button` | `variant`: primary · accent · outline · ghost · destructive · link — `size`: sm · md · lg · icon · icon-sm · icon-lg · inline — `loading` |
+| `Card` / `CardTitle` / `CardDescription` | `variant`: outline · raised · float — `padding`: none · md · lg |
+| `Input` / `Textarea` | `invalid` |
+| `FormField` | `label`, `help`, `error`, `required` (owns id + `aria-describedby`) |
+| `Text` | `variant`: h1–h6 · lead · body · body-sm · caption · overline · button · code — `tone`: default · muted · primary · accent · destructive — `as` |
+| `Badge` | `variant`: neutral · primary · accent · danger · outline |
+| `Alert` | `variant`: info · primary · danger — `title` |
+
+### Tokens
+
+Tokens are wired into Tailwind through `src/styles/gradr-design-system.css` +
+`tailwind.config.ts` (this app is on Tailwind v3, the library ships v4 `@theme`).
+
+- **Colour:** `background`, `foreground`, `surface`, `surface-muted`, `border`, `muted-foreground`, `primary`, `accent`, `destructive`, `ring`, plus the brand ramp `harbor`, `hull`, `shell`, `fog`, `ink`, `slate`, `harbor-soft`, `hull-soft`, `success`.
+- **Typography:** `font-display`, `font-sans`, `text-h1`…`text-h6`, `text-body-lg`, `text-body`, `text-body-sm`, `text-caption`, `text-overline`, `text-button`, `text-code`.
+- **Radius:** `rounded-card` (panels), `rounded-control` (buttons, inputs, chips).
+- **Elevation:** `shadow-raise`, `shadow-float`.
+
+### Rules
+
+- No raw hex/rgb/hsl values and no pixel literals for type or radii — use the token classes.
+- Express variation via `variant`/`size` props; `className` on a design-system component is for placement only (width, margin, grid position), never skin.
+- Light and dark resolve from the same tokens; the `.dark` class on `<html>` is the only switch.
+- Never edit files under `src/design-system/gradr-9b9b95/` — they are replaced on every library update. Adjust `src/styles/gradr-design-system.css` instead.

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Alert, Button, Input, Text } from "@/design-system/gradr-9b9b95";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Mail, ArrowLeft, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -67,13 +66,12 @@ export default function ForgotPassword() {
   };
 
   const errorBlock = error && (
-    <div
-      role="alert"
-      className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
-    >
-      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-      <span className="break-words">{error}</span>
-    </div>
+    <Alert variant="danger" role="alert">
+      <span className="flex items-start gap-2">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className="break-words">{error}</span>
+      </span>
+    </Alert>
   );
 
   return (
@@ -84,35 +82,35 @@ export default function ForgotPassword() {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
               <CheckCircle className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
-            <h1 className="text-center text-xl font-semibold text-foreground">Check your email</h1>
-            <p className="text-center text-sm text-muted-foreground">
+            <Text variant="h4" as="h1" className="text-center">Check your email</Text>
+            <Text variant="body-sm" tone="muted" className="text-center">
               We sent a reset link to{" "}
               <span className="font-medium text-foreground break-words">{email}</span>
-            </p>
+            </Text>
           </div>
 
           {errorBlock}
           {notice && (
-            <div
-              role="status"
-              className="flex items-start gap-2 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm text-foreground"
-            >
-              <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-              <span>{notice}</span>
-            </div>
+            <Alert variant="primary" role="status">
+              <span className="flex items-start gap-2">
+                <CheckCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{notice}</span>
+              </span>
+            </Alert>
           )}
 
           <div className="space-y-3">
             <Button
               variant="outline"
-              className="h-11 w-full border-border"
+              size="lg"
+              className="w-full"
               onClick={handleResend}
               disabled={loading || cooldown > 0}
             >
               {cooldown > 0 ? `Resend in ${cooldown}s` : loading ? "Sending…" : "Resend reset link"}
             </Button>
             <Link to={authPath(nextParam)}>
-              <Button variant="ghost" className="h-11 w-full gap-2">
+              <Button variant="ghost" size="lg" className="w-full">
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 Back to sign in
               </Button>
@@ -122,10 +120,10 @@ export default function ForgotPassword() {
       ) : (
         <div className="space-y-6">
           <div className="space-y-2">
-            <h1 className="text-xl font-semibold text-foreground">Reset your password</h1>
-            <p className="text-sm text-muted-foreground">
+            <Text variant="h4" as="h1">Reset your password</Text>
+            <Text variant="body-sm" tone="muted">
               Enter your email and we'll send you a reset link.
-            </p>
+            </Text>
           </div>
 
           {errorBlock}
@@ -144,12 +142,13 @@ export default function ForgotPassword() {
                 required
                 autoComplete="email"
                 aria-invalid={!!error}
-                className="h-11 border-border bg-secondary pl-10"
+                className="h-12 pl-10"
               />
             </div>
             <Button
               type="submit"
-              className="h-11 w-full gap-2 bg-primary font-medium text-primary-foreground"
+              size="lg"
+              className="w-full"
               disabled={loading}
             >
               {loading ? (
@@ -168,7 +167,7 @@ export default function ForgotPassword() {
 
           <Link
             to={authPath(nextParam)}
-            className="flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+            className="flex items-center justify-center gap-2 text-body-sm text-muted-foreground transition-colors hover:text-primary"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Back to sign in

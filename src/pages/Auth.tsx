@@ -5,8 +5,7 @@ import { urlFor } from "@/config/domains";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Alert, Button, Input, Text } from "@/design-system/gradr-9b9b95";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Mail, Lock, User, ArrowRight, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import {
@@ -273,8 +272,8 @@ export default function Auth() {
             <CheckCircle className="h-6 w-6 text-primary" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-semibold text-foreground">Confirm your email</h1>
-            <p className="text-sm text-muted-foreground">
+            <Text variant="h4" as="h1">Confirm your email</Text>
+            <p className="text-body-sm text-muted-foreground">
               We sent a confirmation link to{" "}
               <span className="font-medium text-foreground">{pendingEmail}</span>. Open it and
               you'll land straight on{" "}
@@ -282,20 +281,21 @@ export default function Auth() {
             </p>
           </div>
           {isGuest && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-caption text-muted-foreground">
               Your guest work is saved — keep using the app while you confirm.
             </p>
           )}
           <div className="space-y-2">
             {isGuest && (
-              <Button className="w-full h-11" onClick={() => navigate(nextTarget, { replace: true })}>
+              <Button size="lg" className="w-full" onClick={() => navigate(nextTarget, { replace: true })}>
                 Continue for now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}
             <Button
               variant="outline"
-              className="w-full h-11 gap-2"
+              size="lg"
+              className="w-full"
               onClick={handleResendVerification}
               disabled={resending || resendIn > 0}
             >
@@ -306,12 +306,13 @@ export default function Auth() {
                   ? "Sending…"
                   : "Resend verification email"}
             </Button>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-caption text-muted-foreground">
               No email after a minute? Check your spam folder before resending.
             </p>
             <Button
               variant="ghost"
-              className="w-full h-11 text-muted-foreground"
+              size="lg"
+              className="w-full"
               onClick={() => setPendingEmail(null)}
             >
               Use a different email
@@ -328,21 +329,22 @@ export default function Auth() {
 
 
       <div className="space-y-2">
-        <h1 className="text-xl font-semibold text-foreground">
+        <Text variant="h4" as="h1">
           {isSignUp ? "Create your account" : "Sign in to Gradr"}
-        </h1>
-        <p className="text-sm text-muted-foreground">
+        </Text>
+        <Text variant="body-sm" tone="muted">
           {isSignUp
             ? "Start dominating your job search."
             : "Sign in to continue your career strategy."}
-        </p>
+        </Text>
       </div>
 
       {/* OAuth buttons */}
       <div className="space-y-2.5">
         <Button
           variant="outline"
-          className="w-full h-11 border-border text-foreground hover:bg-secondary justify-center gap-3"
+          size="lg"
+          className="w-full"
           onClick={() => handleOAuth("google")}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -355,7 +357,8 @@ export default function Auth() {
         </Button>
         <Button
           variant="outline"
-          className="w-full h-11 border-border text-foreground hover:bg-secondary justify-center gap-3"
+          size="lg"
+          className="w-full"
           onClick={() => handleOAuth("apple")}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -365,7 +368,8 @@ export default function Auth() {
         </Button>
         <Button
           variant="outline"
-          className="w-full h-11 border-border text-foreground hover:bg-secondary justify-center gap-3"
+          size="lg"
+          className="w-full"
           onClick={() => handleOAuth("microsoft")}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -380,8 +384,8 @@ export default function Auth() {
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t border-border" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase tracking-wider">
-          <span className="bg-background px-3 text-muted-foreground">or</span>
+        <div className="relative flex justify-center text-overline">
+          <span className="bg-surface px-3 text-muted-foreground">or</span>
         </div>
       </div>
 
@@ -401,11 +405,11 @@ export default function Auth() {
                 onChange={(e) => { setFullName(e.target.value); setFieldErrors((p) => ({ ...p, fullName: undefined })); }}
                 aria-invalid={!!fieldErrors.fullName}
                 aria-describedby={fieldErrors.fullName ? "error-fullName" : undefined}
-                className="pl-10 h-11 bg-secondary border-border"
+                className="h-12 pl-10"
               />
             </div>
             {fieldErrors.fullName && (
-              <p id="error-fullName" className="text-xs text-destructive">{fieldErrors.fullName}</p>
+              <p id="error-fullName" className="text-caption text-destructive">{fieldErrors.fullName}</p>
             )}
           </div>
         )}
@@ -423,11 +427,11 @@ export default function Auth() {
               onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }}
               aria-invalid={!!fieldErrors.email || !!formError}
               aria-describedby={fieldErrors.email ? "error-email" : undefined}
-              className="pl-10 h-11 bg-secondary border-border"
+              className="h-12 pl-10"
             />
           </div>
           {fieldErrors.email && (
-            <p id="error-email" className="text-xs text-destructive">{fieldErrors.email}</p>
+            <p id="error-email" className="text-caption text-destructive">{fieldErrors.email}</p>
           )}
         </div>
         <div className="space-y-1.5">
@@ -443,11 +447,11 @@ export default function Auth() {
               onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }}
               aria-invalid={!!fieldErrors.password}
               aria-describedby={fieldErrors.password ? "error-password" : undefined}
-              className="pl-10 h-11 bg-secondary border-border"
+              className="h-12 pl-10"
             />
           </div>
           {fieldErrors.password && (
-            <p id="error-password" className="text-xs text-destructive">{fieldErrors.password}</p>
+            <p id="error-password" className="text-caption text-destructive">{fieldErrors.password}</p>
           )}
         </div>
 
@@ -456,7 +460,7 @@ export default function Auth() {
           <div className="flex justify-end">
             <Link
               to={nextParam ? `/forgot-password?next=${encodeURIComponent(nextParam)}` : "/forgot-password"}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              className="text-caption text-muted-foreground transition-colors hover:text-primary"
             >
               Forgot password?
             </Link>
@@ -465,20 +469,19 @@ export default function Auth() {
         )}
 
         {formError && (
-          <p
-            role="alert"
-            aria-live="polite"
-            className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-          >
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{formError}</span>
-          </p>
+          <Alert variant="danger" role="alert" aria-live="polite">
+            <span className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{formError}</span>
+            </span>
+          </Alert>
         )}
 
         <Button
           type="submit"
 
-          className="w-full h-11 bg-primary text-primary-foreground font-medium gap-2"
+          size="lg"
+          className="w-full"
           disabled={loading}
         >
           {loading ? (
@@ -495,7 +498,7 @@ export default function Auth() {
         </Button>
 
         {isSignUp && (
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          <p className="text-center text-caption text-muted-foreground">
             By creating an account you agree to our{" "}
             <Link to="/terms" className="text-primary underline underline-offset-2">
               Terms &amp; Conditions
@@ -512,24 +515,25 @@ export default function Auth() {
       <Button
         type="button"
         variant="ghost"
-        className="w-full h-11 text-muted-foreground hover:text-foreground"
+        size="lg"
+        className="w-full"
         onClick={handleGuest}
         disabled={loading}
       >
         Continue as guest
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <Text variant="body-sm" tone="muted" className="text-center">
         {isSignUp ? "Already have an account?" : "No account yet?"}{" "}
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="inline"
           onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); }}
-          className="text-primary hover:underline font-medium"
-
         >
           {isSignUp ? "Sign in" : "Create one"}
-        </button>
-      </p>
+        </Button>
+      </Text>
     </AuthLayout>
   );
 }

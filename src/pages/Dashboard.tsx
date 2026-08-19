@@ -13,6 +13,7 @@ import { CreditsBalance } from "@/components/CreditsBalance";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
 import { UsageBars } from "@/components/UsageBars";
 import { Surface, SurfaceHeader } from "@/components/ui/surface";
+import { Badge, Button, Text } from "@/design-system/gradr-9b9b95";
 import { CareerReadiness, type ReadinessPillar } from "@/components/dashboard/CareerReadiness";
 import { ActivityChart, PipelineFunnelChart, type ActivityPoint } from "@/components/dashboard/DashboardCharts";
 import { CountUp } from "@/components/motion";
@@ -287,8 +288,8 @@ export default function Dashboard() {
   return (
     <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6">
       <div>
-        <h1 className="type-h2 tracking-tight text-foreground sm:text-2xl">Career Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Your AI-powered career command center</p>
+        <Text variant="h2" as="h1">Career Dashboard</Text>
+        <Text variant="body" tone="muted" className="mt-1">Your AI-powered career command center</Text>
       </div>
 
       <PaymentIssueBanner />
@@ -324,9 +325,9 @@ export default function Dashboard() {
           title="Pipeline by Stage"
           icon={Briefcase}
           action={
-            <button onClick={() => navigate("/pipeline")} className="link-accent text-xs font-medium">
+            <Button onClick={() => navigate("/pipeline")} variant="link" size="inline" className="text-caption">
               View pipeline →
-            </button>
+            </Button>
           }
         />
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
@@ -334,13 +335,13 @@ export default function Dashboard() {
             <button
               key={stage.key}
               onClick={() => navigate("/pipeline")}
-              className="elev-1 elev-interactive flex min-h-11 flex-col items-start rounded-lg p-3 text-left sm:p-4"
+              className="elev-1 elev-interactive flex min-h-11 flex-col items-start rounded-control p-3 text-left sm:p-4"
             >
               <stage.icon className={`h-4 w-4 ${stage.color} mb-2`} />
-              <span className="stat-value text-foreground">
+              <span className="text-h4 font-display text-foreground">
                 <CountUp to={stages[stage.key]} duration={0.9} />
               </span>
-              <span className="mt-0.5 text-xs text-muted-foreground">{stage.label}</span>
+              <span className="mt-0.5 text-caption text-muted-foreground">{stage.label}</span>
             </button>
           ))}
         </div>
@@ -360,7 +361,7 @@ export default function Dashboard() {
               { label: "Impact Statements", value: s.impactScore },
             ].map((item) => (
               <div key={item.label}>
-                <div className="flex justify-between text-xs mb-1">
+                <div className="flex justify-between text-caption mb-1">
                   <span className="text-muted-foreground">{item.label}</span>
                   <span className="text-foreground">{item.value}%</span>
                 </div>
@@ -378,21 +379,21 @@ export default function Dashboard() {
         {/* Upcoming Reminders */}
         <Surface level={2} className="lg:col-span-2">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Bell className="h-4 w-4 text-mahogany" />
+            <h3 className="flex items-center gap-2 text-body-sm font-semibold text-foreground">
+              <Bell className="h-4 w-4 text-accent" />
               Upcoming Reminders
               {overdueCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">
+                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-caption text-destructive">
                   <AlertCircle className="h-3 w-3" /> {overdueCount} overdue
                 </span>
               )}
             </h3>
-            <button onClick={() => navigate("/pipeline")} className="link-accent text-xs font-medium">
+            <Button onClick={() => navigate("/pipeline")} variant="link" size="inline" className="text-caption">
               Manage →
-            </button>
+            </Button>
           </div>
           {reminders.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">
+            <p className="text-body-sm text-muted-foreground py-8 text-center">
               No upcoming reminders. Add follow-ups from the Pipeline.
             </p>
           ) : (
@@ -402,16 +403,16 @@ export default function Dashboard() {
                 return (
                   <div
                     key={r.id}
-                    className="elev-1 elev-interactive flex items-center justify-between rounded-lg p-3"
+                    className="elev-1 elev-interactive flex items-center justify-between rounded-control p-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{r.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-body-sm font-medium text-foreground truncate">{r.title}</p>
+                      <p className="text-caption text-muted-foreground truncate">
                         {r.tracked_jobs?.title || "—"}
                         {r.tracked_jobs?.company ? ` · ${r.tracked_jobs.company}` : ""}
                       </p>
                     </div>
-                    <span className={`text-xs shrink-0 ml-3 ${isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                    <span className={`text-caption shrink-0 ml-3 ${isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}`}>
                       {formatDistanceToNow(new Date(r.due_at), { addSuffix: true })}
                     </span>
                   </div>
@@ -426,25 +427,25 @@ export default function Dashboard() {
       <Surface level={2}>
         <SurfaceHeader title="Recent Job Matches" icon={Target} />
         {jobMatches.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">No job matches yet. Use the Job Feed to find opportunities.</p>
+          <p className="text-body-sm text-muted-foreground py-8 text-center">No job matches yet. Use the Job Feed to find opportunities.</p>
         ) : (
           <div className="space-y-3">
             {jobMatches.map((match) => (
               <div
                 key={match.id}
-                className="elev-1 elev-interactive flex items-center justify-between rounded-lg p-3"
+                className="elev-1 elev-interactive flex items-center justify-between rounded-control p-3"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-xs font-bold text-primary">{(match.company || "?")[0]}</span>
+                  <div className="h-9 w-9 rounded-control bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-caption font-bold text-primary">{(match.company || "?")[0]}</span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{match.job_title}</p>
-                    <p className="text-xs text-muted-foreground">{match.company || "Unknown"}</p>
+                    <p className="text-body-sm font-medium text-foreground truncate">{match.job_title}</p>
+                    <p className="text-caption text-muted-foreground">{match.company || "Unknown"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="accent-chip tabular-nums">{match.match_score ?? 0}% match</span>
+                  <Badge variant="accent" className="tabular-nums">{match.match_score ?? 0}% match</Badge>
                 </div>
               </div>
             ))}
@@ -465,11 +466,11 @@ export default function Dashboard() {
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className="elev-1 elev-interactive accent-hover group flex min-h-11 flex-col items-start rounded-lg p-3 text-left sm:p-4"
+              className="elev-1 elev-interactive accent-hover group flex min-h-11 flex-col items-start rounded-control p-3 text-left sm:p-4"
             >
               <action.icon className="mb-3 h-5 w-5 text-primary transition-transform duration-200 group-hover:scale-110" />
-              <span className="text-sm font-medium text-foreground">{action.label}</span>
-              <span className="mt-0.5 text-xs text-muted-foreground">{action.desc}</span>
+              <span className="text-body-sm font-medium text-foreground">{action.label}</span>
+              <span className="mt-0.5 text-caption text-muted-foreground">{action.desc}</span>
             </button>
           ))}
         </div>
