@@ -17,10 +17,13 @@ export interface SubscriptionSnapshot {
 export interface CheckoutRequest {
   plan: PlanKey;
   interval: PlanInterval;
+  /** Provider discount id resolved from a customer-entered promo code. */
+  promoDiscountId?: string | null;
 }
 
 export interface PackCheckoutRequest {
   pack: string;
+  promoDiscountId?: string | null;
 }
 
 /**

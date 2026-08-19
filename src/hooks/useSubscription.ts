@@ -204,19 +204,19 @@ export function useBillingActions() {
   }, []);
 
   const startSubscription = useCallback(
-    async (interval: PlanInterval, plan: PlanKey = "pro") => {
+    async (interval: PlanInterval, plan: PlanKey = "pro", promoDiscountId?: string | null) => {
       setPending(`${plan}-${interval}`);
       // Intent to pay. The paid conversion itself is only ever recorded from
       // the provider webhook — a click is not a payment.
       track("checkout_started", { plan, billing_period: interval, product_type: "subscription" });
       try {
-        const { url, completed } = await billingService.createCheckout({ plan, interval });
+        const { url, completed } = await billingService.createCheckout({ plan, interval, promoDiscountId });
         if (url) openExternal(url);
         else if (completed) await refreshEntitlements();
       } catch (error) {
         const message = error instanceof Error ? error.message : "";
         if (message.toLowerCase().includes("sign in")) toast.error(message);
-        else checkoutFailed(() => void startSubscription(interval, plan));
+        else checkoutFailed(() => void startSubscription(interval, plan, promoDiscountId));
       } finally {
         setPending(null);
       }
@@ -224,17 +224,17 @@ export function useBillingActions() {
     [refreshEntitlements, checkoutFailed],
   );
 
-  const buyPack = useCallback(async (pack: string) => {
+  const buyPack = useCallback(async (pack: string, promoDiscountId?: string | null) => {
     setPending(pack);
     track("checkout_started", { plan: "credit_pack", feature: pack, product_type: "pack" });
     try {
-      const { url, completed } = await billingService.createPackCheckout({ pack });
+      const { url, completed } = await billingService.createPackCheckout({ pack, promoDiscountId });
       if (url) openExternal(url);
       else if (completed) await refreshEntitlements();
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
       if (message.toLowerCase().includes("sign in")) toast.error(message);
-      else checkoutFailed(() => void buyPack(pack));
+      else checkoutFailed(() => void buyPack(pack, promoDiscountId));
     } finally {
       setPending(null);
     }

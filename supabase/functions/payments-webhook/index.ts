@@ -9,6 +9,7 @@ import {
 import { logSecurityEvent } from "../_shared/securityAudit.ts";
 import { capture as phCapture, setPerson as phSetPerson } from "../_shared/posthog.ts";
 import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
+import { closeDunning, openDunning, recordBillingEvent } from "../_shared/billingLedger.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
@@ -237,7 +238,11 @@ async function updateSubscription(data: any, env: PaddleEnv) {
   }
 }
 
-/** Dunning: a failed renewal marks the plan past_due and warns the customer. */
+/**
+ * Dunning: a failed renewal marks the plan past_due, opens (or advances) the
+ * recovery cycle, and tells the customer what happens next. Access is NOT
+ * revoked here — Paddle keeps retrying and the watchdog escalates messaging.
+ */
 // deno-lint-ignore no-explicit-any
 async function handlePaymentFailed(data: any, env: PaddleEnv) {
   const subscriptionId = data?.subscriptionId ?? null;
@@ -257,34 +262,88 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
   const target = (rows?.[0]?.user_id as string | undefined) ?? userId;
   if (!target) return;
 
+  const amountDue = Number(data?.details?.totals?.total ?? 0) || null;
+  const currency = data?.currencyCode ?? "USD";
+  const { attempt, nextRetryAt } = await openDunning({
+    userId: target,
+    environment: env,
+    subscriptionId,
+    amountDue,
+    currency,
+  });
+  const exhausted = !nextRetryAt;
+
   await db().rpc("enqueue_notification", {
     _user_id: target,
     _type: "billing_payment_failed",
-    _title: "Your last payment failed",
-    _body: "Update your card to keep your plan active — we'll keep retrying in the meantime.",
-    _link: "/billing",
-    _metadata: { subscription_id: subscriptionId },
+    _title: exhausted ? "Final payment attempt failed" : "Your last payment failed",
+    _body: exhausted
+      ? "We couldn't collect payment after several attempts. Update your card to resume your plan."
+      : `Update your card to keep your plan active — we'll retry automatically (attempt ${attempt}).`,
+    _link: "/subscription",
+    _metadata: { subscription_id: subscriptionId, attempt },
+  });
+
+  await recordBillingEvent({
+    userId: target,
+    environment: env,
+    eventType: "payment_failed",
+    title: exhausted ? "Final payment attempt failed" : `Payment failed (attempt ${attempt})`,
+    description: exhausted
+      ? "No further automatic retries. Your plan pauses unless the card is updated."
+      : `We'll retry automatically${nextRetryAt ? ` on ${formatDate(nextRetryAt)}` : ""}.`,
+    amountTotal: amountDue,
+    currency,
+    subscriptionId,
+    transactionId: data?.id ?? null,
+    occurredAt: data?.updatedAt ?? new Date().toISOString(),
+    metadata: { attempt, next_retry_at: nextRetryAt },
   });
 
   await billingEmail("payment-failed", await emailFor(target, env), `pay-failed-${data?.id ?? subscriptionId}`, {
-    amount: formatMoney(data?.details?.totals?.total, data?.currencyCode ?? "USD"),
+    amount: formatMoney(amountDue, currency),
     failedAt: formatDate(data?.updatedAt ?? new Date().toISOString()),
-    updatePaymentUrl: "https://app.gradr.me/billing",
+    updatePaymentUrl: "https://app.gradr.me/subscription",
   });
 }
 
-/** A completed payment clears a prior dunning state. */
+/** A completed payment clears a prior dunning state and confirms the resume. */
 // deno-lint-ignore no-explicit-any
 async function clearPaymentIssue(data: any, env: PaddleEnv) {
   const subscriptionId = data?.subscriptionId ?? null;
   if (!subscriptionId) return;
-  await db()
+  const { data: recovered } = await db()
     .from("subscribers")
     .update({ subscribed: true, subscription_status: "active" })
     .eq("stripe_subscription_id", subscriptionId)
     .eq("environment", env)
-    .eq("subscription_status", "past_due");
+    .eq("subscription_status", "past_due")
+    .select("user_id");
+
+  const wasDunning = await closeDunning({ environment: env, subscriptionId });
+  const target = (recovered?.[0]?.user_id as string | undefined) ?? data?.customData?.userId ?? null;
+  if (!target || !(wasDunning || recovered?.length)) return;
+
+  await db().rpc("enqueue_notification", {
+    _user_id: target,
+    _type: "billing_payment_recovered",
+    _title: "Payment received — your plan is active again",
+    _body: "Thanks! Billing is back to normal and full access has resumed.",
+    _link: "/subscription",
+    _metadata: { subscription_id: subscriptionId },
+  });
+
+  await recordBillingEvent({
+    userId: target,
+    environment: env,
+    eventType: "payment_recovered",
+    title: "Plan resumed after successful payment",
+    description: "The outstanding balance was collected and your subscription is active again.",
+    subscriptionId,
+    transactionId: data?.id ?? null,
+  });
 }
+
 
 /**
  * Eligibility discounts: record what was actually redeemed, and re-check that
@@ -492,12 +551,27 @@ Deno.serve(async (req) => {
   let deliveryEventId: string | null = null;
 
   try {
-    const event = await verifyWebhook(req, env);
+    // Internal replay: the watchdog re-runs a stored payload for a delivery
+    // that failed. It authenticates with the cron secret instead of a Paddle
+    // signature, and can only ever replay a payload we already persisted.
+    const replaySecret = req.headers.get("x-internal-replay");
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    const isReplay = Boolean(replaySecret && cronSecret && replaySecret === cronSecret);
+
+    const event = isReplay
+      ? await (async () => {
+        const body = await req.json();
+        return { eventType: body.eventType, data: body.data, eventId: body.eventId } as Awaited<
+          ReturnType<typeof verifyWebhook>
+        >;
+      })()
+      : await verifyWebhook(req, env);
     // deno-lint-ignore no-explicit-any
     const eventUserId = ((event.data as any)?.customData?.userId ?? null) as string | null;
 
     // deno-lint-ignore no-explicit-any
     deliveryEventId = ((event as any)?.eventId ?? null) as string | null;
+
     if (deliveryEventId) {
       await db().from("webhook_deliveries").upsert(
         {
@@ -562,14 +636,47 @@ Deno.serve(async (req) => {
           is_paying: true,
           subscription_status: "active",
         });
+        await recordBillingEvent({
+          userId: eventUserId,
+          environment: env,
+          eventType: "subscription_started",
+          title: `${planLabel(created.plan?.tier, created.plan?.interval)} started`,
+          description: "Your subscription is active.",
+          // deno-lint-ignore no-explicit-any
+          subscriptionId: (event.data as any)?.id ?? null,
+          // deno-lint-ignore no-explicit-any
+          occurredAt: (event.data as any)?.createdAt ?? null,
+        });
         break;
       }
-      case EventName.SubscriptionUpdated:
+      case EventName.SubscriptionUpdated: {
         // A scheduled cancellation is NOT a cancellation: we mirror the
         // scheduled change but keep the status Paddle reports.
         await mirrorSubscription(event.data, env);
         await updateSubscription(event.data, env);
+        // deno-lint-ignore no-explicit-any
+        const updatedData = event.data as any;
+        const updatedPlan = planFromItems(updatedData).plan;
+        const scheduled = updatedData?.scheduledChange?.action ?? null;
+        await recordBillingEvent({
+          userId: eventUserId,
+          environment: env,
+          eventType: scheduled ? `subscription_${scheduled}_scheduled` : "subscription_updated",
+          title: scheduled === "cancel"
+            ? "Cancellation scheduled"
+            : scheduled === "pause"
+              ? "Pause scheduled"
+              : `Subscription updated — ${updatedData?.status ?? "active"}`,
+          description: scheduled
+            ? `Takes effect ${formatDate(updatedData?.scheduledChange?.effectiveAt)}.`
+            : planLabel(updatedPlan?.tier, updatedPlan?.interval),
+          subscriptionId: updatedData?.id ?? null,
+          occurredAt: updatedData?.updatedAt ?? null,
+          metadata: { status: updatedData?.status ?? null, scheduled_change: scheduled },
+        });
         break;
+      }
+
       case EventName.SubscriptionCanceled: {
         await mirrorSubscription({ ...event.data, status: "canceled" }, env);
         await updateSubscription({ ...event.data, status: "canceled" }, env);
@@ -603,9 +710,21 @@ Deno.serve(async (req) => {
               accessUntil: formatDate(cancelData?.currentBillingPeriod?.endsAt),
             },
           );
+          await recordBillingEvent({
+            userId: eventUserId,
+            environment: env,
+            eventType: "subscription_cancelled",
+            title: "Subscription cancelled",
+            description: cancelData?.currentBillingPeriod?.endsAt
+              ? `Access continues until ${formatDate(cancelData.currentBillingPeriod.endsAt)}.`
+              : "Access ends at the close of the paid period.",
+            subscriptionId: cancelData?.id ?? null,
+            occurredAt: cancelData?.canceledAt ?? null,
+          });
         }
         break;
       }
+
       case EventName.CustomerCreated:
       case EventName.CustomerUpdated:
         await mirrorCustomer(event.data, env);
@@ -641,7 +760,25 @@ Deno.serve(async (req) => {
             paidAt: formatDate(txn?.billedAt ?? txn?.createdAt ?? new Date().toISOString()),
             nextBillingDate: formatDate(txn?.billingPeriod?.endsAt),
           });
+          await recordBillingEvent({
+            userId: eventUserId,
+            environment: env,
+            eventType: txn?.subscriptionId ? "invoice_paid" : "pack_purchased",
+            title: pack?.label
+              ? `${pack.label} purchased`
+              : `Payment received — ${planLabel(paidPlan?.tier, paidPlan?.interval)}`,
+            description: txn?.billingPeriod?.endsAt
+              ? `Covers billing period ending ${formatDate(txn.billingPeriod.endsAt)}.`
+              : "One-off purchase.",
+            amountTotal: paidTotal,
+            currency: txn?.currencyCode ?? "usd",
+            subscriptionId: txn?.subscriptionId ?? null,
+            transactionId: txn?.id ?? null,
+            occurredAt: txn?.billedAt ?? txn?.createdAt ?? null,
+            metadata: { invoice_number: txn?.invoiceNumber ?? null },
+          });
         }
+
         break;
       }
       case EventName.TransactionPaymentFailed:

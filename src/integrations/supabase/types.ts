@@ -797,6 +797,96 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          dedupe_key: string
+          details: Json
+          environment: string
+          id: string
+          notified_at: string | null
+          resolved_at: string | null
+          severity: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          dedupe_key: string
+          details?: Json
+          environment?: string
+          id?: string
+          notified_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          dedupe_key?: string
+          details?: Json
+          environment?: string
+          id?: string
+          notified_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_events: {
+        Row: {
+          amount_total: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          environment: string
+          event_type: string
+          id: string
+          metadata: Json
+          occurred_at: string
+          subscription_id: string | null
+          title: string
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_total?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          environment?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          subscription_id?: string | null
+          title: string
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_total?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          environment?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          subscription_id?: string | null
+          title?: string
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       career_plans: {
         Row: {
           created_at: string
@@ -1353,6 +1443,60 @@ export type Database = {
           policy_sp?: string | null
           source?: string
           total_messages?: number
+        }
+        Relationships: []
+      }
+      dunning_state: {
+        Row: {
+          amount_due: number | null
+          attempt_count: number
+          created_at: string
+          currency: string | null
+          environment: string
+          id: string
+          last_failure_at: string
+          last_notified_at: string | null
+          max_attempts: number
+          next_retry_at: string | null
+          recovered_at: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_due?: number | null
+          attempt_count?: number
+          created_at?: string
+          currency?: string | null
+          environment?: string
+          id?: string
+          last_failure_at?: string
+          last_notified_at?: string | null
+          max_attempts?: number
+          next_retry_at?: string | null
+          recovered_at?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_due?: number | null
+          attempt_count?: number
+          created_at?: string
+          currency?: string | null
+          environment?: string
+          id?: string
+          last_failure_at?: string
+          last_notified_at?: string | null
+          max_attempts?: number
+          next_retry_at?: string | null
+          recovered_at?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -3747,6 +3891,7 @@ export type Database = {
       }
       webhook_deliveries: {
         Row: {
+          alerted_at: string | null
           attempts: number
           created_at: string
           environment: string | null
@@ -3754,6 +3899,7 @@ export type Database = {
           event_type: string | null
           id: string
           last_error: string | null
+          next_retry_at: string | null
           payload: Json | null
           processed_at: string | null
           provider: string
@@ -3764,6 +3910,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          alerted_at?: string | null
           attempts?: number
           created_at?: string
           environment?: string | null
@@ -3771,6 +3918,7 @@ export type Database = {
           event_type?: string | null
           id?: string
           last_error?: string | null
+          next_retry_at?: string | null
           payload?: Json | null
           processed_at?: string | null
           provider: string
@@ -3781,6 +3929,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          alerted_at?: string | null
           attempts?: number
           created_at?: string
           environment?: string | null
@@ -3788,6 +3937,7 @@ export type Database = {
           event_type?: string | null
           id?: string
           last_error?: string | null
+          next_retry_at?: string | null
           payload?: Json | null
           processed_at?: string | null
           provider?: string
