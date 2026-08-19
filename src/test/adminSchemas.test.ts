@@ -67,7 +67,7 @@ describe("admin runtime schemas", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].affiliate_code).toBe("ADA10");
     expect(drift).not.toBeNull();
-    expect(drift?.invalid).toBe(1);
+    expect(drift?.dropped).toBe(1);
     expect(captureError).toHaveBeenCalled();
   });
 
