@@ -31,7 +31,24 @@ export default {
           DEFAULT: "hsl(var(--surface))",
           secondary: "hsl(var(--surface-secondary))",
           elevated: "hsl(var(--surface-elevated))",
+          // Gradr design-system role: inset / hover fills.
+          muted: "hsl(var(--surface-secondary))",
         },
+        // Gradr design-system brand palette (src/styles/gradr-design-system.css).
+        shell: "var(--color-shell)",
+        fog: "var(--color-fog)",
+        harbor: {
+          DEFAULT: "var(--color-harbor)",
+          soft: "var(--color-harbor-soft)",
+        },
+        hull: {
+          DEFAULT: "var(--color-hull)",
+          soft: "var(--color-hull-soft)",
+        },
+        ink: "var(--color-ink)",
+        slate: "var(--color-slate)",
+        // Gradr design-system semantic alias (components use `text-muted-foreground`).
+        "muted-foreground": "hsl(var(--muted-foreground))",
         overlay: "hsl(var(--overlay))",
         info: {
           DEFAULT: "hsl(var(--info))",
