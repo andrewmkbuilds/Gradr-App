@@ -427,7 +427,7 @@ export default function Auth() {
               onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }}
               aria-invalid={!!fieldErrors.email || !!formError}
               aria-describedby={fieldErrors.email ? "error-email" : undefined}
-              className="h-12 pl-10"
+              className="pl-10"
             />
           </div>
           {fieldErrors.email && (
