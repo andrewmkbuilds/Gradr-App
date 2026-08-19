@@ -5,6 +5,12 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  affiliateApplicationSchema,
+  affiliateCommissionSchema,
+  affiliateProfileSchema,
+  parseAdminRows,
+} from "@/lib/admin/schemas";
 import { useIsAdmin, useFullAffiliateSettings } from "@/hooks/useAffiliate";
 import { format } from "date-fns";
 import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
@@ -67,7 +73,7 @@ function ApplicationsPanel() {
     queryKey: ["adminApplications"],
     queryFn: async () => {
       const { data } = await supabase.from("affiliate_applications").select("*").order("created_at", { ascending: false });
-      return data || [];
+      return parseAdminRows(affiliateApplicationSchema, data, "affiliate_applications").rows;
     },
   });
 
@@ -144,7 +150,7 @@ function ApplicationsPanel() {
                     a.status === "suspended" ? "bg-warning/10 text-warning" :
                     "bg-primary/10 text-primary"
                   }`}>{a.status}</span>
-                  <span className="text-xs text-muted-foreground">{format(new Date(a.created_at), "MMM d")}</span>
+                  <span className="text-xs text-muted-foreground">{a.created_at ? format(new Date(a.created_at), "MMM d") : "—"}</span>
                 </div>
               </summary>
               <div className="px-4 pb-4 space-y-3 border-t border-border pt-4">
@@ -188,7 +194,7 @@ function AffiliatesPanel() {
     queryKey: ["adminAffiliates"],
     queryFn: async () => {
       const { data } = await supabase.from("affiliate_profiles").select("*").order("approval_date", { ascending: false });
-      return data || [];
+      return parseAdminRows(affiliateProfileSchema, data, "affiliate_profiles").rows;
     },
   });
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
@@ -226,7 +232,7 @@ function AffiliatesPanel() {
               <td>
                 <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
               </td>
-              <td className="text-xs text-muted-foreground">{format(new Date(p.approval_date), "MMM d, yyyy")}</td>
+              <td className="text-xs text-muted-foreground">{p.approval_date ? format(new Date(p.approval_date), "MMM d, yyyy") : "—"}</td>
               <td></td>
             </tr>
           ))}
@@ -243,7 +249,7 @@ function CommissionsPanel() {
     queryKey: ["adminCommissions"],
     queryFn: async () => {
       const { data } = await supabase.from("affiliate_commissions").select("*, affiliate_profiles(affiliate_code)").order("created_date", { ascending: false }).limit(200);
-      return data || [];
+      return parseAdminRows(affiliateCommissionSchema, data, "affiliate_commissions").rows;
     },
   });
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;

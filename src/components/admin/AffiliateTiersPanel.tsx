@@ -4,18 +4,9 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
+import { affiliateTierSchema, parseAdminRows, type AffiliateTierRow } from "@/lib/admin/schemas";
 
-type Tier = {
-  id: string;
-  key: string;
-  name: string;
-  min_referrals: number;
-  bonus_rate: number;
-  color: string;
-  perks: string | null;
-  sort_order: number;
-  active: boolean;
-};
+type Tier = AffiliateTierRow;
 
 /** Tier ladder configuration — drives affiliate levels and bonus commission rates. */
 export function AffiliateTiersPanel() {
@@ -30,7 +21,9 @@ export function AffiliateTiersPanel() {
         .select("*")
         .order("min_referrals", { ascending: true });
       if (error) throw error;
-      return (data || []) as Tier[];
+      // Validated at the boundary: a drifted column drops that one tier
+      // instead of crashing the whole affiliate console.
+      return parseAdminRows(affiliateTierSchema, data, "affiliate_tiers").rows;
     },
   });
 
