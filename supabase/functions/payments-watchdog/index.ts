@@ -358,9 +358,11 @@ async function runDunning(): Promise<{ notified: number; paused: number }> {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const cronSecret = Deno.env.get("CRON_SECRET");
+  // Either the scheduler's own secret or the shared payments cron secret.
   const providedSecret = req.headers.get("x-cron-secret");
-  let authorized = Boolean(cronSecret && providedSecret && providedSecret === cronSecret);
+  const accepted = [Deno.env.get("BILLING_WATCHDOG_CRON_SECRET"), Deno.env.get("CRON_SECRET")]
+    .filter((v): v is string => Boolean(v));
+  let authorized = Boolean(providedSecret && accepted.includes(providedSecret));
 
   if (!authorized) {
     const authHeader = req.headers.get("Authorization") ?? "";
