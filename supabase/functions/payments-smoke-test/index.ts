@@ -85,9 +85,14 @@ async function runSmokeTest(): Promise<{ ok: boolean; steps: Step[] }> {
     userId = created!.user!.id;
 
     // ---- 1. Catalog -------------------------------------------------------
-    const priceRes = await gatewayFetch(env, `/prices?external_id=${PRICE_ID}&status=active`);
+    // The catalog tags each price with `custom_data.external_id`, mirroring
+    // how get-paddle-price resolves human-readable ids to Paddle ids.
+    const priceRes = await gatewayFetch(env, "/prices?status=active&per_page=100");
     const priceBody = priceRes.ok ? await priceRes.json() : null;
-    const paddlePriceId: string | undefined = priceBody?.data?.[0]?.id;
+    const match = (priceBody?.data ?? []).find(
+      (p: { custom_data?: { external_id?: string } }) => p?.custom_data?.external_id === PRICE_ID,
+    );
+    const paddlePriceId: string | undefined = match?.id;
     step("resolve price in catalog", Boolean(paddlePriceId), `${PRICE_ID} -> ${paddlePriceId ?? "not found"}`);
 
     // ---- 2. Checkout ------------------------------------------------------
@@ -126,14 +131,14 @@ async function runSmokeTest(): Promise<{ ok: boolean; steps: Step[] }> {
           price: {
             id: paddlePriceId,
             product_id: `pro_smoke_${runId}`,
-            import_meta: { external_id: PRICE_ID },
+            custom_data: { external_id: PRICE_ID },
             unit_price: { amount: "16000", currency_code: "USD" },
             billing_cycle: { interval: "year", frequency: 1 },
           },
           product: {
             id: `pro_smoke_${runId}`,
             name: "Gradr Pro",
-            import_meta: { external_id: "pro_plan" },
+            custom_data: { external_id: "pro_plan" },
           },
         }],
       },
