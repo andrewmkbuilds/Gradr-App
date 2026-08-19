@@ -1,0 +1,196 @@
+/**
+ * Runtime contracts for admin data.
+ *
+ * Admin screens read wide, fast-moving tables (affiliates, verification
+ * requests, discounts). When the database drifts ahead of the generated
+ * types — a renamed column, a nullable field that used to be required — the
+ * UI would previously blow up mid-render on the whole page.
+ *
+ * These schemas validate rows at the query boundary instead:
+ *   - rows that parse are returned, typed and normalised
+ *   - rows that don't are dropped and reported to Sentry with the field paths
+ *   - the screen keeps rendering with whatever is still valid
+ *
+ * Schemas are deliberately permissive about EXTRA columns (new columns are
+ * not a breaking change) and strict about the fields the UI actually reads.
+ */
+import { z } from "zod";
+import { addBreadcrumb, captureError } from "@/lib/telemetry/sentry";
+
+const iso = z.string();
+const nullableIso = z.string().nullable().catch(null);
+const nullableText = z.string().nullable().catch(null);
+const nullableNumber = z.coerce.number().nullable().catch(null);
+
+/** `affiliate_applications` rows shown in the applications queue. */
+export const affiliateApplicationSchema = z.object({
+  id: z.string(),
+  status: z.string().catch("pending"),
+  full_name: nullableText,
+  email: nullableText,
+  brand_name: nullableText,
+  website: nullableText,
+  audience_size: nullableText,
+  promotion_plan: nullableText,
+  admin_notes: nullableText,
+  rejection_reason: nullableText,
+  created_at: nullableIso,
+  reviewed_date: nullableIso,
+}).passthrough();
+
+/** `affiliate_profiles` rows shown in the affiliates table. */
+export const affiliateProfileSchema = z.object({
+  id: z.string(),
+  user_id: z.string().nullable().catch(null),
+  affiliate_code: nullableText,
+  status: z.string().catch("active"),
+  custom_commission_rate: nullableNumber,
+  tier_id: z.string().nullable().catch(null),
+  approval_date: nullableIso,
+}).passthrough();
+
+/** `affiliate_commissions` joined with the owning profile's code. */
+export const affiliateCommissionSchema = z.object({
+  id: z.string(),
+  status: z.string().catch("pending"),
+  commission_amount: nullableNumber,
+  source_amount: nullableNumber,
+  currency: nullableText,
+  conversion_type: nullableText,
+  created_date: nullableIso,
+  affiliate_profiles: z.object({ affiliate_code: nullableText }).passthrough().nullable().catch(null),
+}).passthrough();
+
+/** `affiliate_tiers` — commission ladder shown in settings. */
+export const affiliateTierSchema = z.object({
+  id: z.string(),
+  name: z.string().catch("Tier"),
+  color: nullableText,
+  min_referrals: z.coerce.number().catch(0),
+  commission_rate: z.coerce.number().catch(0),
+  is_active: z.boolean().catch(true),
+}).passthrough();
+
+/** Result rows of the `admin_verification_requests` RPC. */
+export const adminVerificationRequestSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  applicant_name: nullableText,
+  category: z.string().catch("unknown"),
+  category_label: z.string().catch("Unknown"),
+  full_name: z.string().catch(""),
+  organization: nullableText,
+  website: nullableText,
+  email: z.string().catch(""),
+  personal_email: nullableText,
+  country: nullableText,
+  role_or_status: nullableText,
+  supporting_information: nullableText,
+  document_path: nullableText,
+  domain_matched: z.boolean().catch(false),
+  domain_proof_verified: z.boolean().catch(false),
+  fraud_score: z.coerce.number().catch(0),
+  fraud_flags: z
+    .array(z.object({ code: z.string(), severity: z.string(), label: z.string() }).passthrough())
+    .nullable()
+    .catch(null),
+  appeal_count: z.coerce.number().catch(0),
+  latest_appeal: nullableText,
+  status: z
+    .enum(["pending", "approved", "rejected", "needs_more_information", "appealed"])
+    .catch("pending"),
+  discount_percentage: z.coerce.number().catch(0),
+  submitted_at: iso.catch(() => new Date().toISOString()),
+  reviewed_at: nullableIso,
+  reviewer_name: nullableText,
+  reviewer_notes: nullableText,
+}).passthrough();
+
+/** `discount_rules` rows in the discounts admin. */
+export const discountRuleSchema = z.object({
+  id: z.string(),
+  name: nullableText,
+  eligibility_type: z.string().catch("unknown"),
+  percentage: z.coerce.number().catch(0),
+  is_active: z.boolean().catch(true),
+  starts_at: nullableIso,
+  ends_at: nullableIso,
+  created_at: nullableIso,
+}).passthrough();
+
+export type AffiliateApplicationRow = z.infer<typeof affiliateApplicationSchema>;
+export type AffiliateProfileRow = z.infer<typeof affiliateProfileSchema>;
+export type AffiliateCommissionRow = z.infer<typeof affiliateCommissionSchema>;
+export type AffiliateTierRow = z.infer<typeof affiliateTierSchema>;
+export type AdminVerificationRequestRow = z.infer<typeof adminVerificationRequestSchema>;
+export type DiscountRuleRow = z.infer<typeof discountRuleSchema>;
+
+/** How many bad rows we describe in one report before truncating. */
+const MAX_REPORTED_ISSUES = 5;
+
+export interface SchemaDriftSummary {
+  /** Number of rows that failed validation and were dropped. */
+  dropped: number;
+  /** `row[3].status: expected string` style descriptions, truncated. */
+  issues: string[];
+}
+
+/**
+ * Validates a list of rows, dropping (and reporting) the ones that don't
+ * match. Never throws — a drifting column degrades one row, not the screen.
+ */
+export function parseAdminRows<T extends z.ZodTypeAny>(
+  schema: T,
+  rows: unknown,
+  context: string,
+): { rows: z.infer<T>[]; drift: SchemaDriftSummary | null } {
+  if (!Array.isArray(rows)) {
+    if (rows != null) reportDrift(context, [`expected an array, received ${typeof rows}`], 1);
+    return { rows: [], drift: rows == null ? null : { dropped: 1, issues: ["not an array"] } };
+  }
+
+  const parsed: z.infer<T>[] = [];
+  const issues: string[] = [];
+
+  rows.forEach((row, index) => {
+    const result = schema.safeParse(row);
+    if (result.success) {
+      parsed.push(result.data);
+      return;
+    }
+    if (issues.length < MAX_REPORTED_ISSUES) {
+      for (const issue of result.error.issues.slice(0, 3)) {
+        issues.push(`row[${index}].${issue.path.join(".") || "(root)"}: ${issue.message}`);
+      }
+    }
+  });
+
+  const dropped = rows.length - parsed.length;
+  if (dropped > 0) reportDrift(context, issues, dropped);
+
+  return { rows: parsed, drift: dropped > 0 ? { dropped, issues } : null };
+}
+
+/** Same contract for a single row (RPCs that return one object). */
+export function parseAdminRow<T extends z.ZodTypeAny>(
+  schema: T,
+  row: unknown,
+  context: string,
+): z.infer<T> | null {
+  const result = schema.safeParse(row);
+  if (result.success) return result.data;
+  reportDrift(
+    context,
+    result.error.issues.slice(0, MAX_REPORTED_ISSUES).map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`),
+    1,
+  );
+  return null;
+}
+
+function reportDrift(context: string, issues: string[], dropped: number) {
+  const message = `Schema drift in ${context}: ${dropped} row(s) dropped`;
+  // Field paths and messages only — never row values, which can be PII.
+  console.warn(message, issues);
+  addBreadcrumb({ category: "schema", message, level: "warning", data: { issues: issues.join("; ") } });
+  captureError(new Error(message), { context: "admin-schema-drift", extra: { source: context, issues, dropped } });
+}
