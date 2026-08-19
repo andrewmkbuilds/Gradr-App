@@ -236,6 +236,13 @@ async function updateSubscription(data: any, env: PaddleEnv) {
     .eq("environment", env)
     .select("user_id");
 
+  // Switching to yearly billing earns the annual bonus too (granted once per
+  // subscription, so a renewal or a later change never repeats it).
+  const changedUser = (updated?.[0]?.user_id as string | undefined) ?? data?.customData?.userId ?? null;
+  if (entitled && changedUser && plan?.interval === "annual" && plan.tier) {
+    await grantAnnualBonus(changedUser, String(data.id), plan.tier, env);
+  }
+
   // Out-of-order delivery: an update can arrive before the created event.
   // Rebuild the row from the event rather than dropping the entitlement.
   if (!updated?.length && data?.customData?.userId) {
