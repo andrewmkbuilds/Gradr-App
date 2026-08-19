@@ -40,7 +40,7 @@ const RULES = [
 export default function DesignSystemUsage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <Seo title="Design system usage" description="How to import and use the Gradr design system components and tokens." noindex />
+      <Seo title="Design system usage" description="How to import and use the Gradr design system components and tokens." path="/admin/design-system/usage" noindex />
 
       <header className="space-y-2">
         <Text variant="overline" tone="accent">Design system</Text>
