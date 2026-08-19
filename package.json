@@ -11,6 +11,7 @@
     "typecheck": "tsgo -p tsconfig.app.json && tsgo -p tsconfig.node.json",
     "types:generate": "node scripts/generate-db-types.mjs",
     "types:check": "node scripts/check-type-drift.mjs",
+    "smoke:payments": "node scripts/payments-smoke.mjs",
     "build": "bun run typecheck && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

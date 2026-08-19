@@ -85,9 +85,14 @@ async function runSmokeTest(): Promise<{ ok: boolean; steps: Step[] }> {
     userId = created!.user!.id;
 
     // ---- 1. Catalog -------------------------------------------------------
-    const priceRes = await gatewayFetch(env, `/prices?external_id=${PRICE_ID}&status=active`);
+    // The catalog tags each price with `custom_data.external_id`, mirroring
+    // how get-paddle-price resolves human-readable ids to Paddle ids.
+    const priceRes = await gatewayFetch(env, "/prices?status=active&per_page=100");
     const priceBody = priceRes.ok ? await priceRes.json() : null;
-    const paddlePriceId: string | undefined = priceBody?.data?.[0]?.id;
+    const match = (priceBody?.data ?? []).find(
+      (p: { custom_data?: { external_id?: string } }) => p?.custom_data?.external_id === PRICE_ID,
+    );
+    const paddlePriceId: string | undefined = match?.id;
     step("resolve price in catalog", Boolean(paddlePriceId), `${PRICE_ID} -> ${paddlePriceId ?? "not found"}`);
 
     // ---- 2. Checkout ------------------------------------------------------
@@ -99,11 +104,15 @@ async function runSmokeTest(): Promise<{ ok: boolean; steps: Step[] }> {
         collection_mode: "automatic",
       }),
     });
-    const txBody = await txRes.json().catch(() => null);
+    const txText = await txRes.text();
+    let txBody: { data?: { id?: string } } | null = null;
+    try {
+      txBody = JSON.parse(txText);
+    } catch { /* non-JSON gateway error, surfaced verbatim below */ }
     step(
       "create checkout transaction",
       txRes.ok && Boolean(txBody?.data?.id),
-      txRes.ok ? `transaction ${txBody?.data?.id}` : JSON.stringify(txBody).slice(0, 300),
+      txRes.ok ? `transaction ${txBody?.data?.id}` : `HTTP ${txRes.status} ${txText.slice(0, 400)}`,
     );
 
     // ---- 3. Webhook -------------------------------------------------------
@@ -120,20 +129,27 @@ async function runSmokeTest(): Promise<{ ok: boolean; steps: Step[] }> {
         customer_id: `ctm_smoke_${runId}`,
         custom_data: { userId },
         currency_code: "USD",
+        collection_mode: "automatic",
+        // The Paddle SDK unmarshals these into typed entities; omitting
+        // billing_cycle makes it throw before the handler ever runs.
+        billing_cycle: { interval: "year", frequency: 1 },
+        started_at: now.toISOString(),
+        first_billed_at: now.toISOString(),
+        next_billed_at: periodEnd,
         current_billing_period: { starts_at: now.toISOString(), ends_at: periodEnd },
         items: [{
           quantity: 1,
           price: {
             id: paddlePriceId,
             product_id: `pro_smoke_${runId}`,
-            import_meta: { external_id: PRICE_ID },
+            custom_data: { external_id: PRICE_ID },
             unit_price: { amount: "16000", currency_code: "USD" },
             billing_cycle: { interval: "year", frequency: 1 },
           },
           product: {
             id: `pro_smoke_${runId}`,
             name: "Gradr Pro",
-            import_meta: { external_id: "pro_plan" },
+            custom_data: { external_id: "pro_plan" },
           },
         }],
       },
