@@ -1978,6 +1978,7 @@ export type Database = {
           feature: string
           id: string
           period_start: string
+          rollover: number
           updated_at: string
           used: number
           user_id: string
@@ -1989,6 +1990,7 @@ export type Database = {
           feature: string
           id?: string
           period_start: string
+          rollover?: number
           updated_at?: string
           used?: number
           user_id: string
@@ -2000,6 +2002,7 @@ export type Database = {
           feature?: string
           id?: string
           period_start?: string
+          rollover?: number
           updated_at?: string
           used?: number
           user_id?: string
@@ -4391,6 +4394,16 @@ export type Database = {
       }
       reverse_commission_for_source: {
         Args: { _reason?: string; _source_record_id: string }
+        Returns: number
+      }
+      rollover_for: {
+        Args: {
+          _env: string
+          _feature: string
+          _period: string
+          _tier: string
+          _user_id: string
+        }
         Returns: number
       }
       submit_verification_appeal: {
