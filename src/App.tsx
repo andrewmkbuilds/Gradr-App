@@ -67,6 +67,8 @@ const DigestPreview = lazy(() => import("./pages/DigestPreview"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Billing = lazy(() => import("./pages/Billing"));
 const Credits = lazy(() => import("./pages/Credits"));
+const Subscription = lazy(() => import("./pages/Subscription"));
+const BillingHistory = lazy(() => import("./pages/BillingHistory"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -212,7 +214,9 @@ function ProtectedRoutes() {
 
           <Route path="/billing" element={<AnimatedPage><Billing /></AnimatedPage>} />
           <Route path="/credits" element={<AnimatedPage><Credits /></AnimatedPage>} />
-          <Route path="/manage-subscription" element={<AnimatedPage><Billing /></AnimatedPage>} />
+          <Route path="/billing/history" element={<AnimatedPage><BillingHistory /></AnimatedPage>} />
+          <Route path="/subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
+          <Route path="/manage-subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
           {/* Affiliate pages live on affiliates.gradr.me (see SATELLITE_SURFACES). */}
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
