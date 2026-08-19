@@ -11,43 +11,45 @@
  *   - rows that don't are dropped and reported to Sentry with the field paths
  *   - the screen keeps rendering with whatever is still valid
  *
- * Schemas are deliberately permissive about EXTRA columns (new columns are
- * not a breaking change) and strict about the fields the UI actually reads.
+ * Schemas ignore EXTRA columns (a new column is not a breaking change) and
+ * describe exactly the fields the UI reads. Display strings normalise to ""
+ * so a suddenly-null column renders blank instead of throwing.
  */
 import { z } from "zod";
 import { addBreadcrumb, captureError } from "@/lib/telemetry/sentry";
 
 const iso = z.string();
-const nullableIso = z.string().nullable().catch(null);
-const nullableText = z.string().nullable().catch(null);
-const nullableNumber = z.coerce.number().nullable().catch(null);
+const nullableIso = z.string().nullish().catch(null).transform((v) => v ?? null);
+/** Display string: never null at the UI, so `.toLowerCase()` etc. stay safe. */
+const text = z.coerce.string().nullish().catch(null).transform((v) => v ?? "");
+const nullableNumber = z.coerce.number().nullish().catch(null).transform((v) => v ?? null);
 
 /** `affiliate_applications` rows shown in the applications queue. */
 export const affiliateApplicationSchema = z.object({
   id: z.string(),
   status: z.string().catch("pending"),
-  full_name: nullableText,
-  email: nullableText,
-  brand_name: nullableText,
-  website: nullableText,
-  audience_size: nullableText,
-  promotion_plan: nullableText,
-  admin_notes: nullableText,
-  rejection_reason: nullableText,
+  full_name: text,
+  email: text,
+  brand_name: text,
+  website: text,
+  audience_size: text,
+  promotion_plan: text,
+  admin_notes: text,
+  rejection_reason: text,
   created_at: nullableIso,
   reviewed_date: nullableIso,
-}).passthrough();
+});
 
 /** `affiliate_profiles` rows shown in the affiliates table. */
 export const affiliateProfileSchema = z.object({
   id: z.string(),
-  user_id: z.string().nullable().catch(null),
-  affiliate_code: nullableText,
+  user_id: text,
+  affiliate_code: text,
   status: z.string().catch("active"),
   custom_commission_rate: nullableNumber,
-  tier_id: z.string().nullable().catch(null),
+  tier_id: z.string().nullish().catch(null).transform((v) => v ?? null),
   approval_date: nullableIso,
-}).passthrough();
+});
 
 /** `affiliate_commissions` joined with the owning profile's code. */
 export const affiliateCommissionSchema = z.object({
@@ -55,11 +57,11 @@ export const affiliateCommissionSchema = z.object({
   status: z.string().catch("pending"),
   commission_amount: nullableNumber,
   source_amount: nullableNumber,
-  currency: nullableText,
-  conversion_type: nullableText,
+  currency: text,
+  conversion_type: text,
   created_date: nullableIso,
-  affiliate_profiles: z.object({ affiliate_code: nullableText }).passthrough().nullable().catch(null),
-}).passthrough();
+  affiliate_profiles: z.object({ affiliate_code: text }).nullish().catch(null).transform((v) => v ?? null),
+});
 
 /** `affiliate_tiers` — commission ladder shown in settings. */
 export const affiliateTierSchema = z.object({
@@ -69,57 +71,58 @@ export const affiliateTierSchema = z.object({
   min_referrals: z.coerce.number().catch(0),
   bonus_rate: z.coerce.number().catch(0),
   color: z.string().catch("#245F73"),
-  perks: nullableText,
+  perks: text,
   sort_order: z.coerce.number().catch(0),
   active: z.boolean().catch(true),
-}).passthrough();
+});
 
 /** Result rows of the `admin_verification_requests` RPC. */
 export const adminVerificationRequestSchema = z.object({
   id: z.string(),
   user_id: z.string(),
-  applicant_name: nullableText,
+  applicant_name: text,
   category: z.string().catch("unknown"),
   category_label: z.string().catch("Unknown"),
   full_name: z.string().catch(""),
-  organization: nullableText,
-  website: nullableText,
+  organization: text,
+  website: text,
   email: z.string().catch(""),
-  personal_email: nullableText,
-  country: nullableText,
-  role_or_status: nullableText,
-  supporting_information: nullableText,
-  document_path: nullableText,
+  personal_email: text,
+  country: text,
+  role_or_status: text,
+  supporting_information: text,
+  document_path: text,
   domain_matched: z.boolean().catch(false),
   domain_proof_verified: z.boolean().catch(false),
   fraud_score: z.coerce.number().catch(0),
   fraud_flags: z
-    .array(z.object({ code: z.string(), severity: z.string(), label: z.string() }).passthrough())
-    .nullable()
-    .catch(null),
+    .array(z.object({ code: z.string(), severity: z.string(), label: z.string() }))
+    .nullish()
+    .catch(null)
+    .transform((v) => v ?? null),
   appeal_count: z.coerce.number().catch(0),
-  latest_appeal: nullableText,
+  latest_appeal: text,
   status: z
     .enum(["pending", "approved", "rejected", "needs_more_information", "appealed"])
     .catch("pending"),
   discount_percentage: z.coerce.number().catch(0),
   submitted_at: iso.catch(() => new Date().toISOString()),
   reviewed_at: nullableIso,
-  reviewer_name: nullableText,
-  reviewer_notes: nullableText,
-}).passthrough();
+  reviewer_name: text,
+  reviewer_notes: text,
+});
 
 /** `discount_rules` rows in the discounts admin. */
 export const discountRuleSchema = z.object({
   id: z.string(),
-  name: nullableText,
+  name: text,
   eligibility_type: z.string().catch("unknown"),
   percentage: z.coerce.number().catch(0),
   is_active: z.boolean().catch(true),
   starts_at: nullableIso,
   ends_at: nullableIso,
   created_at: nullableIso,
-}).passthrough();
+});
 
 export type AffiliateApplicationRow = z.infer<typeof affiliateApplicationSchema>;
 export type AffiliateProfileRow = z.infer<typeof affiliateProfileSchema>;
