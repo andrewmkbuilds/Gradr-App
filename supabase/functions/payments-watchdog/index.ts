@@ -194,6 +194,51 @@ async function runRetryQueue(): Promise<{ retried: number; recovered: number; ex
   return { retried, recovered, exhausted };
 }
 
+/**
+ * Manual re-trigger of one stored delivery, used by the billing ops console.
+ * Unlike the queue sweep this ignores backoff and attempt limits — an operator
+ * asking for a replay has already decided it's worth another try.
+ */
+async function replayDelivery(
+  deliveryId: string,
+): Promise<{ ok: boolean; status?: number; error?: string }> {
+  if (!deliveryId) return { ok: false, error: "missing_delivery_id" };
+  const db = admin();
+  const { data: row } = await db
+    .from("webhook_deliveries")
+    .select("id, event_id, event_type, environment, payload, attempts")
+    .eq("id", deliveryId)
+    .maybeSingle();
+
+  if (!row?.payload || !row.event_type) return { ok: false, error: "delivery_not_replayable" };
+
+  const res = await fetch(
+    `${Deno.env.get("SUPABASE_URL")}/functions/v1/payments-webhook?env=${row.environment ?? "sandbox"}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-replay": Deno.env.get("CRON_SECRET") ?? "",
+        apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      },
+      body: JSON.stringify({ eventType: row.event_type, eventId: row.event_id, data: row.payload }),
+    },
+  ).catch(() => null);
+
+  await db.from("webhook_deliveries").update({
+    replays: Number(row.attempts ?? 0) > 0 ? Number(row.attempts) : 1,
+    state: res?.ok ? "processed" : "failed",
+    last_error: res?.ok ? null : `manual replay failed (${res?.status ?? "network"})`,
+    next_retry_at: null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", row.id);
+
+  return res?.ok ? { ok: true, status: res.status } : { ok: false, status: res?.status, error: "replay_failed" };
+}
+
+
+
 /** 2. Purchases that were accepted but never produced entitlements. */
 async function checkDelayedEntitlements(): Promise<number> {
   const db = admin();
@@ -467,7 +512,30 @@ Deno.serve(async (req) => {
     authorized = true;
   }
 
+  // Admin-triggered single actions from the billing ops console; anything else
+  // (including the cron schedule) runs the full sweep.
+  let action = "sweep";
+  let payload: Record<string, unknown> = {};
+  if (req.method === "POST") {
+    payload = await req.json().catch(() => ({})) as Record<string, unknown>;
+    action = String(payload.action ?? "sweep");
+  }
+
   try {
+    if (action === "replay_delivery") {
+      const outcome = await replayDelivery(String(payload.deliveryId ?? ""));
+      return json(outcome, outcome.ok ? 200 : 400);
+    }
+
+    if (action === "resolve_alert") {
+      const { error } = await admin()
+        .from("billing_alerts")
+        .update({ resolved_at: new Date().toISOString() })
+        .eq("id", String(payload.alertId ?? ""));
+      if (error) return json({ ok: false, error: error.message }, 400);
+      return json({ ok: true });
+    }
+
     const retry = await runRetryQueue();
     const delayed = await checkDelayedEntitlements();
     const dunning = await runDunning();
@@ -478,3 +546,4 @@ Deno.serve(async (req) => {
     return json({ error: "watchdog_failed", message: String(err) }, 500);
   }
 });
+

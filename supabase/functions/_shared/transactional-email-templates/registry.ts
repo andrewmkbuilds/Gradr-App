@@ -13,6 +13,7 @@ import { template as subscriptionCancelled } from './subscription-cancelled.tsx'
 import { template as paymentSuccessful } from './payment-successful.tsx'
 import { template as paymentFailed } from './payment-failed.tsx'
 import { template as paymentRetry } from './payment-retry.tsx'
+import { template as paymentRefunded } from './payment-refunded.tsx'
 import { template as invoiceReceipt } from './invoice-receipt.tsx'
 import { template as applicationFollowup } from './application-followup.tsx'
 import { template as jobMatch } from './job-match.tsx'
@@ -57,6 +58,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'payment-successful': paymentSuccessful,
   'payment-failed': paymentFailed,
   'payment-retry': paymentRetry,
+  'payment-refunded': paymentRefunded,
   'invoice-receipt': invoiceReceipt,
   'application-followup': applicationFollowup,
   'job-match': jobMatch,

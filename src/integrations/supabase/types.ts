@@ -1970,6 +1970,63 @@ export type Database = {
         }
         Relationships: []
       }
+      entitlement_ledger: {
+        Row: {
+          amount: number | null
+          balance_after: number | null
+          created_at: string
+          currency: string | null
+          delta: number
+          entry_type: string
+          environment: string
+          feature: string
+          id: string
+          metadata: Json
+          provider_event_id: string | null
+          reason: string | null
+          source: string
+          subscription_id: string | null
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          balance_after?: number | null
+          created_at?: string
+          currency?: string | null
+          delta?: number
+          entry_type: string
+          environment?: string
+          feature: string
+          id?: string
+          metadata?: Json
+          provider_event_id?: string | null
+          reason?: string | null
+          source?: string
+          subscription_id?: string | null
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          balance_after?: number | null
+          created_at?: string
+          currency?: string | null
+          delta?: number
+          entry_type?: string
+          environment?: string
+          feature?: string
+          id?: string
+          metadata?: Json
+          provider_event_id?: string | null
+          reason?: string | null
+          source?: string
+          subscription_id?: string | null
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       feature_usage: {
         Row: {
           created_at: string
@@ -2418,6 +2475,51 @@ export type Database = {
           title?: string
           updated_at?: string
           version?: number
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          dunning_email: boolean
+          dunning_in_app: boolean
+          id: string
+          refund_email: boolean
+          refund_in_app: boolean
+          renewal_email: boolean
+          renewal_in_app: boolean
+          updated_at: string
+          user_id: string
+          webhook_issue_email: boolean
+          webhook_issue_in_app: boolean
+        }
+        Insert: {
+          created_at?: string
+          dunning_email?: boolean
+          dunning_in_app?: boolean
+          id?: string
+          refund_email?: boolean
+          refund_in_app?: boolean
+          renewal_email?: boolean
+          renewal_in_app?: boolean
+          updated_at?: string
+          user_id: string
+          webhook_issue_email?: boolean
+          webhook_issue_in_app?: boolean
+        }
+        Update: {
+          created_at?: string
+          dunning_email?: boolean
+          dunning_in_app?: boolean
+          id?: string
+          refund_email?: boolean
+          refund_in_app?: boolean
+          renewal_email?: boolean
+          renewal_in_app?: boolean
+          updated_at?: string
+          user_id?: string
+          webhook_issue_email?: boolean
+          webhook_issue_in_app?: boolean
         }
         Relationships: []
       }
@@ -2870,6 +2972,39 @@ export type Database = {
           subscription_id?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      payment_simulations: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          environment: string
+          id: string
+          ok: boolean
+          result: Json
+          scenario: string
+          target_user_id: string | null
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          environment?: string
+          id?: string
+          ok?: boolean
+          result?: Json
+          scenario: string
+          target_user_id?: string | null
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          ok?: boolean
+          result?: Json
+          scenario?: string
+          target_user_id?: string | null
         }
         Relationships: []
       }
@@ -4341,6 +4476,10 @@ export type Database = {
           notes: string
           to_status: string
         }[]
+      }
+      notification_channels: {
+        Args: { _category: string; _user_id: string }
+        Returns: Json
       }
       notify_admins: {
         Args: {
