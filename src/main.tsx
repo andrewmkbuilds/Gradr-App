@@ -5,6 +5,8 @@ import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
+// Design system theme layer — must load after the app's own CSS.
+import "./styles/gradr-design-system.css";
 import { initTelemetry } from "./lib/telemetry/journey";
 import RootErrorBoundary from "./components/RootErrorBoundary";
 import { registerServiceWorker } from "./lib/offline/registerServiceWorker";

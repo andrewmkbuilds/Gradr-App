@@ -19,19 +19,36 @@ export default {
       },
       colors: {
         border: {
-          DEFAULT: "hsl(var(--border))",
+          DEFAULT: "hsl(var(--border) / <alpha-value>)",
           subtle: "hsl(var(--border-subtle))",
           strong: "hsl(var(--border-strong))",
         },
         input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        ring: "hsl(var(--ring) / <alpha-value>)",
         background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
         surface: {
-          DEFAULT: "hsl(var(--surface))",
-          secondary: "hsl(var(--surface-secondary))",
+          DEFAULT: "hsl(var(--surface) / <alpha-value>)",
+          secondary: "hsl(var(--surface-secondary) / <alpha-value>)",
           elevated: "hsl(var(--surface-elevated))",
+          // Gradr design-system role: inset / hover fills.
+          muted: "hsl(var(--surface-secondary) / <alpha-value>)",
         },
+        // Gradr design-system brand palette (src/styles/gradr-design-system.css).
+        shell: "var(--color-shell)",
+        fog: "var(--color-fog)",
+        harbor: {
+          DEFAULT: "var(--color-harbor)",
+          soft: "var(--color-harbor-soft)",
+        },
+        hull: {
+          DEFAULT: "var(--color-hull)",
+          soft: "var(--color-hull-soft)",
+        },
+        ink: "var(--color-ink)",
+        slate: "var(--color-slate)",
+        // Gradr design-system semantic alias (components use `text-muted-foreground`).
+        "muted-foreground": "hsl(var(--muted-foreground) / <alpha-value>)",
         overlay: "hsl(var(--overlay))",
         info: {
           DEFAULT: "hsl(var(--info))",
@@ -47,7 +64,7 @@ export default {
           6: "hsl(var(--chart-6))",
         },
         brand: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
           hover: "hsl(var(--primary-hover))",
           soft: "hsl(var(--primary-soft))",
           glow: "hsl(var(--primary-glow))",
@@ -67,8 +84,8 @@ export default {
           border: "hsl(var(--mahogany-border))",
         },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
           hover: "hsl(var(--primary-hover))",
           soft: "hsl(var(--primary-soft))",
         },
@@ -77,17 +94,17 @@ export default {
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
           soft: "hsl(var(--destructive-soft))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -122,6 +139,30 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        // Gradr design-system radii.
+        card: "var(--radius-card)",
+        control: "var(--radius-control)",
+      },
+      boxShadow: {
+        // Gradr design-system elevation.
+        raise: "var(--shadow-raise)",
+        float: "var(--shadow-float)",
+      },
+      // Gradr design-system type scale — one class per semantic role.
+      fontSize: {
+        h1: ["3.5rem", { lineHeight: "1.05", letterSpacing: "-0.02em", fontWeight: "600" }],
+        h2: ["2.25rem", { lineHeight: "1.1", letterSpacing: "-0.015em", fontWeight: "600" }],
+        h3: ["1.75rem", { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600" }],
+        h4: ["1.375rem", { lineHeight: "1.3", fontWeight: "600" }],
+        h5: ["1.125rem", { lineHeight: "1.4", fontWeight: "600" }],
+        h6: ["1rem", { lineHeight: "1.45", fontWeight: "600" }],
+        "body-lg": ["1.125rem", { lineHeight: "1.65" }],
+        body: ["1rem", { lineHeight: "1.6" }],
+        "body-sm": ["0.875rem", { lineHeight: "1.55" }],
+        caption: ["0.8125rem", { lineHeight: "1.45" }],
+        overline: ["0.6875rem", { lineHeight: "1.3", letterSpacing: "0.09em", fontWeight: "600" }],
+        button: ["0.875rem", { lineHeight: "1", letterSpacing: "0.005em", fontWeight: "500" }],
+        code: ["0.8125rem", { lineHeight: "1.5" }],
       },
       keyframes: {
         "accordion-down": {

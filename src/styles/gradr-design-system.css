@@ -1,0 +1,48 @@
+/* ============================================================
+   Gradr design system — consumer theme layer (Tailwind v3)
+   ------------------------------------------------------------
+   The attached library ships a Tailwind v4 `@theme` block
+   (src/design-system/gradr-9b9b95/gradr/styles/theme.css). This
+   app is on Tailwind v3, so the same token values are declared
+   here as plain custom properties and wired into
+   tailwind.config.ts, which is what makes the library's
+   utilities (`rounded-control`, `text-h2`, `bg-harbor`, …) real.
+
+   Semantic roles (background/foreground/primary/…) are NOT
+   redeclared here: the app already carries the identical Yacht
+   Club palette as HSL tokens in index.css, and the config maps
+   the design system's semantic utilities onto those so light /
+   dark theming stays under a single switch.
+
+   Never hand-edit the library files — change this layer instead.
+   ============================================================ */
+
+:root {
+  /* Brand palette (raw values, mirrored from the library theme) */
+  --color-shell: #f9f7f6;
+  --color-fog: #b3c1c6;
+  --color-harbor: #256074;
+  --color-hull: #733e24;
+  --color-ink: #18292f;
+  --color-harbor-soft: #e7eef1;
+  --color-hull-soft: #f3e9e3;
+  --color-slate: #55676d;
+  --color-ds-success: #2f6b46;
+
+  /* Radii */
+  --radius-card: 1rem;
+  --radius-control: 0.7rem; /* 11.2px — gradr.me control radius */
+
+  /* Elevation */
+  --shadow-raise: 0 1px 2px rgb(37 96 116 / 0.3), 0 8px 24px -14px rgb(24 41 47 / 0.25);
+  --shadow-float: 0 2px 4px rgb(24 41 47 / 0.08), 0 20px 40px -20px rgb(24 41 47 / 0.35);
+}
+
+.dark {
+  /* Dark-theme brand tints, matching the library's dark roles. */
+  --color-harbor: #6fb2c8;
+  --color-hull: #c8794f;
+  --color-harbor-soft: #21353c;
+  --color-hull-soft: #33251d;
+  --color-slate: #b3c1c6;
+}
