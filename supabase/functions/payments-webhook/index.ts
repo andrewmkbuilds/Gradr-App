@@ -11,6 +11,11 @@ import { logSecurityEvent } from "../_shared/securityAudit.ts";
 import { capture as phCapture, setPerson as phSetPerson } from "../_shared/posthog.ts";
 import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
 import { closeDunning, openDunning, recordBillingEvent } from "../_shared/billingLedger.ts";
+import {
+  notifyUser,
+  recordLedgerEntry,
+  reverseEntitlementsForAdjustment,
+} from "../_shared/entitlementLedger.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
@@ -285,15 +290,30 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
   });
   const exhausted = !nextRetryAt;
 
-  await db().rpc("enqueue_notification", {
-    _user_id: target,
-    _type: "billing_payment_failed",
-    _title: exhausted ? "Final payment attempt failed" : "Your last payment failed",
-    _body: exhausted
-      ? "We couldn't collect payment after several attempts. Update your card to resume your plan."
-      : `Update your card to keep your plan active — we'll retry automatically (attempt ${attempt}).`,
-    _link: "/subscription",
-    _metadata: { subscription_id: subscriptionId, attempt },
+  // Channel choice (email / in-app / both) is the customer's, from their
+  // notification preferences.
+  await notifyUser({
+    userId: target,
+    category: "dunning",
+    inApp: {
+      type: "billing_payment_failed",
+      title: exhausted ? "Final payment attempt failed" : "Your last payment failed",
+      body: exhausted
+        ? "We couldn't collect payment after several attempts. Update your card to resume your plan."
+        : `Update your card to keep your plan active — we'll retry automatically (attempt ${attempt}).`,
+      link: "/subscription",
+      metadata: { subscription_id: subscriptionId, attempt },
+    },
+    email: {
+      template: "payment-failed",
+      recipient: await emailFor(target, env),
+      idempotencyKey: `pay-failed-${data?.id ?? subscriptionId}`,
+      data: {
+        amount: formatMoney(amountDue, currency),
+        failedAt: formatDate(data?.updatedAt ?? new Date().toISOString()),
+        updatePaymentUrl: "https://app.gradr.me/subscription",
+      },
+    },
   });
 
   await recordBillingEvent({
@@ -312,11 +332,6 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
     metadata: { attempt, next_retry_at: nextRetryAt },
   });
 
-  await billingEmail("payment-failed", await emailFor(target, env), `pay-failed-${data?.id ?? subscriptionId}`, {
-    amount: formatMoney(amountDue, currency),
-    failedAt: formatDate(data?.updatedAt ?? new Date().toISOString()),
-    updatePaymentUrl: "https://app.gradr.me/subscription",
-  });
 }
 
 /** A completed payment clears a prior dunning state and confirms the resume. */
@@ -613,18 +628,104 @@ async function grantPackCredits(data: any, env: PaddleEnv) {
       .eq("environment", env)
       .maybeSingle();
 
+    const appAfter = Number(current?.application_credits ?? 0) +
+      (pack.kind === "application" ? credits : 0);
+    const intAfter = Number(current?.interview_credits ?? 0) +
+      (pack.kind === "interview" ? credits : 0);
+
     await db().from("usage_credits").upsert(
       {
         user_id: userId,
         environment: env,
-        application_credits: Number(current?.application_credits ?? 0) +
-          (pack.kind === "application" ? credits : 0),
-        interview_credits: Number(current?.interview_credits ?? 0) +
-          (pack.kind === "interview" ? credits : 0),
+        application_credits: appAfter,
+        interview_credits: intAfter,
       },
       { onConflict: "user_id,environment" },
     );
+
+    // Ledger the grant so a later refund reversal has a matching counterpart.
+    await recordLedgerEntry({
+      userId,
+      environment: env,
+      entryType: "grant",
+      feature: pack.kind === "interview" ? "interview_credits" : "application_credits",
+      delta: credits,
+      balanceAfter: pack.kind === "interview" ? intAfter : appAfter,
+      reason: `Credit pack purchase: ${pack.label}`,
+      providerEventId: `pack:${data.id}`,
+      transactionId: data.id ?? null,
+      amount: Number(data.details?.totals?.total ?? 0) || null,
+      currency: data.currencyCode ?? "usd",
+      metadata: { pack_key: priceId, quantity },
+    });
   }
+}
+
+
+/**
+ * Refunds and chargebacks: reverse the entitlements the transaction granted,
+ * write the ledger entries, and tell the customer what changed.
+ */
+// deno-lint-ignore no-explicit-any
+async function handleAdjustment(data: any, env: PaddleEnv, providerEventId: string | null) {
+  const outcome = await reverseEntitlementsForAdjustment(data, env, providerEventId);
+  if (!outcome.userId) {
+    console.warn("adjustment could not be attributed to a user", {
+      transaction_id: outcome.transactionId,
+    });
+    return;
+  }
+
+  const action = String(data?.action ?? "refund");
+  const money = formatMoney(outcome.amount, (outcome.currency ?? "usd").toUpperCase());
+  const creditsLine = outcome.reversedCredits
+    .map((c) => `${Math.abs(c.delta)} ${c.feature.replace("_credits", "")} credits`)
+    .join(", ");
+
+  const description = [
+    outcome.subscriptionRevoked ? "Plan access has ended." : null,
+    creditsLine ? `${creditsLine} were removed.` : null,
+  ].filter(Boolean).join(" ") || "No entitlements needed reversing.";
+
+  await recordBillingEvent({
+    userId: outcome.userId,
+    environment: env,
+    eventType: action === "chargeback" ? "chargeback" : "refund",
+    title: action === "chargeback" ? `Chargeback — ${money}` : `Refund issued — ${money}`,
+    description,
+    amountTotal: outcome.amount,
+    currency: outcome.currency,
+    transactionId: outcome.transactionId,
+    occurredAt: data?.createdAt ?? null,
+    metadata: {
+      action,
+      reversed_credits: outcome.reversedCredits,
+      subscription_revoked: outcome.subscriptionRevoked,
+    },
+  });
+
+  await notifyUser({
+    userId: outcome.userId,
+    category: "refund",
+    inApp: {
+      type: "billing_refund",
+      title: action === "chargeback" ? "Payment reversed" : "Refund processed",
+      body: `${money} — ${description}`,
+      link: "/billing",
+      metadata: { transaction_id: outcome.transactionId, action },
+    },
+    email: {
+      template: "payment-refunded",
+      recipient: await emailFor(outcome.userId, env),
+      idempotencyKey: `refund-${outcome.transactionId ?? providerEventId}`,
+      data: {
+        amount: money,
+        refundedAt: formatDate(data?.createdAt ?? new Date().toISOString()),
+        summary: description,
+        billingUrl: "https://app.gradr.me/billing",
+      },
+    },
+  });
 }
 
 Deno.serve(async (req) => {
@@ -869,10 +970,12 @@ Deno.serve(async (req) => {
       case EventName.TransactionPaymentFailed:
         await handlePaymentFailed(event.data, env);
         break;
-      case EventName.AdjustmentCreated:
+      case EventName.AdjustmentCreated: {
         // Refunds / chargebacks arrive as adjustments against a transaction.
         await reverseAffiliateCommission(event.data, env, "refund_adjustment");
+        await handleAdjustment(event.data, env, deliveryEventId);
         break;
+      }
 
 
       default:

@@ -11,6 +11,7 @@ import { IntegrationsPanel } from "@/components/settings/IntegrationsPanel";
 import { LegalLinksPanel } from "@/components/legal/LegalLinksPanel";
 import { AccountDataPanel } from "@/components/settings/AccountDataPanel";
 import { EligibilityPanel } from "@/components/settings/EligibilityPanel";
+import { NotificationPreferencesPanel } from "@/components/settings/NotificationPreferencesPanel";
 import { UsageBars } from "@/components/UsageBars";
 import { logPreferencesRead } from "@/lib/preferencesAudit";
 
