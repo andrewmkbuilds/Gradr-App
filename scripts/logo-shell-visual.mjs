@@ -54,26 +54,34 @@ mkdirSync(OUT, { recursive: true });
 const failures = [];
 const browser = await launch();
 
-try {
-  for (const theme of ["light", "dark"]) {
-    const context = await browser.newContext({
-      viewport: { width: 1280, height: 900 },
-      colorScheme: theme,
-    });
-    const page = await context.newPage();
-    await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
+/** Layouts to cover: mobile, tablet and desktop render different logo marks. */
+const VIEWPORTS = [
+  { name: "mobile", width: 390, height: 844 },
+  { name: "tablet", width: 768, height: 1024 },
+  { name: "desktop", width: 1280, height: 900 },
+];
+
+/**
+ * Navigation transitions: the shell must stay in front after a client-side
+ * route change too, not just on a cold load of /auth.
+ */
+const ROUTES = [
+  { name: "auth", path: "/auth", via: null },
+  { name: "forgot-nav", path: "/forgot-password", via: "/auth" },
+  { name: "auth-return", path: "/auth", via: "/forgot-password" },
+];
+
+async function checkLogoShell(page, label) {
+  const localFailures = [];
+  const spinner = page.locator(".conic-spin").first();
+  if ((await spinner.count()) === 0) {
+    return [`[${label}] no .conic-spin ring found`];
+  }
     await page.evaluate((t) => {
       document.documentElement.classList.toggle("dark", t === "dark");
       document.documentElement.classList.toggle("light", t === "light");
     }, theme);
     await page.waitForTimeout(900);
-
-    const spinner = page.locator(".conic-spin").first();
-    if ((await spinner.count()) === 0) {
-      failures.push(`[${theme}] no .conic-spin ring found on /auth`);
-      await context.close();
-      continue;
-    }
 
     // The mark is the sibling that carries the opaque shell background.
     const info = await spinner.evaluate((el) => {
