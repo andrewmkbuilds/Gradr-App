@@ -57,6 +57,9 @@ jobs:
           AUTH_HERO_BROWSERS: chromium,firefox,webkit
         run: node scripts/auth-hero-visual.mjs http://localhost:8080
 
+      - name: Logo shell / spinner layering visual check (light + dark)
+        run: node scripts/logo-shell-visual.mjs http://localhost:8080
+
       - name: Smoke tests
         run: node scripts/smoke-test.mjs http://localhost:8080
 

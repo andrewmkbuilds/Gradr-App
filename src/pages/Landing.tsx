@@ -16,7 +16,7 @@ import {
   formatUsd,
   planPriceLabel,
 } from "@/config/pricing";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -507,7 +507,7 @@ export default function Landing() {
                     />
                   </MagneticButton>
                   <Magnetic strength={6}>
-                    <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base">
+                    <Button asChild size="lg" variant="outline">
                       <motion.button
                         type="button"
                         whileTap={{ scale: 0.97 }}
@@ -674,7 +674,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" className="h-11" onClick={start("feature_section", "Optimize my resume")}>
+              <Button size="lg" onClick={start("feature_section", "Optimize my resume")}>
                 Optimize my resume
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
@@ -744,7 +744,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" variant="outline" className="h-11" onClick={start("feature_section", "Find my matches")}>
+              <Button size="lg" variant="outline" onClick={start("feature_section", "Find my matches")}>
                 <Search className="mr-2 h-4 w-4" aria-hidden />
                 Find my matches
               </Button>
@@ -766,7 +766,7 @@ export default function Landing() {
                 Everything stays editable. Gradr drafts the first version so you spend your time on judgment, not
                 formatting.
               </p>
-              <Button size="lg" className="h-11" onClick={start("feature_section", "Build an application")}>
+              <Button size="lg" onClick={start("feature_section", "Build an application")}>
                 Build an application
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
@@ -811,12 +811,12 @@ export default function Landing() {
 
           <Reveal delay={80} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <SpatialCta>
-              <Button size="lg" className="h-12 px-6" onClick={start("feature_section", "Run a mock interview")}>
+              <Button size="lg" onClick={start("feature_section", "Run a mock interview")}>
                 Run a mock interview
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
             </SpatialCta>
-            <Button size="lg" variant="outline" className="h-12 px-6" onClick={() => navigate("/pricing")}>
+            <Button size="lg" variant="outline" onClick={() => navigate("/pricing")}>
               See interview plans
             </Button>
           </Reveal>
@@ -906,7 +906,7 @@ export default function Landing() {
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Not sure where you fit? Start free — Gradr adapts to the stage you're actually at.
               </p>
-              <Button variant="outline" className="mt-4 h-11 w-full sm:w-auto" onClick={start("pricing", "Get started free")}>
+              <Button variant="outline" size="lg" className="mt-4 w-full sm:w-auto" onClick={start("pricing", "Get started free")}>
                 Get started free
               </Button>
             </Reveal>
@@ -933,7 +933,7 @@ export default function Landing() {
           </ol>
 
           <Reveal delay={80} className="mt-8">
-            <Button size="lg" className="h-12 px-6" onClick={start("feature_section", "Start building your career system")}>
+            <Button size="lg" onClick={start("feature_section", "Start building your career system")}>
               Start building your career system
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
             </Button>
@@ -1002,7 +1002,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" className="h-11" onClick={start("feature_section", "Rewrite my resume")}>
+              <Button size="lg" onClick={start("feature_section", "Rewrite my resume")}>
                 Rewrite my resume
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
@@ -1097,8 +1097,9 @@ export default function Landing() {
                   </ul>
 
                   <Button
-                    className="mt-6 h-11 w-full"
-                    variant={p.highlight ? "default" : "outline"}
+                    className="mt-6 w-full"
+                    size="lg"
+                    variant={p.highlight ? "primary" : "outline"}
                     onClick={() => {
                       if (p.name === "Free") {
                         start("pricing", p.cta)();
@@ -1157,14 +1158,13 @@ export default function Landing() {
               Build a smarter career system with Gradr.
             </p>
             <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" className="h-12 px-7 text-base" onClick={start("final_cta", "Get started free")}>
+              <Button size="lg" onClick={start("final_cta", "Get started free")}>
                 Get started free
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="h-12 px-7 text-base"
                 onClick={() => scrollIntoViewSafely("product")}
               >
                 Explore Gradr

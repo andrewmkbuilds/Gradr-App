@@ -168,7 +168,8 @@
     "test:watch": "vitest",
     "typecheck": "tsgo -p tsconfig.app.json && tsgo -p tsconfig.node.json",
     "types:check": "node scripts/check-type-drift.mjs",
-    "types:generate": "node scripts/generate-db-types.mjs"
+    "types:generate": "node scripts/generate-db-types.mjs",
+    "visual:logo-shell": "node scripts/logo-shell-visual.mjs"
   },
   "type": "module",
   "version": "0.0.0"
