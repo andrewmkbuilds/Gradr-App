@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * Visual regression: the auth logo's light shell must stay IN FRONT of the
- * spinning conic ring, in both light and dark mode.
+ * spinning conic ring — in both themes, at every breakpoint, and after a
+ * client-side navigation (not just on a cold load).
  *
- * Two independent assertions per theme:
+ * Two independent assertions per case:
  *  1. DOM   — the logo mark resolves to an opaque background colour (alpha 1),
  *             so the spinner cannot bleed through the mark.
  *  2. Pixels— two clipped captures of the mark's interior, taken while the
@@ -51,57 +52,63 @@ async function launch() {
 
 mkdirSync(OUT, { recursive: true });
 
-const failures = [];
-const browser = await launch();
+/** Mobile, tablet and desktop render different logo instances in AuthLayout. */
+const VIEWPORTS = [
+  { name: "mobile", width: 390, height: 844 },
+  { name: "tablet", width: 768, height: 1024 },
+  { name: "desktop", width: 1280, height: 900 },
+];
 
-try {
-  for (const theme of ["light", "dark"]) {
-    const context = await browser.newContext({
-      viewport: { width: 1280, height: 900 },
-      colorScheme: theme,
-    });
-    const page = await context.newPage();
-    await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
-    await page.evaluate((t) => {
-      document.documentElement.classList.toggle("dark", t === "dark");
-      document.documentElement.classList.toggle("light", t === "light");
-    }, theme);
-    await page.waitForTimeout(900);
+/**
+ * `via` performs a client-side route change before asserting, so the layering
+ * is checked after React re-mounts the mark — not only on a cold load.
+ */
+const ROUTES = [
+  { name: "auth", path: "/auth", via: null },
+  { name: "nav-forgot", path: "/forgot-password", via: "/auth" },
+  { name: "nav-back-auth", path: "/auth", via: "/forgot-password" },
+];
 
-    const spinner = page.locator(".conic-spin").first();
-    if ((await spinner.count()) === 0) {
-      failures.push(`[${theme}] no .conic-spin ring found on /auth`);
-      await context.close();
-      continue;
-    }
+/**
+ * Asserts every visible spinner/mark pair on the current page. Returns a list
+ * of failure strings (empty when the layering is correct).
+ */
+async function checkLogoShell(page, label) {
+  const failures = [];
+  const spinners = page.locator(".conic-spin");
+  const count = await spinners.count();
+  if (count === 0) return [`[${label}] no .conic-spin ring found`];
 
-    // The mark is the sibling that carries the opaque shell background.
+  let asserted = 0;
+
+  for (let i = 0; i < count; i += 1) {
+    const spinner = spinners.nth(i);
+    if (!(await spinner.isVisible())) continue;
+
     const info = await spinner.evaluate((el) => {
       const mark = el.nextElementSibling;
       if (!mark) return null;
       const r = mark.getBoundingClientRect();
-      const cs = getComputedStyle(mark);
       return {
-        bg: cs.backgroundColor,
-        zSpinner: getComputedStyle(el).zIndex,
+        bg: getComputedStyle(mark).backgroundColor,
         rect: { x: r.x, y: r.y, width: r.width, height: r.height },
       };
     });
 
     if (!info) {
-      failures.push(`[${theme}] logo mark element missing next to the spinner ring`);
-      await context.close();
+      failures.push(`[${label}] logo mark element missing next to the spinner ring`);
       continue;
     }
+    if (info.rect.width < 8 || info.rect.height < 8) continue;
 
     const alpha = /rgba?\(([^)]+)\)/.exec(info.bg)?.[1].split(",").map((v) => v.trim());
     const isOpaque = alpha ? alpha.length < 4 || Number(alpha[3]) === 1 : false;
     if (!isOpaque) {
-      failures.push(`[${theme}] logo mark background is not opaque (${info.bg}) — spinner can bleed through`);
+      failures.push(`[${label}] logo mark background is not opaque (${info.bg}) — spinner can bleed through`);
     }
 
     // Interior clip: inset far enough to exclude the visible ring edge.
-    const inset = Math.round(info.rect.width * 0.2);
+    const inset = Math.max(2, Math.round(info.rect.width * 0.2));
     const clip = {
       x: Math.round(info.rect.x) + inset,
       y: Math.round(info.rect.y) + inset,
@@ -113,20 +120,68 @@ try {
     await page.waitForTimeout(1500); // ring rotates ~1/4 turn (6s loop)
     const second = await page.screenshot({ clip });
 
-    writeFileSync(join(OUT, `logo-${theme}-a.png`), first);
-    writeFileSync(join(OUT, `logo-${theme}-b.png`), second);
+    writeFileSync(join(OUT, `${label}-${i}-a.png`), first);
+    writeFileSync(join(OUT, `${label}-${i}-b.png`), second);
 
-    const changed =
-      first.length !== second.length || !first.equals(second);
-    if (changed) {
+    if (first.length !== second.length || !first.equals(second)) {
       failures.push(
-        `[${theme}] logo interior changed between frames — the spinning ring is rendering in front of the shell`,
+        `[${label}] logo interior changed between frames — the spinning ring is rendering in front of the shell`,
       );
-    } else {
-      console.log(`✓ ${theme}: shell opaque (${info.bg}) and interior stable across ring rotation`);
     }
+    asserted += 1;
+  }
 
-    await context.close();
+  if (asserted === 0 && failures.length === 0) {
+    failures.push(`[${label}] no visible logo mark could be asserted`);
+  }
+  if (failures.length === 0) {
+    console.log(`✓ ${label}: shell opaque and interior stable across ring rotation (${asserted} mark(s))`);
+  }
+  return failures;
+}
+
+const failures = [];
+const browser = await launch();
+
+try {
+  for (const theme of ["light", "dark"]) {
+    for (const vp of VIEWPORTS) {
+      const context = await browser.newContext({
+        viewport: { width: vp.width, height: vp.height },
+        colorScheme: theme,
+      });
+      const page = await context.newPage();
+
+      const applyTheme = () =>
+        page.evaluate((t) => {
+          document.documentElement.classList.toggle("dark", t === "dark");
+          document.documentElement.classList.toggle("light", t === "light");
+        }, theme);
+
+      for (const route of ROUTES) {
+        const label = `${theme}-${vp.name}-${route.name}`;
+        try {
+          await page.goto(`${BASE}${route.via ?? route.path}`, { waitUntil: "domcontentloaded" });
+          await applyTheme();
+          await page.waitForTimeout(700);
+
+          if (route.via) {
+            // Client-side transition rather than a full reload.
+            await page.evaluate((path) => {
+              window.history.pushState({}, "", path);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }, route.path);
+            await page.waitForTimeout(900);
+          }
+
+          failures.push(...(await checkLogoShell(page, label)));
+        } catch (err) {
+          failures.push(`[${label}] ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+
+      await context.close();
+    }
   }
 } finally {
   await browser.close();
@@ -138,4 +193,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("\n✓ Logo light shell stays in front of the spinner ring in light and dark.");
+console.log("\n✓ Logo light shell stays in front of the spinner ring across themes, breakpoints and navigations.");

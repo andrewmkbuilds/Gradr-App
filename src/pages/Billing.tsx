@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { CreditCard, RefreshCw, Zap, Mic, ExternalLink, Sparkles, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

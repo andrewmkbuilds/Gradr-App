@@ -1,13 +1,39 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { Slot } from "@radix-ui/react-slot";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Button as DsButton,
+  buttonVariants,
   type ButtonProps as DsButtonProps,
 } from "@/design-system/gradr-9b9b95/gradr/components/button";
-import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
 
-export interface ButtonProps extends DsButtonProps {
+/**
+ * Legacy variant / size names accepted for a safe bulk migration off
+ * `@/components/ui/button`. Each maps onto a real design-system variant —
+ * no new style values are introduced.
+ */
+type LegacyVariant = "default" | "secondary" | "success";
+type LegacySize = "default";
+
+const VARIANT_ALIASES: Record<LegacyVariant, NonNullable<DsButtonProps["variant"]>> = {
+  default: "primary",
+  // The design system has no filled neutral button; `outline` is its
+  // low-emphasis surface-safe equivalent.
+  secondary: "outline",
+  // No success button variant exists in the library; a positive confirmation
+  // is still a primary action.
+  success: "primary",
+};
+
+const SIZE_ALIASES: Record<LegacySize, NonNullable<DsButtonProps["size"]>> = {
+  default: "md",
+};
+
+export interface ButtonProps
+  extends Omit<DsButtonProps, "variant" | "size"> {
+  variant?: DsButtonProps["variant"] | LegacyVariant;
+  size?: DsButtonProps["size"] | LegacySize;
   /**
    * Render the design-system button styling onto the single child element
    * (link, motion element, …) instead of a <button>.
@@ -20,39 +46,58 @@ export interface ButtonProps extends DsButtonProps {
   asChild?: boolean;
 }
 
+function resolve(variant: ButtonProps["variant"], size: ButtonProps["size"]) {
+  return {
+    variant: (variant && variant in VARIANT_ALIASES
+      ? VARIANT_ALIASES[variant as LegacyVariant]
+      : variant) as DsButtonProps["variant"],
+    size: (size && size in SIZE_ALIASES
+      ? SIZE_ALIASES[size as LegacySize]
+      : size) as DsButtonProps["size"],
+  };
+}
+
 /**
- * Design-system Button plus `asChild`. Import this from app code when a
- * button needs to render as a link or animated element; otherwise import
- * `Button` straight from `@/design-system/gradr-9b9b95`.
+ * Design-system Button plus `asChild`, legacy variant/size aliases and a
+ * spinner-based `loading` state matching the legacy button's behaviour.
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ asChild, className, variant, size, loading, disabled, children, ...props }, ref) => {
-    if (!asChild) {
+    const resolved = resolve(variant, size);
+
+    if (asChild) {
       return (
-        <DsButton
-          ref={ref}
-          className={className}
-          variant={variant}
-          size={size}
-          loading={loading}
-          disabled={disabled}
-          {...props}
+        <Slot
+          ref={ref as never}
+          className={cn(buttonVariants(resolved), className)}
+          aria-busy={loading || undefined}
+          {...(props as ButtonHTMLAttributes<HTMLButtonElement>)}
         >
           {children}
-        </DsButton>
+        </Slot>
       );
     }
 
     return (
-      <Slot
-        ref={ref as never}
-        className={cn(buttonVariants({ variant, size }), className)}
+      <DsButton
+        ref={ref}
+        className={className}
+        variant={resolved.variant}
+        size={resolved.size}
+        disabled={disabled || loading}
         aria-busy={loading || undefined}
-        {...(props as ButtonHTMLAttributes<HTMLButtonElement>)}
+        {...props}
       >
-        {children}
-      </Slot>
+        {loading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            {children}
+          </>
+        ) : (
+          children
+        )}
+      </DsButton>
     );
   },
 );
-Button.displayName = "DsButtonWithAsChild";
+Button.displayName = "DsButtonCompat";
