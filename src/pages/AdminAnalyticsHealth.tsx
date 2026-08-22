@@ -66,7 +66,7 @@ const KIND_COPY: Record<string, string> = {
 function StatusPill({ status }: { status: MonitorReport["status"] }) {
   const map = {
     healthy: { label: "Healthy", className: "bg-primary/10 text-primary", Icon: CheckCircle2 },
-    degraded: { label: "Degraded", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400", Icon: Clock },
+    degraded: { label: "Degraded", className: "bg-warning/10 text-warning", Icon: Clock },
     critical: { label: "Critical", className: "bg-destructive/10 text-destructive", Icon: AlertTriangle },
   }[status];
   return (
