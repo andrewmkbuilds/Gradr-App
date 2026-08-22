@@ -168,7 +168,8 @@
     "typecheck": "tsgo -p tsconfig.app.json && tsgo -p tsconfig.node.json",
     "types:check": "node scripts/check-type-drift.mjs",
     "types:generate": "node scripts/generate-db-types.mjs",
-    "visual:logo-shell": "node scripts/logo-shell-visual.mjs"
+    "visual:logo-shell": "node scripts/logo-shell-visual.mjs",
+    "theme:check": "node scripts/theme-regression-check.mjs"
   },
   "type": "module",
   "version": "0.0.0"

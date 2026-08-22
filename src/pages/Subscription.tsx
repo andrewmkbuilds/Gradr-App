@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, CalendarClock, CreditCard, Loader2, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";

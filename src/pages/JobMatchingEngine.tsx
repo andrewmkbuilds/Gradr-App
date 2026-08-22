@@ -20,7 +20,7 @@ import { SkeletonList } from "@/components/states";
 import { Surface } from "@/components/ui/surface";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { duration as motionDuration, easeOut, springSnappy } from "@/lib/motion/tokens";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";

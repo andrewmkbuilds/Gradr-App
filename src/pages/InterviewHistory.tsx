@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, FileDown, CalendarDays, ArrowLeft, Trash2, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState, SkeletonList } from "@/components/states";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { toast } from "sonner";
 import { ScoreRing } from "@/components/ScoreRing";
 import type { InterviewReport } from "@/components/interview/InterviewReportView";

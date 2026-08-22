@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Target, TrendingUp } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Surface } from "@/components/ui/surface";
 import { GetStartedState, SkeletonList } from "@/components/states";
 import { EngineCanvas } from "@/components/app/EngineCanvas";

@@ -66,11 +66,11 @@ const KIND_COPY: Record<string, string> = {
 function StatusPill({ status }: { status: MonitorReport["status"] }) {
   const map = {
     healthy: { label: "Healthy", className: "bg-primary/10 text-primary", Icon: CheckCircle2 },
-    degraded: { label: "Degraded", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400", Icon: Clock },
+    degraded: { label: "Degraded", className: "bg-warning/10 text-warning", Icon: Clock },
     critical: { label: "Critical", className: "bg-destructive/10 text-destructive", Icon: AlertTriangle },
   }[status];
   return (
-    <span className={cn("inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium", map.className)}>
+    <span className={cn("inline-flex items-center gap-2 rounded-full px-3 py-1 text-body-sm font-medium", map.className)}>
       <map.Icon className="h-4 w-4" aria-hidden />
       {map.label}
     </span>
@@ -140,7 +140,7 @@ export default function AdminAnalyticsHealth() {
         <div className="flex items-center gap-4">
           {report.isLoading ? <Skeleton className="h-8 w-28" /> : data ? <StatusPill status={data.status} /> : null}
           {data ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-sm text-muted-foreground">
               {data.billing.subscription_webhooks} subscription webhook(s),{" "}
               {data.billing.unprocessed_webhooks} unprocessed, in the last {data.window_hours}h
             </p>
@@ -174,14 +174,14 @@ export default function AdminAnalyticsHealth() {
       </Card>
 
       <Card className="p-5">
-        <h2 className="mb-4 text-lg font-semibold">Event delivery</h2>
+        <h2 className="mb-4 text-h6 font-semibold">Event delivery</h2>
         {report.isLoading ? (
           <div className="space-y-2">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-body-sm">
               <caption className="sr-only">Analytics event delivery outcomes</caption>
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
@@ -229,9 +229,9 @@ export default function AdminAnalyticsHealth() {
       </Card>
 
       <Card className="p-5">
-        <h2 className="mb-4 text-lg font-semibold">Open alerts</h2>
+        <h2 className="mb-4 text-h6 font-semibold">Open alerts</h2>
         {!data?.alerts.length ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body-sm text-muted-foreground">
             No open tracking regressions. The detector runs automatically every 15 minutes.
           </p>
         ) : (
@@ -245,9 +245,9 @@ export default function AdminAnalyticsHealth() {
                         {alert.severity}
                       </Badge>
                       <span className="font-medium">{KIND_COPY[alert.kind] ?? alert.kind}</span>
-                      {alert.event_name ? <code className="text-xs text-muted-foreground">{alert.event_name}</code> : null}
+                      {alert.event_name ? <code className="text-caption text-muted-foreground">{alert.event_name}</code> : null}
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-1 text-body-sm text-muted-foreground">
                       {JSON.stringify(alert.detail)} · window{" "}
                       {formatDistanceToNow(new Date(alert.window_start), { addSuffix: true })}
                       {alert.notified_at ? " · admins notified" : ""}

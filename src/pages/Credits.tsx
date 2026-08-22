@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mic, Radio, RefreshCw, Sparkles, Zap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Seo } from "@/components/Seo";
