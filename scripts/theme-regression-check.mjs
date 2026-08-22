@@ -53,6 +53,8 @@ function staticPass() {
     const src = readFileSync(file, "utf8");
     src.split("\n").forEach((line, i) => {
       if (/theme-regression-ok/.test(line)) return;
+      // mask-image gradients use #000/#fff as alpha stops, not theme colours.
+      if (/mask-image:/.test(line)) return;
       for (const rule of RULES) {
         rule.re.lastIndex = 0;
         const hit = rule.re.exec(line);
