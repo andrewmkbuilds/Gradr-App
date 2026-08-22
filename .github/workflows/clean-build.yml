@@ -1,0 +1,44 @@
+name: Clean install and production build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: clean-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: bun install --frozen-lockfile + production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # No dependency cache on purpose: this job proves a cold, clean install
+      # resolves exactly what the lockfile records and still builds.
+      - name: Clean install and build
+        run: node scripts/ci-build.mjs
+
+      - name: Report failure context
+        if: failure()
+        run: |
+          echo "::error title=Clean build failed::bun install --frozen-lockfile or the production build failed."
+          echo "Reproduce locally: rm -rf node_modules && bun install --frozen-lockfile && bun run build"
+          echo "--- package.json vs lockfile ---"
+          git diff --stat -- package.json bun.lock || true
+
+      - name: Upload build output
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
