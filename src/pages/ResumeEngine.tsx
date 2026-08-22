@@ -18,9 +18,8 @@ import { Surface } from "@/components/ui/surface";
 import { Magnetic } from "@/components/motion";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { duration as motionDuration, easeOut, springSnappy } from "@/lib/motion/tokens";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ds/Button";
+import { Input, Textarea } from "@/design-system/gradr-9b9b95";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
@@ -329,14 +328,13 @@ export default function ResumeEngine() {
                 placeholder="Job title (optional)"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
-                className="bg-surface-secondary"
               />
               <Textarea
                 placeholder="Paste the full job description to score keyword coverage against this exact role…"
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 rows={6}
-                className="resize-y bg-surface-secondary"
+                className="resize-y"
               />
               <p className="text-xs text-muted-foreground">
                 With a job description, keyword match is measured against the posting instead of a general skill lexicon.

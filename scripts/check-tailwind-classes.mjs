@@ -59,7 +59,13 @@ const IGNORE = [
 ];
 
 function collectCandidates() {
-  const files = fg.sync(["src/**/*.{ts,tsx,js,jsx}", "index.html"], { cwd: ROOT, absolute: true });
+  // The vendored design system is Tailwind v4 source we must not edit; its
+  // internal helpers (e.g. cn.ts merge groups) are not app class literals.
+  const files = fg.sync(["src/**/*.{ts,tsx,js,jsx}", "index.html"], {
+    cwd: ROOT,
+    absolute: true,
+    ignore: ["src/design-system/**"],
+  });
   const found = new Map(); // class -> Set(files)
   for (const file of files) {
     const src = readFileSync(file, "utf8");
