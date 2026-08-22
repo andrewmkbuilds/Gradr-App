@@ -333,7 +333,7 @@ export default function Landing() {
         >
           <a href="#hero" className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <BrandLogo size={28} />
-            <span className="text-base font-bold tracking-[0.24em]">GRADR</span>
+            <span className="text-body font-bold tracking-[0.24em]">GRADR</span>
           </a>
 
           <ul className="hidden items-center gap-1 lg:flex">
@@ -345,7 +345,7 @@ export default function Landing() {
                     href={n.href}
                     onClick={onNavClick(n.href)}
                     aria-current={active ? "true" : undefined}
-                    className={`relative z-10 inline-flex min-h-9 items-center rounded-full px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    className={`relative z-10 inline-flex min-h-9 items-center rounded-full px-3 text-body-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -409,7 +409,7 @@ export default function Landing() {
                   <a
                     href={n.href}
                     onClick={(e) => { setMenuOpen(false); onNavClick(n.href)(e); }}
-                    className={`flex min-h-11 items-center rounded-lg px-2 text-sm transition-colors hover:bg-secondary/50 hover:text-foreground ${
+                    className={`flex min-h-11 items-center rounded-lg px-2 text-body-sm transition-colors hover:bg-secondary/50 hover:text-foreground ${
                       activeHash === n.href ? "bg-primary/10 text-foreground" : "text-muted-foreground"
                     }`}
                   >
@@ -473,9 +473,9 @@ export default function Landing() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: easeOut, delay: 0.42 }}
-                  className="flex items-baseline gap-2 text-sm text-muted-foreground"
+                  className="flex items-baseline gap-2 text-body-sm text-muted-foreground"
                 >
-                  <span className="text-xs uppercase tracking-[0.22em] text-brand-secondary">Running now</span>
+                  <span className="text-caption uppercase tracking-[0.22em] text-brand-secondary">Running now</span>
                   <TextLoop
                     className="font-medium text-foreground"
                     items={["Resume Intelligence", "Job Matching", "Interview Coaching", "Career Intelligence"]}
@@ -499,7 +499,7 @@ export default function Landing() {
                   transition={{ duration: 0.7, ease: easeOut, delay: 0.62 }}
                   className="flex flex-col gap-3 sm:flex-row"
                 >
-                  <MagneticButton size="lg" className="group h-12 px-6 text-base" onClick={start("hero", "Get started free")}>
+                  <MagneticButton size="lg" className="group h-12 px-6 text-body" onClick={start("hero", "Get started free")}>
                     Get started free
                     <ArrowRight
                       className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -534,10 +534,10 @@ export default function Landing() {
                     <div key={s.label}>
                       {/* dd first visually via order so the label stays the
                           dt element — a <dl> group may only contain dt/dd. */}
-                      <dd className="font-display text-2xl font-bold tracking-tight text-foreground">
+                      <dd className="font-display text-h4 font-bold tracking-tight text-foreground">
                         <CountUp to={s.value} suffix={s.suffix} duration={1.6} immediate />
                       </dd>
-                      <dt className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.label}</dt>
+                      <dt className="mt-1 text-caption leading-tight text-muted-foreground">{s.label}</dt>
                     </div>
 
                   ))}
@@ -610,7 +610,7 @@ export default function Landing() {
                 {FRAGMENTS.map((f) => (
                   <li
                     key={f}
-                    className="rounded-lg border border-border bg-secondary/30 px-3 py-2 text-xs text-muted-foreground"
+                    className="rounded-lg border border-border bg-secondary/30 px-3 py-2 text-caption text-muted-foreground"
                   >
                     {f}
                   </li>
@@ -618,12 +618,12 @@ export default function Landing() {
               </ul>
               <div className="flex items-center gap-3">
                 <span className="h-px flex-1 bg-border" aria-hidden />
-                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Gradr brings it together</span>
+                <span className="text-caption uppercase tracking-[0.2em] text-muted-foreground">Gradr brings it together</span>
                 <span className="h-px flex-1 bg-border" aria-hidden />
               </div>
               <div className="flex items-center gap-3 rounded-xl border border-primary/25 bg-primary/[0.06] px-4 py-4">
                 <Layers className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-                <p className="text-sm leading-relaxed text-foreground">
+                <p className="text-body-sm leading-relaxed text-foreground">
                   One profile. One resume model. One pipeline. Every module reads the same context about you.
                 </p>
               </div>
@@ -668,7 +668,7 @@ export default function Landing() {
               </Lede>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {["ATS compatibility", "Keyword coverage", "Impact language", "Structure", "Clarity", "Role alignment"].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <li key={f} className="flex items-center gap-2 text-body-sm text-muted-foreground">
                     <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                     {f}
                   </li>
@@ -738,7 +738,7 @@ export default function Landing() {
               </Lede>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {["Match score", "Matched skills", "Missing skills", "Salary where listed", "Location and work mode", "Role alignment"].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <li key={f} className="flex items-center gap-2 text-body-sm text-muted-foreground">
                     <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                     {f}
                   </li>
@@ -762,7 +762,7 @@ export default function Landing() {
                 Paste a link or a description. Gradr produces tailored resume bullets, a cover letter written for that
                 specific role, a short recruiter message, and a tracked entry in your pipeline.
               </Lede>
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <p className="text-body-sm leading-relaxed text-muted-foreground">
                 Everything stays editable. Gradr drafts the first version so you spend your time on judgment, not
                 formatting.
               </p>
@@ -841,7 +841,7 @@ export default function Landing() {
                   "What should I practice before my interview?",
                   "Which skills should I learn next?",
                 ].map((q) => (
-                  <li key={q} className="rounded-lg border border-border bg-secondary/30 px-3 py-2.5 text-sm text-muted-foreground">
+                  <li key={q} className="rounded-lg border border-border bg-secondary/30 px-3 py-2.5 text-body-sm text-muted-foreground">
                     “{q}”
                   </li>
                 ))}
@@ -862,7 +862,7 @@ export default function Landing() {
               </Lede>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {["ATS health", "Application pipeline", "Interview performance", "Competency trends", "Job readiness", "Practice progress"].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <li key={f} className="flex items-center gap-2 text-body-sm text-muted-foreground">
                     <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                     {f}
                   </li>
@@ -896,14 +896,14 @@ export default function Landing() {
                 <SpotlightCard className="h-full p-6">
                   <div id={a.id} className="scroll-mt-28" />
                   <a.icon className="h-5 w-5 text-primary" aria-hidden />
-                  <h3 className="mt-4 text-sm font-semibold text-foreground">{a.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+                  <h3 className="mt-4 text-body-sm font-semibold text-foreground">{a.title}</h3>
+                  <p className="mt-1.5 text-body-sm leading-relaxed text-muted-foreground">{a.copy}</p>
                 </SpotlightCard>
                 </SpatialCard>
               </Reveal>
             ))}
             <Reveal delay={250} className="flex flex-col justify-center rounded-2xl border border-border bg-card p-6">
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <p className="text-body-sm leading-relaxed text-muted-foreground">
                 Not sure where you fit? Start free — Gradr adapts to the stage you're actually at.
               </p>
               <Button variant="outline" size="lg" className="mt-4 w-full sm:w-auto" onClick={start("pricing", "Get started free")}>
@@ -924,10 +924,10 @@ export default function Landing() {
           <ol className="mt-10 space-y-px overflow-hidden rounded-2xl border border-border bg-border">
             {HOW.map((step, i) => (
               <Reveal as="li" key={step} delay={i * 40} className="flex items-center gap-4 bg-card px-5 py-4 sm:px-6">
-                <span className="w-8 shrink-0 text-sm font-semibold tabular-nums text-primary">
+                <span className="w-8 shrink-0 text-body-sm font-semibold tabular-nums text-primary">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="text-sm font-medium text-foreground sm:text-base">{step}</span>
+                <span className="text-body-sm font-medium text-foreground sm:text-body">{step}</span>
               </Reveal>
             ))}
           </ol>
@@ -949,33 +949,33 @@ export default function Landing() {
 
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
             <Reveal className="rounded-2xl border border-border bg-secondary/20 p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <h3 className="text-body-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 The usual setup
               </h3>
               <ul className="mt-5 space-y-3">
                 {OLD_WAY.map((t) => (
-                  <li key={t} className="flex gap-3 text-sm text-muted-foreground">
+                  <li key={t} className="flex gap-3 text-body-sm text-muted-foreground">
                     <Minus className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" aria-hidden />
                     {t}
                   </li>
                 ))}
               </ul>
-              <p className="mt-5 text-xs text-muted-foreground/80">
+              <p className="mt-5 text-caption text-muted-foreground/80">
                 Five tools that never talk to each other.
               </p>
             </Reveal>
 
             <Reveal delay={100} className="rounded-2xl border border-primary/30 bg-primary/[0.05] p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Gradr</h3>
+              <h3 className="text-body-sm font-semibold uppercase tracking-[0.18em] text-primary">Gradr</h3>
               <ul className="mt-5 space-y-3">
                 {NEW_WAY.map((t) => (
-                  <li key={t} className="flex gap-3 text-sm text-foreground">
+                  <li key={t} className="flex gap-3 text-body-sm text-foreground">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                     {t}
                   </li>
                 ))}
               </ul>
-              <p className="mt-5 text-xs text-muted-foreground">
+              <p className="mt-5 text-caption text-muted-foreground">
                 One connected career system.
               </p>
             </Reveal>
@@ -996,7 +996,7 @@ export default function Landing() {
               </Lede>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {["Quantified impact", "Active phrasing", "Keyword coverage", "Parser-safe structure"].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <li key={f} className="flex items-center gap-2 text-body-sm text-muted-foreground">
                     <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                     {f}
                   </li>
@@ -1033,7 +1033,7 @@ export default function Landing() {
                   type="button"
                   aria-pressed={billing === k}
                   onClick={() => setBilling(k)}
-                  className={`min-h-10 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  className={`min-h-10 rounded-lg px-4 text-body-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     billing === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -1041,7 +1041,7 @@ export default function Landing() {
                 </button>
               ))}
             </div>
-            <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-mahogany-border bg-mahogany/10 px-3 py-1 text-xs font-medium text-mahogany">
+            <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-mahogany-border bg-mahogany/10 px-3 py-1 text-caption font-medium text-mahogany">
               {ANNUAL_SAVINGS_MESSAGE}
             </p>
           </Reveal>
@@ -1063,21 +1063,21 @@ export default function Landing() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
+                    <h3 className="text-body-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
                     {p.highlight && (
-                      <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                      <span className="rounded-full bg-primary/15 px-2.5 py-1 text-overline font-semibold uppercase tracking-wider text-primary">
                         <GradientText variant="shine">Most complete</GradientText>
                       </span>
                     )}
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{p.tagline}</p>
+                  <p className="mt-2 text-body-sm text-muted-foreground">{p.tagline}</p>
 
                   <div className="mt-6 flex items-baseline gap-2">
-                    <span className="text-4xl font-bold tracking-tight tabular-nums text-foreground">{priceLabel}</span>
-                    <span className="text-sm text-muted-foreground">{periodNote}</span>
+                    <span className="text-h2 font-bold tracking-tight tabular-nums text-foreground">{priceLabel}</span>
+                    <span className="text-body-sm text-muted-foreground">{periodNote}</span>
                   </div>
                   {savings > 0 && (
-                    <div className="mt-2 flex items-center gap-2 text-xs">
+                    <div className="mt-2 flex items-center gap-2 text-caption">
                       <span className="tabular-nums text-muted-foreground line-through">
                         {formatUsd(annualListPrice(p.id))}
                       </span>
@@ -1089,7 +1089,7 @@ export default function Landing() {
 
                   <ul className="mt-6 flex-1 space-y-2.5">
                     {p.features.map((f) => (
-                      <li key={f} className="flex gap-2.5 text-sm text-muted-foreground">
+                      <li key={f} className="flex gap-2.5 text-body-sm text-muted-foreground">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                         {f}
                       </li>
@@ -1134,10 +1134,10 @@ export default function Landing() {
               <Accordion type="single" collapsible className="w-full">
                 {FAQS.map(([q, a], i) => (
                   <AccordionItem key={q} value={`faq-${i}`} className="border-border">
-                    <AccordionTrigger className="py-4 text-left text-sm font-medium hover:no-underline sm:text-base">
+                    <AccordionTrigger className="py-4 text-left text-body-sm font-medium hover:no-underline sm:text-body">
                       {q}
                     </AccordionTrigger>
-                    <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+                    <AccordionContent className="text-body-sm leading-relaxed text-muted-foreground">
                       {a}
                     </AccordionContent>
                   </AccordionItem>
@@ -1151,10 +1151,10 @@ export default function Landing() {
         <Section className="border-t border-border/60">
           <Reveal className="relative overflow-hidden rounded-3xl border border-primary/25 bg-card px-6 py-14 text-center sm:px-12 sm:py-20">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/10 to-transparent" aria-hidden />
-            <h2 className="relative mx-auto max-w-3xl text-balance text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
+            <h2 className="relative mx-auto max-w-3xl text-balance text-h3 font-bold leading-[1.1] tracking-tight sm:text-h2 lg:text-h1">
               Your next opportunity deserves more than another resume.
             </h2>
-            <p className="relative mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+            <p className="relative mx-auto mt-4 max-w-xl text-body leading-relaxed text-muted-foreground">
               Build a smarter career system with Gradr.
             </p>
             <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
@@ -1180,22 +1180,22 @@ export default function Landing() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <BrandLogo size={28} />
-              <span className="text-base font-bold tracking-[0.24em]">GRADR</span>
+              <span className="text-body font-bold tracking-[0.24em]">GRADR</span>
             </div>
-            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+            <p className="max-w-xs text-body-sm leading-relaxed text-muted-foreground">
               An AI career operating system for the whole path from resume to offer.
             </p>
           </div>
 
           {FOOTER.map((col) => (
             <nav key={col.title} aria-label={col.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground">{col.title}</h3>
+              <h3 className="text-caption font-semibold uppercase tracking-[0.18em] text-foreground">{col.title}</h3>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map(([label, href]) => (
                   <li key={label}>
                     <a
                       href={href}
-                      className="rounded text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="rounded text-body-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       {label}
                     </a>
@@ -1207,8 +1207,8 @@ export default function Landing() {
         </div>
 
         <div className="page-shell mt-12 flex flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Gradr. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">Built for people actively looking for their next role.</p>
+          <p className="text-caption text-muted-foreground">© {new Date().getFullYear()} Gradr. All rights reserved.</p>
+          <p className="text-caption text-muted-foreground">Built for people actively looking for their next role.</p>
         </div>
       </footer>
     </div>
