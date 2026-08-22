@@ -1069,19 +1069,20 @@ export default function Landing() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="text-body-sm font-semibold uppercase tracking-[0.18em] text-foreground">{p.name}</h3>
+                    <Text variant="overline" as="h3" tone="default">{p.name}</Text>
                     {p.highlight && (
-                      <span className="rounded-full bg-primary/15 px-2.5 py-1 text-overline font-semibold uppercase tracking-wider text-primary">
+                      <Badge variant="accent">
                         <GradientText variant="shine">Most complete</GradientText>
-                      </span>
+                      </Badge>
                     )}
                   </div>
-                  <p className="mt-2 text-body-sm text-muted-foreground">{p.tagline}</p>
+                  <Text variant="body-sm" tone="muted" className="mt-2">{p.tagline}</Text>
 
                   <div className="mt-6 flex items-baseline gap-2">
-                    <span className="text-h2 font-bold tracking-tight tabular-nums text-foreground">{priceLabel}</span>
-                    <span className="text-body-sm text-muted-foreground">{periodNote}</span>
+                    <Text variant="h2" as="span" className="tabular-nums">{priceLabel}</Text>
+                    <Text variant="body-sm" tone="muted" as="span">{periodNote}</Text>
                   </div>
+
                   {savings > 0 && (
                     <div className="mt-2 flex items-center gap-2 text-caption">
                       <span className="tabular-nums text-muted-foreground line-through">
