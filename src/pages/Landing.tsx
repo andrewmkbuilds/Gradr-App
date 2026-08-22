@@ -896,20 +896,23 @@ export default function Landing() {
                 <SpotlightCard className="h-full p-6">
                   <div id={a.id} className="scroll-mt-28" />
                   <a.icon className="h-5 w-5 text-primary" aria-hidden />
-                  <h3 className="mt-4 text-body-sm font-semibold text-foreground">{a.title}</h3>
-                  <p className="mt-1.5 text-body-sm leading-relaxed text-muted-foreground">{a.copy}</p>
+                  <Text variant="h6" as="h3" className="mt-4">{a.title}</Text>
+                  <Text variant="body-sm" tone="muted" className="mt-1.5">{a.copy}</Text>
                 </SpotlightCard>
                 </SpatialCard>
               </Reveal>
             ))}
-            <Reveal delay={250} className="flex flex-col justify-center rounded-2xl border border-border bg-card p-6">
-              <p className="text-body-sm leading-relaxed text-muted-foreground">
-                Not sure where you fit? Start free — Gradr adapts to the stage you're actually at.
-              </p>
-              <Button variant="outline" size="lg" className="mt-4 w-full sm:w-auto" onClick={start("pricing", "Get started free")}>
-                Get started free
-              </Button>
+            <Reveal delay={250}>
+              <Card padding="lg" className="flex h-full flex-col justify-center">
+                <Text variant="body-sm" tone="muted">
+                  Not sure where you fit? Start free — Gradr adapts to the stage you're actually at.
+                </Text>
+                <Button variant="outline" size="lg" className="mt-4 w-full sm:w-auto" onClick={start("pricing", "Get started free")}>
+                  Get started free
+                </Button>
+              </Card>
             </Reveal>
+
           </div>
         </Section>
 
