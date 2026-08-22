@@ -951,37 +951,40 @@ export default function Landing() {
           </Reveal>
 
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            <Reveal className="rounded-2xl border border-border bg-secondary/20 p-6">
-              <h3 className="text-body-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                The usual setup
-              </h3>
-              <ul className="mt-5 space-y-3">
-                {OLD_WAY.map((t) => (
-                  <li key={t} className="flex gap-3 text-body-sm text-muted-foreground">
-                    <Minus className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" aria-hidden />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-5 text-caption text-muted-foreground/80">
-                Five tools that never talk to each other.
-              </p>
+            <Reveal>
+              <Card padding="lg" className="h-full">
+                <Text variant="overline" as="h3">The usual setup</Text>
+                <ul className="mt-5 space-y-3">
+                  {OLD_WAY.map((t) => (
+                    <li key={t} className="flex gap-3 text-body-sm text-muted-foreground">
+                      <Minus className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" aria-hidden />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <Text variant="caption" className="mt-5">
+                  Five tools that never talk to each other.
+                </Text>
+              </Card>
             </Reveal>
 
-            <Reveal delay={100} className="rounded-2xl border border-primary/30 bg-primary/[0.05] p-6">
-              <h3 className="text-body-sm font-semibold uppercase tracking-[0.18em] text-primary">Gradr</h3>
-              <ul className="mt-5 space-y-3">
-                {NEW_WAY.map((t) => (
-                  <li key={t} className="flex gap-3 text-body-sm text-foreground">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-5 text-caption text-muted-foreground">
-                One connected career system.
-              </p>
+            <Reveal delay={100}>
+              <Card padding="lg" className="h-full border-primary/30 bg-primary/[0.05]">
+                <Text variant="overline" as="h3" tone="primary">Gradr</Text>
+                <ul className="mt-5 space-y-3">
+                  {NEW_WAY.map((t) => (
+                    <li key={t} className="flex gap-3 text-body-sm text-foreground">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <Text variant="caption" className="mt-5">
+                  One connected career system.
+                </Text>
+              </Card>
             </Reveal>
+
           </div>
         </Section>
 
