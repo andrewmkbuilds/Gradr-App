@@ -971,7 +971,7 @@ export default function Landing() {
             </Reveal>
 
             <Reveal delay={100}>
-              <Card padding="lg" className="h-full border-primary/30 bg-primary/[0.05]">
+              <Card padding="lg" className="h-full border-primary bg-harbor-soft">
                 <Text variant="overline" as="h3" tone="primary">Gradr</Text>
                 <ul className="mt-5 space-y-3">
                   {NEW_WAY.map((t) => (
@@ -1066,7 +1066,7 @@ export default function Landing() {
                   tilt
                   className={`flex h-full flex-col p-6 ${
                     p.highlight
-                      ? "border-primary/40 bg-primary/[0.05] shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
+                      ? "border-primary bg-harbor-soft shadow-float"
                       : ""
                   }`}
                 >
