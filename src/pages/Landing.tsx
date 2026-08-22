@@ -17,6 +17,8 @@ import {
   planPriceLabel,
 } from "@/config/pricing";
 import { Button } from "@/components/ds/Button";
+import { Badge, Card, Text } from "@/design-system/gradr-9b9b95";
+
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
