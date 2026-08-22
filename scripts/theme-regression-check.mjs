@@ -67,7 +67,13 @@ function staticPass() {
 
 async function runtimePass() {
   const { chromium } = await import("playwright");
-  const browser = await chromium.launch({ headless: true });
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch (err) {
+    console.warn("Skipping runtime pass — no Playwright browser available. Run `npx playwright install chromium`.");
+    return [];
+  }
   const failures = [];
   try {
     for (const route of ROUTES) {
