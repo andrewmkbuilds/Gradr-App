@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Download, ExternalLink, FileText, Loader2, Receipt } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
