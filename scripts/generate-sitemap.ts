@@ -7,7 +7,7 @@ import { DOCS } from "../src/content/docs";
 import { NEWS } from "../src/content/news";
 import { PRODUCTION_ORIGIN } from "../src/config/domains";
 
-const BASE_URL = "https://gradr.me";
+const BASE_URL = "https://app.gradr.me";
 
 interface SitemapEntry {
   path: string;

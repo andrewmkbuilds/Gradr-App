@@ -82,7 +82,7 @@ Disallow: /admin/
 Disallow: /oauth
 Disallow: /mcp
 
-Sitemap: https://gradr.me/sitemap.xml
+Sitemap: https://app.gradr.me/sitemap.xml
 Sitemap: https://marketing.gradr.me/sitemap-marketing.xml
 Sitemap: https://news.gradr.me/sitemap-news.xml
 Sitemap: https://docs.gradr.me/sitemap-docs.xml
