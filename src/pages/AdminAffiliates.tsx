@@ -165,7 +165,7 @@ function ApplicationsPanel() {
                   <textarea defaultValue={a.admin_notes || ""} onBlur={(e) => saveNote(a.id, e.target.value)} rows={2} className="w-full mt-1 px-3 py-2 rounded-lg bg-secondary border border-border text-sm" />
                 </div>
                 <div className="flex gap-2 flex-wrap items-center">
-                  {a.status !== "approved" && <ActionBtn icon={Check} label="Approve" onClick={() => approve(a.id)} variant="primary" />}
+                  {a.status !== "approved" && <Button size="sm" onClick={() => approve(a.id)}><Check className="h-3.5 w-3.5" /> Approve</Button>}
                   {a.status !== "rejected" && <RejectApplicationButton applicantName={a.full_name} onReject={async (reason) => { await reject(a.id, reason); }} />}
                   {a.status === "approved" && (
                     <ConfirmDestructive
@@ -174,10 +174,10 @@ function ApplicationsPanel() {
                       confirmLabel="Suspend"
                       onConfirm={async () => { await setStatus(a.id, "suspended"); }}
                     >
-                      <ActionBtn icon={Pause} label="Suspend" />
+                      <Button size="sm" variant="outline"><Pause className="h-3.5 w-3.5" /> Suspend</Button>
                     </ConfirmDestructive>
                   )}
-                  {a.status === "suspended" && <ActionBtn icon={Play} label="Reactivate" onClick={() => setStatus(a.id, "pending")} />}
+                  {a.status === "suspended" && <Button size="sm" variant="outline" onClick={() => setStatus(a.id, "pending")}><Play className="h-3.5 w-3.5" /> Reactivate</Button>}
                 </div>
 
               </div>
@@ -438,10 +438,6 @@ function Field({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return <div><div className="text-xs text-muted-foreground">{label}</div><div className="text-sm text-foreground whitespace-pre-wrap">{value}</div></div>;
 }
-function ActionBtn({ icon: Icon, label, onClick, variant }: { icon: any; label: string; onClick?: () => void; variant?: "primary" | "destructive" }) {
-  const cls = variant === "primary" ? "bg-primary text-primary-foreground" : variant === "destructive" ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-secondary text-foreground";
-  return <span onClick={onClick} role="button" tabIndex={0} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition cursor-pointer ${cls}`}><Icon className="h-3.5 w-3.5" /> {label}</span>;
-}
 
 /**
  * Rejecting an application notifies the applicant and cannot be undone from
@@ -475,7 +471,7 @@ function RejectApplicationButton({
       confirmLabel="Reject application"
       onConfirm={() => onReject(reason)}
     >
-      <ActionBtn icon={X} label="Reject" variant="destructive" />
+      <Button size="sm" variant="destructive"><X className="h-3.5 w-3.5" /> Reject</Button>
     </ConfirmDestructive>
   );
 }

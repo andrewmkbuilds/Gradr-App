@@ -158,6 +158,7 @@
     "test:db": "RUN_DB_TESTS=1 vitest run src/test/dbSchema.integration.test.ts",
     "test:depth": "node scripts/depth-smoke.mjs",
     "test:e2e": "node scripts/e2e-authenticated.mjs",
+    "test:e2e:signin": "node scripts/e2e-signin-dashboard.mjs",
     "test:oauth-flow": "node scripts/test-oauth-flow.mjs",
     "test:security": "vitest run src/test/securityBaseline.test.ts",
     "test:seo-flash": "node scripts/seo-flash-regression.mjs",

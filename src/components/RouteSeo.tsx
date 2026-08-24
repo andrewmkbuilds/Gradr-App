@@ -208,6 +208,7 @@ function resolveOgImage(pathname: string): string {
 const NOINDEX_EXACT = new Set([
   "/",
   "/landing",
+  "/home",
   "/auth",
   "/forgot-password",
   "/reset-password",
