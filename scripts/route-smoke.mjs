@@ -143,6 +143,9 @@ async function run() {
       const landing = await visit(authed, "/landing");
       record("member: /landing -> /", landing.path === "/", `landed on ${landing.path}`);
 
+      const homeAlias = await visit(authed, "/home");
+      record("member: /home -> /", homeAlias.path === "/", `landed on ${homeAlias.path}`);
+
       const signIn = await visit(authed, "/auth");
       record("member: /auth -> /", signIn.path === "/", `landed on ${signIn.path}`);
 

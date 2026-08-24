@@ -77,7 +77,7 @@ async function run() {
   const browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-    const page = await context.new_page?.() ?? (await context.newPage());
+    const page = await context.newPage();
 
     // ---- sign-in page -----------------------------------------------------
     await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
