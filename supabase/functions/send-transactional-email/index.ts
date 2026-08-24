@@ -397,13 +397,17 @@ Deno.serve(async (req) => {
   }
 
   // 4. Render React Email template to HTML and plain text
-  const html = await renderAsync(
-    React.createElement(template.component, templateData)
-  )
-  let plainText = await renderAsync(
-    React.createElement(template.component, templateData),
-    { plainText: true }
-  )
+  // Footer data is scoped to this single render: the recipient's one-click
+  // unsubscribe URL, and the sender postal address once one is configured.
+  const unsubscribeUrl = `https://app.gradr.me/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`
+  const withFooter = () =>
+    React.createElement(
+      EmailFooterContext.Provider,
+      { value: { unsubscribeUrl, postalAddress: POSTAL_ADDRESS || undefined } },
+      React.createElement(template.component, templateData)
+    )
+  const html = await renderAsync(withFooter())
+  let plainText = await renderAsync(withFooter(), { plainText: true })
   // The email API rejects a send with `missing_parameter: text`, so never let an
   // empty plain-text part through — fall back to a stripped version of the HTML.
   if (!plainText || !plainText.trim()) {
