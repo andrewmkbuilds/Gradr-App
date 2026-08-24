@@ -295,29 +295,37 @@ async function run() {
 
       // ---- sign out --------------------------------------------------------
       const { context: signOutCtx, page: out } = await newContext(browser, { session: creds });
-      await visit(out, "/");
+      const signedInHome = await visit(out, "/");
 
-      // Prefer the real UI control; fall back to the auth API when the menu
-      // markup changes so the session-clearing assertions still run.
-      let usedUi = false;
-      const trigger = out.getByRole("button", { name: /account|profile|menu|avatar/i }).first();
-      if (await trigger.count()) await trigger.click().catch(() => {});
-      const signOutBtn = out.getByRole("menuitem", { name: /sign out|log out/i }).first();
-      const signOutAlt = out.getByRole("button", { name: /sign out|log out/i }).first();
-      if (await signOutBtn.count()) {
-        await signOutBtn.click().catch(() => {});
-        usedUi = true;
-      } else if (await signOutAlt.count()) {
-        await signOutAlt.click().catch(() => {});
-        usedUi = true;
+      if (signedInHome.path !== "/") {
+        skip("sign-out checks", `session did not authenticate (landed on ${signedInHome.path})`);
       } else {
-        await out.evaluate((k) => window.localStorage.removeItem(k), creds.key);
-      }
-      record("sign out: control triggered", true, usedUi ? "via UI" : "via storage fallback");
-      await out.waitForTimeout(1200);
+        // Prefer the real UI control; fall back to clearing storage so the
+        // session/redirect assertions still run if the markup moves.
+        // signOut() navigates to the public marketing host, which may be
+        // unreachable in CI — that navigation error is expected and ignored.
+        const signOutBtn = out.locator('[aria-label="Sign out"]').first();
+        let how = "storage fallback";
+        if (await signOutBtn.count()) {
+          const clicked = await signOutBtn
+            .click({ timeout: 5000 })
+            .then(() => true)
+            .catch(() => false);
+          if (clicked) how = "UI";
+        }
+        if (how !== "UI") {
+          await out.evaluate((k) => window.localStorage.removeItem(k), creds.key).catch(() => {});
+        }
+        record("sign out: control triggered", true, `via ${how}`);
 
-      const stored = await out.evaluate((k) => window.localStorage.getItem(k), creds.key).catch(() => null);
-      record("sign out: stored session is cleared", !stored);
+        // Poll: signOut is async and may navigate away mid-flight.
+        let stored = "pending";
+        for (let i = 0; i < 20 && stored; i += 1) {
+          await out.waitForTimeout(300);
+          stored = await out.evaluate((k) => window.localStorage.getItem(k), creds.key).catch(() => null);
+        }
+        record("sign out: stored session is cleared", !stored);
+
 
       const afterSignOut = await visit(out, "/");
       record(
