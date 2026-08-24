@@ -327,28 +327,30 @@ async function run() {
         record("sign out: stored session is cleared", !stored);
 
 
-      const afterSignOut = await visit(out, "/");
-      record(
-        "sign out: / redirects to /auth",
-        afterSignOut.path === "/auth",
-        `landed on ${afterSignOut.path}`,
-      );
-      assertNoLandingUi("after sign out", afterSignOut.text);
+        const afterSignOut = await visit(out, "/");
+        record(
+          "sign out: / redirects to /auth",
+          afterSignOut.path === "/auth",
+          `landed on ${afterSignOut.path}`,
+        );
+        assertNoLandingUi("after sign out", afterSignOut.text);
 
-      await out.reload({ waitUntil: "domcontentloaded" });
-      await out.waitForLoadState("networkidle").catch(() => {});
-      await out.waitForTimeout(600);
-      const refreshed = {
-        path: new URL(out.url()).pathname,
-        text: (await out.locator("body").innerText().catch(() => "")).trim(),
-      };
-      record(
-        "sign out: session stays cleared after refresh",
-        refreshed.path === "/auth" && /sign in/i.test(refreshed.text),
-        `at ${refreshed.path}`,
-      );
+        await out.reload({ waitUntil: "domcontentloaded" });
+        await out.waitForLoadState("networkidle").catch(() => {});
+        await out.waitForTimeout(600);
+        const refreshed = {
+          path: new URL(out.url()).pathname,
+          text: (await out.locator("body").innerText().catch(() => "")).trim(),
+        };
+        record(
+          "sign out: session stays cleared after refresh",
+          refreshed.path === "/auth" && /sign in/i.test(refreshed.text),
+          `at ${refreshed.path}`,
+        );
+      }
 
       await signOutCtx.close();
+
     }
   } finally {
     await browser.close();
