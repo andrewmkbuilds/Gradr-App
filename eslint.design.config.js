@@ -17,6 +17,7 @@ export default tseslint.config(
     plugins: {
       gradr: { rules: { "no-hardcoded-colors": noHardcodedColors } },
       "react-hooks": reactHooks,
+      "@typescript-eslint": tseslint.plugin,
     },
     linterOptions: { reportUnusedDisableDirectives: "off" },
     rules: { "gradr/no-hardcoded-colors": "error" },
