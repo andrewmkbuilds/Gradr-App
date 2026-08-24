@@ -11,10 +11,10 @@ const LEVEL_CLASS: Record<ElevationLevel, string> = {
 };
 
 const RADIUS: Record<ElevationLevel, string> = {
-  1: "rounded-xl",
-  2: "rounded-xl",
-  3: "rounded-2xl",
-  4: "rounded-2xl",
+  1: "rounded-control",
+  2: "rounded-control",
+  3: "rounded-card",
+  4: "rounded-card",
 };
 
 export interface SurfaceProps extends HTMLAttributes<HTMLDivElement> {

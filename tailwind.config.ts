@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"Geist"', '"Inter var"', "Inter", "system-ui", "sans-serif"],
-        display: ['"Bricolage Grotesque"', '"Geist"', "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
       },
       colors: {
         border: {
@@ -32,7 +32,7 @@ export default {
           secondary: "hsl(var(--surface-secondary) / <alpha-value>)",
           elevated: "hsl(var(--surface-elevated))",
           // Gradr design-system role: inset / hover fills.
-          muted: "hsl(var(--surface-secondary) / <alpha-value>)",
+          muted: "var(--color-surface-muted)",
         },
         // Gradr design-system brand palette (src/styles/gradr-design-system.css).
         shell: "var(--color-shell)",

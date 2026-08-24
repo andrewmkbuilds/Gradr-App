@@ -273,7 +273,7 @@
     @apply bg-background text-foreground antialiased;
     /* impeccable-allow: overused-font — Geist is the locked brand UI typeface
        (Bricolage Grotesque for display), not a default pick. */
-    font-family: "Geist", "Inter var", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv01";
     letter-spacing: -0.006em;
   }
