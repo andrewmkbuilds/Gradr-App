@@ -887,6 +887,48 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_retention_records: {
+        Row: {
+          amount_total: number | null
+          created_at: string
+          currency: string | null
+          deleted_at: string
+          environment: string | null
+          id: string
+          occurred_at: string | null
+          provider: string
+          provider_reference: string | null
+          record_kind: string
+          user_ref: string
+        }
+        Insert: {
+          amount_total?: number | null
+          created_at?: string
+          currency?: string | null
+          deleted_at?: string
+          environment?: string | null
+          id?: string
+          occurred_at?: string | null
+          provider?: string
+          provider_reference?: string | null
+          record_kind?: string
+          user_ref: string
+        }
+        Update: {
+          amount_total?: number | null
+          created_at?: string
+          currency?: string | null
+          deleted_at?: string
+          environment?: string | null
+          id?: string
+          occurred_at?: string | null
+          provider?: string
+          provider_reference?: string | null
+          record_kind?: string
+          user_ref?: string
+        }
+        Relationships: []
+      }
       career_plans: {
         Row: {
           created_at: string
