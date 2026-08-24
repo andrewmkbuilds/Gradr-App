@@ -16,7 +16,8 @@ import {
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
-import { LOGO_URL, SITE_URL, SUPPORT_EMAIL, brand, displayStack, fontStack, link, Tone, tonePalette } from './theme.ts'
+import { LOGO_URL, SITE_URL, SUPPORT_EMAIL, appLink, brand, displayStack, fontStack, link, Tone, tonePalette } from './theme.ts'
+import { EmailFooterContext } from './footerContext.ts'
 
 /* ------------------------------------------------------------------ */
 /* Shell                                                               */
@@ -47,6 +48,9 @@ export const EmailLayout = ({
   footerNote,
 }: LayoutProps) => {
   const accent = tonePalette[tone]
+  // Per-send footer data (unsubscribe URL, postal address) supplied by the
+  // sending function; absent in previews, where the links simply fall back.
+  const footer = React.useContext(EmailFooterContext)
   return (
     <Html lang="en" dir="ltr">
       <Head>
@@ -106,13 +110,21 @@ export const EmailLayout = ({
             <Hr style={styles.hr} />
             {footerNote ? <Text style={styles.footerNote}>{footerNote}</Text> : null}
             <Text style={styles.footerLinks}>
-              <Link style={styles.footerLink} href={link('/', campaign)}>
+              <Link style={styles.footerLink} href={appLink('/dashboard', campaign)}>
                 Dashboard
               </Link>
               <span style={styles.dot}>·</span>
-              <Link style={styles.footerLink} href={link('/settings', campaign)}>
+              <Link style={styles.footerLink} href={appLink('/settings#notifications', campaign)}>
                 Email preferences
               </Link>
+              {footer.unsubscribeUrl ? (
+                <>
+                  <span style={styles.dot}>·</span>
+                  <Link style={styles.footerLink} href={footer.unsubscribeUrl}>
+                    Unsubscribe
+                  </Link>
+                </>
+              ) : null}
               <span style={styles.dot}>·</span>
               <Link style={styles.footerLink} href={`mailto:${SUPPORT_EMAIL}`}>
                 Support
@@ -130,6 +142,12 @@ export const EmailLayout = ({
             <Text style={styles.legal}>
               Gradr — AI career copilot for resumes, jobs and interviews.
               <br />
+              {footer.postalAddress ? (
+                <>
+                  {footer.postalAddress}
+                  <br />
+                </>
+              ) : null}
               {SITE_URL.replace('https://', '')} · © {new Date().getFullYear()} Gradr. All rights reserved.
             </Text>
           </Section>
