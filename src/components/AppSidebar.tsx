@@ -278,8 +278,8 @@ export function AppSidebar() {
                             })}
                           </ul>
                         </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
+                      </Collapsible>
+                    </SidebarMenuItem>
                   );
                 })}
               </SidebarMenu>
