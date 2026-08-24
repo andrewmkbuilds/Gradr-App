@@ -51,3 +51,19 @@ jobs:
         env:
           E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
+      # 404 rendering, session persistence, axe a11y, redirect headers and
+      # sign-in/dashboard visual snapshots.
+      - name: Route guards (404, a11y, headers, visuals)
+        run: bun run test:route-guards http://127.0.0.1:8080
+        env:
+          LOVABLE_BROWSER_SUPABASE_STORAGE_KEY: ${{ secrets.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY }}
+          LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
+
+      - name: Upload visual diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: route-guard-visuals
+          path: tests/visual/route-guards/
+
