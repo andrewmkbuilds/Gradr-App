@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "gradr-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Gradr"
     },
     "tools": [
@@ -20,6 +20,22 @@
         "name": "get_profile",
         "title": "Get my Gradr profile",
         "description": "Return the signed-in user's Gradr profile: name, email, target role, and career preferences.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_credit_balance",
+        "title": "Get credit balance",
+        "description": "Return the signed-in user's remaining Gradr credits (application and interview credits) and their subscription tier.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -73,6 +89,46 @@
               "minimum": 1,
               "maximum": 50,
               "description": "Maximum matches to return. Defaults to 10."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_discovered_jobs",
+        "title": "Search the Gradr job feed",
+        "description": "Search jobs Gradr has discovered from its sourcing feeds by keyword, location or remote flag. Use create_tracked_job to save one to the pipeline.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Keyword matched against the job title."
+            },
+            "company": {
+              "type": "string",
+              "description": "Filter by company name."
+            },
+            "location": {
+              "type": "string",
+              "description": "Keyword matched against the job location."
+            },
+            "remote": {
+              "type": "boolean",
+              "description": "Only remote roles when true."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum jobs to return. Defaults to 20."
             }
           },
           "additionalProperties": false,
@@ -163,6 +219,208 @@
           "required": [
             "title"
           ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_tracked_job",
+        "title": "Update tracked job",
+        "description": "Update a job in the signed-in user's Gradr pipeline — move its status, add notes, or record the applied date.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The tracked job id (from list_tracked_jobs)."
+            },
+            "status": {
+              "type": "string",
+              "description": "New pipeline status (e.g. 'saved', 'applied', 'interview', 'offer', 'rejected')."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Replace the job's notes."
+            },
+            "applied_at": {
+              "type": "string",
+              "description": "ISO timestamp for when the user applied."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_job_reminders",
+        "title": "List job reminders",
+        "description": "List the signed-in user's follow-up reminders for tracked jobs, with due dates and completion state.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "include_done": {
+              "type": "boolean",
+              "description": "Include completed reminders. Defaults to false."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Maximum reminders to return. Defaults to 25."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_job_reminder",
+        "title": "Create job reminder",
+        "description": "Create a follow-up reminder for one of the signed-in user's tracked jobs.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "tracked_job_id": {
+              "type": "string",
+              "description": "The tracked job id the reminder belongs to (from list_tracked_jobs)."
+            },
+            "title": {
+              "type": "string",
+              "description": "What to be reminded about, e.g. 'Follow up with the recruiter'."
+            },
+            "due_at": {
+              "type": "string",
+              "description": "ISO timestamp for when the reminder is due."
+            }
+          },
+          "required": [
+            "tracked_job_id",
+            "title",
+            "due_at"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_interview_sessions",
+        "title": "List mock interview sessions",
+        "description": "List the signed-in user's completed AI mock interview sessions with scores, focus areas and target roles.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum sessions to return. Defaults to 10."
+            },
+            "include_report": {
+              "type": "boolean",
+              "description": "Include the full AI feedback report and practice plan. Defaults to false."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_scheduled_interviews",
+        "title": "List scheduled interviews",
+        "description": "List the signed-in user's scheduled real interviews and calls, with company, role, time and status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "upcoming_only": {
+              "type": "boolean",
+              "description": "Only return interviews starting from now. Defaults to true."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Maximum interviews to return. Defaults to 25."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_career_plan",
+        "title": "Get career plan",
+        "description": "Return the signed-in user's current AI-generated Gradr career plan: summary and the ordered list of steps.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_notifications",
+        "title": "List notifications",
+        "description": "List the signed-in user's recent Gradr notifications, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "unread_only": {
+              "type": "boolean",
+              "description": "Only return unread notifications. Defaults to false."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum notifications to return. Defaults to 20."
+            }
+          },
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
