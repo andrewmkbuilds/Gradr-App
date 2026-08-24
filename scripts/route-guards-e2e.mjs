@@ -316,6 +316,7 @@ async function run() {
         // signOut() navigates to the public marketing host, which may be
         // unreachable in CI — that navigation error is expected and ignored.
         const signOutBtn = out.locator('[aria-label="Sign out"]').first();
+        await signOutBtn.waitFor({ state: "attached", timeout: 8000 }).catch(() => {});
         let how = "storage fallback";
         if (await signOutBtn.count()) {
           const clicked = await signOutBtn
