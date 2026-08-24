@@ -338,9 +338,9 @@ export default function Dashboard() {
               className="elev-1 elev-interactive flex min-h-11 flex-col items-start rounded-control p-3 text-left sm:p-4"
             >
               <stage.icon className={`h-4 w-4 ${stage.color} mb-2`} />
-              <span className="text-h4 font-display text-foreground">
+              <Text as="span" variant="h4">
                 <CountUp to={stages[stage.key]} duration={0.9} />
-              </span>
+              </Text>
               <span className="mt-0.5 text-caption text-muted-foreground">{stage.label}</span>
             </button>
           ))}
@@ -379,7 +379,7 @@ export default function Dashboard() {
         {/* Upcoming Reminders */}
         <Surface level={2} className="lg:col-span-2">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h3 className="flex items-center gap-2 text-body-sm font-semibold text-foreground">
+            <Text as="h3" variant="h6" className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-accent" />
               Upcoming Reminders
               {overdueCount > 0 && (
@@ -387,8 +387,8 @@ export default function Dashboard() {
                   <AlertCircle className="h-3 w-3" /> {overdueCount} overdue
                 </span>
               )}
-            </h3>
-            <Button onClick={() => navigate("/pipeline")} variant="link" size="inline" className="text-caption">
+            </Text>
+            <Button onClick={() => navigate("/pipeline")} variant="link" size="inline">
               Manage →
             </Button>
           </div>
@@ -406,7 +406,7 @@ export default function Dashboard() {
                     className="elev-1 elev-interactive flex items-center justify-between rounded-control p-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-body-sm font-medium text-foreground truncate">{r.title}</p>
+                      <Text variant="body-sm" className="truncate font-medium">{r.title}</Text>
                       <p className="text-caption text-muted-foreground truncate">
                         {r.tracked_jobs?.title || "—"}
                         {r.tracked_jobs?.company ? ` · ${r.tracked_jobs.company}` : ""}
