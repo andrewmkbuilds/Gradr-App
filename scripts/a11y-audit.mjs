@@ -20,18 +20,21 @@ const BASE = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "http://localhost
 const AXE = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 const BLOCKING = new Set(["serious", "critical"]);
 
+// Signed-out reachable surfaces. Everything else in the app sits behind auth
+// and is covered by the route-guard suite. `/landing` and `/home` stay in the
+// list on purpose: they must keep redirecting after the marketing pages were
+// deleted, and the audit checks the page they land on.
 const ROUTES = [
-  "/landing",
-  "/pricing",
+  "/",
   "/auth",
-  "/job-search",
-  "/ats-resume-checker",
-  "/career-advice",
-  "/privacy",
-  "/terms",
-  "/affiliate-program",
+  "/forgot-password",
+  "/reset-password",
+  "/landing",
+  "/home",
+  "/unsubscribe",
   "/this-route-does-not-exist",
 ];
+
 
 const VIEWPORTS = [
   { name: "mobile", width: 390, height: 844 },
@@ -92,8 +95,16 @@ try {
 
       for (const route of ROUTES) {
         await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
-        await page.waitForTimeout(1800);
-        await page.addScriptTag({ content: AXE });
+        // Routes such as /landing redirect on mount; wait for the navigation to
+        // settle before injecting axe, or the execution context is destroyed
+        // mid-injection and the whole run crashes.
+        await page.waitForLoadState("networkidle").catch(() => {});
+        await page.waitForTimeout(1200);
+        await page.addScriptTag({ content: AXE }).catch(async () => {
+          await page.waitForLoadState("networkidle").catch(() => {});
+          await page.addScriptTag({ content: AXE });
+        });
+        const finalUrl = new URL(page.url()).pathname;
         const run = await page.evaluate(async () => {
           // eslint-disable-next-line no-undef
           return await window.axe.run(document, {
@@ -103,7 +114,7 @@ try {
         });
         for (const violation of run.violations) {
           results.push({
-            route,
+            route: finalUrl === route ? route : `${route} -> ${finalUrl}`,
             viewport: viewport.name,
             theme,
             id: violation.id,

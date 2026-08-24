@@ -271,6 +271,8 @@
   html.dark { color-scheme: dark; }
   body {
     @apply bg-background text-foreground antialiased;
+    /* impeccable-allow: overused-font — Geist is the locked brand UI typeface
+       (Bricolage Grotesque for display), not a default pick. */
     font-family: "Geist", "Inter var", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     font-feature-settings: "ss01", "cv01";
     letter-spacing: -0.006em;
@@ -606,6 +608,8 @@
   }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
+  /* impeccable-allow: gradient-text — the auth hero wordmark is the brand's one
+     sanctioned gradient treatment (Yacht Club palette), not decoration. */
   .kinetic-text {
     background: linear-gradient(110deg, hsl(var(--primary)) 0%, hsl(var(--info)) 35%, hsl(var(--brand-secondary)) 65%, hsl(var(--primary)) 100%);
     background-size: 220% auto;
@@ -614,42 +618,16 @@
   }
   @keyframes kinetic { to { background-position: 220% center; } }
 
-  .tilt-3d { transform-style: preserve-3d; transition: transform 400ms cubic-bezier(.2,.9,.3,1.4), box-shadow 400ms; }
-  .tilt-3d:hover { transform: perspective(900px) rotateX(6deg) rotateY(-8deg) translateZ(12px); box-shadow: var(--shadow-elevated); }
-
-  .hover-lift { transition: transform 240ms cubic-bezier(.2,.9,.3,1.2), box-shadow 240ms; }
-  .hover-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
-
-  .stop-motion { animation: stop-motion-jitter 0.8s steps(4) infinite; }
-  @keyframes stop-motion-jitter {
-    0%   { transform: translate(0,0) rotate(0deg); }
-    25%  { transform: translate(-1px,1px) rotate(-0.6deg); }
-    50%  { transform: translate(1px,-1px) rotate(0.4deg); }
-    75%  { transform: translate(-1px,-1px) rotate(0.5deg); }
-    100% { transform: translate(0,0) rotate(0deg); }
-  }
-
-  .letter-reveal > span {
-    display: inline-block; opacity: 0;
-    transform: translateY(40%) rotateX(-60deg);
-    animation: letter-in 0.7s cubic-bezier(.2,.9,.3,1.2) forwards;
-  }
-  @keyframes letter-in { to { opacity: 1; transform: translateY(0) rotateX(0); } }
-
-  .marquee { animation: marquee 28s linear infinite; }
-  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
   .conic-spin {
     background: conic-gradient(from 0deg, hsl(var(--primary)) 0%, hsl(var(--brand-secondary)) 30%, hsl(var(--primary)) 60%, transparent 100%);
     animation: spin-slow 6s linear infinite;
   }
   @keyframes spin-slow { to { transform: rotate(360deg); } }
 
-  .isometric { transform: rotateX(55deg) rotateZ(-45deg); transform-style: preserve-3d; }
 
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.9,.3,1.1); }
-  .reveal.in-view, .reveal.reveal-in { opacity: 1; transform: translateY(0); }
 
+  /* impeccable-allow: codex-grid-background — masked blueprint grid is part of
+     the Atmosphere/SceneBackground brand scene, not filler texture. */
   .grid-lines {
     background-image:
       linear-gradient(to right, hsl(var(--border) / 0.6) 1px, transparent 1px),
@@ -676,6 +654,8 @@
   }
 
   /* Slow-drifting brand gradient for eyebrow rules and accent text. */
+  /* impeccable-allow: gradient-text — sanctioned brand accent treatment, used
+     only on short eyebrow/accent strings, never on body copy. */
   .animated-gradient-text {
     background-image: linear-gradient(
       100deg,
@@ -817,6 +797,8 @@
     letter-spacing: -0.02em;
   }
   .type-mono {
+    /* impeccable-allow: overused-font — Geist Mono is the brand's paired
+       monospace face. */
     font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.8125rem;
     letter-spacing: -0.01em;
@@ -878,6 +860,8 @@
 @layer base {
   :root {
     --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    /* impeccable-allow: bounce-easing — the single shared spring curve every
+       surface animates on; overshoot is the brand's motion signature. */
     --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
     --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
     --dur-fast: 160ms;
@@ -971,16 +955,20 @@
     position: absolute;
     left: 0;
     top: 50%;
-    height: 0;
+    /* Full-size rail scaled on the compositor: same pixels as the old
+       height 0 -> 40% -> 65% animation, without animating layout. */
+    height: 65%;
     width: 2px;
     border-radius: 9999px;
     background: hsl(var(--primary));
-    transform: translateY(-50%);
-    transition: height var(--dur-base) var(--ease-spring), opacity var(--dur-base) var(--ease-out-soft);
+    transform: translateY(-50%) scaleY(0);
+    transform-origin: center;
+    transition: transform var(--dur-base) var(--ease-spring), opacity var(--dur-base) var(--ease-out-soft);
     opacity: 0;
   }
-  .nav-item:hover::before { height: 40%; opacity: 0.5; }
-  .nav-item[data-active="true"]::before { height: 65%; opacity: 1; }
+  .nav-item:hover::before { transform: translateY(-50%) scaleY(0.615); opacity: 0.5; }
+  .nav-item[data-active="true"]::before { transform: translateY(-50%) scaleY(1); opacity: 1; }
+
   .nav-item[data-active="true"] { box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.18); }
 
   .nav-underline { position: relative; }
@@ -1206,6 +1194,8 @@ html[data-motion="reduced"] *::after {
   }
 
   /* Card that should read as "the important one" without shouting. */
+  /* impeccable-allow: side-tab — mahogany edge is the documented accent-card
+     treatment in the design system, applied deliberately and sparingly. */
   .accent-card {
     border: 1px solid hsl(var(--mahogany-border) / 0.8);
     background-color: hsl(var(--card));
