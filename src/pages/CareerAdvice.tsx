@@ -157,6 +157,11 @@ export default function CareerAdvice() {
                 label: "AI interview coach",
                 note: "Voice mock interviews with scored feedback",
               },
+              {
+                to: "/ai-career-coach",
+                label: "AI career coach",
+                note: "Skill gap analysis and a plan built from your own resume",
+              },
             ].map((tool) => (
               <li key={tool.to}>
                 <Link

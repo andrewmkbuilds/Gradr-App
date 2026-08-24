@@ -32,6 +32,7 @@ const TOOL_LINKS = [
   { label: "Job application tracker", to: "/job-application-tracker" },
   { label: "ATS resume checker", to: "/ats-resume-checker" },
   { label: "AI interview coach", to: "/ai-interview-coach" },
+  { label: "AI career coach", to: "/ai-career-coach" },
   { label: "AI cover letter generator", to: "/ai-cover-letter-generator" },
   { label: "Career advice hub", to: "/career-advice" },
 ];
