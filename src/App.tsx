@@ -135,6 +135,22 @@ function RouteFallback() {
 }
 
 
+/**
+ * Path prefixes that exist behind sign-in. Anything outside this set is a real
+ * 404 and gets the friendly not-found page instead of being bounced through
+ * sign-in only to dead-end afterwards.
+ */
+const PROTECTED_PREFIXES = [
+  "/", "/dashboard", "/career", "/resume", "/jobs", "/match", "/pipeline", "/apply",
+  "/interview", "/growth", "/settings", "/billing", "/credits", "/subscription",
+  "/manage-subscription", "/welcome", "/admin",
+];
+
+function isProtectedPath(pathname: string) {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  return PROTECTED_PREFIXES.some((p) => path === p || (p !== "/" && path.startsWith(`${p}/`)));
+}
+
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -150,10 +166,16 @@ function ProtectedRoutes() {
   }
 
   if (!user) {
+    // Unknown URLs never existed for guests either — show the 404 rather than a
+    // pointless sign-in detour.
+    if (!isProtectedPath(location.pathname)) {
+      return <AnimatedPage><NotFound /></AnimatedPage>;
+    }
     // No marketing landing page in the app surface: unauthenticated visitors go
     // straight to sign-in, preserving query + hash so deep links survive.
     return <Navigate to={authPath(nextFromLocation(location))} replace />;
   }
+
 
 
   // Email/password accounts must confirm their address before using the app.
