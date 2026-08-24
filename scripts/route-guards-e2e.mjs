@@ -25,7 +25,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import pixelmatch from "pixelmatch";
+import { PNG } from "pngjs";
 import { launchBrowser } from "./lib/browser.mjs";
+
 
 const args = process.argv.slice(2);
 const UPDATE = args.includes("--update");
