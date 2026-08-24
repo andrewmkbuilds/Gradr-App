@@ -1,5 +1,5 @@
 import { AudioLines, Keyboard, Loader2, RotateCw, ShieldAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import {
   voiceErrorCopy,
   voiceReasonCopy,

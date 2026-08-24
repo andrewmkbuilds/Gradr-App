@@ -1,3 +1,4 @@
+import { Button } from "@/components/ds/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { Sparkles, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -25,12 +26,9 @@ export function GuestBanner() {
         </div>
         <p className="text-sm text-foreground truncate">
           You're browsing as a guest.{" "}
-          <Link
-            to={signUpHref}
-            className="font-semibold text-primary hover:underline"
-          >
-            Create a free account
-          </Link>{" "}
+          <Button variant="link" size="inline" asChild>
+            <Link to={signUpHref}>Create a free account</Link>
+          </Button>{" "}
 
           <span className="text-muted-foreground">to save your data permanently.</span>
         </p>

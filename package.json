@@ -139,6 +139,7 @@
     "icons:check": "node scripts/generate-app-icons.mjs --check",
     "icons:generate": "node scripts/generate-app-icons.mjs",
     "lint": "eslint .",
+    "lint:design": "eslint --config eslint.design.config.js .",
     "og:check": "node scripts/generate-og-images.mjs --check",
     "og:generate": "node scripts/generate-og-images.mjs",
     "prebuild": "node scripts/generate-app-icons.mjs --check && node scripts/check-no-tanstack.mjs && node scripts/check-tailwind-classes.mjs && node scripts/check-legacy-design.mjs && bun run scripts/generate-sitemap.ts",
@@ -163,13 +164,15 @@
     "test:visual": "node scripts/auth-hero-visual.mjs",
     "test:visual:logo": "node scripts/logo-visual.mjs",
     "test:visual:routes": "node scripts/visual-regression.mjs",
+    "test:visual:themes": "node scripts/screenshot-diff.mjs",
+    "test:visual:themes:update": "node scripts/screenshot-diff.mjs --update",
     "test:voice-e2e": "node scripts/voice-e2e.mjs",
     "test:watch": "vitest",
+    "theme:check": "node scripts/theme-regression-check.mjs",
     "typecheck": "tsgo -p tsconfig.app.json && tsgo -p tsconfig.node.json",
     "types:check": "node scripts/check-type-drift.mjs",
     "types:generate": "node scripts/generate-db-types.mjs",
-    "visual:logo-shell": "node scripts/logo-shell-visual.mjs",
-    "theme:check": "node scripts/theme-regression-check.mjs"
+    "visual:logo-shell": "node scripts/logo-shell-visual.mjs"
   },
   "type": "module",
   "version": "0.0.0"

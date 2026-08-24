@@ -1,7 +1,7 @@
+import { Button } from "@/components/ds/Button";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -205,15 +205,12 @@ export function CompanyResearchDialog({ open, onOpenChange, company, role }: Pro
                     <ul className="space-y-1.5">
                       {data.sources.map((s, i) => (
                         <li key={i}>
-                          <a
-                            href={s.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                          >
+                          <Button variant="link" size="inline" asChild>
+                          <a href={s.url} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3" aria-hidden="true" />
                             <span className="truncate max-w-[28rem]">{s.title || s.url}</span>
                           </a>
+                          </Button>
                         </li>
                       ))}
                     </ul>

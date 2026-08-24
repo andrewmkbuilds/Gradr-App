@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AudioLines, Loader2, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fetchVoiceHealth, type VoiceHealth } from "@/lib/interview/voiceStatus";
 import { voiceReasonCopy } from "@/lib/interview/voiceErrors";

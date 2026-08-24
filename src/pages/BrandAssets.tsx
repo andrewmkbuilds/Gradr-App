@@ -4,7 +4,7 @@ import { Download, Image as ImageIcon, Loader2, Smartphone } from "lucide-react"
 
 import { PageHeader } from "@/components/app/PageHeader";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { BRAND_ASSETS, type BrandAsset, type BrandAssetGroup } from "@/config/brandAssets.generated";

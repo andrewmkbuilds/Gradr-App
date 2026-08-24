@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, LifeBuoy, Home, RotateCw } from "lucide-react";
 
@@ -106,7 +107,7 @@ export class RootErrorBoundary extends Component<Props, State> {
               Go home
             </a>
             <a
-              className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium text-primary underline-offset-4 hover:underline"
+              className={buttonVariants({ variant: "link", size: "md" })}
               href={this.supportHref()}
             >
               <LifeBuoy className="size-4" aria-hidden="true" />

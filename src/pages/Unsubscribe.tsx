@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, MailX, AlertTriangle, Loader2, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card } from "@/components/ui/card";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";

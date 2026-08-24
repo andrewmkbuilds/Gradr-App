@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sparkles, TrendingUp, HelpCircle, FileDown, FileText, Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import type { InterviewReport } from "@/components/interview/InterviewReportView";
 import {
   downloadTranscriptDoc,

@@ -4,7 +4,7 @@ import { Loader2, ShieldAlert } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**

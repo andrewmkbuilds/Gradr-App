@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 import { Surface, SurfaceHeader } from "@/components/ui/surface";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";

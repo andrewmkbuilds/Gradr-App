@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { AlarmClock, Bell, Check, Loader2, Settings2 } from "lucide-react";
 import { Surface, SurfaceHeader } from "@/components/ui/surface";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

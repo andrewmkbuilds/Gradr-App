@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { useBillingActions, usePaymentIssue } from "@/hooks/useSubscription";
 
 /** Surfaces failed/overdue invoices and lets the user retry payment in the portal. */

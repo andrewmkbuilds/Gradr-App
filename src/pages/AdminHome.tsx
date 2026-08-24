@@ -1,3 +1,4 @@
+import { Button } from "@/components/ds/Button";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -220,12 +221,9 @@ export default function AdminHome() {
               : "No scan runs recorded yet."}
           </p>
         </div>
-        <Link
-          to="/admin/security-findings"
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-        >
-          Open Security Center
-        </Link>
+        <Button variant="link" size="inline" asChild>
+          <Link to="/admin/security-findings">Open Security Center</Link>
+        </Button>
       </Card>
 
       {SECTIONS.map((section) => (

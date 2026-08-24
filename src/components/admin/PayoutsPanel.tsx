@@ -1,3 +1,4 @@
+import { Button } from "@/components/ds/Button";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -207,13 +208,14 @@ function CreatePayoutDialog() {
                 {unpaidCommissions?.length === 1 ? "" : "s"} (${suggestedTotal.toFixed(2)})
               </label>
               {includeUnpaid && suggestedTotal > 0 && (
-                <button
+                <Button
                   type="button"
+                  variant="link"
+                  size="inline"
                   onClick={() => setAmount(suggestedTotal.toFixed(2))}
-                  className="text-xs text-primary hover:underline"
                 >
                   Use suggested amount ${suggestedTotal.toFixed(2)}
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -282,9 +284,9 @@ function MarkPaidButton({ payout }: { payout: Payout }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="inline-flex items-center gap-1 text-xs text-success hover:underline">
-          <CheckCircle2 className="h-3 w-3" /> Mark paid
-        </button>
+        <Button variant="link" size="inline">
+          <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> Mark paid
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-sm">
         <DialogHeader><DialogTitle>Mark payout as paid</DialogTitle></DialogHeader>

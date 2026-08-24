@@ -9,7 +9,7 @@ import {
   Unplug,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Badge } from "@/components/ui/badge";
 import { useIntegrations, type IntegrationId } from "@/hooks/useIntegrations";
 

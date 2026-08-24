@@ -16,7 +16,7 @@ import { Seo } from "@/components/Seo";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Surface } from "@/components/ui/surface";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";

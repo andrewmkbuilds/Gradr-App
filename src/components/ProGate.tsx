@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Lock, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useCredits, useSubscription } from "@/hooks/useSubscription";
