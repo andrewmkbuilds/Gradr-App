@@ -650,4 +650,4 @@ const styles: Record<string, React.CSSProperties> = {
   fallbackLink: { color: brand.teal },
 }
 
-export { link, brand }
+export { link, appLink, brand }

@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Bullets, Cta, EmailLayout, FallbackUrl, Paragraph, SecondaryLink, greeting, link } from './components.tsx'
+import { appLink, Bullets, Cta, EmailLayout, FallbackUrl, greeting, link, Paragraph, SecondaryLink } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
