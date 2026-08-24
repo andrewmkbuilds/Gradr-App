@@ -111,12 +111,19 @@ async function checkA11y(page, label) {
   }
 }
 
-/** Coarse byte-level difference ratio — enough to catch layout/palette drift. */
-function differenceRatio(a, b) {
-  if (a.length !== b.length) return 1;
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) diff += 1;
-  return diff / a.length;
+/**
+ * True pixel difference ratio, plus a highlighted diff image for CI artifacts.
+ * PNG bytes can't be compared directly — compression makes identical-looking
+ * captures differ — so both sides are decoded first.
+ */
+function pixelDifference(baselineBuf, currentBuf, diffPath) {
+  const a = PNG.sync.read(baselineBuf);
+  const b = PNG.sync.read(currentBuf);
+  if (a.width !== b.width || a.height !== b.height) return 1;
+  const diff = new PNG({ width: a.width, height: a.height });
+  const changed = pixelmatch(a.data, b.data, diff.data, a.width, a.height, { threshold: 0.15 });
+  writeFileSync(diffPath, PNG.sync.write(diff));
+  return changed / (a.width * a.height);
 }
 
 async function snapshot(page, name) {
@@ -131,8 +138,9 @@ async function snapshot(page, name) {
     return;
   }
   writeFileSync(join(CURRENT_DIR, file), shot);
-  const ratio = differenceRatio(readFileSync(baseline), shot);
-  record(`visual: ${file} within ${(DIFF_TOLERANCE * 100).toFixed(0)}%`, ratio <= DIFF_TOLERANCE, `${(ratio * 100).toFixed(1)}% changed`);
+  const ratio = pixelDifference(readFileSync(baseline), shot, join(CURRENT_DIR, `${name}.diff.png`));
+  record(`visual: ${file} within ${(DIFF_TOLERANCE * 100).toFixed(0)}%`, ratio <= DIFF_TOLERANCE, `${(ratio * 100).toFixed(1)}% of pixels changed`);
+
 }
 
 /** Raw HTTP probe: SPA routes must serve 200 HTML with sane cache headers. */
