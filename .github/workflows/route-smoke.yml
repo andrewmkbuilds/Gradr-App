@@ -45,6 +45,14 @@ jobs:
           LOVABLE_BROWSER_SUPABASE_STORAGE_KEY: ${{ secrets.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY }}
           LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
 
+      # Lightweight, browser-free: sign in, sign out, prove the tokens are dead
+      # (so a refresh cannot rehydrate the session). Skips without credentials.
+      - name: Sign-out API smoke test
+        run: bun run test:signout:api
+        env:
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
       # Sign-in -> dashboard end to end; skips itself without test credentials.
       - name: Sign-in to dashboard e2e
         run: bun run test:e2e:signin http://127.0.0.1:8080
@@ -74,6 +82,28 @@ jobs:
         with:
           name: route-guard-axe-reports
           path: tests/reports/axe/
+          if-no-files-found: ignore
+
+      # Single-file HTML report: open it straight from the artifact download.
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: tests/reports/html/
+          if-no-files-found: ignore
+
+      # Traces and videos are only written for contexts that failed, so this
+      # artifact exists exactly when there is something to debug.
+      - name: Upload Playwright traces and videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces-and-videos
+          path: |
+            tests/reports/traces/
+            tests/reports/videos/
+          retention-days: 7
           if-no-files-found: ignore
 
 
