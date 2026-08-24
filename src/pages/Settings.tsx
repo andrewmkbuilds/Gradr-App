@@ -179,37 +179,37 @@ export default function Settings() {
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Display Name</label>
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="bg-secondary border-border" />
+            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" />
           </div>
 
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Target Job Title</label>
-            <Input value={targetJobTitle} onChange={(e) => setTargetJobTitle(e.target.value)} placeholder="e.g., Senior Frontend Engineer" className="bg-secondary border-border" />
+            <Input value={targetJobTitle} onChange={(e) => setTargetJobTitle(e.target.value)} placeholder="e.g., Senior Frontend Engineer" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Target Salary</label>
-              <Input value={targetSalary} onChange={(e) => setTargetSalary(e.target.value)} placeholder="e.g., $150k-$200k" className="bg-secondary border-border" />
+              <Input value={targetSalary} onChange={(e) => setTargetSalary(e.target.value)} placeholder="e.g., $150k-$200k" />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Target Industry</label>
-              <Input value={targetIndustry} onChange={(e) => setTargetIndustry(e.target.value)} placeholder="e.g., Fintech, SaaS" className="bg-secondary border-border" />
+              <Input value={targetIndustry} onChange={(e) => setTargetIndustry(e.target.value)} placeholder="e.g., Fintech, SaaS" />
             </div>
           </div>
 
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Career Stage</label>
-            <Input value={careerStage} onChange={(e) => setCareerStage(e.target.value)} placeholder="e.g., mid-career, senior, entry-level" className="bg-secondary border-border" />
+            <Input value={careerStage} onChange={(e) => setCareerStage(e.target.value)} placeholder="e.g., mid-career, senior, entry-level" />
           </div>
 
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Skills (comma-separated)</label>
-            <Input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="e.g., React, TypeScript, Node.js, AWS" className="bg-secondary border-border" />
+            <Input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="e.g., React, TypeScript, Node.js, AWS" />
           </div>
         </div>
 
-        <Button onClick={saveProfile} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90 w-full">
+        <Button onClick={saveProfile} disabled={saving} className="w-full">
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
           Save Profile
         </Button>
@@ -238,11 +238,11 @@ export default function Settings() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Preferred Send Time</label>
-              <Input type="time" value={digestSendTime} onChange={(e) => setDigestSendTime(e.target.value)} className="bg-secondary border-border" />
+              <Input type="time" value={digestSendTime} onChange={(e) => setDigestSendTime(e.target.value)} />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Timezone</label>
-              <Input value={digestTimezone} onChange={(e) => setDigestTimezone(e.target.value)} placeholder="America/New_York" className="bg-secondary border-border" />
+              <Input value={digestTimezone} onChange={(e) => setDigestTimezone(e.target.value)} placeholder="America/New_York" />
             </div>
           </div>
 
