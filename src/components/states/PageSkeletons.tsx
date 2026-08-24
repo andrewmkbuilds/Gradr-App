@@ -213,7 +213,6 @@ function ListSkeletonRows({ rows }: { rows: number }) {
 const ENGINE_ROUTES = ["/resume", "/match", "/apply", "/interview", "/growth", "/ats", "/career"];
 const LIST_ROUTES = ["/jobs", "/pipeline", "/history", "/affiliate", "/settings", "/billing"];
 const MARKETING_ROUTES = [
-  "/landing",
   "/pricing",
   "/blog",
   "/guides",
