@@ -53,6 +53,15 @@ jobs:
           E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
 
+      # Proves the live send path never queues a marketing-shaped email during
+      # normal app usage. Skips itself without test credentials.
+      - name: Email marketing guard
+        run: bun run test:email-guard http://127.0.0.1:8080
+        env:
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
+
       # Sign-in -> dashboard end to end; skips itself without test credentials.
       - name: Sign-in to dashboard e2e
         run: bun run test:e2e:signin http://127.0.0.1:8080
