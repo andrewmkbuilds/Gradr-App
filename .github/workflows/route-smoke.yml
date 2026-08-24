@@ -61,9 +61,19 @@ jobs:
           LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
 
       - name: Upload visual diffs
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: route-guard-visuals
           path: tests/visual/route-guards/
+          if-no-files-found: ignore
+
+      - name: Upload axe accessibility reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: route-guard-axe-reports
+          path: tests/reports/axe/
+          if-no-files-found: ignore
+
 
