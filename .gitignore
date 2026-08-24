@@ -31,4 +31,7 @@ tests/visual/diff/
 # Lovable sandbox workspace directory
 .workspace/
 tests/reports/
+# Keep the Impeccable audit report in the repo for review.
+!tests/reports/impeccable/
+!tests/reports/impeccable/**
 tests/visual/route-guards/current/

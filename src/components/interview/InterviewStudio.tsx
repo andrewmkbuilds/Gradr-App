@@ -508,6 +508,7 @@ export function InterviewStudio(props: Props) {
                       {[0, 1, 2].map((i) => (
                         <span
                           key={i}
+                          /* impeccable-allow: bounce-easing — typing indicator; the bounce is the affordance itself. */
                           className="h-1.5 w-1.5 rounded-full bg-muted-foreground motion-safe:animate-bounce"
                           style={{ animationDelay: `${i * 0.15}s` }}
                         />
