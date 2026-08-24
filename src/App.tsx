@@ -33,7 +33,6 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
-import Landing from "./pages/Landing";
 import { authPath, nextFromLocation, resolveNext } from "./lib/nextRedirect";
 import RequireAdmin from "@/components/RequireAdmin";
 import {
@@ -354,7 +353,7 @@ function AppRoutes() {
         <Route path="/landing" element={<Navigate to="/" replace />} />
         {homeOnly ? (
           <>
-            <Route path="/" element={<AnimatedPage><Landing /></AnimatedPage>} />
+            <Route path="/" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
             <Route path="/auth" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
             <Route path="/forgot-password" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
             <Route path="/reset-password" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
