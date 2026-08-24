@@ -69,6 +69,7 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
       { title: "Webhook deliveries", description: "Paddle and RevenueCat payloads and signatures.", url: "/admin/webhook-logs", icon: Webhook },
       { title: "Billing operations", description: "Alerts, webhook retries and sandbox failure simulations.", url: "/admin/billing-ops", icon: Webhook },
       { title: "Conversion tracking", description: "Are revenue events reaching PostHog once each, on time?", url: "/admin/analytics-health", icon: Activity },
+      { title: "Email templates", description: "Every email, transactional vs marketing, and its send status.", url: "/admin/email-templates", icon: Mail },
       { title: "CSP violations", description: "Report-only policy blocks and spike alerts.", url: "/admin/csp-reports", icon: ShieldAlert },
     ],
   },
