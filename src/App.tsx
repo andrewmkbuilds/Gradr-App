@@ -120,6 +120,7 @@ const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const InterviewHistory = lazy(() => import("./pages/InterviewHistory"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const Connect = lazy(() => import("./pages/Connect"));
 
 const queryClient = new QueryClient();
 
