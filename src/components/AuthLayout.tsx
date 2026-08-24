@@ -1,4 +1,3 @@
-import { Sparkles, Target, Brain, Rocket } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { motion } from "motion/react";
 import { type ReactNode } from "react";
@@ -8,18 +7,11 @@ interface AuthLayoutProps {
   children: ReactNode;
 }
 
-const features = [
-  { icon: Brain, label: "AI resume scoring & rewrite engine" },
-  { icon: Target, label: "Smart job matching with strategy" },
-  { icon: Sparkles, label: "One-click cover letters & outreach" },
-  { icon: Rocket, label: "Mock interviews with realtime coach" },
-];
-
 const TITLE = "Gradr";
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex aurora-bg overflow-hidden relative">
+    <div className="min-h-screen flex items-center justify-center aurora-bg overflow-hidden relative">
       <div className="absolute right-4 top-4 z-20">
         <ThemeToggle />
       </div>
@@ -59,93 +51,6 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         </svg>
       </div>
 
-      {/* Left panel — branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative z-10 w-full max-w-md px-8 xl:px-12 space-y-8"
-        >
-          {/* Animated logo: conic-spin ring + center mark + stop-motion sparkle */}
-          <div className="flex items-center gap-4">
-            <div className="relative h-14 w-14 shrink-0">
-              <div className="conic-spin absolute inset-0 rounded-control opacity-90" />
-              <BrandLogo size={52} className="absolute inset-[2px] rounded-control bg-shell" />
-            </div>
-            {/* Brand mark, not a heading — each auth page owns the single page <h1>. */}
-            <div className="text-3xl font-bold tracking-tight kinetic-text">{TITLE}</div>
-          </div>
-
-          {/* Expressive typography — letter reveal on line one, kinetic gradient on line two.
-              Line two is a single gradient element: nesting per-letter spans inside a
-              background-clip:text parent paints them transparent (the words disappear). */}
-          {/* LAYOUT GUARDRAIL: never add fixed heights, truncate, line-clamp,
-              whitespace-nowrap or overflow-hidden to the hero headline — the
-              full sentence must always be visible. Enforced by
-              src/test/authHeroLayout.test.ts. */}
-          <p
-            data-auth-hero="desktop"
-            className="text-3xl xl:text-4xl font-bold leading-[1.2] tracking-tight break-words text-balance min-w-0 max-w-full pb-1"
-          >
-            <span className="letter-reveal block">
-              {"Your AI career".split("").map((c, i) => (
-                <span key={`a${i}`} style={{ animationDelay: `${i * 35}ms` }}>
-                  {c === " " ? "\u00A0" : c}
-                </span>
-              ))}
-            </span>
-            <motion.span
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
-              className="kinetic-text block pb-1"
-            >
-              command center.
-            </motion.span>
-          </p>
-
-
-          <p className="text-muted-foreground leading-relaxed text-base">
-            Resume analysis. Job matching. Application generation. Interview coaching. One platform, zero guesswork.
-          </p>
-
-          {/* Glassmorphic feature stack — faux-3D tilt on hover */}
-          <div className="space-y-3 pt-2">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.label}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 + i * 0.1 }}
-                className="glassmorphic tilt-3d rounded-xl px-4 py-3 flex items-center gap-3 cursor-default"
-              >
-                <div className="claymorphic h-9 w-9 flex items-center justify-center shrink-0">
-                  <f.icon className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-sm text-foreground/90">{f.label}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Marquee trust strip */}
-          <div className="overflow-hidden mask-marquee pt-2" style={{ maskImage: "linear-gradient(90deg, transparent, black 15%, black 85%, transparent)" }}>
-            <div className="flex gap-10 marquee whitespace-nowrap text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              {Array.from({ length: 2 }).map((_, dup) => (
-                <div key={dup} className="flex gap-10 shrink-0">
-                  <span>· AI Resume Engine</span>
-                  <span>· Realtime Interview</span>
-                  <span>· Pipeline Tracker</span>
-                  <span>· Smart Match</span>
-                  <span>· Outreach Studio</span>
-                  <span>· Growth Insights</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
       {/* Right panel — form content */}
       <main className="flex-1 flex items-center justify-center p-6 sm:p-10 relative z-10">
         <motion.div
@@ -154,9 +59,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-sm space-y-7 glassmorphic rounded-3xl p-7 sm:p-8"
         >
-          {/* Mobile/tablet-only brand + headline (the left panel is hidden below lg,
-              so the headline must render here or it disappears entirely). */}
-          <div className="lg:hidden text-center space-y-3">
+          {/* Brand mark above the form — the marketing hero panel was removed. */}
+          <div className="text-center space-y-3">
             <div className="relative h-14 w-14 mx-auto">
               <div className="conic-spin absolute inset-0 rounded-control opacity-90" />
               <BrandLogo size={52} className="absolute inset-[2px] rounded-control bg-shell" />
