@@ -279,7 +279,7 @@ async function run() {
   const browser = await launchBrowser({ headless: true });
   try {
     // ---- signed out -------------------------------------------------------
-    const { context: guest, page } = await newContext(browser);
+    const { page, close: closeGuest } = await openContext(browser, "guest-light");
 
     const notFound = await visit(page, "/this-route-really-does-not-exist");
     record("guest: unknown route stays on the requested path", !!notFound.path, notFound.path);
@@ -299,27 +299,37 @@ async function run() {
     await checkA11y(page, "sign-in");
     await snapshot(page, "signin-light");
 
-    await guest.close();
+    // Signed-out redirect end-state: / lands on the sign-in screen.
+    const guestRedirect = await visit(page, "/");
+    record("guest: / redirects to /auth", guestRedirect.path === "/auth", `landed on ${guestRedirect.path}`);
+    await checkA11y(page, "redirect-end-state-light");
 
-    // 404 in dark theme and on mobile.
-    const { context: dark, page: darkPage } = await newContext(browser, { colorScheme: "dark" });
+    await closeGuest();
+
+    // 404 + redirect end-state in dark theme, and 404 on mobile.
+    const { page: darkPage, close: closeDark } = await openContext(browser, "guest-dark", { colorScheme: "dark" });
     await visit(darkPage, "/this-route-really-does-not-exist");
     await check404Layout(darkPage, "guest 404 (dark)");
+    await checkA11y(darkPage, "404-dark");
     await snapshot(darkPage, "notfound-dark");
-    await dark.close();
 
-    const { context: mobile404Ctx, page: mobile404 } = await newContext(browser, { viewport: MOBILE });
+    const darkRedirect = await visit(darkPage, "/");
+    record("guest (dark): / redirects to /auth", darkRedirect.path === "/auth", `landed on ${darkRedirect.path}`);
+    await checkA11y(darkPage, "redirect-end-state-dark");
+    await closeDark();
+
+    const { page: mobile404, close: closeMobile404 } = await openContext(browser, "guest-mobile", { viewport: MOBILE });
     await visit(mobile404, "/this-route-really-does-not-exist");
     await check404Layout(mobile404, "guest 404 (mobile)");
     await snapshot(mobile404, "notfound-mobile");
-    await mobile404Ctx.close();
+    await closeMobile404();
 
     // ---- signed in --------------------------------------------------------
     const creds = loadSession();
     if (!creds) {
       skip("signed-in checks", "no preview session available");
     } else {
-      const { context: member, page: authed } = await newContext(browser, { session: creds });
+      const { page: authed, close: closeMember } = await openContext(browser, "member-light", { session: creds });
 
       const home = await visit(authed, "/");
       record("member: / renders the dashboard", home.path === "/" && !isBlank(home.text), `at ${home.path}`);
@@ -327,8 +337,7 @@ async function run() {
 
       // Session persistence across a hard reload.
       await authed.reload({ waitUntil: "domcontentloaded" });
-      await authed.waitForLoadState("networkidle").catch(() => {});
-      await authed.waitForTimeout(600);
+      await settle(authed);
       const afterReload = {
         path: new URL(authed.url()).pathname,
         text: (await authed.locator("body").innerText().catch(() => "")).trim(),
@@ -354,10 +363,28 @@ async function run() {
       await checkA11y(authed, "dashboard");
       await snapshot(authed, "dashboard-light");
 
-      await member.close();
+      // Redirect end-state a11y: what the member actually sees after /landing.
+      await visit(authed, "/landing");
+      await checkA11y(authed, "member-redirect-end-state-light");
+
+      await closeMember();
+
+      // Same redirect end-state in dark theme.
+      const { page: memberDark, close: closeMemberDark } = await openContext(browser, "member-dark", {
+        colorScheme: "dark",
+        session: creds,
+      });
+      const darkLanding = await visit(memberDark, "/landing");
+      record(
+        "member (dark): /landing -> dashboard",
+        darkLanding.path === "/" && !isBlank(darkLanding.text),
+        `landed on ${darkLanding.path}`,
+      );
+      await checkA11y(memberDark, "member-redirect-end-state-dark");
+      await closeMemberDark();
 
       // ---- mobile redirect end-state --------------------------------------
-      const { context: mobileCtx, page: mobilePage } = await newContext(browser, {
+      const { page: mobilePage, close: closeMobile } = await openContext(browser, "member-mobile", {
         viewport: MOBILE,
         session: creds,
       });
@@ -380,10 +407,10 @@ async function run() {
       assertNoLandingUi("/landing redirect (mobile)", mobileLanding.text);
       await snapshot(mobilePage, "landing-redirect-mobile");
 
-      await mobileCtx.close();
+      await closeMobile();
 
       // ---- sign out --------------------------------------------------------
-      const { context: signOutCtx, page: out } = await newContext(browser, { session: creds });
+      const { page: out, close: closeSignOut } = await openContext(browser, "sign-out", { session: creds });
       const signedInHome = await visit(out, "/");
 
       if (signedInHome.path !== "/") {
@@ -426,8 +453,7 @@ async function run() {
         assertNoLandingUi("after sign out", afterSignOut.text);
 
         await out.reload({ waitUntil: "domcontentloaded" });
-        await out.waitForLoadState("networkidle").catch(() => {});
-        await out.waitForTimeout(600);
+        await settle(out);
         const refreshed = {
           path: new URL(out.url()).pathname,
           text: (await out.locator("body").innerText().catch(() => "")).trim(),
@@ -439,7 +465,7 @@ async function run() {
         );
       }
 
-      await signOutCtx.close();
+      await closeSignOut();
 
     }
   } finally {
@@ -448,9 +474,20 @@ async function run() {
 
   mkdirSync(AXE_REPORT_DIR, { recursive: true });
   writeFileSync(join(AXE_REPORT_DIR, "route-guards-summary.json"), JSON.stringify(results, null, 2));
+  attachments.push({ kind: "axe", path: "tests/reports/axe/", label: "per-page axe JSON reports" });
 
-  const failed = results.filter((r) => !r.ok);
-  console.log(`\n${results.length - failed.length}/${results.length} route guard checks passed.`);
+  writeHtmlReport({
+    outFile: HTML_REPORT,
+    title: "Gradr route guards",
+    baseUrl: BASE,
+    results,
+    attachments,
+  });
+  console.log(`\nHTML report: ${HTML_REPORT}`);
+
+  const failed = results.filter((r) => !r.ok && !r.skipped);
+  const ran = results.filter((r) => !r.skipped);
+  console.log(`${ran.length - failed.length}/${ran.length} route guard checks passed.`);
   if (failed.length) process.exit(1);
 }
 
