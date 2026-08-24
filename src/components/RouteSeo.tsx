@@ -206,6 +206,8 @@ function resolveOgImage(pathname: string): string {
  * no public content and only dilute how search engines understand Gradr.
  */
 const NOINDEX_EXACT = new Set([
+  "/",
+  "/landing",
   "/auth",
   "/forgot-password",
   "/reset-password",

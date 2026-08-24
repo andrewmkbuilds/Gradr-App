@@ -351,6 +351,7 @@ function AppRoutes() {
 
         <Route path="/unsubscribe" element={<AnimatedPage><Unsubscribe /></AnimatedPage>} />
         <Route path="/landing" element={<Navigate to="/" replace />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
         {homeOnly ? (
           <>
             <Route path="/" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
@@ -411,7 +412,7 @@ function ReferralCapture() {
   return null;
 }
 
-const HOMEPAGE_PATHS = new Set(["/", "/landing", "/home"]);
+const HOMEPAGE_PATHS = new Set(["/"]);
 
 function TelemetryRouteTracker() {
   const location = useLocation();
@@ -424,8 +425,7 @@ function TelemetryRouteTracker() {
   useEffect(() => {
     phPageview(location.pathname);
     addBreadcrumb("navigation", location.pathname);
-    // Funnel step 1. Guests land on /landing, members on / — both are the
-    // homepage for acquisition purposes, and each is counted once per visit.
+    // Funnel step 1. "/" is the app home (dashboard); counted once per visit.
     if (HOMEPAGE_PATHS.has(location.pathname)) {
       trackOnce("homepage_viewed", { path: location.pathname }, "route");
     }

@@ -24,7 +24,6 @@ const FULL: QaState[] = ["default", "loading", "empty", "error"];
 const STATIC: QaState[] = ["default"];
 
 export const QA_ROUTES: QaRoute[] = [
-  { id: "landing", label: "Landing", path: "/landing", group: "Public", auth: false, states: STATIC },
   { id: "pricing", label: "Pricing", path: "/pricing", group: "Public", auth: false, states: ["default", "loading", "error"] },
   { id: "auth", label: "Sign in", path: "/auth", group: "Public", auth: false, states: ["default", "loading", "error"] },
   { id: "jobs-index", label: "Job search index", path: "/job-search", group: "Public", auth: false, states: STATIC },
