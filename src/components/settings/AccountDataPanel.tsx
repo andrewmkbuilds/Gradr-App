@@ -7,22 +7,39 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-/** Tables exported in the personal data archive. */
+/**
+ * Tables exported in the personal data archive (GDPR Art. 20 portability).
+ * Kept in sync with the tables the delete-account function clears, so what a
+ * user can take with them matches what leaving actually removes.
+ */
 const EXPORT_TABLES = [
   "profiles",
   "user_preferences",
+  "notification_preferences",
   "resumes",
   "job_matches",
   "tracked_jobs",
   "job_reminders",
+  "career_plans",
   "interview_sessions",
+  "interview_session_metrics",
+  "scheduled_interviews",
   "notifications",
+  "email_notification_log",
+  "digest_send_logs",
   "purchases",
+  "billing_events",
+  "paddle_subscriptions",
+  "entitlement_ledger",
+  "discount_redemptions",
   "subscribers",
   "usage_credits",
   "feature_usage",
   "user_integrations",
+  "legal_acceptances",
 ] as const;
+
+
 
 export function AccountDataPanel() {
   const { user } = useAuth();
