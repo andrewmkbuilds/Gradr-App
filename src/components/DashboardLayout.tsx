@@ -8,6 +8,7 @@ import { AmbientBackground } from "@/components/AmbientBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { PolicyUpdateGate } from "@/components/legal/PolicyUpdateGate";
+import { SignupConsentSync } from "@/components/legal/SignupConsentSync";
 import { NavBreadcrumb } from "@/components/NavBreadcrumb";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { useScrollTransform } from "@/hooks/useScrollTransform";
@@ -89,6 +90,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           <MobileTabBar />
           <PolicyUpdateGate />
+          <SignupConsentSync />
         </div>
       </div>
     </SidebarProvider>
