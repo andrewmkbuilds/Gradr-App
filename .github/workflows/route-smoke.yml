@@ -1,0 +1,53 @@
+name: Route smoke
+
+# Catches routing regressions (deleted Landing/Home pages reappearing, broken
+# redirects, blank screens, missing 404) on every PR and push.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  route-smoke:
+    name: Routes and redirects
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Static guard: no landing/home URLs in robots.txt, sitemaps or RouteSeo.
+      - name: Landing/Home removal regression test
+        run: bunx vitest run src/test/landingRoutesRemoved.test.ts
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Start preview server
+        run: |
+          bun run build
+          bunx vite preview --port 8080 --host 127.0.0.1 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://127.0.0.1:8080/ && break
+            sleep 2
+          done
+
+      # Signed-out redirects, 404 handling and console-error checks. The
+      # signed-in half runs automatically when a preview session is available.
+      - name: Route smoke test
+        run: bun run smoke:routes http://127.0.0.1:8080
+        env:
+          LOVABLE_BROWSER_SUPABASE_STORAGE_KEY: ${{ secrets.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY }}
+          LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
+
+      # Sign-in -> dashboard end to end; skips itself without test credentials.
+      - name: Sign-in to dashboard e2e
+        run: bun run test:e2e:signin http://127.0.0.1:8080
+        env:
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
