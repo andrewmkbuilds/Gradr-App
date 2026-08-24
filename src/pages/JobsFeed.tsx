@@ -461,15 +461,15 @@ export default function JobsFeed() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-4 relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Job title or keywords" value={what} onChange={(e) => setWhat(e.target.value)} className="pl-10 h-11" onKeyDown={(e) => e.key === "Enter" && search()} />
+            <Input aria-label="Job title or keywords" placeholder="Job title or keywords" value={what} onChange={(e) => setWhat(e.target.value)} className="pl-10 h-11" onKeyDown={(e) => e.key === "Enter" && search()} />
           </div>
           <div className="md:col-span-3 relative">
             <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="City or region" value={where} onChange={(e) => setWhere(e.target.value)} className="pl-10 h-11" onKeyDown={(e) => e.key === "Enter" && search()} />
+            <Input aria-label="City or region" placeholder="City or region" value={where} onChange={(e) => setWhere(e.target.value)} className="pl-10 h-11" onKeyDown={(e) => e.key === "Enter" && search()} />
           </div>
           <div className="md:col-span-2">
             <Select value={country} onValueChange={setCountry}>
-              <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Country" className="h-11"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {COUNTRIES.map((c) => <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>)}
               </SelectContent>
@@ -488,7 +488,7 @@ export default function JobsFeed() {
             <Label htmlFor="remote" className="text-sm">Remote only</Label>
           </div>
           <Select value={sortBy} onValueChange={(v: "relevance" | "date" | "salary") => setSortBy(v)}>
-            <SelectTrigger className="h-9 w-40 text-sm"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Sort results" className="h-9 w-40 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="relevance">Relevance</SelectItem>
               <SelectItem value="date">Most recent</SelectItem>
@@ -496,6 +496,7 @@ export default function JobsFeed() {
             </SelectContent>
           </Select>
           <Input
+            aria-label="Filter by company"
             placeholder="Filter by company"
             value={companyFilter}
             onChange={(e) => setCompanyFilter(e.target.value)}
@@ -539,7 +540,7 @@ export default function JobsFeed() {
         </div>
         <p className="text-xs text-muted-foreground mb-3">Paste any job URL (LinkedIn, Greenhouse, company sites) — AI extracts the details.</p>
         <div className="flex gap-2">
-          <Input placeholder="https://…" value={pasteUrl} onChange={(e) => setPasteUrl(e.target.value)} className="h-10" />
+          <Input aria-label="Job posting URL" placeholder="https://…" value={pasteUrl} onChange={(e) => setPasteUrl(e.target.value)} className="h-10" />
           <Button onClick={addFromUrl} disabled={pasting || !pasteUrl.trim()} className="gap-2">
             {pasting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             Add

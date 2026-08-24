@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,10 +37,16 @@ export function useNotifications() {
   });
 
   // Realtime subscription — new notifications trigger a toast + refetch.
+  // The topic is per hook instance: two components using this hook must not
+  // share one channel, or the second `.on()` lands after `subscribe()`.
+  const channelId = useRef<string>();
+  if (!channelId.current) {
+    channelId.current = Math.random().toString(36).slice(2);
+  }
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel(`notifications:${user.id}`)
+      .channel(`notifications:${user.id}:${channelId.current}`)
       .on(
         "postgres_changes",
         {

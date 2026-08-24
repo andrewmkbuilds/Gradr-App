@@ -64,10 +64,10 @@ export function SurfaceHeader({
 }) {
   return (
     <div className={cn("mb-4 flex items-center justify-between gap-3", className)}>
-      <h3 className="flex items-center gap-2 text-h6 text-foreground">
+      <h2 className="flex items-center gap-2 text-h6 text-foreground">
         {Icon ? <Icon className="h-4 w-4 text-primary" /> : null}
         {title}
-      </h3>
+      </h2>
 
       {action}
     </div>

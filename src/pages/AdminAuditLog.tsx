@@ -96,13 +96,13 @@ export default function AdminAuditLog() {
       </div>
 
       <div className="flex gap-2 flex-wrap">
-        <select value={resource} onChange={(e) => setResource(e.target.value)} className={selectCls}>
+        <select aria-label="Filter by resource" value={resource} onChange={(e) => setResource(e.target.value)} className={selectCls}>
           <option value="all">All resources</option>
           <option value="affiliate_clicks">Affiliate clicks</option>
           <option value="analytics_events">Analytics events</option>
           <option value="affiliate_payouts">Affiliate payouts</option>
         </select>
-        <select value={action} onChange={(e) => setAction(e.target.value)} className={selectCls}>
+        <select aria-label="Filter by action" value={action} onChange={(e) => setAction(e.target.value)} className={selectCls}>
           <option value="all">All actions</option>
           <option value="view">Viewed</option>
           <option value="create">Created</option>
@@ -110,7 +110,7 @@ export default function AdminAuditLog() {
           <option value="delete">Deleted</option>
           <option value="export">Exported</option>
         </select>
-        <select value={actorId} onChange={(e) => setActorId(e.target.value)} className={selectCls}>
+        <select aria-label="Filter by actor" value={actorId} onChange={(e) => setActorId(e.target.value)} className={selectCls}>
           <option value="all">Everyone</option>
           {(actors || []).map((a) => (
             <option key={a.user_id} value={a.user_id}>
@@ -119,6 +119,7 @@ export default function AdminAuditLog() {
           ))}
         </select>
         <select
+          aria-label="Time range"
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
           className={selectCls}

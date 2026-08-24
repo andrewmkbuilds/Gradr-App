@@ -432,7 +432,7 @@ export default function ResumeEngine() {
                 >
                   <Upload className="h-7 w-7" aria-hidden="true" />
                 </motion.span>
-                <h3 className="font-display text-lg text-foreground">Drop your resume in</h3>
+                <h2 className="font-display text-lg text-foreground">Drop your resume in</h2>
                 <p className="mt-1 text-sm text-muted-foreground">PDF, DOCX or TXT · max 10MB</p>
                 <span className="mt-5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm">
                   Choose a file
@@ -459,9 +459,9 @@ export default function ResumeEngine() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
               </div>
               <div>
-                <h3 className="font-display text-lg text-foreground" role="status">
+                <h2 className="font-display text-lg text-foreground" role="status">
                   Uploading your resume
-                </h3>
+                </h2>
                 <p className="mt-1 text-sm text-muted-foreground">Encrypting and storing the file…</p>
               </div>
             </Surface>
@@ -475,7 +475,7 @@ export default function ResumeEngine() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-secondary">
                     Overall
                   </p>
-                  <h3 className="font-display text-lg text-foreground">ATS readiness</h3>
+                  <h2 className="font-display text-lg text-foreground">ATS readiness</h2>
                 </div>
                 <ScoreDial
                   score={analysis.ats_score}
@@ -510,7 +510,7 @@ export default function ResumeEngine() {
             <motion.div {...stagger(1)} className="lg:col-span-2">
               <Surface level={2} className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="font-display text-lg text-foreground">Fix list</h3>
+                  <h2 className="font-display text-lg text-foreground">Fix list</h2>
                   <span className="rounded-full bg-surface-secondary px-2.5 py-1 text-xs tabular-nums text-muted-foreground">
                     {analysis.suggestions.length} items
                   </span>
@@ -582,10 +582,10 @@ export default function ResumeEngine() {
             {analysis.evidence?.length ? (
               <motion.div {...stagger(2)} className="lg:col-span-2">
                 <Surface level={2} className="p-6">
-                  <h3 className="mb-4 flex items-center gap-2 font-display text-lg text-foreground">
+                  <h2 className="mb-4 flex items-center gap-2 font-display text-lg text-foreground">
                     <Gauge className="h-4 w-4 text-mahogany" aria-hidden="true" />
                     How these scores were calculated
-                  </h3>
+                  </h2>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {analysis.evidence.map((e, i) => (
                       <motion.div
@@ -616,7 +616,7 @@ export default function ResumeEngine() {
             {analysis.metrics?.missingSkills?.length ? (
               <motion.div {...stagger(3)}>
                 <Surface level={2} className="p-6">
-                  <h3 className="mb-3 font-display text-base text-foreground">Missing job keywords</h3>
+                  <h2 className="mb-3 font-display text-base text-foreground">Missing job keywords</h2>
                   <div className="flex flex-wrap gap-1.5">
                     {analysis.metrics.missingSkills.slice(0, 20).map((s, i) => (
                       <motion.span
@@ -649,7 +649,7 @@ export default function ResumeEngine() {
             {analysis.rewrites?.length ? (
               <motion.div {...stagger(4)} className="lg:col-span-3">
                 <Surface level={2} className="p-6">
-                  <h3 className="mb-4 font-display text-lg text-foreground">Suggested bullet rewrites</h3>
+                  <h2 className="mb-4 font-display text-lg text-foreground">Suggested bullet rewrites</h2>
                   <div className="space-y-3">
                     {analysis.rewrites.map((r, i) => (
                       <motion.div

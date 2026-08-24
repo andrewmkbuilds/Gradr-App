@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, FileText, Gift, Mic, Sparkles, Target } from "lucide-react";
 import { Button } from "@/components/ds/Button";
-import { Badge, Card } from "@/design-system/gradr-9b9b95";
+import { Badge, Card, Text } from "@/design-system/gradr-9b9b95";
 import { useQueryClient } from "@tanstack/react-query";
 import { Seo } from "@/components/Seo";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -76,7 +76,7 @@ export default function Welcome() {
           <CheckCircle2 className="h-8 w-8 text-primary" aria-hidden />
         </div>
         <div className="space-y-2">
-          <h1 className="type-h1 text-foreground">{isPack ? "Credits added" : "You're all set"}</h1>
+          <Text variant="h1">{isPack ? "Credits added" : "You're all set"}</Text>
           <p className="text-muted-foreground">
             {isPack
               ? "Your credit pack is being applied to your account — it appears in your usage within a few seconds."
