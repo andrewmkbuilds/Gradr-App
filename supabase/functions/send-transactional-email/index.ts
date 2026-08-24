@@ -136,6 +136,26 @@ Deno.serve(async (req) => {
     )
   }
 
+  // 1b. Gradr sends transactional email only. Any template classified as
+  // marketing — or registered without a classification at all — is refused
+  // before it can reach the queue, whoever the caller is.
+  if (!EMAIL_CLASSIFICATIONS[templateName]) {
+    console.error('Template is not classified — refusing to send', { templateName })
+    return new Response(
+      JSON.stringify({ error: 'Template is not classified as transactional' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+  if (isMarketing(templateName)) {
+    console.error('Blocked marketing-classified send', { templateName })
+    return new Response(
+      JSON.stringify({ error: 'Marketing emails are not supported' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+
+
   // Enforce the trust model described at the top of this file.
   const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
   const claims = decodeJwtClaims(bearer)
