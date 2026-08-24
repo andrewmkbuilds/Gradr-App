@@ -122,29 +122,118 @@ var create_tracked_job_default = defineTool3({
   }
 });
 
-// src/lib/mcp/tools/list-job-matches.ts
-import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.112.3";
+// src/lib/mcp/tools/update-tracked-job.ts
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.26.2";
 import { z as z4 } from "npm:zod@^3.25.76";
+
+// src/lib/mcp/supabase.ts
+import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.112.3";
+function runtimeEnv(name) {
+  const runtime = globalThis;
+  return runtime.Deno?.env?.get?.(name) ?? runtime.process?.env?.[name];
+}
+function configuredEnv(names) {
+  for (const name of names) {
+    const value = runtimeEnv(name)?.trim();
+    if (value) return value;
+  }
+  return void 0;
+}
+function supabaseProjectUrl() {
+  const url = configuredEnv(["SUPABASE_URL", "VITE_SUPABASE_URL"]);
+  if (!url) throw new Error("SUPABASE_URL (or VITE_SUPABASE_URL) is required");
+  return url;
+}
+function supabasePublishableKey() {
+  const direct = configuredEnv(["SUPABASE_PUBLISHABLE_KEY", "VITE_SUPABASE_PUBLISHABLE_KEY"]);
+  if (direct) return direct;
+  const keyset = runtimeEnv("SUPABASE_PUBLISHABLE_KEYS");
+  if (keyset) {
+    try {
+      const parsed = JSON.parse(keyset);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        const keys = parsed;
+        const key = [keys.default, ...Object.values(keys)].find((v) => typeof v === "string" && v.trim().startsWith("sb_publishable_"))?.trim();
+        if (key) return key;
+      }
+    } catch {
+    }
+  }
+  const legacy = configuredEnv(["SUPABASE_ANON_KEY", "VITE_SUPABASE_ANON_KEY"]);
+  if (legacy) return legacy;
+  throw new Error("SUPABASE_PUBLISHABLE_KEY, SUPABASE_PUBLISHABLE_KEYS, or SUPABASE_ANON_KEY is required");
+}
 function supabaseForUser4(ctx) {
-  return createClient4(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  const token = ctx.getToken();
+  if (!token) throw new Error("supabaseForUser requires a verified OAuth token");
+  return createClient4(supabaseProjectUrl(), supabasePublishableKey(), {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+var NOT_AUTHENTICATED = {
+  content: [{ type: "text", text: "Not authenticated" }],
+  isError: true
+};
+function errorResult(message) {
+  return { content: [{ type: "text", text: message }], isError: true };
+}
+function jsonResult(structured) {
+  return {
+    content: [{ type: "text", text: JSON.stringify(structured, null, 2) }],
+    structuredContent: structured
+  };
+}
+
+// src/lib/mcp/tools/update-tracked-job.ts
+var update_tracked_job_default = defineTool4({
+  name: "update_tracked_job",
+  title: "Update tracked job",
+  description: "Update a job in the signed-in user's Gradr pipeline \u2014 move its status, add notes, or record the applied date.",
+  inputSchema: {
+    id: z4.string().describe("The tracked job id (from list_tracked_jobs)."),
+    status: z4.string().optional().describe("New pipeline status (e.g. 'saved', 'applied', 'interview', 'offer', 'rejected')."),
+    notes: z4.string().optional().describe("Replace the job's notes."),
+    applied_at: z4.string().optional().describe("ISO timestamp for when the user applied.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  handler: async ({ id, status, notes, applied_at }, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    const patch = { last_touch_at: (/* @__PURE__ */ new Date()).toISOString() };
+    if (status !== void 0) patch.status = status;
+    if (notes !== void 0) patch.notes = notes;
+    if (applied_at !== void 0) patch.applied_at = applied_at;
+    if (Object.keys(patch).length === 1) return errorResult("Provide at least one field to update.");
+    const { data, error } = await supabaseForUser4(ctx).from("tracked_jobs").update(patch).eq("id", id).eq("user_id", ctx.getUserId()).select().maybeSingle();
+    if (error) return errorResult(error.message);
+    if (!data) return errorResult(`No tracked job found with id ${id}.`);
+    return jsonResult({ job: data });
+  }
+});
+
+// src/lib/mcp/tools/list-job-matches.ts
+import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.112.3";
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.2";
+import { z as z5 } from "npm:zod@^3.25.76";
+function supabaseForUser5(ctx) {
+  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
 }
-var list_job_matches_default = defineTool4({
+var list_job_matches_default = defineTool5({
   name: "list_job_matches",
   title: "List AI job matches",
   description: "List AI-generated job matches for the signed-in user, sorted by match score.",
   inputSchema: {
-    limit: z4.number().int().min(1).max(50).optional().describe("Maximum matches to return. Defaults to 10.")
+    limit: z5.number().int().min(1).max(50).optional().describe("Maximum matches to return. Defaults to 10.")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ limit }, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
-    const { data, error } = await supabaseForUser4(ctx).from("job_matches").select("*").order("match_score", { ascending: false }).limit(limit ?? 10);
+    const { data, error } = await supabaseForUser5(ctx).from("job_matches").select("*").order("match_score", { ascending: false }).limit(limit ?? 10);
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
@@ -154,15 +243,15 @@ var list_job_matches_default = defineTool4({
 });
 
 // src/lib/mcp/tools/get-profile.ts
-import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.112.3";
-import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.2";
-function supabaseForUser5(ctx) {
-  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+import { createClient as createClient6 } from "npm:@supabase/supabase-js@^2.112.3";
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.26.2";
+function supabaseForUser6(ctx) {
+  return createClient6(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
 }
-var get_profile_default = defineTool5({
+var get_profile_default = defineTool6({
   name: "get_profile",
   title: "Get my Gradr profile",
   description: "Return the signed-in user's Gradr profile: name, email, target role, and career preferences.",
@@ -172,7 +261,7 @@ var get_profile_default = defineTool5({
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
-    const supabase = supabaseForUser5(ctx);
+    const supabase = supabaseForUser6(ctx);
     const [profile, prefs] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", ctx.getUserId()).maybeSingle(),
       supabase.from("user_preferences").select("*").eq("user_id", ctx.getUserId()).maybeSingle()
@@ -186,18 +275,216 @@ var get_profile_default = defineTool5({
   }
 });
 
+// src/lib/mcp/tools/list-interview-sessions.ts
+import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.26.2";
+import { z as z6 } from "npm:zod@^3.25.76";
+var list_interview_sessions_default = defineTool7({
+  name: "list_interview_sessions",
+  title: "List mock interview sessions",
+  description: "List the signed-in user's completed AI mock interview sessions with scores, focus areas and target roles.",
+  inputSchema: {
+    limit: z6.number().int().min(1).max(50).optional().describe("Maximum sessions to return. Defaults to 10."),
+    include_report: z6.boolean().optional().describe("Include the full AI feedback report and practice plan. Defaults to false.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ limit, include_report }, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    const columns = include_report ? "id, target_role, focus_areas, overall_score, duration_sec, report, practice_plan, created_at" : "id, target_role, focus_areas, overall_score, duration_sec, created_at";
+    const { data, error } = await supabaseForUser4(ctx).from("interview_sessions").select(columns).order("created_at", { ascending: false }).limit(limit ?? 10);
+    if (error) return errorResult(error.message);
+    return jsonResult({ sessions: data ?? [] });
+  }
+});
+
+// src/lib/mcp/tools/get-career-plan.ts
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.26.2";
+var get_career_plan_default = defineTool8({
+  name: "get_career_plan",
+  title: "Get career plan",
+  description: "Return the signed-in user's current AI-generated Gradr career plan: summary and the ordered list of steps.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async (_input, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    const { data, error } = await supabaseForUser4(ctx).from("career_plans").select("id, summary, steps, valid_until, created_at, updated_at").eq("user_id", ctx.getUserId()).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (error) return errorResult(error.message);
+    if (!data) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "No career plan yet. Generate one from the Career page in Gradr."
+          }
+        ],
+        structuredContent: { plan: null }
+      };
+    }
+    return jsonResult({ plan: data });
+  }
+});
+
+// src/lib/mcp/tools/list-scheduled-interviews.ts
+import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@0.26.2";
+import { z as z7 } from "npm:zod@^3.25.76";
+var list_scheduled_interviews_default = defineTool9({
+  name: "list_scheduled_interviews",
+  title: "List scheduled interviews",
+  description: "List the signed-in user's scheduled real interviews and calls, with company, role, time and status.",
+  inputSchema: {
+    upcoming_only: z7.boolean().optional().describe("Only return interviews starting from now. Defaults to true."),
+    limit: z7.number().int().min(1).max(100).optional().describe("Maximum interviews to return. Defaults to 25.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ upcoming_only, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    let q = supabaseForUser4(ctx).from("scheduled_interviews").select("id, title, company, target_role, kind, status, starts_at, ends_at, timezone, location, html_link, notes").order("starts_at", { ascending: true }).limit(limit ?? 25);
+    if (upcoming_only !== false) q = q.gte("starts_at", (/* @__PURE__ */ new Date()).toISOString());
+    const { data, error } = await q;
+    if (error) return errorResult(error.message);
+    return jsonResult({ interviews: data ?? [] });
+  }
+});
+
+// src/lib/mcp/tools/get-credit-balance.ts
+import { defineTool as defineTool10 } from "npm:@lovable.dev/mcp-js@0.26.2";
+var get_credit_balance_default = defineTool10({
+  name: "get_credit_balance",
+  title: "Get credit balance",
+  description: "Return the signed-in user's remaining Gradr credits (application and interview credits) and their subscription tier.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async (_input, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    const supabase = supabaseForUser4(ctx);
+    const [credits, subscriber] = await Promise.all([
+      supabase.from("usage_credits").select("application_credits, interview_credits, environment, updated_at").eq("user_id", ctx.getUserId()).maybeSingle(),
+      supabase.from("subscribers").select("subscribed, subscription_tier, subscription_end").eq("user_id", ctx.getUserId()).maybeSingle()
+    ]);
+    if (credits.error) return errorResult(credits.error.message);
+    return jsonResult({ credits: credits.data ?? null, subscription: subscriber.data ?? null });
+  }
+});
+
+// src/lib/mcp/tools/search-discovered-jobs.ts
+import { defineTool as defineTool11 } from "npm:@lovable.dev/mcp-js@0.26.2";
+import { z as z8 } from "npm:zod@^3.25.76";
+var search_discovered_jobs_default = defineTool11({
+  name: "search_discovered_jobs",
+  title: "Search the Gradr job feed",
+  description: "Search jobs Gradr has discovered from its sourcing feeds by keyword, location or remote flag. Use create_tracked_job to save one to the pipeline.",
+  inputSchema: {
+    query: z8.string().optional().describe("Keyword matched against the job title."),
+    company: z8.string().optional().describe("Filter by company name."),
+    location: z8.string().optional().describe("Keyword matched against the job location."),
+    remote: z8.boolean().optional().describe("Only remote roles when true."),
+    limit: z8.number().int().min(1).max(50).optional().describe("Maximum jobs to return. Defaults to 20.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ query, company, location, remote, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    let q = supabaseForUser4(ctx).from("discovered_jobs").select("id, title, company, location, remote, salary_min, salary_max, currency, url, source, posted_at").order("posted_at", { ascending: false, nullsFirst: false }).limit(limit ?? 20);
+    if (query) q = q.ilike("title", `%${query}%`);
+    if (company) q = q.ilike("company", `%${company}%`);
+    if (location) q = q.ilike("location", `%${location}%`);
+    if (remote !== void 0) q = q.eq("remote", remote);
+    const { data, error } = await q;
+    if (error) return errorResult(error.message);
+    return jsonResult({ jobs: data ?? [] });
+  }
+});
+
+// src/lib/mcp/tools/list-job-reminders.ts
+import { defineTool as defineTool12 } from "npm:@lovable.dev/mcp-js@0.26.2";
+import { z as z9 } from "npm:zod@^3.25.76";
+var list_job_reminders_default = defineTool12({
+  name: "list_job_reminders",
+  title: "List job reminders",
+  description: "List the signed-in user's follow-up reminders for tracked jobs, with due dates and completion state.",
+  inputSchema: {
+    include_done: z9.boolean().optional().describe("Include completed reminders. Defaults to false."),
+    limit: z9.number().int().min(1).max(100).optional().describe("Maximum reminders to return. Defaults to 25.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ include_done, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    let q = supabaseForUser4(ctx).from("job_reminders").select("id, title, due_at, done, tracked_job_id, created_at").order("due_at", { ascending: true }).limit(limit ?? 25);
+    if (!include_done) q = q.eq("done", false);
+    const { data, error } = await q;
+    if (error) return errorResult(error.message);
+    return jsonResult({ reminders: data ?? [] });
+  }
+});
+
+// src/lib/mcp/tools/create-job-reminder.ts
+import { defineTool as defineTool13 } from "npm:@lovable.dev/mcp-js@0.26.2";
+import { z as z10 } from "npm:zod@^3.25.76";
+var create_job_reminder_default = defineTool13({
+  name: "create_job_reminder",
+  title: "Create job reminder",
+  description: "Create a follow-up reminder for one of the signed-in user's tracked jobs.",
+  inputSchema: {
+    tracked_job_id: z10.string().describe("The tracked job id the reminder belongs to (from list_tracked_jobs)."),
+    title: z10.string().describe("What to be reminded about, e.g. 'Follow up with the recruiter'."),
+    due_at: z10.string().describe("ISO timestamp for when the reminder is due.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  handler: async ({ tracked_job_id, title, due_at }, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    const { data, error } = await supabaseForUser4(ctx).from("job_reminders").insert({ user_id: ctx.getUserId(), tracked_job_id, title, due_at }).select().single();
+    if (error) return errorResult(error.message);
+    return jsonResult({ reminder: data });
+  }
+});
+
+// src/lib/mcp/tools/list-notifications.ts
+import { defineTool as defineTool14 } from "npm:@lovable.dev/mcp-js@0.26.2";
+import { z as z11 } from "npm:zod@^3.25.76";
+var list_notifications_default = defineTool14({
+  name: "list_notifications",
+  title: "List notifications",
+  description: "List the signed-in user's recent Gradr notifications, newest first.",
+  inputSchema: {
+    unread_only: z11.boolean().optional().describe("Only return unread notifications. Defaults to false."),
+    limit: z11.number().int().min(1).max(50).optional().describe("Maximum notifications to return. Defaults to 20.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ unread_only, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
+    let q = supabaseForUser4(ctx).from("notifications").select("id, type, title, body, link, read_at, created_at").order("created_at", { ascending: false }).limit(limit ?? 20);
+    if (unread_only) q = q.is("read_at", null);
+    const { data, error } = await q;
+    if (error) return errorResult(error.message);
+    return jsonResult({ notifications: data ?? [] });
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "zdlajleqgmmbfsdnelch";
 var mcp_default = defineMcp({
   name: "gradr-mcp",
   title: "Gradr",
-  version: "0.1.0",
-  instructions: "Tools for the signed-in Gradr user. Use `get_profile` for identity and career preferences, `list_resumes` and `list_job_matches` for AI resume + matching data, and `list_tracked_jobs` / `create_tracked_job` to read and write the user's job pipeline.",
+  version: "0.2.0",
+  instructions: "Tools for the signed-in Gradr user. Identity and preferences: `get_profile`, `get_credit_balance`. Resumes and matching: `list_resumes`, `list_job_matches`. Job pipeline: `search_discovered_jobs` to find roles, `create_tracked_job` to save one, `list_tracked_jobs` and `update_tracked_job` to read and move them, `list_job_reminders` / `create_job_reminder` for follow-ups. Interviews and growth: `list_interview_sessions` for AI mock interview feedback, `list_scheduled_interviews` for real upcoming interviews, `get_career_plan` for the user's plan. `list_notifications` surfaces recent activity.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [get_profile_default, list_resumes_default, list_job_matches_default, list_tracked_jobs_default, create_tracked_job_default]
+  tools: [
+    get_profile_default,
+    get_credit_balance_default,
+    list_resumes_default,
+    list_job_matches_default,
+    search_discovered_jobs_default,
+    list_tracked_jobs_default,
+    create_tracked_job_default,
+    update_tracked_job_default,
+    list_job_reminders_default,
+    create_job_reminder_default,
+    list_interview_sessions_default,
+    list_scheduled_interviews_default,
+    get_career_plan_default,
+    list_notifications_default
+  ]
 });
 
 // lovable-mcp-supabase-entry.ts
