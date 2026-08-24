@@ -149,7 +149,7 @@ export default function Settings() {
             <Palette className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
           <div>
-            <h2 id="appearance-heading" className="text-h3 text-foreground">Appearance</h2>
+            <h2 id="appearance-heading" className="text-h6 text-foreground">Appearance</h2>
             <p className="text-xs text-muted-foreground">Choose your theme. System follows your device setting.</p>
           </div>
         </div>

@@ -73,13 +73,13 @@ export default function MotionPlayground() {
       </header>
 
       <Surface level={3} className="space-y-4 p-6">
-        <h2 className="text-h3 text-foreground">Motion preference</h2>
+        <h2 className="text-h6 text-foreground">Motion preference</h2>
         <MotionSegmentedControl />
       </Surface>
 
       <Surface level={3} className="space-y-6 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-h3 text-foreground">Springs</h2>
+          <h2 className="text-h6 text-foreground">Springs</h2>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(SPRINGS) as SpringName[]).map((name) => (
               <Button
@@ -118,7 +118,7 @@ export default function MotionPlayground() {
 
       <Surface level={3} className="space-y-5 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-h3 text-foreground">Page transitions</h2>
+          <h2 className="text-h6 text-foreground">Page transitions</h2>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(PAGE_VARIANTS) as VariantName[]).map((name) => (
               <Button
@@ -161,7 +161,7 @@ export default function MotionPlayground() {
       </Surface>
 
       <Surface level={3} className="space-y-5 p-6">
-        <h2 className="text-h3 text-foreground">Easings</h2>
+        <h2 className="text-h6 text-foreground">Easings</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {[
             { name: "easeOut", curve: easeOut },
@@ -184,7 +184,7 @@ export default function MotionPlayground() {
       </Surface>
 
       <Surface level={3} className="space-y-5 p-6">
-        <h2 className="text-h3 text-foreground">Primitives</h2>
+        <h2 className="text-h6 text-foreground">Primitives</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <TiltCard className="rounded-xl border border-border bg-surface-secondary p-5 text-sm text-foreground">
             TiltCard — pointer parallax
@@ -199,7 +199,7 @@ export default function MotionPlayground() {
       </Surface>
 
       <Surface level={3} className="space-y-6 p-6">
-        <h2 className="text-h3 text-foreground">Loading, empty and error states</h2>
+        <h2 className="text-h6 text-foreground">Loading, empty and error states</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <SkeletonPanel lines={3} />
           <EmptyState title="Nothing here yet" description="Empty-state pattern used across engines." />
