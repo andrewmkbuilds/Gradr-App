@@ -244,7 +244,7 @@ export default function JobMatchingEngine() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Switch id="remote-only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
+                <Switch id="remote-only" aria-label="Remote only" checked={remoteOnly} onCheckedChange={setRemoteOnly} />
                 <Label htmlFor="remote-only" className="text-xs text-muted-foreground">Remote only</Label>
               </div>
               {!hasResume && (

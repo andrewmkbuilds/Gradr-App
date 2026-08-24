@@ -237,7 +237,7 @@ export function OnboardingDialog({ open, onComplete }: Props) {
                   <div className="grid gap-2">
                     <Label>Experience level</Label>
                     <Select value={experience} onValueChange={(v: typeof experience) => setExperience(v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger aria-label="Experience level"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="entry">Entry level</SelectItem>
                         <SelectItem value="mid">Mid-level</SelectItem>
@@ -281,7 +281,7 @@ export function OnboardingDialog({ open, onComplete }: Props) {
                   <div className="grid gap-2">
                     <Label>What best describes you?</Label>
                     <Select value={identity} onValueChange={setIdentity}>
-                      <SelectTrigger><SelectValue placeholder="Choose one" /></SelectTrigger>
+                      <SelectTrigger aria-label="What best describes you?"><SelectValue placeholder="Choose one" /></SelectTrigger>
                       <SelectContent>
                         {ONBOARDING_IDENTITIES.map((i) => (
                           <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>
@@ -341,7 +341,7 @@ export function OnboardingDialog({ open, onComplete }: Props) {
                     <div className="grid gap-2">
                       <Label>Country</Label>
                       <Select value={country} onValueChange={setCountry}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger aria-label="Country"><SelectValue /></SelectTrigger>
                         <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
@@ -349,7 +349,7 @@ export function OnboardingDialog({ open, onComplete }: Props) {
                   <div className="grid gap-2">
                     <Label>Remote preference</Label>
                     <Select value={remote} onValueChange={(v: typeof remote) => setRemote(v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger aria-label="Remote preference"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="any">Open to any</SelectItem>
                         <SelectItem value="remote">Remote only</SelectItem>
