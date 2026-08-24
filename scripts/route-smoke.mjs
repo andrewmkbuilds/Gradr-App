@@ -90,7 +90,19 @@ async function run() {
     const guest = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await guest.newPage();
     const consoleErrors = [];
-    page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
+    // Dev-only noise: the Lovable component tagger attaches a callback ref to
+    // every JSX component element in the dev server bundle, which makes React
+    // warn about refs on function components. It does not exist in production
+    // builds and is not app code, so it must not fail the smoke test.
+    const IGNORED_CONSOLE = [/Function components cannot be given refs/];
+    page.on(
+      "console",
+      (m) =>
+        m.type() === "error" &&
+        !IGNORED_CONSOLE.some((re) => re.test(m.text())) &&
+        consoleErrors.push(m.text()),
+    );
+
 
     await checkRedirect(page, "/", "/auth", "guest");
     await checkRedirect(page, "/landing", "/auth", "guest");
