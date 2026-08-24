@@ -34,8 +34,8 @@ function heroBlocks(): { variant: string; tag: string }[] {
 describe("Auth hero layout guardrail", () => {
   const blocks = heroBlocks();
 
-  it("renders a hero headline for both desktop and mobile breakpoints", () => {
-    expect(blocks.map((b) => b.variant).sort()).toEqual(["desktop", "mobile"]);
+  it("renders exactly one hero headline (marketing panel removed)", () => {
+    expect(blocks.map((b) => b.variant)).toEqual(["single"]);
   });
 
   it.each(blocks.map((b) => b.variant))("%s headline has no clipping classes", (variant) => {
@@ -59,12 +59,9 @@ describe("Auth hero layout guardrail", () => {
     if (m) expect(Number(m[1])).toBeGreaterThanOrEqual(1.2);
   });
 
-  it("keeps the mobile headline outside the lg-only branding panel", () => {
-    // The desktop panel is hidden below lg, so the mobile copy must live in a
-    // container marked lg:hidden.
-    const mobileIndex = SOURCE.indexOf('data-auth-hero="mobile"');
-    const wrapperStart = SOURCE.lastIndexOf("lg:hidden", mobileIndex);
-    expect(wrapperStart).toBeGreaterThan(-1);
+  it("has no marketing hero panel on the sign-in screen", () => {
+    expect(SOURCE).not.toMatch(/lg:w-1\/2/);
+    expect(SOURCE).not.toMatch(/marquee/);
   });
 
   it("never applies a fixed height to the auth shell", () => {

@@ -22,7 +22,7 @@ interface SitemapEntry {
 // RouteSeo and disallowed in robots.txt, so listing them would only send
 // crawlers to a sign-in wall.
 const entries: SitemapEntry[] = [
-  { path: "/", changefreq: "weekly", priority: "1.0" },
+  // No "/" entry: the app root is the authenticated dashboard (noindexed).
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
   { path: "/ats-resume-checker", changefreq: "monthly", priority: "0.9" },
   { path: "/ai-interview-coach", changefreq: "monthly", priority: "0.9" },
