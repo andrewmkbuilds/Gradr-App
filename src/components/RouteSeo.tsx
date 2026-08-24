@@ -153,6 +153,11 @@ const META: Record<string, { title: string; description: string }> = {
     description:
       "Practice spoken mock interviews with an AI interview coach that adapts to your target role, asks real follow-ups, and scores your answers with a full transcript.",
   },
+  "/ai-career-coach": {
+    title: "AI Career Coach — Free Career Guidance & Skill Gap Analysis",
+    description:
+      "A free AI career coach that reads your resume, scores your fit against live roles, ranks the skill gaps holding you back, and turns them into a step-by-step plan.",
+  },
   "/career-advice": {
     title: "Career Advice",
     description: "Free guides on resume optimization, cover letters, and interview preparation — practical advice for every stage of your job search.",

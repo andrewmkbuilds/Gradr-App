@@ -111,6 +111,7 @@ const AiResumeOptimization = lazy(() => import("./pages/blog/AiResumeOptimizatio
 const AtsResumeChecker = lazy(() => import("./pages/AtsResumeChecker"));
 const AiCoverLetterGenerator = lazy(() => import("./pages/AiCoverLetterGenerator"));
 const AiInterviewCoach = lazy(() => import("./pages/AiInterviewCoach"));
+const AiCareerCoach = lazy(() => import("./pages/AiCareerCoach"));
 const JobApplicationTracker = lazy(() => import("./pages/JobApplicationTracker"));
 const CareerAdvice = lazy(() => import("./pages/CareerAdvice"));
 const GuideArticle = lazy(() => import("./pages/GuideArticle"));
@@ -396,6 +397,7 @@ function AppRoutes() {
         <Route path="/ats-resume-checker" element={publicPage(appOnly, <AnimatedPage><AtsResumeChecker /></AnimatedPage>)} />
         <Route path="/ai-cover-letter-generator" element={publicPage(appOnly, <AnimatedPage><AiCoverLetterGenerator /></AnimatedPage>)} />
         <Route path="/ai-interview-coach" element={publicPage(appOnly, <AnimatedPage><AiInterviewCoach /></AnimatedPage>)} />
+        <Route path="/ai-career-coach" element={publicPage(appOnly, <AnimatedPage><AiCareerCoach /></AnimatedPage>)} />
         <Route path="/job-application-tracker" element={publicPage(appOnly, <AnimatedPage><JobApplicationTracker /></AnimatedPage>)} />
         {/* Duplicate URL variants collapse into the canonical path so only one
             version of each landing page can ever be indexed. */}
