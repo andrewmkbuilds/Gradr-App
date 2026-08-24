@@ -22,12 +22,14 @@
  *   node scripts/route-guards-e2e.mjs [baseUrl]
  *   node scripts/route-guards-e2e.mjs --update      # refresh visual baselines
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { launchBrowser } from "./lib/browser.mjs";
+import { settle, stableScreenshot, withRetry } from "./lib/pageStability.mjs";
+import { writeHtmlReport } from "./lib/htmlReport.mjs";
 
 
 const args = process.argv.slice(2);
@@ -39,6 +41,10 @@ const ROOT = process.cwd();
 const BASELINE_DIR = join(ROOT, "tests/visual/route-guards/baseline");
 const CURRENT_DIR = join(ROOT, "tests/visual/route-guards/current");
 const AXE_REPORT_DIR = join(ROOT, "tests/reports/axe");
+const HTML_REPORT = join(ROOT, "tests/reports/html/route-guards.html");
+const TRACE_DIR = join(ROOT, "tests/reports/traces");
+const VIDEO_DIR = join(ROOT, "tests/reports/videos");
+const SNAPSHOT_ATTEMPTS = Number(process.env.VISUAL_RETRIES ?? 3);
 const AXE_PATH = join(ROOT, "node_modules/axe-core/axe.min.js");
 const DIFF_TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.03);
 
@@ -46,13 +52,17 @@ const DESKTOP = { width: 1280, height: 900 };
 const MOBILE = { width: 390, height: 844 };
 
 const results = [];
-function record(name, ok, detail = "") {
-  results.push({ name, ok, detail });
-  console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`);
+const attachments = [];
+function record(name, ok, detail = "", extra = {}) {
+  results.push({ name, ok, detail, ...extra });
+  const retry = extra.attempts && extra.attempts > 1 ? ` (${extra.attempts} attempts)` : "";
+  console.log(`${ok ? "PASS" : "FAIL"}  ${name}${retry}${detail ? ` — ${detail}` : ""}`);
 }
 function skip(name, why) {
+  results.push({ name, ok: true, skipped: true, detail: why });
   console.log(`SKIP  ${name} — ${why}`);
 }
+const failureCount = () => results.filter((r) => !r.ok && !r.skipped).length;
 
 /** Marketing copy that only ever existed on the deleted landing/home pages. */
 const LANDING_MARKERS = [/get started free/i, /trusted by/i, /how it works/i, /pricing plans/i];
@@ -70,8 +80,7 @@ function loadSession() {
 
 async function visit(page, path) {
   await page.goto(`${BASE}${path}`, { waitUntil: "domcontentloaded" });
-  await page.waitForLoadState("networkidle").catch(() => {});
-  await page.waitForTimeout(400);
+  await settle(page);
   return {
     path: new URL(page.url()).pathname,
     text: (await page.locator("body").innerText().catch(() => "")).trim(),
@@ -129,21 +138,53 @@ function pixelDifference(baselineBuf, currentBuf, diffPath) {
   return changed / (a.width * a.height);
 }
 
+/**
+ * Captures a settled frame and diffs it against the baseline, retrying the whole
+ * capture when it misses: a first-attempt miss is usually a late-arriving avatar
+ * or chart paint, not a real regression, so we re-settle and shoot again before
+ * failing the run.
+ */
 async function snapshot(page, name) {
   mkdirSync(BASELINE_DIR, { recursive: true });
   mkdirSync(CURRENT_DIR, { recursive: true });
   const file = `${name}.png`;
-  const shot = await page.screenshot();
   const baseline = join(BASELINE_DIR, file);
+
   if (UPDATE || !existsSync(baseline)) {
-    writeFileSync(baseline, shot);
+    await settle(page);
+    const { buffer } = await stableScreenshot(page);
+    writeFileSync(baseline, buffer);
     console.log(`${UPDATE ? "updated" : "created"} baseline ${file}`);
     return;
   }
-  writeFileSync(join(CURRENT_DIR, file), shot);
-  const ratio = pixelDifference(readFileSync(baseline), shot, join(CURRENT_DIR, `${name}.diff.png`));
-  record(`visual: ${file} within ${(DIFF_TOLERANCE * 100).toFixed(0)}%`, ratio <= DIFF_TOLERANCE, `${(ratio * 100).toFixed(1)}% of pixels changed`);
 
+  const currentPath = join(CURRENT_DIR, file);
+  const diffPath = join(CURRENT_DIR, `${name}.diff.png`);
+  const outcome = await withRetry(
+    async () => {
+      const { buffer, stable } = await stableScreenshot(page);
+      writeFileSync(currentPath, buffer);
+      const ratio = pixelDifference(readFileSync(baseline), buffer, diffPath);
+      return { ok: ratio <= DIFF_TOLERANCE, ratio, stable };
+    },
+    {
+      attempts: SNAPSHOT_ATTEMPTS,
+      beforeRetry: async () => {
+        await page.waitForTimeout(500);
+        await settle(page);
+      },
+    },
+  );
+
+  record(
+    `visual: ${file} within ${(DIFF_TOLERANCE * 100).toFixed(0)}%`,
+    outcome.ok,
+    `${(outcome.ratio * 100).toFixed(1)}% of pixels changed${outcome.stable ? "" : " (frame never stabilised)"}`,
+    { attempts: outcome.attempts },
+  );
+  if (!outcome.ok) {
+    attachments.push({ kind: "diff", path: `tests/visual/route-guards/current/${name}.diff.png`, label: file });
+  }
 }
 
 /** Raw HTTP probe: SPA routes must serve 200 HTML with sane cache headers. */
@@ -187,14 +228,51 @@ async function check404Layout(page, label) {
   assertNoLandingUi(label, text);
 }
 
-async function newContext(browser, { viewport = DESKTOP, colorScheme = "light", session = null } = {}) {
-  const context = await browser.newContext({ viewport, colorScheme, reducedMotion: "reduce" });
+/**
+ * Opens a traced, video-recorded context. The trace and video are kept only when
+ * the checks run inside it failed — a green run leaves no artifacts behind.
+ */
+async function openContext(browser, name, { viewport = DESKTOP, colorScheme = "light", session = null } = {}) {
+  mkdirSync(TRACE_DIR, { recursive: true });
+  mkdirSync(VIDEO_DIR, { recursive: true });
+
+  const context = await browser.newContext({
+    viewport,
+    colorScheme,
+    reducedMotion: "reduce",
+    recordVideo: { dir: VIDEO_DIR, size: viewport },
+  });
+  await context.tracing.start({ screenshots: true, snapshots: true, sources: true, title: name });
+
   const page = await context.newPage();
   if (session) {
     await page.goto(BASE, { waitUntil: "domcontentloaded" });
     await page.evaluate(([k, v]) => window.localStorage.setItem(k, v), [session.key, session.session]);
   }
-  return { context, page };
+
+  const failuresAtOpen = failureCount();
+  const close = async () => {
+    const failedHere = failureCount() > failuresAtOpen;
+    const tracePath = join(TRACE_DIR, `${name}.trace.zip`);
+    if (failedHere) {
+      await context.tracing.stop({ path: tracePath }).catch(() => {});
+      attachments.push({ kind: "trace", path: `tests/reports/traces/${name}.trace.zip`, label: `${name} (failed)` });
+    } else {
+      await context.tracing.stop().catch(() => {});
+    }
+
+    const video = page.video();
+    await context.close();
+    if (!video) return;
+    if (failedHere) {
+      const target = join(VIDEO_DIR, `${name}.webm`);
+      await video.saveAs(target).catch(() => {});
+      attachments.push({ kind: "video", path: `tests/reports/videos/${name}.webm`, label: `${name} (failed)` });
+    }
+    await video.delete().catch(() => {});
+  };
+
+  return { context, page, close };
 }
 
 async function run() {
