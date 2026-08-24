@@ -2,9 +2,8 @@ import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck
 import { trackSignupCta, trackUpgradeCta } from "@/lib/telemetry/events";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ds/Button";
-import { Card } from "@/components/ui/card";
+import { Badge, Card } from "@/design-system/gradr-9b9b95";
 import { SpatialCard } from "@/components/motion";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -153,7 +152,7 @@ export default function Pricing() {
             <span className="text-sm text-muted-foreground ml-1">/ {suffix}</span>
             <div className="mt-1 flex items-center gap-2 text-xs">
               <span className="text-muted-foreground line-through">{listLabel}</span>
-              <Badge variant="secondary" className="gap-1">
+              <Badge className="gap-1">
                 <BadgePercent className="h-3 w-3" aria-hidden="true" />
                 {discountPercent}% off applied
               </Badge>
@@ -170,7 +169,7 @@ export default function Pricing() {
             <span className="text-muted-foreground line-through tabular-nums">
               {formatUsd(annualListPrice(plan))}
             </span>
-            <Badge className="bg-mahogany text-mahogany-foreground hover:bg-mahogany">
+            <Badge variant="accent">
               Save {yearlySavings}%
             </Badge>
           </div>
@@ -291,7 +290,7 @@ export default function Pricing() {
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
             <SpatialCard className="group/spatial h-full rounded-xl" tilt={4}>
-            <Card className="relative h-full p-6 flex flex-col border-border">
+            <Card className="relative flex h-full flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -329,9 +328,8 @@ export default function Pricing() {
               return (
                 <SpatialCard key={tier.name} className="group/spatial h-full rounded-xl" tilt={4} featured={tier.highlighted}>
                 <Card
-                  className={`relative h-full p-6 flex flex-col ${
-                    tier.highlighted ? "accent-card border-mahogany-border shadow-lg shadow-mahogany/10 xl:scale-[1.02]" : "border-border"
-                  }`}
+                  variant={tier.highlighted ? "raised" : "outline"}
+                  className={`relative flex h-full flex-col ${tier.highlighted ? "xl:scale-[1.02]" : ""}`}
                 >
                   {tier.highlighted && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-mahogany text-mahogany-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-[0_8px_20px_-12px_hsl(var(--mahogany))]">
@@ -387,7 +385,7 @@ export default function Pricing() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CREDIT_PACKS.map((pack) => (
             <SpatialCard key={pack.priceId} className="group/spatial h-full rounded-xl" tilt={3}>
-            <Card className="h-full p-5 flex flex-col">
+            <Card className="flex h-full flex-col">
               <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <Zap className="h-4 w-4 text-primary" />
               </div>
