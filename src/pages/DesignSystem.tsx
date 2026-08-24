@@ -136,12 +136,12 @@ export default function DesignSystem() {
             </div>
             <div>
               <p className="mb-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">H1 · page title</p>
-              <h1 className="font-display text-3xl tracking-tight text-foreground">Resume Intelligence</h1>
+              <p className="font-display text-3xl tracking-tight text-foreground">Resume Intelligence</p>
             </div>
             <div>
               <p className="mb-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">H2 / H3 · sections</p>
-              <h2 className="font-display text-xl tracking-tight text-foreground">Keyword coverage</h2>
-              <h3 className="text-base font-semibold text-foreground">Missing from your resume</h3>
+              <p className="font-display text-xl tracking-tight text-foreground">Keyword coverage</p>
+              <p className="text-base font-semibold text-foreground">Missing from your resume</p>
             </div>
             <div>
               <p className="mb-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Body · Geist</p>

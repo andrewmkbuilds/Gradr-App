@@ -78,13 +78,13 @@ export function GenerationStream({
     <Surface level={2} className={cn("space-y-4 p-4 sm:p-6", className)}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="type-h3 flex items-center gap-2 text-foreground">
+          <h2 className="type-h3 flex items-center gap-2 text-foreground">
             <Sparkles
               className={cn("h-4 w-4 shrink-0 text-primary", streaming && !reduced && "animate-pulse")}
               aria-hidden="true"
             />
             {title}
-          </h3>
+          </h2>
           <p className="mt-1 type-body-sm text-muted-foreground" role="status" aria-live="polite">
             {status === "error"
               ? error || "Generation failed"

@@ -144,7 +144,7 @@ function ApplicationEngineInner() {
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
             <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
-          <h3 className="type-h3 mb-1 text-foreground">Cover letter</h3>
+          <h2 className="type-h3 mb-1 text-foreground">Cover letter</h2>
           <p className="measure type-body-sm mb-4 text-muted-foreground">
             A tailored letter built from your resume and the job description.
           </p>
@@ -162,7 +162,7 @@ function ApplicationEngineInner() {
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-mahogany-soft transition-colors group-hover:bg-mahogany/20">
             <MessageSquare className="h-6 w-6 text-mahogany" aria-hidden="true" />
           </div>
-          <h3 className="type-h3 mb-1 text-foreground">Recruiter message</h3>
+          <h2 className="type-h3 mb-1 text-foreground">Recruiter message</h2>
           <p className="measure type-body-sm mb-4 text-muted-foreground">
             Concise outreach for recruiters or hiring managers.
           </p>

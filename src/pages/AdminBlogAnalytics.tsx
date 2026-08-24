@@ -182,7 +182,7 @@ function Breakdown({
     <div className="elev-2 rounded-xl p-5">
       <div className="flex items-center gap-2 mb-3">
         <Icon className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       </div>
       {rows.length === 0 ? (
         <p className="text-xs text-muted-foreground">No events in this range yet.</p>

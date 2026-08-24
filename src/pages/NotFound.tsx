@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Compass, FileText, LayoutDashboard, MessageSquare, Target } from "lucide-react";
-import { Badge, Card, CardDescription, CardTitle, Text } from "@/design-system/gradr-9b9b95";
+import { Badge, Card, CardDescription, Text } from "@/design-system/gradr-9b9b95";
 import { Button } from "@/components/ds/Button";
 import { Seo } from "@/components/Seo";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,7 +39,7 @@ const NotFound = () => {
             <Compass className="h-3 w-3" aria-hidden />
             Error 404
           </Badge>
-          <CardTitle className="text-h5">This page took a different career path</CardTitle>
+          <Text as="h1" variant="h5">This page took a different career path</Text>
           <CardDescription>
             We couldn&apos;t find{" "}
             <span className="font-medium text-foreground">{location.pathname}</span>. It may have

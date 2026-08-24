@@ -179,33 +179,33 @@ export default function Settings() {
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Display Name</label>
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" />
+            <Input aria-label="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" />
           </div>
 
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Target Job Title</label>
-            <Input value={targetJobTitle} onChange={(e) => setTargetJobTitle(e.target.value)} placeholder="e.g., Senior Frontend Engineer" />
+            <Input aria-label="Target job title" value={targetJobTitle} onChange={(e) => setTargetJobTitle(e.target.value)} placeholder="e.g., Senior Frontend Engineer" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Target Salary</label>
-              <Input value={targetSalary} onChange={(e) => setTargetSalary(e.target.value)} placeholder="e.g., $150k-$200k" />
+              <Input aria-label="Target salary" value={targetSalary} onChange={(e) => setTargetSalary(e.target.value)} placeholder="e.g., $150k-$200k" />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Target Industry</label>
-              <Input value={targetIndustry} onChange={(e) => setTargetIndustry(e.target.value)} placeholder="e.g., Fintech, SaaS" />
+              <Input aria-label="Target industry" value={targetIndustry} onChange={(e) => setTargetIndustry(e.target.value)} placeholder="e.g., Fintech, SaaS" />
             </div>
           </div>
 
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Career Stage</label>
-            <Input value={careerStage} onChange={(e) => setCareerStage(e.target.value)} placeholder="e.g., mid-career, senior, entry-level" />
+            <Input aria-label="Career stage" value={careerStage} onChange={(e) => setCareerStage(e.target.value)} placeholder="e.g., mid-career, senior, entry-level" />
           </div>
 
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Skills (comma-separated)</label>
-            <Input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="e.g., React, TypeScript, Node.js, AWS" />
+            <Input aria-label="Skills" value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="e.g., React, TypeScript, Node.js, AWS" />
           </div>
         </div>
 
@@ -238,11 +238,11 @@ export default function Settings() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Preferred Send Time</label>
-              <Input type="time" value={digestSendTime} onChange={(e) => setDigestSendTime(e.target.value)} />
+              <Input aria-label="Daily digest send time" type="time" value={digestSendTime} onChange={(e) => setDigestSendTime(e.target.value)} />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Timezone</label>
-              <Input value={digestTimezone} onChange={(e) => setDigestTimezone(e.target.value)} placeholder="America/New_York" />
+              <Input aria-label="Digest timezone" value={digestTimezone} onChange={(e) => setDigestTimezone(e.target.value)} placeholder="America/New_York" />
             </div>
           </div>
 

@@ -122,9 +122,9 @@ function ApplicationsPanel() {
       <div className="flex gap-2 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, email, brand..." className="w-full pl-9 pr-3 py-2 rounded-lg bg-secondary border border-border text-sm" />
+          <input aria-label="Search affiliates" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, email, brand..." className="w-full pl-9 pr-3 py-2 rounded-lg bg-secondary border border-border text-sm" />
         </div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm">
+        <select aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm">
           <option value="all">All statuses</option>
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
@@ -231,7 +231,7 @@ function AffiliatesPanel() {
               </td>
 
               <td>
-                <input defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
+                <input aria-label="Custom commission rate" defaultValue={p.custom_commission_rate ?? ""} onBlur={(e) => updateRate(p.id, e.target.value)} placeholder="(default)" className="w-24 px-2 py-1 rounded bg-secondary border border-border text-xs" />
               </td>
               <td className="text-xs text-muted-foreground">{p.approval_date ? format(new Date(p.approval_date), "MMM d, yyyy") : "—"}</td>
               <td></td>
