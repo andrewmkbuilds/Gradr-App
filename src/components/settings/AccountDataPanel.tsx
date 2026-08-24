@@ -128,9 +128,12 @@ export function AccountDataPanel() {
         <div>
           <p className="text-sm font-medium text-foreground">Delete my account</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            This permanently removes your account, files and every record above. It cannot be undone — export first if
-            you want a copy.
+            This permanently removes your account, uploaded files and every record above. It cannot be
+            undone — export first if you want a copy. Tax law requires us to keep a pseudonymised
+            record of past payments (amount, currency and date only, with no name or email) for the
+            statutory retention period.
           </p>
+
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Input
