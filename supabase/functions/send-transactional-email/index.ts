@@ -3,6 +3,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+import { EmailFooterContext, POSTAL_ADDRESS } from '../_shared/transactional-email-templates/footerContext.ts'
 import {
   categoryOf,
   EMAIL_CLASSIFICATIONS,
