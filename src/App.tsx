@@ -354,7 +354,7 @@ function AppRoutes() {
         <Route path="/landing" element={<Navigate to="/" replace />} />
         {homeOnly ? (
           <>
-            <Route path="/" element={<AnimatedPage><Landing /></AnimatedPage>} />
+            <Route path="/" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
             <Route path="/auth" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
             <Route path="/forgot-password" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
             <Route path="/reset-password" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
