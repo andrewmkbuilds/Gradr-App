@@ -445,7 +445,7 @@ export default function Auth() {
               placeholder="Password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }}
-              aria-invalid={!!fieldErrors.password}
+              invalid={!!fieldErrors.password}
               aria-describedby={fieldErrors.password ? "error-password" : undefined}
               className="pl-10"
             />
