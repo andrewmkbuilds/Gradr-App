@@ -40,7 +40,7 @@ const Email = ({
   postedAt,
   jobUrl,
 }: Props) => {
-  const href = jobUrl || link('/jobs', 'job-match')
+  const href = jobUrl || appLink('/jobs', 'job-match')
   return (
     <EmailLayout
       preview={`${matchScore ?? 0}% match — ${jobTitle || 'A new role'} at ${companyName || 'a company'}`}
@@ -77,7 +77,7 @@ const Email = ({
         </>
       ) : null}
       <Cta href={href}>View and apply</Cta>
-      <SecondaryLink href={link('/apply', 'job-match')}>Generate a tailored application pack</SecondaryLink>
+      <SecondaryLink href={appLink('/apply', 'job-match')}>Generate a tailored application pack</SecondaryLink>
     </EmailLayout>
   )
 }

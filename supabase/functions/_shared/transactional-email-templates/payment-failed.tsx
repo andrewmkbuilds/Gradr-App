@@ -26,7 +26,7 @@ const Email = ({
   gracePeriodEnds,
   updatePaymentUrl,
 }: Props) => {
-  const href = updatePaymentUrl || link('/billing', 'payment-failed')
+  const href = updatePaymentUrl || appLink('/billing', 'payment-failed')
   return (
     <EmailLayout
       preview="We couldn't process your Gradr payment."

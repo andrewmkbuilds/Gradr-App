@@ -39,8 +39,8 @@ const Email = ({ firstName, role, interviewType, durationMinutes, questionsAnswe
         drilling in your next run.
       </Paragraph>
     </Card>
-    <Cta href={link('/interview', 'interview-completed')}>Open my session</Cta>
-    <SecondaryLink href={link('/interview', 'interview-completed')}>Book another practice run</SecondaryLink>
+    <Cta href={appLink('/interview', 'interview-completed')}>Open my session</Cta>
+    <SecondaryLink href={appLink('/interview', 'interview-completed')}>Book another practice run</SecondaryLink>
   </EmailLayout>
 )
 

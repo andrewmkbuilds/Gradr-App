@@ -44,7 +44,7 @@ const Email = ({ firstName, email, device, browser, location, ipAddress, signedI
         reply to this email and our team will lock the account.
       </Paragraph>
     </Card>
-    <Cta href={link('/settings', 'sign-in-alert')} tone="mahogany">
+    <Cta href={appLink('/settings', 'sign-in-alert')} tone="mahogany">
       Review account security
     </Cta>
   </EmailLayout>

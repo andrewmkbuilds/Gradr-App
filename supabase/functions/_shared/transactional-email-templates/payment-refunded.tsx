@@ -12,7 +12,7 @@ interface Props {
 }
 
 const Email = ({ firstName, amount, refundedAt, summary, billingUrl }: Props) => {
-  const href = billingUrl || link('/billing', 'payment-refunded')
+  const href = billingUrl || appLink('/billing', 'payment-refunded')
   return (
     <EmailLayout
       preview="Your Gradr refund has been processed."

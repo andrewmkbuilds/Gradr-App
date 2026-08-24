@@ -43,8 +43,8 @@ const Email = ({ firstName, horizonLabel, focus, steps }: Props) => (
         href: s.href ? link(s.href, 'career-plan') : undefined,
       }))}
     />
-    <Cta href={link('/', 'career-plan')}>Open my plan</Cta>
-    <SecondaryLink href={link('/', 'career-plan')}>Mark steps complete as you go</SecondaryLink>
+    <Cta href={appLink('/dashboard', 'career-plan')}>Open my plan</Cta>
+    <SecondaryLink href={appLink('/dashboard', 'career-plan')}>Mark steps complete as you go</SecondaryLink>
   </EmailLayout>
 )
 

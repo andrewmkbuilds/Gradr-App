@@ -77,7 +77,7 @@ const Email = ({
     <Cta href={applicationUrl || link('/applications', 'application-followup')} tone="mahogany">
       Open this application
     </Cta>
-    <SecondaryLink href={link('/settings', 'application-followup')}>Change reminder cadence</SecondaryLink>
+    <SecondaryLink href={appLink('/settings', 'application-followup')}>Change reminder cadence</SecondaryLink>
   </EmailLayout>
 )
 

@@ -44,7 +44,7 @@ const Email = ({ firstName, planName, accessUntil, cancelledAt, reason }: Props)
     <Cta href={link('/pricing', 'subscription-cancelled')} tone="mahogany">
       Reactivate my plan
     </Cta>
-    <SecondaryLink href={link('/settings', 'subscription-cancelled')}>Export my data</SecondaryLink>
+    <SecondaryLink href={appLink('/settings', 'subscription-cancelled')}>Export my data</SecondaryLink>
   </EmailLayout>
 )
 

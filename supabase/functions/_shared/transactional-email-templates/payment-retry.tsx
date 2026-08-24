@@ -14,7 +14,7 @@ interface Props {
 }
 
 const Email = ({ firstName, amount, planName, attemptNumber, maxAttempts, nextRetryDate, updatePaymentUrl }: Props) => {
-  const href = updatePaymentUrl || link('/billing', 'payment-retry')
+  const href = updatePaymentUrl || appLink('/billing', 'payment-retry')
   return (
     <EmailLayout
       preview="We're retrying your Gradr payment."

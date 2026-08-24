@@ -43,8 +43,8 @@ const Email = ({
         { label: 'Next billing date', value: nextBillingDate || '—' },
       ]}
     />
-    <Cta href={invoiceUrl || link('/billing', 'payment-successful')}>View receipt</Cta>
-    <SecondaryLink href={link('/billing', 'payment-successful')}>Manage subscription</SecondaryLink>
+    <Cta href={invoiceUrl || appLink('/billing', 'payment-successful')}>View receipt</Cta>
+    <SecondaryLink href={appLink('/billing', 'payment-successful')}>Manage subscription</SecondaryLink>
   </EmailLayout>
 )
 

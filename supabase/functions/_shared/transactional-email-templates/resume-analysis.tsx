@@ -69,8 +69,8 @@ const Email = ({
         <Chips items={missingKeywords} tone="mahogany" />
       </>
     ) : null}
-    <Cta href={reportUrl || link('/resume', 'resume-analysis')}>View full report</Cta>
-    <SecondaryLink href={link('/match', 'resume-analysis')}>See roles this resume matches</SecondaryLink>
+    <Cta href={reportUrl || appLink('/resume', 'resume-analysis')}>View full report</Cta>
+    <SecondaryLink href={appLink('/match', 'resume-analysis')}>See roles this resume matches</SecondaryLink>
   </EmailLayout>
 )
 

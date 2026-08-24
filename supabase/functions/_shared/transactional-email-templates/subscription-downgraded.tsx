@@ -41,7 +41,7 @@ const Email = ({ firstName, previousPlan, planName, amount, interval, effectiveD
     <Cta href={link('/pricing', 'subscription-downgraded')} tone="mahogany">
       Compare plans
     </Cta>
-    <SecondaryLink href={link('/billing', 'subscription-downgraded')}>Manage billing</SecondaryLink>
+    <SecondaryLink href={appLink('/billing', 'subscription-downgraded')}>Manage billing</SecondaryLink>
   </EmailLayout>
 )
 

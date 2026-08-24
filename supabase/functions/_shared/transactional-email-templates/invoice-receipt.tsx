@@ -51,8 +51,8 @@ const Email = ({
         { label: 'Total paid', value: <strong>{total || '$19.00'}</strong> },
       ]}
     />
-    <Cta href={invoiceUrl || link('/billing', 'invoice-receipt')}>Download invoice</Cta>
-    <SecondaryLink href={link('/billing', 'invoice-receipt')}>See billing history</SecondaryLink>
+    <Cta href={invoiceUrl || appLink('/billing', 'invoice-receipt')}>Download invoice</Cta>
+    <SecondaryLink href={appLink('/billing', 'invoice-receipt')}>See billing history</SecondaryLink>
   </EmailLayout>
 )
 

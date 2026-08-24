@@ -54,7 +54,7 @@ const Email = ({
         }
       />
     </Card>
-    <Cta href={link('/', 'subscription-upgraded')}>Use my new limits</Cta>
+    <Cta href={appLink('/dashboard', 'subscription-upgraded')}>Use my new limits</Cta>
   </EmailLayout>
 )
 

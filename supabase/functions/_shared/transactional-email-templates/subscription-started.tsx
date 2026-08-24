@@ -46,8 +46,8 @@ const Email = ({ firstName, planName, amount, interval, nextBillingDate, feature
         }
       />
     </Card>
-    <Cta href={link('/', 'subscription-started')}>Open my dashboard</Cta>
-    <SecondaryLink href={link('/billing', 'subscription-started')}>Manage billing and invoices</SecondaryLink>
+    <Cta href={appLink('/dashboard', 'subscription-started')}>Open my dashboard</Cta>
+    <SecondaryLink href={appLink('/billing', 'subscription-started')}>Manage billing and invoices</SecondaryLink>
   </EmailLayout>
 )
 

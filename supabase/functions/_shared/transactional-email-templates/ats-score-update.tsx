@@ -52,7 +52,7 @@ const Email = ({ firstName, resumeName, previousScore, newScore, versionLabel, c
           <Paragraph>{nextStep}</Paragraph>
         </Card>
       ) : null}
-      <Cta href={reportUrl || link('/resume', 'ats-score-update')}>Compare versions</Cta>
+      <Cta href={reportUrl || appLink('/resume', 'ats-score-update')}>Compare versions</Cta>
     </EmailLayout>
   )
 }

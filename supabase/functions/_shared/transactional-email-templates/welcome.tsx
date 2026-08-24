@@ -32,7 +32,7 @@ const Email = ({ firstName, targetRole }: Props) => {
         ]}
       />
       <Cta href={cta}>Set up my career profile</Cta>
-      <SecondaryLink href={link('/resume', 'welcome')}>Or start with a resume analysis</SecondaryLink>
+      <SecondaryLink href={appLink('/resume', 'welcome')}>Or start with a resume analysis</SecondaryLink>
       <FallbackUrl href={cta} />
     </EmailLayout>
   )
