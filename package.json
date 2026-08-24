@@ -152,6 +152,7 @@
     "smoke:ci": "node scripts/smoke-ci.mjs",
     "smoke:pages": "node scripts/smoke-critical-pages.mjs",
     "smoke:payments": "node scripts/payments-smoke.mjs",
+    "smoke:routes": "node scripts/route-smoke.mjs",
     "test": "vitest run",
     "test:a11y": "node scripts/a11y-nav.mjs",
     "test:db": "RUN_DB_TESTS=1 vitest run src/test/dbSchema.integration.test.ts",
