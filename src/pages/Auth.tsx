@@ -403,7 +403,7 @@ export default function Auth() {
                 placeholder="Full name"
                 value={fullName}
                 onChange={(e) => { setFullName(e.target.value); setFieldErrors((p) => ({ ...p, fullName: undefined })); }}
-                aria-invalid={!!fieldErrors.fullName}
+                invalid={!!fieldErrors.fullName}
                 aria-describedby={fieldErrors.fullName ? "error-fullName" : undefined}
                 className="pl-10"
               />
@@ -425,7 +425,7 @@ export default function Auth() {
               placeholder="Email address"
               value={email}
               onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }}
-              aria-invalid={!!fieldErrors.email || !!formError}
+              invalid={!!fieldErrors.email || !!formError}
               aria-describedby={fieldErrors.email ? "error-email" : undefined}
               className="pl-10"
             />
@@ -445,7 +445,7 @@ export default function Auth() {
               placeholder="Password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }}
-              aria-invalid={!!fieldErrors.password}
+              invalid={!!fieldErrors.password}
               aria-describedby={fieldErrors.password ? "error-password" : undefined}
               className="pl-10"
             />

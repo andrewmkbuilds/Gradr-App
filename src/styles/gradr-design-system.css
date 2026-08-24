@@ -18,6 +18,10 @@
    ============================================================ */
 
 :root {
+  /* Typography */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
+
   /* Brand palette (raw values, mirrored from the library theme) */
   --color-shell: #f9f7f6;
   --color-fog: #b3c1c6;
@@ -27,6 +31,7 @@
   --color-harbor-soft: #e7eef1;
   --color-hull-soft: #f3e9e3;
   --color-slate: #55676d;
+  --color-surface-muted: #eeeae8;
   /* No success value here: `success` is a semantic role, and the config maps it
      onto the app's HSL `--success` token so light/dark stay on one switch. */
 
@@ -47,4 +52,5 @@
   --color-harbor-soft: #21353c;
   --color-hull-soft: #33251d;
   --color-slate: #b3c1c6;
+  --color-surface-muted: #21353c;
 }
