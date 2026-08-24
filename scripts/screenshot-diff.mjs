@@ -117,30 +117,38 @@ async function main() {
   mkdirSync(CURRENT_DIR, { recursive: true });
 
   const auth = loadSession();
-  const routes = [...PUBLIC_ROUTES, ...(auth ? AUTHED_ROUTES : [])];
   if (!auth) {
     console.warn("No Supabase session available — capturing public routes only (dashboard skipped).");
   }
+
+  // Public routes are captured signed OUT on purpose: with a session present the
+  // app redirects /auth to the dashboard, which would silently rebaseline the
+  // sign-in capture as a dashboard screenshot.
+  const groups = [
+    { routes: PUBLIC_ROUTES, session: null },
+    ...(auth ? [{ routes: AUTHED_ROUTES, session: auth }] : []),
+  ];
 
   const browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   const failures = [];
   const captured = [];
 
   for (const theme of THEMES) {
+  for (const group of groups) {
     const context = await browser.newContext({ viewport: VIEWPORT, colorScheme: theme });
     const page = await context.newPage();
 
-    if (auth) {
-      const cookies = JSON.parse(auth.cookies ?? "[]").map((c) => ({ ...c, url: BASE }));
+    if (group.session) {
+      const cookies = JSON.parse(group.session.cookies ?? "[]").map((c) => ({ ...c, url: BASE }));
       if (cookies.length) await context.addCookies(cookies);
       await page.goto(BASE, { waitUntil: "domcontentloaded" });
       await page.evaluate(
         ([k, v]) => window.localStorage.setItem(k, v),
-        [auth.storageKey, auth.session],
+        [group.session.storageKey, group.session.session],
       );
     }
 
-    for (const [name, route] of routes) {
+    for (const [name, route] of group.routes) {
       const prepare = async () => {
         await page.evaluate((t) => {
           document.documentElement.classList.toggle("dark", t === "dark");
@@ -187,6 +195,7 @@ async function main() {
     }
 
     await context.close();
+  }
   }
 
   await browser.close();
