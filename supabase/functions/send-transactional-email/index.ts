@@ -43,7 +43,6 @@ const USER_SENDABLE = new Set([
   'interview-completed',
   'interview-report',
   'career-plan',
-  'daily-briefing',
   'application-followup',
   'job-match',
   'verification-submitted',

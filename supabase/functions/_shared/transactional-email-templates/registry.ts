@@ -17,7 +17,6 @@ import { template as paymentRefunded } from './payment-refunded.tsx'
 import { template as invoiceReceipt } from './invoice-receipt.tsx'
 import { template as applicationFollowup } from './application-followup.tsx'
 import { template as jobMatch } from './job-match.tsx'
-import { template as dailyBriefing } from './daily-briefing.tsx'
 import { template as resumeAnalysis } from './resume-analysis.tsx'
 import { template as atsScoreUpdate } from './ats-score-update.tsx'
 import { template as interviewCompleted } from './interview-completed.tsx'
@@ -62,7 +61,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'invoice-receipt': invoiceReceipt,
   'application-followup': applicationFollowup,
   'job-match': jobMatch,
-  'daily-briefing': dailyBriefing,
   'resume-analysis': resumeAnalysis,
   'ats-score-update': atsScoreUpdate,
   'interview-completed': interviewCompleted,
