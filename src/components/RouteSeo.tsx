@@ -7,6 +7,7 @@ import { JOB_LANDINGS_BY_SLUG } from "@/content/jobLandings";
 import { legalJsonLd } from "@/lib/structuredData";
 import { POLICIES_UPDATED } from "@/content/legal";
 import { COOKIE_POLICY_EFFECTIVE, DPA_EFFECTIVE } from "@/content/legalExtra";
+import { POLICIES_V1_EFFECTIVE } from "@/content/legalPolicies";
 import {
   type Surface,
   canonicalUrlFor,
@@ -69,6 +70,30 @@ const META: Record<string, { title: string; description: string }> = {
   "/dpa": {
     title: "Data Processing Addendum",
     description: "Gradr's DPA for universities, bootcamps, and employers — processing roles, sub-processors, security measures, international transfers, and deletion terms.",
+  },
+  "/acceptable-use": {
+    title: "Acceptable Use Policy",
+    description: "The content standards and technical rules for using Gradr — what you may upload, what is prohibited, and how we enforce breaches.",
+  },
+  "/ai-disclosure": {
+    title: "AI Usage & Disclaimer",
+    description: "How Gradr uses AI for resume analysis, job matching and mock interviews, which providers process your content, and the limits of AI output.",
+  },
+  "/disclaimer": {
+    title: "Disclaimer & Limitation of Liability",
+    description: "Gradr gives career tooling, not guarantees. What we do not promise, how third-party job listings are treated, and the limits of our liability.",
+  },
+  "/affiliate-disclosure": {
+    title: "Affiliate Disclosure",
+    description: "Gradr pays commission to referral partners. What that means for the price you pay, the cookie we set, and the rules partners must follow.",
+  },
+  "/subprocessors": {
+    title: "Sub-processors",
+    description: "The full register of third-party services that can process personal data on Gradr's behalf, what each receives, and where processing happens.",
+  },
+  "/legal": {
+    title: "Legal & contact",
+    description: "Every Gradr policy in one index, plus the right contact address for support, privacy requests, legal notices, billing and security reports.",
   },
   "/resume": {
     title: "Resume Engine",
@@ -431,6 +456,11 @@ export function RouteSeo() {
     "/refund-policy": POLICIES_UPDATED,
     "/cookie-policy": COOKIE_POLICY_EFFECTIVE,
     "/dpa": DPA_EFFECTIVE,
+    "/acceptable-use": POLICIES_V1_EFFECTIVE,
+    "/ai-disclosure": POLICIES_V1_EFFECTIVE,
+    "/disclaimer": POLICIES_V1_EFFECTIVE,
+    "/affiliate-disclosure": POLICIES_V1_EFFECTIVE,
+    "/subprocessors": POLICIES_V1_EFFECTIVE,
   };
   const legalLd = legalUpdated[pathname]
     ? legalJsonLd({

@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Card, Cta, DetailTable, EmailLayout, Paragraph, greeting, link } from './components.tsx'
+import { appLink, Card, Cta, DetailTable, EmailLayout, greeting, link, Paragraph } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -44,7 +44,7 @@ const Email = ({ firstName, email, device, browser, location, ipAddress, signedI
         reply to this email and our team will lock the account.
       </Paragraph>
     </Card>
-    <Cta href={link('/settings', 'sign-in-alert')} tone="mahogany">
+    <Cta href={appLink('/settings', 'sign-in-alert')} tone="mahogany">
       Review account security
     </Cta>
   </EmailLayout>

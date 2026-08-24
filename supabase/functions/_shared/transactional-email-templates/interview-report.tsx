@@ -1,17 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import {
-  Bullets,
-  Card,
-  Cta,
-  EmailLayout,
-  MetricList,
-  Paragraph,
-  ScoreBlock,
-  SecondaryLink,
-  greeting,
-  link,
-} from './components.tsx'
+import { appLink, Bullets, Card, Cta, EmailLayout, greeting, link, MetricList, Paragraph, ScoreBlock, SecondaryLink } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -69,8 +58,8 @@ const Email = ({
         <Bullets tone="mahogany" items={improvements} />
       </Card>
     ) : null}
-    <Cta href={reportUrl || link('/interview', 'interview-report')}>View full scorecard</Cta>
-    <SecondaryLink href={link('/interview', 'interview-report')}>Practise the weak areas</SecondaryLink>
+    <Cta href={reportUrl || appLink('/interview', 'interview-report')}>View full scorecard</Cta>
+    <SecondaryLink href={appLink('/interview', 'interview-report')}>Practise the weak areas</SecondaryLink>
   </EmailLayout>
 )
 

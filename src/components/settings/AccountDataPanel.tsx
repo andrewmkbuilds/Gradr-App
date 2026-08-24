@@ -7,22 +7,39 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-/** Tables exported in the personal data archive. */
+/**
+ * Tables exported in the personal data archive (GDPR Art. 20 portability).
+ * Kept in sync with the tables the delete-account function clears, so what a
+ * user can take with them matches what leaving actually removes.
+ */
 const EXPORT_TABLES = [
   "profiles",
   "user_preferences",
+  "notification_preferences",
   "resumes",
   "job_matches",
   "tracked_jobs",
   "job_reminders",
+  "career_plans",
   "interview_sessions",
+  "interview_session_metrics",
+  "scheduled_interviews",
   "notifications",
+  "email_notification_log",
+  "digest_send_logs",
   "purchases",
+  "billing_events",
+  "paddle_subscriptions",
+  "entitlement_ledger",
+  "discount_redemptions",
   "subscribers",
   "usage_credits",
   "feature_usage",
   "user_integrations",
+  "legal_acceptances",
 ] as const;
+
+
 
 export function AccountDataPanel() {
   const { user } = useAuth();
@@ -111,9 +128,12 @@ export function AccountDataPanel() {
         <div>
           <p className="text-sm font-medium text-foreground">Delete my account</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            This permanently removes your account, files and every record above. It cannot be undone — export first if
-            you want a copy.
+            This permanently removes your account, uploaded files and every record above. It cannot be
+            undone — export first if you want a copy. Tax law requires us to keep a pseudonymised
+            record of past payments (amount, currency and date only, with no name or email) for the
+            statutory retention period.
           </p>
+
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Input

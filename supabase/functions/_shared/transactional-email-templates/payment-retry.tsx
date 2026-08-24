@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Card, Cta, DetailTable, EmailLayout, Paragraph, greeting, link } from './components.tsx'
+import { appLink, Card, Cta, DetailTable, EmailLayout, greeting, link, Paragraph } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const Email = ({ firstName, amount, planName, attemptNumber, maxAttempts, nextRetryDate, updatePaymentUrl }: Props) => {
-  const href = updatePaymentUrl || link('/billing', 'payment-retry')
+  const href = updatePaymentUrl || appLink('/billing', 'payment-retry')
   return (
     <EmailLayout
       preview="We're retrying your Gradr payment."

@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Card, Cta, EmailLayout, Paragraph, PriorityList, SecondaryLink, greeting, link } from './components.tsx'
+import { appLink, Card, Cta, EmailLayout, greeting, link, Paragraph, PriorityList, SecondaryLink } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Step {
@@ -43,8 +43,8 @@ const Email = ({ firstName, horizonLabel, focus, steps }: Props) => (
         href: s.href ? link(s.href, 'career-plan') : undefined,
       }))}
     />
-    <Cta href={link('/', 'career-plan')}>Open my plan</Cta>
-    <SecondaryLink href={link('/', 'career-plan')}>Mark steps complete as you go</SecondaryLink>
+    <Cta href={appLink('/dashboard', 'career-plan')}>Open my plan</Cta>
+    <SecondaryLink href={appLink('/dashboard', 'career-plan')}>Mark steps complete as you go</SecondaryLink>
   </EmailLayout>
 )
 

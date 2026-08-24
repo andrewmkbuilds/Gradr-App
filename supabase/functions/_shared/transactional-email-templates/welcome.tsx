@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Bullets, Cta, EmailLayout, FallbackUrl, Paragraph, SecondaryLink, greeting, link } from './components.tsx'
+import { appLink, Bullets, Cta, EmailLayout, FallbackUrl, greeting, link, Paragraph, SecondaryLink } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -32,7 +32,7 @@ const Email = ({ firstName, targetRole }: Props) => {
         ]}
       />
       <Cta href={cta}>Set up my career profile</Cta>
-      <SecondaryLink href={link('/resume', 'welcome')}>Or start with a resume analysis</SecondaryLink>
+      <SecondaryLink href={appLink('/resume', 'welcome')}>Or start with a resume analysis</SecondaryLink>
       <FallbackUrl href={cta} />
     </EmailLayout>
   )

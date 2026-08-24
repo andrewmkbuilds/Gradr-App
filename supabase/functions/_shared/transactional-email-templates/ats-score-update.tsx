@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Bullets, Card, Cta, EmailLayout, MetricList, Paragraph, ScoreBlock, greeting, link } from './components.tsx'
+import { appLink, Bullets, Card, Cta, EmailLayout, greeting, link, MetricList, Paragraph, ScoreBlock } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -52,7 +52,7 @@ const Email = ({ firstName, resumeName, previousScore, newScore, versionLabel, c
           <Paragraph>{nextStep}</Paragraph>
         </Card>
       ) : null}
-      <Cta href={reportUrl || link('/resume', 'ats-score-update')}>Compare versions</Cta>
+      <Cta href={reportUrl || appLink('/resume', 'ats-score-update')}>Compare versions</Cta>
     </EmailLayout>
   )
 }

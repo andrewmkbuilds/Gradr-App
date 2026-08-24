@@ -1,18 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import {
-  Bullets,
-  Card,
-  Chips,
-  Cta,
-  DetailTable,
-  EmailLayout,
-  Paragraph,
-  ScoreBlock,
-  SecondaryLink,
-  greeting,
-  link,
-} from './components.tsx'
+import { appLink, Bullets, Card, Chips, Cta, DetailTable, EmailLayout, greeting, link, Paragraph, ScoreBlock, SecondaryLink } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -40,7 +28,7 @@ const Email = ({
   postedAt,
   jobUrl,
 }: Props) => {
-  const href = jobUrl || link('/jobs', 'job-match')
+  const href = jobUrl || appLink('/jobs', 'job-match')
   return (
     <EmailLayout
       preview={`${matchScore ?? 0}% match — ${jobTitle || 'A new role'} at ${companyName || 'a company'}`}
@@ -77,7 +65,7 @@ const Email = ({
         </>
       ) : null}
       <Cta href={href}>View and apply</Cta>
-      <SecondaryLink href={link('/apply', 'job-match')}>Generate a tailored application pack</SecondaryLink>
+      <SecondaryLink href={appLink('/apply', 'job-match')}>Generate a tailored application pack</SecondaryLink>
     </EmailLayout>
   )
 }

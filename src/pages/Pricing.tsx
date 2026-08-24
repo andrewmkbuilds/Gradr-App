@@ -414,23 +414,59 @@ export default function Pricing() {
         </div>
       )}
 
-      <div className="space-y-2 text-center text-xs text-muted-foreground">
-        <p>
-          Prices shown in your local currency. Orders are processed by Paddle.com, our Merchant of
-          Record. Cancel anytime from your billing page.
-        </p>
-        <p className="flex flex-wrap items-center justify-center gap-3">
+      <div className="mx-auto mt-10 max-w-3xl space-y-3 rounded-card border border-border bg-surface-muted p-5 text-left text-xs text-muted-foreground">
+        <h2 className="text-body-sm font-medium text-foreground">Before you subscribe</h2>
+        <ul className="space-y-1.5">
+          <li>
+            <strong className="text-foreground">Automatic renewal.</strong> Paid plans renew
+            automatically at the price and interval shown above until you cancel. We email you before
+            each renewal.
+          </li>
+          <li>
+            <strong className="text-foreground">Cancelling.</strong> Cancel any time from Billing.
+            You keep full access until the end of the period you have already paid for, then move to
+            the Free plan — your data stays in your account.
+          </li>
+          <li>
+            <strong className="text-foreground">Changing plan.</strong> Upgrades take effect
+            immediately and are charged pro rata. Downgrades take effect at your next renewal.
+          </li>
+          <li>
+            <strong className="text-foreground">Tax.</strong> Paddle.com Market Ltd is the Merchant
+            of Record and calculates any sales tax or VAT for your country. The exact total,
+            including tax, is shown in checkout before you pay.
+          </li>
+          <li>
+            <strong className="text-foreground">If a payment fails.</strong> Paddle retries the
+            charge over the following days and we email you a link to update your card. If every
+            retry fails the subscription ends and the account returns to the Free plan.
+          </li>
+          <li>
+            <strong className="text-foreground">Refunds.</strong> Covered by our Refund &amp;
+            Cancellation Policy, in addition to any statutory right of withdrawal you have where you
+            live.
+          </li>
+          <li>
+            <strong className="text-foreground">Credit packs</strong> are one-off purchases, not
+            subscriptions, and do not renew.
+          </li>
+        </ul>
+        <p className="flex flex-wrap items-center gap-3 pt-1">
           <Link to="/terms" className="underline hover:text-foreground">
             Terms &amp; Conditions
           </Link>
           <Link to="/refund-policy" className="underline hover:text-foreground">
-            Refund Policy
+            Refund &amp; Cancellation Policy
           </Link>
           <Link to="/privacy" className="underline hover:text-foreground">
             Privacy Notice
+          </Link>
+          <Link to="/legal" className="underline hover:text-foreground">
+            All policies
           </Link>
         </p>
       </div>
     </div>
   );
+
 }

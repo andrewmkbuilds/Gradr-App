@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Cta, DetailTable, EmailLayout, Paragraph, SecondaryLink, greeting, link } from './components.tsx'
+import { appLink, Cta, DetailTable, EmailLayout, greeting, link, Paragraph, SecondaryLink } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -51,8 +51,8 @@ const Email = ({
         { label: 'Total paid', value: <strong>{total || '$19.00'}</strong> },
       ]}
     />
-    <Cta href={invoiceUrl || link('/billing', 'invoice-receipt')}>Download invoice</Cta>
-    <SecondaryLink href={link('/billing', 'invoice-receipt')}>See billing history</SecondaryLink>
+    <Cta href={invoiceUrl || appLink('/billing', 'invoice-receipt')}>Download invoice</Cta>
+    <SecondaryLink href={appLink('/billing', 'invoice-receipt')}>See billing history</SecondaryLink>
   </EmailLayout>
 )
 

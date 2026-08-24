@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Card, Cta, DetailTable, EmailLayout, Paragraph, SecondaryLink, greeting, link } from './components.tsx'
+import { appLink, Card, Cta, DetailTable, EmailLayout, greeting, link, Paragraph, SecondaryLink } from './components.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -39,8 +39,8 @@ const Email = ({ firstName, role, interviewType, durationMinutes, questionsAnswe
         drilling in your next run.
       </Paragraph>
     </Card>
-    <Cta href={link('/interview', 'interview-completed')}>Open my session</Cta>
-    <SecondaryLink href={link('/interview', 'interview-completed')}>Book another practice run</SecondaryLink>
+    <Cta href={appLink('/interview', 'interview-completed')}>Open my session</Cta>
+    <SecondaryLink href={appLink('/interview', 'interview-completed')}>Book another practice run</SecondaryLink>
   </EmailLayout>
 )
 

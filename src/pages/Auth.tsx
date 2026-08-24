@@ -18,6 +18,7 @@ import { OAuthHostMismatchNotice } from "@/components/auth/OAuthHostMismatchNoti
 import { toast } from "sonner";
 import { z } from "zod";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
+import { signupConsentMetadata, stashSignupConsent, type SignupConsent } from "@/lib/consent/signupConsent";
 
 /** Client-side field validation — mirrors the server rules, fails fast and inline. */
 const passwordSchema = z
@@ -47,6 +48,12 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  // Consent is captured as an explicit, unbundled action: the legal box and the
+  // eligibility box are mandatory, product news is optional and defaults to off.
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [confirmedEligible, setConfirmedEligible] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
 
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
@@ -154,12 +161,33 @@ export default function Auth() {
     }
   };
 
+  /**
+   * Mandatory consent gate. Returns the recorded consent, or null after
+   * surfacing the reason the account cannot be created yet.
+   */
+  const requireConsent = (): SignupConsent | null => {
+    if (!acceptedTerms || !confirmedEligible) {
+      setConsentError(
+        !acceptedTerms
+          ? "Please accept the Terms & Conditions and Privacy Notice to create an account."
+          : "Please confirm you meet the minimum age requirement.",
+      );
+      return null;
+    }
+    setConsentError(null);
+    const consent: SignupConsent = { marketing: marketingOptIn, acceptedAt: new Date().toISOString() };
+    stashSignupConsent(consent);
+    return consent;
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     const valid = validateForm();
     if (!valid) return;
     const { email, password, fullName } = valid;
+    const consent = isSignUp ? requireConsent() : null;
+    if (isSignUp && !consent) return;
     setLoading(true);
     if (isSignUp) markSignupIntent("email");
     try {
@@ -167,7 +195,7 @@ export default function Auth() {
         if (isGuest) {
           // Upgrade the existing anonymous session so guest data is preserved.
           const { error } = await supabase.auth.updateUser(
-            { email, password, data: { full_name: fullName } },
+            { email, password, data: { full_name: fullName, ...signupConsentMetadata(consent!) } },
             { emailRedirectTo: postAuthUrl },
           );
           if (error) throw error;
@@ -179,7 +207,7 @@ export default function Auth() {
           email,
           password,
           options: {
-            data: { full_name: fullName },
+            data: { full_name: fullName, ...signupConsentMetadata(consent!) },
             emailRedirectTo: postAuthUrl,
           },
         });
@@ -208,6 +236,9 @@ export default function Auth() {
 
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
+    // Same consent gate as the email form — a provider button must not become a
+    // way to create an account without accepting the terms.
+    if (isSignUp && !requireConsent()) return;
     // Recorded before the redirect so the funnel survives the round trip.
     if (isSignUp) markSignupIntent(provider);
 
@@ -248,6 +279,7 @@ export default function Auth() {
   };
 
   const handleGuest = async () => {
+    if (isSignUp && !requireConsent()) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInAnonymously();
@@ -477,6 +509,58 @@ export default function Auth() {
           </Alert>
         )}
 
+        {isSignUp && (
+          <fieldset className="space-y-2.5 rounded-control border border-border bg-surface-muted p-3">
+            <legend className="sr-only">Consent</legend>
+            <label htmlFor="consent-terms" className="flex cursor-pointer items-start gap-2.5 text-caption text-muted-foreground">
+              <input
+                id="consent-terms"
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => { setAcceptedTerms(e.target.checked); setConsentError(null); }}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                aria-describedby={consentError ? "consent-error" : undefined}
+              />
+              <span>
+                I agree to the{" "}
+                <Link to="/terms" className="text-primary underline underline-offset-2">Terms &amp; Conditions</Link>{" "}
+                and have read the{" "}
+                <Link to="/privacy" className="text-primary underline underline-offset-2">Privacy Notice</Link>.
+                <span className="text-destructive"> *</span>
+              </span>
+            </label>
+            <label htmlFor="consent-age" className="flex cursor-pointer items-start gap-2.5 text-caption text-muted-foreground">
+              <input
+                id="consent-age"
+                type="checkbox"
+                checked={confirmedEligible}
+                onChange={(e) => { setConfirmedEligible(e.target.checked); setConsentError(null); }}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>
+                I am at least 16 years old (18 where my country requires it).
+                <span className="text-destructive"> *</span>
+              </span>
+            </label>
+            <label htmlFor="consent-marketing" className="flex cursor-pointer items-start gap-2.5 text-caption text-muted-foreground">
+              <input
+                id="consent-marketing"
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(e) => setMarketingOptIn(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>
+                Optional: send me product news and job-search tips. You can unsubscribe at any time,
+                and this has no effect on your account.
+              </span>
+            </label>
+            {consentError && (
+              <p id="consent-error" role="alert" className="text-caption text-destructive">{consentError}</p>
+            )}
+          </fieldset>
+        )}
+
         <Button
           type="submit"
 
@@ -499,13 +583,13 @@ export default function Auth() {
 
         {isSignUp && (
           <p className="text-center text-caption text-muted-foreground">
-            By creating an account you agree to our{" "}
-            <Link to="/terms" className="text-primary underline underline-offset-2">
-              Terms &amp; Conditions
+            Gradr uses AI to analyse what you upload — see the{" "}
+            <Link to="/ai-disclosure" className="text-primary underline underline-offset-2">
+              AI disclosure
             </Link>{" "}
             and{" "}
-            <Link to="/privacy" className="text-primary underline underline-offset-2">
-              Privacy Notice
+            <Link to="/legal" className="text-primary underline underline-offset-2">
+              all policies
             </Link>
             .
           </p>

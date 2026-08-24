@@ -3,6 +3,7 @@
  * Safe no-op when VITE_SENTRY_DSN is not configured.
  */
 import * as Sentry from "@sentry/react";
+import { consentFor } from "@/lib/cookieConsent";
 
 const DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 const RELEASE =
@@ -24,8 +25,18 @@ function scrub<T>(value: T): T {
   return out as T;
 }
 
+/**
+ * Starts Sentry only once the visitor has accepted the "Analytics" category
+ * (which the Cookie Policy lists Sentry under) and re-checks whenever the
+ * choice changes. A Global Privacy Control signal keeps it off. Diagnostics
+ * that fire before a decision are deliberately not collected.
+ */
 export function initSentry() {
   if (started || !DSN) return;
+  if (!consentFor("analytics")) {
+    watchConsent();
+    return;
+  }
   started = true;
 
   Sentry.init({
@@ -52,6 +63,16 @@ export function initSentry() {
       if (event.extra) event.extra = scrub(event.extra);
       return event;
     },
+  });
+}
+
+let watching = false;
+
+function watchConsent() {
+  if (watching || typeof window === "undefined") return;
+  watching = true;
+  window.addEventListener("gradr:consent", () => {
+    if (!started && consentFor("analytics")) initSentry();
   });
 }
 

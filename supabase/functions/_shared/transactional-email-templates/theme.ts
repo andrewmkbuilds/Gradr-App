@@ -50,6 +50,17 @@ export function link(path: string, campaign: string): string {
   return `${base}${sep}utm_source=email&utm_medium=lifecycle&utm_campaign=${encodeURIComponent(campaign)}`
 }
 
+/**
+ * Link to a signed-in destination. Those routes only exist on the application
+ * surface, so they must never be built off the apex marketing host — a
+ * `gradr.me/settings` link 404s for the recipient.
+ */
+export function appLink(path: string, campaign: string): string {
+  const base = `${APP_URL}${path.startsWith('/') ? path : `/${path}`}`
+  const sep = base.includes('?') ? '&' : '?'
+  return `${base}${sep}utm_source=email&utm_medium=lifecycle&utm_campaign=${encodeURIComponent(campaign)}`
+}
+
 export type Tone = 'teal' | 'mahogany' | 'success' | 'warning' | 'danger' | 'neutral'
 
 export const tonePalette: Record<Tone, { fg: string; bg: string; border: string }> = {
