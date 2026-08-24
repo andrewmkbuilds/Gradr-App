@@ -30,3 +30,5 @@ tests/visual/diff/
 
 # Lovable sandbox workspace directory
 .workspace/
+tests/reports/
+tests/visual/route-guards/current/
