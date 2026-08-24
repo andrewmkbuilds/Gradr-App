@@ -12,7 +12,6 @@ export type UserEmailTemplate =
   | "interview-completed"
   | "interview-report"
   | "career-plan"
-  | "daily-briefing"
   | "application-followup"
   | "job-match"
   | "verification-submitted";
