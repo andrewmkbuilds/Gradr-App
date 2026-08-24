@@ -412,6 +412,12 @@ function AppRoutes() {
         <Route path="/refund-policy" element={publicPage(appOnly, <AnimatedPage><RefundPolicy /></AnimatedPage>)} />
         <Route path="/cookie-policy" element={publicPage(appOnly, <AnimatedPage><CookiePolicy /></AnimatedPage>)} />
         <Route path="/dpa" element={publicPage(appOnly, <AnimatedPage><Dpa /></AnimatedPage>)} />
+        <Route path="/acceptable-use" element={publicPage(appOnly, <AnimatedPage><AcceptableUse /></AnimatedPage>)} />
+        <Route path="/ai-disclosure" element={publicPage(appOnly, <AnimatedPage><AiDisclosure /></AnimatedPage>)} />
+        <Route path="/disclaimer" element={publicPage(appOnly, <AnimatedPage><Disclaimer /></AnimatedPage>)} />
+        <Route path="/affiliate-disclosure" element={publicPage(appOnly, <AnimatedPage><AffiliateDisclosure /></AnimatedPage>)} />
+        <Route path="/subprocessors" element={publicPage(appOnly, <AnimatedPage><Subprocessors /></AnimatedPage>)} />
+        <Route path="/legal" element={publicPage(appOnly, <AnimatedPage><LegalHub /></AnimatedPage>)} />
         <Route path="/job-search" element={publicPage(appOnly, <AnimatedPage><JobSearchIndex /></AnimatedPage>)} />
         <Route path="/job-search/:slug" element={publicPage(appOnly, <AnimatedPage><JobLanding /></AnimatedPage>)} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
