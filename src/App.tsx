@@ -246,6 +246,7 @@ function ProtectedRoutes() {
           <Route path="/subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
           <Route path="/manage-subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
+          <Route path="/connect" element={<AnimatedPage><Connect /></AnimatedPage>} />
           {/* Affiliate pages live on affiliates.gradr.me (see SATELLITE_SURFACES). */}
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
