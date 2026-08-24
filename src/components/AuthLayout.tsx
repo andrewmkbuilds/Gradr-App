@@ -67,7 +67,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             </div>
             <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
             <p
-              data-auth-hero="mobile"
+              data-auth-hero="single"
               className="text-xl sm:text-2xl font-bold leading-[1.25] tracking-tight break-words text-balance min-w-0 max-w-full pb-1"
             >
               <span className="block">Your AI career</span>
