@@ -27,6 +27,7 @@ import {
   Gauge,
   Globe,
   Newspaper,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 import type { Surface } from "@/config/domains";
@@ -111,6 +112,7 @@ export const navGroups: NavGroup[] = [
       { title: "Manage Subscription", url: "/subscription", icon: CreditCard },
       { title: "Billing History", url: "/billing/history", icon: CreditCard },
       { title: "Pricing & Plans", url: "/pricing", icon: Sparkles },
+      { title: "Connect AI assistant", url: "/connect", icon: Bot },
     ],
   },
   {

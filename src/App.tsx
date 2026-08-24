@@ -120,6 +120,7 @@ const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const InterviewHistory = lazy(() => import("./pages/InterviewHistory"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const Connect = lazy(() => import("./pages/Connect"));
 
 const queryClient = new QueryClient();
 
@@ -144,7 +145,7 @@ function RouteFallback() {
 const PROTECTED_PREFIXES = [
   "/", "/dashboard", "/career", "/resume", "/jobs", "/match", "/pipeline", "/apply",
   "/interview", "/growth", "/settings", "/billing", "/credits", "/subscription",
-  "/manage-subscription", "/welcome", "/admin",
+  "/manage-subscription", "/welcome", "/connect", "/admin",
 ];
 
 function isProtectedPath(pathname: string) {
@@ -245,6 +246,7 @@ function ProtectedRoutes() {
           <Route path="/subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
           <Route path="/manage-subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
+          <Route path="/connect" element={<AnimatedPage><Connect /></AnimatedPage>} />
           {/* Affiliate pages live on affiliates.gradr.me (see SATELLITE_SURFACES). */}
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
