@@ -21,20 +21,14 @@ const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og.png`;
 
 const META: Record<string, { title: string; description: string }> = {
-  // "/" renders the public Gradr landing page for signed-out visitors (and the
-  // dashboard once authenticated), so its metadata must describe the product.
+  // "/" is the authenticated dashboard (signed-out visitors are redirected to
+  // /auth). There is no public landing page on this surface, so "/" is
+  // noindexed and its metadata is purely functional.
   "/": {
-    title: "AI Career Copilot for Resumes, Jobs & Interviews",
-    description:
-      "Gradr is your AI career copilot for building better resumes, finding the right jobs, tracking applications, and practicing interviews in one powerful workspace.",
+    title: "Dashboard",
+    description: "Your Gradr career command center: resumes, jobs, applications and interview prep.",
   },
-  // Product tour page. Must not reuse the homepage title/description or search
-  // engines and social platforms treat it as a duplicate of "/".
-  "/landing": {
-    title: "Product Tour: How Gradr Takes You From Resume to Offer",
-    description:
-      "See how Gradr works end to end: ATS resume scoring, job matching, application tracking, and AI mock interviews — with a walkthrough of every module.",
-  },
+
   "/manage-subscription": {
     title: "Manage Your Subscription",
     description:
