@@ -19,7 +19,7 @@ import {
   SELLER_WEBSITE_URL,
   REFUND_WINDOW_DAYS,
 } from "./legal";
-import { LEGAL_CONTACT_EMAIL, PRIVACY_CONTACT_EMAIL } from "./companyIdentity";
+import { LEGAL_CONTACT_EMAIL, PRIVACY_CONTACT_EMAIL, SECURITY_CONTACT_EMAIL } from "./companyIdentity";
 
 export const POLICIES_V1_EFFECTIVE = "2026-08-24";
 
@@ -53,7 +53,7 @@ You must not:
 - Use the Service to build, benchmark or train a competing product or model.
 - Interfere with the Service, other accounts, or the infrastructure it runs on.
 
-Responsible security research is welcome — see [Security](/security) for how to report a vulnerability.
+Responsible security research is welcome — email ${SECURITY_CONTACT_EMAIL} before testing anything.
 
 ## 5. Sensitive data
 
