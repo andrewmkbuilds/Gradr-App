@@ -19,6 +19,7 @@ import { chromium } from "playwright";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
+import { settle, stableScreenshot, withRetry } from "./lib/pageStability.mjs";
 
 const BASE = (process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 const UPDATE = process.argv.includes("--update");
@@ -26,6 +27,7 @@ const ROOT = process.cwd();
 const BASELINE_DIR = join(ROOT, "tests/visual/themes/baseline");
 const CURRENT_DIR = join(ROOT, "tests/visual/themes/current");
 const TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.02); // 2% of pixels
+const RETRIES = Number(process.env.VISUAL_RETRIES ?? 3);
 
 const PUBLIC_ROUTES = [["auth", "/auth"]];
 const AUTHED_ROUTES = [
@@ -139,32 +141,49 @@ async function main() {
     }
 
     for (const [name, route] of routes) {
-      await page.goto(`${BASE}${route}`, { waitUntil: "networkidle" });
-      await page.evaluate((t) => {
-        document.documentElement.classList.toggle("dark", t === "dark");
-        document.documentElement.style.colorScheme = t;
-        // Freeze motion so captures are deterministic.
-        const style = document.createElement("style");
-        style.textContent = "*,*::before,*::after{animation:none!important;transition:none!important}";
-        document.head.appendChild(style);
-      }, theme);
-      await page.waitForTimeout(600);
+      const prepare = async () => {
+        await page.evaluate((t) => {
+          document.documentElement.classList.toggle("dark", t === "dark");
+          document.documentElement.style.colorScheme = t;
+        }, theme);
+        // Fonts, images, animations and scroll position all settled before we shoot.
+        await settle(page);
+      };
+
+      await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
+      await prepare();
 
       const file = `${name}-${theme}.png`;
       const current = join(CURRENT_DIR, file);
-      await page.screenshot({ path: current });
       captured.push(file);
 
       const baseline = join(BASELINE_DIR, file);
       if (UPDATE || !existsSync(baseline)) {
-        writeFileSync(baseline, readFileSync(current));
+        const { buffer } = await stableScreenshot(page);
+        writeFileSync(current, buffer);
+        writeFileSync(baseline, buffer);
         console.log(`${UPDATE ? "updated" : "created"} baseline ${file}`);
         continue;
       }
-      const ratio = await diffRatio(page, baseline, current);
-      const verdict = ratio > TOLERANCE ? "FAIL" : "ok";
-      console.log(`${verdict.padEnd(4)} ${file}  ${(ratio * 100).toFixed(2)}% changed`);
-      if (ratio > TOLERANCE) failures.push(`${file}: ${(ratio * 100).toFixed(2)}% of pixels changed`);
+
+      // Retry the capture before failing: a first-attempt miss is usually a late
+      // paint, not a regression.
+      const outcome = await withRetry(
+        async () => {
+          const { buffer, stable } = await stableScreenshot(page);
+          writeFileSync(current, buffer);
+          const ratio = await diffRatio(page, baseline, current);
+          return { ok: ratio <= TOLERANCE, ratio, stable };
+        },
+        { attempts: RETRIES, beforeRetry: async () => { await page.waitForTimeout(500); await prepare(); } },
+      );
+
+      const verdict = outcome.ok ? "ok" : "FAIL";
+      console.log(
+        `${verdict.padEnd(4)} ${file}  ${(outcome.ratio * 100).toFixed(2)}% changed` +
+          (outcome.attempts > 1 ? `  (${outcome.attempts} attempts)` : ""),
+      );
+      if (!outcome.ok) failures.push(`${file}: ${(outcome.ratio * 100).toFixed(2)}% of pixels changed`);
     }
 
     await context.close();

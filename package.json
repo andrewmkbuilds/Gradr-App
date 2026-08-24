@@ -178,7 +178,8 @@
     "types:generate": "node scripts/generate-db-types.mjs",
     "visual:logo-shell": "node scripts/logo-shell-visual.mjs",
     "test:route-guards": "node scripts/route-guards-e2e.mjs",
-    "test:route-guards:update": "node scripts/route-guards-e2e.mjs --update"
+    "test:route-guards:update": "node scripts/route-guards-e2e.mjs --update",
+    "test:signout:api": "node scripts/signout-api-smoke.mjs"
   },
   "type": "module",
   "version": "0.0.0"
