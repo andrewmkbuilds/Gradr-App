@@ -196,7 +196,7 @@ export function ResumeVersionDiff() {
         <div className="grid gap-1.5">
           <Label htmlFor="diff-base" className="text-xs text-muted-foreground">Baseline</Label>
           <Select value={base?.id ?? ""} onValueChange={setBaseId}>
-            <SelectTrigger id="diff-base"><SelectValue /></SelectTrigger>
+            <SelectTrigger id="diff-base" aria-label="Baseline version"><SelectValue /></SelectTrigger>
             <SelectContent>
               {versions.map((v) => <SelectItem key={v.id} value={v.id}>{label(v)}</SelectItem>)}
             </SelectContent>
@@ -206,7 +206,7 @@ export function ResumeVersionDiff() {
         <div className="grid gap-1.5">
           <Label htmlFor="diff-compare" className="text-xs text-muted-foreground">Compared version</Label>
           <Select value={compare?.id ?? ""} onValueChange={setCompareId}>
-            <SelectTrigger id="diff-compare"><SelectValue /></SelectTrigger>
+            <SelectTrigger id="diff-compare" aria-label="Compared version"><SelectValue /></SelectTrigger>
             <SelectContent>
               {versions.map((v) => <SelectItem key={v.id} value={v.id}>{label(v)}</SelectItem>)}
             </SelectContent>

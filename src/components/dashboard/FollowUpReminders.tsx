@@ -206,7 +206,7 @@ export function FollowUpReminders() {
               value={String(settings.followup_days)}
               onValueChange={(v) => saveSettings({ ...settings, followup_days: Number(v) })}
             >
-              <SelectTrigger className="h-9 w-40"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Nudge after" className="h-9 w-40"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {CADENCES.map((d) => <SelectItem key={d} value={String(d)}>{d} days of silence</SelectItem>)}
               </SelectContent>
