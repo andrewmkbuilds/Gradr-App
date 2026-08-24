@@ -39,7 +39,7 @@ const NotFound = () => {
             <Compass className="h-3 w-3" aria-hidden />
             Error 404
           </Badge>
-          <CardTitle className="text-h3">This page took a different career path</CardTitle>
+          <CardTitle className="text-h5">This page took a different career path</CardTitle>
           <CardDescription>
             We couldn&apos;t find{" "}
             <span className="font-medium text-foreground">{location.pathname}</span>. It may have

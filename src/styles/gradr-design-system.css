@@ -27,7 +27,9 @@
   --color-harbor-soft: #e7eef1;
   --color-hull-soft: #f3e9e3;
   --color-slate: #55676d;
-  --color-ds-success: #2f6b46;
+  /* No success value here: `success` is a semantic role, and the config maps it
+     onto the app's HSL `--success` token so light/dark stay on one switch. */
+
 
   /* Radii */
   --radius-card: 1rem;

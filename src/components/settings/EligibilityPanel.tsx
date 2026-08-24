@@ -33,7 +33,7 @@ export function EligibilityPanel() {
             <BadgePercent className="h-5 w-5 text-primary" aria-hidden="true" />
           </div>
           <div>
-            <h2 id="eligibility-heading" className="text-h3 text-foreground">
+            <h2 id="eligibility-heading" className="text-h6 text-foreground">
               Eligibility &amp; discounts
             </h2>
             <p className="text-xs text-muted-foreground">

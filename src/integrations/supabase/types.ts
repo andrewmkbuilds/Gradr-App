@@ -2480,10 +2480,16 @@ export type Database = {
       }
       notification_preferences: {
         Row: {
+          application_reminders_email: boolean
+          application_reminders_in_app: boolean
           created_at: string
           dunning_email: boolean
           dunning_in_app: boolean
           id: string
+          job_matches_email: boolean
+          job_matches_in_app: boolean
+          product_insights_email: boolean
+          product_insights_in_app: boolean
           refund_email: boolean
           refund_in_app: boolean
           renewal_email: boolean
@@ -2494,10 +2500,16 @@ export type Database = {
           webhook_issue_in_app: boolean
         }
         Insert: {
+          application_reminders_email?: boolean
+          application_reminders_in_app?: boolean
           created_at?: string
           dunning_email?: boolean
           dunning_in_app?: boolean
           id?: string
+          job_matches_email?: boolean
+          job_matches_in_app?: boolean
+          product_insights_email?: boolean
+          product_insights_in_app?: boolean
           refund_email?: boolean
           refund_in_app?: boolean
           renewal_email?: boolean
@@ -2508,10 +2520,16 @@ export type Database = {
           webhook_issue_in_app?: boolean
         }
         Update: {
+          application_reminders_email?: boolean
+          application_reminders_in_app?: boolean
           created_at?: string
           dunning_email?: boolean
           dunning_in_app?: boolean
           id?: string
+          job_matches_email?: boolean
+          job_matches_in_app?: boolean
+          product_insights_email?: boolean
+          product_insights_in_app?: boolean
           refund_email?: boolean
           refund_in_app?: boolean
           renewal_email?: boolean
@@ -4382,6 +4400,10 @@ export type Database = {
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
+        Returns: boolean
+      }
+      email_category_allowed: {
+        Args: { _category: string; _email: string }
         Returns: boolean
       }
       enqueue_email: {

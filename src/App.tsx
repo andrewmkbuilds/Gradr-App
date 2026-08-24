@@ -89,6 +89,7 @@ const AdminWebhookLogs = lazy(() => import("@/pages/AdminWebhookLogs"));
 const AdminBillingOps = lazy(() => import("@/pages/AdminBillingOps"));
 const AdminCspReports = lazy(() => import("@/pages/AdminCspReports"));
 const AdminAnalyticsHealth = lazy(() => import("@/pages/AdminAnalyticsHealth"));
+const AdminEmailTemplates = lazy(() => import("@/pages/AdminEmailTemplates"));
 
 const AdminNavAnalytics = lazy(() => import("@/pages/AdminNavAnalytics"));
 const AdminSeoMonitor = lazy(() => import("@/pages/AdminSeoMonitor"));
@@ -219,6 +220,7 @@ function ProtectedRoutes() {
         <Route path="/admin/api-health" element={<RequireAdmin><AnimatedPage><AdminApiHealth /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/billing-ops" element={<RequireAdmin><AnimatedPage><AdminBillingOps /></AnimatedPage></RequireAdmin>} />
         <Route path="/admin/webhook-logs" element={<RequireAdmin><AnimatedPage><AdminWebhookLogs /></AnimatedPage></RequireAdmin>} />
+        <Route path="/admin/email-templates" element={<RequireAdmin><AnimatedPage><AdminEmailTemplates /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/analytics-health" element={<RequireAdmin><AnimatedPage><AdminAnalyticsHealth /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/csp-reports" element={<RequireAdmin><AnimatedPage><AdminCspReports /></AnimatedPage></RequireAdmin>} />
 

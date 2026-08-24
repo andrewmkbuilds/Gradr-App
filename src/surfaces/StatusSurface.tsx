@@ -64,7 +64,7 @@ function StatusHome() {
     <div className="page-shell py-12">
       <header className="max-w-2xl">
         <p className="text-caption font-semibold uppercase tracking-wide text-brand-secondary">Status</p>
-        <h1 className="mt-2 font-display text-h2 font-semibold tracking-tight text-foreground">
+        <h1 className="mt-2 font-display text-h5 font-semibold tracking-tight text-foreground">
           Gradr system status
         </h1>
         <p className="mt-3 text-muted-foreground">

@@ -3,6 +3,11 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+import {
+  categoryOf,
+  EMAIL_CLASSIFICATIONS,
+  isMarketing,
+} from '../_shared/transactional-email-templates/classification.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -131,6 +136,26 @@ Deno.serve(async (req) => {
     )
   }
 
+  // 1b. Gradr sends transactional email only. Any template classified as
+  // marketing — or registered without a classification at all — is refused
+  // before it can reach the queue, whoever the caller is.
+  if (!EMAIL_CLASSIFICATIONS[templateName]) {
+    console.error('Template is not classified — refusing to send', { templateName })
+    return new Response(
+      JSON.stringify({ error: 'Template is not classified as transactional' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+  if (isMarketing(templateName)) {
+    console.error('Blocked marketing-classified send', { templateName })
+    return new Response(
+      JSON.stringify({ error: 'Marketing emails are not supported' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+
+
   // Enforce the trust model described at the top of this file.
   const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
   const claims = decodeJwtClaims(bearer)
@@ -179,6 +204,40 @@ Deno.serve(async (req) => {
 
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  // 1c. Honour per-user opt-outs for non-essential notifications. Essential
+  // mail (auth, security, billing, verification outcomes) always sends.
+  const category = categoryOf(templateName)
+  if (category !== 'essential') {
+    const { data: allowed, error: prefError } = await supabase.rpc('email_category_allowed', {
+      _email: effectiveRecipient,
+      _category: category,
+    })
+    if (prefError) {
+      // Fail closed: a preference we can't read must not become an unwanted send.
+      console.error('Preference check failed — refusing to send', { error: prefError, templateName })
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify notification preferences' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    if (allowed === false) {
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'suppressed',
+        error_message: `Recipient opted out of ${category}`,
+      })
+      console.log('Email skipped by preference', { templateName, category })
+      return new Response(
+        JSON.stringify({ success: false, reason: 'preference_opt_out', category }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+  }
+
+
 
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
