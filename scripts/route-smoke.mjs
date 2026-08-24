@@ -20,12 +20,33 @@
  * Usage: node scripts/route-smoke.mjs [baseUrl]     (default http://localhost:8080)
  */
 import { chromium } from "playwright";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
 const BASE = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 const results = [];
+
+/** Locates the sandbox/CI Chromium build Playwright downloaded. */
+function findChromium() {
+  for (const envPath of [process.env.PLAYWRIGHT_CHROMIUM_PATH, process.env.CHROME_PATH]) {
+    if (envPath && existsSync(envPath)) return envPath;
+  }
+  for (const root of ["/opt/ms-playwright", join(homedir(), ".cache/ms-playwright")]) {
+    if (!existsSync(root)) continue;
+    for (const dir of readdirSync(root).filter((d) => d.startsWith("chromium"))) {
+      for (const rel of [
+        "chrome-linux/chrome",
+        "chrome-linux/headless_shell",
+        "chrome-linux64/chrome-headless-shell",
+      ]) {
+        const candidate = join(root, dir, rel);
+        if (existsSync(candidate)) return candidate;
+      }
+    }
+  }
+  return undefined;
+}
 
 function record(name, ok, detail = "") {
   results.push({ name, ok, detail });
@@ -63,7 +84,7 @@ async function checkRedirect(page, from, to, label) {
 }
 
 async function run() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   try {
     // ---- signed out -------------------------------------------------------
     const guest = await browser.newContext({ viewport: { width: 1280, height: 900 } });
