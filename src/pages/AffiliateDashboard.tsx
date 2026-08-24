@@ -1,3 +1,4 @@
+import { Button } from "@/components/ds/Button";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -125,7 +126,9 @@ export default function AffiliateDashboard() {
             Share Gradr, climb the levels, get paid. Everything below is live data from your account.
           </p>
         </div>
-        <button onClick={() => navigate("/affiliate/resources")} className="text-xs text-primary hover:underline">Resources & terms →</button>
+        <Button variant="link" size="inline" onClick={() => navigate("/affiliate/resources")}>
+          Resources &amp; terms →
+        </Button>
       </div>
 
       <ShareCard code={profile.affiliate_code} link={link} />

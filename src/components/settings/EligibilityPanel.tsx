@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BadgePercent, Plus, ShieldCheck } from "lucide-react";
 import { VerificationDialog } from "@/components/VerificationDialog";

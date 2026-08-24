@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, CameraOff, ShieldCheck, ShieldAlert, Eye, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { FaceMonitor, EMPTY_INTEGRITY, type IntegritySnapshot } from "@/lib/cv/faceMonitor";
 
 interface Props {

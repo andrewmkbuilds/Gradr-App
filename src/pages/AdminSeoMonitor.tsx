@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useAffiliate";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app/PageHeader";
 import { typography } from "@/lib/design/typography";

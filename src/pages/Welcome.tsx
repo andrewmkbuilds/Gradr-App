@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, FileText, Gift, Mic, Sparkles, Target } from "lucide-react";
 import { Button } from "@/components/ds/Button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Badge, Card } from "@/design-system/gradr-9b9b95";
 import { useQueryClient } from "@tanstack/react-query";
 import { Seo } from "@/components/Seo";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -72,7 +71,7 @@ export default function Welcome() {
         path="/welcome"
       />
 
-      <Card className="space-y-6 p-10 text-center">
+      <Card variant="raised" padding="lg" className="space-y-6 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
           <CheckCircle2 className="h-8 w-8 text-primary" aria-hidden />
         </div>
@@ -85,7 +84,7 @@ export default function Welcome() {
           </p>
           {!isPack && isSubscribed && (
             <div className="flex flex-wrap justify-center gap-2 pt-1">
-              <Badge className="gap-1">
+              <Badge variant="primary" className="gap-1">
                 <Sparkles className="h-3 w-3" aria-hidden />
                 {planName} {interval === "annual" ? "Annual" : "Monthly"}
               </Badge>
@@ -95,7 +94,7 @@ export default function Welcome() {
       </Card>
 
       {bonus && (
-        <Card className="flex items-start gap-3 border-primary/30 bg-primary/5 p-5">
+        <Card className="flex items-start gap-3">
           <Gift className="mt-0.5 h-5 w-5 text-primary" aria-hidden />
           <div className="space-y-1">
             <p className="text-sm font-semibold text-foreground">Your annual bonus credits are on the way</p>
@@ -108,7 +107,7 @@ export default function Welcome() {
       )}
 
       {!isPack && (
-        <Card className="space-y-4 p-6">
+        <Card className="space-y-4">
           <div className="space-y-1">
             <h2 className="text-sm font-semibold text-foreground">Start here — 10 minutes to your first win</h2>
             <p className="text-sm text-muted-foreground">

@@ -8,7 +8,7 @@
  */
 import { forwardRef, useEffect, useState } from "react";
 import { AlertTriangle, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import {
   detectOAuthHostMismatch,
   recordOAuthHop,

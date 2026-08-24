@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { RotateCcw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Slider } from "@/components/ui/slider";
 import { Surface } from "@/components/ui/surface";
 import { MotionSegmentedControl } from "@/components/MotionToggle";

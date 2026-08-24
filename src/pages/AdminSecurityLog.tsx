@@ -5,7 +5,7 @@ import { Loader2, ShieldCheck, CreditCard, Gauge, Bot, Download, FileJson } from
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow, format } from "date-fns";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { downloadCsv, downloadJson } from "@/lib/exportFile";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app/PageHeader";

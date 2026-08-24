@@ -1,6 +1,6 @@
 import { Zap, Mic, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { useNavigate } from "react-router-dom";
 import { useCredits, useSubscription } from "@/hooks/useSubscription";
 

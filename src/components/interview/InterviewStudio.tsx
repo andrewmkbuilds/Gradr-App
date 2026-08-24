@@ -6,7 +6,7 @@ import {
   Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX,
   Square, Radio, Hand, Zap, Captions, WifiOff, Search, X, ChevronUp, ChevronDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

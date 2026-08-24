@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FileText, Loader2, Pencil, Trash2, Check, X, Layers, CloudOff, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Input } from "@/components/ui/input";
 import { useResumeVersions, type ResumeVersion } from "@/hooks/useResumeVersions";
 

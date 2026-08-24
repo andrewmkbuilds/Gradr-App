@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Cookie } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -76,9 +76,9 @@ export function CookieConsent() {
               <p className="text-sm text-muted-foreground">
                 We use strictly necessary cookies to keep you signed in. With your consent we also use
                 analytics, attribution and functional cookies to improve Gradr.{" "}
-                <Link to="/cookie-policy" className="font-medium text-primary underline-offset-4 hover:underline">
-                  Cookie Policy
-                </Link>
+                <Button variant="link" size="inline" asChild>
+                  <Link to="/cookie-policy">Cookie Policy</Link>
+                </Button>
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">

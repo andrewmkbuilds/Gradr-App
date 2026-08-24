@@ -1,7 +1,7 @@
 import { AlertTriangle, RefreshCw, Sparkles, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Surface } from "@/components/ui/surface";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { duration as motionDuration, easeOut } from "@/lib/motion/tokens";

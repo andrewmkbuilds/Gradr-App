@@ -1,3 +1,4 @@
+import { Button } from "@/components/ds/Button";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -38,12 +39,14 @@ export function NotificationsBell() {
             )}
           </div>
           {unreadCount > 0 && (
-            <button
+            <Button
+              variant="link"
+              size="inline"
               onClick={() => markAllRead.mutate()}
-              className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+              disabled={markAllRead.isPending}
             >
-              <Check className="h-3 w-3" /> Mark all read
-            </button>
+              <Check className="h-3 w-3" aria-hidden="true" /> Mark all read
+            </Button>
           )}
         </div>
         <div className="max-h-[420px] overflow-y-auto">

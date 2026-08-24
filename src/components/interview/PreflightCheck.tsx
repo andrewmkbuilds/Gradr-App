@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Mic, Wifi, CheckCircle2, XCircle, Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 
 /**
  * Mandatory pre-interview device check: camera, microphone level and network.

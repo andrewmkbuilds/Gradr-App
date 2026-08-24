@@ -1,0 +1,54 @@
+name: Design system
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  theme:
+    name: Theme + token regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Blocks hardcoded Tailwind palette utilities and raw colour literals.
+      - name: Lint (design-system colour tokens)
+        run: bun run lint:design
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build
+        run: bun run build
+
+      - name: Start preview server
+        run: |
+          bun run preview --port 8080 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:8080/ && break; sleep 1; done
+
+      # Static token scan + runtime light/dark rendering assertions.
+      - name: Theme regression check
+        env:
+          BASE_URL: http://localhost:8080
+        run: bun run theme:check
+
+      # Pixel diff of the sign-in and dashboard screens in both themes.
+      - name: Theme screenshot diff
+        env:
+          SMOKE_BASE_URL: http://localhost:8080
+        run: bun run test:visual:themes
+
+      - name: Upload screenshot diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-screenshots
+          path: tests/visual/themes

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthLayout } from "@/components/AuthLayout";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { AlertCircle, CheckCircle2, LogOut, MailCheck, RefreshCw } from "lucide-react";
 import { friendlyAuthError } from "@/lib/authErrors";
 

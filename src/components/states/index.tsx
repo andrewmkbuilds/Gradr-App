@@ -1,7 +1,7 @@
 import { AlertTriangle, Compass, Inbox, RefreshCw, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Surface } from "@/components/ui/surface";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { duration, easeOut } from "@/lib/motion/tokens";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Shield, CheckCircle2 } from "lucide-react";
 

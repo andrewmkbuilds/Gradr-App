@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { StatCard } from "@/components/StatCard";
 import { PageHeader } from "@/components/app/PageHeader";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { cn } from "@/lib/utils";
 
 const ARTICLE = "ai-resume-optimization";

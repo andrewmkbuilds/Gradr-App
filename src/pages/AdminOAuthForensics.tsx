@@ -8,7 +8,7 @@
 import { useMemo, useState } from "react";
 import { Download, FileText, Filter, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

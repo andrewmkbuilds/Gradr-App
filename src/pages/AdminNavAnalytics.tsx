@@ -4,7 +4,7 @@ import { Compass, Download, Layers, Loader2, MousePointerClick, Route as RouteIc
 import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { StatCard } from "@/components/StatCard";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

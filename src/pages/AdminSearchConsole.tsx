@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useAffiliate";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { Seo } from "@/components/Seo";
 import { PageHeader } from "@/components/app/PageHeader";
 

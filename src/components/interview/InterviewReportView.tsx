@@ -8,7 +8,7 @@ import {
   Loader2,
   HistoryIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { ScoreRing } from "@/components/ScoreRing";
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 

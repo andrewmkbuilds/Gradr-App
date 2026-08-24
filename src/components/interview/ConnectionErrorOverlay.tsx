@@ -1,5 +1,5 @@
 import { AudioLines, Loader2, Keyboard, RotateCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds/Button";
 import { voiceErrorCopy, type VoiceErrorCode } from "@/lib/interview/voiceErrors";
 
 interface Props {

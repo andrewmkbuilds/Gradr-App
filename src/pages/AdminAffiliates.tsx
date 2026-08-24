@@ -1,3 +1,4 @@
+import { Button } from "@/components/ds/Button";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Loader2, Check, X, Pause, Play, Search, ShieldAlert, Gift } from "lucide-react";
@@ -281,8 +282,8 @@ function CommissionsPanel() {
               <td className="text-xs text-muted-foreground">${Number(c.source_amount || 0).toFixed(2)}</td>
               <td><span className="text-xs">{c.status}</span></td>
               <td className="space-x-1">
-                {c.status === "pending" && <button onClick={() => setStatus(c.id, "approved")} className="text-xs text-primary hover:underline">Approve</button>}
-                {c.status === "approved" && <button onClick={() => setStatus(c.id, "paid")} className="text-xs text-success hover:underline">Mark paid</button>}
+                {c.status === "pending" && <Button variant="link" size="inline" onClick={() => setStatus(c.id, "approved")}>Approve</Button>}
+                {c.status === "approved" && <Button variant="link" size="inline" onClick={() => setStatus(c.id, "paid")}>Mark paid</Button>}
                 {(c.status === "pending" || c.status === "approved") && (
                   <ConfirmDestructive
                     title="Reverse this commission?"
@@ -291,7 +292,7 @@ function CommissionsPanel() {
                     typeToConfirm="REVERSE"
                     onConfirm={async () => { await setStatus(c.id, "reversed"); }}
                   >
-                    <span role="button" tabIndex={0} className="text-xs text-destructive hover:underline cursor-pointer">Reverse</span>
+                    <Button variant="link" size="inline">Reverse</Button>
                   </ConfirmDestructive>
                 )}
 

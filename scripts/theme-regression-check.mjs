@@ -10,11 +10,15 @@
  *
  * Usage: node scripts/theme-regression-check.mjs [--static-only]
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
 import { execSync } from "node:child_process";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:8080";
-const ROUTES = ["/", "/auth", "/pricing"];
+// "/" is the authenticated dashboard, and the marketing routes 302 away on the
+// app surface, so the sign-in screen is the stable signed-out sample.
+const ROUTES = (process.env.THEME_ROUTES ?? "/auth").split(",");
 
 // Tailwind default palette families that are not design-system tokens.
 const PALETTE =
@@ -65,11 +69,32 @@ function staticPass() {
   return violations;
 }
 
+/** Locates a Chromium binary in the sandbox / CI image. */
+function findChromium() {
+  for (const envPath of [process.env.PLAYWRIGHT_CHROMIUM_PATH, process.env.CHROME_PATH]) {
+    if (envPath && existsSync(envPath)) return envPath;
+  }
+  for (const root of ["/opt/ms-playwright", join(homedir(), ".cache/ms-playwright")]) {
+    if (!existsSync(root)) continue;
+    for (const dir of readdirSync(root).filter((d) => d.startsWith("chromium"))) {
+      for (const rel of [
+        "chrome-linux/chrome",
+        "chrome-linux/headless_shell",
+        "chrome-linux64/chrome-headless-shell",
+      ]) {
+        const candidate = join(root, dir, rel);
+        if (existsSync(candidate)) return candidate;
+      }
+    }
+  }
+  return undefined;
+}
+
 async function runtimePass() {
   const { chromium } = await import("playwright");
   let browser;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   } catch (err) {
     console.warn("Skipping runtime pass — no Playwright browser available. Run `npx playwright install chromium`.");
     return [];
@@ -82,6 +107,8 @@ async function runtimePass() {
         const context = await browser.newContext({ viewport: { width: 1280, height: 1800 } });
         const page = await context.newPage();
         await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
+        // Routes may client-redirect (auth guards, surface pinning); settle first.
+        await page.waitForLoadState("networkidle").catch(() => {});
         await page.evaluate((t) => {
           document.documentElement.classList.toggle("dark", t === "dark");
           document.documentElement.style.colorScheme = t;
