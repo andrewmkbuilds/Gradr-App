@@ -27,6 +27,7 @@ import {
   Gauge,
   Globe,
   Newspaper,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 import type { Surface } from "@/config/domains";
