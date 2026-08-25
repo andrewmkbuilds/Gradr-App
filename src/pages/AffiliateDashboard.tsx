@@ -23,6 +23,7 @@ import { TierProgress, MilestoneBadges } from "@/components/affiliate/TierProgre
 import { ShareCard } from "@/components/affiliate/ShareCard";
 import { ReferralLeaderboard } from "@/components/affiliate/ReferralLeaderboard";
 import { ActivityTimeline, type TimelineEvent } from "@/components/affiliate/ActivityTimeline";
+import { AffiliateLocked } from "@/components/affiliate/AffiliateLocked";
 
 type Tab = "overview" | "rewards" | "analytics" | "campaigns";
 
