@@ -217,7 +217,8 @@ Deno.serve(async (req) => {
   }
 
   // --- Audit the dry run itself so the trail shows who probed what.
-  if (decisions.length > 0) {
+  // A pure preview writes nothing: it renders and returns, no queue, no audit.
+  if (!previewOnly && decisions.length > 0) {
     await supabase.from('email_delivery_audit').insert(
       decisions.map((d) => ({
         event: 'dry_run',
@@ -244,7 +245,10 @@ Deno.serve(async (req) => {
     html,
     renderError,
     decisions,
+    previewRecipient,
+    previewOnly,
     dryRun: true,
     sent: false,
+
   })
 })
