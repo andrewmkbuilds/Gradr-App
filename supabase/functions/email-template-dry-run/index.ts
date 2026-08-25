@@ -69,6 +69,10 @@ Deno.serve(async (req) => {
   let templateName = ''
   let recipients: string[] = []
   let templateData: Record<string, unknown> | null = null
+  /** Address the preview is personalised for. Rendering only — never a send. */
+  let previewRecipient: string | null = null
+  /** Preview mode renders the template and skips gate evaluation + audit writes. */
+  let previewOnly = false
   try {
     const body = await req.json()
     templateName = String(body.templateName ?? '')
@@ -76,9 +80,12 @@ Deno.serve(async (req) => {
       ? body.recipients.map((r: unknown) => String(r).trim()).filter(Boolean).slice(0, 25)
       : []
     if (body.templateData && typeof body.templateData === 'object') templateData = body.templateData
+    if (body.previewRecipient) previewRecipient = String(body.previewRecipient).trim() || null
+    previewOnly = body.previewOnly === true
   } catch {
     return json({ error: 'Invalid JSON in request body' }, 400)
   }
+
 
   if (!templateName) return json({ error: 'templateName is required' }, 400)
   const template = TEMPLATES[templateName]
