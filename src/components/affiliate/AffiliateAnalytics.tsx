@@ -152,7 +152,7 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
       </div>
 
       <div className="elev-2 rounded-xl p-0 overflow-hidden">
-        <div className="flex gap-1 border-b border-border px-3 pt-3 overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="Analytics sections" className="flex gap-1 border-b border-border px-3 pt-3 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {(["clicks", "referrals", "commissions", "payouts"] as const).map((t) => (
             <button
               key={t}
@@ -168,7 +168,7 @@ export function AffiliateAnalytics({ affiliateProfileId }: Props) {
           ))}
         </div>
 
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="Analytics table" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {isLoading || !data ? (
             <div className="py-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
           ) : tab === "clicks" ? (

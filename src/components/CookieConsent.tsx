@@ -82,12 +82,11 @@ export function CookieConsent() {
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <Button variant="ghost" size="sm" onClick={() => save(ALL_OFF)}>
+              <Button variant="ghost" onClick={() => save(ALL_OFF)}>
                 Reject optional
               </Button>
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => {
                   setChoices(ALL_OFF);
                   setDialogOpen(true);
@@ -95,7 +94,7 @@ export function CookieConsent() {
               >
                 Customize
               </Button>
-              <Button size="sm" onClick={() => save(ALL_ON)}>
+              <Button onClick={() => save(ALL_ON)}>
                 Accept all
               </Button>
             </div>

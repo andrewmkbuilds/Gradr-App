@@ -199,7 +199,7 @@ export default function AdminRevenue() {
             {data.atRisk.length === 0 ? (
               <p className="text-sm text-success">No failing payments. </p>
             ) : (
-              <div className="overflow-x-auto">
+              <div tabIndex={0} role="group" aria-label="Revenue table" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left text-muted-foreground">

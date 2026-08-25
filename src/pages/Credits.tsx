@@ -42,7 +42,7 @@ function AllowanceRow({
           {unlimited ? "Unlimited" : `${used} / ${allowance} used`}
         </span>
       </div>
-      <Progress value={unlimited ? 100 : pct} className="h-1.5" />
+      <Progress value={unlimited ? 100 : pct} aria-label="Credit usage" className="h-1.5" />
     </div>
   );
 }

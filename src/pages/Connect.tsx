@@ -56,7 +56,7 @@ function CopyField({ value, label }: { value: string; label: string }) {
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <code className="min-w-0 flex-1 overflow-x-auto rounded-md border border-border bg-muted/40 px-3 py-2 font-mono text-sm text-foreground">
+      <code tabIndex={0} className="min-w-0 flex-1 overflow-x-auto rounded-md border border-border bg-muted/40 px-3 py-2 font-mono text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         {value}
       </code>
       <Button variant="outline" size="sm" className="gap-2 shrink-0" onClick={() => void copy()}>

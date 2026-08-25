@@ -245,7 +245,7 @@ export default function AdminSecurityLog() {
       </p>
 
 
-      <div className="elev-2 rounded-xl overflow-x-auto">
+      <div tabIndex={0} role="group" aria-label="Security log table" className="elev-2 rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <table className="w-full text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
             <tr>

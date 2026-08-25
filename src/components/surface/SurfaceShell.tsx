@@ -49,7 +49,7 @@ export function SurfaceShell({ nav = [], eyebrow, children }: SurfaceShellProps)
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="relative flex min-h-dvh flex-col bg-background">
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[32rem] opacity-[0.14]"

@@ -44,7 +44,7 @@ export function NavBreadcrumb() {
             <Link
               to="/"
               aria-label="Dashboard"
-              className="interactive flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+              className="interactive -my-2 flex min-h-11 min-w-11 items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground sm:min-w-0 sm:justify-start"
               onClick={() => trackEvent("nav_item_click", { location: "breadcrumb", item: "/", item_title: "Dashboard" })}
             >
               <Home className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />

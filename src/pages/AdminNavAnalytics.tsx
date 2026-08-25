@@ -236,7 +236,7 @@ export default function AdminNavAnalytics() {
                 <CardTitle className="text-lg">Groups</CardTitle>
                 <CardDescription>Opens, clicks and click-through per sidebar group.</CardDescription>
               </CardHeader>
-              <CardContent className="overflow-x-auto">
+              <CardContent tabIndex={0} role="group" aria-label="Navigation analytics table" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <table className="w-full text-sm">
                   <caption className="sr-only">Navigation group engagement</caption>
                   <thead>

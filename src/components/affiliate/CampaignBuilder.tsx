@@ -117,7 +117,7 @@ export function CampaignBuilder({ affiliateProfileId, affiliateCode }: Props) {
       <div className="elev-2 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Plus className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold text-foreground">Campaign link builder</h3>
+          <h2 className="text-sm font-semibold text-foreground">Campaign link builder</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

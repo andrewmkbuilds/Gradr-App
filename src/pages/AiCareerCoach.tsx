@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
+import { cn } from "@/lib/utils";
 import {
   ArrowRight,
   Compass,
@@ -232,7 +234,7 @@ export default function AiCareerCoach() {
           <Link
             to={ctaHref("/auth?mode=signup", "hero_primary")}
             onClick={trackSignupClick("hero_primary", "Get your free career analysis")}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] motion-reduce:transform-none"
+            className={cn(buttonVariants({ variant: "primary", size: "lg" }), "transition-transform hover:scale-[1.02] motion-reduce:transform-none")}
           >
             <Compass className="h-4 w-4" aria-hidden="true" />
             Get your free career analysis
@@ -240,7 +242,7 @@ export default function AiCareerCoach() {
           <Link
             to={ctaHref("/pricing", "hero_secondary")}
             onClick={trackCta("hero_secondary", "/pricing")}
-            className="inline-flex h-11 items-center gap-2 rounded-xl border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            className={buttonVariants({ variant: "outline", size: "lg" })}
           >
             See plans and limits
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -307,7 +309,7 @@ export default function AiCareerCoach() {
           The difference is not the model. It is whether the advice can see your resume, your
           matches, and the roles you are competing for.
         </p>
-        <div className="mt-6 overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="Comparison table" className="mt-6 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <table className="w-full min-w-[640px] text-sm">
             <caption className="sr-only">
               Comparison of generic AI career advice and Gradr's data-grounded career coaching

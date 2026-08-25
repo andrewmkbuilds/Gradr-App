@@ -98,7 +98,7 @@ function Column({ status, label, tone, jobs, onCardClick }: {
   return (
     <div className="flex flex-col min-w-[260px] flex-1">
       <div className="flex items-center justify-between px-2 mb-2">
-        <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+        <h2 className="text-sm font-semibold text-foreground">{label}</h2>
         <Badge>{jobs.length}</Badge>
       </div>
       <div
@@ -304,7 +304,12 @@ export default function Pipeline() {
       )}
 
       <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div
+          tabIndex={0}
+          role="group"
+          aria-label="Application pipeline columns"
+          className="flex gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           {COLUMNS.map((c) => (
             <Column key={c.key} status={c.key} label={c.label} tone={c.tone} jobs={grouped[c.key]} onCardClick={setSelected} />
           ))}

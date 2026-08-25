@@ -25,9 +25,9 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
   if (versions.length === 0) {
     return (
       <div className="elev-2 rounded-xl p-5">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Layers className="h-4 w-4 text-primary" /> Resume versions
-        </h3>
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Every resume you analyse is saved here as a version. Tailor one to a job title and it will be labelled
           automatically, so you can compare scores side by side.
@@ -39,9 +39,9 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
   return (
     <div className="elev-2 rounded-xl p-5">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Layers className="h-4 w-4 text-primary" /> Resume versions
-        </h3>
+        </h2>
         <div className="flex items-center gap-2">
           {(!online || fromCache) && (
             <span className="inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">

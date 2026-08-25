@@ -170,9 +170,9 @@ export function ResumeVersionDiff() {
   if (versions.length < 2) {
     return (
       <div className="elev-2 rounded-xl p-5">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <GitCompare className="h-4 w-4 text-primary" aria-hidden="true" /> Compare versions
-        </h3>
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Analyse or tailor a second resume and this panel will show exactly what changed between versions — and how each
           edit moved your ATS and keyword scores.
@@ -186,9 +186,9 @@ export function ResumeVersionDiff() {
   return (
     <div className="elev-2 rounded-xl p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <GitCompare className="h-4 w-4 text-primary" aria-hidden="true" /> Compare versions
-        </h3>
+        </h2>
         <DeltaPill delta={atsDelta} />
       </div>
 

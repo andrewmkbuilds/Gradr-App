@@ -80,10 +80,10 @@ export function SessionDebrief({ report, messages, targetRole, durationSec, onPr
       <div className="grid gap-4 sm:grid-cols-2">
         {columns.map(({ key, title, icon: Icon, tone }) => (
           <div key={key} className="rounded-xl border border-border bg-secondary/30 p-4">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Icon className={`h-4 w-4 ${tone}`} aria-hidden="true" />
               {title}
-            </h3>
+            </h2>
             <ul className="mt-3 space-y-2">
               {(report[key] ?? []).map((item, i) => (
                 <li key={i} className="flex gap-2 text-sm leading-relaxed text-muted-foreground">
@@ -103,10 +103,10 @@ export function SessionDebrief({ report, messages, targetRole, durationSec, onPr
 
       {questions.length > 0 && (
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <HelpCircle className="h-4 w-4 text-mahogany" aria-hidden="true" />
             Next recommended questions
-          </h3>
+          </h2>
           <ul className="mt-3 space-y-2">
             {questions.map((q, i) => (
               <li

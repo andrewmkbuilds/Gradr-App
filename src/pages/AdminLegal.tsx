@@ -231,7 +231,7 @@ export default function AdminLegal() {
                       Users are blocked until they explicitly accept this version.
                     </p>
                   </div>
-                  <Switch checked={requiresAcceptance} onCheckedChange={setRequiresAcceptance} />
+                  <Switch aria-label="Require explicit acceptance of this version" checked={requiresAcceptance} onCheckedChange={setRequiresAcceptance} />
                 </div>
                 <Button onClick={createDraft} disabled={busy}>
                   <Plus className="mr-1.5 h-4 w-4" /> Save draft

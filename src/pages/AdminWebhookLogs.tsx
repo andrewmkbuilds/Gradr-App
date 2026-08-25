@@ -308,7 +308,7 @@ export default function AdminWebhookLogs() {
       </div>
 
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="Webhook log table" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <table className="w-full text-sm">
             <caption className="sr-only">Webhook delivery log</caption>
             <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">

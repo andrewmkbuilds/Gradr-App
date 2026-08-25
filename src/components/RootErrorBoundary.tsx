@@ -67,7 +67,7 @@ export class RootErrorBoundary extends Component<Props, State> {
       <div
         role="alert"
         data-app-error-screen
-        className="flex min-h-screen items-center justify-center bg-background px-6 py-12 text-foreground"
+        className="flex min-h-dvh items-center justify-center bg-background px-6 py-12 text-foreground"
       >
         <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-lg">
           <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">

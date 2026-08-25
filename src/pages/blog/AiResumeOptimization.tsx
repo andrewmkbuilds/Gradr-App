@@ -45,7 +45,7 @@ export default function AiResumeOptimization() {
   useReadTracking("ai-resume-optimization");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Helmet>
         <meta property="og:type" content="article" />
         <meta property="article:published_time" content={PUBLISHED} />
@@ -68,6 +68,7 @@ export default function AiResumeOptimization() {
         </div>
       </header>
 
+      <main>
       <article className="max-w-3xl mx-auto px-6 section-block">
         <p className="text-xs uppercase tracking-wider text-primary font-medium mb-3">Guide · Resume Intelligence</p>
         <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight leading-tight">
@@ -387,6 +388,7 @@ export default function AiResumeOptimization() {
 
         </div>
       </article>
+      </main>
 
       <footer className="border-t border-border mt-8">
         <div className="max-w-4xl mx-auto px-6 py-6 text-xs text-muted-foreground flex items-center justify-between flex-wrap gap-2">

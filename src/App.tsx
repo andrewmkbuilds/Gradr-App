@@ -171,7 +171,7 @@ function ProtectedRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-5">
+      <div className="min-h-dvh bg-background flex flex-col items-center justify-center gap-5">
         <BrandLogo size={64} className="animate-pulse" />
         <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         <span className="sr-only">Loading Gradr</span>
@@ -513,7 +513,7 @@ function TelemetryRouteTracker() {
 const App = () => (
   <SentryErrorBoundary
     fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
+      <div className="min-h-dvh bg-background flex items-center justify-center p-6 text-center">
         <div className="space-y-2">
           <p className="text-lg font-semibold text-foreground">Something broke on our side</p>
           <p className="text-sm text-muted-foreground">

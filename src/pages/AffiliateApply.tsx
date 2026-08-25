@@ -96,33 +96,33 @@ export default function AffiliateApply() {
 
       <form onSubmit={handleSubmit} className="elev-2 rounded-xl p-6 space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className={labelCls}>Full name *</label><input name="full_name" required defaultValue={user?.user_metadata?.full_name || ""} className={inputCls} /></div>
-          <div><label className={labelCls}>Contact email *</label><input name="email" type="email" required defaultValue={user?.email || ""} className={inputCls} /></div>
-          <div><label className={labelCls}>Brand / company</label><input name="brand_name" className={inputCls} /></div>
-          <div><label className={labelCls}>Website</label><input name="website" placeholder="https://" className={inputCls} /></div>
-          <div><label className={labelCls}>Twitter / X</label><input name="twitter" placeholder="@handle or url" className={inputCls} /></div>
-          <div><label className={labelCls}>LinkedIn</label><input name="linkedin" className={inputCls} /></div>
-          <div><label className={labelCls}>YouTube / TikTok</label><input name="youtube" className={inputCls} /></div>
-          <div><label className={labelCls}>Audience type *</label><input name="audience_type" required placeholder="e.g. career coach, student creator" className={inputCls} /></div>
-          <div><label className={labelCls}>Audience size *</label><input name="audience_size" required placeholder="e.g. 12k newsletter, 50k YT" className={inputCls} /></div>
-          <div><label className={labelCls}>Payout email *</label><input name="payout_email" type="email" required defaultValue={user?.email || ""} className={inputCls} /></div>
-          <div>
-            <label className={labelCls}>Payout method *</label>
+          <label className="block"><span className={labelCls}>Full name *</span><input name="full_name" required defaultValue={user?.user_metadata?.full_name || ""} className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>Contact email *</span><input name="email" type="email" required defaultValue={user?.email || ""} className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>Brand / company</span><input name="brand_name" className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>Website</span><input name="website" placeholder="https://" className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>Twitter / X</span><input name="twitter" placeholder="@handle or url" className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>LinkedIn</span><input name="linkedin" className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>YouTube / TikTok</span><input name="youtube" className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>Audience type *</span><input name="audience_type" required placeholder="e.g. career coach, student creator" className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>Audience size *</span><input name="audience_size" required placeholder="e.g. 12k newsletter, 50k YT" className={inputCls} /></label>
+          <label className="block"><span className={labelCls}>Payout email *</span><input name="payout_email" type="email" required defaultValue={user?.email || ""} className={inputCls} /></label>
+          <label className="block">
+            <span className={labelCls}>Payout method *</span>
             <select name="payout_method" defaultValue="paypal" className={inputCls}>
               <option value="paypal">PayPal</option>
               <option value="wise">Wise</option>
               <option value="bank">Bank transfer</option>
             </select>
-          </div>
+          </label>
         </div>
-        <div>
-          <label className={labelCls}>How will you promote Gradr? *</label>
+        <label className="block">
+          <span className={labelCls}>How will you promote Gradr? *</span>
           <textarea name="promotion_plan" required rows={4} className={inputCls} placeholder="Newsletter feature, YouTube review, course bonus, etc." />
-        </div>
-        <div>
-          <label className={labelCls}>Why do you want to join? *</label>
+        </label>
+        <label className="block">
+          <span className={labelCls}>Why do you want to join? *</span>
           <textarea name="why_join" required rows={3} className={inputCls} />
-        </div>
+        </label>
         <label className="flex items-start gap-2 text-sm text-muted-foreground">
           <input type="checkbox" name="agreed_to_terms" required className="mt-1" />
           <span>I agree to the Gradr affiliate terms, including no self-referrals, no brand-keyword paid search, and commission reversal on refunds.</span>
