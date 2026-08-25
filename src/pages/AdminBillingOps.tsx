@@ -174,7 +174,7 @@ export default function AdminBillingOps() {
         <TabsContent value="alerts" className="space-y-4 pt-4">
           <div className="flex items-center gap-3">
             <Select value={alertFilter} onValueChange={setAlertFilter}>
-              <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Filter alerts" className="w-44"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="open">Open</SelectItem>
                 <SelectItem value="resolved">Resolved</SelectItem>
@@ -230,7 +230,7 @@ export default function AdminBillingOps() {
 
         <TabsContent value="deliveries" className="space-y-4 pt-4">
           <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Filter webhook deliveries" className="w-44"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="failed">Failed</SelectItem>
               <SelectItem value="processed">Processed</SelectItem>
@@ -294,7 +294,7 @@ export default function AdminBillingOps() {
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={scenario} onValueChange={setScenario}>
-                <SelectTrigger className="sm:w-96"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Select webhook event" className="sm:w-96"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {SCENARIOS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                 </SelectContent>

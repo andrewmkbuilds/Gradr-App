@@ -241,7 +241,7 @@ export default function AdminDiscounts() {
                   value={draft.eligibility_type}
                   onValueChange={(v) => setDraft({ ...draft, eligibility_type: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Eligibility category">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -400,7 +400,7 @@ export default function AdminDiscounts() {
           {redemptions.isLoading ? (
             <Skeleton className="h-40 w-full" />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div tabIndex={0} role="group" aria-label="Discounts table" className="overflow-x-auto rounded-lg border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-xs text-muted-foreground">
                   <tr>
@@ -466,7 +466,7 @@ export default function AdminDiscounts() {
                     value={String(settings.data.affiliate_commission_basis ?? "net")}
                     onValueChange={(v) => saveSettings.mutate({ affiliate_commission_basis: v })}
                   >
-                    <SelectTrigger className="max-w-xs">
+                    <SelectTrigger aria-label="Affiliate commission basis" className="max-w-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

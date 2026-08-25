@@ -279,7 +279,7 @@ export default function AiInterviewCoach() {
           Nothing is a black box. Each dimension is weighted, reported separately, and traced
           back to the signals that produced it.
         </p>
-        <div className="mt-6 overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="Comparison table" className="mt-6 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <table className="w-full min-w-[640px] text-sm">
             <caption className="sr-only">
               AI mock interview scoring dimensions, weights, what each measures, and the data signals used
@@ -310,7 +310,7 @@ export default function AiInterviewCoach() {
         <h3 className="section-gap text-lg font-semibold tracking-tight text-foreground">
           What your interview score means
         </h3>
-        <div className="mt-4 overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="Comparison table" className="mt-4 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <table className="w-full min-w-[420px] text-sm">
             <caption className="sr-only">Interview score bands and what each range means</caption>
             <thead>

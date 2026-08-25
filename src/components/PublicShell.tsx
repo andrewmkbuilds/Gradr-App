@@ -45,7 +45,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-dvh bg-background">
       {/* Ambient Ocean Teal wash — decorative, sits behind everything. */}
       <div
         aria-hidden="true"

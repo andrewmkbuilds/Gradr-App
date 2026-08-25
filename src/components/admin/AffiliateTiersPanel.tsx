@@ -74,7 +74,7 @@ export function AffiliateTiersPanel() {
         threshold they have reached, and the bonus rate is added to their percentage commission.
       </p>
 
-      <div className="elev-2 rounded-xl overflow-x-auto">
+      <div tabIndex={0} role="group" aria-label="Affiliate tiers table" className="elev-2 rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground">
             <tr>

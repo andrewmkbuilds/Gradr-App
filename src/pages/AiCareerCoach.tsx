@@ -307,7 +307,7 @@ export default function AiCareerCoach() {
           The difference is not the model. It is whether the advice can see your resume, your
           matches, and the roles you are competing for.
         </p>
-        <div className="mt-6 overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="Comparison table" className="mt-6 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <table className="w-full min-w-[640px] text-sm">
             <caption className="sr-only">
               Comparison of generic AI career advice and Gradr's data-grounded career coaching

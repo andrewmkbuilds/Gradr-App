@@ -140,7 +140,7 @@ export default function AffiliateDashboard() {
 
       <ShareCard code={profile.affiliate_code} link={link} />
 
-      <div className="flex gap-1 border-b border-border overflow-x-auto">
+      <div tabIndex={0} role="group" aria-label="Affiliate sections" className="flex gap-1 border-b border-border overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         {tabs.map((t) => (
           <button
             key={t.id}

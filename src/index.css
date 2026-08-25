@@ -1362,6 +1362,14 @@ html[data-motion="reduced"] *::after {
     max-width: 100%;
     overflow-x: auto;
   }
+  /* When a table already sits in a focusable scroll wrapper, let the wrapper
+     own the scrolling so the table itself never becomes an unreachable
+     keyboard scroll region. */
+  main .overflow-x-auto table {
+    display: table;
+    max-width: none;
+    overflow-x: visible;
+  }
 
   /* Every tappable control clears the 44px target on touch. */
   button,

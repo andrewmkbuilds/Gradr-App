@@ -434,9 +434,9 @@ export default function JobMatchingEngine() {
               >
                 <Target className="h-7 w-7" aria-hidden="true" />
               </motion.span>
-              <h3 className="font-display text-lg text-foreground">
+              <h2 className="font-display text-lg text-foreground">
                 {searched ? "No live jobs cleared the bar" : "Match against real openings"}
-              </h3>
+              </h2>
               <p className="mt-1.5 max-w-md text-sm text-muted-foreground">
                 {searched
                   ? "Try a broader role title, a different location, or turn off remote-only."

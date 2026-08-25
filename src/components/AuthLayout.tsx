@@ -11,7 +11,7 @@ const TITLE = "Gradr";
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center aurora-bg overflow-hidden relative">
+    <div className="min-h-dvh flex items-center justify-center aurora-bg overflow-hidden relative">
       <div className="absolute right-4 top-4 z-20">
         <ThemeToggle />
       </div>

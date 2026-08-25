@@ -75,7 +75,7 @@ export function CareerReadiness({
       />
 
       <div className="mb-1 flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold text-foreground">Career Readiness</h3>
+        <h2 className="text-sm font-semibold text-foreground">Career Readiness</h2>
         <span className={cn("text-xs font-medium", state.tone)}>{state.label}</span>
       </div>
       <p className="text-xs text-muted-foreground">Weighted across resume, matching, activity and practice.</p>

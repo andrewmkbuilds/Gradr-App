@@ -301,7 +301,7 @@ export default function AdminApiHealth() {
         <div className="border-b border-border p-4">
           <h2 className="text-sm font-semibold">Per-provider breakdown</h2>
         </div>
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="group" aria-label="API health table" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <table className="w-full text-sm">
             <caption className="sr-only">Provider health summary for the selected window</caption>
             <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">

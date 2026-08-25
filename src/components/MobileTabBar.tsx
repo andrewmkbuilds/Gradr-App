@@ -60,7 +60,7 @@ export function MobileTabBar() {
                 className={cn(
                   // min-h-11 keeps every tap target at least 44px tall.
                   "interactive flex min-h-11 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  active ? "text-primary" : "text-foreground/90 hover:text-foreground",
                 )}
               >
                 <tab.icon

@@ -12,6 +12,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [linkExpired, setLinkExpired] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,7 +28,19 @@ export default function ResetPassword() {
       setReady(true);
     }
 
-    return () => subscription.unsubscribe();
+    // If no recovery session materialises, surface a real error instead of
+    // spinning forever.
+    const timer = window.setTimeout(() => {
+      setReady((current) => {
+        if (!current) setLinkExpired(true);
+        return current;
+      });
+    }, 4000);
+
+    return () => {
+      window.clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -56,12 +69,29 @@ export default function ResetPassword() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-body-sm text-muted-foreground">Verifying reset link...</p>
+      <AuthLayout>
+        <div className="space-y-2">
+          <Text variant="h4" as="h1">
+            {linkExpired ? "This reset link is no longer valid" : "Checking your reset link"}
+          </Text>
+          <Text variant="body-sm" tone="muted">
+            {linkExpired
+              ? "Password reset links expire after a short while and can only be used once. Request a new one and we'll email it straight away."
+              : "One moment while we verify the link you opened."}
+          </Text>
         </div>
-      </div>
+        {linkExpired ? (
+          <Button size="lg" className="w-full" onClick={() => navigate("/forgot-password")}>
+            Request a new link
+          </Button>
+        ) : (
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"
+            role="status"
+            aria-label="Verifying reset link"
+          />
+        )}
+      </AuthLayout>
     );
   }
 
