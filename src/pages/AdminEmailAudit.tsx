@@ -108,20 +108,20 @@ export default function AdminEmailAudit() {
         </Button>
       </div>
 
-      {error && <p className="text-sm text-destructive">{(error as Error).message}</p>}
+      {error && <p className="text-body-sm text-destructive">{(error as Error).message}</p>}
 
       {isLoading ? (
         <Skeleton className="h-64 w-full" />
       ) : rows.length === 0 ? (
         <Card className="p-8 text-center elev-1">
           <ScrollText className="h-6 w-6 mx-auto text-muted-foreground" aria-hidden="true" />
-          <p className="text-sm mt-2">No delivery events recorded yet.</p>
+          <p className="text-body-sm mt-2">No delivery events recorded yet.</p>
         </Card>
       ) : (
         <Card className="p-0 overflow-x-auto elev-1">
-          <table className="w-full text-sm">
+          <table className="w-full text-body-sm">
             <caption className="sr-only">Email delivery audit log</caption>
-            <thead className="bg-surface-muted text-xs text-muted-foreground">
+            <thead className="bg-surface-muted text-caption text-muted-foreground">
               <tr>
                 <th scope="col" className="px-4 py-2 text-left font-medium">When</th>
                 <th scope="col" className="px-4 py-2 text-left font-medium">Event</th>
@@ -135,19 +135,19 @@ export default function AdminEmailAudit() {
             <tbody className="divide-y divide-border/60">
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td className="px-4 py-2 whitespace-nowrap text-xs text-muted-foreground">
+                  <td className="px-4 py-2 whitespace-nowrap text-caption text-muted-foreground">
                     {format(new Date(r.occurred_at), "d MMM yyyy HH:mm")}
                   </td>
                   <td className="px-4 py-2">
                     <Badge variant={EVENT_VARIANT[r.event] ?? "outline"}>{r.event}</Badge>
                   </td>
                   <td className="px-4 py-2"><code className="text-code">{r.template_name}</code></td>
-                  <td className="px-4 py-2 text-xs">{r.category_label ?? "Unclassified"}</td>
-                  <td className="px-4 py-2 text-xs">{r.recipient_email}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">
+                  <td className="px-4 py-2 text-caption">{r.category_label ?? "Unclassified"}</td>
+                  <td className="px-4 py-2 text-caption">{r.recipient_email}</td>
+                  <td className="px-4 py-2 text-caption text-muted-foreground">
                     {r.recipient_user_id ? `${r.recipient_user_id.slice(0, 8)}…` : "—"}
                   </td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{r.reason ?? "—"}</td>
+                  <td className="px-4 py-2 text-caption text-muted-foreground">{r.reason ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
