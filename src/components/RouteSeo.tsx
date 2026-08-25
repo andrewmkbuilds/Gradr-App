@@ -22,9 +22,10 @@ const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og.png`;
 
 const META: Record<string, { title: string; description: string }> = {
-  // "/" is the authenticated dashboard (signed-out visitors are redirected to
-  // /auth). There is no public landing page on this surface, so "/" is
-  // noindexed and its metadata is purely functional.
+  // "/" is the authenticated dashboard; signed-out visitors are redirected to
+  // /auth. It is indexable so brand searches resolve to the canonical public
+  // host (gradr.me) — the dashboard itself stays behind auth, so no private
+  // content is exposed to crawlers.
   "/": {
     title: "Dashboard",
     description: "Your Gradr career command center: resumes, jobs, applications and interview prep.",
@@ -236,16 +237,22 @@ function resolveOgImage(pathname: string): string {
  * no public content and only dilute how search engines understand Gradr.
  */
 const NOINDEX_EXACT = new Set([
-  "/",
+  // Brand entry points ("/" and "/auth") are intentionally indexable so Google
+  // can consolidate them onto the canonical public host (gradr.me) and brand
+  // searches resolve. Everything below is a private/authenticated surface.
+  "/dashboard",
   "/landing",
   "/home",
-  "/auth",
   "/forgot-password",
   "/reset-password",
   "/verify-email",
   "/welcome",
   "/settings",
   "/billing",
+  "/billing/history",
+  "/credits",
+  "/subscription",
+  "/manage-subscription",
   "/resume",
   "/jobs",
   "/match",
@@ -254,6 +261,8 @@ const NOINDEX_EXACT = new Set([
   "/interview",
   "/interview/history",
   "/growth",
+  "/connect",
+  "/unsubscribe",
   "/affiliate/apply",
   "/affiliate/dashboard",
   "/affiliate/resources",
@@ -422,12 +431,14 @@ export function RouteSeo() {
   // slash, aliases resolved) on this surface's own production origin, so
   // docs.gradr.me never canonicalises to gradr.me and vice versa.
   const canonical = canonicalPath(pathname);
-  // app.gradr.me is a private product surface: it is fully noindexed, and any
-  // public page reachable there points its canonical at the public host.
+  // app.gradr.me shares the home surface's robots policy: public entry points
+  // (homepage, auth, legal, tool pages) are indexable and canonicalise to the
+  // public host (gradr.me) so Google consolidates them; authenticated routes
+  // stay noindexed via isSurfaceNoIndex.
   const canonicalSurface: Surface = surface === "app" ? "home" : surface;
   const url = canonicalUrlFor(canonicalSurface, canonical);
   const ogImage = resolveOgImage(canonical);
-  const noindex = surface === "app" || isSurfaceNoIndex(surface, canonical);
+  const noindex = isSurfaceNoIndex(surface, canonical);
 
 
   // index.html ships a full static SEO head so crawlers that never execute
