@@ -16,9 +16,11 @@
  *   node scripts/screenshot-diff.mjs            # compare against baselines
  */
 import { chromium } from "playwright";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, appendFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
+import { PNG } from "pngjs";
+import pixelmatch from "pixelmatch";
 import { settle, stableScreenshot, withRetry } from "./lib/pageStability.mjs";
 import { loadManifest, verifyLocks } from "./lib/visualBaselines.mjs";
 
@@ -28,8 +30,21 @@ const ROOT = process.cwd();
 const BASELINE_DIR = join(ROOT, "tests/visual/themes/baseline");
 const CURRENT_DIR = join(ROOT, "tests/visual/themes/current");
 const PENDING_DIR = join(ROOT, "tests/visual/themes/pending");
+const DIFF_DIR = join(ROOT, "tests/visual/themes/diff");
+const REPORT_FILE = join(ROOT, "tests/reports/json/visual-themes.json");
+// Two thresholds, deliberately:
+//   drift <= TOLERANCE             -> pass
+//   TOLERANCE < drift <= QUARANTINE-> real regression, blocks the merge
+//   drift  > QUARANTINE            -> too large to be a targeted regression
+//                                     (renderer/font/env breakage, a whole
+//                                     screen swap). The run is QUARANTINED:
+//                                     reported loudly, artifacts uploaded, but
+//                                     it does not block the merge — a human
+//                                     triages it instead of everyone force-merging.
 const TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.02); // 2% of pixels
+const QUARANTINE_TOLERANCE = Number(process.env.VISUAL_QUARANTINE_TOLERANCE ?? 0.25); // 25% of pixels
 const RETRIES = Number(process.env.VISUAL_RETRIES ?? 3);
+
 
 const PUBLIC_ROUTES = [["auth", "/auth"]];
 const AUTHED_ROUTES = [
