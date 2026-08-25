@@ -150,6 +150,8 @@ export const navGroups: NavGroup[] = [
       { title: "Nav Analytics", url: "/admin/nav-analytics", icon: BarChart3 },
       { title: "SEO Monitor", url: "/admin/seo-monitor", icon: BarChart3 },
       { title: "Digest Preview", url: "/admin/digest-preview", icon: Mail },
+      { title: "Email Templates", url: "/admin/email-templates", icon: Mail },
+      { title: "Email Delivery Audit", url: "/admin/email-audit", icon: Mail },
       { title: "Paddle Customers", url: "/admin/paddle", icon: Wallet },
       { title: "Payments Status", url: "/admin/payments-status", icon: Activity },
       { title: "Brand Assets", url: "/admin/brand-assets", icon: ImageIcon },
