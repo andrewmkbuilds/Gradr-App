@@ -214,6 +214,11 @@ export default function AdminHome() {
         />
       </section>
 
+      <section aria-label="Weekly email report">
+        <EmailWeeklyReportCard compact />
+      </section>
+
+
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div>
           <p className={typography.h4}>Security scan</p>
