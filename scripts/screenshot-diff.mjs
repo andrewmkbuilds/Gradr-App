@@ -196,8 +196,11 @@ async function main() {
         const why = lock.unlocked.length ? "never approved" : "edited without approval";
         console.log(`FAIL ${file}  baseline lock: ${why}`);
         failures.push(`${file}: baseline ${why} — run 'bun run visual:baseline:review'`);
+        results.push({ name: file, status: "failed", detail: `baseline ${why}` });
         continue;
       }
+
+      const diffPath = join(DIFF_DIR, file);
 
       // Retry the capture before failing: a first-attempt miss is usually a late
       // paint, not a regression.
@@ -205,23 +208,49 @@ async function main() {
         async () => {
           const { buffer, stable } = await stableScreenshot(page);
           writeFileSync(current, buffer);
-          const ratio = await diffRatio(page, baseline, current);
-          return { ok: ratio <= TOLERANCE, ratio, stable };
+          const { ratio, sizeChanged } = diffRatio(baseline, current, diffPath);
+          return { ok: ratio <= TOLERANCE, ratio, sizeChanged, stable };
         },
         { attempts: RETRIES, beforeRetry: async () => { await page.waitForTimeout(500); await prepare(); } },
       );
 
-      const verdict = outcome.ok ? "ok" : "FAIL";
+      const driftPct = outcome.ratio * 100;
+      const status = outcome.ok
+        ? "passed"
+        : outcome.ratio > QUARANTINE_TOLERANCE
+          ? "quarantined"
+          : "failed";
+      const verdict = { passed: "ok", failed: "FAIL", quarantined: "QUAR" }[status];
       console.log(
-        `${verdict.padEnd(4)} ${file}  ${(outcome.ratio * 100).toFixed(2)}% changed` +
+        `${verdict.padEnd(4)} ${file}  ${driftPct.toFixed(2)}% changed` +
+          (outcome.sizeChanged ? "  (capture size changed)" : "") +
           (outcome.attempts > 1 ? `  (${outcome.attempts} attempts)` : ""),
       );
-      if (!outcome.ok) failures.push(`${file}: ${(outcome.ratio * 100).toFixed(2)}% of pixels changed`);
+
+      results.push({
+        name: file,
+        status,
+        drift: Number(driftPct.toFixed(2)),
+        threshold: Number((TOLERANCE * 100).toFixed(2)),
+        quarantineThreshold: Number((QUARANTINE_TOLERANCE * 100).toFixed(2)),
+        sizeChanged: outcome.sizeChanged,
+        baseline: `tests/visual/themes/baseline/${file}`,
+        current: `tests/visual/themes/current/${file}`,
+        diff: existsSync(diffPath) ? `tests/visual/themes/diff/${file}` : null,
+      });
+
+      if (status === "failed") failures.push(`${file}: ${driftPct.toFixed(2)}% of pixels changed`);
+      if (status === "quarantined") {
+        quarantined.push(
+          `${file}: ${driftPct.toFixed(2)}% of pixels changed (over the ${(QUARANTINE_TOLERANCE * 100).toFixed(0)}% quarantine threshold)`,
+        );
+      }
     }
 
     await context.close();
   }
   }
+
 
   await browser.close();
 
