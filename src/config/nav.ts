@@ -121,8 +121,9 @@ export const navGroups: NavGroup[] = [
     icon: Gift,
     url: "/pricing",
     items: [
-      { title: "Affiliate Program", url: "/", icon: Gift, surface: "affiliates" },
-      { title: "Affiliate Dashboard", url: "/dashboard", icon: BarChart3, surface: "affiliates" },
+      { title: "Affiliate Program", url: "/affiliate", icon: Gift },
+      { title: "Affiliate Dashboard", url: "/affiliate/dashboard", icon: BarChart3 },
+      { title: "Affiliate Resources", url: "/affiliate/resources", icon: BookOpen },
       { title: "Documentation", url: "/", icon: BookOpen, surface: "docs" },
       { title: "Gradr News", url: "/", icon: Newspaper, surface: "news" },
       { title: "Product site", url: "/", icon: Globe, surface: "marketing" },

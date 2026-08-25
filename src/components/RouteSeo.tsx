@@ -241,6 +241,10 @@ const NOINDEX_EXACT = new Set([
   // can consolidate them onto the canonical public host (gradr.me) and brand
   // searches resolve. Everything below is a private/authenticated surface.
   "/dashboard",
+  "/affiliate/dashboard",
+  "/affiliate/resources",
+  "/affiliate/apply",
+  "/affiliate/join",
   "/landing",
   "/home",
   "/forgot-password",
