@@ -136,8 +136,12 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   const failures = [];
+  const quarantined = [];
   const captured = [];
   const pending = [];
+  /** Per-capture rows consumed by the PR summary comment. */
+  const results = [];
+
 
   for (const theme of THEMES) {
   for (const group of groups) {
