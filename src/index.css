@@ -355,6 +355,23 @@
   @media (min-width: 640px) {
     .page-shell { padding-inline: 2rem; }
   }
+
+  /* ---------- Vertical rhythm system ----------
+     One vertical scale for every public/marketing section, so pages flow
+     continuously instead of accumulating one-off py-14/py-20/mt-24 gaps that
+     stack into large empty bands. All three fluidly compress on tablet and
+     phone, where a fixed 4-6rem gap eats most of the viewport. */
+  .section-hero {
+    padding-block: clamp(2rem, 1.25rem + 3vw, 3.5rem) clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
+  }
+  .section-block {
+    padding-block: clamp(2rem, 1.5rem + 1.75vw, 3rem);
+  }
+  /* Gap between sibling sections inside one page body (replaces mt-14/mt-16). */
+  .section-gap {
+    margin-top: clamp(2.25rem, 1.5rem + 2.25vw, 3.25rem);
+  }
+
   /* Perfectly centred square box for icons, avatars and logo marks.
      Uses grid place-items so the glyph is centred on both axes regardless of
      line-height or the icon's own baseline. */
