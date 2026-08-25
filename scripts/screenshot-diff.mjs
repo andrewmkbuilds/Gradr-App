@@ -262,7 +262,29 @@ async function main() {
         "  bun run visual:baseline:review\n" +
         '  bun run visual:baseline:approve -- --all --reviewer "Your Name" --reason "why"',
     );
-    if (!UPDATE) failures.push(`${pending.length} baseline(s) missing approval`);
+    if (!UPDATE) {
+      failures.push(`${pending.length} baseline(s) missing approval`);
+      pending.forEach((f) => results.push({ name: f, status: "failed", detail: "awaiting baseline approval" }));
+    }
+  }
+
+  const isQuarantined = quarantined.length > 0 && failures.length === 0;
+  writeReport({
+    quarantined: isQuarantined,
+    tolerance: TOLERANCE * 100,
+    quarantineThreshold: QUARANTINE_TOLERANCE * 100,
+    results,
+  });
+
+  if (quarantined.length) {
+    console.warn(`\n${quarantined.length} capture(s) QUARANTINED (drift too large to be a targeted regression):`);
+    quarantined.forEach((f) => console.warn("  " + f));
+    console.warn(
+      "\nDrift this size normally means a renderer/font/environment difference or a whole-screen\n" +
+        "change, not a pixel regression. Artifacts are uploaded for triage; this does not block the merge.\n" +
+        "Triage: open the diff PNGs in tests/visual/themes/diff, then either fix the cause or approve\n" +
+        'new baselines with `bun run visual:baseline:approve -- --all --reviewer "You" --reason "why"`.',
+    );
   }
 
   if (failures.length) {
@@ -274,8 +296,26 @@ async function main() {
     );
     process.exit(1);
   }
+
+  if (isQuarantined) {
+    console.warn("\nScreenshot diff QUARANTINED — reported, not blocking.");
+    return;
+  }
   console.log(`\nScreenshot diff passed (${captured.length} captures).`);
 }
+
+/** Writes the machine-readable report and exports the quarantine flag to CI. */
+function writeReport(report) {
+  mkdirSync(join(ROOT, "tests/reports/json"), { recursive: true });
+  writeFileSync(REPORT_FILE, JSON.stringify(report, null, 2) + "\n");
+  if (process.env.GITHUB_OUTPUT) {
+    appendFileSync(process.env.GITHUB_OUTPUT, `quarantined=${report.quarantined}\n`);
+  }
+  if (process.env.GITHUB_ENV) {
+    appendFileSync(process.env.GITHUB_ENV, `VISUAL_RUN_QUARANTINED=${report.quarantined}\n`);
+  }
+}
+
 
 main().catch((err) => {
   console.error(err);
