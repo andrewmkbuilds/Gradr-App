@@ -35,3 +35,5 @@ tests/reports/
 !tests/reports/impeccable/
 !tests/reports/impeccable/**
 tests/visual/route-guards/current/
+tests/visual/themes/current/
+tests/visual/themes/pending/

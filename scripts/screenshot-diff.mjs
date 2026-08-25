@@ -20,12 +20,14 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { settle, stableScreenshot, withRetry } from "./lib/pageStability.mjs";
+import { loadManifest, verifyLocks } from "./lib/visualBaselines.mjs";
 
 const BASE = (process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 const UPDATE = process.argv.includes("--update");
 const ROOT = process.cwd();
 const BASELINE_DIR = join(ROOT, "tests/visual/themes/baseline");
 const CURRENT_DIR = join(ROOT, "tests/visual/themes/current");
+const PENDING_DIR = join(ROOT, "tests/visual/themes/pending");
 const TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.02); // 2% of pixels
 const RETRIES = Number(process.env.VISUAL_RETRIES ?? 3);
 
@@ -115,6 +117,9 @@ async function diffRatio(page, aPath, bPath) {
 async function main() {
   mkdirSync(BASELINE_DIR, { recursive: true });
   mkdirSync(CURRENT_DIR, { recursive: true });
+  mkdirSync(PENDING_DIR, { recursive: true });
+
+  const manifest = loadManifest(ROOT);
 
   const auth = loadSession();
   if (!auth) {
@@ -132,6 +137,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   const failures = [];
   const captured = [];
+  const pending = [];
 
   for (const theme of THEMES) {
   for (const group of groups) {
@@ -166,11 +172,26 @@ async function main() {
       captured.push(file);
 
       const baseline = join(BASELINE_DIR, file);
+
+      // Baselines are never rewritten in place: a candidate goes to pending/ and
+      // only becomes the baseline once a human approves and locks it with
+      // scripts/baseline-approve.mjs. That review step is what makes a later
+      // regression easy to triage — every baseline has an owner and a reason.
       if (UPDATE || !existsSync(baseline)) {
         const { buffer } = await stableScreenshot(page);
         writeFileSync(current, buffer);
-        writeFileSync(baseline, buffer);
-        console.log(`${UPDATE ? "updated" : "created"} baseline ${file}`);
+        writeFileSync(join(PENDING_DIR, file), buffer);
+        pending.push(file);
+        console.log(`pending review: ${file} (${existsSync(baseline) ? "candidate update" : "new capture"})`);
+        continue;
+      }
+
+      // An unapproved edit to a committed baseline is itself a failure.
+      const lock = verifyLocks([file], { root: ROOT, manifest });
+      if (lock.unlocked.length || lock.mismatched.length) {
+        const why = lock.unlocked.length ? "never approved" : "edited without approval";
+        console.log(`FAIL ${file}  baseline lock: ${why}`);
+        failures.push(`${file}: baseline ${why} — run 'bun run visual:baseline:review'`);
         continue;
       }
 
@@ -200,10 +221,24 @@ async function main() {
 
   await browser.close();
 
+  if (pending.length) {
+    console.log(`\n${pending.length} capture(s) awaiting review in tests/visual/themes/pending:`);
+    pending.forEach((f) => console.log("  " + f));
+    console.log(
+      "\nReview them, then lock:\n" +
+        "  bun run visual:baseline:review\n" +
+        '  bun run visual:baseline:approve -- --all --reviewer "Your Name" --reason "why"',
+    );
+    if (!UPDATE) failures.push(`${pending.length} baseline(s) missing approval`);
+  }
+
   if (failures.length) {
     console.error(`\nScreenshot diff FAILED (${failures.length}):`);
     failures.forEach((f) => console.error("  " + f));
-    console.error(`\nInspect tests/visual/themes/current vs baseline. Accept with --update.`);
+    console.error(
+      `\nInspect tests/visual/themes/current vs baseline. Propose new baselines with --update, ` +
+        `then approve them with 'bun run visual:baseline:approve'.`,
+    );
     process.exit(1);
   }
   console.log(`\nScreenshot diff passed (${captured.length} captures).`);

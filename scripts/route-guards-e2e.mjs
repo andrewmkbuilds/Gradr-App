@@ -30,6 +30,7 @@ import { PNG } from "pngjs";
 import { launchBrowser } from "./lib/browser.mjs";
 import { settle, stableScreenshot, withRetry } from "./lib/pageStability.mjs";
 import { writeHtmlReport } from "./lib/htmlReport.mjs";
+import { BUDGET_FILE, evaluateSurface, loadBudget } from "./lib/axeBudget.mjs";
 
 
 const args = process.argv.slice(2);
@@ -46,6 +47,7 @@ const TRACE_DIR = join(ROOT, "tests/reports/traces");
 const VIDEO_DIR = join(ROOT, "tests/reports/videos");
 const SNAPSHOT_ATTEMPTS = Number(process.env.VISUAL_RETRIES ?? 3);
 const AXE_PATH = join(ROOT, "node_modules/axe-core/axe.min.js");
+const AXE_BUDGET = loadBudget(ROOT);
 const DIFF_TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.03);
 
 const DESKTOP = { width: 1280, height: 900 };
@@ -53,6 +55,7 @@ const MOBILE = { width: 390, height: 844 };
 
 const results = [];
 const attachments = [];
+const axeSurfaces = [];
 function record(name, ok, detail = "", extra = {}) {
   results.push({ name, ok, detail, ...extra });
   const retry = extra.attempts && extra.attempts > 1 ? ` (${extra.attempts} attempts)` : "";
@@ -112,15 +115,22 @@ async function checkA11y(page, label) {
     join(AXE_REPORT_DIR, `${label.replace(/[^a-z0-9-]+/gi, "-")}.json`),
     JSON.stringify({ label, url: page.url(), violations }, null, 2),
   );
-  const blocking = violations.filter((v) => v.impact === "serious" || v.impact === "critical");
-  record(
-    `${label}: no serious/critical axe violations`,
-    blocking.length === 0,
-    blocking.map((v) => `${v.id}(${v.nodes.length})`).join(", "),
-  );
-  if (violations.length && !blocking.length) {
-    console.log(`      minor axe findings: ${violations.map((v) => v.id).join(", ")}`);
+  // Budgeted: CI fails on violations beyond the accepted allowance for this
+  // surface (see tests/a11y/axe-budget.json), not on the whole backlog. The
+  // untruncated report above is always written for the artifact upload.
+  const surface = label.replace(/[^a-z0-9-]+/gi, "-").toLowerCase();
+  const verdict = evaluateSurface(AXE_BUDGET, surface, violations);
+  record(`${label}: axe within accessibility budget`, verdict.ok, verdict.summary);
+  if (verdict.overBudget.length) {
+    for (const v of verdict.overBudget) {
+      console.log(`      OVER BUDGET [${v.impact}] ${v.id}: ${v.count} nodes, ${v.allowed} allowed — ${v.help}`);
+    }
+    console.log(`      surface key for ${BUDGET_FILE}: "${surface}"`);
   }
+  if (verdict.ignored.length) {
+    console.log(`      non-blocking findings: ${verdict.ignored.map((v) => v.id).join(", ")}`);
+  }
+  axeSurfaces.push({ surface, label, url: page.url(), verdict: { ok: verdict.ok, summary: verdict.summary }, violations });
 }
 
 /**
@@ -474,6 +484,10 @@ async function run() {
 
   mkdirSync(AXE_REPORT_DIR, { recursive: true });
   writeFileSync(join(AXE_REPORT_DIR, "route-guards-summary.json"), JSON.stringify(results, null, 2));
+  writeFileSync(
+    join(AXE_REPORT_DIR, "axe-budget-report.json"),
+    JSON.stringify({ budget: AXE_BUDGET, surfaces: axeSurfaces }, null, 2),
+  );
   attachments.push({ kind: "axe", path: "tests/reports/axe/", label: "per-page axe JSON reports" });
 
   writeHtmlReport({

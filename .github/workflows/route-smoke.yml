@@ -7,6 +7,11 @@ on:
   push:
     branches: [main]
 
+# The summary step edits a comment on the PR.
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   route-smoke:
     name: Routes and redirects
@@ -24,6 +29,11 @@ jobs:
       # Static guard: no landing/home URLs in robots.txt, sitemaps or RouteSeo.
       - name: Landing/Home removal regression test
         run: bunx vitest run src/test/landingRoutesRemoved.test.ts
+
+      # Every committed theme baseline must be approved and hash-locked in
+      # tests/visual/themes/baselines.lock.json (see scripts/baseline-approve.mjs).
+      - name: Theme baseline lock check
+        run: bun run visual:baseline:review
 
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
@@ -115,4 +125,9 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-
+      # Upserts one comment on the PR with the suite table plus artifact links.
+      - name: Post CI test summary to PR
+        if: always() && github.event_name == 'pull_request'
+        run: bun run ci:summary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

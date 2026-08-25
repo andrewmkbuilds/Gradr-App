@@ -1,0 +1,7 @@
+{
+  "$comment": "Accessibility budget for CI. 'allow' records accepted violation NODE counts per surface and axe rule id; anything above the allowance (or above the global max* ceilings) fails the run. Full axe JSON for every surface is always written to tests/reports/axe/ and uploaded as an artifact, budget or not. Lower these numbers as debt is paid off; raising one requires a reason in the PR description.",
+  "blockingImpacts": ["critical", "serious"],
+  "maxNewCritical": 0,
+  "maxNewSerious": 0,
+  "surfaces": {}
+}
