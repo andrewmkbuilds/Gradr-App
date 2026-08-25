@@ -68,7 +68,7 @@ export default function AiResumeOptimization() {
         </div>
       </header>
 
-      <article className="max-w-3xl mx-auto px-6 py-12">
+      <article className="max-w-3xl mx-auto px-6 section-block">
         <p className="text-xs uppercase tracking-wider text-primary font-medium mb-3">Guide · Resume Intelligence</p>
         <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight leading-tight">
           {TITLE}
@@ -80,7 +80,7 @@ export default function AiResumeOptimization() {
         </p>
         <p className="mt-3 text-xs text-muted-foreground">Published July 9, 2026 · 9 min read</p>
 
-        <div className="prose prose-invert max-w-none mt-10 space-y-8 text-foreground">
+        <div className="prose prose-invert max-w-none section-gap space-y-8 text-foreground">
           <section>
             <h2 className="text-2xl font-semibold tracking-tight">What is an AI resume builder?</h2>
             <p className="mt-3 text-muted-foreground leading-relaxed">
@@ -283,7 +283,7 @@ export default function AiResumeOptimization() {
             </div>
           </section>
 
-          <section className="mt-10">
+          <section className="section-gap">
             <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" /> Related guides
             </h2>
@@ -352,7 +352,7 @@ export default function AiResumeOptimization() {
             </div>
           </section>
 
-          <section className="elev-2 rounded-xl p-6 mt-10">
+          <section className="elev-2 rounded-xl p-6 section-gap">
             <h2 className="type-h2 text-foreground">
               Try the Gradr Resume Engine
             </h2>

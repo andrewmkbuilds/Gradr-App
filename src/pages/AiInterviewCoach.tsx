@@ -307,7 +307,7 @@ export default function AiInterviewCoach() {
           </table>
         </div>
 
-        <h3 className="mt-10 text-lg font-semibold tracking-tight text-foreground">
+        <h3 className="section-gap text-lg font-semibold tracking-tight text-foreground">
           What your interview score means
         </h3>
         <div className="mt-4 overflow-x-auto">

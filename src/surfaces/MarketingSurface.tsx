@@ -172,7 +172,7 @@ function Features() {
         Every module shares the same data, so improving your resume immediately improves your match
         scores, your generated applications and your interview prep.
       </p>
-      <div className="mt-10 space-y-4">
+      <div className="section-gap space-y-4">
         {FEATURES.map((feature) => (
           <section
             key={feature.title}
@@ -186,7 +186,7 @@ function Features() {
           </section>
         ))}
       </div>
-      <div className="mt-10">
+      <div className="section-gap">
         <CrossLink
           surface="docs"
           className="text-sm text-brand-secondary underline underline-offset-4"
@@ -205,7 +205,7 @@ function UseCases() {
       <p className="mt-3 max-w-2xl text-muted-foreground">
         The same workspace, tuned to where you are in your career.
       </p>
-      <div className="mt-10 grid gap-5 md:grid-cols-2">
+      <div className="section-gap grid gap-5 md:grid-cols-2">
         {USE_CASES.map((useCase) => (
           <section key={useCase.audience} className="rounded-xl border border-border/60 bg-card p-6 elev-1">
             <h2 className="text-lg font-semibold text-foreground">{useCase.audience}</h2>
@@ -234,7 +234,7 @@ function Testimonials() {
       <p className="mt-3 max-w-2xl text-muted-foreground">
         What changes when the feedback loop is objective and immediate.
       </p>
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
+      <div className="section-gap grid gap-5 md:grid-cols-3">
         {TESTIMONIALS.map((testimonial) => (
           <figure key={testimonial.name} className="rounded-xl border border-border/60 bg-card p-6 elev-1">
             <blockquote className="text-sm leading-relaxed text-foreground">
@@ -257,7 +257,7 @@ function Demos() {
       <p className="mt-3 max-w-2xl text-muted-foreground">
         Three short paths through the product. Each one works on the free plan.
       </p>
-      <ol className="mt-10 space-y-4">
+      <ol className="section-gap space-y-4">
         {DEMOS.map((demo) => (
           <li key={demo.step} className="flex gap-5 rounded-xl border border-border/60 bg-card p-6 elev-1">
             <span className="text-2xl font-semibold text-brand-secondary">{demo.step}</span>
@@ -271,7 +271,7 @@ function Demos() {
       <CrossLink
         surface="app"
         to="/auth?mode=signup"
-        className="mt-10 inline-flex h-11 items-center gap-1.5 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground"
+        className="section-gap inline-flex h-11 items-center gap-1.5 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground"
       >
         Run it on your resume
         <ArrowRight className="h-4 w-4" aria-hidden="true" />

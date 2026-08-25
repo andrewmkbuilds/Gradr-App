@@ -184,7 +184,7 @@ export default function Pricing() {
 
 
   return (
-    <div className="max-w-7xl mx-auto py-8 space-y-10">
+    <div className="max-w-7xl mx-auto py-8 section-stack-lg">
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-bold tracking-tight text-foreground">Choose your career edge</h1>
         <p className="text-muted-foreground max-w-xl mx-auto">
@@ -428,7 +428,7 @@ export default function Pricing() {
         </div>
       )}
 
-      <div className="mx-auto mt-10 max-w-3xl space-y-3 rounded-card border border-border bg-surface-muted p-5 text-left text-xs text-muted-foreground">
+      <div className="mx-auto section-gap max-w-3xl space-y-3 rounded-card border border-border bg-surface-muted p-5 text-left text-xs text-muted-foreground">
         <h2 className="text-body-sm font-medium text-foreground">Before you subscribe</h2>
         <ul className="space-y-1.5">
           <li>

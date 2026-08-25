@@ -94,7 +94,7 @@ export default function JobSearchIndex() {
     <PublicShell source="job-search-index">
       <JsonLd nodes={jsonLd} label="job-search-index" />
 
-      <div className="space-y-10">
+      <div className="section-stack-lg">
         <MarketingHero
           eyebrow="Job search"
           title="Find jobs by role, location, and remote preference"

@@ -319,7 +319,7 @@ export default function JobApplicationTracker() {
         </ul>
       </section>
 
-      <section className="mt-12 text-center">
+      <section className="section-gap text-center">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           Run your next fifty applications properly
         </h2>

@@ -90,7 +90,7 @@ function NewsIndex() {
       </div>
 
       {!items.length && (
-        <p className="mt-10 text-sm text-muted-foreground">No articles in this category yet.</p>
+        <p className="section-gap text-sm text-muted-foreground">No articles in this category yet.</p>
       )}
     </div>
   );
@@ -121,7 +121,7 @@ function NewsArticleRoute() {
           </span>
         </p>
 
-        <div className="mt-10 space-y-8">
+        <div className="section-gap space-y-8">
           {article.sections.map((section) => (
             <section key={section.heading}>
               <h2 className="text-xl font-semibold text-foreground">{section.heading}</h2>
@@ -144,7 +144,7 @@ function NewsArticleRoute() {
           ))}
         </div>
 
-        <div className="mt-12 rounded-xl border border-border/60 bg-card p-6 elev-1">
+        <div className="section-gap rounded-xl border border-border/60 bg-card p-6 elev-1">
           <h2 className="text-lg font-semibold text-foreground">Try it yourself</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Score your resume, match a live role and run a mock interview — free to start.
