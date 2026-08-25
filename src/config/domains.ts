@@ -149,7 +149,7 @@ export function pinnedSurface(): Surface | null {
 export function satelliteSubdomainsLive(host: string = currentHost()): boolean {
   // A pinned build is by definition a dedicated per-domain deployment.
   if (pinnedSurface()) return true;
-  if (SATELLITE_SUBDOMAINS_LIVE) return true;
+  if (appSubdomainLive()) return true;
   if (deployEnv(host) !== "production") return false;
   const surface = surfaceFromHost(host);
   return surface !== null && surface !== "home";
