@@ -105,7 +105,7 @@ function LegacyAffiliateRedirect() {
 
 function AffiliateNotFound() {
   return (
-    <div className="page-shell py-24 text-center">
+    <div className="page-shell section-block text-center">
       <h1 className="text-3xl font-semibold tracking-tight text-foreground">Page not found</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         This page does not exist in the affiliate portal.
