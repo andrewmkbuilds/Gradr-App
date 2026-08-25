@@ -374,8 +374,12 @@ function AppRoutes() {
       <Routes location={location} key={location.pathname}>
         {/* Satellite surfaces: mounted under a path prefix on shared hosts
             (local dev + previews), redirected to their real subdomain in
-            production so a URL only ever resolves in one place. */}
-        {SATELLITE_SURFACES.map((surface) =>
+            production so a URL only ever resolves in one place.
+            `affiliates` is excluded — the affiliate portal is now served
+            in-app at /affiliate/* (affiliates.gradr.me still renders it by
+            host). */}
+        {SATELLITE_SURFACES.filter((s) => s !== "affiliates").map((surface) =>
+
           multiSurface ? (
             <Route
               key={surface}
