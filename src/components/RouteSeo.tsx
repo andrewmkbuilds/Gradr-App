@@ -237,16 +237,22 @@ function resolveOgImage(pathname: string): string {
  * no public content and only dilute how search engines understand Gradr.
  */
 const NOINDEX_EXACT = new Set([
-  "/",
+  // Brand entry points ("/" and "/auth") are intentionally indexable so Google
+  // can consolidate them onto the canonical public host (gradr.me) and brand
+  // searches resolve. Everything below is a private/authenticated surface.
+  "/dashboard",
   "/landing",
   "/home",
-  "/auth",
   "/forgot-password",
   "/reset-password",
   "/verify-email",
   "/welcome",
   "/settings",
   "/billing",
+  "/billing/history",
+  "/credits",
+  "/subscription",
+  "/manage-subscription",
   "/resume",
   "/jobs",
   "/match",
@@ -255,6 +261,8 @@ const NOINDEX_EXACT = new Set([
   "/interview",
   "/interview/history",
   "/growth",
+  "/connect",
+  "/unsubscribe",
   "/affiliate/apply",
   "/affiliate/dashboard",
   "/affiliate/resources",
