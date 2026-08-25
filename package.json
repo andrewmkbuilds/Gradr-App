@@ -162,6 +162,7 @@
     "smoke:console": "node scripts/console-sweep.mjs",
     "test": "vitest run",
     "test:a11y": "node scripts/a11y-nav.mjs",
+    "test:admin-rpc": "node scripts/admin-rpc-guard.mjs",
     "test:db": "RUN_DB_TESTS=1 vitest run src/test/dbSchema.integration.test.ts",
     "test:depth": "node scripts/depth-smoke.mjs",
     "test:e2e": "node scripts/e2e-authenticated.mjs",
