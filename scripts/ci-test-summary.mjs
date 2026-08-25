@@ -11,7 +11,7 @@
  *
  * Env: GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_EVENT_PATH.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync, appendFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync, appendFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = process.cwd();
@@ -142,6 +142,7 @@ async function upsertComment(body) {
   );
 }
 
+mkdirSync(REPORT_DIR, { recursive: true });
 const body = render(loadResults());
 console.log(body);
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, body + "\n");

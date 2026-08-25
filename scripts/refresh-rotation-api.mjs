@@ -20,7 +20,7 @@
  *   E2E_EMAIL=… E2E_PASSWORD=… node scripts/refresh-rotation-api.mjs
  */
 import { request } from "playwright";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { writeHtmlReport } from "./lib/htmlReport.mjs";
 
@@ -157,6 +157,10 @@ async function finish(api) {
     baseUrl: SUPABASE_URL,
     results,
   });
+  const jsonReport = join(ROOT, "tests/reports/json/refresh-rotation.json");
+  mkdirSync(join(ROOT, "tests/reports/json"), { recursive: true });
+  writeFileSync(jsonReport, JSON.stringify(results, null, 2));
+
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} refresh-rotation checks passed.`);
   console.log(`HTML report: ${HTML_REPORT}`);
