@@ -168,7 +168,36 @@ Deno.serve(async (req) => {
   let html = ''
   let subject = ''
   let renderError: string | null = null
-  const data = templateData ?? template.previewData ?? {}
+  const baseData = templateData ?? template.previewData ?? {}
+
+  // Personalise the preview for one recipient: their display name and address
+  // are merged in where the template's own data does not already provide them.
+  let previewProfile: { email: string; fullName: string | null } | null = null
+  if (previewRecipient) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('email', previewRecipient.toLowerCase())
+      .maybeSingle()
+    previewProfile = {
+      email: previewRecipient,
+      fullName: (profile as { full_name?: string } | null)?.full_name ?? null,
+    }
+  }
+
+  const data: Record<string, unknown> = previewProfile
+    ? {
+        ...baseData,
+        name: previewProfile.fullName ?? (baseData as Record<string, unknown>).name ?? previewProfile.email,
+        firstName:
+          previewProfile.fullName?.split(' ')[0] ??
+          (baseData as Record<string, unknown>).firstName ??
+          previewProfile.email,
+        email: previewProfile.email,
+        recipientEmail: previewProfile.email,
+      }
+    : (baseData as Record<string, unknown>)
+
   try {
     html = await renderAsync(
       React.createElement(
