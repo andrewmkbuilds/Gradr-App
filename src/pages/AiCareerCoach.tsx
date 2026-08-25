@@ -210,7 +210,7 @@ export default function AiCareerCoach() {
         </p>
       </section>
 
-      <section className="mt-16" aria-labelledby="how-it-works">
+      <section className="section-gap" aria-labelledby="how-it-works">
         <h2 id="how-it-works" className="text-2xl font-semibold tracking-tight text-foreground">
           How the AI career coach works
         </h2>
@@ -234,7 +234,7 @@ export default function AiCareerCoach() {
         </ol>
       </section>
 
-      <section className="mt-16" aria-labelledby="comparison">
+      <section className="section-gap" aria-labelledby="comparison">
         <h2
           id="comparison"
           className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground"
@@ -273,7 +273,7 @@ export default function AiCareerCoach() {
         </div>
       </section>
 
-      <section className="mt-16" aria-labelledby="whats-included">
+      <section className="section-gap" aria-labelledby="whats-included">
         <h2 id="whats-included" className="text-2xl font-semibold tracking-tight text-foreground">
           What your coaching account includes
         </h2>
@@ -325,7 +325,7 @@ export default function AiCareerCoach() {
         </ul>
       </section>
 
-      <section className="mt-16" aria-labelledby="faq">
+      <section className="section-gap" aria-labelledby="faq">
         <h2 id="faq" className="text-2xl font-semibold tracking-tight text-foreground">
           AI career coach FAQ
         </h2>
@@ -339,7 +339,7 @@ export default function AiCareerCoach() {
         </dl>
       </section>
 
-      <section className="mt-16 rounded-2xl border border-border bg-card p-8 text-center">
+      <section className="section-gap rounded-2xl border border-border bg-card p-8 text-center">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           Start with one resume and one target role
         </h2>

@@ -77,7 +77,7 @@ export function SurfaceHome() {
 export function SurfaceNotFound({ label }: { label: string }) {
   const path = useSurfacePath();
   return (
-    <div className="page-shell flex min-h-[60vh] flex-col items-center justify-center py-24 text-center">
+    <div className="page-shell flex min-h-[42vh] flex-col items-center justify-center py-16 text-center">
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-mahogany">404</p>
       <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
         This page isn’t here

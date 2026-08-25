@@ -160,7 +160,7 @@ function NewsArticleRoute() {
         </div>
       </article>
 
-      <section className="mx-auto mt-14 max-w-3xl">
+      <section className="mx-auto section-gap max-w-3xl">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-brand-secondary">
           More from Gradr News
         </h2>
