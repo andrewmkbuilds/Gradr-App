@@ -190,7 +190,8 @@
     "visual:baseline:relock": "node scripts/baseline-approve.mjs --relock",
     "visual:baseline:review": "node scripts/baseline-approve.mjs",
     "visual:logo-shell": "node scripts/logo-shell-visual.mjs",
-    "test:email-preferences": "node scripts/email-preference-enforcement.mjs"
+    "test:email-preferences": "node scripts/email-preference-enforcement.mjs",
+    "audit:spacing": "node scripts/spacing-audit.mjs"
   },
   "type": "module",
   "version": "0.0.0"

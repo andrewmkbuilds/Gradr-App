@@ -14,7 +14,7 @@ function NewsIndex() {
   const [lead, ...rest] = items;
 
   return (
-    <div className="page-shell py-12">
+    <div className="page-shell section-block">
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-secondary">
           Gradr News
@@ -104,7 +104,7 @@ function NewsArticleRoute() {
   const related = byNewest.filter((n) => n.slug !== article.slug).slice(0, 3);
 
   return (
-    <div className="page-shell py-12">
+    <div className="page-shell section-block">
       <article className="mx-auto max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-secondary">
           {article.category}
