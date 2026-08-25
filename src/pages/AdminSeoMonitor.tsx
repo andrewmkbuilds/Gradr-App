@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/app/PageHeader";
 import { typography } from "@/lib/design/typography";
 import { cn } from "@/lib/utils";
+import { AdminErrorState } from "@/components/admin/AdminErrorState";
 
 type Level = "error" | "warning" | "info";
 interface Alert {
@@ -122,7 +123,7 @@ export default function AdminSeoMonitor() {
     return data as MonitorResponse;
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["seo-monitor", selectedSiteUrl],
     enabled: !!isAdmin,
     queryFn: () => call(false),
@@ -179,9 +180,7 @@ export default function AdminSeoMonitor() {
       )}
 
       {error && (
-        <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-          {(error as Error).message}
-        </p>
+        <AdminErrorState error={error} resource="the SEO monitor report" onRetry={() => refetch()} isRetrying={isFetching} />
       )}
 
       {isLoading ? (

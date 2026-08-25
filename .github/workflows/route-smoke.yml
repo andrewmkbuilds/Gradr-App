@@ -55,6 +55,22 @@ jobs:
           LOVABLE_BROWSER_SUPABASE_STORAGE_KEY: ${{ secrets.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY }}
           LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
 
+      # Fails the build when any route emits a console error or unhandled
+      # promise rejection during the production sweep.
+      - name: Console error sweep
+        run: bun run smoke:console http://127.0.0.1:8080
+        env:
+          LOVABLE_BROWSER_SUPABASE_STORAGE_KEY: ${{ secrets.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY }}
+          LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
+
+      - name: Upload console sweep report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: console-sweep
+          path: test-results/console-sweep
+          if-no-files-found: ignore
+
       # Lightweight, browser-free: sign in, sign out, prove the tokens are dead
       # (so a refresh cannot rehydrate the session). Skips without credentials.
       - name: Sign-out API smoke test

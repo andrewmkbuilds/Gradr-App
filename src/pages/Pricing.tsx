@@ -53,6 +53,7 @@ export default function Pricing() {
 
   // Localized prices come straight from Paddle — no client-side math, no
   // re-formatting of the strings Paddle returns.
+  const [priceAttempt, setPriceAttempt] = useState(0);
   useEffect(() => {
     let cancelled = false;
     const ids = [
@@ -68,13 +69,16 @@ export default function Pricing() {
       })
       .catch((err) => {
         if (cancelled) return;
+        // Never blank the page: plans keep their USD catalog price and the
+        // notice below explains that only localization is unavailable.
+        setPrices({});
         setPricesError(err instanceof Error ? err.message : "Couldn't load prices");
       })
       .finally(() => !cancelled && setPricesLoading(false));
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [priceAttempt]);
 
   const priceFor = (id: string) => prices[id]?.formattedTotal;
 
@@ -247,10 +251,20 @@ export default function Pricing() {
       {/* Localized pricing is a nice-to-have: when Paddle can't be reached we
           quietly fall back to the standard USD catalog instead of blanking. */}
       {pricesError && (
-        <p className="text-center text-sm text-muted-foreground">
-          Showing standard USD pricing — localized prices are unavailable right now.
-          You'll see your exact local total at checkout.
-        </p>
+        <div role="status" className="flex flex-col items-center gap-2">
+          <p className="text-center text-sm text-muted-foreground">
+            Showing standard USD pricing — localized prices are unavailable right now.
+            You'll see your exact local total at checkout.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPriceAttempt((n) => n + 1)}
+            disabled={pricesLoading}
+          >
+            {pricesLoading ? "Retrying…" : "Retry"}
+          </Button>
+        </div>
       )}
 
 

@@ -14,6 +14,7 @@ import { useIsAdmin } from "@/hooks/useAffiliate";
 import { Button } from "@/components/ds/Button";
 import { Seo } from "@/components/Seo";
 import { PageHeader } from "@/components/app/PageHeader";
+import { AdminErrorState } from "@/components/admin/AdminErrorState";
 
 interface Alert {
   level: "error" | "warning" | "info";
@@ -123,9 +124,7 @@ export default function AdminSearchConsole() {
       )}
 
       {error && (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-          {(error as Error).message}
-        </div>
+        <AdminErrorState error={error} resource="Search Console data" onRetry={() => refetch()} isRetrying={isFetching} />
       )}
 
       {data?.status === "no_property" && (

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { AdminErrorState } from "@/components/admin/AdminErrorState";
 
 /**
  * Conversion-tracking health.
@@ -129,12 +130,39 @@ export default function AdminAnalyticsHealth() {
 
   const data = report.data;
 
+  if (report.error && !data) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Conversion tracking health"
+          description="Are payment_completed, subscription_created and upgraded_to_premium reaching PostHog — once each, on time?"
+        />
+        <AdminErrorState
+          error={report.error}
+          resource="the tracking health report"
+          onRetry={() => report.refetch()}
+          isRetrying={report.isFetching}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Conversion tracking health"
         description="Are payment_completed, subscription_created and upgraded_to_premium reaching PostHog — once each, on time?"
       />
+
+      {report.error && data && (
+        <AdminErrorState
+          error={report.error}
+          resource="fresh tracking data"
+          onRetry={() => report.refetch()}
+          isRetrying={report.isFetching}
+        />
+      )}
+
 
       <Card className="flex flex-wrap items-center justify-between gap-4 p-5">
         <div className="flex items-center gap-4">

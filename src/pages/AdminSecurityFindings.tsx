@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { PageHeader } from "@/components/app/PageHeader";
+import { AdminErrorState } from "@/components/admin/AdminErrorState";
 import {
   useCreateGithubIssue,
   useRunScan,
@@ -60,7 +61,7 @@ export default function AdminSecurityFindings() {
   const [repo, setRepo] = useState("");
   const [showUnchanged, setShowUnchanged] = useState(false);
 
-  const { data, isLoading, error } = useSecurityFindings(runId);
+  const { data, isLoading, isFetching, refetch, error } = useSecurityFindings(runId);
   const diffQuery = useSecurityDiff();
   const runScan = useRunScan();
   const signExport = useSignedExport();
@@ -134,12 +135,7 @@ export default function AdminSecurityFindings() {
       />
 
       {error && (
-        <Card className="border-destructive/40">
-          <CardContent className="flex items-center gap-2 py-4 text-sm text-destructive">
-            <AlertTriangle className="h-4 w-4" />
-            {error instanceof Error ? error.message : "Could not load findings"}
-          </CardContent>
-        </Card>
+        <AdminErrorState error={error} resource="security findings" onRetry={() => refetch()} isRetrying={isFetching} />
       )}
 
       <Tabs defaultValue="findings">
