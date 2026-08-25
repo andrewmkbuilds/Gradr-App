@@ -26,15 +26,27 @@ export default function DigestPreview() {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!user) return;
-      const { data } = await (supabase as any)
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!data);
-      setChecking(false);
+      if (!user) {
+        // No session yet: stop checking rather than spinning forever.
+        setChecking(false);
+        return;
+      }
+      try {
+        const { data } = await (supabase as any)
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        setIsAdmin(!!data);
+      } catch (error) {
+        // A thrown request (offline, RLS rejection) must not leave the page
+        // stuck on a full-screen spinner — fall through to the denied state.
+        console.error("digest preview admin check failed", error);
+        setIsAdmin(false);
+      } finally {
+        setChecking(false);
+      }
     };
     void checkAdmin();
   }, [user]);

@@ -11,16 +11,23 @@ export default defineTool({
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) return NOT_AUTHENTICATED;
     const supabase = supabaseForUser(ctx);
+    // MCP clients always talk to the real account, never the sandbox test
+    // ledger. Without this filter a user who ever tested checkout has rows in
+    // both environments and `.maybeSingle()` errors out (or silently reports
+    // sandbox credits as real ones).
+    const env = "live";
     const [credits, subscriber] = await Promise.all([
       supabase
         .from("usage_credits")
         .select("application_credits, interview_credits, environment, updated_at")
         .eq("user_id", ctx.getUserId())
+        .eq("environment", env)
         .maybeSingle(),
       supabase
         .from("subscribers")
         .select("subscribed, subscription_tier, subscription_end")
         .eq("user_id", ctx.getUserId())
+        .eq("environment", env)
         .maybeSingle(),
     ]);
     if (credits.error) return errorResult(credits.error.message);

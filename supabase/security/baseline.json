@@ -225,6 +225,7 @@
       "accept_legal_document",
       "admin_audit_actors",
       "admin_create_payout",
+      "admin_email_weekly_report",
       "admin_legal_document_stats",
       "admin_mark_payout_paid",
       "admin_publish_legal_document",

@@ -116,8 +116,10 @@ export function isProduction(host: string = currentHost()): boolean {
  * app.gradr.me; from then on gradr.me is marketing-only and every product
  * route lives on app.gradr.me.
  */
-export const SATELLITE_SUBDOMAINS_LIVE =
-  (import.meta.env?.VITE_APP_SUBDOMAIN_LIVE as string | undefined) === "true";
+export function appSubdomainLive(): boolean {
+  return (import.meta.env?.VITE_APP_SUBDOMAIN_LIVE as string | undefined) === "true";
+}
+
 
 /**
  * Build-time surface pin — the mechanism for one-project-per-domain hosting.
@@ -147,7 +149,7 @@ export function pinnedSurface(): Surface | null {
 export function satelliteSubdomainsLive(host: string = currentHost()): boolean {
   // A pinned build is by definition a dedicated per-domain deployment.
   if (pinnedSurface()) return true;
-  if (SATELLITE_SUBDOMAINS_LIVE) return true;
+  if (appSubdomainLive()) return true;
   if (deployEnv(host) !== "production") return false;
   const surface = surfaceFromHost(host);
   return surface !== null && surface !== "home";

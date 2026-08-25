@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   RedirectDomainError,
   assertOAuthCallback,
@@ -28,6 +28,14 @@ function setHost(origin: string) {
 const realLocation = window.location;
 
 describe("redirect guard", () => {
+  // Unpinned, multi-surface default: deployments that pin a surface set these.
+  beforeEach(() => {
+    vi.stubEnv("VITE_GRADR_SURFACE", "");
+    vi.stubEnv("VITE_APP_SUBDOMAIN_LIVE", "");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
   afterEach(() => {
     Object.defineProperty(window, "location", { configurable: true, value: realLocation });
   });

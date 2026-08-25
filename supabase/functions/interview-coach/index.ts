@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
-import { consume, paymentRequired, resolveEnv } from "../_shared/entitlements.ts";
+import { consume, paymentRequired, refund, resolveEnv } from "../_shared/entitlements.ts";
 import { logAiAuthorization } from "../_shared/securityAudit.ts";
 
 const corsHeaders = {
@@ -22,6 +22,17 @@ async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Set once the opening turn has actually charged an interview credit. Every
+  // failure path after that point must hand the credit back — a burnt credit
+  // with no interview is the worst possible outcome for the user.
+  let charged: { userId: string; env: "sandbox" | "live" } | null = null;
+  const refundIfCharged = async () => {
+    if (!charged) return;
+    const c = charged;
+    charged = null;
+    await refund(c.userId, "interview", c.env);
+  };
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -73,6 +84,7 @@ serve(async (req) => {
       const entitlement = await consume(user.id, "interview", paymentEnv);
       void logAiAuthorization({ source: "interview-coach", decision: entitlement.allowed ? "allowed" : "denied", userId: user.id, feature: "interview", env: paymentEnv, reason: entitlement.reason ?? entitlement.source ?? null, details: { tier: entitlement.tier, used: entitlement.used, allowance: entitlement.allowance } });
       if (!entitlement.allowed) return paymentRequired(entitlement, corsHeaders);
+      charged = { userId: user.id, env: paymentEnv };
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -130,11 +142,13 @@ Output only the words you say out loud.`;
 
     if (!response.ok) {
       if (response.status === 429) {
+        await refundIfCharged();
         return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
+        await refundIfCharged();
         return new Response(JSON.stringify({ error: "Credits exhausted, please add funds." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -144,11 +158,17 @@ Output only the words you say out loud.`;
       throw new Error("AI interview coach failed");
     }
 
+    if (!response.body) {
+      await refundIfCharged();
+      throw new Error("AI interview coach returned no stream");
+    }
+
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
     console.error("interview-coach error:", e);
+    await refundIfCharged();
     return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

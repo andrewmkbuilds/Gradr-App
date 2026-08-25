@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   currentSurface,
   isMultiSurfaceHost,
@@ -18,6 +18,10 @@ import {
  * *.lovable.app preview URL, so the surface is verifiable before DNS moves.
  */
 describe("surface pin", () => {
+  beforeEach(() => {
+    vi.stubEnv("VITE_GRADR_SURFACE", "");
+    vi.stubEnv("VITE_APP_SUBDOMAIN_LIVE", "");
+  });
   afterEach(() => {
     vi.unstubAllEnvs();
   });

@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { surfaceBase, surfaceFromPath, urlFor } from "@/config/domains";
 import { authPath, sanitizeNext } from "@/lib/nextRedirect";
 
@@ -20,6 +20,14 @@ function setHost(origin: string) {
 const realLocation = window.location;
 
 describe("cross-surface navigation", () => {
+  // Unpinned, multi-surface default: deployments that pin a surface set these.
+  beforeEach(() => {
+    vi.stubEnv("VITE_GRADR_SURFACE", "");
+    vi.stubEnv("VITE_APP_SUBDOMAIN_LIVE", "");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
   afterEach(() => {
     Object.defineProperty(window, "location", { configurable: true, value: realLocation });
   });

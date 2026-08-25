@@ -8,7 +8,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
-vi.mock("@/hooks/useAffiliate", () => ({ useIsAdmin: () => ({ data: false }) }));
+vi.mock("@/hooks/useAffiliate", () => ({
+  useIsAdmin: () => ({ data: false }),
+  useMyAffiliate: () => ({ data: null, isLoading: false }),
+}));
 vi.mock("@/lib/navAnalytics", () => ({
   trackDashboardClick: vi.fn(),
   trackNavGroupToggle: vi.fn(),

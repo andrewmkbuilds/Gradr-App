@@ -76,6 +76,8 @@ export function useSubscription() {
     ...state,
     plan,
     isLoading: query.isLoading,
+    /** The plan could not be verified — callers must not treat this as "free". */
+    isError: query.isError,
     /** Paying subscriber on any tier. */
     isSubscribed: active,
     isStarter: plan === "starter",

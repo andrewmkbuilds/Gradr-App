@@ -7,6 +7,7 @@ import { Button } from "@/components/ds/Button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { BadgePercent, ArrowLeft, ArrowRight, Loader2, Sparkles, X } from "lucide-react";
 import { ONBOARDING_IDENTITIES } from "@/config/eligibility";
 import { VerificationDialog } from "@/components/VerificationDialog";
@@ -96,7 +97,7 @@ export function OnboardingDialog({ open, onComplete }: Props) {
     const min = salaryMin ? parseInt(salaryMin, 10) : null;
     const max = salaryMax ? parseInt(salaryMax, 10) : null;
 
-    await supabase.from("user_preferences").upsert(
+    const { error } = await supabase.from("user_preferences").upsert(
       {
         user_id: user.id,
         target_role: roles[0],
@@ -113,6 +114,17 @@ export function OnboardingDialog({ open, onComplete }: Props) {
       },
       { onConflict: "user_id" },
     );
+
+    if (error) {
+      // Never close the dialog on a failed write — the user would believe their
+      // preferences were saved and silently lose the whole onboarding answer set.
+      console.error("onboarding preferences save failed", error);
+      setSaving(false);
+      toast.error("We couldn't save your preferences", {
+        description: "Check your connection and try again.",
+      });
+      return;
+    }
 
     // Rebuild the 3-day plan against the new targets so the daily actions the
     // user lands on already reflect the roles, industries and salary they chose.
