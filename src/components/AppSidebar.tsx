@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronDown, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useIsAdmin } from "@/hooks/useAffiliate";
+import { useMyAffiliate, useIsAdmin } from "@/hooks/useAffiliate";
 import { cn } from "@/lib/utils";
 import { useReducedMotionPref } from "@/hooks/useMotionPreference";
 import { springSmooth } from "@/lib/motion/tokens";
@@ -91,7 +91,18 @@ export function AppSidebar() {
   // Admin links are only rendered for verified admins. This is presentation
   // only — every admin route is additionally wrapped in <RequireAdmin> and
   // every admin table/RPC enforces has_role() server-side.
-  const groups = useMemo(() => navGroups.filter((g) => !g.adminOnly || isAdmin), [isAdmin]);
+  // Affiliate-only links stay hidden until the user actually has an approved
+  // affiliate profile; the routes themselves render a locked state regardless.
+  const { data: myAffiliate } = useMyAffiliate();
+  const isAffiliate = myAffiliate?.profile?.status === "active";
+  const groups = useMemo(
+    () =>
+      navGroups
+        .filter((g) => !g.adminOnly || isAdmin)
+        .map((g) => ({ ...g, items: g.items.filter((i) => !i.affiliateOnly || isAffiliate) }))
+        .filter((g) => g.items.length > 0),
+    [isAdmin, isAffiliate],
+  );
 
   const [openGroups, setOpenGroups] = useState<string[]>(() =>
     navGroups.filter((g) => isGroupActive(g, pathname)).map((g) => g.id),

@@ -23,6 +23,7 @@ import { TierProgress, MilestoneBadges } from "@/components/affiliate/TierProgre
 import { ShareCard } from "@/components/affiliate/ShareCard";
 import { ReferralLeaderboard } from "@/components/affiliate/ReferralLeaderboard";
 import { ActivityTimeline, type TimelineEvent } from "@/components/affiliate/ActivityTimeline";
+import { AffiliateLocked } from "@/components/affiliate/AffiliateLocked";
 
 type Tab = "overview" | "rewards" | "analytics" | "campaigns";
 
@@ -99,10 +100,16 @@ export default function AffiliateDashboard() {
   if (loadingMy || isLoading || loadingOverview) {
     return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
-  if (!profile) {
-    navigate("/affiliate", { replace: true });
-    return null;
+  // Locked until the user has an approved affiliate profile.
+  if (!profile || profile.status !== "active") {
+    return (
+      <AffiliateLocked
+        applicationStatus={my?.application?.status ?? null}
+        profileStatus={profile?.status ?? null}
+      />
+    );
   }
+
 
   const earnings = overview?.earnings;
   const stats = overview?.stats;
