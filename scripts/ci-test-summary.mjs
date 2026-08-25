@@ -20,7 +20,17 @@ const REPORT_DIR = join(ROOT, "tests/reports");
 const SUMMARY_SOURCES = [
   ["Route guards", "tests/reports/axe/route-guards-summary.json"],
   ["Refresh rotation", "tests/reports/json/refresh-rotation.json"],
+  ["Multi-tab sign-out", "tests/reports/json/multi-tab-signout.json"],
 ];
+
+// Theme pixel diffs are reported separately: they carry a drift % and a diff
+// image per capture, and they can put the whole run in "quarantined" state.
+const VISUAL_REPORT = "tests/reports/json/visual-themes.json";
+// Optional public base (e.g. an S3/pages mirror of the diff dir). When set, the
+// summary links the diff PNGs directly instead of pointing at the artifact zip.
+const DIFF_BASE_URL = process.env.VISUAL_DIFF_BASE_URL?.replace(/\/$/, "");
+const VISUAL_ARTIFACT = "theme-visual-diffs";
+
 
 const repo = process.env.GITHUB_REPOSITORY;
 const runId = process.env.GITHUB_RUN_ID;
