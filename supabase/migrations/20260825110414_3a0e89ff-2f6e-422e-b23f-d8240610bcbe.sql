@@ -1,0 +1,11 @@
+GRANT EXECUTE ON FUNCTION public.admin_audit_actors() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_legal_document_stats() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_verification_requests(_status text, _limit integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_create_payout(_affiliate_profile_id uuid, _amount numeric, _payout_method text, _reference text, _notes text, _commission_ids uuid[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_mark_payout_paid(_payout_id uuid, _reference text, _payout_method text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.approve_affiliate_application(_application_id uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.reject_affiliate_application(_application_id uuid, _reason text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.log_admin_access(_action text, _resource_type text, _record_count integer, _resource_id text, _details jsonb) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.affiliate_click_is_valid(_profile_id uuid, _code text) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.get_affiliate_public_settings() TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.lookup_affiliate_by_code(_code text) TO authenticated, anon;
