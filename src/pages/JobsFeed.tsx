@@ -5,13 +5,11 @@ import { logPreferencesRead } from "@/lib/preferencesAudit";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ds/Button";
-import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/states";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Alert, Badge, Card, Input } from "@/design-system/gradr-9b9b95";
 import { Search, Loader2, MapPin, Briefcase, ExternalLink, Bookmark, Sparkles, Link2, AlertCircle, Upload, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { handleAiFunctionError } from "@/lib/aiErrors";
@@ -457,15 +455,15 @@ export default function JobsFeed() {
         <p className="text-sm text-muted-foreground mt-1">Search live listings from Adzuna and Indeed with AI match scoring.</p>
       </div>
 
-      <Card className="p-4 space-y-3">
+      <Card className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-4 relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input aria-label="Job title or keywords" placeholder="Job title or keywords" value={what} onChange={(e) => setWhat(e.target.value)} className="pl-10 h-11" onKeyDown={(e) => e.key === "Enter" && search()} />
+            <Input aria-label="Job title or keywords" placeholder="Job title or keywords" value={what} onChange={(e) => setWhat(e.target.value)} className="pl-10" onKeyDown={(e) => e.key === "Enter" && search()} />
           </div>
           <div className="md:col-span-3 relative">
             <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input aria-label="City or region" placeholder="City or region" value={where} onChange={(e) => setWhere(e.target.value)} className="pl-10 h-11" onKeyDown={(e) => e.key === "Enter" && search()} />
+            <Input aria-label="City or region" placeholder="City or region" value={where} onChange={(e) => setWhere(e.target.value)} className="pl-10" onKeyDown={(e) => e.key === "Enter" && search()} />
           </div>
           <div className="md:col-span-2">
             <Select value={country} onValueChange={setCountry}>
@@ -500,7 +498,7 @@ export default function JobsFeed() {
             placeholder="Filter by company"
             value={companyFilter}
             onChange={(e) => setCompanyFilter(e.target.value)}
-            className="h-9 w-48 text-sm"
+            className="w-48"
           />
           {scoring && (
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -511,10 +509,10 @@ export default function JobsFeed() {
       </Card>
 
       {(hasResume === false || noResumeScoringAttempted) && (
-        <Card className="p-4 border-warning/40 bg-warning/10">
+        <Alert variant="primary">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Upload a resume to unlock AI match scoring</h3>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -530,17 +528,17 @@ export default function JobsFeed() {
               Upload resume
             </Button>
           </div>
-        </Card>
+        </Alert>
       )}
 
-      <Card className="p-4">
+      <Card>
         <div className="flex items-center gap-2 mb-2">
           <Link2 className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-semibold">Add job by URL</h3>
         </div>
         <p className="text-xs text-muted-foreground mb-3">Paste any job URL (LinkedIn, Greenhouse, company sites) — AI extracts the details.</p>
         <div className="flex gap-2">
-          <Input aria-label="Job posting URL" placeholder="https://…" value={pasteUrl} onChange={(e) => setPasteUrl(e.target.value)} className="h-10" />
+          <Input aria-label="Job posting URL" placeholder="https://…" value={pasteUrl} onChange={(e) => setPasteUrl(e.target.value)}  />
           <Button onClick={addFromUrl} disabled={pasting || !pasteUrl.trim()} className="gap-2">
             {pasting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             Add
@@ -557,7 +555,7 @@ export default function JobsFeed() {
           />
         )}
         {filtered.map((job) => (
-          <Card key={`${job.source}-${job.external_id}`} className="p-4 hover:border-primary/50 transition-colors">
+          <Card key={`${job.source}-${job.external_id}`} className="transition-colors">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-start gap-3">
@@ -569,30 +567,30 @@ export default function JobsFeed() {
                       {job.company || "Unknown"} · {job.location || "Remote"}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {job.remote && <Badge variant="secondary" className="text-xs">Remote</Badge>}
+                      {job.remote && <Badge>Remote</Badge>}
                       {(job.salary_min || job.salary_max) && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline">
                           ${job.salary_min ? Math.round(job.salary_min / 1000) + "k" : "?"} – ${job.salary_max ? Math.round(job.salary_max / 1000) + "k" : "?"}
                         </Badge>
                       )}
                       {job.posted_at && !Number.isNaN(new Date(job.posted_at).getTime()) && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline">
                           {formatDistanceToNow(new Date(job.posted_at), { addSuffix: true })}
                         </Badge>
                       )}
                       {job.source === "jobmaps" && (
-                        <Badge variant="outline" className="text-xs border-accent/40 text-accent">
+                        <Badge variant="accent">
                           JobMaps · CH
                         </Badge>
                       )}
                       {job.source === "indeed" && (
-                        <Badge variant="outline" className="text-xs border-accent/40 text-accent">
+                        <Badge variant="accent">
                           Indeed
                         </Badge>
                       )}
 
                       {typeof job.match_score === "number" && (
-                        <Badge className="text-xs bg-primary/15 text-primary border-primary/30 hover:bg-primary/20">
+                        <Badge variant="primary">
                           <Sparkles className="h-3 w-3 mr-1" /> {job.match_score}% match
                         </Badge>
                       )}

@@ -14,14 +14,11 @@ import {
 } from "@dnd-kit/core";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Badge, Card, Input, Textarea } from "@/design-system/gradr-9b9b95";
 import { Button } from "@/components/ds/Button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { SkeletonList } from "@/components/states";
 import { ExternalLink, Trash2, Bell, Loader2, Plus, Sparkles, Link2, FileText, Copy } from "lucide-react";
@@ -84,11 +81,11 @@ function JobCard({ job, onClick }: { job: TrackedJob; onClick: () => void }) {
       <p className="text-xs text-muted-foreground mt-1">{job.company || "Unknown"}</p>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {typeof job.match_score === "number" && (
-          <Badge variant="accentSoft" className="text-[10px]">
+          <Badge variant="accent">
             <Sparkles className="h-2.5 w-2.5 mr-0.5" />{job.match_score}%
           </Badge>
         )}
-        {job.remote && <Badge variant="secondary" className="text-[10px]">Remote</Badge>}
+        {job.remote && <Badge>Remote</Badge>}
       </div>
     </div>
   );
@@ -102,7 +99,7 @@ function Column({ status, label, tone, jobs, onCardClick }: {
     <div className="flex flex-col min-w-[260px] flex-1">
       <div className="flex items-center justify-between px-2 mb-2">
         <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-        <Badge variant="secondary" className="text-xs">{jobs.length}</Badge>
+        <Badge>{jobs.length}</Badge>
       </div>
       <div
         ref={setNodeRef}
@@ -281,7 +278,7 @@ export default function Pipeline() {
 
       {/* Reminders bar */}
       {reminders.length > 0 && (
-        <Card className="p-4">
+        <Card>
           <div className="flex items-center gap-2 mb-3">
             <Bell className="h-4 w-4 text-warning" />
             <h2 className="text-sm font-semibold">Upcoming reminders</h2>
@@ -335,9 +332,9 @@ export default function Pipeline() {
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline">{selected.status}</Badge>
                   {typeof selected.match_score === "number" && (
-                    <Badge className="bg-primary/15 text-primary border-primary/30">{selected.match_score}% match</Badge>
+                    <Badge variant="primary">{selected.match_score}% match</Badge>
                   )}
-                  {selected.applied_at && <Badge variant="secondary">Applied {formatDistanceToNow(new Date(selected.applied_at), { addSuffix: true })}</Badge>}
+                  {selected.applied_at && <Badge>Applied {formatDistanceToNow(new Date(selected.applied_at), { addSuffix: true })}</Badge>}
                 </div>
                 {selected.url && (
                   <Button variant="outline" className="w-full gap-2" onClick={() => window.open(selected.url!, "_blank")}>

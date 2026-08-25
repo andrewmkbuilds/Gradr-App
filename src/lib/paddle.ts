@@ -163,9 +163,13 @@ async function previewPricesOnce(
 ): Promise<Record<string, PreviewedPrice>> {
 
   const paddle = await getPaddle();
-  const resolved = await Promise.all(
-    priceIds.map(async (id) => [id, await getPaddlePriceId(id)] as const),
-  );
+  // Batch resolve: a price that is not in the active catalog is skipped, not
+  // fatal. The pricing page renders its USD catalog value for those ids.
+  const resolvedMap = await resolvePaddlePriceIds(priceIds);
+  const resolved = priceIds
+    .map((id) => [id, resolvedMap[id]] as const)
+    .filter((entry): entry is readonly [string, string] => Boolean(entry[1]));
+  if (resolved.length === 0) throw new Error("No prices could be resolved");
   const byPaddleId = new Map(resolved.map(([id, paddleId]) => [paddleId, id]));
 
   const country = resolveCountryCode();
@@ -192,14 +196,52 @@ async function previewPricesOnce(
 
 const priceCache = new Map<string, string>();
 
+/**
+ * Resolves several human-readable price ids in one round trip.
+ * Ids missing from the environment's catalog are simply absent from the result
+ * — callers decide whether that is fatal (checkout) or cosmetic (pricing page).
+ */
+export async function resolvePaddlePriceIds(
+  priceIds: string[],
+): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  const pending = priceIds.filter((id) => {
+    const cached = priceCache.get(id);
+    if (cached) out[id] = cached;
+    return !cached;
+  });
+  if (pending.length === 0) return out;
+
+  const { data, error } = await supabase.functions.invoke("get-paddle-price", {
+    body: { priceIds: pending, environment: getPaddleEnvironment() },
+  });
+  if (error) throw error;
+
+  const paddleIds = (data?.paddleIds ?? {}) as Record<string, string>;
+  for (const [id, paddleId] of Object.entries(paddleIds)) {
+    if (typeof paddleId !== "string") continue;
+    priceCache.set(id, paddleId);
+    out[id] = paddleId;
+  }
+  return out;
+}
+
+/** Thrown when a price simply does not exist in the active Paddle catalog. */
+export class PriceNotFoundError extends Error {
+  readonly priceId: string;
+  constructor(priceId: string) {
+    super(`This plan isn't available for purchase right now (${priceId}).`);
+    this.name = "PriceNotFoundError";
+    this.priceId = priceId;
+  }
+}
+
 export async function getPaddlePriceId(priceId: string): Promise<string> {
   const cached = priceCache.get(priceId);
   if (cached) return cached;
 
-  const { data, error } = await supabase.functions.invoke("get-paddle-price", {
-    body: { priceId, environment: getPaddleEnvironment() },
-  });
-  if (error || !data?.paddleId) throw new Error(`Failed to resolve price: ${priceId}`);
-  priceCache.set(priceId, data.paddleId);
-  return data.paddleId as string;
+  const resolved = await resolvePaddlePriceIds([priceId]);
+  const paddleId = resolved[priceId];
+  if (!paddleId) throw new PriceNotFoundError(priceId);
+  return paddleId;
 }

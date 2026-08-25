@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmailWeeklyReportCard } from "@/components/admin/EmailWeeklyReportCard";
+import { AdminErrorState } from "@/components/admin/AdminErrorState";
 
 interface AuditRow {
   id: string;
@@ -108,7 +109,14 @@ export default function AdminEmailAudit() {
         </Button>
       </div>
 
-      {error && <p className="text-body-sm text-destructive">{(error as Error).message}</p>}
+      {error && (
+        <AdminErrorState
+          error={error}
+          resource="the email delivery audit"
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
+      )}
 
       {isLoading ? (
         <Skeleton className="h-64 w-full" />

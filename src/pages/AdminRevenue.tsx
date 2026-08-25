@@ -20,6 +20,7 @@ import { getPaddleEnvironment } from "@/lib/paddle";
 import { typography } from "@/lib/design/typography";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { AdminErrorState } from "@/components/admin/AdminErrorState";
 
 interface RevenuePayload {
   activeCount: number;
@@ -113,9 +114,12 @@ export default function AdminRevenue() {
       />
 
       {error && (
-        <Card className="border-destructive/40 p-4 text-sm text-destructive">
-          Couldn't load revenue metrics: {error instanceof Error ? error.message : "unknown error"}
-        </Card>
+        <AdminErrorState
+          error={error}
+          resource="revenue metrics"
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       )}
 
       {isLoading ? (

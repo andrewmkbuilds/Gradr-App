@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { typography } from "@/lib/design/typography";
 import { cn } from "@/lib/utils";
+import { AdminErrorState } from "@/components/admin/AdminErrorState";
 
 interface UsagePayload {
   features: { feature: string; used: number; credits: number; users: number; estimatedCostCents: number }[];
@@ -81,9 +82,12 @@ export default function AdminUsage() {
       />
 
       {error && (
-        <Card className="border-destructive/40 p-4 text-sm text-destructive">
-          Couldn't load usage metrics: {error instanceof Error ? error.message : "unknown error"}
-        </Card>
+        <AdminErrorState
+          error={error}
+          resource="usage metrics"
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       )}
 
       {isLoading ? (
