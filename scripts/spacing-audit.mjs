@@ -147,6 +147,7 @@ async function run() {
       }
     }
   };
+  server?.unref();
   process.on("exit", stopServer);
   const browser = await chromium.launch({
     headless: true,
@@ -205,9 +206,12 @@ async function run() {
 
   if (rows.length > 0 && !REPORT_ONLY) {
     console.error(`\n✗ ${rows.length} vertical gap(s) over budget.`);
+    stopServer();
     process.exit(1);
   }
   console.log("\n✓ vertical rhythm within budget");
+  stopServer();
+  process.exit(0);
 }
 
 run().catch((error) => {
