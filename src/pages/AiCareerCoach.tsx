@@ -12,7 +12,7 @@ import {
 import { PublicShell } from "@/components/PublicShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { trackEvent, withUtm } from "@/lib/analytics";
-import { track, trackSignupCta } from "@/lib/telemetry/events";
+import { trackSignupCta } from "@/lib/telemetry/events";
 import {
   SITE_NAME,
   SITE_ORIGIN,
@@ -193,7 +193,6 @@ const softwareLd = {
 export default function AiCareerCoach() {
   useEffect(() => {
     trackEvent("career_coach_page_view", { path: AI_CAREER_COACH_PATH });
-    track("homepage_viewed", { page_kind: "landing", landing_page: AI_CAREER_COACH_PATH });
   }, []);
 
   return (
@@ -411,7 +410,7 @@ export default function AiCareerCoach() {
         </p>
         <Link
           to={ctaHref("/auth?mode=signup", "footer_primary")}
-          onClick={trackCta("footer_primary", "/auth")}
+          onClick={trackSignupClick("footer_primary", "Create a free account")}
           className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] motion-reduce:transform-none"
         >
           Create a free account
