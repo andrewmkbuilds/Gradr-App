@@ -431,12 +431,14 @@ export function RouteSeo() {
   // slash, aliases resolved) on this surface's own production origin, so
   // docs.gradr.me never canonicalises to gradr.me and vice versa.
   const canonical = canonicalPath(pathname);
-  // app.gradr.me is a private product surface: it is fully noindexed, and any
-  // public page reachable there points its canonical at the public host.
+  // app.gradr.me shares the home surface's robots policy: public entry points
+  // (homepage, auth, legal, tool pages) are indexable and canonicalise to the
+  // public host (gradr.me) so Google consolidates them; authenticated routes
+  // stay noindexed via isSurfaceNoIndex.
   const canonicalSurface: Surface = surface === "app" ? "home" : surface;
   const url = canonicalUrlFor(canonicalSurface, canonical);
   const ogImage = resolveOgImage(canonical);
-  const noindex = surface === "app" || isSurfaceNoIndex(surface, canonical);
+  const noindex = isSurfaceNoIndex(surface, canonical);
 
 
   // index.html ships a full static SEO head so crawlers that never execute
