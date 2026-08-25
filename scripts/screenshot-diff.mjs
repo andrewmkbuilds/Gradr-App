@@ -89,45 +89,28 @@ function loadSession() {
   };
 }
 
-/** Cheap pixel diff on raw PNG bytes decoded via the browser itself. */
-async function diffRatio(page, aPath, bPath) {
-  const a = readFileSync(aPath).toString("base64");
-  const b = readFileSync(bPath).toString("base64");
-  return page.evaluate(
-    async ([a, b]) => {
-      const load = (data) =>
-        new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = `data:image/png;base64,${data}`;
-        });
-      const [ia, ib] = await Promise.all([load(a), load(b)]);
-      if (ia.width !== ib.width || ia.height !== ib.height) return 1;
-      const draw = (img) => {
-        const c = document.createElement("canvas");
-        c.width = img.width;
-        c.height = img.height;
-        c.getContext("2d").drawImage(img, 0, 0);
-        return c.getContext("2d").getImageData(0, 0, img.width, img.height).data;
-      };
-      const da = draw(ia);
-      const db = draw(ib);
-      let changed = 0;
-      for (let i = 0; i < da.length; i += 4) {
-        if (
-          Math.abs(da[i] - db[i]) > 8 ||
-          Math.abs(da[i + 1] - db[i + 1]) > 8 ||
-          Math.abs(da[i + 2] - db[i + 2]) > 8
-        ) {
-          changed++;
-        }
-      }
-      return changed / (da.length / 4);
-    },
-    [a, b],
-  );
+/**
+ * Pixel diff via pixelmatch — the same comparison scripts/baseline-approve.mjs
+ * reports at review time, so the drift % a reviewer approves is the drift % CI
+ * measures. Also writes a highlighted diff PNG for triage.
+ */
+function diffRatio(baselinePath, currentPath, diffPath) {
+  const a = PNG.sync.read(readFileSync(baselinePath));
+  const b = PNG.sync.read(readFileSync(currentPath));
+  if (a.width !== b.width || a.height !== b.height) {
+    // Size change: no meaningful per-pixel diff image, treat as total drift.
+    return { ratio: 1, diff: null, sizeChanged: true };
+  }
+  const out = new PNG({ width: a.width, height: a.height });
+  const changed = pixelmatch(a.data, b.data, out.data, a.width, a.height, {
+    threshold: 0.15,
+    includeAA: false,
+  });
+  const ratio = changed / (a.width * a.height);
+  if (diffPath && changed > 0) writeFileSync(diffPath, PNG.sync.write(out));
+  return { ratio, diff: changed > 0 ? diffPath : null, sizeChanged: false };
 }
+
 
 async function main() {
   mkdirSync(BASELINE_DIR, { recursive: true });
