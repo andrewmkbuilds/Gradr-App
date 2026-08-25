@@ -62,6 +62,7 @@ function review() {
 
   if (!pending.length) {
     console.log("\nNothing pending review.");
+    if (mismatched.length || unlocked.length) failReview(mismatched, unlocked);
     return;
   }
   console.log(`\nPending review (${pending.length}):`);
@@ -73,6 +74,17 @@ function review() {
     "\nInspect tests/visual/themes/pending vs baseline, then approve:\n" +
       '  bun run visual:baseline:approve -- --all --reviewer "Your Name" --reason "why this drift is intended"',
   );
+  if (mismatched.length || unlocked.length) failReview(mismatched, unlocked);
+}
+
+/** In CI this is a hard failure: an unreviewed baseline is not a baseline. */
+function failReview(mismatched, unlocked) {
+  console.error(
+    `\n${mismatched.length + unlocked.length} baseline(s) are not approved and locked. ` +
+      "Approve pending captures, or re-lock reviewed files with:\n" +
+      '  bun run visual:baseline:relock -- --reviewer "Your Name" --reason "why"',
+  );
+  process.exit(1);
 }
 
 function approve() {
