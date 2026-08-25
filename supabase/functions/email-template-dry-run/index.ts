@@ -103,14 +103,9 @@ Deno.serve(async (req) => {
         : 'Template has no classification — the send path refuses it'
       : null
 
-    const { data: userRow } = await supabase
-      .schema('auth' as never)
-      .from('users' as never)
-      .select('id')
-      .eq('email', normalized)
-      .maybeSingle()
-      .then((r) => r, () => ({ data: null }))
-    const recipientUserId = (userRow as { id?: string } | null)?.id ?? null
+    // Recipient account id is resolved by the audit trigger for real sends;
+    // the sandbox never needs it and does not read auth.users.
+    const recipientUserId: string | null = null
 
     if (!blockedBy && category !== 'essential') {
       const { data: allowed, error: prefError } = await supabase.rpc('email_category_allowed', {
