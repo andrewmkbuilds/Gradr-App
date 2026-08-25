@@ -78,6 +78,7 @@ export function ResumeVersions({ activeId, onSelect }: Props) {
                     value={draft}
                     autoFocus
                     onChange={(e) => setDraft(e.target.value)}
+                    aria-label="Version name"
                     className="h-8 bg-background/60"
                     placeholder="Version name"
                   />

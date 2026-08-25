@@ -11,7 +11,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
-vi.mock("@/hooks/useAffiliate", () => ({ useIsAdmin: () => ({ data: false }) }));
+vi.mock("@/hooks/useAffiliate", () => ({
+  useIsAdmin: () => ({ data: false }),
+  useMyAffiliate: () => ({ data: null, isLoading: false }),
+}));
 vi.mock("@/lib/navAnalytics", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/navAnalytics")>();
   return {
