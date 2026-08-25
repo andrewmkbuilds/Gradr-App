@@ -34,10 +34,29 @@ jobs:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: node scripts/security-findings-guard.mjs
 
+      - name: Admin RPC grants (admin succeeds, non-admin and anon refused)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          ADMIN_E2E_EMAIL: ${{ secrets.ADMIN_E2E_EMAIL }}
+          ADMIN_E2E_PASSWORD: ${{ secrets.ADMIN_E2E_PASSWORD }}
+          USER_E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          USER_E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        run: node scripts/admin-rpc-guard.mjs
+
+      - name: Upload admin RPC guard report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-rpc-guard-report
+          path: tests/reports/html/admin-rpc-guard.html
+          if-no-files-found: ignore
+
       - name: RLS and policy regression tests
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: bunx vitest run src/test/securityBaseline.test.ts src/test/userPreferencesAccess.test.ts
+
 
       - name: Dependency audit (version floors + high/critical advisories)
         run: node scripts/dependency-audit.mjs
