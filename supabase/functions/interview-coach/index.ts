@@ -142,11 +142,13 @@ Output only the words you say out loud.`;
 
     if (!response.ok) {
       if (response.status === 429) {
+        await refundIfCharged();
         return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
+        await refundIfCharged();
         return new Response(JSON.stringify({ error: "Credits exhausted, please add funds." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -156,11 +158,17 @@ Output only the words you say out loud.`;
       throw new Error("AI interview coach failed");
     }
 
+    if (!response.body) {
+      await refundIfCharged();
+      throw new Error("AI interview coach returned no stream");
+    }
+
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
     console.error("interview-coach error:", e);
+    await refundIfCharged();
     return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
