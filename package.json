@@ -187,7 +187,8 @@
     "visual:baseline:approve": "node scripts/baseline-approve.mjs --approve",
     "visual:baseline:relock": "node scripts/baseline-approve.mjs --relock",
     "visual:baseline:review": "node scripts/baseline-approve.mjs",
-    "visual:logo-shell": "node scripts/logo-shell-visual.mjs"
+    "visual:logo-shell": "node scripts/logo-shell-visual.mjs",
+    "test:email-preferences": "node scripts/email-preference-enforcement.mjs"
   },
   "type": "module",
   "version": "0.0.0"

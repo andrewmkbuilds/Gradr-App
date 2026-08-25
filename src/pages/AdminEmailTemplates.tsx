@@ -10,6 +10,7 @@ import { Button } from "@/components/ds/Button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EmailTemplateSandbox } from "@/components/admin/EmailTemplateSandbox";
 import {
   CATEGORY_LABELS,
   EMAIL_TEMPLATE_CATALOG,
@@ -122,6 +123,8 @@ export default function AdminEmailTemplates() {
           <p className="text-xs text-muted-foreground mt-1">{unclassified.join(", ")}</p>
         </Card>
       )}
+
+      <EmailTemplateSandbox />
 
       <div className="flex flex-wrap items-center gap-3">
         <Input

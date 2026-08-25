@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageHeader";
+import { EmailWeeklyReportCard } from "@/components/admin/EmailWeeklyReportCard";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -70,6 +71,7 @@ const SECTIONS: { group: string; links: SectionLink[] }[] = [
       { title: "Billing operations", description: "Alerts, webhook retries and sandbox failure simulations.", url: "/admin/billing-ops", icon: Webhook },
       { title: "Conversion tracking", description: "Are revenue events reaching PostHog once each, on time?", url: "/admin/analytics-health", icon: Activity },
       { title: "Email templates", description: "Every email, transactional vs marketing, and its send status.", url: "/admin/email-templates", icon: Mail },
+      { title: "Email delivery audit", description: "Weekly report plus every queued, sent and suppressed email.", url: "/admin/email-audit", icon: Mail },
       { title: "CSP violations", description: "Report-only policy blocks and spike alerts.", url: "/admin/csp-reports", icon: ShieldAlert },
     ],
   },
@@ -212,6 +214,11 @@ export default function AdminHome() {
           loading={isLoading}
         />
       </section>
+
+      <section aria-label="Weekly email report">
+        <EmailWeeklyReportCard compact />
+      </section>
+
 
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div>
