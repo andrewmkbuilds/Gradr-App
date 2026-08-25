@@ -177,6 +177,7 @@
     "test:visual": "node scripts/auth-hero-visual.mjs",
     "test:visual:logo": "node scripts/logo-visual.mjs",
     "test:visual:routes": "node scripts/visual-regression.mjs",
+    "test:multi-tab-signout": "node scripts/multi-tab-signout-e2e.mjs",
     "test:visual:themes": "node scripts/screenshot-diff.mjs",
     "test:visual:themes:update": "node scripts/screenshot-diff.mjs --update",
     "test:voice-e2e": "node scripts/voice-e2e.mjs",
