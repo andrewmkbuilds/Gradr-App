@@ -151,7 +151,66 @@ export function EmailTemplateSandbox() {
         <span className="text-caption text-muted-foreground">Dry-runs are recorded in the delivery audit log.</span>
       </div>
 
+      <div className="rounded-control border border-border/60 p-3 space-y-3">
+        <div>
+          <p className="text-body-sm font-medium">Preview for a recipient</p>
+          <p className="text-caption text-muted-foreground mt-1">
+            Renders the subject and body exactly as that recipient would receive them. Nothing is queued, sent or
+            written to the audit log.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1.5 min-w-[16rem]">
+            <Label htmlFor="sandbox-preview-recipient">Recipient</Label>
+            {recipientList.length > 0 ? (
+              <Select value={previewRecipient} onValueChange={setPreviewRecipient}>
+                <SelectTrigger id="sandbox-preview-recipient">
+                  <SelectValue placeholder="Generic preview data" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recipientList.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {r}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="sandbox-preview-recipient"
+                value={previewRecipient}
+                onChange={(e) => setPreviewRecipient(e.target.value)}
+                placeholder="person@example.com (optional)"
+              />
+            )}
+          </div>
+          <Button variant="outline" onClick={runPreview} loading={previewing} disabled={!templateName}>
+            Preview template
+          </Button>
+        </div>
+
+        {preview && (
+          <div className="space-y-2">
+            <p className="text-caption text-muted-foreground">
+              Previewing as <span className="font-medium">{preview.recipient}</span>
+            </p>
+            <div className="rounded-control border border-border/60 p-3">
+              <p className="text-caption text-muted-foreground">Subject</p>
+              <p className="text-body-sm font-medium">{preview.subject || "(empty)"}</p>
+            </div>
+            <iframe
+              title="Rendered email preview"
+              srcDoc={preview.html}
+              sandbox=""
+              className="w-full h-96 rounded-control border border-border/60 bg-surface"
+            />
+          </div>
+        )}
+      </div>
+
       {error && <p className="text-body-sm text-destructive">{error}</p>}
+
+
 
       {result && (
         <div className="space-y-4">
