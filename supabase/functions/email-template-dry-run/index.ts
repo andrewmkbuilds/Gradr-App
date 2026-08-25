@@ -170,33 +170,47 @@ Deno.serve(async (req) => {
   let renderError: string | null = null
   const baseData = templateData ?? template.previewData ?? {}
 
-  // Personalise the preview for one recipient: their display name and address
-  // are merged in where the template's own data does not already provide them.
+  // Personalise the preview for one recipient: their account display name (when
+  // the address belongs to a Gradr user) and address are merged in where the
+  // template's own data does not already provide them.
   let previewProfile: { email: string; fullName: string | null } | null = null
   if (previewRecipient) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('email', previewRecipient.toLowerCase())
+    let fullName: string | null = null
+    const { data: userRow } = await supabase
+      .from('email_delivery_audit')
+      .select('recipient_user_id')
+      .eq('recipient_email', previewRecipient)
+      .not('recipient_user_id', 'is', null)
+      .limit(1)
       .maybeSingle()
-    previewProfile = {
-      email: previewRecipient,
-      fullName: (profile as { full_name?: string } | null)?.full_name ?? null,
+    const userId = (userRow as { recipient_user_id?: string } | null)?.recipient_user_id ?? null
+    if (userId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', userId)
+        .maybeSingle()
+      fullName = (profile as { display_name?: string } | null)?.display_name ?? null
     }
+    previewProfile = { email: previewRecipient, fullName }
   }
 
   const data: Record<string, unknown> = previewProfile
     ? {
         ...baseData,
-        name: previewProfile.fullName ?? (baseData as Record<string, unknown>).name ?? previewProfile.email,
+        name:
+          previewProfile.fullName ??
+          (baseData as Record<string, unknown>).name ??
+          previewProfile.email.split('@')[0],
         firstName:
           previewProfile.fullName?.split(' ')[0] ??
           (baseData as Record<string, unknown>).firstName ??
-          previewProfile.email,
+          previewProfile.email.split('@')[0],
         email: previewProfile.email,
         recipientEmail: previewProfile.email,
       }
     : (baseData as Record<string, unknown>)
+
 
   try {
     html = await renderAsync(
