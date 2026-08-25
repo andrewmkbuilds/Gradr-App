@@ -41,15 +41,20 @@ export function EmailTemplateSandbox() {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<DryRunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [previewRecipient, setPreviewRecipient] = useState("");
+  const [previewing, setPreviewing] = useState(false);
+  const [preview, setPreview] = useState<{ recipient: string; subject: string; html: string } | null>(null);
+
+  const recipientList = recipientsRaw
+    .split(/[\s,;]+/)
+    .map((r) => r.trim())
+    .filter(Boolean);
 
   const run = async () => {
     setRunning(true);
     setError(null);
     setResult(null);
-    const recipients = recipientsRaw
-      .split(/[\s,;]+/)
-      .map((r) => r.trim())
-      .filter(Boolean);
+    const recipients = recipientList;
     const { data, error: fnError } = await supabase.functions.invoke("email-template-dry-run", {
       body: { templateName, recipients },
     });
@@ -64,6 +69,40 @@ export function EmailTemplateSandbox() {
     }
     setResult(data as DryRunResult);
   };
+
+  /**
+   * Render-only preview. `previewOnly` tells the edge function to skip the gate
+   * evaluation and the audit write entirely — nothing is queued, nothing is
+   * sent, and no delivery record is created.
+   */
+  const runPreview = async () => {
+    setPreviewing(true);
+    setError(null);
+    setPreview(null);
+    const { data, error: fnError } = await supabase.functions.invoke("email-template-dry-run", {
+      body: { templateName, previewOnly: true, previewRecipient: previewRecipient || null },
+    });
+    setPreviewing(false);
+    if (fnError) {
+      setError(fnError.message);
+      return;
+    }
+    const payload = data as DryRunResult & { error?: string };
+    if (payload?.error) {
+      setError(payload.error);
+      return;
+    }
+    if (payload.renderError) {
+      setError(`Render failed: ${payload.renderError}`);
+      return;
+    }
+    setPreview({
+      recipient: previewRecipient || "Generic preview data",
+      subject: payload.subject,
+      html: payload.html,
+    });
+  };
+
 
   return (
     <Card className="p-5 elev-1 space-y-4">
