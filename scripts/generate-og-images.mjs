@@ -54,6 +54,14 @@ const PAGE_TARGETS = [
   },
   {
     kind: "page",
+    slug: "ai-career-coach",
+    title: "Free AI Career Coach \u2014 guidance from your own resume",
+    description:
+      "Score your fit against live roles, see your ranked skill gaps, and turn them into an ordered plan. Free to start, no credit card.",
+    eyebrow: "Growth Engine",
+  },
+  {
+    kind: "page",
     slug: "ai-interview-coach",
     title: "AI Interview Coach — free voice mock interviews",
     description:
