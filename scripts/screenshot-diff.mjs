@@ -116,6 +116,8 @@ async function main() {
   mkdirSync(BASELINE_DIR, { recursive: true });
   mkdirSync(CURRENT_DIR, { recursive: true });
   mkdirSync(PENDING_DIR, { recursive: true });
+  mkdirSync(DIFF_DIR, { recursive: true });
+
 
   const manifest = loadManifest(ROOT);
 
