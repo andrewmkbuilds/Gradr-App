@@ -12,6 +12,7 @@ import {
 import { PublicShell } from "@/components/PublicShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { trackEvent, withUtm } from "@/lib/analytics";
+import { track, trackSignupCta } from "@/lib/telemetry/events";
 import {
   SITE_NAME,
   SITE_ORIGIN,
@@ -36,8 +37,25 @@ const UTM = {
 
 const ctaHref = (path: string, content: string) => withUtm(path, { ...UTM, content });
 
+/**
+ * Signup CTAs on this page emit both the page-scoped diagnostic event and the
+ * canonical `signup_cta_clicked` funnel event, so clicks from
+ * /ai-career-coach can be joined to `signup_completed` (which now carries the
+ * first-touch `landing_page`) in one funnel.
+ */
+const trackSignupClick = (location: string, text: string) => () => {
+  trackEvent("career_coach_cta_click", { location, destination: "/auth" });
+  trackSignupCta({
+    location: "landing_page",
+    text,
+    authenticated: false,
+    destination: "/auth?mode=signup",
+  });
+};
+
 const trackCta = (location: string, destination: string) => () =>
   trackEvent("career_coach_cta_click", { location, destination });
+
 
 const STEPS = [
   {
