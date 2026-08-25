@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   PRODUCTION_ORIGIN,
   canonicalUrlFor,
@@ -16,6 +16,16 @@ import {
  * contract to be achievable; an alias redirect happens before this code runs.
  */
 describe("surface routing", () => {
+  // These assertions describe the unpinned, multi-surface default. Deployments
+  // that pin a surface set these vars; clear them so the contract is testable.
+  beforeEach(() => {
+    vi.stubEnv("VITE_GRADR_SURFACE", "");
+    vi.stubEnv("VITE_APP_SUBDOMAIN_LIVE", "");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("maps each production hostname to its surface", () => {
     expect(surfaceFromHost("gradr.me")).toBe("home");
     expect(surfaceFromHost("www.gradr.me")).toBe("home");
