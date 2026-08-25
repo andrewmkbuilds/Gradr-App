@@ -45,6 +45,12 @@ export type NavItem = {
    * dev/preview and points at the real subdomain in production.
    */
   surface?: Surface;
+  /**
+   * Only shown once the signed-in user has an approved affiliate profile.
+   * Presentation only — the route itself renders a locked state for everyone
+   * else and every affiliate table is RLS-scoped to the owning profile.
+   */
+  affiliateOnly?: boolean;
 };
 
 export type NavGroup = {
@@ -122,8 +128,8 @@ export const navGroups: NavGroup[] = [
     url: "/pricing",
     items: [
       { title: "Affiliate Program", url: "/affiliate", icon: Gift },
-      { title: "Affiliate Dashboard", url: "/affiliate/dashboard", icon: BarChart3 },
-      { title: "Affiliate Resources", url: "/affiliate/resources", icon: BookOpen },
+      { title: "Affiliate Dashboard", url: "/affiliate/dashboard", icon: BarChart3, affiliateOnly: true },
+      { title: "Affiliate Resources", url: "/affiliate/resources", icon: BookOpen, affiliateOnly: true },
       { title: "Documentation", url: "/", icon: BookOpen, surface: "docs" },
       { title: "Gradr News", url: "/", icon: Newspaper, surface: "news" },
       { title: "Product site", url: "/", icon: Globe, surface: "marketing" },
