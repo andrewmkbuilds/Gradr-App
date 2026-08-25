@@ -50,6 +50,14 @@ Run the whole guard locally before shipping a wave:
 bun run check:no-tanstack && bun run lint && bunx vitest run src/test/architectureGuard.test.tsx src/test/navRoutes.test.ts
 ```
 
+## Vertical rhythm
+
+Public pages share one fluid spacing unit. Use `section-hero`, `section-block`,
+`section-gap`, `section-stack` / `section-stack-lg` instead of `py-12`-style
+utilities — `gradr/no-raw-vertical-spacing` (`bun run lint:rhythm`) enforces it
+and `bun run audit:spacing` catches drift with per-route before/after diffs.
+Full guide: [docs/vertical-rhythm.md](docs/vertical-rhythm.md).
+
 ## Design system (Gradr)
 
 The attached Gradr design system is vendored at `src/design-system/gradr-9b9b95/`.

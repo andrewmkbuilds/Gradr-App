@@ -397,6 +397,12 @@
   .section-stack > * + * {
     margin-top: var(--rhythm-md);
   }
+  /* Wider stack for top-level content blocks inside a page body
+     (replaces space-y-10 / space-y-12). */
+  .section-stack-lg > * + * {
+    margin-top: var(--rhythm-2xl);
+  }
+
 
 
   /* Perfectly centred square box for icons, avatars and logo marks.

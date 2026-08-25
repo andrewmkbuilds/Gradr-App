@@ -66,7 +66,7 @@ function DocsHome() {
         </p>
       </header>
 
-      <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="section-gap grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {DOC_CATEGORIES.map((category) => {
           const items = DOCS.filter((doc) => doc.category === category);
           if (!items.length) return null;
@@ -93,7 +93,7 @@ function DocsHome() {
         })}
       </div>
 
-      <div className="mt-12 rounded-xl border border-border/60 bg-card p-6 elev-1">
+      <div className="section-gap rounded-xl border border-border/60 bg-card p-6 elev-1">
         <h2 className="text-lg font-semibold text-foreground">Ready to use it?</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Documentation is best read with the product open next to it.
@@ -140,7 +140,7 @@ function DocArticleView({ doc }: { doc: DocArticle }) {
           </section>
         ))}
       </div>
-      <p className="mt-10 text-xs text-muted-foreground">Last updated {doc.updated}</p>
+      <p className="section-gap text-xs text-muted-foreground">Last updated {doc.updated}</p>
     </article>
   );
 }

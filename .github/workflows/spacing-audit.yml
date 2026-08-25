@@ -1,0 +1,50 @@
+name: Spacing audit
+
+# Vertical rhythm regression gate. Fails only on NEW or WORSENING whitespace
+# (see docs/vertical-rhythm.md); the per-route HTML report with before/after
+# diff images is uploaded either way.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  spacing-audit:
+    name: Vertical rhythm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Static guard: no fixed py-12 / mt-16 / space-y-10 on public routes.
+      - name: Lint (rhythm utilities)
+        run: bun run lint:rhythm
+
+      # Locks the scale itself: one fluid unit, no hand-rolled clamp()s.
+      - name: Rhythm token tests
+        run: bunx vitest run src/test/verticalRhythm.test.ts
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      # Boots its own Vite server in multi-surface mode so every public route
+      # resolves, measures 26 routes x 3 breakpoints, screenshots and diffs.
+      - name: Vertical spacing audit
+        run: bun run audit:spacing
+
+      - name: Upload spacing audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacing-audit
+          path: test-results/spacing-audit
+          if-no-files-found: warn

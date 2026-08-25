@@ -62,7 +62,7 @@ function SupportHome() {
         </p>
       </header>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-3">
+      <div className="section-gap grid gap-4 sm:grid-cols-3">
         <SLink
           to="/contact"
           className="interactive group rounded-xl border border-border/60 bg-card p-5 elev-1"
@@ -95,7 +95,7 @@ function SupportHome() {
         </CrossLink>
       </div>
 
-      <section className="mt-12 max-w-3xl">
+      <section className="section-gap max-w-3xl">
         <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Frequently asked questions
         </h2>
@@ -182,7 +182,7 @@ function SupportContact() {
         </p>
       </form>
 
-      <div className="mt-10">
+      <div className="section-gap">
         <SLink
           to="/"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"

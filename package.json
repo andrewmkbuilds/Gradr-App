@@ -144,6 +144,7 @@
     "icons:check": "node scripts/generate-app-icons.mjs --check",
     "icons:generate": "node scripts/generate-app-icons.mjs",
     "lint": "eslint .",
+    "lint:rhythm": "eslint src/surfaces src/components/PublicShell.tsx src/pages/legal src/pages/blog src/pages/AiCareerCoach.tsx src/pages/AtsResumeChecker.tsx src/pages/AiCoverLetterGenerator.tsx src/pages/AiInterviewCoach.tsx src/pages/JobApplicationTracker.tsx src/pages/JobSearchIndex.tsx src/pages/JobLanding.tsx src/pages/GuideArticle.tsx src/pages/CareerAdvice.tsx src/pages/Pricing.tsx src/pages/AffiliateProgram.tsx",
     "lint:design": "eslint --config eslint.design.config.js .",
     "og:check": "node scripts/generate-og-images.mjs --check",
     "og:generate": "node scripts/generate-og-images.mjs",
@@ -191,7 +192,8 @@
     "visual:baseline:review": "node scripts/baseline-approve.mjs",
     "visual:logo-shell": "node scripts/logo-shell-visual.mjs",
     "test:email-preferences": "node scripts/email-preference-enforcement.mjs",
-    "audit:spacing": "node scripts/spacing-audit.mjs"
+    "audit:spacing": "node scripts/spacing-audit.mjs",
+    "audit:spacing:update": "node scripts/spacing-audit.mjs --update"
   },
   "type": "module",
   "version": "0.0.0"

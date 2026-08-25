@@ -34,7 +34,7 @@ export default function GuideArticle() {
     <PublicShell source={guide.slug}>
       <JsonLd nodes={guideJsonLd(guide)} label={guide.slug} />
 
-      <article className="space-y-10">
+      <article className="section-stack-lg">
         <nav aria-label="Breadcrumb">
           <Link
             to="/career-advice"

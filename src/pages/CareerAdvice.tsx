@@ -84,7 +84,7 @@ export default function CareerAdvice() {
     <PublicShell source="career-advice-index">
       <JsonLd nodes={jsonLd} label="career-advice-index" />
 
-      <div className="space-y-10">
+      <div className="section-stack-lg">
         <MarketingHero
           eyebrow="Career advice"
           title="Guides for resumes, cover letters, and interviews"

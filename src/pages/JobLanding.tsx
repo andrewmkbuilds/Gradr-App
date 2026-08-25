@@ -46,7 +46,7 @@ export default function JobLanding() {
     <PublicShell source={landing.slug}>
       <JsonLd nodes={jobLandingJsonLd(landing)} label={landing.slug} />
 
-      <div className="space-y-10">
+      <div className="section-stack-lg">
         <nav aria-label="Breadcrumb">
           <Link
             to="/job-search"

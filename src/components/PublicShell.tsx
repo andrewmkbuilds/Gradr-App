@@ -137,9 +137,9 @@ export function PublicShell({ children, source }: PublicShellProps) {
         )}
       </header>
 
-      <main className="page-shell py-12 sm:py-16">{children}</main>
+      <main className="page-shell section-block">{children}</main>
 
-      <footer className="border-t border-border/60 py-12">
+      <footer className="border-t border-border/60 section-block">
         <div className="page-shell grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div className="space-y-3">
             <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
@@ -212,7 +212,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
           </nav>
         </div>
 
-        <div className="page-shell mt-10 border-t border-border/60 pt-6 text-sm text-muted-foreground">
+        <div className="page-shell section-gap border-t border-border/60 pt-6 text-sm text-muted-foreground">
           © {new Date().getFullYear()} Gradr. All rights reserved.
         </div>
       </footer>

@@ -74,7 +74,7 @@ function StatusHome() {
 
       <section
         className={cn(
-          "mt-10 flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 elev-1",
+          "section-gap flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 elev-1",
         )}
         aria-live="polite"
       >
@@ -113,7 +113,7 @@ function StatusHome() {
         </ul>
       </section>
 
-      <section className="mt-10">
+      <section className="section-gap">
         <h2 className="text-body-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Incident history
         </h2>
@@ -122,7 +122,7 @@ function StatusHome() {
         </div>
       </section>
 
-      <div className="mt-12 rounded-xl border border-border/60 bg-card p-6 elev-1">
+      <div className="section-gap rounded-xl border border-border/60 bg-card p-6 elev-1">
         <h2 className="text-h6 font-semibold text-foreground">Something looks wrong?</h2>
         <p className="mt-1 text-body-sm text-muted-foreground">
           If you are hitting a problem that isn’t reflected here, tell our support team.
