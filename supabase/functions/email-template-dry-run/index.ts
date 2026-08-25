@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
 
   // --- Per-recipient evaluation, same order as the real send path.
   const decisions: Decision[] = []
-  for (const recipient of recipients) {
+  for (const recipient of previewOnly ? [] : recipients) {
     const normalized = recipient.toLowerCase()
     let blockedBy: string | null = templateBlocked
     let reason: string | null = templateBlocked
