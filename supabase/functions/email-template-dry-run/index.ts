@@ -69,6 +69,10 @@ Deno.serve(async (req) => {
   let templateName = ''
   let recipients: string[] = []
   let templateData: Record<string, unknown> | null = null
+  /** Address the preview is personalised for. Rendering only — never a send. */
+  let previewRecipient: string | null = null
+  /** Preview mode renders the template and skips gate evaluation + audit writes. */
+  let previewOnly = false
   try {
     const body = await req.json()
     templateName = String(body.templateName ?? '')
@@ -76,9 +80,12 @@ Deno.serve(async (req) => {
       ? body.recipients.map((r: unknown) => String(r).trim()).filter(Boolean).slice(0, 25)
       : []
     if (body.templateData && typeof body.templateData === 'object') templateData = body.templateData
+    if (body.previewRecipient) previewRecipient = String(body.previewRecipient).trim() || null
+    previewOnly = body.previewOnly === true
   } catch {
     return json({ error: 'Invalid JSON in request body' }, 400)
   }
+
 
   if (!templateName) return json({ error: 'templateName is required' }, 400)
   const template = TEMPLATES[templateName]
@@ -94,7 +101,7 @@ Deno.serve(async (req) => {
 
   // --- Per-recipient evaluation, same order as the real send path.
   const decisions: Decision[] = []
-  for (const recipient of recipients) {
+  for (const recipient of previewOnly ? [] : recipients) {
     const normalized = recipient.toLowerCase()
     let blockedBy: string | null = templateBlocked
     let reason: string | null = templateBlocked
@@ -161,7 +168,50 @@ Deno.serve(async (req) => {
   let html = ''
   let subject = ''
   let renderError: string | null = null
-  const data = templateData ?? template.previewData ?? {}
+  const baseData = templateData ?? template.previewData ?? {}
+
+  // Personalise the preview for one recipient: their account display name (when
+  // the address belongs to a Gradr user) and address are merged in where the
+  // template's own data does not already provide them.
+  let previewProfile: { email: string; fullName: string | null } | null = null
+  if (previewRecipient) {
+    let fullName: string | null = null
+    const { data: userRow } = await supabase
+      .from('email_delivery_audit')
+      .select('recipient_user_id')
+      .eq('recipient_email', previewRecipient)
+      .not('recipient_user_id', 'is', null)
+      .limit(1)
+      .maybeSingle()
+    const userId = (userRow as { recipient_user_id?: string } | null)?.recipient_user_id ?? null
+    if (userId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', userId)
+        .maybeSingle()
+      fullName = (profile as { display_name?: string } | null)?.display_name ?? null
+    }
+    previewProfile = { email: previewRecipient, fullName }
+  }
+
+  const data: Record<string, unknown> = previewProfile
+    ? {
+        ...baseData,
+        name:
+          previewProfile.fullName ??
+          (baseData as Record<string, unknown>).name ??
+          previewProfile.email.split('@')[0],
+        firstName:
+          previewProfile.fullName?.split(' ')[0] ??
+          (baseData as Record<string, unknown>).firstName ??
+          previewProfile.email.split('@')[0],
+        email: previewProfile.email,
+        recipientEmail: previewProfile.email,
+      }
+    : (baseData as Record<string, unknown>)
+
+
   try {
     html = await renderAsync(
       React.createElement(
@@ -181,7 +231,8 @@ Deno.serve(async (req) => {
   }
 
   // --- Audit the dry run itself so the trail shows who probed what.
-  if (decisions.length > 0) {
+  // A pure preview writes nothing: it renders and returns, no queue, no audit.
+  if (!previewOnly && decisions.length > 0) {
     await supabase.from('email_delivery_audit').insert(
       decisions.map((d) => ({
         event: 'dry_run',
@@ -208,7 +259,10 @@ Deno.serve(async (req) => {
     html,
     renderError,
     decisions,
+    previewRecipient,
+    previewOnly,
     dryRun: true,
     sent: false,
+
   })
 })

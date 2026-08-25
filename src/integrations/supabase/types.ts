@@ -1922,6 +1922,99 @@ export type Database = {
         }
         Relationships: []
       }
+      email_pipeline_alerts: {
+        Row: {
+          category_label: string | null
+          created_at: string
+          event: string
+          first_occurred_at: string
+          id: string
+          last_occurred_at: string
+          occurrence_count: number
+          reason: string | null
+          recipient_count: number
+          recipients: string[]
+          resolved_at: string | null
+          resolved_by: string | null
+          stage: string
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          category_label?: string | null
+          created_at?: string
+          event: string
+          first_occurred_at?: string
+          id?: string
+          last_occurred_at?: string
+          occurrence_count?: number
+          reason?: string | null
+          recipient_count?: number
+          recipients?: string[]
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stage?: string
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          category_label?: string | null
+          created_at?: string
+          event?: string
+          first_occurred_at?: string
+          id?: string
+          last_occurred_at?: string
+          occurrence_count?: number
+          reason?: string | null
+          recipient_count?: number
+          recipients?: string[]
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stage?: string
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_retention_settings: {
+        Row: {
+          alert_retention_days: number
+          audit_retention_days: number
+          created_at: string
+          id: boolean
+          last_purge_at: string | null
+          last_purge_result: Json | null
+          purge_enabled: boolean
+          report_retention_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          alert_retention_days?: number
+          audit_retention_days?: number
+          created_at?: string
+          id?: boolean
+          last_purge_at?: string | null
+          last_purge_result?: Json | null
+          purge_enabled?: boolean
+          report_retention_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          alert_retention_days?: number
+          audit_retention_days?: number
+          created_at?: string
+          id?: boolean
+          last_purge_at?: string | null
+          last_purge_result?: Json | null
+          purge_enabled?: boolean
+          report_retention_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -4408,6 +4501,27 @@ export type Database = {
         }
         Returns: string
       }
+      admin_email_retention_settings: {
+        Args: never
+        Returns: {
+          alert_retention_days: number
+          audit_retention_days: number
+          created_at: string
+          id: boolean
+          last_purge_at: string | null
+          last_purge_result: Json | null
+          purge_enabled: boolean
+          report_retention_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_retention_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_email_weekly_report: { Args: never; Returns: Json }
       admin_legal_document_stats: {
         Args: never
@@ -4440,6 +4554,32 @@ export type Database = {
         Args: { _document_id: string }
         Returns: string
       }
+      admin_resolve_email_alert: {
+        Args: { _alert_id: string }
+        Returns: {
+          category_label: string | null
+          created_at: string
+          event: string
+          first_occurred_at: string
+          id: string
+          last_occurred_at: string
+          occurrence_count: number
+          reason: string | null
+          recipient_count: number
+          recipients: string[]
+          resolved_at: string | null
+          resolved_by: string | null
+          stage: string
+          template_name: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_pipeline_alerts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_review_verification: {
         Args: { _reason?: string; _status: string; _verification_id: string }
         Returns: undefined
@@ -4453,6 +4593,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_run_email_retention_purge: { Args: never; Returns: Json }
       admin_set_commission_status: {
         Args: {
           _commission_ids: string[]
@@ -4460,6 +4601,32 @@ export type Database = {
           _status: Database["public"]["Enums"]["affiliate_commission_status"]
         }
         Returns: number
+      }
+      admin_update_email_retention: {
+        Args: {
+          _alert_retention_days: number
+          _audit_retention_days: number
+          _purge_enabled: boolean
+          _report_retention_days: number
+        }
+        Returns: {
+          alert_retention_days: number
+          audit_retention_days: number
+          created_at: string
+          id: boolean
+          last_purge_at: string | null
+          last_purge_result: Json | null
+          purge_enabled: boolean
+          report_retention_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_retention_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_verification_requests: {
         Args: { _limit?: number; _status?: string }
@@ -4678,6 +4845,7 @@ export type Database = {
         Args: { _feature: string; _tier: string }
         Returns: number
       }
+      purge_email_retention: { Args: never; Returns: Json }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
