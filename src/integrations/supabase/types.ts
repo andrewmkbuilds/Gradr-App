@@ -1751,6 +1751,54 @@ export type Database = {
         }
         Relationships: []
       }
+      email_delivery_audit: {
+        Row: {
+          category: string | null
+          category_label: string | null
+          event: string
+          id: string
+          kind: string | null
+          message_id: string | null
+          metadata: Json | null
+          occurred_at: string
+          reason: string | null
+          recipient_email: string
+          recipient_user_id: string | null
+          source: string
+          template_name: string
+        }
+        Insert: {
+          category?: string | null
+          category_label?: string | null
+          event: string
+          id?: string
+          kind?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          occurred_at?: string
+          reason?: string | null
+          recipient_email: string
+          recipient_user_id?: string | null
+          source?: string
+          template_name: string
+        }
+        Update: {
+          category?: string | null
+          category_label?: string | null
+          event?: string
+          id?: string
+          kind?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          occurred_at?: string
+          reason?: string | null
+          recipient_email?: string
+          recipient_user_id?: string | null
+          source?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
       email_events: {
         Row: {
           created_at: string
@@ -1937,6 +1985,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_template_classification: {
+        Row: {
+          category: string
+          category_label: string
+          group_label: string
+          kind: string
+          template_name: string
+          trigger_reason: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          category_label: string
+          group_label: string
+          kind: string
+          template_name: string
+          trigger_reason?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          category_label?: string
+          group_label?: string
+          kind?: string
+          template_name?: string
+          trigger_reason?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_unsubscribe_tokens: {
         Row: {
           created_at: string
@@ -1958,6 +2036,33 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      email_weekly_reports: {
+        Row: {
+          generated_at: string
+          id: string
+          period_day: string
+          period_end: string
+          period_start: string
+          report: Json
+        }
+        Insert: {
+          generated_at?: string
+          id?: string
+          period_day: string
+          period_end: string
+          period_start: string
+          report: Json
+        }
+        Update: {
+          generated_at?: string
+          id?: string
+          period_day?: string
+          period_end?: string
+          period_start?: string
+          report?: Json
         }
         Relationships: []
       }
@@ -4303,6 +4408,7 @@ export type Database = {
         }
         Returns: string
       }
+      admin_email_weekly_report: { Args: never; Returns: Json }
       admin_legal_document_stats: {
         Args: never
         Returns: {
@@ -4427,6 +4533,7 @@ export type Database = {
         Args: { _interval?: string; _plan?: string; _user_id: string }
         Returns: Json
       }
+      build_email_weekly_report: { Args: { _end?: string }; Returns: Json }
       consume_entitlement: {
         Args: {
           _amount?: number
@@ -4466,6 +4573,7 @@ export type Database = {
       entitlement_snapshot: { Args: { _env?: string }; Returns: Json }
       expire_stale_verifications: { Args: never; Returns: number }
       generate_affiliate_code: { Args: never; Returns: string }
+      generate_email_weekly_report: { Args: never; Returns: string }
       get_affiliate_public_settings: {
         Args: never
         Returns: {
