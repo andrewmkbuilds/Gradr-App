@@ -88,7 +88,11 @@ export function completeSignupTracking(user: User): boolean {
     referral_source: attribution?.referrer_domain,
     utm_source: attribution?.utm_source,
     utm_campaign: attribution?.utm_campaign,
+    // First-touch entry path, so completions can be attributed back to the
+    // landing page that produced them (e.g. /ai-career-coach).
+    landing_page: attribution?.landing_page,
   };
+
 
   if (!isNew) {
     track("login_completed", { signup_method: method });
