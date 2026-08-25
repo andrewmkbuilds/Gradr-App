@@ -68,11 +68,11 @@ export function EmailTemplateSandbox() {
   return (
     <Card className="p-5 elev-1 space-y-4">
       <div>
-        <h2 className="text-sm font-semibold flex items-center gap-2">
+        <h2 className="text-body-sm font-semibold flex items-center gap-2">
           <FlaskConical className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           Template test sandbox
         </h2>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-caption text-muted-foreground mt-1">
           Dry-run any template against real recipients. Nothing is queued or sent — the run only reports which
           recipients the preferences, suppression list and classification rules would block.
         </p>
@@ -109,34 +109,34 @@ export function EmailTemplateSandbox() {
         <Button onClick={run} loading={running} disabled={!templateName}>
           Run dry-run
         </Button>
-        <span className="text-xs text-muted-foreground">Dry-runs are recorded in the delivery audit log.</span>
+        <span className="text-caption text-muted-foreground">Dry-runs are recorded in the delivery audit log.</span>
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-body-sm text-destructive">{error}</p>}
 
       {result && (
         <div className="space-y-4">
           <div className="rounded-control border border-border/60 p-3">
-            <p className="text-sm font-medium">Subject</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-body-sm font-medium">Subject</p>
+            <p className="text-caption text-muted-foreground mt-1">
               {result.renderError ? `Render failed: ${result.renderError}` : result.subject || "(empty)"}
             </p>
             {result.templateBlocked && (
-              <p className="text-xs text-destructive mt-2">
+              <p className="text-caption text-destructive mt-2">
                 Template gate: {result.templateBlocked} — this template can never be queued.
               </p>
             )}
           </div>
 
           <div>
-            <p className="text-sm font-medium mb-2">Recipient outcomes</p>
+            <p className="text-body-sm font-medium mb-2">Recipient outcomes</p>
             {result.decisions.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Add at least one recipient to evaluate delivery rules.</p>
+              <p className="text-caption text-muted-foreground">Add at least one recipient to evaluate delivery rules.</p>
             ) : (
               <div className="divide-y divide-border/60 rounded-control border border-border/60">
                 {result.decisions.map((d) => (
                   <div key={d.recipient} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2">
-                    <span className="text-sm">{d.recipient}</span>
+                    <span className="text-body-sm">{d.recipient}</span>
                     <div className="flex items-center gap-2">
                       {d.wouldSend ? (
                         <Badge variant="secondary" className="gap-1">
@@ -147,7 +147,7 @@ export function EmailTemplateSandbox() {
                           <ShieldAlert className="h-3 w-3" aria-hidden="true" /> Blocked · {d.blockedBy}
                         </Badge>
                       )}
-                      <span className="text-xs text-muted-foreground">{d.reason}</span>
+                      <span className="text-caption text-muted-foreground">{d.reason}</span>
                     </div>
                   </div>
                 ))}

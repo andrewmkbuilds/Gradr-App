@@ -45,7 +45,7 @@ export function useEmailWeeklyReport() {
 function Stat({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Send }) {
   return (
     <div className="rounded-control border border-border/60 p-3">
-      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+      <p className="text-caption text-muted-foreground flex items-center gap-1.5">
         <Icon className="h-3.5 w-3.5" aria-hidden="true" /> {label}
       </p>
       <p className="text-2xl font-semibold mt-1">{value}</p>
@@ -61,8 +61,8 @@ export function EmailWeeklyReportCard({ compact = false }: { compact?: boolean }
   if (error) {
     return (
       <Card className="p-4 elev-1">
-        <p className="text-sm text-destructive">Weekly email report unavailable.</p>
-        <p className="text-xs text-muted-foreground mt-1">{(error as Error).message}</p>
+        <p className="text-body-sm text-destructive">Weekly email report unavailable.</p>
+        <p className="text-caption text-muted-foreground mt-1">{(error as Error).message}</p>
       </Card>
     );
   }
@@ -76,8 +76,8 @@ export function EmailWeeklyReportCard({ compact = false }: { compact?: boolean }
     <Card className="p-5 elev-1 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold">Weekly email report</h2>
-          <p className="text-xs text-muted-foreground mt-1">
+          <h2 className="text-body-sm font-semibold">Weekly email report</h2>
+          <p className="text-caption text-muted-foreground mt-1">
             Rolling 7 days.{" "}
             {data?.snapshot_generated_at
               ? `Automated snapshot ${formatDistanceToNow(new Date(data.snapshot_generated_at))} ago.`
@@ -104,16 +104,16 @@ export function EmailWeeklyReportCard({ compact = false }: { compact?: boolean }
             : "rounded-control border border-border/60 p-3"
         }
       >
-        <p className="text-sm font-medium flex items-center gap-2">
+        <p className="text-body-sm font-medium flex items-center gap-2">
           {marketing.length > 0 && <AlertTriangle className="h-4 w-4 text-destructive" aria-hidden="true" />}
           Marketing-shaped templates
         </p>
         {marketing.length === 0 ? (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-caption text-muted-foreground mt-1">
             None in the last 7 days — every send mapped to a registered transactional template.
           </p>
         ) : (
-          <ul className="mt-2 space-y-1 text-xs">
+          <ul className="mt-2 space-y-1 text-caption">
             {marketing.map((m) => (
               <li key={`${m.template_name}-${m.event}`} className="flex items-center gap-2">
                 <code className="text-code">{m.template_name}</code>
@@ -128,9 +128,9 @@ export function EmailWeeklyReportCard({ compact = false }: { compact?: boolean }
       {!compact && (
         <>
           <div>
-            <p className="text-sm font-medium mb-2">By template</p>
+            <p className="text-body-sm font-medium mb-2">By template</p>
             {report.by_template.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No email activity in the last 7 days.</p>
+              <p className="text-caption text-muted-foreground">No email activity in the last 7 days.</p>
             ) : (
               <div className="divide-y divide-border/60 rounded-control border border-border/60">
                 {report.by_template.map((t) => (
@@ -139,7 +139,7 @@ export function EmailWeeklyReportCard({ compact = false }: { compact?: boolean }
                       <code className="text-code">{t.template_name}</code>
                       <Badge variant="outline">{t.category_label}</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-caption text-muted-foreground">
                       {t.sent} sent · {t.queued} queued · {t.suppressed} suppressed · {t.failed} failed
                     </p>
                   </div>
@@ -149,11 +149,11 @@ export function EmailWeeklyReportCard({ compact = false }: { compact?: boolean }
           </div>
 
           <div>
-            <p className="text-sm font-medium mb-2">Why sends were suppressed</p>
+            <p className="text-body-sm font-medium mb-2">Why sends were suppressed</p>
             {report.suppression_reasons.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Nothing suppressed in the last 7 days.</p>
+              <p className="text-caption text-muted-foreground">Nothing suppressed in the last 7 days.</p>
             ) : (
-              <ul className="space-y-1 text-xs text-muted-foreground">
+              <ul className="space-y-1 text-caption text-muted-foreground">
                 {report.suppression_reasons.map((r) => (
                   <li key={r.reason}>
                     {r.reason} — {r.count}
