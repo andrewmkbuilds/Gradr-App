@@ -20,7 +20,17 @@ const REPORT_DIR = join(ROOT, "tests/reports");
 const SUMMARY_SOURCES = [
   ["Route guards", "tests/reports/axe/route-guards-summary.json"],
   ["Refresh rotation", "tests/reports/json/refresh-rotation.json"],
+  ["Multi-tab sign-out", "tests/reports/json/multi-tab-signout.json"],
 ];
+
+// Theme pixel diffs are reported separately: they carry a drift % and a diff
+// image per capture, and they can put the whole run in "quarantined" state.
+const VISUAL_REPORT = "tests/reports/json/visual-themes.json";
+// Optional public base (e.g. an S3/pages mirror of the diff dir). When set, the
+// summary links the diff PNGs directly instead of pointing at the artifact zip.
+const DIFF_BASE_URL = process.env.VISUAL_DIFF_BASE_URL?.replace(/\/$/, "");
+const VISUAL_ARTIFACT = "theme-visual-diffs";
+
 
 const repo = process.env.GITHUB_REPOSITORY;
 const runId = process.env.GITHUB_RUN_ID;
@@ -43,7 +53,75 @@ function loadResults() {
   return suites;
 }
 
-function artifactLines() {
+/** Theme visual report, when the screenshot-diff step produced one. */
+function loadVisual() {
+  const file = join(ROOT, VISUAL_REPORT);
+  if (!existsSync(file)) return null;
+  try {
+    const parsed = JSON.parse(readFileSync(file, "utf8"));
+    return { ...parsed, results: parsed.results ?? [] };
+  } catch {
+    return null;
+  }
+}
+
+/** A link a reviewer can actually click through to the image itself. */
+function diffLink(relPath) {
+  if (!relPath) return null;
+  if (DIFF_BASE_URL) return `${DIFF_BASE_URL}/${relPath.split("/").pop()}`;
+  return runUrl ? `${runUrl}#artifacts` : null;
+}
+
+function visualSection(visual) {
+  if (!visual) return [];
+  const notable = visual.results.filter((r) => r.status !== "passed");
+  const lines = [];
+
+  if (visual.quarantined) {
+    lines.push(
+      "> [!WARNING]",
+      `> **Visual run quarantined** — drift above the ${visual.quarantineThreshold}% quarantine threshold is treated as`,
+      "> environment/renderer breakage rather than a pixel regression, so it does **not** block this merge.",
+      "> All diff images are uploaded below; triage them and either fix the cause or approve new baselines.",
+      "",
+    );
+  }
+
+  lines.push(
+    `**Theme visual diffs** — fail above ${visual.tolerance}% drift, quarantine above ${visual.quarantineThreshold}%`,
+    "",
+  );
+
+  if (!notable.length) {
+    lines.push(`✅ All ${visual.results.length} theme captures within ${visual.tolerance}% drift.`, "");
+    return lines;
+  }
+
+  lines.push("| | Capture | Drift | Diff image |", "| --- | --- | --- | --- |");
+  for (const r of notable) {
+    const icon = r.status === "quarantined" ? "🟡" : "❌";
+    const drift = r.drift === undefined ? (r.detail ?? "—") : `${r.drift}%`;
+    const link = diffLink(r.diff);
+    const cell = link
+      ? `[\`${r.diff.split("/").pop()}\`](${link})`
+      : r.diff
+        ? `\`${r.diff}\``
+        : r.sizeChanged
+          ? "capture size changed"
+          : "—";
+    lines.push(`| ${icon} | \`${r.name}\` | ${drift} | ${cell} |`);
+  }
+  if (!DIFF_BASE_URL && runUrl) {
+    lines.push(
+      "",
+      `<sub>Diff images ship in the [\`${VISUAL_ARTIFACT}\` artifact](${runUrl}#artifacts) — download it and open the file named in each row (baseline and current captures are in the same bundle).</sub>`,
+    );
+  }
+  lines.push("");
+  return lines;
+}
+
+function artifactLines(visual) {
   const lines = [];
   const htmlDir = join(REPORT_DIR, "html");
   const reports = existsSync(htmlDir) ? readdirSync(htmlDir).filter((f) => f.endsWith(".html")) : [];
@@ -62,13 +140,18 @@ function artifactLines() {
         : `- **Failing traces & videos**: none captured (nothing failed in a traced context)`,
     );
     lines.push(`- **Accessibility JSON**: [\`route-guard-axe-reports\` artifact](${runUrl}#artifacts)`);
-    lines.push(`- **Visual diffs**: [\`route-guard-visuals\` artifact](${runUrl}#artifacts)`);
+    lines.push(`- **Route visual diffs**: [\`route-guard-visuals\` artifact](${runUrl}#artifacts)`);
+    lines.push(
+      visual
+        ? `- **Theme baseline/current/diff images**: [\`${VISUAL_ARTIFACT}\` artifact](${runUrl}#artifacts)`
+        : `- **Theme baseline diffs**: not produced by this run`,
+    );
     lines.push(`- **Full logs**: [workflow run](${runUrl})`);
   }
   return lines;
 }
 
-function render(suites) {
+function render(suites, visual) {
   const rows = [];
   let totalFailed = 0;
   for (const suite of suites) {
@@ -82,22 +165,41 @@ function render(suites) {
       rows.push(`| | ↳ \`${f.name}\` | ${String(f.detail ?? "").slice(0, 160) || "failed"} |`);
     }
   }
+  if (visual) {
+    const failed = visual.results.filter((r) => r.status === "failed").length;
+    const quar = visual.results.filter((r) => r.status === "quarantined").length;
+    totalFailed += failed;
+    rows.push(
+      `| ${failed ? "❌" : quar ? "🟡" : "✅"} | **Theme visuals** | ${
+        visual.results.length - failed - quar
+      } passed · ${failed} failed · ${quar} quarantined |`,
+    );
+  }
   if (!rows.length) rows.push("| ℹ️ | No suite reports found | the test steps skipped or did not run |");
+
+  const heading = totalFailed ? "❌" : visual?.quarantined ? "🟡" : "✅";
+  const title = totalFailed
+    ? "CI test summary"
+    : visual?.quarantined
+      ? "CI test summary — visual drift quarantined (not blocking)"
+      : "CI test summary";
 
   return [
     MARKER,
-    `### ${totalFailed ? "❌" : "✅"} CI test summary`,
+    `### ${heading} ${title}`,
     "",
     "| | Suite | Result |",
     "| --- | --- | --- |",
     ...rows,
     "",
+    ...visualSection(visual),
     "**Artifacts**",
-    ...artifactLines(),
+    ...artifactLines(visual),
     "",
     `<sub>Updated ${new Date().toISOString()}${runId ? ` · run \`${runId}\`` : ""}</sub>`,
   ].join("\n");
 }
+
 
 async function upsertComment(body) {
   const token = process.env.GITHUB_TOKEN;
@@ -143,7 +245,7 @@ async function upsertComment(body) {
 }
 
 mkdirSync(REPORT_DIR, { recursive: true });
-const body = render(loadResults());
+const body = render(loadResults(), loadVisual());
 console.log(body);
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, body + "\n");
 writeFileSync(join(REPORT_DIR, "ci-summary.md"), body + "\n");

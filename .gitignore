@@ -37,3 +37,4 @@ tests/reports/
 tests/visual/route-guards/current/
 tests/visual/themes/current/
 tests/visual/themes/pending/
+tests/visual/themes/diff/

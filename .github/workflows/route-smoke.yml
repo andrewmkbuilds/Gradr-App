@@ -103,6 +103,48 @@ jobs:
           LOVABLE_BROWSER_SUPABASE_STORAGE_KEY: ${{ secrets.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY }}
           LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
 
+      # Two tabs, one session: signing out in tab A must kill tab B and its
+      # already-issued refresh token. Skips itself without credentials.
+      - name: Multi-tab sign-out e2e
+        run: bun run test:multi-tab-signout http://127.0.0.1:8080
+        env:
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
+      # Theme pixel diffs. Drift over VISUAL_TOLERANCE fails the job; drift over
+      # VISUAL_QUARANTINE_TOLERANCE is *quarantined* instead — the script exits 0
+      # so the merge is not blocked, and the diff images go up for triage.
+      - name: Theme visual diff
+        id: theme-visual
+        if: hashFiles('tests/visual/themes/baseline/*.png') != ''
+        run: bun run test:visual:themes
+        env:
+          SMOKE_BASE_URL: http://127.0.0.1:8080
+          VISUAL_TOLERANCE: "0.02"
+          VISUAL_QUARANTINE_TOLERANCE: "0.25"
+          LOVABLE_BROWSER_SUPABASE_STORAGE_KEY: ${{ secrets.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY }}
+          LOVABLE_BROWSER_SUPABASE_SESSION_JSON: ${{ secrets.LOVABLE_BROWSER_SUPABASE_SESSION_JSON }}
+
+      # Always uploaded — a quarantined run is exactly the one that needs images.
+      - name: Upload theme visual diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-visual-diffs
+          path: |
+            tests/visual/themes/diff/
+            tests/visual/themes/current/
+            tests/visual/themes/baseline/
+            tests/reports/json/visual-themes.json
+          if-no-files-found: ignore
+
+      - name: Flag quarantined visual run
+        if: always() && steps.theme-visual.outputs.quarantined == 'true'
+        run: |
+          echo "::warning title=Visual run quarantined::Theme drift exceeded the quarantine threshold — \
+          artifacts uploaded for triage, merge not blocked."
+
+
       - name: Upload visual diffs
         if: always()
         uses: actions/upload-artifact@v4

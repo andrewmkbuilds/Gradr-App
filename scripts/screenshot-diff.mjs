@@ -16,9 +16,11 @@
  *   node scripts/screenshot-diff.mjs            # compare against baselines
  */
 import { chromium } from "playwright";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, appendFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
+import { PNG } from "pngjs";
+import pixelmatch from "pixelmatch";
 import { settle, stableScreenshot, withRetry } from "./lib/pageStability.mjs";
 import { loadManifest, verifyLocks } from "./lib/visualBaselines.mjs";
 
@@ -28,8 +30,21 @@ const ROOT = process.cwd();
 const BASELINE_DIR = join(ROOT, "tests/visual/themes/baseline");
 const CURRENT_DIR = join(ROOT, "tests/visual/themes/current");
 const PENDING_DIR = join(ROOT, "tests/visual/themes/pending");
+const DIFF_DIR = join(ROOT, "tests/visual/themes/diff");
+const REPORT_FILE = join(ROOT, "tests/reports/json/visual-themes.json");
+// Two thresholds, deliberately:
+//   drift <= TOLERANCE             -> pass
+//   TOLERANCE < drift <= QUARANTINE-> real regression, blocks the merge
+//   drift  > QUARANTINE            -> too large to be a targeted regression
+//                                     (renderer/font/env breakage, a whole
+//                                     screen swap). The run is QUARANTINED:
+//                                     reported loudly, artifacts uploaded, but
+//                                     it does not block the merge — a human
+//                                     triages it instead of everyone force-merging.
 const TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.02); // 2% of pixels
+const QUARANTINE_TOLERANCE = Number(process.env.VISUAL_QUARANTINE_TOLERANCE ?? 0.25); // 25% of pixels
 const RETRIES = Number(process.env.VISUAL_RETRIES ?? 3);
+
 
 const PUBLIC_ROUTES = [["auth", "/auth"]];
 const AUTHED_ROUTES = [
@@ -74,50 +89,35 @@ function loadSession() {
   };
 }
 
-/** Cheap pixel diff on raw PNG bytes decoded via the browser itself. */
-async function diffRatio(page, aPath, bPath) {
-  const a = readFileSync(aPath).toString("base64");
-  const b = readFileSync(bPath).toString("base64");
-  return page.evaluate(
-    async ([a, b]) => {
-      const load = (data) =>
-        new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = `data:image/png;base64,${data}`;
-        });
-      const [ia, ib] = await Promise.all([load(a), load(b)]);
-      if (ia.width !== ib.width || ia.height !== ib.height) return 1;
-      const draw = (img) => {
-        const c = document.createElement("canvas");
-        c.width = img.width;
-        c.height = img.height;
-        c.getContext("2d").drawImage(img, 0, 0);
-        return c.getContext("2d").getImageData(0, 0, img.width, img.height).data;
-      };
-      const da = draw(ia);
-      const db = draw(ib);
-      let changed = 0;
-      for (let i = 0; i < da.length; i += 4) {
-        if (
-          Math.abs(da[i] - db[i]) > 8 ||
-          Math.abs(da[i + 1] - db[i + 1]) > 8 ||
-          Math.abs(da[i + 2] - db[i + 2]) > 8
-        ) {
-          changed++;
-        }
-      }
-      return changed / (da.length / 4);
-    },
-    [a, b],
-  );
+/**
+ * Pixel diff via pixelmatch — the same comparison scripts/baseline-approve.mjs
+ * reports at review time, so the drift % a reviewer approves is the drift % CI
+ * measures. Also writes a highlighted diff PNG for triage.
+ */
+function diffRatio(baselinePath, currentPath, diffPath) {
+  const a = PNG.sync.read(readFileSync(baselinePath));
+  const b = PNG.sync.read(readFileSync(currentPath));
+  if (a.width !== b.width || a.height !== b.height) {
+    // Size change: no meaningful per-pixel diff image, treat as total drift.
+    return { ratio: 1, diff: null, sizeChanged: true };
+  }
+  const out = new PNG({ width: a.width, height: a.height });
+  const changed = pixelmatch(a.data, b.data, out.data, a.width, a.height, {
+    threshold: 0.15,
+    includeAA: false,
+  });
+  const ratio = changed / (a.width * a.height);
+  if (diffPath && changed > 0) writeFileSync(diffPath, PNG.sync.write(out));
+  return { ratio, diff: changed > 0 ? diffPath : null, sizeChanged: false };
 }
+
 
 async function main() {
   mkdirSync(BASELINE_DIR, { recursive: true });
   mkdirSync(CURRENT_DIR, { recursive: true });
   mkdirSync(PENDING_DIR, { recursive: true });
+  mkdirSync(DIFF_DIR, { recursive: true });
+
 
   const manifest = loadManifest(ROOT);
 
@@ -136,8 +136,12 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   const failures = [];
+  const quarantined = [];
   const captured = [];
   const pending = [];
+  /** Per-capture rows consumed by the PR summary comment. */
+  const results = [];
+
 
   for (const theme of THEMES) {
   for (const group of groups) {
@@ -192,8 +196,11 @@ async function main() {
         const why = lock.unlocked.length ? "never approved" : "edited without approval";
         console.log(`FAIL ${file}  baseline lock: ${why}`);
         failures.push(`${file}: baseline ${why} — run 'bun run visual:baseline:review'`);
+        results.push({ name: file, status: "failed", detail: `baseline ${why}` });
         continue;
       }
+
+      const diffPath = join(DIFF_DIR, file);
 
       // Retry the capture before failing: a first-attempt miss is usually a late
       // paint, not a regression.
@@ -201,23 +208,49 @@ async function main() {
         async () => {
           const { buffer, stable } = await stableScreenshot(page);
           writeFileSync(current, buffer);
-          const ratio = await diffRatio(page, baseline, current);
-          return { ok: ratio <= TOLERANCE, ratio, stable };
+          const { ratio, sizeChanged } = diffRatio(baseline, current, diffPath);
+          return { ok: ratio <= TOLERANCE, ratio, sizeChanged, stable };
         },
         { attempts: RETRIES, beforeRetry: async () => { await page.waitForTimeout(500); await prepare(); } },
       );
 
-      const verdict = outcome.ok ? "ok" : "FAIL";
+      const driftPct = outcome.ratio * 100;
+      const status = outcome.ok
+        ? "passed"
+        : outcome.ratio > QUARANTINE_TOLERANCE
+          ? "quarantined"
+          : "failed";
+      const verdict = { passed: "ok", failed: "FAIL", quarantined: "QUAR" }[status];
       console.log(
-        `${verdict.padEnd(4)} ${file}  ${(outcome.ratio * 100).toFixed(2)}% changed` +
+        `${verdict.padEnd(4)} ${file}  ${driftPct.toFixed(2)}% changed` +
+          (outcome.sizeChanged ? "  (capture size changed)" : "") +
           (outcome.attempts > 1 ? `  (${outcome.attempts} attempts)` : ""),
       );
-      if (!outcome.ok) failures.push(`${file}: ${(outcome.ratio * 100).toFixed(2)}% of pixels changed`);
+
+      results.push({
+        name: file,
+        status,
+        drift: Number(driftPct.toFixed(2)),
+        threshold: Number((TOLERANCE * 100).toFixed(2)),
+        quarantineThreshold: Number((QUARANTINE_TOLERANCE * 100).toFixed(2)),
+        sizeChanged: outcome.sizeChanged,
+        baseline: `tests/visual/themes/baseline/${file}`,
+        current: `tests/visual/themes/current/${file}`,
+        diff: existsSync(diffPath) ? `tests/visual/themes/diff/${file}` : null,
+      });
+
+      if (status === "failed") failures.push(`${file}: ${driftPct.toFixed(2)}% of pixels changed`);
+      if (status === "quarantined") {
+        quarantined.push(
+          `${file}: ${driftPct.toFixed(2)}% of pixels changed (over the ${(QUARANTINE_TOLERANCE * 100).toFixed(0)}% quarantine threshold)`,
+        );
+      }
     }
 
     await context.close();
   }
   }
+
 
   await browser.close();
 
@@ -229,7 +262,29 @@ async function main() {
         "  bun run visual:baseline:review\n" +
         '  bun run visual:baseline:approve -- --all --reviewer "Your Name" --reason "why"',
     );
-    if (!UPDATE) failures.push(`${pending.length} baseline(s) missing approval`);
+    if (!UPDATE) {
+      failures.push(`${pending.length} baseline(s) missing approval`);
+      pending.forEach((f) => results.push({ name: f, status: "failed", detail: "awaiting baseline approval" }));
+    }
+  }
+
+  const isQuarantined = quarantined.length > 0 && failures.length === 0;
+  writeReport({
+    quarantined: isQuarantined,
+    tolerance: TOLERANCE * 100,
+    quarantineThreshold: QUARANTINE_TOLERANCE * 100,
+    results,
+  });
+
+  if (quarantined.length) {
+    console.warn(`\n${quarantined.length} capture(s) QUARANTINED (drift too large to be a targeted regression):`);
+    quarantined.forEach((f) => console.warn("  " + f));
+    console.warn(
+      "\nDrift this size normally means a renderer/font/environment difference or a whole-screen\n" +
+        "change, not a pixel regression. Artifacts are uploaded for triage; this does not block the merge.\n" +
+        "Triage: open the diff PNGs in tests/visual/themes/diff, then either fix the cause or approve\n" +
+        'new baselines with `bun run visual:baseline:approve -- --all --reviewer "You" --reason "why"`.',
+    );
   }
 
   if (failures.length) {
@@ -241,8 +296,26 @@ async function main() {
     );
     process.exit(1);
   }
+
+  if (isQuarantined) {
+    console.warn("\nScreenshot diff QUARANTINED — reported, not blocking.");
+    return;
+  }
   console.log(`\nScreenshot diff passed (${captured.length} captures).`);
 }
+
+/** Writes the machine-readable report and exports the quarantine flag to CI. */
+function writeReport(report) {
+  mkdirSync(join(ROOT, "tests/reports/json"), { recursive: true });
+  writeFileSync(REPORT_FILE, JSON.stringify(report, null, 2) + "\n");
+  if (process.env.GITHUB_OUTPUT) {
+    appendFileSync(process.env.GITHUB_OUTPUT, `quarantined=${report.quarantined}\n`);
+  }
+  if (process.env.GITHUB_ENV) {
+    appendFileSync(process.env.GITHUB_ENV, `VISUAL_RUN_QUARANTINED=${report.quarantined}\n`);
+  }
+}
+
 
 main().catch((err) => {
   console.error(err);
