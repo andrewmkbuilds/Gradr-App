@@ -73,7 +73,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
                 to={item.to}
                 aria-current={isActive(item.to) ? "page" : undefined}
                 className={cn(
-                  "relative rounded-lg px-3 py-2 text-sm transition-colors",
+                  "relative rounded-control px-3 py-2 text-sm transition-colors",
                   isActive(item.to)
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",
