@@ -245,7 +245,7 @@ async function upsertComment(body) {
 }
 
 mkdirSync(REPORT_DIR, { recursive: true });
-const body = render(loadResults());
+const body = render(loadResults(), loadVisual());
 console.log(body);
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, body + "\n");
 writeFileSync(join(REPORT_DIR, "ci-summary.md"), body + "\n");
