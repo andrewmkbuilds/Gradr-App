@@ -72,6 +72,10 @@ const Welcome = lazy(() => import("./pages/Welcome"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const AdminAffiliates = lazy(() => import("./pages/AdminAffiliates"));
+const AffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
+const AffiliateApply = lazy(() => import("./pages/AffiliateApply"));
+const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
+const AffiliateResources = lazy(() => import("./pages/AffiliateResources"));
 const AdminBlogAnalytics = lazy(() => import("./pages/AdminBlogAnalytics"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminSecurityLog = lazy(() => import("@/pages/AdminSecurityLog"));
@@ -153,7 +157,7 @@ function RouteFallback() {
 const PROTECTED_PREFIXES = [
   "/", "/dashboard", "/career", "/resume", "/jobs", "/match", "/pipeline", "/apply",
   "/interview", "/growth", "/settings", "/billing", "/credits", "/subscription",
-  "/manage-subscription", "/welcome", "/connect", "/admin",
+  "/manage-subscription", "/welcome", "/connect", "/admin", "/affiliate",
 ];
 
 function isProtectedPath(pathname: string) {
@@ -256,7 +260,12 @@ function ProtectedRoutes() {
           <Route path="/manage-subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
           <Route path="/connect" element={<AnimatedPage><Connect /></AnimatedPage>} />
-          {/* Affiliate pages live on affiliates.gradr.me (see SATELLITE_SURFACES). */}
+          {/* Affiliate portal, mounted in-app (also mirrored on affiliates.gradr.me). */}
+          <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
+          <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
+          <Route path="/affiliate/join" element={<Navigate to="/affiliate/apply" replace />} />
+          <Route path="/affiliate/dashboard" element={<AnimatedPage><AffiliateDashboard /></AnimatedPage>} />
+          <Route path="/affiliate/resources" element={<AnimatedPage><AffiliateResources /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
@@ -365,8 +374,12 @@ function AppRoutes() {
       <Routes location={location} key={location.pathname}>
         {/* Satellite surfaces: mounted under a path prefix on shared hosts
             (local dev + previews), redirected to their real subdomain in
-            production so a URL only ever resolves in one place. */}
-        {SATELLITE_SURFACES.map((surface) =>
+            production so a URL only ever resolves in one place.
+            `affiliates` is excluded — the affiliate portal is now served
+            in-app at /affiliate/* (affiliates.gradr.me still renders it by
+            host). */}
+        {SATELLITE_SURFACES.filter((s) => s !== "affiliates").map((surface) =>
+
           multiSurface ? (
             <Route
               key={surface}
