@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "baselines": {
+    "auth-dark.png": {
+      "sha256": "12e1331dad97a4d17571d0cad033bdbf8e32d80274067d09b922a275f819b7b1",
+      "approvedBy": "Andrew Mathews",
+      "approvedAt": "2026-08-25T06:58:01.882Z",
+      "reason": "Initial lock of existing reviewed theme baselines"
+    },
+    "auth-light.png": {
+      "sha256": "c30883a0c4fc91a2e0451a6fdfa78320ae49ed9bd439738725e95f1122823fd3",
+      "approvedBy": "Andrew Mathews",
+      "approvedAt": "2026-08-25T06:58:01.884Z",
+      "reason": "Initial lock of existing reviewed theme baselines"
+    },
+    "dashboard-dark.png": {
+      "sha256": "ec7acde311afbf9ac75f30dc4d3e8ac63c9aeb9a5c4d8d22239811ce46f1c9f9",
+      "approvedBy": "Andrew Mathews",
+      "approvedAt": "2026-08-25T06:58:01.885Z",
+      "reason": "Initial lock of existing reviewed theme baselines"
+    },
+    "dashboard-light.png": {
+      "sha256": "e2a91646d3f32e3d62318fcbade82c29b9b14f8f9fe0bdeeb436f7e66d4b95cc",
+      "approvedBy": "Andrew Mathews",
+      "approvedAt": "2026-08-25T06:58:01.885Z",
+      "reason": "Initial lock of existing reviewed theme baselines"
+    },
+    "pipeline-dark.png": {
+      "sha256": "4dc32b548ddcc430e1e21a9d93c1d1d4d8f82d9ecc14e0fdbc1ad8a479700cbe",
+      "approvedBy": "Andrew Mathews",
+      "approvedAt": "2026-08-25T06:58:01.886Z",
+      "reason": "Initial lock of existing reviewed theme baselines"
+    },
+    "pipeline-light.png": {
+      "sha256": "a41f121da77dd24a7df8635b6f4148d062c55bdef163224ef8f44443f21b0119",
+      "approvedBy": "Andrew Mathews",
+      "approvedAt": "2026-08-25T06:58:01.887Z",
+      "reason": "Initial lock of existing reviewed theme baselines"
+    }
+  }
+}
