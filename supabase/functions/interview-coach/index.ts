@@ -23,6 +23,17 @@ async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Set once the opening turn has actually charged an interview credit. Every
+  // failure path after that point must hand the credit back — a burnt credit
+  // with no interview is the worst possible outcome for the user.
+  let charged: { userId: string; env: "sandbox" | "live" } | null = null;
+  const refundIfCharged = async () => {
+    if (!charged) return;
+    const c = charged;
+    charged = null;
+    await refund(c.userId, "interview", c.env);
+  };
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
