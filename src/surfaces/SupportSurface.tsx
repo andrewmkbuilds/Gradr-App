@@ -51,7 +51,7 @@ const FAQS: { question: string; answer: string }[] = [
 
 function SupportHome() {
   return (
-    <div className="page-shell py-12">
+    <div className="page-shell section-block">
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-secondary">Support</p>
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-foreground">
@@ -129,7 +129,7 @@ function SupportContact() {
   )}&body=${encodeURIComponent(message)}`;
 
   return (
-    <div className="page-shell py-12">
+    <div className="page-shell section-block">
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-secondary">Contact</p>
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-foreground">

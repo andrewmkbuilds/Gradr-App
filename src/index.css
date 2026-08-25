@@ -103,6 +103,24 @@
 
     --radius: 0.7rem;
 
+    /* ---------- Vertical rhythm scale ----------
+       One fluid unit, one slope, one set of multiples. Every vertical gap in
+       the app (section padding, section gaps, stacked children, panel
+       padding) is a multiple of --rhythm-unit, so the proportions hold at
+       every breakpoint instead of drifting per component. */
+    --rhythm-unit: clamp(1rem, 0.85rem + 0.9vw, 1.5rem); /* 17px → 24px */
+    --rhythm-xs: calc(var(--rhythm-unit) * 0.5);
+    --rhythm-sm: calc(var(--rhythm-unit) * 0.75);
+    --rhythm-md: var(--rhythm-unit);
+    --rhythm-lg: calc(var(--rhythm-unit) * 1.5);
+    --rhythm-xl: calc(var(--rhythm-unit) * 1.75);
+    --rhythm-2xl: calc(var(--rhythm-unit) * 2);
+    --rhythm-3xl: calc(var(--rhythm-unit) * 2.25);
+    /* Horizontal gutter shares the same slope so the page never looks
+       narrower or wider than its vertical rhythm implies. */
+    --rhythm-gutter: clamp(0.875rem, 0.5rem + 1.2vw, 1.5rem);
+
+
     /* ---------- Charts — teal → mahogany spectrum ---------- */
     --chart-1: 195 52% 30%;
     --chart-2: 20 52% 38%;
@@ -345,32 +363,41 @@
      and page body uses the same max width AND the same gutters, so logos,
      headings and content share one optical left/right edge at every
      breakpoint. Padding lives INSIDE the max-width box on purpose — putting
-     it outside shifts content relative to containers that don't. */
+     it outside shifts content relative to containers that don't.
+     NOTE: this is the ONLY definition of .page-shell — do not restate it
+     lower in the file, or the two padding rules silently fight. */
   .page-shell {
     margin-inline: auto;
     width: 100%;
     max-width: 72rem; /* = max-w-6xl */
-    padding-inline: 1.25rem;
-  }
-  @media (min-width: 640px) {
-    .page-shell { padding-inline: 2rem; }
+    padding-inline: var(--rhythm-gutter);
   }
 
   /* ---------- Vertical rhythm system ----------
-     One vertical scale for every public/marketing section, so pages flow
+     One fluid unit drives every vertical gap on the site, so pages flow
      continuously instead of accumulating one-off py-14/py-20/mt-24 gaps that
-     stack into large empty bands. All three fluidly compress on tablet and
-     phone, where a fixed 4-6rem gap eats most of the viewport. */
+     stack into large empty bands.
+
+     --rhythm-unit interpolates 17px (390px viewport) → 24px (≥1224px) on a
+     single slope; every rhythm token below is an exact multiple of it. That
+     means the ratio between a panel's padding, the gap between stacked
+     children, and the gap between sections is IDENTICAL at every breakpoint —
+     mobile is the same layout at a smaller unit, never a different one. */
   .section-hero {
-    padding-block: clamp(2rem, 1.25rem + 3vw, 3.5rem) clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
+    padding-block: var(--rhythm-3xl) var(--rhythm-lg);
   }
   .section-block {
-    padding-block: clamp(2rem, 1.5rem + 1.75vw, 3rem);
+    padding-block: var(--rhythm-2xl);
   }
   /* Gap between sibling sections inside one page body (replaces mt-14/mt-16). */
   .section-gap {
-    margin-top: clamp(2.25rem, 1.5rem + 2.25vw, 3.25rem);
+    margin-top: var(--rhythm-3xl);
   }
+  /* Vertical rhythm applied to a section's own children. */
+  .section-stack > * + * {
+    margin-top: var(--rhythm-md);
+  }
+
 
   /* Perfectly centred square box for icons, avatars and logo marks.
      Uses grid place-items so the glyph is centred on both axes regardless of
@@ -834,21 +861,19 @@
     max-width: 46ch;
   }
 
-  /* ---------- Mobile rhythm ----------
-     One shell for every routed page so gutters, max width and vertical
-     rhythm are identical across the app and tighten on small screens. */
-  .page-shell {
-    width: 100%;
-    margin-inline: auto;
-    padding-inline: clamp(0.875rem, 0.4rem + 2vw, 1.5rem);
-  }
+  /* ---------- Page rhythm ----------
+     The page shell itself is defined once, with the alignment system above.
+     These two are the in-page stacking rules, on the same rhythm unit so a
+     panel's inner padding and the gap between stacked panels stay in step at
+     every breakpoint. */
   .page-stack > * + * {
-    margin-top: clamp(1rem, 0.75rem + 1.1vw, 1.5rem);
+    margin-top: var(--rhythm-md);
   }
   /* Panel padding that never wastes a phone's narrow gutter. */
   .pad-panel {
-    padding: clamp(1rem, 0.75rem + 1.2vw, 1.5rem);
+    padding: var(--rhythm-md);
   }
+
 }
 
 /* Small screens: tighten tracking on display type and stop tap targets

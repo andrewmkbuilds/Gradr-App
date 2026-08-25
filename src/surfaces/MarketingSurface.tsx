@@ -149,7 +149,7 @@ function Overview() {
   return (
     <>
       <Hero />
-      <section className="page-shell pb-10">
+      <section className="page-shell section-block pt-0">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <div key={feature.title} className="rounded-xl border border-border/60 bg-card p-5 elev-1">

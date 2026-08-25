@@ -52,7 +52,7 @@ function DocsSidebar() {
 
 function DocsHome() {
   return (
-    <div className="page-shell py-12">
+    <div className="page-shell section-block">
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-secondary">
           Documentation
@@ -171,7 +171,7 @@ export default function DocsSurface() {
         <Route
           path=":slug"
           element={
-            <div className="page-shell grid gap-10 py-12 lg:grid-cols-[16rem_1fr]">
+            <div className="page-shell section-block grid gap-10 lg:grid-cols-[16rem_1fr]">
               <aside className="hidden lg:block">
                 <div className="sticky top-24">
                   <DocsSidebar />
