@@ -22,9 +22,10 @@ const ORIGIN = "https://gradr.me";
 const OG_IMAGE = `${ORIGIN}/og.png`;
 
 const META: Record<string, { title: string; description: string }> = {
-  // "/" is the authenticated dashboard (signed-out visitors are redirected to
-  // /auth). There is no public landing page on this surface, so "/" is
-  // noindexed and its metadata is purely functional.
+  // "/" is the authenticated dashboard; signed-out visitors are redirected to
+  // /auth. It is indexable so brand searches resolve to the canonical public
+  // host (gradr.me) — the dashboard itself stays behind auth, so no private
+  // content is exposed to crawlers.
   "/": {
     title: "Dashboard",
     description: "Your Gradr career command center: resumes, jobs, applications and interview prep.",
