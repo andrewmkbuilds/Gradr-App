@@ -7,6 +7,7 @@ import { Button } from "@/components/ds/Button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { BadgePercent, ArrowLeft, ArrowRight, Loader2, Sparkles, X } from "lucide-react";
 import { ONBOARDING_IDENTITIES } from "@/config/eligibility";
 import { VerificationDialog } from "@/components/VerificationDialog";
