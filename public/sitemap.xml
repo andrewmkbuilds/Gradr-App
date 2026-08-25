@@ -71,6 +71,36 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://app.gradr.me/acceptable-use</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://app.gradr.me/ai-disclosure</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://app.gradr.me/disclaimer</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://app.gradr.me/affiliate-disclosure</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://app.gradr.me/subprocessors</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://app.gradr.me/legal</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://app.gradr.me/career-advice/cover-letter-guide</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
