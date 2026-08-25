@@ -157,7 +157,7 @@ function RouteFallback() {
 const PROTECTED_PREFIXES = [
   "/", "/dashboard", "/career", "/resume", "/jobs", "/match", "/pipeline", "/apply",
   "/interview", "/growth", "/settings", "/billing", "/credits", "/subscription",
-  "/manage-subscription", "/welcome", "/connect", "/admin",
+  "/manage-subscription", "/welcome", "/connect", "/admin", "/affiliate",
 ];
 
 function isProtectedPath(pathname: string) {
