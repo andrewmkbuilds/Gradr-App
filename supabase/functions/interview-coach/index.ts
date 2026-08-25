@@ -84,6 +84,7 @@ serve(async (req) => {
       const entitlement = await consume(user.id, "interview", paymentEnv);
       void logAiAuthorization({ source: "interview-coach", decision: entitlement.allowed ? "allowed" : "denied", userId: user.id, feature: "interview", env: paymentEnv, reason: entitlement.reason ?? entitlement.source ?? null, details: { tier: entitlement.tier, used: entitlement.used, allowance: entitlement.allowance } });
       if (!entitlement.allowed) return paymentRequired(entitlement, corsHeaders);
+      charged = { userId: user.id, env: paymentEnv };
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
