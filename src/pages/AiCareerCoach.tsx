@@ -12,6 +12,7 @@ import {
 import { PublicShell } from "@/components/PublicShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { trackEvent, withUtm } from "@/lib/analytics";
+import { trackSignupCta } from "@/lib/telemetry/events";
 import {
   SITE_NAME,
   SITE_ORIGIN,
@@ -36,8 +37,25 @@ const UTM = {
 
 const ctaHref = (path: string, content: string) => withUtm(path, { ...UTM, content });
 
+/**
+ * Signup CTAs on this page emit both the page-scoped diagnostic event and the
+ * canonical `signup_cta_clicked` funnel event, so clicks from
+ * /ai-career-coach can be joined to `signup_completed` (which now carries the
+ * first-touch `landing_page`) in one funnel.
+ */
+const trackSignupClick = (location: string, text: string) => () => {
+  trackEvent("career_coach_cta_click", { location, destination: "/auth" });
+  trackSignupCta({
+    location: "landing_page",
+    text,
+    authenticated: false,
+    destination: "/auth?mode=signup",
+  });
+};
+
 const trackCta = (location: string, destination: string) => () =>
   trackEvent("career_coach_cta_click", { location, destination });
+
 
 const STEPS = [
   {
@@ -127,13 +145,24 @@ const FAQS = [
   },
 ];
 
+const PAGE_URL = absoluteUrl(AI_CAREER_COACH_PATH);
+
+/**
+ * SoftwareApplication describes the coach itself. Every property the Rich
+ * Results Test warns about when omitted is supplied: an explicit @id so the
+ * node can be referenced, a full Offer (url + availability + category), and a
+ * publisher with a logo.
+ */
 const softwareLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
+  "@id": `${PAGE_URL}#software`,
   name: "Gradr AI Career Coach",
-  url: absoluteUrl(AI_CAREER_COACH_PATH),
+  url: PAGE_URL,
   applicationCategory: "BusinessApplication",
+  applicationSubCategory: "Career coaching",
   operatingSystem: "Web",
+  browserRequirements: "Requires a modern web browser with JavaScript enabled.",
   description:
     "AI career coach that analyses your resume against live job matches, ranks your real skill gaps, and turns them into a step-by-step career plan.",
   featureList: [
@@ -144,8 +173,20 @@ const softwareLd = {
     "Tailored applications and cover letters",
     "AI mock interview practice",
   ],
-  publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_ORIGIN },
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  publisher: {
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: SITE_ORIGIN,
+    logo: { "@type": "ImageObject", url: `${SITE_ORIGIN}/gradr-logo-256.png` },
+  },
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    availability: "https://schema.org/InStock",
+    category: "Free plan",
+    url: PAGE_URL,
+  },
   inLanguage: "en",
 };
 
@@ -180,17 +221,17 @@ export default function AiCareerCoach() {
           Career guidance · Growth Engine
         </p>
         <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          AI Career Coach
+          Free AI Career Coach
         </h1>
         <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
-          Get career guidance built from your own resume and the jobs you actually want. Gradr
-          scores your fit against live roles, ranks the skill gaps holding you back, and turns
-          them into the next few concrete moves — not generic advice.
+          An AI career coach that reads your actual resume, scores your fit against the jobs you
+          want, ranks the skill gaps holding you back, and gives you the next concrete moves. Free
+          to start, no credit card, no generic advice.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             to={ctaHref("/auth?mode=signup", "hero_primary")}
-            onClick={trackCta("hero_primary", "/auth")}
+            onClick={trackSignupClick("hero_primary", "Get your free career analysis")}
             className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] motion-reduce:transform-none"
           >
             <Compass className="h-4 w-4" aria-hidden="true" />
@@ -209,6 +250,26 @@ export default function AiCareerCoach() {
           No credit card required · Works from your existing resume · Your data stays private to your account
         </p>
       </section>
+
+      <section className="section-gap mx-auto max-w-3xl" aria-labelledby="what-is">
+        <h2 id="what-is" className="text-2xl font-semibold tracking-tight text-foreground">
+          What is an AI career coach?
+        </h2>
+        <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
+          An AI career coach is software that analyses your experience and your target roles, then
+          tells you what to change to get hired — which skills are missing, how to evidence the
+          ones you already have, and what to do next. Unlike a chatbot, it works from your record
+          rather than a prompt: Gradr parses your resume, scores it against live job descriptions,
+          and re-measures your fit every time you change something.
+        </p>
+        <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
+          It is a good fit if you are job hunting, changing careers, or unsure which roles you are
+          genuinely competitive for today. It is not a replacement for a human coach when you need
+          accountability, negotiation help, or industry introductions.
+        </p>
+      </section>
+
+
 
       <section className="section-gap" aria-labelledby="how-it-works">
         <h2 id="how-it-works" className="text-2xl font-semibold tracking-tight text-foreground">
@@ -349,7 +410,7 @@ export default function AiCareerCoach() {
         </p>
         <Link
           to={ctaHref("/auth?mode=signup", "footer_primary")}
-          onClick={trackCta("footer_primary", "/auth")}
+          onClick={trackSignupClick("footer_primary", "Create a free account")}
           className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] motion-reduce:transform-none"
         >
           Create a free account

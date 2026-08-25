@@ -216,6 +216,7 @@ function resolveDynamicMeta(pathname: string): { title: string; description: str
  */
 const PAGE_OG_IMAGES: Record<string, string> = {
   "/ai-interview-coach": `${ORIGIN}/og/page-ai-interview-coach.png`,
+  "/ai-career-coach": `${ORIGIN}/og/page-ai-career-coach.png`,
 };
 
 function resolveOgImage(pathname: string): string {
