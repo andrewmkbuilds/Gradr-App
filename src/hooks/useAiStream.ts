@@ -38,6 +38,8 @@ export interface AiStreamState<TResult> {
   rateLimitSecondsRemaining: number | null;
   /** True when this run failed because of throttling rather than an error. */
   rateLimited: boolean;
+  /** Server-side audit id for the throttled call, shown so support can trace it. */
+  rateLimitRequestId: string | null;
   start: (body: Record<string, unknown>) => Promise<TResult | null>;
   cancel: () => void;
   retry: () => Promise<TResult | null>;
@@ -66,6 +68,7 @@ export function useAiStream<TResult = unknown>({
   const [error, setError] = useState<string | null>(null);
   const [rateLimitSecondsRemaining, setRateLimitSecondsRemaining] = useState<number | null>(null);
   const [rateLimited, setRateLimited] = useState(false);
+  const [rateLimitRequestId, setRateLimitRequestId] = useState<string | null>(null);
 
   const retryTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const runRef = useRef<((body: Record<string, unknown>) => Promise<TResult | null>) | null>(null);
@@ -87,6 +90,7 @@ export function useAiStream<TResult = unknown>({
     retryTimerRef.current = null;
     setRateLimitSecondsRemaining(null);
     setRateLimited(false);
+    setRateLimitRequestId(null);
   }, []);
 
   const reset = useCallback(() => {
@@ -181,6 +185,7 @@ export function useAiStream<TResult = unknown>({
         const retryAfterMs = e instanceof AiStreamError ? e.retryAfterMs : null;
         if (status === 429 && mounted.current) {
           setRateLimited(true);
+          setRateLimitRequestId(e instanceof AiStreamError ? e.requestId : null);
           const waitMs = retryAfterMs ?? 60_000;
           const deadline = Date.now() + waitMs;
           setRateLimitSecondsRemaining(Math.max(1, Math.ceil(waitMs / 1000)));
@@ -233,6 +238,7 @@ export function useAiStream<TResult = unknown>({
     isStreaming: status === "streaming",
     rateLimitSecondsRemaining,
     rateLimited,
+    rateLimitRequestId,
     start: run,
     cancel,
     retry,
