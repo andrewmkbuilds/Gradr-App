@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { markSignupIntent } from "@/lib/telemetry/signup";
+import { markSignupIntent, type SignupMethod } from "@/lib/telemetry/signup";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { urlFor } from "@/config/domains";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
-import { Alert, Button, Input, Text } from "@/design-system/gradr-9b9b95";
+import { Alert, Input, Text } from "@/design-system/gradr-9b9b95";
+import { Button } from "@/components/ds/Button";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Mail, Lock, User, ArrowRight, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import {
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { emailSchema, friendlyAuthError } from "@/lib/authErrors";
 import { signupConsentMetadata, stashSignupConsent, type SignupConsent } from "@/lib/consent/signupConsent";
+import { ageGateApplies, trackAgeGateOutcome } from "@/lib/consent/ageGate";
 
 /** Client-side field validation — mirrors the server rules, fails fast and inline. */
 const passwordSchema = z
@@ -162,11 +164,19 @@ export default function Auth() {
   };
 
   /**
-   * Mandatory consent gate. Returns the recorded consent, or null after
-   * surfacing the reason the account cannot be created yet.
+   * Mandatory consent gate — runs only when an account is being created.
+   * Existing-user sign-in (email or any provider) short-circuits to `bypass`
+   * so a returning user can never be blocked by it.
+   * Returns the recorded consent, `"bypass"` when the gate does not apply, or
+   * null after surfacing the reason the account cannot be created yet.
    */
-  const requireConsent = (): SignupConsent | null => {
+  const requireConsent = (method: SignupMethod): SignupConsent | "bypass" | null => {
+    if (!ageGateApplies({ isSignUp })) {
+      trackAgeGateOutcome("bypass", method, "existing_account_signin");
+      return "bypass";
+    }
     if (!acceptedTerms || !confirmedEligible) {
+      if (!confirmedEligible) trackAgeGateOutcome("ineligible", method);
       setConsentError(
         !acceptedTerms
           ? "Please accept the Terms & Conditions and Privacy Notice to create an account."
@@ -174,6 +184,7 @@ export default function Auth() {
       );
       return null;
     }
+    trackAgeGateOutcome("eligible", method);
     setConsentError(null);
     const consent: SignupConsent = { marketing: marketingOptIn, acceptedAt: new Date().toISOString() };
     stashSignupConsent(consent);
@@ -186,8 +197,10 @@ export default function Auth() {
     const valid = validateForm();
     if (!valid) return;
     const { email, password, fullName } = valid;
-    const consent = isSignUp ? requireConsent() : null;
-    if (isSignUp && !consent) return;
+    const consent = requireConsent("email");
+    if (!consent) return;
+    // `bypass` means this is an existing-user sign-in; only signup carries consent.
+    const signupConsent = consent === "bypass" ? null : consent;
     setLoading(true);
     if (isSignUp) markSignupIntent("email");
     try {
@@ -195,7 +208,7 @@ export default function Auth() {
         if (isGuest) {
           // Upgrade the existing anonymous session so guest data is preserved.
           const { error } = await supabase.auth.updateUser(
-            { email, password, data: { full_name: fullName, ...signupConsentMetadata(consent!) } },
+            { email, password, data: { full_name: fullName, ...signupConsentMetadata(signupConsent!) } },
             { emailRedirectTo: postAuthUrl },
           );
           if (error) throw error;
@@ -207,7 +220,7 @@ export default function Auth() {
           email,
           password,
           options: {
-            data: { full_name: fullName, ...signupConsentMetadata(consent!) },
+            data: { full_name: fullName, ...signupConsentMetadata(signupConsent!) },
             emailRedirectTo: postAuthUrl,
           },
         });
@@ -237,8 +250,9 @@ export default function Auth() {
 
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
     // Same consent gate as the email form — a provider button must not become a
-    // way to create an account without accepting the terms.
-    if (isSignUp && !requireConsent()) return;
+    // way to create an account without accepting the terms. On the sign-in tab
+    // the gate reports `bypass` and never blocks the provider handoff.
+    if (!requireConsent(provider)) return;
     // Recorded before the redirect so the funnel survives the round trip.
     if (isSignUp) markSignupIntent(provider);
 
@@ -279,7 +293,7 @@ export default function Auth() {
   };
 
   const handleGuest = async () => {
-    if (isSignUp && !requireConsent()) return;
+    if (!requireConsent("guest")) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInAnonymously();
@@ -613,7 +627,7 @@ export default function Auth() {
           type="button"
           variant="link"
           size="inline"
-          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); }}
+          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); setConsentError(null); }}
         >
           {isSignUp ? "Sign in" : "Create one"}
         </Button>

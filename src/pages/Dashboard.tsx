@@ -341,7 +341,7 @@ export default function Dashboard() {
               <Text as="span" variant="h4">
                 <CountUp to={stages[stage.key]} duration={0.9} />
               </Text>
-              <span className="mt-0.5 text-caption text-muted-foreground">{stage.label}</span>
+              <Text as="span" variant="caption" tone="muted" className="mt-0.5">{stage.label}</Text>
             </button>
           ))}
         </div>

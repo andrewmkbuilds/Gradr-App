@@ -95,6 +95,15 @@ jobs:
           E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
 
+      # Age-confirmation gate: new accounts must confirm, existing sign-ins
+      # (email + every OAuth provider) must never be blocked by it.
+      - name: Age gate regression e2e
+        run: bun run test:e2e:age-gate http://127.0.0.1:8080
+        env:
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
+
       # 404 rendering, session persistence, axe a11y, redirect headers and
       # sign-in/dashboard visual snapshots.
       - name: Route guards (404, a11y, headers, visuals)

@@ -751,10 +751,6 @@
   /* ---------- Typography: display vs UI ----------
      Bricolage Grotesque carries the editorial voice; Geist runs the
      interface. Never mix them within the same block of text. */
-  .font-display {
-    font-family: "Bricolage Grotesque", "Geist", system-ui, sans-serif;
-    font-optical-sizing: auto;
-  }
   .type-hero {
     @apply font-display;
     font-size: clamp(2.75rem, 7.2vw, 5.5rem);
