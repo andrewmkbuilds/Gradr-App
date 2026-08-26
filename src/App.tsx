@@ -522,8 +522,8 @@ const App = () => (
       <ThemeProvider>
       <MotionPreferenceProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
+        {false && <Toaster />}
+        {false && <Sonner />}
         <BrowserRouter>
           <WwwRedirect />
           <ScrollToTop />
@@ -532,7 +532,7 @@ const App = () => (
             <SentryUserSync />
             <TelemetryRouteTracker />
             <AnalyticsProvider />
-            {false && <RouteSeo />}
+            <RouteSeo />
             <Suspense fallback={<RouteFallback />}>
               <AppRoutes />
             </Suspense>
