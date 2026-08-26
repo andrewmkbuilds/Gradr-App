@@ -48,6 +48,8 @@ export interface GenerationStreamProps {
   onRetry?: () => void;
   /** Whole seconds left on a rate-limit window; drives the auto-retry copy. */
   rateLimitSecondsRemaining?: number | null;
+  /** Audit id for the throttled call, rendered so support can correlate it. */
+  rateLimitRequestId?: string | null;
   /** Rendered instead of the streamed text once the result is final. */
   children?: ReactNode;
   className?: string;
@@ -68,6 +70,7 @@ export function GenerationStream({
   onCancel,
   onRetry,
   rateLimitSecondsRemaining = null,
+  rateLimitRequestId = null,
   children,
   className,
 }: GenerationStreamProps) {
@@ -138,6 +141,14 @@ export function GenerationStream({
               You've hit the short-term analysis limit. Nothing was lost — the same request runs again
               in <span className="tabular-nums font-medium text-foreground">{rateLimitSecondsRemaining}s</span>,
               or retry now if you prefer.
+              {rateLimitRequestId && (
+                <>
+                  {" "}
+                  <span className="type-caption" data-testid="rate-limit-request-id">
+                    Request id: {rateLimitRequestId}
+                  </span>
+                </>
+              )}
             </span>
           </p>
         ) : (
