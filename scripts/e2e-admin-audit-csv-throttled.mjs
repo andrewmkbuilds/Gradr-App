@@ -15,7 +15,7 @@
  * Requires E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD; the non-admin half additionally
  * needs E2E_EMAIL / E2E_PASSWORD. Skips cleanly when they are absent.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { launchBrowser } from "./lib/browser.mjs";
 
 const BASE = (process.argv[2] || process.env.E2E_BASE_URL || "http://localhost:8080").replace(/\/$/, "");
@@ -115,8 +115,8 @@ try {
       empty ? "no throttled resume-analysis rows in range" : "no download and no empty notice");
   } else {
     const path = `${OUT}/admin-rpc-audit-throttled.csv`;
-    writeFileSync(path, await (await download.createReadStream()).setEncoding("utf8").toArray().then((c) => c.join("")));
-    const text = (await import("node:fs")).readFileSync(path, "utf8").replace(/^\uFEFF/, "");
+    await download.saveAs(path);
+    const text = readFileSync(path, "utf8").replace(/^\uFEFF/, "");
     const rows = parseCsv(text);
     const headers = rows[0] || [];
     record(
