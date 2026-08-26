@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { urlFor } from "@/config/domains";
+import { isProduction, urlFor } from "@/config/domains";
 import { useNavigate } from "react-router-dom";
 import { identifyUser, setSessionContext } from "@/lib/telemetry/journey";
 import { setAnalyticsUserContext } from "@/lib/telemetry/events";
