@@ -15,10 +15,12 @@ import { useIsAdmin } from "@/hooks/useAffiliate";
 import { PageHeader } from "@/components/app/PageHeader";
 import {
   useAdminAuditLog,
+  useAdminRpcAudit,
   useAuditActors,
   useLogAdminView,
   type AuditEntry,
 } from "@/hooks/useAdminAudit";
+
 
 const ACTION_META: Record<
   string,
@@ -168,9 +170,158 @@ export default function AdminAuditLog() {
         Repeat views by the same admin within 30 seconds are collapsed into one entry. Admin
         modifications and deletions are throttled to 50 per minute per account.
       </p>
+
+      <RpcAuditSection actorName={actorName} actors={actors || []} />
     </div>
   );
 }
+
+function RpcAuditSection({
+  actorName,
+  actors,
+}: {
+  actorName: Map<string, string>;
+  actors: { user_id: string; display_name: string | null }[];
+}) {
+  const [fn, setFn] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [actorId, setActorId] = useState("all");
+  const [days, setDays] = useState(7);
+
+  const { data: calls, isLoading } = useAdminRpcAudit({ fn, status, actorId, days });
+
+  const functionNames = useMemo(
+    () => Array.from(new Set((calls || []).map((c) => c.function_name))).sort(),
+    [calls],
+  );
+
+  const selectCls =
+    "px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
+
+  const STATUS_CLS: Record<string, string> = {
+    ok: "bg-primary/10 text-primary",
+    denied: "bg-destructive/10 text-destructive",
+    rate_limited: "bg-warning/10 text-warning",
+  };
+
+  return (
+    <section className="page-stack">
+      <div>
+        <h2 className="type-h3 text-foreground">Admin RPC calls</h2>
+        <p className="text-sm text-muted-foreground">
+          Server-side record of every admin database function invocation — who called it, when,
+          which function, the request id, and whether it was allowed, denied, or throttled. Written
+          by the database guard itself, so it cannot be bypassed from the client.
+        </p>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        <select aria-label="Filter by function" value={fn} onChange={(e) => setFn(e.target.value)} className={selectCls}>
+          <option value="all">All functions</option>
+          {functionNames.map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+        <select aria-label="Filter by outcome" value={status} onChange={(e) => setStatus(e.target.value)} className={selectCls}>
+          <option value="all">All outcomes</option>
+          <option value="ok">Allowed</option>
+          <option value="denied">Denied</option>
+          <option value="rate_limited">Throttled</option>
+        </select>
+        <select aria-label="Filter RPC calls by actor" value={actorId} onChange={(e) => setActorId(e.target.value)} className={selectCls}>
+          <option value="all">Everyone</option>
+          {actors.map((a) => (
+            <option key={a.user_id} value={a.user_id}>
+              {a.display_name || a.user_id.slice(0, 8)}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="RPC call time range"
+          value={days}
+          onChange={(e) => setDays(Number(e.target.value))}
+          className={selectCls}
+        >
+          <option value={1}>Last 24 hours</option>
+          <option value={7}>Last 7 days</option>
+          <option value={30}>Last 30 days</option>
+        </select>
+      </div>
+
+      <div className="elev-2 rounded-xl overflow-x-auto">
+        <table className="w-full text-sm">
+          <caption className="sr-only">Admin RPC call audit</caption>
+          <thead className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="p-3">When</th>
+              <th>Who</th>
+              <th>Function</th>
+              <th>Outcome</th>
+              <th>Request id</th>
+              <th>Client</th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} className="p-10 text-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary inline" />
+                </td>
+              </tr>
+            ) : (calls || []).length === 0 ? (
+              <tr>
+                <td colSpan={6} className="p-12 text-center text-muted-foreground">
+                  <ShieldCheck className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                  No admin RPC calls for these filters.
+                </td>
+              </tr>
+            ) : (
+              calls!.map((c) => (
+                <tr key={c.id} className="border-t border-border">
+                  <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {format(new Date(c.created_at), "MMM d, yyyy HH:mm:ss")}
+                  </td>
+                  <td className="text-xs text-foreground">
+                    {c.actor_id ? actorName.get(c.actor_id) || c.actor_id.slice(0, 8) : "anonymous"}
+                  </td>
+                  <td className="text-xs">
+                    <code className="text-[11px] text-foreground">{c.function_name}</code>
+                  </td>
+                  <td>
+                    <span
+                      className={`inline-flex items-center text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                        STATUS_CLS[c.status] ?? "bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {c.status === "ok" ? "Allowed" : c.status === "denied" ? "Denied" : "Throttled"}
+                    </span>
+                  </td>
+                  <td>
+                    <code className="text-[11px] text-muted-foreground">
+                      {c.request_id ? c.request_id.slice(0, 12) : "—"}
+                    </code>
+                  </td>
+                  <td className="text-xs text-muted-foreground max-w-[220px] truncate">
+                    {c.ip ? `${c.ip} · ` : ""}
+                    {c.user_agent ? c.user_agent.slice(0, 60) : "—"}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Admin RPCs are throttled to 120 successful calls per minute per account; excess calls are
+        rejected and recorded here as throttled.
+      </p>
+    </section>
+  );
+}
+
 
 function AuditRow({
   entry,
