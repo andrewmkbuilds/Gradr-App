@@ -157,7 +157,10 @@ export function OnboardingDialog({ open, onComplete }: Props) {
 
   return (
     <Dialog open={open}>
-      <DialogContent className="sm:max-w-lg">
+      {/* No `onOpenChange`: onboarding is required, so the close affordance is
+          suppressed rather than rendered as a control that cannot close it. */}
+      <DialogContent className="sm:max-w-lg" hideClose>
+
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
