@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { urlFor } from "@/config/domains";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithOAuthMaybeMocked } from "@/lib/qa/sandbox/oauth";
 import { Alert, Input, Text } from "@/design-system/gradr-9b9b95";
 import { Button } from "@/components/ds/Button";
 import { AuthLayout } from "@/components/AuthLayout";
