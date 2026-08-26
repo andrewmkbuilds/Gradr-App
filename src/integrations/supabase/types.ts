@@ -47,6 +47,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_rpc_audit: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          details: Json
+          function_name: string
+          id: string
+          ip: string | null
+          request_id: string | null
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          function_name: string
+          id?: string
+          ip?: string | null
+          request_id?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          function_name?: string
+          id?: string
+          ip?: string | null
+          request_id?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       affiliate_applications: {
         Row: {
           admin_notes: string | null
@@ -4591,6 +4627,10 @@ export type Database = {
           _notes?: string
           _request_id: string
         }
+        Returns: undefined
+      }
+      admin_rpc_guard: {
+        Args: { _function: string; _limit?: number; _window?: string }
         Returns: undefined
       }
       admin_run_email_retention_purge: { Args: never; Returns: Json }
