@@ -50,6 +50,8 @@ export interface OnboardingResult {
 interface Props {
   open: boolean;
   onComplete: (prefs: OnboardingResult) => void;
+  /** Dismiss without saving — the dialog re-appears on the next visit until onboarding completes. */
+  onSkip?: () => void;
 }
 
 const STEPS = ["Target roles", "Industries", "Compensation & location"];
