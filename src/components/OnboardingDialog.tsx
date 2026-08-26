@@ -56,7 +56,7 @@ interface Props {
 
 const STEPS = ["Target roles", "Industries", "Compensation & location"];
 
-export function OnboardingDialog({ open, onComplete }: Props) {
+export function OnboardingDialog({ open, onComplete, onSkip }: Props) {
   const { user } = useAuth();
   const reduced = useReducedMotionPref();
   const [step, setStep] = useState(0);
