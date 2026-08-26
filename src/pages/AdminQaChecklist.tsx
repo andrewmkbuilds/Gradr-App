@@ -13,7 +13,6 @@ import {
   XCircle,
 } from "lucide-react";
 import { Seo } from "@/components/Seo";
-import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Surface } from "@/components/ui/surface";
 import { Button } from "@/components/ds/Button";
@@ -176,7 +175,7 @@ export default function AdminQaChecklist() {
   const current = records[cellKey(route.id, activeState)];
 
   return (
-    <DashboardLayout>
+    <>
       <Seo
         title="Final QA checklist"
         description="Verify loading, empty and error states across every major Gradr route."
@@ -360,7 +359,7 @@ export default function AdminQaChecklist() {
           </Surface>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
 
