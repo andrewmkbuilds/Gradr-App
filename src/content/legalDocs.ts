@@ -271,9 +271,11 @@ We use access-controlled infrastructure with row-level security on every user ta
 
 No online service can be completely secure, so we cannot guarantee absolute security. Protect your own account with a strong, unique password and tell us at ${SELLER_CONTACT_EMAIL} if you suspect a problem.
 
-## 11. Children and minors
+## 11. Children and age requirement
 
-Gradr is not intended for children under 16, and we do not knowingly collect their personal data. If you believe a child has given us personal data, contact ${SELLER_CONTACT_EMAIL} and we will delete it.
+You must be at least 13 years old to create or maintain a Gradr account. Gradr is not intended for children under 13 and we do not knowingly collect their personal data. If you believe a child under 13 has given us personal data, contact ${SELLER_CONTACT_EMAIL} and we will delete it.
+
+We do not ask for or store your date of birth. At sign-up we ask you to confirm that you meet the minimum age, and we record that confirmation together with your other account consents; we also log an analytics event recording whether the confirmation was given, without any date of birth. You must answer truthfully and must not attempt to bypass the age requirement. Some paid services, payouts and contractual features may require you to be older, or to have a parent or guardian act for you, where the law requires it.
 
 ## 12. Your privacy rights
 
