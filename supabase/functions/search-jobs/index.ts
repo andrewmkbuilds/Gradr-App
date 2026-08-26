@@ -63,11 +63,6 @@ serve(async (req) => {
 
     const APP_ID = Deno.env.get("ADZUNA_APP_ID");
     const APP_KEY = Deno.env.get("ADZUNA_APP_KEY");
-    if (!APP_ID || !APP_KEY) {
-      return new Response(JSON.stringify({ error: "Adzuna API keys not configured" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     const { what = "", where = "", country: rawCountry = "us", page: rawPage = 1, remoteOnly = false, salaryMin, sortBy = "relevance" } = await req.json();
 
@@ -79,6 +74,24 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Sandbox/preview backends have no Adzuna credentials. Returning clearly
+    // labelled sample listings keeps the search surface testable instead of
+    // failing the whole page with a 500 — the payload says the data isn't live.
+    if (!APP_ID || !APP_KEY) {
+      const mock = mockJobs({ what: String(what), where: String(where), page, remoteOnly: Boolean(remoteOnly) });
+      return new Response(
+        JSON.stringify({
+          jobs: mock.jobs,
+          total: mock.total,
+          page,
+          mock: true,
+          sources: { adzuna: { count: mock.jobs.length, status: "missing_credentials" } },
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
 
     const params = new URLSearchParams({
       app_id: APP_ID,
