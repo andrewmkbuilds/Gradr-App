@@ -222,9 +222,9 @@ export default function AiCareerCoach() {
         <p className="text-xs font-medium uppercase tracking-wider text-primary">
           Career guidance · Growth Engine
         </p>
-        <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+        <Text variant="h1" as="h1" className="mt-3 text-balance sm:text-5xl">
           Free AI Career Coach
-        </h1>
+        </Text>
         <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
           An AI career coach that reads your actual resume, scores your fit against the jobs you
           want, ranks the skill gaps holding you back, and gives you the next concrete moves. Free

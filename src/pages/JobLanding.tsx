@@ -15,6 +15,8 @@ import {
 import { jobLandingJsonLd } from "@/lib/structuredData";
 import { trackEvent, withUtm } from "@/lib/analytics";
 import { useReadTracking } from "@/hooks/useReadTracking";
+import { Badge, Text } from "@/design-system/gradr-9b9b95";
+import { Button } from "@/components/ds/Button";
 
 export default function JobLanding() {
   const { slug = "" } = useParams();
@@ -71,6 +73,7 @@ export default function JobLanding() {
           title={landing.title}
           description={role.summary}
           actions={
+            <Button asChild size="lg" className="transition-transform hover:scale-[1.02] motion-reduce:transform-none">
             <Link
               to={ctaHref}
               onClick={() =>
@@ -80,26 +83,23 @@ export default function JobLanding() {
                   destination: "/auth",
                 })
               }
-              className="inline-flex h-11 items-center gap-1.5 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground shadow-sm transition-transform hover:scale-[1.02] motion-reduce:transform-none"
             >
               Match my resume to these roles
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
+            </Button>
           }
         />
 
         <section className="space-y-3">
-          <h2 className="type-h2 text-foreground">
+          <Text variant="h2" as="h2">
             Skills employers look for in {role.plural}
-          </h2>
+          </Text>
           <div className="flex flex-wrap gap-2">
             {role.skills.map((skill) => (
-              <span
-                key={skill}
-                className="rounded-full border border-border bg-secondary/60 px-3 py-1 text-sm text-foreground"
-              >
+              <Badge key={skill} variant="neutral">
                 {skill}
-              </span>
+              </Badge>
             ))}
           </div>
           <p className="text-muted-foreground">
