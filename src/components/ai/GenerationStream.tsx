@@ -1,4 +1,4 @@
-import { AlertTriangle, RefreshCw, Sparkles, X } from "lucide-react";
+import { AlertTriangle, Clock, RefreshCw, Sparkles, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ds/Button";
@@ -46,6 +46,8 @@ export interface GenerationStreamProps {
   description?: string;
   onCancel?: () => void;
   onRetry?: () => void;
+  /** Whole seconds left on a rate-limit window; drives the auto-retry copy. */
+  rateLimitSecondsRemaining?: number | null;
   /** Rendered instead of the streamed text once the result is final. */
   children?: ReactNode;
   className?: string;
@@ -65,12 +67,14 @@ export function GenerationStream({
   description,
   onCancel,
   onRetry,
+  rateLimitSecondsRemaining = null,
   children,
   className,
 }: GenerationStreamProps) {
   const reduced = useReducedMotionPref();
   const streaming = status === "streaming";
   const pct = Math.round(Math.max(0, Math.min(1, progress)) * 100);
+  const waiting = status === "error" && typeof rateLimitSecondsRemaining === "number" && rateLimitSecondsRemaining > 0;
 
   if (status === "idle") return null;
 
@@ -86,7 +90,9 @@ export function GenerationStream({
             {title}
           </h2>
           <p className="mt-1 type-body-sm text-muted-foreground" role="status" aria-live="polite">
-            {status === "error"
+            {waiting
+              ? `Too many analyses just now — retrying automatically in ${rateLimitSecondsRemaining}s.`
+              : status === "error"
               ? error || "Generation failed"
               : status === "canceled"
                 ? "Canceled — nothing was saved and your credit was returned."
@@ -120,10 +126,26 @@ export function GenerationStream({
       )}
 
       {status === "error" && (
-        <p className="flex items-start gap-2 rounded-xl bg-destructive/10 p-3 type-body-sm text-destructive">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>Your work is untouched. Retrying re-runs the same request.</span>
-        </p>
+        waiting ? (
+          <p
+            className="flex items-start gap-2 rounded-xl bg-surface-secondary p-3 type-body-sm text-muted-foreground"
+            data-testid="rate-limit-notice"
+            role="status"
+            aria-live="polite"
+          >
+            <Clock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>
+              You've hit the short-term analysis limit. Nothing was lost — the same request runs again
+              in <span className="tabular-nums font-medium text-foreground">{rateLimitSecondsRemaining}s</span>,
+              or retry now if you prefer.
+            </span>
+          </p>
+        ) : (
+          <p className="flex items-start gap-2 rounded-xl bg-destructive/10 p-3 type-body-sm text-destructive">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>Your work is untouched. Retrying re-runs the same request.</span>
+          </p>
+        )
       )}
 
       <AnimatePresence initial={false} mode="wait">
