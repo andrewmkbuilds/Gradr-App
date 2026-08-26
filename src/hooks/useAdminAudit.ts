@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { adminRpc, adminRpcOrThrow, newRequestId, requestIdFor } from "@/lib/admin/adminRpc";
 
 export type AuditResource = "affiliate_clicks" | "analytics_events";
 
@@ -88,9 +89,13 @@ export function useAuditActors() {
     queryKey: ["adminAuditActors"],
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_audit_actors");
+      const { data, error } = await adminRpc<{ user_id: string; display_name: string | null }[]>(
+        "admin_audit_actors",
+        undefined,
+        { requestId: requestIdFor("admin_audit_actors", "all") },
+      );
       if (error) return [] as { user_id: string; display_name: string | null }[];
-      return (data || []) as { user_id: string; display_name: string | null }[];
+      return data || [];
     },
   });
 }
@@ -144,6 +149,78 @@ export function useAdminRpcAudit(filters: {
       const { data, error } = await q;
       if (error) throw error;
       return (data || []) as unknown as AdminRpcAuditEntry[];
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Retention & archival
+ *
+ * `admin_rpc_audit` is written on every admin RPC, so it grows fast. A nightly
+ * job moves rows past the live window into `admin_rpc_audit_archive` (or
+ * deletes them when archiving is off) and prunes the archive past its own
+ * window. Admins can change the windows and run the sweep on demand.
+ * ------------------------------------------------------------------ */
+
+export interface RpcAuditRetention {
+  retention_days: number;
+  archive_enabled: boolean;
+  archive_retention_days: number;
+  purge_enabled: boolean;
+  last_purge_at: string | null;
+  last_purge_result: Record<string, unknown> | null;
+}
+
+export function useRpcAuditRetention(enabled: boolean) {
+  return useQuery({
+    queryKey: ["adminRpcAuditRetention"],
+    enabled,
+    queryFn: async () => {
+      const data = await adminRpcOrThrow<RpcAuditRetention>(
+        "admin_rpc_audit_retention_settings",
+        undefined,
+        { requestId: requestIdFor("admin_rpc_audit_retention_settings", "singleton") },
+      );
+      return data;
+    },
+  });
+}
+
+export function useUpdateRpcAuditRetention() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      retentionDays: number;
+      archiveEnabled: boolean;
+      archiveRetentionDays: number;
+      purgeEnabled: boolean;
+    }) =>
+      adminRpcOrThrow<RpcAuditRetention>(
+        "admin_update_rpc_audit_retention",
+        {
+          _retention_days: input.retentionDays,
+          _archive_enabled: input.archiveEnabled,
+          _archive_retention_days: input.archiveRetentionDays,
+          _purge_enabled: input.purgeEnabled,
+        },
+        { requestId: newRequestId("update-rpc-audit-retention") },
+      ),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["adminRpcAuditRetention"] });
+    },
+  });
+}
+
+export function useRunRpcAuditPurge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () =>
+      adminRpcOrThrow<Record<string, unknown>>("admin_run_rpc_audit_purge", undefined, {
+        requestId: newRequestId("run-rpc-audit-purge"),
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["adminRpcAuditRetention"] });
+      void qc.invalidateQueries({ queryKey: ["adminRpcAudit"] });
     },
   });
 }

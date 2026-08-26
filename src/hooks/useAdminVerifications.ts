@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { adminVerificationRequestSchema, parseAdminRows } from "@/lib/admin/schemas";
-import { adminRpcOrThrow, newRequestId, requestIdFor } from "@/lib/admin/adminRpc";
+import { adminRpcOrThrow, requestIdFor } from "@/lib/admin/adminRpc";
 
 export interface AdminVerificationRequest {
   id: string;
