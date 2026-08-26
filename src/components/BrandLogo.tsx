@@ -38,12 +38,21 @@ type BrandLogoProps = {
   priority?: boolean;
 };
 
-export function BrandLogo({ size = 32, className, decorative = true, priority = true }: BrandLogoProps) {
+/**
+ * Ref-forwarding: parents (motion wrappers, tooltip/popover triggers) may hand
+ * this component a ref. Without forwardRef React logs a dev-time warning.
+ */
+export const BrandLogo = forwardRef<HTMLSpanElement, BrandLogoProps>(function BrandLogo(
+  { size = 32, className, decorative = true, priority = true, ...rest },
+  ref,
+) {
   return (
     <span
+      ref={ref}
       className={cn("relative inline-grid shrink-0 place-items-center align-middle", className)}
       style={{ width: size, height: size }}
       data-brand-logo=""
+      {...rest}
     >
       <img
         src={BRAND_LOGO_URL}
@@ -59,4 +68,4 @@ export function BrandLogo({ size = 32, className, decorative = true, priority = 
       />
     </span>
   );
-}
+});
