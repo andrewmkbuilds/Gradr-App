@@ -28,11 +28,29 @@ export interface StreamHandlers<TResult> {
 
 export class AiStreamError extends Error {
   status: number;
-  constructor(message: string, status = 500) {
+  /** Milliseconds until the request may be retried (429 responses only). */
+  retryAfterMs: number | null;
+  constructor(message: string, status = 500, retryAfterMs: number | null = null) {
     super(message);
     this.name = "AiStreamError";
     this.status = status;
+    this.retryAfterMs = retryAfterMs;
   }
+}
+
+/** Reads the server's retry window from the JSON body or the Retry-After header. */
+export function parseRetryAfterMs(
+  payload: unknown,
+  headers?: Headers,
+): number | null {
+  const body = payload as { retry_after_ms?: unknown; retry_after?: unknown } | null;
+  const ms = Number(body?.retry_after_ms);
+  if (Number.isFinite(ms) && ms > 0) return Math.round(ms);
+  const seconds = Number(body?.retry_after);
+  if (Number.isFinite(seconds) && seconds > 0) return Math.round(seconds * 1000);
+  const header = Number(headers?.get("Retry-After"));
+  if (Number.isFinite(header) && header > 0) return Math.round(header * 1000);
+  return null;
 }
 
 const FUNCTIONS_BASE = SUPABASE_FUNCTIONS_BASE;
@@ -67,13 +85,15 @@ export async function streamEdgeFunction<TResult>(
     // Non-streamed failures (auth, rate limit, entitlement) still come back
     // as ordinary JSON, so surface their message verbatim.
     let message = "Generation failed";
+    let retryAfterMs: number | null = parseRetryAfterMs(null, response.headers);
     try {
       const payload = await response.json();
       if (payload?.error) message = String(payload.error);
+      retryAfterMs = parseRetryAfterMs(payload, response.headers);
     } catch {
       /* keep the default */
     }
-    throw new AiStreamError(message, response.status);
+    throw new AiStreamError(message, response.status, retryAfterMs);
   }
 
   const reader = response.body.getReader();
