@@ -23,6 +23,11 @@ jobs:
       - name: Lint (design-system colour tokens)
         run: bun run lint:design
 
+      # Guards against <Text> silently resolving to the DOM Text constructor
+      # when the design-system import is missing.
+      - name: Design-system Text import guard
+        run: bun run check:ds-text
+
       # Impeccable audit: anti-pattern detector + token/theme gates. Fails the
       # build on any P0/P1 issue; the HTML + JSON report is always uploaded.
       - name: Impeccable audit
