@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { jobmapsEnabled, searchJobMaps, type NormalizedJob } from "../_shared/jobmaps.ts";
 import { corviEnabled, searchCorvi } from "../_shared/corvi.ts";
 import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
+import { mockJobs } from "../_shared/mockJobs.ts";
 
 
 const corsHeaders = {
