@@ -52,6 +52,40 @@ jobs:
           path: tests/reports/html/admin-rpc-guard.html
           if-no-files-found: ignore
 
+      - name: Admin table RLS matrix (admin vs non-admin vs anon JWTs)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          ADMIN_E2E_EMAIL: ${{ secrets.ADMIN_E2E_EMAIL }}
+          ADMIN_E2E_PASSWORD: ${{ secrets.ADMIN_E2E_PASSWORD }}
+          USER_E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          USER_E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        run: node scripts/admin-rls-matrix.mjs
+
+      - name: Build app for admin route e2e
+        run: bun run build
+
+      - name: Admin routes render for an admin
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          ADMIN_E2E_EMAIL: ${{ secrets.ADMIN_E2E_EMAIL }}
+          ADMIN_E2E_PASSWORD: ${{ secrets.ADMIN_E2E_PASSWORD }}
+        run: |
+          bunx playwright install --with-deps chromium
+          bun run preview --port 8080 &
+          npx wait-on http://localhost:8080 -t 60000
+          node scripts/admin-routes-e2e.mjs http://localhost:8080
+
+      - name: Upload admin route screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-routes-screenshots
+          path: tests/reports/screenshots/admin-routes
+          if-no-files-found: ignore
+
+
       - name: RLS and policy regression tests
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
