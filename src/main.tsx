@@ -1,6 +1,17 @@
 // Must stay first: guarantees Web Storage exists before any module (including
 // the Supabase client) touches localStorage.
 import "./lib/storagePolyfill";
+import * as ReactNS from "react";
+if (import.meta.env.DEV) {
+  const orig = (ReactNS as any).createElement;
+  (ReactNS as any).createElement = function (type: any, config: any, ...kids: any[]) {
+    if (config && config.ref != null && typeof type === "function" && !(type as any).$$typeof) {
+      // eslint-disable-next-line no-console
+      console.warn("[REFPROBE]", type.name || type.displayName || String(type));
+    }
+    return orig.apply(this, [type, config, ...kids]);
+  };
+}
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
