@@ -118,12 +118,15 @@ export default function AdminDiscounts() {
 
   const review = useMutation({
     mutationFn: async (input: { id: string; status: VerificationStatus; reason?: string }) => {
-      const { error } = await supabase.rpc("admin_review_verification", {
-        _verification_id: input.id,
-        _status: input.status,
-        _reason: input.reason ?? undefined,
-      });
-      if (error) throw error;
+      await adminRpcOrThrow(
+        "admin_review_verification",
+        {
+          _verification_id: input.id,
+          _status: input.status,
+          _reason: input.reason ?? undefined,
+        },
+        { requestId: newRequestId(`review-verification-${input.id}`) },
+      );
     },
     onSuccess: () => {
       void invalidate("admin-verifications");

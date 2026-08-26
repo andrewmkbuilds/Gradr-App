@@ -95,7 +95,9 @@ export default function AdminLegal() {
 
   const publish = async (doc: LegalDocument) => {
     setBusy(true);
-    const { error } = await supabase.rpc("admin_publish_legal_document", { _document_id: doc.id });
+    const { error } = await adminRpc("admin_publish_legal_document", { _document_id: doc.id }, {
+      requestId: newRequestId(`publish-legal-${doc.id}`),
+    });
     setBusy(false);
     if (error) {
       toast.error(error.message);
