@@ -29,8 +29,8 @@ export function StatCard({ title, value, subtitle, icon: Icon, glowing }: StatCa
       <p className="stat-value text-foreground">
         {numeric !== null ? <CountUp to={numeric} duration={1.1} /> : value}
       </p>
-      <p className="mt-1 text-sm text-muted-foreground">{title}</p>
-      {subtitle && <p className="mt-1 text-xs text-primary">{subtitle}</p>}
+      <p className="mt-1 text-body-sm text-muted-foreground">{title}</p>
+      {subtitle && <p className="mt-1 text-caption text-primary">{subtitle}</p>}
     </Surface>
   );
 }

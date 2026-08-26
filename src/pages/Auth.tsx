@@ -5,7 +5,8 @@ import { urlFor } from "@/config/domains";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
-import { Alert, Button, Input, Text } from "@/design-system/gradr-9b9b95";
+import { Alert, Input, Text } from "@/design-system/gradr-9b9b95";
+import { Button } from "@/components/ds/Button";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Mail, Lock, User, ArrowRight, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import {
