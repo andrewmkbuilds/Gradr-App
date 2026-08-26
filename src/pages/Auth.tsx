@@ -180,7 +180,7 @@ export default function Auth() {
       setConsentError(
         !acceptedTerms
           ? "Please accept the Terms & Conditions and Privacy Notice to create an account."
-          : "Please confirm you meet the minimum age requirement.",
+          : "Please confirm you are at least 13 years old.",
       );
       return null;
     }
@@ -552,7 +552,7 @@ export default function Auth() {
                 className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
               />
               <span>
-                I am at least 16 years old (18 where my country requires it).
+                I am at least 13 years old, and the age information I provide is truthful.
                 <span className="text-destructive"> *</span>
               </span>
             </label>

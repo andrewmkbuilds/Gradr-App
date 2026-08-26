@@ -11,8 +11,8 @@
  */
 import { REFUND_WINDOW_DAYS, SELLER_CONTACT_EMAIL, SELLER_DOMAIN, SELLER_LEGAL_NAME, SELLER_TRADING_NAME, SELLER_WEBSITE_URL } from "./legal";
 
-export const TERMS_V1_EFFECTIVE = "2026-08-12";
-export const PRIVACY_V1_EFFECTIVE = "2026-08-12";
+export const TERMS_V1_EFFECTIVE = "2026-08-26";
+export const PRIVACY_V1_EFFECTIVE = "2026-08-26";
 
 export const TERMS_V1 = `## 1. Agreement to these terms
 
@@ -24,7 +24,11 @@ We may update these terms from time to time. We will change the "Last updated" d
 
 ## 2. Eligibility and age requirements
 
-The Service is intended for people who are at least 16 years old. If you are under the age of majority where you live, you may only use Gradr with the involvement of a parent or guardian who agrees to these terms on your behalf. We do not knowingly provide the Service to children under 16.
+You must be at least 13 years old to create or maintain a Gradr account. Children under 13 are not permitted to create or keep an account, and we do not knowingly provide the Service to them. If you are under the age of majority where you live, you may only use Gradr with the involvement of a parent or guardian who agrees to these terms on your behalf.
+
+When you sign up you confirm that you meet this age requirement. You must give truthful age information and must not attempt to bypass, misstate or circumvent the age requirement, including by creating an account for someone under 13. If we learn that an account belongs to someone under 13, we may suspend or delete it.
+
+Certain paid services, payouts, contracts or features — for example subscriptions and purchases, the affiliate programme and its payouts, and other agreements that require legal capacity to contract — may carry additional eligibility requirements, including a higher minimum age or a parent or guardian entering the agreement on your behalf where the law requires it.
 
 You are responsible for complying with the laws of the country you access Gradr from. The Service is not directed at any jurisdiction where offering it would be unlawful.
 
@@ -267,9 +271,11 @@ We use access-controlled infrastructure with row-level security on every user ta
 
 No online service can be completely secure, so we cannot guarantee absolute security. Protect your own account with a strong, unique password and tell us at ${SELLER_CONTACT_EMAIL} if you suspect a problem.
 
-## 11. Children and minors
+## 11. Children and age requirement
 
-Gradr is not intended for children under 16, and we do not knowingly collect their personal data. If you believe a child has given us personal data, contact ${SELLER_CONTACT_EMAIL} and we will delete it.
+You must be at least 13 years old to create or maintain a Gradr account. Gradr is not intended for children under 13 and we do not knowingly collect their personal data. If you believe a child under 13 has given us personal data, contact ${SELLER_CONTACT_EMAIL} and we will delete it.
+
+We do not ask for or store your date of birth. At sign-up we ask you to confirm that you meet the minimum age. We record an analytics event noting whether that confirmation was given and which sign-in method was used, and no date of birth is collected or stored. You must answer truthfully and must not attempt to bypass the age requirement. Some paid services, payouts and contractual features may require you to be older, or to have a parent or guardian act for you, where the law requires it.
 
 ## 12. Your privacy rights
 
