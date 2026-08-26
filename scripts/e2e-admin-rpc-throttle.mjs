@@ -141,6 +141,10 @@ async function main() {
 
   // The UI should show the throttled rows under the Throttled outcome filter.
   await page.reload({ waitUntil: "domcontentloaded" });
+  await page.evaluate(() => {
+    window.__SUPABASE_URL__ = import.meta?.env?.VITE_SUPABASE_URL;
+    window.__SUPABASE_KEY__ = import.meta?.env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+  });
   await page.waitForTimeout(2500);
   await page.getByLabel(/filter by outcome/i).selectOption("rate_limited");
   await page.waitForTimeout(2500);
@@ -148,6 +152,64 @@ async function main() {
   record("audit log UI lists throttled calls", throttledBadges > 0, `${throttledBadges} rows`);
 
   await page.screenshot({ path: `${SHOTS}/throttled-audit.png` });
+
+  // --- request id parity -------------------------------------------------
+  // Exhaust the retention-settings RPC, then reload: the retention card's own
+  // read is throttled and renders the error with its request id. That id must
+  // be the one the server wrote onto the `rate_limited` audit row.
+  const parity = await burst(page, "admin_rpc_audit_retention_settings", BURST);
+  record(
+    "retention settings RPC can be throttled",
+    parity.throttled > 0,
+    `${parity.throttled} rejected`,
+  );
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.evaluate(() => {
+    window.__SUPABASE_URL__ = import.meta?.env?.VITE_SUPABASE_URL;
+    window.__SUPABASE_KEY__ = import.meta?.env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+  });
+  const errorBox = page.getByTestId("retention-error");
+  let uiRequestId = null;
+  try {
+    await errorBox.waitFor({ state: "visible", timeout: 20_000 });
+    const text = (await errorBox.textContent()) || "";
+    record("UI shows the throttle error", /throttl|too many/i.test(text), text.slice(0, 160));
+    uiRequestId = (/request id:\s*([\w-]+)/i.exec(text) || [])[1] || null;
+    record("throttle error carries a request id", Boolean(uiRequestId), uiRequestId || "none");
+  } catch (err) {
+    record("UI shows the throttle error", false, err.message);
+  }
+
+  await page.screenshot({ path: `${SHOTS}/throttle-request-id.png` });
+
+  if (uiRequestId) {
+    // Give the guard's audit write a moment, then look the id up server-side.
+    await page.waitForTimeout(2000);
+    const audited = await page.evaluate(async (requestId) => {
+      const url = window.__SUPABASE_URL__;
+      const apikey = window.__SUPABASE_KEY__;
+      const key = Object.keys(localStorage).find((k) => /^sb-.*-auth-token$/.test(k));
+      const token = key ? JSON.parse(localStorage.getItem(key))?.access_token : null;
+      const res = await fetch(
+        `${url}/rest/v1/admin_rpc_audit?select=request_id,status,function_name&request_id=eq.${encodeURIComponent(requestId)}`,
+        { headers: { apikey, authorization: `Bearer ${token}` } },
+      );
+      return res.ok ? await res.json() : { error: await res.text() };
+    }, uiRequestId);
+
+    const rows = Array.isArray(audited) ? audited : [];
+    record(
+      "audit log holds a row for the request id shown in the UI",
+      rows.length > 0,
+      `${rows.length} rows`,
+    );
+    record(
+      "that audit row is recorded as throttled",
+      rows.some((r) => r.status === "rate_limited"),
+      rows.map((r) => r.status).join(", ") || JSON.stringify(audited).slice(0, 160),
+    );
+  }
 
   await browser.close();
 

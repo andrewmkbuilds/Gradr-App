@@ -14,6 +14,7 @@ import {
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
+import { formatAdminRpcError } from "@/lib/admin/adminRpc";
 import { Button } from "@/components/ds/Button";
 import {
   useAdminAuditLog,
@@ -372,7 +373,7 @@ function RpcAuditSection({
  * ------------------------------------------------------------------ */
 
 function RetentionCard() {
-  const { data: settings, isLoading } = useRpcAuditRetention(true);
+  const { data: settings, isLoading, error: settingsError } = useRpcAuditRetention(true);
   const update = useUpdateRpcAuditRetention();
   const purge = useRunRpcAuditPurge();
 
@@ -391,6 +392,20 @@ function RetentionCard() {
         purgeEnabled: settings.purge_enabled,
       }
     : null);
+
+  if (settingsError) {
+    // Surfacing the request id here is what makes a throttled or denied read
+    // traceable straight back to its `admin_rpc_audit` row.
+    return (
+      <div
+        role="alert"
+        data-testid="retention-error"
+        className="elev-2 rounded-card p-4 text-body-sm text-destructive"
+      >
+        {formatAdminRpcError(settingsError)}
+      </div>
+    );
+  }
 
   if (isLoading || !current) {
     return (
@@ -464,7 +479,7 @@ function RetentionCard() {
                 setDraft(null);
                 toast.success("Retention policy saved");
               },
-              onError: (e: Error) => toast.error(e.message),
+              onError: (e: Error) => toast.error(formatAdminRpcError(e)),
             })
           }
         >
@@ -481,7 +496,7 @@ function RetentionCard() {
                     ? "Sweep skipped — automatic clean-up is off"
                     : `Swept: ${Number(r?.archived ?? 0)} archived, ${Number(r?.deleted ?? 0)} deleted, ${Number(r?.archive_pruned ?? 0)} pruned`,
                 ),
-              onError: (e: Error) => toast.error(e.message),
+              onError: (e: Error) => toast.error(formatAdminRpcError(e)),
             })
           }
         >

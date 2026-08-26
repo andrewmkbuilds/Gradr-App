@@ -85,6 +85,23 @@ jobs:
           ADMIN_E2E_PASSWORD: ${{ secrets.ADMIN_E2E_PASSWORD }}
         run: node scripts/e2e-admin-rpc-throttle.mjs http://localhost:8080
 
+      - name: Admin audit CSV export (columns, filters, non-admin blocked)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          ADMIN_E2E_EMAIL: ${{ secrets.ADMIN_E2E_EMAIL }}
+          ADMIN_E2E_PASSWORD: ${{ secrets.ADMIN_E2E_PASSWORD }}
+          USER_E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          USER_E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        run: node scripts/e2e-admin-audit-csv.mjs http://localhost:8080
+
+      - name: Audit retention sweep archives and purges as configured
+        env:
+          RUN_DB_TESTS: "1"
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: bunx vitest run src/test/adminRpcAuditRetention.integration.test.ts
+
       - name: Upload admin route screenshots
         if: always()
         uses: actions/upload-artifact@v4

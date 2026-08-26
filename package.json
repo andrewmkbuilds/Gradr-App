@@ -148,7 +148,7 @@
     "lint:design": "eslint --config eslint.design.config.js .",
     "og:check": "node scripts/generate-og-images.mjs --check",
     "og:generate": "node scripts/generate-og-images.mjs",
-    "prebuild": "node scripts/generate-app-icons.mjs --check && node scripts/check-no-tanstack.mjs && node scripts/check-tailwind-classes.mjs && node scripts/check-legacy-design.mjs && bun run scripts/generate-sitemap.ts",
+    "prebuild": "node scripts/generate-app-icons.mjs --check && node scripts/check-no-tanstack.mjs && node scripts/check-tailwind-classes.mjs && node scripts/check-legacy-design.mjs && node scripts/check-ds-text-import.mjs && bun run scripts/generate-sitemap.ts",
     "predev": "bun run scripts/generate-sitemap.ts",
     "prepare": "node scripts/install-git-hooks.mjs",
     "preview": "vite preview",
@@ -166,6 +166,9 @@
     "test:admin-rls": "node scripts/admin-rls-matrix.mjs",
     "test:admin-routes": "node scripts/admin-routes-e2e.mjs",
     "test:admin-throttle": "node scripts/e2e-admin-rpc-throttle.mjs",
+    "test:admin-csv": "node scripts/e2e-admin-audit-csv.mjs",
+    "test:audit-retention": "RUN_DB_TESTS=1 vitest run src/test/adminRpcAuditRetention.integration.test.ts",
+    "check:ds-text": "node scripts/check-ds-text-import.mjs",
 
     "test:db": "RUN_DB_TESTS=1 vitest run src/test/dbSchema.integration.test.ts",
     "test:depth": "node scripts/depth-smoke.mjs",

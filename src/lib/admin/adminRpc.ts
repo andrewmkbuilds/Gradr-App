@@ -137,3 +137,23 @@ export async function adminRpcOrThrow<T = unknown>(
   }
   return result.data as T;
 }
+
+/**
+ * User-facing text for a failed admin RPC, always carrying the request id.
+ *
+ * The id is the join key between what the admin saw and the `admin_rpc_audit`
+ * row the server wrote, so a throttled or denied action can be traced without
+ * guessing at timestamps.
+ */
+export function formatAdminRpcError(error: unknown): string {
+  if (error instanceof AdminRpcError) {
+    return `${error.message} (request id: ${error.requestId})`;
+  }
+  return error instanceof Error ? error.message : "Something went wrong";
+}
+
+/** Pulls a request id back out of a rendered error string (used by tests). */
+export function parseRequestId(text: string): string | null {
+  const match = /request id:\s*([\w-]+)/i.exec(text);
+  return match ? match[1] : null;
+}
