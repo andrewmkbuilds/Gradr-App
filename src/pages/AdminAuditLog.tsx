@@ -13,13 +13,21 @@ import {
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { PageHeader } from "@/components/app/PageHeader";
+import { toast } from "sonner";
+import { Button } from "@/components/ds/Button";
 import {
   useAdminAuditLog,
   useAdminRpcAudit,
   useAuditActors,
   useLogAdminView,
+  useRpcAuditRetention,
+  useRunRpcAuditPurge,
+  useUpdateRpcAuditRetention,
   type AuditEntry,
 } from "@/hooks/useAdminAudit";
+
+/** RFC4180-safe cell: quote everything, double embedded quotes. */
+const csvCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 
 
 const ACTION_META: Record<
@@ -198,6 +206,34 @@ function RpcAuditSection({
   const selectCls =
     "px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
 
+  /** Exports exactly the rows the current filters produced — not the whole table. */
+  const exportCsv = () => {
+    const rows = calls || [];
+    if (rows.length === 0) return;
+    const headers = ["When", "Actor id", "Actor", "Function", "Outcome", "Request id", "IP", "User agent"];
+    const body = rows.map((c) =>
+      [
+        format(new Date(c.created_at), "yyyy-MM-dd HH:mm:ss"),
+        c.actor_id ?? "",
+        c.actor_id ? actorName.get(c.actor_id) ?? "" : "anonymous",
+        c.function_name,
+        c.status,
+        c.request_id ?? "",
+        c.ip ?? "",
+        c.user_agent ?? "",
+      ]
+        .map(csvCell)
+        .join(","),
+    );
+    const csv = [headers.map(csvCell).join(","), ...body].join("\r\n");
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `admin-rpc-audit-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const STATUS_CLS: Record<string, string> = {
     ok: "bg-primary/10 text-primary",
     denied: "bg-destructive/10 text-destructive",
@@ -248,6 +284,13 @@ function RpcAuditSection({
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>
         </select>
+        <Button
+          variant="outline"
+          disabled={!calls || calls.length === 0}
+          onClick={exportCsv}
+        >
+          <Download className="h-4 w-4" aria-hidden="true" /> Export CSV
+        </Button>
       </div>
 
       <div className="elev-2 rounded-xl overflow-x-auto">
