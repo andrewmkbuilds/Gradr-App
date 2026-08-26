@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { adminRpc } from "@/lib/admin/adminRpc";
 import { supabase } from "@/integrations/supabase/client";
 import {
-import { adminRpc } from "@/lib/admin/adminRpc";
   PRIVACY_V1,
   PRIVACY_V1_EFFECTIVE,
   TERMS_V1,
