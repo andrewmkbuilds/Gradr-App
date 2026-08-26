@@ -388,14 +388,21 @@ export function OnboardingDialog({ open, onComplete, onSkip }: Props) {
         </div>
 
         <DialogFooter className="gap-2 sm:justify-between">
-          <Button
-            variant="ghost"
-            className="gap-1.5"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              className="gap-1.5"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              disabled={step === 0}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
+            </Button>
+            {onSkip && (
+              <Button variant="ghost" onClick={handleSkip}>
+                Skip for now
+              </Button>
+            )}
+          </div>
           {step < STEPS.length - 1 ? (
             <Button className="gap-1.5" onClick={() => setStep((s) => s + 1)} disabled={!canAdvance}>
               Continue <ArrowRight className="h-4 w-4" aria-hidden="true" />
