@@ -15,10 +15,12 @@ import { useIsAdmin } from "@/hooks/useAffiliate";
 import { PageHeader } from "@/components/app/PageHeader";
 import {
   useAdminAuditLog,
+  useAdminRpcAudit,
   useAuditActors,
   useLogAdminView,
   type AuditEntry,
 } from "@/hooks/useAdminAudit";
+
 
 const ACTION_META: Record<
   string,
