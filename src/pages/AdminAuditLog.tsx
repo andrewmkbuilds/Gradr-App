@@ -87,7 +87,7 @@ export default function AdminAuditLog() {
   if (!isAdmin) return <Navigate to="/" replace />;
 
   const selectCls =
-    "px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
+    "px-3 py-2 rounded-control bg-secondary border border-border text-body-sm text-foreground";
 
   return (
     <div className="page-shell page-stack">
@@ -141,9 +141,9 @@ export default function AdminAuditLog() {
         </select>
       </div>
 
-      <div className="elev-2 rounded-xl overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+      <div className="elev-2 rounded-card overflow-x-auto">
+        <table className="w-full text-body-sm">
+          <thead className="text-left text-caption uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="p-3">When</th>
               <th>Who</th>
@@ -174,7 +174,7 @@ export default function AdminAuditLog() {
         </table>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-caption text-muted-foreground">
         Repeat views by the same admin within 30 seconds are collapsed into one entry. Admin
         modifications and deletions are throttled to 50 per minute per account.
       </p>
@@ -204,7 +204,7 @@ function RpcAuditSection({
   );
 
   const selectCls =
-    "px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
+    "px-3 py-2 rounded-control bg-secondary border border-border text-body-sm text-foreground";
 
   /** Exports exactly the rows the current filters produced — not the whole table. */
   const exportCsv = () => {
@@ -244,7 +244,7 @@ function RpcAuditSection({
     <section className="page-stack">
       <div>
         <h2 className="type-h3 text-foreground">Admin RPC calls</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-body-sm text-muted-foreground">
           Server-side record of every admin database function invocation — who called it, when,
           which function, the request id, and whether it was allowed, denied, or throttled. Written
           by the database guard itself, so it cannot be bypassed from the client.
@@ -293,10 +293,10 @@ function RpcAuditSection({
         </Button>
       </div>
 
-      <div className="elev-2 rounded-xl overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="elev-2 rounded-card overflow-x-auto">
+        <table className="w-full text-body-sm">
           <caption className="sr-only">Admin RPC call audit</caption>
-          <thead className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+          <thead className="text-left text-caption uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="p-3">When</th>
               <th>Who</th>
@@ -323,18 +323,18 @@ function RpcAuditSection({
             ) : (
               calls!.map((c) => (
                 <tr key={c.id} className="border-t border-border">
-                  <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
+                  <td className="p-3 text-caption text-muted-foreground whitespace-nowrap">
                     {format(new Date(c.created_at), "MMM d, yyyy HH:mm:ss")}
                   </td>
-                  <td className="text-xs text-foreground">
+                  <td className="text-caption text-foreground">
                     {c.actor_id ? actorName.get(c.actor_id) || c.actor_id.slice(0, 8) : "anonymous"}
                   </td>
-                  <td className="text-xs">
-                    <code className="text-[11px] text-foreground">{c.function_name}</code>
+                  <td className="text-caption">
+                    <code className="text-caption text-foreground">{c.function_name}</code>
                   </td>
                   <td>
                     <span
-                      className={`inline-flex items-center text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                      className={`inline-flex items-center text-overline px-2 py-0.5 rounded-full ${
                         STATUS_CLS[c.status] ?? "bg-secondary text-muted-foreground"
                       }`}
                     >
@@ -342,11 +342,11 @@ function RpcAuditSection({
                     </span>
                   </td>
                   <td>
-                    <code className="text-[11px] text-muted-foreground">
+                    <code className="text-caption text-muted-foreground">
                       {c.request_id ? c.request_id.slice(0, 12) : "—"}
                     </code>
                   </td>
-                  <td className="text-xs text-muted-foreground max-w-[220px] truncate">
+                  <td className="text-caption text-muted-foreground max-w-56 truncate">
                     {c.ip ? `${c.ip} · ` : ""}
                     {c.user_agent ? c.user_agent.slice(0, 60) : "—"}
                   </td>
@@ -357,7 +357,7 @@ function RpcAuditSection({
         </table>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-caption text-muted-foreground">
         Admin RPCs are throttled to 120 successful calls per minute per account; excess calls are
         rejected and recorded here as throttled.
       </p>
@@ -394,27 +394,27 @@ function RetentionCard() {
 
   if (isLoading || !current) {
     return (
-      <div className="elev-2 rounded-xl p-4 text-sm text-muted-foreground">
+      <div className="elev-2 rounded-card p-4 text-body-sm text-muted-foreground">
         Loading retention policy…
       </div>
     );
   }
 
   const inputCls =
-    "w-24 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
+    "w-24 px-3 py-2 rounded-control bg-secondary border border-border text-body-sm text-foreground";
 
   return (
-    <div className="elev-2 rounded-xl p-4 space-y-3">
+    <div className="elev-2 rounded-card p-4 space-y-3">
       <div>
         <h3 className="text-body font-medium text-foreground">Retention &amp; archival</h3>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-caption text-muted-foreground">
           A nightly sweep moves call records older than the live window into the archive (or deletes
           them when archiving is off), then prunes archived records past their own window.
         </p>
       </div>
 
       <div className="flex flex-wrap items-end gap-4">
-        <label className="text-xs text-muted-foreground">
+        <label className="text-caption text-muted-foreground">
           <span className="block mb-1">Keep live (days)</span>
           <input
             type="number"
@@ -425,7 +425,7 @@ function RetentionCard() {
             onChange={(e) => setDraft({ ...current, retentionDays: Number(e.target.value) })}
           />
         </label>
-        <label className="text-xs text-muted-foreground">
+        <label className="text-caption text-muted-foreground">
           <span className="block mb-1">Keep archived (days)</span>
           <input
             type="number"
@@ -436,7 +436,7 @@ function RetentionCard() {
             onChange={(e) => setDraft({ ...current, archiveRetentionDays: Number(e.target.value) })}
           />
         </label>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+        <label className="flex items-center gap-2 text-caption text-muted-foreground">
           <input
             type="checkbox"
             checked={current.archiveEnabled}
@@ -444,7 +444,7 @@ function RetentionCard() {
           />
           Archive before deleting
         </label>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+        <label className="flex items-center gap-2 text-caption text-muted-foreground">
           <input
             type="checkbox"
             checked={current.purgeEnabled}
@@ -493,7 +493,7 @@ function RetentionCard() {
           Run sweep now
         </Button>
         {settings?.last_purge_at && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-caption text-muted-foreground">
             Last sweep {format(new Date(settings.last_purge_at), "MMM d, yyyy HH:mm")}
           </span>
         )}
@@ -522,10 +522,10 @@ function AuditRow({
         className={`border-t border-border ${hasDetails ? "cursor-pointer hover:bg-secondary/40" : ""}`}
         onClick={() => hasDetails && setOpen((v) => !v)}
       >
-        <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
+        <td className="p-3 text-caption text-muted-foreground whitespace-nowrap">
           {format(new Date(entry.created_at), "MMM d, yyyy HH:mm:ss")}
         </td>
-        <td className="text-xs">
+        <td className="text-caption">
           {entry.actor_id ? (
             <span className="text-foreground">
               {actorName.get(entry.actor_id) || entry.actor_id.slice(0, 8)}
@@ -536,26 +536,26 @@ function AuditRow({
         </td>
         <td>
           <span
-            className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${meta.cls}`}
+            className={`inline-flex items-center gap-1 text-overline px-2 py-0.5 rounded-full ${meta.cls}`}
           >
             <Icon className="h-3 w-3" />
             {meta.label}
           </span>
         </td>
-        <td className="text-xs text-foreground">
+        <td className="text-caption text-foreground">
           {RESOURCE_LABEL[entry.resource_type] || entry.resource_type}
         </td>
         <td>
-          <code className="text-[11px] text-muted-foreground">
+          <code className="text-caption text-muted-foreground">
             {entry.resource_id ? entry.resource_id.slice(0, 8) : "—"}
           </code>
         </td>
-        <td className="text-xs text-muted-foreground">{entry.record_count}</td>
+        <td className="text-caption text-muted-foreground">{entry.record_count}</td>
       </tr>
       {open && hasDetails && (
         <tr className="border-t border-border bg-secondary/20">
           <td colSpan={6} className="p-3">
-            <pre className="text-[11px] text-muted-foreground overflow-x-auto whitespace-pre-wrap break-all">
+            <pre className="text-caption text-muted-foreground overflow-x-auto whitespace-pre-wrap break-all">
               {JSON.stringify(entry.details, null, 2)}
             </pre>
           </td>
@@ -575,8 +575,8 @@ function StatTile({
   icon: typeof Eye;
 }) {
   return (
-    <div className="elev-2 rounded-xl p-4">
-      <div className="flex items-center gap-2 text-muted-foreground text-xs">
+    <div className="elev-2 rounded-card p-4">
+      <div className="flex items-center gap-2 text-muted-foreground text-caption">
         <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
