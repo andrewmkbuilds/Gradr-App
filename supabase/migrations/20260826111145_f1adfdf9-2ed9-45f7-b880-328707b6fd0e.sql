@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.detect_analytics_regressions(text) FROM PUBLIC, anon;

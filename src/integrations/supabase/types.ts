@@ -710,6 +710,39 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_event_deliveries: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_name: string
+          id: string
+          latency_ms: number | null
+          occurred_at: string
+          provider_event_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_name: string
+          id?: string
+          latency_ms?: number | null
+          occurred_at?: string
+          provider_event_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_name?: string
+          id?: string
+          latency_ms?: number | null
+          occurred_at?: string
+          provider_event_id?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           article: string | null
@@ -808,6 +841,7 @@ export type Database = {
       }
       api_health_events: {
         Row: {
+          attempt: number
           created_at: string
           duration_ms: number
           endpoint: string
@@ -816,10 +850,14 @@ export type Database = {
           id: string
           method: string
           outcome: string
+          provider: string | null
+          rate_limited: boolean
+          retry_after_ms: number | null
           status_code: number
           user_id: string | null
         }
         Insert: {
+          attempt?: number
           created_at?: string
           duration_ms?: number
           endpoint: string
@@ -828,10 +866,14 @@ export type Database = {
           id?: string
           method: string
           outcome: string
+          provider?: string | null
+          rate_limited?: boolean
+          retry_after_ms?: number | null
           status_code: number
           user_id?: string | null
         }
         Update: {
+          attempt?: number
           created_at?: string
           duration_ms?: number
           endpoint?: string
@@ -840,6 +882,9 @@ export type Database = {
           id?: string
           method?: string
           outcome?: string
+          provider?: string | null
+          rate_limited?: boolean
+          retry_after_ms?: number | null
           status_code?: number
           user_id?: string | null
         }
@@ -4883,6 +4928,10 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      detect_analytics_regressions: {
+        Args: { p_window: string }
+        Returns: number
       }
       email_category_allowed: {
         Args: { _category: string; _email: string }

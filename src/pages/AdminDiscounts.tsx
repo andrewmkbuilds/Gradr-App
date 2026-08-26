@@ -311,14 +311,14 @@ export default function AdminDiscounts() {
               {(rules.data ?? []).map((r) => (
                 <Card key={r.id} className="flex flex-wrap items-center gap-3 p-4">
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                       {r.name}
                       <Badge variant="secondary">{Number(r.percentage)}%</Badge>
                       <Badge variant="outline">{r.kind}</Badge>
                       {r.eligibility_type && (
                         <Badge variant="outline">{r.eligibility_type}</Badge>
                       )}
-                    </p>
+                    </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {r.redemption_count} redeemed
                       {r.max_redemptions ? ` of ${r.max_redemptions}` : ""} · ends {date(r.ends_at)}
@@ -353,13 +353,13 @@ export default function AdminDiscounts() {
               return (
                 <Card key={v.id} className="flex flex-wrap items-center gap-3 p-4">
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                       {v.eligibility_type}
                       <Badge variant="outline" className={copy.tone}>
                         {copy.label}
                       </Badge>
                       <Badge variant="outline">{v.provider}</Badge>
-                    </p>
+                    </div>
                     <p className="mt-0.5 truncate text-xs text-muted-foreground">
                       user {String(v.user_id).slice(0, 8)}… · started {date(v.created_at)} ·
                       expires {date(v.expires_at)}
