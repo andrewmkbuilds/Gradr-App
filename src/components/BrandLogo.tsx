@@ -1,3 +1,4 @@
+import { forwardRef, type ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils";
 import gradrLogoUrl from "@/design-system/gradr-9b9b95/assets/logos/gradr-logo.png";
 
@@ -28,7 +29,7 @@ export const BRAND_LOCKUP_URL = "/gradr-lockup.png";
 export const BRAND_LOCKUP_DARK_URL = "/gradr-lockup-dark.png";
 
 
-type BrandLogoProps = {
+type BrandLogoProps = Omit<ComponentPropsWithoutRef<"span">, "children"> & {
   /** Rendered box size in px. The source is square, so width === height. */
   size?: number;
   className?: string;
