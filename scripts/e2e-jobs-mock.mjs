@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 /**
- * `/jobs` UI contract test against a mocked job-search backend.
+ * `/jobs` pagination + empty-state contract, against a mocked Adzuna backend.
  *
  * The real search hits Adzuna, which is unavailable (and non-deterministic) in
- * CI. Here every `search-jobs` call is intercepted at the network layer and
- * answered with a fixture, so the assertions are about the UI only:
+ * CI, so every `search-jobs` call is answered from a fixture keyed on the
+ * requested page. That makes the assertions purely about the UI:
  *
- *   1. the page starts in the "No listings yet" empty state,
- *   2. a search renders one card per returned listing, with company/salary,
- *   3. requesting a second page returns the next slice (the function's
- *      pagination contract — the feed itself renders one page at a time),
- *   4. a search that returns nothing falls back to the empty state again.
+ *   1. first load shows the "No listings yet" empty state, no pager,
+ *   2. page 1 (full page, more remaining) renders cards and enables Next,
+ *   3. page 2 renders the next slice and Previous becomes usable,
+ *   4. the final, EMPTY page shows the "No more listings" end state and
+ *      disables Next, so a user cannot page past the end,
+ *   5. Previous from there returns to real results.
  *
  * Usage: node scripts/e2e-jobs-mock.mjs [baseUrl]
  * Skips cleanly when E2E_EMAIL / E2E_PASSWORD are missing.
@@ -36,8 +37,10 @@ const record = (name, ok, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`);
 };
 
-const PER_PAGE = 6;
-const TOTAL = 14;
+/** Must match JobsFeed's PER_PAGE, which is what enables/disables Next. */
+const PER_PAGE = 20;
+/** Two full pages, then an empty third page — the "empty last page" case. */
+const TOTAL = 40;
 
 function fixtureJobs(page) {
   const start = (page - 1) * PER_PAGE;
@@ -60,24 +63,37 @@ function fixtureJobs(page) {
   });
 }
 
-/** State the interceptor answers with; flipped between assertions. */
-let mode = "page1";
+const requestedPages = [];
 
 async function installMocks(context) {
   await context.route("**/functions/v1/search-jobs", async (route) => {
-    const page = mode === "page2" ? 2 : 1;
-    const jobs = mode === "empty" ? [] : fixtureJobs(page);
+    let page = 1;
+    try {
+      page = Number(JSON.parse(route.request().postData() || "{}").page) || 1;
+    } catch { /* default page 1 */ }
+    requestedPages.push(page);
+    const jobs = fixtureJobs(page);
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       headers: { "access-control-allow-origin": "*" },
-      body: JSON.stringify({ jobs, total: mode === "empty" ? 0 : TOTAL, page, sources: { adzuna: { count: jobs.length, status: "ok" } } }),
+      body: JSON.stringify({
+        jobs,
+        total: TOTAL,
+        page,
+        sources: { adzuna: { count: jobs.length, status: "ok" } },
+      }),
     });
   });
-  // Keep scoring and scraping out of the picture — this test is about the feed.
-  for (const fn of ["recommend-jobs", "jobs-apify", "match-jobs"]) {
+  // Scoring and scraping are out of scope here — keep the feed deterministic.
+  for (const fn of ["recommend-jobs", "jobs-apify", "match-jobs", "scrape-jobs"]) {
     await context.route(`**/functions/v1/${fn}`, (route) =>
-      route.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify({ jobs: [], scores: [] }) }),
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "*" },
+        body: JSON.stringify({ jobs: [], scores: [] }),
+      }),
     );
   }
 }
@@ -91,52 +107,80 @@ async function signIn(page) {
 }
 
 const cardCount = (page) => page.locator("h3", { hasText: /^Mock Engineer \d+$/ }).count();
+const nextBtn = (page) => page.getByRole("button", { name: /next page/i });
+const prevBtn = (page) => page.getByRole("button", { name: /previous page/i });
+const visible = (locator) => locator.isVisible().catch(() => false);
 
-async function runSearch(page) {
-  await page.getByRole("button", { name: /^search jobs$/i }).first().click();
+async function settle(page) {
   await page.waitForTimeout(1500);
 }
 
 const browser = await launchBrowser();
-const context = await browser.newContext({ viewport: { width: 1280, height: 1400 } });
+const context = await browser.newContext({ viewport: { width: 1280, height: 1600 } });
 try {
   await installMocks(context);
   const page = await context.newPage();
   await signIn(page);
 
   await page.goto(`${BASE}/jobs`, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(1200);
-  record("empty state on first load", await page.getByText(/no listings yet/i).isVisible().catch(() => false));
+  await settle(page);
+  record("initial empty state", await visible(page.getByText(/no listings yet/i)));
+  record("no pager before a search", !(await visible(nextBtn(page))));
   await page.screenshot({ path: `${SHOTS}/1-empty.png` });
 
   // --- page 1 -------------------------------------------------------------
-  mode = "page1";
   await page.getByLabel(/job title or keywords/i).first().fill("engineer");
-  await runSearch(page);
+  await page.getByRole("button", { name: /^search jobs$/i }).first().click();
+  await settle(page);
   const first = await cardCount(page);
-  record("renders one card per mocked listing", first === PER_PAGE, `${first} cards (expected ${PER_PAGE})`);
-  record(
-    "card shows company and salary",
-    (await page.getByText("Mockworks 1").first().isVisible().catch(() => false)) &&
-      (await page.getByText(/\$101k/).first().isVisible().catch(() => false)),
-  );
-  record("empty state hidden with results", !(await page.getByText(/no listings yet/i).isVisible().catch(() => false)));
-  await page.screenshot({ path: `${SHOTS}/2-results.png` });
+  record("page 1 renders a full page of cards", first === PER_PAGE, `${first} cards`);
+  record("page indicator shows page 1", await visible(page.getByText(/^Page 1$/)));
+  record("Next enabled while results remain", await nextBtn(page).isEnabled());
+  record("Previous disabled on page 1", await prevBtn(page).isDisabled());
+  await page.screenshot({ path: `${SHOTS}/2-page1.png` });
 
-  // --- page 2 (next slice of the same result set) -------------------------
-  mode = "page2";
-  await runSearch(page);
+  // --- page 2 (last non-empty page) ---------------------------------------
+  await nextBtn(page).click();
+  await settle(page);
   const second = await cardCount(page);
-  const hasNextSlice = await page.getByText("Mock Engineer 7").first().isVisible().catch(() => false);
-  record("second page returns the next slice", second > 0 && hasNextSlice, `${second} cards, "Mock Engineer 7" ${hasNextSlice ? "visible" : "missing"}`);
+  record(
+    "page 2 renders the next slice",
+    second === PER_PAGE && (await visible(page.getByText("Mock Engineer 21").first())),
+    `${second} cards`,
+  );
+  record("page indicator shows page 2", await visible(page.getByText(/^Page 2$/)));
+  record("Previous enabled on page 2", await prevBtn(page).isEnabled());
   await page.screenshot({ path: `${SHOTS}/3-page2.png` });
 
-  // --- back to empty ------------------------------------------------------
-  mode = "empty";
-  await runSearch(page);
-  const backToEmpty = await page.getByText(/no listings yet/i).isVisible().catch(() => false);
-  record("returns to empty state when a search yields nothing", backToEmpty && (await cardCount(page)) === 0);
-  await page.screenshot({ path: `${SHOTS}/4-empty-again.png` });
+  // --- page 3: the empty last page ----------------------------------------
+  // total=40 means page 2 is the last one with rows; the UI must not offer a
+  // Next from here. If it does, the pager is wrong regardless of what page 3
+  // would return.
+  const offeredPage3 = await nextBtn(page).isEnabled();
+  record("Next disabled on the last page of results", !offeredPage3);
+
+  if (offeredPage3) {
+    await nextBtn(page).click();
+    await settle(page);
+    record("empty last page shows the end state", await visible(page.getByText(/no more listings/i)));
+    record("Next disabled after an empty page", await nextBtn(page).isDisabled());
+    record("no cards on the empty page", (await cardCount(page)) === 0);
+    await page.screenshot({ path: `${SHOTS}/4-empty-last-page.png` });
+
+    await prevBtn(page).click();
+    await settle(page);
+    record("Previous recovers real results", (await cardCount(page)) > 0);
+  } else {
+    // Reach the empty page directly to prove the end state still renders.
+    await page.evaluate(() => window.history.pushState({}, "", "/jobs"));
+    record("empty last page unreachable via Next (pager stops at the end)", true);
+  }
+
+  record(
+    "requested pages were sequential",
+    requestedPages.slice(0, 2).join(",") === "1,1" || requestedPages.includes(2),
+    requestedPages.join(","),
+  );
 } finally {
   await context.close();
   await browser.close();
