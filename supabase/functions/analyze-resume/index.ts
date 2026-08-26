@@ -52,8 +52,14 @@ serve(async (req) => {
 
     const rl = await checkRateLimit(user.id);
     if (!rl.ok) {
+      // Structured so the client can show an exact wait and retry itself.
       return new Response(
-        JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }),
+        JSON.stringify({
+          error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.`,
+          code: "rate_limited",
+          retry_after: rl.retryAfter,
+          retry_after_ms: rl.retryAfter * 1000,
+        }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rl.retryAfter) } },
       );
     }
