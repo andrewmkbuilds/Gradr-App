@@ -157,7 +157,7 @@ function RouteFallback() {
 const PROTECTED_PREFIXES = [
   "/", "/dashboard", "/career", "/resume", "/jobs", "/match", "/pipeline", "/apply",
   "/interview", "/growth", "/settings", "/billing", "/credits", "/subscription",
-  "/manage-subscription", "/welcome", "/connect", "/admin", "/affiliate",
+  "/manage-subscription", "/welcome", "/connect", "/admin",
 ];
 
 function isProtectedPath(pathname: string) {
@@ -260,12 +260,6 @@ function ProtectedRoutes() {
           <Route path="/manage-subscription" element={<AnimatedPage><Subscription /></AnimatedPage>} />
           <Route path="/welcome" element={<AnimatedPage><Welcome /></AnimatedPage>} />
           <Route path="/connect" element={<AnimatedPage><Connect /></AnimatedPage>} />
-          {/* Affiliate portal, mounted in-app (also mirrored on affiliates.gradr.me). */}
-          <Route path="/affiliate" element={<AnimatedPage><AffiliateProgram /></AnimatedPage>} />
-          <Route path="/affiliate/apply" element={<AnimatedPage><AffiliateApply /></AnimatedPage>} />
-          <Route path="/affiliate/join" element={<Navigate to="/affiliate/apply" replace />} />
-          <Route path="/affiliate/dashboard" element={<AnimatedPage><AffiliateDashboard /></AnimatedPage>} />
-          <Route path="/affiliate/resources" element={<AnimatedPage><AffiliateResources /></AnimatedPage>} />
           <Route path="*" element={<AnimatedPage><NotFound /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
@@ -375,10 +369,9 @@ function AppRoutes() {
         {/* Satellite surfaces: mounted under a path prefix on shared hosts
             (local dev + previews), redirected to their real subdomain in
             production so a URL only ever resolves in one place.
-            `affiliates` is excluded — the affiliate portal is now served
-            in-app at /affiliate/* (affiliates.gradr.me still renders it by
-            host). */}
-        {SATELLITE_SURFACES.filter((s) => s !== "affiliates").map((surface) =>
+            The affiliate surface keeps its program and application public;
+            its dashboard and resources enforce their own partner auth gate. */}
+        {SATELLITE_SURFACES.map((surface) =>
 
           multiSurface ? (
             <Route
