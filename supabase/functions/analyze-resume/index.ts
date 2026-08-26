@@ -18,9 +18,9 @@ const RATE_LIMIT = 10;
 const WINDOW_SECONDS = 60;
 
 /** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
-async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter?: number }> {
+async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter: number }> {
   const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
-  return { ok: r.allowed, retryAfter: r.retry_after };
+  return { ok: r.allowed, retryAfter: r.retry_after ?? WINDOW_SECONDS };
 }
 
 serve(async (req) => {
