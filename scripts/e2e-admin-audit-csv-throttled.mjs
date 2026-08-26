@@ -99,7 +99,7 @@ try {
 
   const tableRequestIds = await page
     .locator("[data-testid='rpc-audit-request-id']")
-    .allInnerTexts()
+    .evaluateAll((els) => els.map((el) => el.getAttribute("data-request-id") || ""))
     .catch(() => []);
 
   const [download] = await Promise.all([
