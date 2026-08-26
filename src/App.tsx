@@ -522,8 +522,8 @@ const App = () => (
       <ThemeProvider>
       <MotionPreferenceProvider>
       <TooltipProvider>
-        {false && <Toaster />}
-        {false && <Sonner />}
+        <Toaster />
+        <Sonner />
         <BrowserRouter>
           <WwwRedirect />
           <ScrollToTop />
