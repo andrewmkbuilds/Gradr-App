@@ -170,6 +170,7 @@
     "test:depth": "node scripts/depth-smoke.mjs",
     "test:e2e": "node scripts/e2e-authenticated.mjs",
     "test:e2e:signin": "node scripts/e2e-signin-dashboard.mjs",
+    "test:e2e:age-gate": "node scripts/e2e-age-gate.mjs",
     "test:email-guard": "node scripts/email-marketing-guard-e2e.mjs",
     "test:oauth-flow": "node scripts/test-oauth-flow.mjs",
     "test:refresh-rotation": "node scripts/refresh-rotation-api.mjs",

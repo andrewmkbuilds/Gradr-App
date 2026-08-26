@@ -22,6 +22,7 @@ export type GradrEvent =
   | "signup_cta_clicked"
   // Signup
   | "signup_started"
+  | "age_gate_result"
   | "account_created"
   | "signup_completed"
   | "signup_email_completed"
