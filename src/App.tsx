@@ -45,6 +45,7 @@ import {
   urlFor,
 } from "@/config/domains";
 import { SurfaceProvider } from "@/components/surface/SurfaceLink";
+import { isSandboxAvailable } from "@/lib/qa/sandbox/flags";
 
 // Route-level code splitting: only the shell, dashboard, auth and landing
 // pages ship in the initial bundle. Everything else loads on navigation.
@@ -81,6 +82,8 @@ const DesignSystemUsage = lazy(() => import("@/pages/DesignSystemUsage"));
 const ColorUsageGuidelines = lazy(() => import("@/pages/ColorUsageGuidelines"));
 const AdminQaChecklist = lazy(() => import("@/pages/AdminQaChecklist"));
 const BrandAssets = lazy(() => import("@/pages/BrandAssets"));
+const QaSandbox = lazy(() => import("@/pages/QaSandbox"));
+const QaOAuthMock = lazy(() => import("@/pages/QaOAuthMock"));
 const AdminSecurityFindings = lazy(() => import("@/pages/AdminSecurityFindings"));
 const AdminOAuthForensics = lazy(() => import("@/pages/AdminOAuthForensics"));
 const AdminApiHealth = lazy(() => import("@/pages/AdminApiHealth"));
@@ -431,6 +434,9 @@ function AppRoutes() {
         <Route path="/job-search" element={publicPage(appOnly, <AnimatedPage><JobSearchIndex /></AnimatedPage>)} />
         <Route path="/job-search/:slug" element={publicPage(appOnly, <AnimatedPage><JobLanding /></AnimatedPage>)} />
         <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+        {/* Dev/preview only: local fixture console and mock identity provider. */}
+        {isSandboxAvailable() && <Route path="/qa/sandbox" element={<QaSandbox />} />}
+        {isSandboxAvailable() && <Route path="/qa/oauth" element={<QaOAuthMock />} />}
         {homeOnly ? (
           <Route path="/*" element={<ExternalSurfaceRedirect surface="app" strip="" />} />
         ) : (

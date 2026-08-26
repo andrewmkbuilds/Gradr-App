@@ -2,6 +2,8 @@ import type { BillingProvider, CheckoutRequest, CheckoutResult, PackCheckoutRequ
 import { paddleBillingProvider } from "./paddleProvider";
 import { revenueCatBillingProvider } from "./revenuecatProvider";
 import { isPaymentsConfigured } from "@/lib/paddle";
+import { sandboxFlags } from "@/lib/qa/sandbox/flags";
+import { applySimulatedPack, setSimulatedPlan } from "@/lib/qa/sandbox/simulator";
 
 export * from "./types";
 
@@ -66,10 +68,22 @@ async function withFallback<T>(
  */
 export const billingService: BillingProvider = {
   id: primary.id,
-  createCheckout: (req: CheckoutRequest): Promise<CheckoutResult> =>
-    withFallback((p) => p.createCheckout(req)),
-  createPackCheckout: (req: PackCheckoutRequest): Promise<CheckoutResult> =>
-    withFallback((p) => p.createPackCheckout(req)),
+  createCheckout: (req: CheckoutRequest): Promise<CheckoutResult> => {
+    // QA sandbox: settle the purchase locally instead of opening a provider
+    // checkout, so upgrades/downgrades are testable without credentials.
+    if (sandboxFlags().payments) {
+      setSimulatedPlan(req.plan === "free" ? "free" : req.plan, req.interval);
+      return Promise.resolve({ completed: true });
+    }
+    return withFallback((p) => p.createCheckout(req));
+  },
+  createPackCheckout: (req: PackCheckoutRequest): Promise<CheckoutResult> => {
+    if (sandboxFlags().payments) {
+      applySimulatedPack(req.pack);
+      return Promise.resolve({ completed: true });
+    }
+    return withFallback((p) => p.createPackCheckout(req));
+  },
   openCustomerPortal: (): Promise<CheckoutResult> => withFallback((p) => p.openCustomerPortal()),
   syncSubscription: (): Promise<void> => withFallback((p) => p.syncSubscription()),
 };
