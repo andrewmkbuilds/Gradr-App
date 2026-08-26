@@ -5,6 +5,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import noHardcodedColors from "./eslint-rules/no-hardcoded-colors.js";
 import noRawVerticalSpacing from "./eslint-rules/no-raw-vertical-spacing.js";
+import noUnimportedDsText from "./eslint-rules/no-unimported-ds-text.js";
 
 
 export default tseslint.config(
@@ -24,6 +25,7 @@ export default tseslint.config(
         rules: {
           "no-hardcoded-colors": noHardcodedColors,
           "no-raw-vertical-spacing": noRawVerticalSpacing,
+          "no-unimported-ds-text": noUnimportedDsText,
         },
       },
     },
@@ -32,6 +34,8 @@ export default tseslint.config(
       // Design system guard: colour comes from tokens, never from raw values
       // or Tailwind's default palette.
       "gradr/no-hardcoded-colors": "error",
+      // JSX <Text> with no import silently resolves to the DOM Text global.
+      "gradr/no-unimported-ds-text": "error",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
       // Architecture guard: Gradr stays on Vite + React Router.
