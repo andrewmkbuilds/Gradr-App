@@ -1,0 +1,77 @@
+name: Visual regression (key pages)
+
+# Pixel gate for the surfaces where a token or layout regression hurts most:
+# Career Dashboard, Resume Intelligence, Interview coach, Jobs and Pipeline —
+# each in light and dark, at mobile, tablet and desktop.
+#
+# Diffs are perceptual (pixelmatch, anti-aliasing aware), so PNG-encoding noise
+# does not fail the build and a palette swap cannot slip through.
+#
+# When a diff is INTENDED (design-token change, layout update), regenerate every
+# baseline with one command and commit the result:
+#
+#     bun run test:visual:key-pages:update
+#
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  key-pages:
+    name: Key page pixels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build
+        run: bun run build
+
+      - name: Start preview server
+        run: |
+          bun run preview --port 8080 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:8080/ && break
+            sleep 1
+          done
+
+      # Authenticated routes: without credentials the script skips cleanly
+      # rather than reporting false green on an empty capture.
+      - name: Key page visual regression
+        env:
+          E2E_BASE_URL: http://localhost:8080
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: bun run test:visual:key-pages
+
+      - name: Upload screenshots and diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: key-page-visuals
+          path: |
+            tests/visual/key-pages/current
+            tests/visual/key-pages/diff
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: How to accept an intended change
+        if: failure()
+        run: |
+          echo "::notice::Download the 'key-page-visuals' artifact and review diff/."
+          echo "::notice::If the change is intended, run: bun run test:visual:key-pages:update"
