@@ -52,7 +52,7 @@ export default function JobLanding() {
         <nav aria-label="Breadcrumb">
           <Link
             to="/job-search"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-1.5 text-body-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Job search
@@ -61,19 +61,19 @@ export default function JobLanding() {
 
         <MarketingHero
           above={
-            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-secondary">
+            <Text variant="body-sm" className="inline-flex items-center gap-1.5 font-medium text-brand-secondary">
               {location.remote ? (
                 <Wifi className="h-4 w-4" aria-hidden="true" />
               ) : (
                 <MapPin className="h-4 w-4" aria-hidden="true" />
               )}
               {location.name}
-            </p>
+            </Text>
           }
           title={landing.title}
           description={role.summary}
           actions={
-            <Button asChild size="lg" className="transition-transform hover:scale-[1.02] motion-reduce:transform-none">
+            <Button asChild size="lg">
             <Link
               to={ctaHref}
               onClick={() =>
