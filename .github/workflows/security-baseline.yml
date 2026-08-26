@@ -77,13 +77,22 @@ jobs:
           npx wait-on http://localhost:8080 -t 60000
           node scripts/admin-routes-e2e.mjs http://localhost:8080
 
+      - name: Admin RPC throttling is enforced and audited
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          ADMIN_E2E_EMAIL: ${{ secrets.ADMIN_E2E_EMAIL }}
+          ADMIN_E2E_PASSWORD: ${{ secrets.ADMIN_E2E_PASSWORD }}
+        run: node scripts/e2e-admin-rpc-throttle.mjs http://localhost:8080
+
       - name: Upload admin route screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: admin-routes-screenshots
-          path: tests/reports/screenshots/admin-routes
+          path: tests/reports/screenshots
           if-no-files-found: ignore
+
 
 
       - name: RLS and policy regression tests
