@@ -24,7 +24,11 @@ We may update these terms from time to time. We will change the "Last updated" d
 
 ## 2. Eligibility and age requirements
 
-The Service is intended for people who are at least 16 years old. If you are under the age of majority where you live, you may only use Gradr with the involvement of a parent or guardian who agrees to these terms on your behalf. We do not knowingly provide the Service to children under 16.
+You must be at least 13 years old to create or maintain a Gradr account. Children under 13 are not permitted to create or keep an account, and we do not knowingly provide the Service to them. If you are under the age of majority where you live, you may only use Gradr with the involvement of a parent or guardian who agrees to these terms on your behalf.
+
+When you sign up you confirm that you meet this age requirement. You must give truthful age information and must not attempt to bypass, misstate or circumvent the age requirement, including by creating an account for someone under 13. If we learn that an account belongs to someone under 13, we may suspend or delete it.
+
+Certain paid services, payouts, contracts or features — for example subscriptions and purchases, the affiliate programme and its payouts, and other agreements that require legal capacity to contract — may carry additional eligibility requirements, including a higher minimum age or a parent or guardian entering the agreement on your behalf where the law requires it.
 
 You are responsible for complying with the laws of the country you access Gradr from. The Service is not directed at any jurisdiction where offering it would be unlawful.
 
