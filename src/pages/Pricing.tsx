@@ -2,7 +2,7 @@ import { Check, Sparkles, Rocket, Zap, Crown, Loader2, BadgePercent, ShieldCheck
 import { trackSignupCta, trackUpgradeCta } from "@/lib/telemetry/events";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ds/Button";
-import { Badge, Card } from "@/design-system/gradr-9b9b95";
+import { Badge, Card, Text } from "@/design-system/gradr-9b9b95";
 import { SpatialCard } from "@/components/motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
@@ -186,11 +186,11 @@ export default function Pricing() {
   return (
     <div className="max-w-7xl mx-auto py-8 section-stack-lg">
       <div className="text-center space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">Choose your career edge</h1>
-        <p className="text-muted-foreground max-w-xl mx-auto">
+        <Text variant="h2" as="h1">Choose your career edge</Text>
+        <Text variant="body" tone="muted" className="max-w-xl mx-auto">
           Start free. Upgrade when you're ready to dominate your job search with full AI firepower.
-        </p>
-        <div className="inline-flex rounded-lg border border-border p-1 bg-card/50">
+        </Text>
+        <div className="inline-flex rounded-control border border-border p-1 bg-card/50">
           {(["plans", "packs"] as const).map((t) => (
             <button
               key={t}
@@ -211,7 +211,7 @@ export default function Pricing() {
       {(discountPercent > 0 || topProgram) && (
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-primary/10">
               {discountPercent > 0 ? (
                 <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
               ) : (
@@ -306,7 +306,7 @@ export default function Pricing() {
             <SpatialCard className="group/spatial h-full rounded-xl" tilt={4}>
             <Card className="relative flex h-full flex-col">
               <div className="flex items-center gap-2 mb-4">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-control bg-primary/10 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <h2 className="text-lg font-semibold text-foreground">{FREE_TIER.name}</h2>
@@ -352,7 +352,7 @@ export default function Pricing() {
                   )}
 
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="h-9 w-9 rounded-control bg-primary/10 flex items-center justify-center">
                       <Icon className="h-4 w-4 text-primary" />
                     </div>
                     <h2 className="text-lg font-semibold text-foreground">{tier.name}</h2>
@@ -400,7 +400,7 @@ export default function Pricing() {
           {CREDIT_PACKS.map((pack) => (
             <SpatialCard key={pack.priceId} className="group/spatial h-full rounded-xl" tilt={3}>
             <Card className="flex h-full flex-col">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-control bg-primary/10 flex items-center justify-center mb-3">
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <h2 className="text-sm font-semibold text-foreground">{pack.label}</h2>
