@@ -18,8 +18,11 @@ const RATE_LIMIT = 10;
 const WINDOW_SECONDS = 60;
 
 /** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
-async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter: number }> {
-  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
+async function checkRateLimit(
+  userId: string,
+  requestId: string,
+): Promise<{ ok: boolean; retryAfter: number }> {
+  const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS, requestId);
   return { ok: r.allowed, retryAfter: r.retry_after ?? WINDOW_SECONDS };
 }
 
@@ -50,7 +53,11 @@ serve(async (req) => {
       });
     }
 
-    const rl = await checkRateLimit(user.id);
+    // Prefer the caller's id so the client, the 429 body and the audit row all
+    // agree; mint one when the client didn't send it.
+    const requestId = req.headers.get("x-request-id") ??
+      `analyze-resume-${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 8)}`;
+    const rl = await checkRateLimit(user.id, requestId);
     if (!rl.ok) {
       // Structured so the client can show an exact wait and retry itself.
       return new Response(
@@ -59,8 +66,9 @@ serve(async (req) => {
           code: "rate_limited",
           retry_after: rl.retryAfter,
           retry_after_ms: rl.retryAfter * 1000,
+          request_id: requestId,
         }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rl.retryAfter) } },
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rl.retryAfter), "x-request-id": requestId } },
       );
     }
 
