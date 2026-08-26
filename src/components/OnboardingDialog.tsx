@@ -50,11 +50,13 @@ export interface OnboardingResult {
 interface Props {
   open: boolean;
   onComplete: (prefs: OnboardingResult) => void;
+  /** Dismiss without saving — the dialog re-appears on the next visit until onboarding completes. */
+  onSkip?: () => void;
 }
 
 const STEPS = ["Target roles", "Industries", "Compensation & location"];
 
-export function OnboardingDialog({ open, onComplete }: Props) {
+export function OnboardingDialog({ open, onComplete, onSkip }: Props) {
   const { user } = useAuth();
   const reduced = useReducedMotionPref();
   const [step, setStep] = useState(0);
@@ -153,13 +155,20 @@ export function OnboardingDialog({ open, onComplete }: Props) {
     if (eligibleIdentity) setVerifyOpen(true);
   };
 
+  const handleSkip = () => {
+    if (!onSkip) return;
+    track("onboarding_skipped", { step });
+    onSkip();
+  };
+
   const enter = reduced ? {} : { initial: { opacity: 0, x: 16 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -16 } };
 
   return (
-    <Dialog open={open}>
-      {/* No `onOpenChange`: onboarding is required, so the close affordance is
-          suppressed rather than rendered as a control that cannot close it. */}
-      <DialogContent className="sm:max-w-lg" hideClose>
+    <Dialog open={open} onOpenChange={onSkip ? (o) => { if (!o) handleSkip(); } : undefined}>
+      {/* Without an onSkip handler onboarding is required, so the close
+          affordance is suppressed rather than rendered as a control that
+          cannot close it. When onSkip exists, closing means "skip for now". */}
+      <DialogContent className="sm:max-w-lg" hideClose={!onSkip}>
 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -379,14 +388,21 @@ export function OnboardingDialog({ open, onComplete }: Props) {
         </div>
 
         <DialogFooter className="gap-2 sm:justify-between">
-          <Button
-            variant="ghost"
-            className="gap-1.5"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              className="gap-1.5"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              disabled={step === 0}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
+            </Button>
+            {onSkip && (
+              <Button variant="ghost" onClick={handleSkip}>
+                Skip for now
+              </Button>
+            )}
+          </div>
           {step < STEPS.length - 1 ? (
             <Button className="gap-1.5" onClick={() => setStep((s) => s + 1)} disabled={!canAdvance}>
               Continue <ArrowRight className="h-4 w-4" aria-hidden="true" />
