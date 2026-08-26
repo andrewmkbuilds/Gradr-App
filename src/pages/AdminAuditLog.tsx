@@ -320,10 +320,8 @@ function RpcAuditSection({
       </p>
     </section>
   );
-
-    </div>
-  );
 }
+
 
 function AuditRow({
   entry,
