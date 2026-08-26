@@ -363,7 +363,7 @@ export default function Dashboard() {
             ].map((item) => (
               <div key={item.label}>
                 <div className="flex justify-between text-caption mb-1">
-                  <span className="text-muted-foreground">{item.label}</span>
+                  <Text as="span" variant="caption" tone="muted">{item.label}</Text>
                   <span className="text-foreground">{item.value}%</span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
@@ -408,10 +408,10 @@ export default function Dashboard() {
                   >
                     <div className="min-w-0 flex-1">
                       <Text variant="body-sm" className="truncate font-medium">{r.title}</Text>
-                      <p className="text-caption text-muted-foreground truncate">
+                      <Text variant="caption" className="truncate">
                         {r.tracked_jobs?.title || "—"}
                         {r.tracked_jobs?.company ? ` · ${r.tracked_jobs.company}` : ""}
-                      </p>
+                      </Text>
                     </div>
                     <span className={`text-caption shrink-0 ml-3 ${isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}`}>
                       {formatDistanceToNow(new Date(r.due_at), { addSuffix: true })}

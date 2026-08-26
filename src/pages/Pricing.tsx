@@ -274,7 +274,7 @@ export default function Pricing() {
             <div
               role="group"
               aria-label="Billing interval"
-              className="inline-flex items-center rounded-full border border-border bg-card/60 p-1"
+              className="inline-flex items-center rounded-control border border-border bg-card/60 p-1"
             >
               {(["monthly", "annual"] as const).map((i) => (
                 <button
