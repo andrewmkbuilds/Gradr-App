@@ -60,7 +60,7 @@ export default function QaOAuthMock() {
         <title>Mock {provider} sign-in — Gradr QA</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      <Card className="w-full p-6 stack-sm">
+      <Card className="w-full p-6 section-stack">
         <Badge variant="outline">QA sandbox</Badge>
         <h1 className="text-h4 font-display">Continue with {provider}</h1>
         <p className="text-body-sm text-muted-foreground">

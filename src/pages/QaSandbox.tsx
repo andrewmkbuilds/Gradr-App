@@ -73,13 +73,13 @@ export default function QaSandbox() {
   const toggle = (key: keyof SandboxFlags) => (value: boolean) => setFlags(setSandboxFlags({ [key]: value } as Partial<SandboxFlags>));
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 stack-lg">
+    <main className="mx-auto max-w-4xl px-4 py-10 section-stack-lg">
       <Helmet>
         <title>QA sandbox — Gradr</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <header className="stack-xs">
+      <header className="section-stack">
         <Badge variant="outline">Development only</Badge>
         <h1 className="text-h2 font-display">QA sandbox</h1>
         <p className="text-body text-muted-foreground">
@@ -88,7 +88,7 @@ export default function QaSandbox() {
         </p>
       </header>
 
-      <Card className="p-6 stack-sm">
+      <Card className="p-6 section-stack">
         <h2 className="text-h5 font-display">Fixture modes</h2>
         <ToggleRow label="Job search fixtures" hint="search-jobs, board scraper and match scoring return saved listings." checked={flags.jobs} onChange={toggle("jobs")} />
         <ToggleRow label="Resume ATS fixture" hint="analyze-resume streams a saved report with real progress stages." checked={flags.resume} onChange={toggle("resume")} />
@@ -96,7 +96,7 @@ export default function QaSandbox() {
         <ToggleRow label="Mocked OAuth providers" hint="Google/Apple/Microsoft sign-in bounces through a deterministic mock." checked={flags.oauth} onChange={toggle("oauth")} />
         <ToggleRow label="Payment simulator" hint="Plan, credits and purchases come from the local simulator instead of Paddle." checked={flags.payments} onChange={toggle("payments")} />
 
-        <div className="stack-2xs pt-2">
+        <div className="section-stack pt-2">
           <p className="text-body-sm font-medium">Camera &amp; microphone</p>
           <div className="flex flex-wrap gap-2">
             {MEDIA_MODES.map((m) => (
@@ -128,7 +128,7 @@ export default function QaSandbox() {
         </div>
       </Card>
 
-      <Card className="p-6 stack-sm">
+      <Card className="p-6 section-stack">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-h5 font-display">Captured mailbox ({mail.length})</h2>
           <Button variant="outline" size="sm" onClick={() => { clearInbox(); toast.success("Inbox cleared"); }}>
@@ -141,9 +141,9 @@ export default function QaSandbox() {
             <Link className="underline" to="/forgot-password">/forgot-password</Link>.
           </p>
         ) : (
-          <ul className="stack-xs">
+          <ul className="section-stack">
             {mail.map((m) => (
-              <li key={m.id} className="rounded-control border border-border p-3 stack-2xs">
+              <li key={m.id} className="rounded-control border border-border p-3 section-stack">
                 <p className="text-body-sm font-medium">{m.subject}</p>
                 <p className="text-caption text-muted-foreground">
                   to {m.to} · {new Date(m.capturedAt).toLocaleTimeString()} · {m.template ?? "ad-hoc"}
@@ -159,7 +159,7 @@ export default function QaSandbox() {
         )}
       </Card>
 
-      <Card className="p-6 stack-sm">
+      <Card className="p-6 section-stack">
         <h2 className="text-h5 font-display">Payment simulator</h2>
         <p className="text-body-sm text-muted-foreground">
           Plan <strong>{billing.plan}</strong> · {billing.status}
@@ -185,7 +185,7 @@ export default function QaSandbox() {
           <Button size="sm" variant="outline" onClick={() => setBilling(resetSimulator())}>Reset</Button>
         </div>
         {billing.purchases.length > 0 && (
-          <ul className="stack-2xs text-caption text-muted-foreground">
+          <ul className="section-stack text-caption text-muted-foreground">
             {billing.purchases.slice(0, 5).map((p) => (
               <li key={p.id}>{p.pack_label} · {p.credits_granted} credits · {p.id}</li>
             ))}
@@ -193,18 +193,18 @@ export default function QaSandbox() {
         )}
       </Card>
 
-      <Card className="p-6 stack-sm">
+      <Card className="p-6 section-stack">
         <h2 className="text-h5 font-display">Mocked OAuth</h2>
         <p className="text-body-sm text-muted-foreground">
           Optional QA account used to create a real session at the end of the mocked redirect.
           Leave it empty to verify the redirect chain only.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="stack-2xs">
+          <div className="section-stack">
             <Label htmlFor="qa-oauth-email">QA account e-mail</Label>
             <Input id="qa-oauth-email" type="email" value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
           </div>
-          <div className="stack-2xs">
+          <div className="section-stack">
             <Label htmlFor="qa-oauth-password">QA account password</Label>
             <Input id="qa-oauth-password" type="password" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
           </div>
@@ -220,7 +220,7 @@ export default function QaSandbox() {
           <Button size="sm" variant="outline" onClick={() => setLog(oauthLog())}>Refresh log</Button>
         </div>
         {log.length > 0 && (
-          <ul className="stack-2xs text-caption text-muted-foreground">
+          <ul className="section-stack text-caption text-muted-foreground">
             {log.slice(0, 8).map((entry) => (
               <li key={`${entry.at}-${entry.stage}`}>
                 {new Date(entry.at).toLocaleTimeString()} · {entry.provider} · {entry.stage} · {entry.detail}
@@ -237,7 +237,7 @@ function ToggleRow({ label, hint, checked, onChange }: { label: string; hint: st
   const id = `qa-${label.toLowerCase().replace(/[^a-z]+/g, "-")}`;
   return (
     <div className="flex items-start justify-between gap-4 rounded-control border border-border p-3">
-      <div className="stack-2xs">
+      <div className="section-stack">
         <Label htmlFor={id} className="text-body-sm font-medium">{label}</Label>
         <p className="text-caption text-muted-foreground">{hint}</p>
       </div>
