@@ -412,6 +412,7 @@ export default function ResumeEngine() {
         description="Scores and coaching notes are ready."
         onCancel={analysisStream.cancel}
         onRetry={analysisStream.retry}
+        rateLimitSecondsRemaining={analysisStream.rateLimitSecondsRemaining}
       />
       )}
 
