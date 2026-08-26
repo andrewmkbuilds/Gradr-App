@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/design-system/gradr-9b9b95/gradr/lib/cn";
 import {
   ArrowRight,
   Compass,
