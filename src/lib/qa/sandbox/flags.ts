@@ -10,7 +10,7 @@
  * production domains — and every mode is off until it is explicitly switched
  * on from `/qa/sandbox`, so normal traffic is untouched.
  */
-import { safeLocalStorage } from "@/lib/safeStorage";
+import { safeStorage } from "@/lib/safeStorage";
 
 export type MediaMode = "off" | "granted" | "denied" | "no-device";
 
@@ -54,7 +54,7 @@ export function sandboxFlags(): SandboxFlags {
   if (!isSandboxAvailable()) return DEFAULT_FLAGS;
   if (cache) return cache;
   try {
-    const raw = safeLocalStorage.getItem(KEY);
+    const raw = safeStorage.get(KEY);
     cache = raw ? { ...DEFAULT_FLAGS, ...(JSON.parse(raw) as Partial<SandboxFlags>) } : DEFAULT_FLAGS;
   } catch {
     cache = DEFAULT_FLAGS;
@@ -68,7 +68,7 @@ export function setSandboxFlags(next: Partial<SandboxFlags>): SandboxFlags {
   const merged = { ...sandboxFlags(), ...next };
   cache = merged;
   try {
-    safeLocalStorage.setItem(KEY, JSON.stringify(merged));
+    safeStorage.set(KEY, JSON.stringify(merged));
   } catch {
     /* storage is best-effort */
   }
