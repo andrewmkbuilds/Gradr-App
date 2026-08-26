@@ -23,6 +23,28 @@ export function newRequestId(action: string): string {
   return `${slug}-${stamp}-${rand}`;
 }
 
+/**
+ * Stable id for a *repeatable* read: the same `fn` + `key` always yields the
+ * same id for the lifetime of the page, so react-query retries, refetches on
+ * focus, and manual "reload" clicks all trace back to one id instead of
+ * flooding the audit log with unrelated ones. Bounded so a long admin session
+ * with many filter permutations cannot grow the map without limit.
+ */
+const stableIds = new Map<string, string>();
+const STABLE_ID_LIMIT = 200;
+
+export function requestIdFor(fn: string, key: string): string {
+  const mapKey = `${fn}:${key}`;
+  const existing = stableIds.get(mapKey);
+  if (existing) return existing;
+  if (stableIds.size >= STABLE_ID_LIMIT) {
+    stableIds.delete(stableIds.keys().next().value as string);
+  }
+  const id = newRequestId(fn);
+  stableIds.set(mapKey, id);
+  return id;
+}
+
 export interface AdminRpcOptions {
   /**
    * Reuse across retries of one logical action. Omit and a fresh id is minted
