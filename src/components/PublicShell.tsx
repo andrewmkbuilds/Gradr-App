@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackSignupCta } from "@/lib/telemetry/events";
 import { LEGAL_PAGES } from "@/content/legal";
 import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
-import { cn } from "@/design-system/gradr-9b9b95/gradr/lib/cn";
+import { cn } from "@/lib/utils";
 
 interface PublicShellProps {
   children: React.ReactNode;
