@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -10,11 +10,24 @@ import {
   Plus,
   Download,
   ScrollText,
+  Bookmark,
+  X,
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useAffiliate";
+import { useAuth } from "@/hooks/useAuth";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
 import { formatAdminRpcError } from "@/lib/admin/adminRpc";
+import {
+  EMPTY_FILTERS,
+  deletePreset,
+  loadPresets,
+  savePreset,
+  type RpcAuditFilters,
+  type RpcAuditPreset,
+} from "@/lib/admin/auditPresets";
+import { downloadBlob, streamAuditCsv } from "@/lib/admin/streamAuditCsv";
 import { Button } from "@/components/ds/Button";
 import {
   useAdminAuditLog,
@@ -29,6 +42,7 @@ import {
 
 /** RFC4180-safe cell: quote everything, double embedded quotes. */
 const csvCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+
 
 
 const ACTION_META: Record<
@@ -192,12 +206,34 @@ function RpcAuditSection({
   actorName: Map<string, string>;
   actors: { user_id: string; display_name: string | null }[];
 }) {
-  const [fn, setFn] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [actorId, setActorId] = useState("all");
+  const { user } = useAuth();
+  const [filters, setFilters] = useState<RpcAuditFilters>(EMPTY_FILTERS);
   const [days, setDays] = useState(7);
+  const [presets, setPresets] = useState<RpcAuditPreset[]>([]);
+  const [presetName, setPresetName] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [exported, setExported] = useState<number | null>(null);
 
-  const { data: calls, isLoading } = useAdminRpcAudit({ fn, status, actorId, days });
+  // The search box drives a query key, so it is debounced: one request per
+  // pause, not one per keystroke against a 120/minute throttle.
+  const debouncedSearch = useDebouncedValue(filters.search, 350);
+
+  useEffect(() => {
+    setPresets(loadPresets(user?.id));
+  }, [user?.id]);
+
+  const { data: calls, isLoading } = useAdminRpcAudit({
+    fn: filters.fn,
+    status: filters.status,
+    actorId: filters.actorId,
+    days,
+    search: debouncedSearch,
+    from: filters.from,
+    to: filters.to,
+  });
+
+  const set = <K extends keyof RpcAuditFilters>(key: K, value: RpcAuditFilters[K]) =>
+    setFilters((f) => ({ ...f, [key]: value }));
 
   const functionNames = useMemo(
     () => Array.from(new Set((calls || []).map((c) => c.function_name))).sort(),
@@ -207,32 +243,32 @@ function RpcAuditSection({
   const selectCls =
     "px-3 py-2 rounded-control bg-secondary border border-border text-body-sm text-foreground";
 
-  /** Exports exactly the rows the current filters produced — not the whole table. */
-  const exportCsv = () => {
-    const rows = calls || [];
-    if (rows.length === 0) return;
-    const headers = ["When", "Actor id", "Actor", "Function", "Outcome", "Request id", "IP", "User agent"];
-    const body = rows.map((c) =>
-      [
-        format(new Date(c.created_at), "yyyy-MM-dd HH:mm:ss"),
-        c.actor_id ?? "",
-        c.actor_id ? actorName.get(c.actor_id) ?? "" : "anonymous",
-        c.function_name,
-        c.status,
-        c.request_id ?? "",
-        c.ip ?? "",
-        c.user_agent ?? "",
-      ]
-        .map(csvCell)
-        .join(","),
-    );
-    const csv = [headers.map(csvCell).join(","), ...body].join("\r\n");
-    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `admin-rpc-audit-${format(new Date(), "yyyy-MM-dd")}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+  /**
+   * Streams the *full* filtered result set — not just the 500 rows on screen —
+   * page by page, so a month-wide export neither times out nor materialises
+   * every row at once.
+   */
+  const exportCsv = async () => {
+    setExporting(true);
+    setExported(null);
+    try {
+      const { blob, rows } = await streamAuditCsv({
+        filters: { ...filters, search: debouncedSearch },
+        days,
+        actorName,
+      });
+      if (rows === 0) {
+        toast.info("No admin RPC calls match these filters.");
+        return;
+      }
+      downloadBlob(blob, `admin-rpc-audit-${format(new Date(), "yyyy-MM-dd")}.csv`);
+      setExported(rows);
+      toast.success(`Exported ${rows.toLocaleString()} rows`);
+    } catch (e) {
+      toast.error(formatAdminRpcError(e));
+    } finally {
+      setExporting(false);
+    }
   };
 
   const STATUS_CLS: Record<string, string> = {
@@ -252,8 +288,18 @@ function RpcAuditSection({
         </p>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        <select aria-label="Filter by function" value={fn} onChange={(e) => setFn(e.target.value)} className={selectCls}>
+      <div className="flex gap-2 flex-wrap items-end">
+        <label className="text-caption text-muted-foreground">
+          <span className="block mb-1">Search</span>
+          <input
+            type="search"
+            value={filters.search}
+            onChange={(e) => set("search", e.target.value)}
+            placeholder="Function, request id, user agent"
+            className={`w-64 ${selectCls}`}
+          />
+        </label>
+        <select aria-label="Filter by function" value={filters.fn} onChange={(e) => set("fn", e.target.value)} className={selectCls}>
           <option value="all">All functions</option>
           {functionNames.map((n) => (
             <option key={n} value={n}>
@@ -261,13 +307,13 @@ function RpcAuditSection({
             </option>
           ))}
         </select>
-        <select aria-label="Filter by outcome" value={status} onChange={(e) => setStatus(e.target.value)} className={selectCls}>
+        <select aria-label="Filter by outcome" value={filters.status} onChange={(e) => set("status", e.target.value)} className={selectCls}>
           <option value="all">All outcomes</option>
           <option value="ok">Allowed</option>
           <option value="denied">Denied</option>
           <option value="rate_limited">Throttled</option>
         </select>
-        <select aria-label="Filter RPC calls by actor" value={actorId} onChange={(e) => setActorId(e.target.value)} className={selectCls}>
+        <select aria-label="Filter RPC calls by actor" value={filters.actorId} onChange={(e) => set("actorId", e.target.value)} className={selectCls}>
           <option value="all">Everyone</option>
           {actors.map((a) => (
             <option key={a.user_id} value={a.user_id}>
@@ -278,6 +324,7 @@ function RpcAuditSection({
         <select
           aria-label="RPC call time range"
           value={days}
+          disabled={!!filters.from}
           onChange={(e) => setDays(Number(e.target.value))}
           className={selectCls}
         >
@@ -285,14 +332,94 @@ function RpcAuditSection({
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>
         </select>
+        <label className="text-caption text-muted-foreground">
+          <span className="block mb-1">From</span>
+          <input
+            type="date"
+            value={filters.from}
+            onChange={(e) => set("from", e.target.value)}
+            className={selectCls}
+          />
+        </label>
+        <label className="text-caption text-muted-foreground">
+          <span className="block mb-1">To</span>
+          <input
+            type="date"
+            value={filters.to}
+            onChange={(e) => set("to", e.target.value)}
+            className={selectCls}
+          />
+        </label>
         <Button
           variant="outline"
-          disabled={!calls || calls.length === 0}
-          onClick={exportCsv}
+          disabled={exporting}
+          onClick={() => void exportCsv()}
+          data-testid="export-rpc-audit"
         >
-          <Download className="h-4 w-4" aria-hidden="true" /> Export CSV
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Download className="h-4 w-4" aria-hidden="true" />
+          )}
+          {exporting ? "Exporting…" : "Export CSV"}
+        </Button>
+        <Button variant="ghost" onClick={() => setFilters(EMPTY_FILTERS)}>
+          Reset
         </Button>
       </div>
+
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="text-caption text-muted-foreground">
+          <span className="block mb-1">Save these filters as</span>
+          <input
+            type="text"
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            placeholder="Preset name"
+            className={`w-48 ${selectCls}`}
+          />
+        </label>
+        <Button
+          variant="outline"
+          disabled={!presetName.trim()}
+          onClick={() => {
+            setPresets(savePreset(user?.id, presetName, filters));
+            setPresetName("");
+            toast.success("Filter preset saved");
+          }}
+        >
+          <Bookmark className="h-4 w-4" aria-hidden="true" /> Save preset
+        </Button>
+        {presets.map((p) => (
+          <span
+            key={p.name}
+            className="inline-flex items-center gap-1 rounded-control bg-secondary border border-border pl-3 pr-1 py-1"
+          >
+            <button
+              type="button"
+              className="text-caption text-foreground"
+              onClick={() => setFilters({ ...EMPTY_FILTERS, ...p.filters })}
+            >
+              {p.name}
+            </button>
+            <button
+              type="button"
+              aria-label={`Delete preset ${p.name}`}
+              className="p-1 text-muted-foreground hover:text-destructive"
+              onClick={() => setPresets(deletePreset(user?.id, p.name))}
+            >
+              <X className="h-3 w-3" aria-hidden="true" />
+            </button>
+          </span>
+        ))}
+      </div>
+
+      {exported !== null && (
+        <p className="text-caption text-muted-foreground" role="status">
+          Last export streamed {exported.toLocaleString()} rows.
+        </p>
+      )}
+
 
       <div className="elev-2 rounded-card overflow-x-auto">
         <table className="w-full text-body-sm">

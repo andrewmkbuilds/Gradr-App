@@ -130,11 +130,19 @@ export function useAdminRpcAudit(filters: {
   status: string;
   actorId: string;
   days: number;
+  /** Debounced free-text match across function name, request id and user agent. */
+  search?: string;
+  /** Inclusive calendar-day bounds; override the rolling `days` window. */
+  from?: string;
+  to?: string;
 }) {
   return useQuery({
     queryKey: ["adminRpcAudit", filters],
     queryFn: async () => {
-      const since = new Date(Date.now() - filters.days * 864e5).toISOString();
+      const since = filters.from
+        ? new Date(`${filters.from}T00:00:00`).toISOString()
+        : new Date(Date.now() - filters.days * 864e5).toISOString();
+
       let q = supabase
         .from("admin_rpc_audit")
         .select("*")
@@ -142,9 +150,17 @@ export function useAdminRpcAudit(filters: {
         .order("created_at", { ascending: false })
         .limit(500);
 
+      if (filters.to) q = q.lte("created_at", new Date(`${filters.to}T23:59:59.999`).toISOString());
       if (filters.fn !== "all") q = q.eq("function_name", filters.fn);
       if (filters.status !== "all") q = q.eq("status", filters.status);
       if (filters.actorId !== "all") q = q.eq("actor_id", filters.actorId);
+      if (filters.search?.trim()) {
+        // Commas and % would break PostgREST's `or` grammar / LIKE semantics.
+        const term = `%${filters.search.trim().replace(/[%,]/g, "")}%`;
+        q = q.or(
+          `function_name.ilike.${term},request_id.ilike.${term},user_agent.ilike.${term}`,
+        );
+      }
 
       const { data, error } = await q;
       if (error) throw error;
@@ -152,6 +168,7 @@ export function useAdminRpcAudit(filters: {
     },
   });
 }
+
 
 /* ------------------------------------------------------------------ *
  * Retention & archival
