@@ -94,3 +94,56 @@ export function useAuditActors() {
     },
   });
 }
+
+/* ------------------------------------------------------------------ *
+ * Admin RPC audit
+ *
+ * Every `public.admin_*` routine begins with `PERFORM
+ * public.admin_rpc_guard('<name>')`, which re-checks the admin role, throttles
+ * the caller and writes one row per invocation to `admin_rpc_audit`
+ * (who / when / which function / request id / outcome). The table is
+ * admin-read-only and has no insert policy — only the SECURITY DEFINER guard
+ * writes to it.
+ * ------------------------------------------------------------------ */
+
+export type AdminRpcStatus = "ok" | "denied" | "rate_limited";
+
+export interface AdminRpcAuditEntry {
+  id: string;
+  actor_id: string | null;
+  function_name: string;
+  request_id: string | null;
+  status: AdminRpcStatus;
+  ip: string | null;
+  user_agent: string | null;
+  details: Record<string, unknown>;
+  created_at: string;
+}
+
+export function useAdminRpcAudit(filters: {
+  fn: string;
+  status: string;
+  actorId: string;
+  days: number;
+}) {
+  return useQuery({
+    queryKey: ["adminRpcAudit", filters],
+    queryFn: async () => {
+      const since = new Date(Date.now() - filters.days * 864e5).toISOString();
+      let q = supabase
+        .from("admin_rpc_audit")
+        .select("*")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(500);
+
+      if (filters.fn !== "all") q = q.eq("function_name", filters.fn);
+      if (filters.status !== "all") q = q.eq("status", filters.status);
+      if (filters.actorId !== "all") q = q.eq("actor_id", filters.actorId);
+
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data || []) as unknown as AdminRpcAuditEntry[];
+    },
+  });
+}
