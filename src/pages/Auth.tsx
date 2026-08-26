@@ -277,7 +277,7 @@ export default function Auth() {
       },
     });
 
-    const { error } = await lovable.auth.signInWithOAuth(provider, {
+    const { error } = await signInWithOAuthMaybeMocked(provider, {
       redirect_uri: postAuthUrl,
     });
     if (error) {
