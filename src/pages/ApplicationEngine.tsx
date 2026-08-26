@@ -1,8 +1,7 @@
 import { useCallback, useState } from "react";
 import { FileText, Mail, MessageSquare, Loader2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ds/Button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Input, Textarea } from "@/design-system/gradr-9b9b95";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { useAuth } from "@/hooks/useAuth";
@@ -119,14 +118,12 @@ function ApplicationEngineInner() {
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
             aria-label="Job title"
-            className="border-border bg-secondary"
           />
           <Input
             placeholder="Company name"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             aria-label="Company name"
-            className="border-border bg-secondary"
           />
         </div>
         <Textarea
@@ -134,7 +131,6 @@ function ApplicationEngineInner() {
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           aria-label="Job description"
-          className="min-h-[100px] border-border bg-secondary"
         />
       </div>
 
