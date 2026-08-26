@@ -83,6 +83,84 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_rpc_audit_archive: {
+        Row: {
+          actor_id: string | null
+          archived_at: string
+          created_at: string
+          details: Json
+          function_name: string
+          id: string
+          ip: string | null
+          request_id: string | null
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          archived_at?: string
+          created_at: string
+          details?: Json
+          function_name: string
+          id: string
+          ip?: string | null
+          request_id?: string | null
+          status: string
+          user_agent?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          archived_at?: string
+          created_at?: string
+          details?: Json
+          function_name?: string
+          id?: string
+          ip?: string | null
+          request_id?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      admin_rpc_audit_retention: {
+        Row: {
+          archive_enabled: boolean
+          archive_retention_days: number
+          created_at: string
+          id: boolean
+          last_purge_at: string | null
+          last_purge_result: Json | null
+          purge_enabled: boolean
+          retention_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archive_enabled?: boolean
+          archive_retention_days?: number
+          created_at?: string
+          id?: boolean
+          last_purge_at?: string | null
+          last_purge_result?: Json | null
+          purge_enabled?: boolean
+          retention_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archive_enabled?: boolean
+          archive_retention_days?: number
+          created_at?: string
+          id?: boolean
+          last_purge_at?: string | null
+          last_purge_result?: Json | null
+          purge_enabled?: boolean
+          retention_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       affiliate_applications: {
         Row: {
           admin_notes: string | null
@@ -4629,11 +4707,33 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_rpc_audit_retention_settings: {
+        Args: never
+        Returns: {
+          archive_enabled: boolean
+          archive_retention_days: number
+          created_at: string
+          id: boolean
+          last_purge_at: string | null
+          last_purge_result: Json | null
+          purge_enabled: boolean
+          retention_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "admin_rpc_audit_retention"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_rpc_guard: {
         Args: { _function: string; _limit?: number; _window?: string }
         Returns: undefined
       }
       admin_run_email_retention_purge: { Args: never; Returns: Json }
+      admin_run_rpc_audit_purge: { Args: never; Returns: Json }
       admin_set_commission_status: {
         Args: {
           _commission_ids: string[]
@@ -4664,6 +4764,32 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "email_retention_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_update_rpc_audit_retention: {
+        Args: {
+          _archive_enabled: boolean
+          _archive_retention_days: number
+          _purge_enabled: boolean
+          _retention_days: number
+        }
+        Returns: {
+          archive_enabled: boolean
+          archive_retention_days: number
+          created_at: string
+          id: boolean
+          last_purge_at: string | null
+          last_purge_result: Json | null
+          purge_enabled: boolean
+          retention_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "admin_rpc_audit_retention"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -4885,6 +5011,7 @@ export type Database = {
         Args: { _feature: string; _tier: string }
         Returns: number
       }
+      purge_admin_rpc_audit: { Args: never; Returns: Json }
       purge_email_retention: { Args: never; Returns: Json }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }

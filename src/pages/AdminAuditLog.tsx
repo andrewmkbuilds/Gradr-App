@@ -13,13 +13,21 @@ import {
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useAffiliate";
 import { PageHeader } from "@/components/app/PageHeader";
+import { toast } from "sonner";
+import { Button } from "@/components/ds/Button";
 import {
   useAdminAuditLog,
   useAdminRpcAudit,
   useAuditActors,
   useLogAdminView,
+  useRpcAuditRetention,
+  useRunRpcAuditPurge,
+  useUpdateRpcAuditRetention,
   type AuditEntry,
 } from "@/hooks/useAdminAudit";
+
+/** RFC4180-safe cell: quote everything, double embedded quotes. */
+const csvCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 
 
 const ACTION_META: Record<
@@ -198,6 +206,34 @@ function RpcAuditSection({
   const selectCls =
     "px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
 
+  /** Exports exactly the rows the current filters produced — not the whole table. */
+  const exportCsv = () => {
+    const rows = calls || [];
+    if (rows.length === 0) return;
+    const headers = ["When", "Actor id", "Actor", "Function", "Outcome", "Request id", "IP", "User agent"];
+    const body = rows.map((c) =>
+      [
+        format(new Date(c.created_at), "yyyy-MM-dd HH:mm:ss"),
+        c.actor_id ?? "",
+        c.actor_id ? actorName.get(c.actor_id) ?? "" : "anonymous",
+        c.function_name,
+        c.status,
+        c.request_id ?? "",
+        c.ip ?? "",
+        c.user_agent ?? "",
+      ]
+        .map(csvCell)
+        .join(","),
+    );
+    const csv = [headers.map(csvCell).join(","), ...body].join("\r\n");
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `admin-rpc-audit-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const STATUS_CLS: Record<string, string> = {
     ok: "bg-primary/10 text-primary",
     denied: "bg-destructive/10 text-destructive",
@@ -248,6 +284,13 @@ function RpcAuditSection({
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>
         </select>
+        <Button
+          variant="outline"
+          disabled={!calls || calls.length === 0}
+          onClick={exportCsv}
+        >
+          <Download className="h-4 w-4" aria-hidden="true" /> Export CSV
+        </Button>
       </div>
 
       <div className="elev-2 rounded-xl overflow-x-auto">
@@ -318,9 +361,147 @@ function RpcAuditSection({
         Admin RPCs are throttled to 120 successful calls per minute per account; excess calls are
         rejected and recorded here as throttled.
       </p>
+
+      <RetentionCard />
     </section>
   );
 }
+
+/* ------------------------------------------------------------------ *
+ * Retention & archival control
+ * ------------------------------------------------------------------ */
+
+function RetentionCard() {
+  const { data: settings, isLoading } = useRpcAuditRetention(true);
+  const update = useUpdateRpcAuditRetention();
+  const purge = useRunRpcAuditPurge();
+
+  const [draft, setDraft] = useState<{
+    retentionDays: number;
+    archiveEnabled: boolean;
+    archiveRetentionDays: number;
+    purgeEnabled: boolean;
+  } | null>(null);
+
+  const current = draft ?? (settings
+    ? {
+        retentionDays: settings.retention_days,
+        archiveEnabled: settings.archive_enabled,
+        archiveRetentionDays: settings.archive_retention_days,
+        purgeEnabled: settings.purge_enabled,
+      }
+    : null);
+
+  if (isLoading || !current) {
+    return (
+      <div className="elev-2 rounded-xl p-4 text-sm text-muted-foreground">
+        Loading retention policy…
+      </div>
+    );
+  }
+
+  const inputCls =
+    "w-24 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground";
+
+  return (
+    <div className="elev-2 rounded-xl p-4 space-y-3">
+      <div>
+        <h3 className="text-body font-medium text-foreground">Retention &amp; archival</h3>
+        <p className="text-xs text-muted-foreground">
+          A nightly sweep moves call records older than the live window into the archive (or deletes
+          them when archiving is off), then prunes archived records past their own window.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="text-xs text-muted-foreground">
+          <span className="block mb-1">Keep live (days)</span>
+          <input
+            type="number"
+            min={7}
+            max={3650}
+            className={inputCls}
+            value={current.retentionDays}
+            onChange={(e) => setDraft({ ...current, retentionDays: Number(e.target.value) })}
+          />
+        </label>
+        <label className="text-xs text-muted-foreground">
+          <span className="block mb-1">Keep archived (days)</span>
+          <input
+            type="number"
+            min={7}
+            max={3650}
+            className={inputCls}
+            value={current.archiveRetentionDays}
+            onChange={(e) => setDraft({ ...current, archiveRetentionDays: Number(e.target.value) })}
+          />
+        </label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={current.archiveEnabled}
+            onChange={(e) => setDraft({ ...current, archiveEnabled: e.target.checked })}
+          />
+          Archive before deleting
+        </label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={current.purgeEnabled}
+            onChange={(e) => setDraft({ ...current, purgeEnabled: e.target.checked })}
+          />
+          Automatic nightly sweep
+        </label>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          disabled={update.isPending || !draft}
+          onClick={() =>
+            update.mutate(current, {
+              onSuccess: () => {
+                setDraft(null);
+                toast.success("Retention policy saved");
+              },
+              onError: (e: Error) => toast.error(e.message),
+            })
+          }
+        >
+          Save policy
+        </Button>
+        <Button
+          variant="outline"
+          disabled={purge.isPending}
+          onClick={() =>
+            purge.mutate(undefined, {
+              onSuccess: (r) =>
+                toast.success(
+                  r?.skipped
+                    ? "Sweep skipped — automatic clean-up is off"
+                    : `Swept: ${Number(r?.archived ?? 0)} archived, ${Number(r?.deleted ?? 0)} deleted, ${Number(r?.archive_pruned ?? 0)} pruned`,
+                ),
+              onError: (e: Error) => toast.error(e.message),
+            })
+          }
+        >
+          {purge.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+          )}
+          Run sweep now
+        </Button>
+        {settings?.last_purge_at && (
+          <span className="text-xs text-muted-foreground">
+            Last sweep {format(new Date(settings.last_purge_at), "MMM d, yyyy HH:mm")}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 
 function AuditRow({

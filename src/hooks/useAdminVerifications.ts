@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { adminVerificationRequestSchema, parseAdminRows } from "@/lib/admin/schemas";
+import { adminRpcOrThrow, requestIdFor } from "@/lib/admin/adminRpc";
 
 export interface AdminVerificationRequest {
   id: string;
@@ -35,11 +36,13 @@ export function useAdminVerificationRequests(status: string | null) {
   return useQuery({
     queryKey: ["admin-verification-requests", status],
     queryFn: async (): Promise<AdminVerificationRequest[]> => {
-      const { data, error } = await supabase.rpc("admin_verification_requests", {
-        _status: status ?? undefined,
-        _limit: 200,
-      });
-      if (error) throw new Error(error.message);
+      // One id per filter set, reused across react-query retries so a retried
+      // fetch groups with its first attempt in the RPC audit trail.
+      const data = await adminRpcOrThrow<unknown>(
+        "admin_verification_requests",
+        { _status: status ?? undefined, _limit: 200 },
+        { requestId: requestIdFor("admin_verification_requests", status ?? "all") },
+      );
       // Rows that no longer match the contract are dropped and reported
       // rather than crashing the review queue mid-render.
       return parseAdminRows(
@@ -198,11 +201,12 @@ export function useAdminVerificationTimeline(requestId: string | null) {
     queryKey: ["admin-verification-timeline", requestId],
     enabled: Boolean(requestId),
     queryFn: async (): Promise<AdminVerificationEvent[]> => {
-      const { data, error } = await supabase.rpc("admin_verification_timeline", {
-        _request_id: requestId as string,
-      });
-      if (error) throw new Error(error.message);
-      return (data ?? []) as AdminVerificationEvent[];
+      const data = await adminRpcOrThrow<AdminVerificationEvent[]>(
+        "admin_verification_timeline",
+        { _request_id: requestId as string },
+        { requestId: requestIdFor("admin_verification_timeline", requestId as string) },
+      );
+      return data ?? [];
     },
   });
 }
