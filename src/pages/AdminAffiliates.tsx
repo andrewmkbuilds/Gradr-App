@@ -18,6 +18,7 @@ import { PayoutsPanel } from "@/components/admin/PayoutsPanel";
 import { ConfirmDestructive } from "@/components/admin/ConfirmDestructive";
 import { AffiliateTiersPanel } from "@/components/admin/AffiliateTiersPanel";
 import {
+import { adminRpc, newRequestId } from "@/lib/admin/adminRpc";
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -256,10 +257,11 @@ function CommissionsPanel() {
   if (isLoading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
 
   const setStatus = async (id: string, status: "pending" | "approved" | "paid" | "reversed" | "canceled") => {
-    const { error } = await supabase.rpc("admin_set_commission_status", {
-      _commission_ids: [id],
-      _status: status,
-    });
+    const { error } = await adminRpc(
+      "admin_set_commission_status",
+      { _commission_ids: [id], _status: status },
+      { requestId: newRequestId(`commission-${status}-${id}`) },
+    );
 
     if (error) return toast.error(error.message);
     toast.success(`Marked ${status}`);

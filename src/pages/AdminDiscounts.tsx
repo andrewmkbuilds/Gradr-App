@@ -21,6 +21,7 @@ import { BadgePercent, Check, Loader2, Plus, ShieldCheck, X } from "lucide-react
 import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
 import { STATUS_COPY, type VerificationStatus } from "@/config/eligibility";
+import { adminRpcOrThrow, newRequestId } from "@/lib/admin/adminRpc";
 
 // `discount_settings` is not present in the currently generated Database types.
 type DiscountSettingsPatch = Record<string, unknown>;

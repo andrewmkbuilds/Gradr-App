@@ -22,6 +22,7 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { adminRpc, newRequestId } from "@/lib/admin/adminRpc";
 
 const TYPES: { id: LegalDocType; label: string }[] = [
   { id: "privacy", label: "Privacy Notice" },
