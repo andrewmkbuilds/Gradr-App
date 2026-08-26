@@ -180,7 +180,7 @@ export default function Auth() {
       setConsentError(
         !acceptedTerms
           ? "Please accept the Terms & Conditions and Privacy Notice to create an account."
-          : "Please confirm you meet the minimum age requirement.",
+          : "Please confirm you are at least 13 years old.",
       );
       return null;
     }
