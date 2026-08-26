@@ -18,9 +18,9 @@ const RATE_LIMIT = 10;
 const WINDOW_SECONDS = 60;
 
 /** Durable, cross-instance limit (see _shared/rateLimit.ts). Fails closed. */
-async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter?: number }> {
+async function checkRateLimit(userId: string): Promise<{ ok: boolean; retryAfter: number }> {
   const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
-  return { ok: r.allowed, retryAfter: r.retry_after };
+  return { ok: r.allowed, retryAfter: r.retry_after ?? WINDOW_SECONDS };
 }
 
 serve(async (req) => {
@@ -52,8 +52,14 @@ serve(async (req) => {
 
     const rl = await checkRateLimit(user.id);
     if (!rl.ok) {
+      // Structured so the client can show an exact wait and retry itself.
       return new Response(
-        JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.` }),
+        JSON.stringify({
+          error: `Rate limit exceeded. Try again in ${rl.retryAfter}s.`,
+          code: "rate_limited",
+          retry_after: rl.retryAfter,
+          retry_after_ms: rl.retryAfter * 1000,
+        }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rl.retryAfter) } },
       );
     }

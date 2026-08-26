@@ -671,6 +671,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_rate_limits: {
+        Row: {
+          endpoint: string
+          hits: number
+          updated_at: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          endpoint: string
+          hits?: number
+          updated_at?: string
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          endpoint?: string
+          hits?: number
+          updated_at?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       analytics_alerts: {
         Row: {
           created_at: string
@@ -4902,6 +4926,15 @@ export type Database = {
         Args: { _actor: string; _limit?: number }
         Returns: undefined
       }
+      assert_ai_rate_limit: {
+        Args: {
+          _endpoint: string
+          _limit: number
+          _user_id: string
+          _window_seconds?: number
+        }
+        Returns: Json
+      }
       assert_not_anonymous: { Args: never; Returns: undefined }
       attribute_signup_referral: {
         Args: { _click_id?: string; _code: string }
@@ -5061,6 +5094,7 @@ export type Database = {
         Returns: number
       }
       purge_admin_rpc_audit: { Args: never; Returns: Json }
+      purge_ai_rate_limits: { Args: never; Returns: number }
       purge_email_retention: { Args: never; Returns: Json }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
