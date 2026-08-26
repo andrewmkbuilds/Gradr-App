@@ -14,6 +14,8 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import pixelmatch from "pixelmatch";
+import { PNG } from "pngjs";
 import { launchBrowser } from "./lib/browser.mjs";
 
 const BASE = (process.argv.find((a) => a.startsWith("http")) || process.env.E2E_BASE_URL || "http://localhost:8080").replace(/\/$/, "");
@@ -28,7 +30,11 @@ if (!EMAIL || !PASSWORD) {
 
 const BASELINE_DIR = join(process.cwd(), "tests/visual/key-pages/baseline");
 const CURRENT_DIR = join(process.cwd(), "tests/visual/key-pages/current");
-const TOLERANCE = Number(process.env.KEY_PAGE_VISUAL_TOLERANCE ?? 0.04);
+const DIFF_DIR = join(process.cwd(), "tests/visual/key-pages/diff");
+/** Fraction of *perceptually different* pixels tolerated before a route fails. */
+const TOLERANCE = Number(process.env.KEY_PAGE_VISUAL_TOLERANCE ?? 0.005);
+/** Per-pixel colour sensitivity handed to pixelmatch (0 = strictest). */
+const THRESHOLD = Number(process.env.KEY_PAGE_PIXEL_THRESHOLD ?? 0.12);
 
 const ROUTES = [
   ["dashboard", "/"],
@@ -46,13 +52,27 @@ const SCHEMES = ["light", "dark"];
 
 mkdirSync(BASELINE_DIR, { recursive: true });
 mkdirSync(CURRENT_DIR, { recursive: true });
+mkdirSync(DIFF_DIR, { recursive: true });
 
-/** Coarse byte-level difference ratio — enough to catch token/layout drift. */
-function differenceRatio(a, b) {
-  if (a.length !== b.length) return 1;
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) diff += 1;
-  return diff / a.length;
+/**
+ * Perceptual diff. A byte comparison flags PNG-encoding noise as a change and
+ * misses a same-size palette swap, so anti-aliasing-aware pixel matching is
+ * what makes "meaningful diff" mean anything. Writes a diff image on failure.
+ */
+function pixelDiff(baselineBuf, currentBuf, diffPath) {
+  const a = PNG.sync.read(baselineBuf);
+  const b = PNG.sync.read(currentBuf);
+  if (a.width !== b.width || a.height !== b.height) {
+    return { ratio: 1, note: `size ${a.width}x${a.height} -> ${b.width}x${b.height}` };
+  }
+  const diff = new PNG({ width: a.width, height: a.height });
+  const changed = pixelmatch(a.data, b.data, diff.data, a.width, a.height, {
+    threshold: THRESHOLD,
+    includeAA: false,
+  });
+  const ratio = changed / (a.width * a.height);
+  if (ratio > TOLERANCE) writeFileSync(diffPath, PNG.sync.write(diff));
+  return { ratio, note: `${changed} px` };
 }
 
 async function signIn(page) {
@@ -88,12 +108,12 @@ try {
           continue;
         }
         writeFileSync(join(CURRENT_DIR, file), shot);
-        const ratio = differenceRatio(readFileSync(baselinePath), shot);
+        const { ratio, note } = pixelDiff(readFileSync(baselinePath), shot, join(DIFF_DIR, file));
         if (ratio > TOLERANCE) {
-          failures.push({ file, ratio });
-          console.log(`✖ ${file} differs by ${(ratio * 100).toFixed(1)}%`);
+          failures.push({ file, ratio, note });
+          console.log(`✖ ${file} differs by ${(ratio * 100).toFixed(2)}% (${note})`);
         } else {
-          console.log(`✓ ${file}`);
+          console.log(`✓ ${file} (${(ratio * 100).toFixed(2)}%)`);
         }
       }
       await context.close();
@@ -106,7 +126,8 @@ try {
 if (failures.length) {
   console.error(
     `\n${failures.length} capture(s) drifted beyond ${(TOLERANCE * 100).toFixed(0)}%. ` +
-      `Compare tests/visual/key-pages/current/ against baseline/, then re-run with --update once intended.`,
+      `Diff images: tests/visual/key-pages/diff/. When the change is intended (token or layout update), ` +
+      `regenerate every baseline with one command:  bun run test:visual:key-pages:update`,
   );
   process.exit(1);
 }
