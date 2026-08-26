@@ -99,3 +99,37 @@ database's point of view:
 
 All three run in `.github/workflows/security-baseline.yml` and skip cleanly when
 the `ADMIN_E2E_*` credentials are not configured.
+
+## Request-id propagation (client → audit)
+
+All admin RPCs must be called through `src/lib/admin/adminRpc.ts`, never
+`supabase.rpc(...)` directly:
+
+- `adminRpc(fn, args, { requestId })` / `adminRpcOrThrow(...)` attach
+  `x-request-id` to the PostgREST request; `admin_rpc_guard()` stores it on the
+  `admin_rpc_audit` row for allowed, denied, and throttled calls alike.
+- Mutations mint an id per user action with `newRequestId("<action>-<id>")`.
+- Queries use `requestIdFor(fn, key)` so react-query retries and refetches of
+  the same logical read share one id instead of scattering across the log.
+- `AdminRpcError.throttled` (and `adminRpc(...).throttled`) is true when the
+  guard rejected the call for exceeding 120 calls/minute, so the UI can show a
+  throttling message rather than a generic failure.
+
+## Audit retention and archival
+
+`admin_rpc_audit` is append-only and grows with every admin action.
+
+- `admin_rpc_audit_retention` (singleton) holds the live window, the archive
+  toggle, the archive window, and the automatic-sweep toggle.
+- `purge_admin_rpc_audit()` is service-role-only and runs nightly via
+  `pg_cron` (`admin-rpc-audit-purge`, 03:45). It moves rows past the live
+  window into `admin_rpc_audit_archive` (or deletes them when archiving is
+  off), then prunes archived rows past the archive window.
+- Admins read/change the policy with `admin_rpc_audit_retention_settings()` and
+  `admin_update_rpc_audit_retention(...)`, and can run the sweep on demand with
+  `admin_run_rpc_audit_purge()`. All three go through `admin_rpc_guard()`.
+- `/admin/audit-log` exposes the policy controls plus a filtered CSV export of
+  the visible rows (function, outcome, request id, actor, IP, user agent).
+
+CI: `bun run test:admin-throttle` bursts a read-only admin RPC past the limit
+and asserts both the throttle response and the `rate_limited` audit rows.
