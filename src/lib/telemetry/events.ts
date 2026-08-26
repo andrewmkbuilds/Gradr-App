@@ -31,6 +31,7 @@ export type GradrEvent =
   // Onboarding / activation milestones
   | "onboarding_started"
   | "onboarding_completed"
+  | "onboarding_skipped"
   | "profile_completed"
   | "career_preferences_completed"
   | "resume_uploaded"
