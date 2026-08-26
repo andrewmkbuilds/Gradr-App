@@ -532,7 +532,7 @@ const App = () => (
             <SentryUserSync />
             <TelemetryRouteTracker />
             <AnalyticsProvider />
-            <RouteSeo />
+            {false && <RouteSeo />}
             <Suspense fallback={<RouteFallback />}>
               <AppRoutes />
             </Suspense>
