@@ -1,15 +1,15 @@
 // Must stay first: guarantees Web Storage exists before any module (including
 // the Supabase client) touches localStorage.
 import "./lib/storagePolyfill";
-import * as ReactNS from "react";
+import * as JsxDev from "react/jsx-dev-runtime";
 if (import.meta.env.DEV) {
-  const orig = (ReactNS as any).createElement;
-  (ReactNS as any).createElement = function (type: any, config: any, ...kids: any[]) {
-    if (config && config.ref != null && typeof type === "function" && !(type as any).$$typeof) {
+  const orig = (JsxDev as any).jsxDEV;
+  (JsxDev as any).jsxDEV = function (type: any, props: any, ...rest: any[]) {
+    if (props && props.ref != null && typeof type === "function" && !(type as any).$$typeof && !(type as any).render) {
       // eslint-disable-next-line no-console
-      console.warn("[REFPROBE]", type.name || type.displayName || String(type));
+      console.warn("[REFPROBE]", type.name || type.displayName || String(type).slice(0, 80));
     }
-    return orig.apply(this, [type, config, ...kids]);
+    return orig.apply(this, [type, props, ...rest]);
   };
 }
 import { createRoot } from "react-dom/client";
