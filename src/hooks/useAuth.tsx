@@ -66,10 +66,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     // Signing out always lands on the public site root, never on an
     // authenticated route (and never on a product route of the marketing host).
+    // Off production (local dev, *.lovable.app previews) the public surface is
+    // not served by another host, so stay on this origin instead of throwing
+    // the tester out of the preview and onto the live site.
     if (typeof window !== "undefined") {
-      window.location.assign(urlFor("home", "/"));
+      const target = isProduction() ? urlFor("home", "/") : "/auth";
+      window.location.assign(target);
     }
   };
+
 
   return (
     <AuthContext.Provider value={{ session, user: session?.user ?? null, loading, signOut }}>
