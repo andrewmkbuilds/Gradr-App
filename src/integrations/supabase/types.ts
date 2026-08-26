@@ -4930,6 +4930,7 @@ export type Database = {
         Args: {
           _endpoint: string
           _limit: number
+          _request_id?: string
           _user_id: string
           _window_seconds?: number
         }

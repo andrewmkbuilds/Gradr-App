@@ -32,6 +32,8 @@ export interface RateLimitResult {
   remaining: number;
   /** Seconds until the current window rolls over. */
   retry_after: number;
+  /** Echo of the id written to `admin_rpc_audit` when a call is throttled. */
+  request_id?: string | null;
 }
 
 /**
@@ -45,17 +47,24 @@ export async function checkRateLimit(
   endpoint: string,
   limit: number,
   windowSeconds = 60,
+  /**
+   * Correlates the throttle with the client's request. Persisted on the
+   * `admin_rpc_audit` row so a user-visible "you're going too fast" message can
+   * be traced back to the exact server decision.
+   */
+  requestId: string | null = null,
 ): Promise<RateLimitResult> {
   const { data, error } = await admin().rpc("assert_ai_rate_limit", {
     _user_id: userId,
     _endpoint: endpoint,
     _limit: limit,
     _window_seconds: windowSeconds,
+    _request_id: requestId,
   });
 
   if (error) {
     console.error("assert_ai_rate_limit error", error);
-    return { allowed: false, hits: limit, limit, remaining: 0, retry_after: windowSeconds };
+    return { allowed: false, hits: limit, limit, remaining: 0, retry_after: windowSeconds, request_id: requestId };
   }
   return data as unknown as RateLimitResult;
 }

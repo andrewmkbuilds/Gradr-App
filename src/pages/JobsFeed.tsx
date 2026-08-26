@@ -69,6 +69,10 @@ export default function JobsFeed() {
   const [researchTarget, setResearchTarget] = useState<{ company: string; role?: string } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasResume, setHasResume] = useState<boolean | null>(null);
+  const [page, setPage] = useState(1);
+  /** False once the server reports no further results — drives the Next button. */
+  const [hasMore, setHasMore] = useState(false);
+  const [searched, setSearched] = useState(false);
   const [noResumeScoringAttempted, setNoResumeScoringAttempted] = useState(false);
 
   useEffect(() => {
@@ -187,20 +191,25 @@ export default function JobsFeed() {
     }
   };
 
-  const runSearch = async (q: string, loc: string, ctry: string, remote: boolean) => {
+  const PER_PAGE = 20;
+
+  const runSearch = async (q: string, loc: string, ctry: string, remote: boolean, pageNum = 1) => {
     if (!user) return;
     setLoading(true);
     setJobs([]);
+    setPage(pageNum);
+    setSearched(true);
     try {
       const [primary, scraped] = await Promise.all([
         supabase.functions.invoke("search-jobs", {
-          body: { what: q, where: loc, country: ctry, remoteOnly: remote, sortBy },
+          body: { what: q, where: loc, country: ctry, remoteOnly: remote, sortBy, page: pageNum },
         }),
         fetchScrapedJobs(q, loc, ctry, remote),
       ]);
       const { data, error } = primary;
       if (error || data?.error) {
         if (!handleAiFunctionError(error, data)) toast.error(data?.error || "Search failed");
+        setHasMore(false);
         return;
       }
       const merged: FeedJob[] = [...(data.jobs || [])];
@@ -212,6 +221,10 @@ export default function JobsFeed() {
         }
       }
       setJobs(merged);
+      // The board reports a total; a short/empty page also means we're at the end.
+      const returned = (data.jobs || []).length;
+      const total = Number(data.total ?? 0);
+      setHasMore(returned >= PER_PAGE && (!total || pageNum * PER_PAGE < total));
       prefetchLogos(merged.map((j: FeedJob) => j.company));
       trackJourney("job_match_started", { results: merged.length, remote_only: remote });
       void savePrefs({ what: q, where: loc, country: ctry, remoteOnly: remote });
@@ -219,12 +232,14 @@ export default function JobsFeed() {
 
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Search failed");
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const search = () => runSearch(what, where, country, remoteOnly);
+  const search = () => runSearch(what, where, country, remoteOnly, 1);
+  const goToPage = (next: number) => runSearch(what, where, country, remoteOnly, Math.max(1, next));
 
   const scoreJobs = async (list: FeedJob[]) => {
     if (!user || list.length === 0) return;
@@ -550,8 +565,12 @@ export default function JobsFeed() {
         {filtered.length === 0 && !loading && (
           <EmptyState
             icon={Briefcase}
-            title="No listings yet"
-            description="Search a role and location above to pull live openings, then let Gradr score them against your resume."
+            title={searched && page > 1 ? "No more listings" : "No listings yet"}
+            description={
+              searched && page > 1
+                ? "You've reached the end of these results. Go back a page or refine your search."
+                : "Search a role and location above to pull live openings, then let Gradr score them against your resume."
+            }
           />
         )}
         {filtered.map((job) => (
@@ -640,6 +659,28 @@ export default function JobsFeed() {
           </Card>
         ))}
       </div>
+
+      {searched && (page > 1 || hasMore) && (
+        <nav className="flex items-center justify-between gap-3" aria-label="Job results pages">
+          <Button
+            variant="outline"
+            onClick={() => goToPage(page - 1)}
+            disabled={loading || page <= 1}
+          >
+            Previous page
+          </Button>
+          <span className="type-body-sm text-muted-foreground" aria-live="polite">
+            Page {page}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => goToPage(page + 1)}
+            disabled={loading || !hasMore}
+          >
+            Next page
+          </Button>
+        </nav>
+      )}
 
       <CompanyResearchDialog
         open={!!researchTarget}

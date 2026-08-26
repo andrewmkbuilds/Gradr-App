@@ -413,6 +413,7 @@ export default function ResumeEngine() {
         onCancel={analysisStream.cancel}
         onRetry={analysisStream.retry}
         rateLimitSecondsRemaining={analysisStream.rateLimitSecondsRemaining}
+        rateLimitRequestId={analysisStream.rateLimitRequestId}
       />
       )}
 

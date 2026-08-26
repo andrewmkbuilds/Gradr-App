@@ -9,8 +9,9 @@
  *   1. the 429 body is structured — `code: "rate_limited"` plus
  *      `retry_after` / `retry_after_ms` — so the UI can count down,
  *   2. the UI shows the wait instead of a bare failure,
- *   3. `ai_rate_limits` / the security audit records the throttled outcome for
- *      that user + endpoint (checked with the service role when available).
+ *   3. `ai_rate_limits` records the throttled window, and `admin_rpc_audit`
+ *      holds a `rate_limited` row for that user carrying the request id and the
+ *      retry-window fields (checked with the service role when available).
  *
  * Usage: node scripts/e2e-resume-throttle-audit.mjs [baseUrl]
  * Skips cleanly when E2E_EMAIL / E2E_PASSWORD are missing. The audit assertion
@@ -57,26 +58,37 @@ async function burst(page, count) {
     if (!token || !url) return { error: "no session/url in page" };
     let throttled = 0;
     let body = null;
+    let requestId = null;
     let userId = session?.user?.id ?? null;
     for (let i = 0; i < count; i += 1) {
+      const probeId = `throttle-probe-${Date.now().toString(36)}-${i}`;
       const res = await fetch(`${url}/functions/v1/analyze-resume`, {
         method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${token}`,
+          // Correlates this exact call with the server audit row it writes.
+          "x-request-id": probeId,
+        },
         body: JSON.stringify({ resumeText: "Throttle probe resume. Engineer. Shipped features." }),
       });
       if (res.status === 429) {
         throttled += 1;
-        if (!body) body = await res.json().catch(() => null);
+        if (!body) {
+          body = await res.json().catch(() => null);
+          requestId = res.headers.get("x-request-id") || body?.request_id || probeId;
+        }
         if (throttled >= 2) break;
       }
     }
-    return { throttled, body, userId };
+    return { throttled, body, userId, requestId };
   }, { count });
 }
 
 const browser = await launchBrowser();
 const context = await browser.newContext({ viewport: { width: 1280, height: 1400 } });
 let userId = null;
+let throttledRequestId = null;
 try {
   const page = await context.newPage();
   // Expose the backend URL for the in-page burst.
@@ -92,12 +104,18 @@ try {
     record("burst analyze-resume until throttled", false, out.error);
   } else {
     userId = out.userId;
+    throttledRequestId = out.requestId;
     record("burst analyze-resume until throttled", out.throttled > 0, `${out.throttled} throttled responses`);
     record("429 body carries code rate_limited", out.body?.code === "rate_limited", JSON.stringify(out.body ?? {}));
     record(
       "429 body carries retry_after_ms",
       Number(out.body?.retry_after_ms) > 0 && Number(out.body?.retry_after) > 0,
       `retry_after=${out.body?.retry_after} retry_after_ms=${out.body?.retry_after_ms}`,
+    );
+    record(
+      "429 body echoes the request id",
+      typeof out.body?.request_id === "string" && out.body.request_id.length > 0,
+      String(out.body?.request_id ?? "missing"),
     );
   }
 
@@ -122,6 +140,41 @@ if (!SERVICE_KEY || !SUPABASE_URL) {
     res.ok && mine.length > 0 && Number(mine[0].hits ?? 0) > 10,
     res.ok ? `hits=${mine[0]?.hits ?? "none"}` : `HTTP ${res.status}`,
   );
+
+  // The limiter is the only writer of these rows, so their presence proves the
+  // throttle was recorded server-side and cannot be faked from the client.
+  const auditRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/admin_rpc_audit?status=eq.rate_limited&order=created_at.desc&limit=20`,
+    { headers: { apikey: SERVICE_KEY, authorization: `Bearer ${SERVICE_KEY}` } },
+  );
+  const auditRows = auditRes.ok ? await auditRes.json() : [];
+  const resumeRows = auditRows.filter(
+    (r) =>
+      (!userId || r.actor_id === userId) &&
+      /analyze-resume/.test(`${r.function_name} ${JSON.stringify(r.details ?? {})}`),
+  );
+  const row = resumeRows[0];
+  record(
+    "admin_rpc_audit holds a throttled resume-analysis row",
+    auditRes.ok && !!row,
+    auditRes.ok ? `${resumeRows.length} matching rows` : `HTTP ${auditRes.status}`,
+  );
+  if (row) {
+    record("audit row records the throttled outcome", row.status === "rate_limited", row.status);
+    record(
+      "audit row carries the request id from the 429",
+      !!row.request_id && (!throttledRequestId || row.request_id === throttledRequestId),
+      `${row.request_id} (client saw ${throttledRequestId ?? "n/a"})`,
+    );
+    const d = row.details ?? {};
+    record(
+      "audit row carries the retry window fields",
+      Number(d.retry_after) > 0 && Number(d.retry_after_ms) > 0 && Number(d.window_seconds) > 0,
+      JSON.stringify({ retry_after: d.retry_after, retry_after_ms: d.retry_after_ms, window_seconds: d.window_seconds }),
+    );
+    record("audit row records the limit and hit count", Number(d.limit) > 0 && Number(d.hits) >= Number(d.limit),
+      `hits=${d.hits} limit=${d.limit}`);
+  }
 }
 
 const failed = results.filter((r) => !r.ok);

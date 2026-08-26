@@ -470,10 +470,18 @@ function RpcAuditSection({
                     </span>
                   </td>
                   <td>
-                    <code className="text-caption text-muted-foreground">
+                    {/* Truncated for the eye; the full id stays in the DOM so
+                        exports and support tickets can be correlated. */}
+                    <code
+                      className="text-caption text-muted-foreground"
+                      data-testid="rpc-audit-request-id"
+                      data-request-id={c.request_id ?? ""}
+                      title={c.request_id ?? undefined}
+                    >
                       {c.request_id ? c.request_id.slice(0, 12) : "—"}
                     </code>
                   </td>
+
                   <td className="text-caption text-muted-foreground max-w-56 truncate">
                     {c.ip ? `${c.ip} · ` : ""}
                     {c.user_agent ? c.user_agent.slice(0, 60) : "—"}

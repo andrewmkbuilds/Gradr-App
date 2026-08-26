@@ -30,12 +30,25 @@ export class AiStreamError extends Error {
   status: number;
   /** Milliseconds until the request may be retried (429 responses only). */
   retryAfterMs: number | null;
-  constructor(message: string, status = 500, retryAfterMs: number | null = null) {
+  /** Id shared with the server-side audit row for this call. */
+  requestId: string | null;
+  constructor(
+    message: string,
+    status = 500,
+    retryAfterMs: number | null = null,
+    requestId: string | null = null,
+  ) {
     super(message);
     this.name = "AiStreamError";
     this.status = status;
     this.retryAfterMs = retryAfterMs;
+    this.requestId = requestId;
   }
+}
+
+/** Short, sortable id sent with every streamed call so throttles are traceable. */
+export function newStreamRequestId(fn: string): string {
+  return `${fn}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /** Reads the server's retry window from the JSON body or the Retry-After header. */
@@ -69,6 +82,8 @@ export async function streamEdgeFunction<TResult>(
   const token = sessionData.session?.access_token;
   if (!token) throw new AiStreamError("Please sign in to use this feature", 401);
 
+  const requestId = newStreamRequestId(fn);
+
   const response = await fetch(`${FUNCTIONS_BASE}/${fn}`, {
     method: "POST",
     headers: {
@@ -76,6 +91,7 @@ export async function streamEdgeFunction<TResult>(
       Authorization: `Bearer ${token}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       Accept: "text/event-stream",
+      "x-request-id": requestId,
     },
     body: JSON.stringify({ ...body, stream: true }),
     signal,
@@ -93,7 +109,12 @@ export async function streamEdgeFunction<TResult>(
     } catch {
       /* keep the default */
     }
-    throw new AiStreamError(message, response.status, retryAfterMs);
+    throw new AiStreamError(
+      message,
+      response.status,
+      retryAfterMs,
+      response.headers.get("x-request-id") ?? requestId,
+    );
   }
 
   const reader = response.body.getReader();
