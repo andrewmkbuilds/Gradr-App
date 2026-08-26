@@ -155,13 +155,20 @@ export function OnboardingDialog({ open, onComplete, onSkip }: Props) {
     if (eligibleIdentity) setVerifyOpen(true);
   };
 
+  const handleSkip = () => {
+    if (!onSkip) return;
+    track("onboarding_skipped", { step });
+    onSkip();
+  };
+
   const enter = reduced ? {} : { initial: { opacity: 0, x: 16 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -16 } };
 
   return (
-    <Dialog open={open}>
-      {/* No `onOpenChange`: onboarding is required, so the close affordance is
-          suppressed rather than rendered as a control that cannot close it. */}
-      <DialogContent className="sm:max-w-lg" hideClose>
+    <Dialog open={open} onOpenChange={onSkip ? (o) => { if (!o) handleSkip(); } : undefined}>
+      {/* Without an onSkip handler onboarding is required, so the close
+          affordance is suppressed rather than rendered as a control that
+          cannot close it. When onSkip exists, closing means "skip for now". */}
+      <DialogContent className="sm:max-w-lg" hideClose={!onSkip}>
 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
