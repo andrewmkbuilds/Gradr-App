@@ -15,7 +15,7 @@ import { track } from "@/lib/telemetry/events";
 import type { SignupMethod } from "@/lib/telemetry/signup";
 
 /** Minimum self-declared age required to create an account. */
-export const MINIMUM_AGE = 16;
+export const MINIMUM_AGE = 13;
 
 export type AgeGateOutcome = "eligible" | "ineligible" | "bypass";
 

@@ -275,7 +275,7 @@ No online service can be completely secure, so we cannot guarantee absolute secu
 
 You must be at least 13 years old to create or maintain a Gradr account. Gradr is not intended for children under 13 and we do not knowingly collect their personal data. If you believe a child under 13 has given us personal data, contact ${SELLER_CONTACT_EMAIL} and we will delete it.
 
-We do not ask for or store your date of birth. At sign-up we ask you to confirm that you meet the minimum age, and we record that confirmation together with your other account consents; we also log an analytics event recording whether the confirmation was given, without any date of birth. You must answer truthfully and must not attempt to bypass the age requirement. Some paid services, payouts and contractual features may require you to be older, or to have a parent or guardian act for you, where the law requires it.
+We do not ask for or store your date of birth. At sign-up we ask you to confirm that you meet the minimum age. We record an analytics event noting whether that confirmation was given and which sign-in method was used, and no date of birth is collected or stored. You must answer truthfully and must not attempt to bypass the age requirement. Some paid services, payouts and contractual features may require you to be older, or to have a parent or guardian act for you, where the law requires it.
 
 ## 12. Your privacy rights
 
