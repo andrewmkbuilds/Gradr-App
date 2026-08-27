@@ -9,6 +9,7 @@ import {
   EMAIL_CLASSIFICATIONS,
   isMarketing,
 } from '../_shared/transactional-email-templates/classification.ts'
+import { verifyCaller } from '../_shared/verifyCaller.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
