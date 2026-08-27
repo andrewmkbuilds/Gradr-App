@@ -9,6 +9,7 @@ import {
   EMAIL_CLASSIFICATIONS,
   isMarketing,
 } from '../_shared/transactional-email-templates/classification.ts'
+import { verifyCaller } from '../_shared/verifyCaller.ts'
 
 /**
  * Admin template sandbox — renders a template and evaluates every gate the real
