@@ -44,11 +44,12 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !serviceKey) return json({ error: 'Server configuration error' }, 500)
 
   // --- Admin gate. The sandbox exposes rendered templates and recipient
-  // preference state, so it is admin-only and verified server-side.
-  const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
-  const claims = decodeJwtClaims(bearer)
-  const callerId = typeof claims?.sub === 'string' ? claims.sub : null
+  // preference state, so it is admin-only and verified server-side against a
+  // cryptographically validated session (never a self-decoded JWT payload).
+  const caller = await verifyCaller(req)
+  const callerId = caller.userId
   if (!callerId) return json({ error: 'Authentication required' }, 401)
+
 
   const supabase = createClient(supabaseUrl, serviceKey)
   const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', {
