@@ -217,7 +217,6 @@
   "functionExecute": {
     "$comment": "SECURITY DEFINER functions in `public`. PUBLIC execute must never be granted. anon/authenticated execute is only allowed for the functions listed here.",
     "anonAllowlist": [
-      "affiliate_click_is_valid",
       "get_affiliate_public_settings",
       "lookup_affiliate_by_code"
     ],
@@ -232,17 +231,20 @@
       "admin_publish_legal_document",
       "admin_resolve_email_alert",
       "admin_review_verification",
+      "admin_rpc_audit_retention_settings",
       "admin_run_email_retention_purge",
+      "admin_run_rpc_audit_purge",
       "admin_set_commission_status",
       "admin_update_email_retention",
+      "admin_update_rpc_audit_retention",
       "admin_verification_requests",
       "admin_verification_timeline",
-      "affiliate_click_is_valid",
       "affiliate_leaderboard",
       "approve_affiliate_application",
       "attribute_signup_referral",
       "entitlement_snapshot",
       "get_affiliate_public_settings",
+
       "has_role",
       "is_admin",
       "is_anonymous_session",
