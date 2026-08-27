@@ -91,14 +91,16 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Service identity must be proven by presenting the real service-role key.
+    // A self-decoded `role` claim proves nothing — it can be forged.
     const token = authHeader.slice('Bearer '.length).trim()
-    const claims = parseJwtClaims(token)
-    if (claims?.role !== 'service_role' && token !== supabaseServiceKey) {
+    if (!supabaseServiceKey || token !== supabaseServiceKey) {
       return new Response(
         JSON.stringify({ error: 'Forbidden' }),
         { status: 403, headers: { 'Content-Type': 'application/json' } }
       )
     }
+
   }
 
 
