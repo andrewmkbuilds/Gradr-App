@@ -27,14 +27,6 @@ interface Decision {
   reason: string | null
 }
 
-function decodeJwtClaims(token: string): Record<string, unknown> | null {
-  try {
-    const payload = token.split('.')[1]
-    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
-  } catch {
-    return null
-  }
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
