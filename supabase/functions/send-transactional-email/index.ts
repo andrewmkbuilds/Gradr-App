@@ -9,6 +9,7 @@ import {
   EMAIL_CLASSIFICATIONS,
   isMarketing,
 } from '../_shared/transactional-email-templates/classification.ts'
+import { verifyCaller } from '../_shared/verifyCaller.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -54,15 +55,6 @@ const USER_SENDABLE = new Set([
   'verification-submitted',
 ])
 
-function decodeJwtClaims(token: string): Record<string, unknown> | null {
-  try {
-    const payload = token.split('.')[1]
-    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
-    return JSON.parse(json)
-  } catch {
-    return null
-  }
-}
 
 
 
@@ -157,15 +149,11 @@ Deno.serve(async (req) => {
 
 
 
-  // Enforce the trust model described at the top of this file.
-  const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
-  const claims = decodeJwtClaims(bearer)
-  const callerRole = String(claims?.role ?? '')
-  // Newer Supabase secret keys (`sb_secret_...`) are opaque, not JWTs, so the
-  // claim check alone would misclassify server callers as end users.
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-  const isService = callerRole === 'service_role' || (!!bearer && !!serviceKey && bearer === serviceKey)
-
+  // Enforce the trust model described at the top of this file. Identity is
+  // resolved cryptographically: service callers must present the real
+  // service-role key, users must present a token Supabase auth verifies.
+  const caller = await verifyCaller(req)
+  const isService = caller.isService
 
   if (!isService) {
     if (!USER_SENDABLE.has(templateName)) {
@@ -175,7 +163,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-    const callerEmail = typeof claims?.email === 'string' ? claims.email : ''
+    const callerEmail = caller.email ?? ''
     if (!callerEmail) {
       return new Response(JSON.stringify({ error: 'Authenticated email required' }), {
         status: 403,
@@ -185,6 +173,7 @@ Deno.serve(async (req) => {
     // Users can only mail themselves.
     recipientEmail = callerEmail
   }
+
 
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
