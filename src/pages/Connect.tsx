@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ds/Button";
-import { Badge } from "@/components/ds/Badge";
+import { Badge } from "@/design-system/gradr-9b9b95";
 import { Seo } from "@/components/Seo";
 import { PageHeader } from "@/components/app/PageHeader";
 import { toast } from "sonner";
@@ -263,7 +263,7 @@ export default function Connect() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium text-foreground">{tool.title}</span>
                 <code className="font-mono text-caption text-muted-foreground">{tool.name}</code>
-                <Badge variant={tool.readOnly ? "neutral" : "warning"}>
+                <Badge variant={tool.readOnly ? "neutral" : "accent"}>
                   {tool.readOnly ? "Read-only" : "Can make changes"}
                 </Badge>
               </div>
