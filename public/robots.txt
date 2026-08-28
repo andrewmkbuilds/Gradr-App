@@ -1,6 +1,6 @@
 # Gradr — AI career command center
 # One robots.txt is served for every Gradr subdomain (gradr.me, app.gradr.me,
-# marketing.gradr.me, news.gradr.me, docs.gradr.me, affiliates.gradr.me, status.gradr.me, support.gradr.me), so the
+# marketing.gradr.me, news.gradr.me, docs.gradr.me, status.gradr.me, support.gradr.me), so the
 # rules below are written to be safe on all of them. Product, credential and
 # admin paths only exist on app.gradr.me and are blocked everywhere.
 # Public marketing, pricing, legal and career-content pages are crawlable.
@@ -22,8 +22,6 @@ Disallow: /pipeline
 Disallow: /apply
 Disallow: /interview
 Disallow: /growth
-Disallow: /affiliate/dashboard
-Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
 Disallow: /mcp
@@ -44,8 +42,6 @@ Disallow: /pipeline
 Disallow: /apply
 Disallow: /interview
 Disallow: /growth
-Disallow: /affiliate/dashboard
-Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
 Disallow: /mcp
@@ -76,8 +72,6 @@ Disallow: /pipeline
 Disallow: /apply
 Disallow: /interview
 Disallow: /growth
-Disallow: /affiliate/dashboard
-Disallow: /affiliate/resources
 Disallow: /admin/
 Disallow: /oauth
 Disallow: /mcp
@@ -86,6 +80,5 @@ Sitemap: https://app.gradr.me/sitemap.xml
 Sitemap: https://marketing.gradr.me/sitemap-marketing.xml
 Sitemap: https://news.gradr.me/sitemap-news.xml
 Sitemap: https://docs.gradr.me/sitemap-docs.xml
-Sitemap: https://affiliates.gradr.me/sitemap-affiliates.xml
 Sitemap: https://status.gradr.me/sitemap-status.xml
 Sitemap: https://support.gradr.me/sitemap-support.xml

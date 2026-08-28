@@ -140,22 +140,6 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Settings",
     description: "Manage your Gradr account, preferences, and digest settings.",
   },
-  "/affiliate": {
-    title: "Affiliate Program",
-    description: "Earn recurring commission by referring job seekers to Gradr — transparent rates and monthly payouts.",
-  },
-  "/affiliate/apply": {
-    title: "Apply to the Affiliate Program",
-    description: "Tell us about your audience and apply to become a Gradr affiliate partner.",
-  },
-  "/affiliate/dashboard": {
-    title: "Affiliate Dashboard",
-    description: "Track your referral clicks, conversions, commissions, and payouts as a Gradr affiliate.",
-  },
-  "/affiliate/resources": {
-    title: "Affiliate Resources",
-    description: "Campaign link builder, brand assets, and copy templates for Gradr affiliate partners.",
-  },
   "/blog/ai-resume-optimization": {
     title: "AI Resume Builder & ATS Guide",
     description: "How AI resume builders help candidates beat Applicant Tracking Systems — keyword matching, formatting rules, and AI-driven rewrites.",
@@ -234,7 +218,7 @@ function resolveOgImage(pathname: string): string {
 
 /**
  * Routes that must never enter a search index: authenticated product surfaces,
- * account/credential flows, admin tooling and affiliate back-office. They hold
+ * account/credential flows and admin tooling. They hold
  * no public content and only dilute how search engines understand Gradr.
  */
 const NOINDEX_EXACT = new Set([
@@ -242,10 +226,6 @@ const NOINDEX_EXACT = new Set([
   // can consolidate them onto the canonical public host (gradr.me) and brand
   // searches resolve. Everything below is a private/authenticated surface.
   "/dashboard",
-  "/affiliate/dashboard",
-  "/affiliate/resources",
-  "/affiliate/apply",
-  "/affiliate/join",
   "/landing",
   "/home",
   "/forgot-password",
@@ -268,9 +248,6 @@ const NOINDEX_EXACT = new Set([
   "/growth",
   "/connect",
   "/unsubscribe",
-  "/affiliate/apply",
-  "/affiliate/dashboard",
-  "/affiliate/resources",
 ]);
 
 const NOINDEX_PREFIXES = ["/admin", "/interview/", "/oauth", "/mcp"];
@@ -280,7 +257,7 @@ function isNoIndex(pathname: string): boolean {
   return NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-/** Per-surface metadata for the marketing, news, docs and affiliate subdomains. */
+/** Per-surface metadata for the marketing, news, docs and status/support subdomains. */
 const SURFACE_META: Partial<Record<Surface, Record<string, { title: string; description: string }>>> = {
   marketing: {
     "/": {
@@ -331,18 +308,6 @@ const SURFACE_META: Partial<Record<Surface, Record<string, { title: string; desc
       title: "Gradr Documentation — Guides, Features & Troubleshooting",
       description:
         "Official Gradr documentation: quickstart, feature guides, AI Mock Interview reference, billing, API access and troubleshooting.",
-    },
-  },
-  affiliates: {
-    "/": {
-      title: "Gradr Affiliate Program — Earn Recurring Commission",
-      description:
-        "Join the Gradr affiliate program: recurring commission, transparent click and conversion tracking, monthly payouts and ready-made assets.",
-    },
-    "/join": {
-      title: "Apply to the Gradr Affiliate Program",
-      description:
-        "Tell us about your audience and apply to become a Gradr affiliate partner with recurring commission on every referred subscription.",
     },
   },
   status: {
@@ -402,7 +367,6 @@ function isSurfaceNoIndex(surface: Surface, path: string): boolean {
     // Unknown paths render the in-surface 404 — never let those be indexed.
     return resolveSurfaceMeta(surface, path) === null;
   }
-  if (surface === "affiliates") return !(path === "/" || path === "/join");
   return isNoIndex(path);
 }
 

@@ -30,7 +30,8 @@ const HOSTS = [
   { host: `marketing.${ROOT}`, surface: "marketing" },
   { host: `docs.${ROOT}`, surface: "docs" },
   { host: `news.${ROOT}`, surface: "news" },
-  { host: `affiliates.${ROOT}`, surface: "affiliates" },
+  { host: `earn.${ROOT}`, surface: "earn" },
+  { host: `partners.${ROOT}`, surface: "partners" },
 ];
 
 async function resolveDns(host) {

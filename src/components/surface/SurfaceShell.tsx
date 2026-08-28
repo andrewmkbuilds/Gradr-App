@@ -18,7 +18,8 @@ const ECOSYSTEM: { label: string; surface: Surface; to?: string }[] = [
   { label: "Product", surface: "marketing" },
   { label: "News", surface: "news" },
   { label: "Docs", surface: "docs" },
-  { label: "Affiliates", surface: "affiliates" },
+  { label: "Gradr Earn", surface: "earn" },
+  { label: "Partners", surface: "partners" },
   { label: "Status", surface: "status" },
   { label: "Support", surface: "support" },
 ];

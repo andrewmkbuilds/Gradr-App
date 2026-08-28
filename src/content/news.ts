@@ -85,7 +85,7 @@ export const NEWS: NewsArticle[] = [
           "marketing.gradr.me — features, pricing, use cases",
           "news.gradr.me — this newsroom",
           "docs.gradr.me — documentation",
-          "affiliates.gradr.me — the affiliate portal",
+          "partners.gradr.me — the partner portal",
         ],
       },
       {

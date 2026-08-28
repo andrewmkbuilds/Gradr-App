@@ -300,16 +300,20 @@ function About() {
         </p>
       </div>
       <div className="mt-8 flex flex-wrap gap-4">
-        <CrossLink surface="news" className="text-sm text-brand-secondary underline underline-offset-4">
+        <CrossLink surface="news" className="text-body-sm text-brand-secondary underline underline-offset-4">
           Read the newsroom
         </CrossLink>
+        <CrossLink surface="earn" className="text-body-sm text-brand-secondary underline underline-offset-4">
+          Earn Gradr credits
+        </CrossLink>
         <CrossLink
-          surface="affiliates"
-          className="text-sm text-brand-secondary underline underline-offset-4"
+          surface="partners"
+          className="text-body-sm text-brand-secondary underline underline-offset-4"
         >
           Partner with us
         </CrossLink>
       </div>
+
     </div>
   );
 }

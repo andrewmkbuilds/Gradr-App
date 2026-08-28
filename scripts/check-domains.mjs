@@ -21,7 +21,8 @@ const HOSTS = [
   { host: "marketing.gradr.me", purpose: "Marketing" },
   { host: "docs.gradr.me", purpose: "Documentation" },
   { host: "news.gradr.me", purpose: "News / blog" },
-  { host: "affiliates.gradr.me", purpose: "Affiliate portal" },
+  { host: "earn.gradr.me", purpose: "Gradr Earn (credits / rewards)" },
+  { host: "partners.gradr.me", purpose: "Gradr Partners (affiliate portal)" },
   { host: "status.gradr.me", purpose: "Service status" },
   { host: "support.gradr.me", purpose: "Support / help center" },
 ];

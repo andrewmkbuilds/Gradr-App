@@ -52,7 +52,6 @@ import { isSandboxAvailable } from "@/lib/qa/sandbox/flags";
 const MarketingSurface = lazy(() => import("./surfaces/MarketingSurface"));
 const NewsSurface = lazy(() => import("./surfaces/NewsSurface"));
 const DocsSurface = lazy(() => import("./surfaces/DocsSurface"));
-const AffiliatesSurface = lazy(() => import("./surfaces/AffiliatesSurface"));
 const StatusSurface = lazy(() => import("./surfaces/StatusSurface"));
 const SupportSurface = lazy(() => import("./surfaces/SupportSurface"));
 const ResumeEngine = lazy(() => import("./pages/ResumeEngine"));
@@ -72,7 +71,6 @@ const BillingHistory = lazy(() => import("./pages/BillingHistory"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const AdminAffiliates = lazy(() => import("./pages/AdminAffiliates"));
 const AdminBlogAnalytics = lazy(() => import("./pages/AdminBlogAnalytics"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminSecurityLog = lazy(() => import("@/pages/AdminSecurityLog"));
@@ -218,7 +216,6 @@ function ProtectedRoutes() {
           <Route path="/growth" element={<AnimatedPage><GrowthEngine /></AnimatedPage>} />
           <Route path="/settings" element={<AnimatedPage><Settings /></AnimatedPage>} />
           <Route path="/admin/digest-preview" element={<RequireAdmin><AnimatedPage><DigestPreview /></AnimatedPage></RequireAdmin>} />
-          <Route path="/admin/affiliates" element={<RequireAdmin><AnimatedPage><AdminAffiliates /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/blog-analytics" element={<RequireAdmin><AnimatedPage><AdminBlogAnalytics /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/security-findings" element={<RequireAdmin><AnimatedPage><AdminSecurityFindings /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/brand-assets" element={<RequireAdmin><AnimatedPage><BrandAssets /></AnimatedPage></RequireAdmin>} />
@@ -315,10 +312,9 @@ function SurfaceOutlet({ surface }: { surface: Surface }) {
     marketing: MarketingSurface,
     news: NewsSurface,
     docs: DocsSurface,
-    affiliates: AffiliatesSurface,
     status: StatusSurface,
     support: SupportSurface,
-  }[surface as "marketing" | "news" | "docs" | "affiliates" | "status" | "support"];
+  }[surface as "marketing" | "news" | "docs" | "status" | "support"];
   return (
     <SurfaceProvider surface={surface}>
       <Component />
@@ -330,7 +326,6 @@ const SATELLITE_SURFACES: Surface[] = [
   "marketing",
   "news",
   "docs",
-  "affiliates",
   "status",
   "support",
 ];
@@ -368,8 +363,8 @@ function AppRoutes() {
         {/* Satellite surfaces: mounted under a path prefix on shared hosts
             (local dev + previews), redirected to their real subdomain in
             production so a URL only ever resolves in one place.
-            The affiliate surface keeps its program and application public;
-            its dashboard and resources enforce their own partner auth gate. */}
+            Earn and Partners are separate deployments and are never mounted
+            here — only linked to. */}
         {SATELLITE_SURFACES.map((surface) =>
 
           multiSurface ? (
@@ -389,6 +384,15 @@ function AppRoutes() {
           ),
         )}
 
+        {/* Retired in-app affiliate portal: partners.gradr.me owns it now. */}
+        <Route
+          path="/affiliate/*"
+          element={<ExternalSurfaceRedirect surface="partners" strip="/affiliate" />}
+        />
+        <Route
+          path="/affiliate"
+          element={<ExternalSurfaceRedirect surface="partners" strip="/affiliate" />}
+        />
         <Route path="/unsubscribe" element={<AnimatedPage><Unsubscribe /></AnimatedPage>} />
         <Route path="/landing" element={<Navigate to="/" replace />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
