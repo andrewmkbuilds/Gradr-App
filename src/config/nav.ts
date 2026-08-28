@@ -40,17 +40,11 @@ export type NavItem = {
   /** match nested routes as active */
   matchPrefix?: boolean;
   /**
-   * Renders the item as a cross-surface link (docs, news, affiliate portal…).
+   * Renders the item as a cross-product link (docs, news, Earn, Partners…).
    * The href is resolved with `urlFor()` so it stays on the current origin in
    * dev/preview and points at the real subdomain in production.
    */
   surface?: Surface;
-  /**
-   * Only shown once the signed-in user has an approved affiliate profile.
-   * Presentation only — the route itself renders a locked state for everyone
-   * else and every affiliate table is RLS-scoped to the owning profile.
-   */
-  affiliateOnly?: boolean;
 };
 
 export type NavGroup = {
@@ -127,9 +121,8 @@ export const navGroups: NavGroup[] = [
     icon: Gift,
     url: "/pricing",
     items: [
-      { title: "Affiliate Program", url: "/affiliate", icon: Gift },
-      { title: "Affiliate Dashboard", url: "/affiliate/dashboard", icon: BarChart3, affiliateOnly: true },
-      { title: "Affiliate Resources", url: "/affiliate/resources", icon: BookOpen, affiliateOnly: true },
+      { title: "Gradr Earn", url: "/", icon: Gift, surface: "earn" },
+      { title: "Partner Program", url: "/", icon: Wallet, surface: "partners" },
       { title: "Documentation", url: "/", icon: BookOpen, surface: "docs" },
       { title: "Gradr News", url: "/", icon: Newspaper, surface: "news" },
       { title: "Product site", url: "/", icon: Globe, surface: "marketing" },
@@ -145,7 +138,6 @@ export const navGroups: NavGroup[] = [
       { title: "Control Room", url: "/admin", icon: LayoutDashboard },
       { title: "Revenue", url: "/admin/revenue", icon: Wallet },
       { title: "Usage & AI Cost", url: "/admin/usage", icon: Gauge },
-      { title: "Affiliate Admin", url: "/admin/affiliates", icon: Gift },
       { title: "Verifications", url: "/admin/verifications", icon: ShieldCheck },
       { title: "Discounts", url: "/admin/discounts", icon: BadgePercent },
       { title: "Legal Documents", url: "/admin/legal", icon: ScrollText },

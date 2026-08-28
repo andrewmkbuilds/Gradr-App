@@ -65,7 +65,8 @@ describe("Auth hero layout guardrail", () => {
   });
 
   it("never applies a fixed height to the auth shell", () => {
-    expect(SOURCE).toMatch(/min-h-screen/);
+    // min-h-dvh is the mobile-correct spelling; min-h-screen is also accepted.
+    expect(SOURCE).toMatch(/min-h-(dvh|screen)/);
     expect(SOURCE).not.toMatch(/(?<!min-)\bh-screen\b/);
   });
 });

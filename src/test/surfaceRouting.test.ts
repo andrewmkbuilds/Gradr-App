@@ -33,7 +33,10 @@ describe("surface routing", () => {
     expect(surfaceFromHost("marketing.gradr.me")).toBe("marketing");
     expect(surfaceFromHost("news.gradr.me")).toBe("news");
     expect(surfaceFromHost("docs.gradr.me")).toBe("docs");
-    expect(surfaceFromHost("affiliates.gradr.me")).toBe("affiliates");
+    expect(surfaceFromHost("earn.gradr.me")).toBe("earn");
+    expect(surfaceFromHost("partners.gradr.me")).toBe("partners");
+    // Legacy affiliate host now resolves to the Partners product.
+    expect(surfaceFromHost("affiliates.gradr.me")).toBe("partners");
     expect(surfaceFromHost("status.gradr.me")).toBe("status");
     expect(surfaceFromHost("support.gradr.me")).toBe("support");
   });

@@ -36,7 +36,7 @@ describe("cross-surface navigation", () => {
     { path: "/marketing", surface: "marketing" as const },
     { path: "/docs", surface: "docs" as const },
     { path: "/news", surface: "news" as const },
-    { path: "/affiliate", surface: "affiliates" as const },
+    { path: "/affiliate", surface: "partners" as const },
   ];
 
   it("resolves each public entry point to its own surface", () => {

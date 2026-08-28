@@ -1,5 +1,6 @@
 import { forwardRef, type HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
+import { Text } from "@/design-system/gradr-9b9b95";
 
 export type ElevationLevel = 1 | 2 | 3 | 4;
 
@@ -64,10 +65,10 @@ export function SurfaceHeader({
 }) {
   return (
     <div className={cn("mb-4 flex items-center justify-between gap-3", className)}>
-      <h2 className="flex items-center gap-2 text-h6 text-foreground">
+      <Text as="h2" variant="h6" className="flex items-center gap-2">
         {Icon ? <Icon className="h-4 w-4 text-primary" /> : null}
         {title}
-      </h2>
+      </Text>
 
       {action}
     </div>

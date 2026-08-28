@@ -384,9 +384,9 @@ export default function Dashboard() {
               <Bell className="h-4 w-4 text-accent" />
               Upcoming Reminders
               {overdueCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-caption text-destructive">
+                <Badge variant="danger" className="gap-1">
                   <AlertCircle className="h-3 w-3" /> {overdueCount} overdue
-                </span>
+                </Badge>
               )}
             </Text>
             <Button onClick={() => navigate("/pipeline")} variant="link" size="inline">

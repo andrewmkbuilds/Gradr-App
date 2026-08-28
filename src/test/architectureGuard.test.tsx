@@ -61,10 +61,15 @@ describe("router setup", () => {
     }
   });
 
-  it("mounts the public affiliate surface before the protected app catch-all", () => {
+  it("mounts satellite surfaces before the protected app catch-all", () => {
     expect(APP).toContain("{SATELLITE_SURFACES.map((surface) =>");
-    expect(APP).not.toMatch(/SATELLITE_SURFACES\.filter\(\(s\) => s !== ["']affiliates["']\)/);
-    expect(APP).not.toMatch(/PROTECTED_PREFIXES[\s\S]*?["']\/affiliate["']/);
+  });
+
+  it("hands the retired affiliate portal to partners.gradr.me", () => {
+    // The affiliate portal is owned by the Gradr Partners repo now: this app
+    // must not mount it, only redirect legacy URLs to it.
+    expect(APP).not.toMatch(/AffiliatesSurface|AdminAffiliates/);
+    expect(APP).toMatch(/ExternalSurfaceRedirect surface="partners"/);
   });
 
   it("renders and navigates with react-router primitives", () => {

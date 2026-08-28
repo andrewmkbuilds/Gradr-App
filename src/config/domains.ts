@@ -1,23 +1,22 @@
 /**
  * Centralised subdomain (surface) architecture for Gradr.
  *
- * Gradr ships as a single React bundle that is served from several hostnames.
- * Which part of the product renders is decided by the hostname in production
- * and by a URL path prefix in local development / preview deployments, where
- * only one hostname exists.
+ * The Gradr ecosystem is four separate products on four hostnames. This
+ * repository is **Gradr App** — it owns the authenticated customer product and
+ * Paddle billing. Marketing, Earn and Partners are separate deployments; they
+ * appear here only as cross-link targets, never as route trees.
  *
- *   Production                     Dev & preview (single host)
- *   ------------------------------ -----------------------------
- *   gradr.me            → home      /            → home + app
- *   www.gradr.me        → redirect  —
- *   app.gradr.me        → app       /            → app (authenticated)
- *   marketing.gradr.me  → marketing /marketing
- *   news.gradr.me       → news      /news
- *   docs.gradr.me       → docs      /docs
- *   affiliates.gradr.me → affiliates/affiliate
+ *   Hostname              Owner repo         Served here?
+ *   --------------------- ------------------ ------------------------------
+ *   gradr.me              Gradr Marketing    no (public brand surface)
+ *   app.gradr.me          Gradr App          YES — this bundle
+ *   earn.gradr.me         Gradr Earn         no (external product)
+ *   partners.gradr.me     Gradr Partners     no (external product)
+ *   marketing/news/docs   Gradr Marketing    path-routed while co-hosted
+ *   status/support        shared             path-routed while co-hosted
  *
- * Everything else (auth, Supabase client, design tokens, SEO helpers,
- * analytics) is shared — surfaces are route trees, not separate apps.
+ * `affiliates.gradr.me` is retired: partners.gradr.me is the canonical
+ * affiliate/partner origin. Legacy affiliate hosts and paths redirect there.
  */
 
 export type Surface =
@@ -26,7 +25,8 @@ export type Surface =
   | "marketing"
   | "news"
   | "docs"
-  | "affiliates"
+  | "earn"
+  | "partners"
   | "status"
   | "support";
 
@@ -36,7 +36,8 @@ export const SURFACES: Surface[] = [
   "marketing",
   "news",
   "docs",
-  "affiliates",
+  "earn",
+  "partners",
   "status",
   "support",
 ];
@@ -50,10 +51,22 @@ export const PRODUCTION_ORIGIN: Record<Surface, string> = {
   marketing: `https://marketing.${ROOT_DOMAIN}`,
   news: `https://news.${ROOT_DOMAIN}`,
   docs: `https://docs.${ROOT_DOMAIN}`,
-  affiliates: `https://affiliates.${ROOT_DOMAIN}`,
+  earn: `https://earn.${ROOT_DOMAIN}`,
+  partners: `https://partners.${ROOT_DOMAIN}`,
   status: `https://status.${ROOT_DOMAIN}`,
   support: `https://support.${ROOT_DOMAIN}`,
 };
+
+/**
+ * Surfaces owned by a *different* repository/deployment. Links to these always
+ * resolve to their production origin — there is no local route tree to fall
+ * back to, so a path-prefixed link would 404 on this host.
+ */
+export const EXTERNAL_SURFACES: Surface[] = ["earn", "partners"];
+
+export function isExternalSurface(surface: Surface): boolean {
+  return EXTERNAL_SURFACES.includes(surface);
+}
 
 /** Hostname label → surface (production hostname routing). */
 const SUBDOMAIN_TO_SURFACE: Record<string, Surface> = {
@@ -61,7 +74,10 @@ const SUBDOMAIN_TO_SURFACE: Record<string, Surface> = {
   marketing: "marketing",
   news: "news",
   docs: "docs",
-  affiliates: "affiliates",
+  earn: "earn",
+  partners: "partners",
+  // Legacy: the affiliate portal moved to partners.gradr.me.
+  affiliates: "partners",
   status: "status",
   support: "support",
 };
@@ -78,10 +94,12 @@ export const SURFACE_PATH_PREFIX: Record<Surface, string> = {
   marketing: "/marketing",
   news: "/news",
   docs: "/docs",
-  affiliates: "/affiliate",
+  earn: "/earn",
+  partners: "/partners",
   status: "/status",
   support: "/support",
 };
+
 
 export type DeployEnv = "development" | "preview" | "production";
 
@@ -193,11 +211,14 @@ export function surfaceFromHost(host: string = currentHost()): Surface | null {
 /** Surface implied by a path prefix on a shared host. */
 export function surfaceFromPath(pathname: string): Surface | null {
   const path = pathname.toLowerCase();
+  // Legacy affiliate paths belong to the Partners product now.
+  if (path === "/affiliate" || path.startsWith("/affiliate/")) return "partners";
   for (const surface of [
     "marketing",
     "news",
     "docs",
-    "affiliates",
+    "earn",
+    "partners",
     "status",
     "support",
   ] as Surface[]) {
@@ -206,6 +227,7 @@ export function surfaceFromPath(pathname: string): Surface | null {
   }
   return null;
 }
+
 
 /**
  * The surface being rendered right now.
@@ -226,6 +248,8 @@ export function currentSurface(pathname?: string): Surface {
 
 /** Base path every in-surface link must be prefixed with on the current host. */
 export function surfaceBase(surface: Surface, host: string = currentHost()): string {
+  // Earn and Partners are separate deployments — there is no local path tree.
+  if (isExternalSurface(surface)) return "";
   return isMultiSurfaceHost(host) ? SURFACE_PATH_PREFIX[surface] : "";
 }
 
@@ -235,6 +259,8 @@ export function surfaceBase(surface: Surface, host: string = currentHost()): str
  * (dev, preview, or production-with-redirecting-subdomains) the current origin.
  */
 export function surfaceOrigin(surface: Surface, host: string = currentHost()): string {
+  // Externally owned products always live on their own production origin.
+  if (isExternalSurface(surface)) return PRODUCTION_ORIGIN[surface];
   // In a pinned build, links to the pinned surface stay on whatever host the
   // bundle is running on, so its preview URL stays self-contained instead of
   // bouncing to production. Other surfaces genuinely live on other origins.
@@ -246,6 +272,7 @@ export function surfaceOrigin(surface: Surface, host: string = currentHost()): s
   if (typeof window === "undefined") return PRODUCTION_ORIGIN[surface];
   return window.location.origin;
 }
+
 
 
 /**

@@ -59,7 +59,7 @@ const entries: SitemapEntry[] = [
   // Excluded intentionally (auth-gated, credential flows, or internal tools):
   // /auth, /forgot-password, /reset-password, /verify-email, /welcome
   // /resume, /jobs, /match, /pipeline, /apply, /interview, /growth
-  // /settings, /billing, /affiliate/dashboard, /admin/*
+  // /settings, /billing, /admin/*
 ];
 
 
@@ -123,11 +123,6 @@ const docsEntries: SitemapEntry[] = [
   })),
 ];
 
-// Only the two crawlable affiliate pages; the dashboard and resources are gated.
-const affiliateEntries: SitemapEntry[] = [
-  { path: "/", changefreq: "monthly", priority: "0.7" },
-  { path: "/join", changefreq: "monthly", priority: "0.6" },
-];
 
 // Status and support are small public surfaces — every page is crawlable.
 const statusEntries: SitemapEntry[] = [{ path: "/", changefreq: "hourly", priority: "0.6" }];
@@ -141,7 +136,6 @@ const surfaceSitemaps: { file: string; origin: string; items: SitemapEntry[] }[]
   { file: "sitemap-marketing.xml", origin: PRODUCTION_ORIGIN.marketing, items: marketingEntries },
   { file: "sitemap-news.xml", origin: PRODUCTION_ORIGIN.news, items: newsEntries },
   { file: "sitemap-docs.xml", origin: PRODUCTION_ORIGIN.docs, items: docsEntries },
-  { file: "sitemap-affiliates.xml", origin: PRODUCTION_ORIGIN.affiliates, items: affiliateEntries },
   { file: "sitemap-status.xml", origin: PRODUCTION_ORIGIN.status, items: statusEntries },
   { file: "sitemap-support.xml", origin: PRODUCTION_ORIGIN.support, items: supportEntries },
 ];
