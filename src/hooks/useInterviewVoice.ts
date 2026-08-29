@@ -183,7 +183,8 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   const ensureWebSpeech = useCallback(() => {
     if (!webSpeechRef.current) {
       const profile = voiceProfileFor(optsRef.current.personaId);
-      webSpeechRef.current = new WebSpeechVoice(profile.rate ?? 1, profile.pitch ?? 1);
+      webSpeechRef.current = // Web Speech rate is clamped: browsers distort badly outside this band.
+      new WebSpeechVoice(Math.min(1.2, Math.max(0.8, profile.speed)), 1);
     }
     return webSpeechRef.current;
   }, []);
