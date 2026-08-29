@@ -208,6 +208,10 @@ export class SpeechQueue {
   private failure: VoiceErrorCode | null = null;
   /** Caption scheduler for the chunk currently playing. */
   private reveal: TimedReveal | null = null;
+  /** Active browser-fallback utterance, cancellable for barge-in. */
+  private fallbackHandle: { cancel: () => void } | null = null;
+  /** One fallback notice per turn, not one per chunk. */
+  private fallbackAnnounced = false;
 
 
   constructor(private opts: SpeechQueueOptions) {}
