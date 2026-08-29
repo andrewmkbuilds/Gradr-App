@@ -5,14 +5,19 @@ import { getPaddleEnvironment } from "@/lib/paddle";
 import { SentenceChunker, SpeechQueue, TimedReveal, cleanForSpeech, estimatedSpeechMs, type AudioResult } from "@/lib/interview/speechStream";
 import { VOICE_ABORTED, toVoiceErrorCode, toVoiceProviderReason, type VoiceErrorCode, type VoiceProviderReason } from "@/lib/interview/voiceErrors";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
+import { WebSpeechVoice, speechSynthesisSupported } from "@/lib/interview/webSpeechVoice";
 
 /**
  * The interviewer's voice.
  *
  * Consumes the reasoning model's text stream and speaks it through Gradr's
  * voice backend chunk by chunk, revealing the transcript only as each thought
- * is actually spoken. The provider lives entirely behind that backend: this
- * hook only ever sees sanitized Gradr voice error codes.
+ * is actually spoken. The provider (Deepgram) lives entirely behind that
+ * backend: this hook only ever sees sanitized Gradr voice error codes.
+ *
+ * If the backend cannot deliver audio, the queue automatically speaks the same
+ * thought through the browser's Web Speech API — the candidate never has to
+ * switch anything, and the turn is only aborted when neither engine can speak.
  */
 
 const SPEECH_URL = `${SUPABASE_FUNCTIONS_BASE}/interview-speech`;
@@ -43,6 +48,10 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   /** Backend request id for the failing turn — quoted to support for lookup. */
   const [errorRequestId, setErrorRequestId] = useState<string | null>(null);
   const requestIdRef = useRef<string | null>(null);
+  /** True once a turn has fallen back to the browser's own voice. */
+  const [usingFallbackVoice, setUsingFallbackVoice] = useState(false);
+  /** One instance per session so the fallback voice stays consistent. */
+  const webSpeechRef = useRef<WebSpeechVoice | null>(null);
 
 
   const optsRef = useRef(opts);
@@ -170,12 +179,28 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
 
 
 
+  /** Browser voice, tuned to the persona's pacing. Created lazily. */
+  const ensureWebSpeech = useCallback(() => {
+    if (!webSpeechRef.current) {
+      const profile = voiceProfileFor(optsRef.current.personaId);
+      webSpeechRef.current = new WebSpeechVoice(profile.rate ?? 1, profile.pitch ?? 1);
+    }
+    return webSpeechRef.current;
+  }, []);
+
   const ensureQueue = useCallback(() => {
     if (queueRef.current) return queueRef.current;
     const profile = voiceProfileFor(optsRef.current.personaId);
     const q = new SpeechQueue({
       fetchAudio,
       beatMs: profile.beatMs,
+      speakFallback: speechSynthesisSupported()
+        ? (text) => ensureWebSpeech().speak(text)
+        : undefined,
+      onFallbackEngaged: (code) => {
+        console.warn("[voice] interviewer switched to the browser voice", code);
+        setUsingFallbackVoice(true);
+      },
       onChunkStart: () => {
         // New thought: the caption starts empty and fills in as it is spoken.
         emitCaption("");
@@ -200,7 +225,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     });
     queueRef.current = q;
     return q;
-  }, [fetchAudio, emitCaption]);
+  }, [fetchAudio, emitCaption, ensureWebSpeech]);
 
   /** Opens a new interviewer turn. */
   const beginTurn = useCallback(() => {
@@ -215,6 +240,8 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     setErrorRequestId(null);
     reasonRef.current = null;
     requestIdRef.current = null;
+    // Every turn retries the backend voice first; the notice clears if it works.
+    setUsingFallbackVoice(false);
     const q = ensureQueue();
     q.reset();
   }, [ensureQueue, stopPaced]);
@@ -250,6 +277,7 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
   /** Barge-in / end of session: silence the interviewer immediately. */
   const stop = useCallback(() => {
     queueRef.current?.stop();
+    webSpeechRef.current?.stop();
     stopPaced();
     setSpeaking(false);
   }, [stopPaced]);
@@ -265,10 +293,14 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
     pacedRef.current.reveal?.cancel();
     queueRef.current?.stop();
     queueRef.current = null;
+    webSpeechRef.current?.stop();
+    webSpeechRef.current = null;
   }, []);
 
   return {
     speaking,
+    /** The interviewer is currently speaking through the browser fallback. */
+    usingFallbackVoice,
     error,
     errorReason,
     errorRequestId,
