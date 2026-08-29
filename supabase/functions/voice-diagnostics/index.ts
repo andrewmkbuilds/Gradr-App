@@ -304,13 +304,23 @@ serve(async (req) => {
     .order("created_at", { ascending: false })
     .limit(20);
 
+  const deepgramConfigured = Boolean(Deno.env.get("DEEPGRAM_API_KEY"));
+
   if (!apiKey) {
-    console.error("[voice-diagnostics] credential missing");
+    // Deepgram is the primary voice; a missing ElevenLabs key is only a
+    // degraded secondary, not an outage.
+    console[deepgramConfigured ? "info" : "error"](
+      deepgramConfigured
+        ? "[voice-diagnostics] running on Deepgram only"
+        : "[voice-diagnostics] credential missing",
+    );
     return json({
-      credential: "missing",
-      synthesis: "unavailable",
-      code: "VOICE_CONFIGURATION_ERROR",
-      reason: "PROVIDER_CREDENTIAL_MISSING",
+      primaryProvider: deepgramConfigured ? "deepgram" : null,
+      deepgramConfigured,
+      credential: deepgramConfigured ? "present" : "missing",
+      synthesis: deepgramConfigured ? "ok" : "unavailable",
+      code: deepgramConfigured ? null : "VOICE_CONFIGURATION_ERROR",
+      reason: deepgramConfigured ? null : "PROVIDER_CREDENTIAL_MISSING",
       config,
       personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({ id, defaultVoiceId: p.voiceId })),
       recent: recent ?? [],
@@ -319,6 +329,8 @@ serve(async (req) => {
 
   const subscription = await providerSubscription(apiKey);
   return json({
+    primaryProvider: deepgramConfigured ? "deepgram" : "elevenlabs",
+    deepgramConfigured,
     credential: "present",
     synthesis: subscription.ok ? "ok" : "failing",
     code: subscription.ok ? null : subscription.code ?? "VOICE_UNAVAILABLE",
