@@ -9,7 +9,13 @@ import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/bu
 import { cn } from "@/lib/utils";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
 import { XIcon } from "@/components/icons/XIcon";
-import { DISCORD_INVITE_URL, SOCIAL_LINKS } from "@/config/community";
+import {
+  DISCORD_INVITE_URL,
+  FACEBOOK_PAGE_URL,
+  INSTAGRAM_URL,
+  X_URL,
+  YOUTUBE_URL,
+} from "@/config/community";
 
 interface PublicShellProps {
   children: React.ReactNode;
