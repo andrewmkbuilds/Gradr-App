@@ -22,10 +22,17 @@ if (!existsSync(ASSETS)) {
 const ALLOWED = /^[A-Za-z0-9_-]{6,12}\.[a-z0-9]+$/
 const KNOWN_TECH = /(react|vue|angular|svelte|next|nuxt|vite|rollup|rolldown|webpack|motion|framer|radix|tailwind|supabase|router|query|recharts|chart|lucide|heroui|nextui|shadcn|paddle|posthog|sentry|admin|auth)/i
 
+// Vite content hashes are opaque 8-char base64url strings. Random hashes can
+// accidentally contain a tech substring (`BikVvuEi` -> "vuE"), so a pure hash
+// is never an offender; only names carrying real words are checked.
+const PURE_HASH = /^[A-Za-z0-9_-]{8}$/
+
 const offenders = []
 for (const name of readdirSync(ASSETS)) {
+  const base = name.split('.')[0]
+  if (PURE_HASH.test(base)) continue
   // Fonts/images keep their extensions; only flag names that carry words.
-  if (KNOWN_TECH.test(name) || (!ALLOWED.test(name) && /[A-Za-z]{5,}/.test(name.split('.')[0]))) {
+  if (KNOWN_TECH.test(name) || (!ALLOWED.test(name) && /[A-Za-z]{5,}/.test(base))) {
     offenders.push(name)
   }
 }

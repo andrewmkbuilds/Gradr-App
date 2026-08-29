@@ -30,8 +30,10 @@ export interface PaymentsDiagnostics {
   ok: boolean;
   /** Env vars that are entirely absent or blank. */
   missing: PaymentsEnvVar[];
-  /** All problems, including value mismatches (not just missing vars). */
+  /** Blocking problems: checkout stays disabled while any are present. */
   issues: PaymentsIssue[];
+  /** Non-blocking configuration notes (e.g. a stale environment override). */
+  warnings: PaymentsIssue[];
   /** Resolved environment when valid. */
   environment?: PaddleEnvName;
   /** Environment implied by the token prefix, when a token is present. */
@@ -59,6 +61,7 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
 
   const missing: PaymentsEnvVar[] = [];
   const issues: PaymentsIssue[] = [];
+  const warnings: PaymentsIssue[] = [];
 
   if (!token) {
     missing.push("VITE_PAYMENTS_CLIENT_TOKEN");
@@ -79,9 +82,7 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
   // is the single source of truth after the build-time token swap. The explicit
   // env var is an optional override/validation only.
   const resolvedEnv: PaddleEnvName | undefined =
-    configuredEnv === "sandbox" || configuredEnv === "live"
-      ? configuredEnv
-      : tokenEnvironment;
+    tokenEnvironment ?? (configuredEnv === "sandbox" || configuredEnv === "live" ? configuredEnv : undefined);
 
   if (!configuredEnv) {
     // Env var is optional; we derive from the token prefix. Still surface it in
@@ -94,9 +95,13 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
       fix: "Correct the value to exactly 'sandbox' or 'live' (lowercase), or remove it to derive from the token prefix.",
     });
   } else if (tokenEnvironment && tokenEnvironment !== configuredEnv) {
-    issues.push({
-      message: `Environment mismatch: VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnvironment}' token.`,
-      fix: `Either switch VITE_PAYMENTS_ENVIRONMENT to '${tokenEnvironment}', or replace the token with a ${configuredEnv} one.`,
+    // The client token is the single source of truth after the build-time
+    // token swap: a live_ token always means live Paddle, whatever a stale
+    // VITE_PAYMENTS_ENVIRONMENT override says. Never block checkout on it.
+    warnings.push({
+      variable: "VITE_PAYMENTS_ENVIRONMENT",
+      message: `VITE_PAYMENTS_ENVIRONMENT is '${configuredEnv}' but the client token is a '${tokenEnvironment}' token — using '${tokenEnvironment}'.`,
+      fix: `Set VITE_PAYMENTS_ENVIRONMENT to '${tokenEnvironment}' or remove it so the environment is derived from the token prefix.`,
     });
   }
 
@@ -107,6 +112,7 @@ export function diagnosePaymentsConfig(env: PaymentsEnvInput): PaymentsDiagnosti
     ok,
     missing,
     issues,
+    warnings,
     environment,
     tokenEnvironment,
     tokenPreview: token ? previewToken(token) : undefined,

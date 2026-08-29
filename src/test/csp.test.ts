@@ -1,25 +1,34 @@
 /**
  * Content Security Policy contract.
  *
- * The policy is delivered as a REPORT-ONLY response header by the edge (a
- * <meta>-delivered report-only policy is ignored by browsers, so it must never
- * come back). These tests pin the shared CI contract in
- * scripts/lib/securityHeaders.mjs, guard against an accidental flip to
- * enforcing, and cover the client-side violation summariser.
+ * The policy is delivered in two tiers (docs/security-headers.md):
+ *
+ *  - index.html ships a document-level <meta http-equiv> CSP carrying the three
+ *    directives a meta tag can actually enforce (base-uri, object-src,
+ *    form-action). This repository owns it, so it is a blocking check.
+ *  - The full policy — including frame-ancestors and the REPORT-ONLY variant —
+ *    can only be a real response header from the hosting edge, so it lives in
+ *    the advisory EDGE_ONLY tier.
+ *
+ * These tests pin the shared CI contract in scripts/lib/securityHeaders.mjs,
+ * guard against an accidental flip to enforcing, and cover the client-side
+ * violation summariser.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
-  REQUIRED_HEADERS,
+  EDGE_ONLY_HEADERS,
+  META_CSP_DIRECTIVES,
   REPORT_ONLY_DIRECTIVES,
   REPORT_ONLY_ORIGINS,
+  metaCspFromHtml,
 } from "../../scripts/lib/securityHeaders.mjs";
 import { summarizeViolation } from "@/lib/security/cspReport";
 
 const HTML = readFileSync(join(process.cwd(), "index.html"), "utf8");
 
-const reportOnlyRule = (REQUIRED_HEADERS as { name: string; test: (v: string) => boolean }[]).find(
+const reportOnlyRule = (EDGE_ONLY_HEADERS as { name: string; test: (v: string) => boolean }[]).find(
   (r) => r.name === "content-security-policy-report-only",
 )!;
 
@@ -43,12 +52,23 @@ const VALID_POLICY = [
 ].join("; ");
 
 describe("CSP delivery", () => {
-  it("is never delivered via a meta tag", () => {
-    expect(HTML).not.toMatch(/http-equiv=["']Content-Security-Policy/i);
+  it("ships a document-level CSP in index.html", () => {
+    const meta = metaCspFromHtml(HTML);
+    expect(meta).toBeTruthy();
   });
 
-  it("documents where the policy actually lives", () => {
-    expect(HTML).toMatch(/REPORT-ONLY/);
+  it("only claims directives a meta tag can enforce", () => {
+    const meta = metaCspFromHtml(HTML) as string;
+    for (const directive of META_CSP_DIRECTIVES as { pattern: RegExp; describe: string }[]) {
+      expect(directive.pattern.test(meta), directive.describe).toBe(true);
+    }
+    // frame-ancestors and report-only are ignored in a meta tag; asserting they
+    // are absent stops anyone from believing the document CSP covers them.
+    expect(meta).not.toMatch(/frame-ancestors/i);
+  });
+
+  it("documents where the rest of the policy actually lives", () => {
+    expect(HTML).toMatch(/REPORT-ONLY/i);
   });
 });
 

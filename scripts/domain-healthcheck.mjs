@@ -31,7 +31,9 @@ const HOSTS = [
   { host: `docs.${ROOT}`, surface: "docs" },
   { host: `news.${ROOT}`, surface: "news" },
   { host: `earn.${ROOT}`, surface: "earn" },
-  { host: `partners.${ROOT}`, surface: "partners" },
+  // Owned by the Gradr Partners project, not this repo. Reported but not
+  // blocking until that surface is deployed and its TLS cert is issued.
+  { host: `partners.${ROOT}`, surface: "partners", optional: true },
 ];
 
 async function resolveDns(host) {
@@ -165,11 +167,16 @@ if (AS_JSON) {
 } else {
   for (const r of results) {
     const chain = r.chain.map((hop) => `${hop.status ?? "ERR"}`).join(" → ") || "-";
-    console.log(`${(r.ok ? "PASS" : "FAIL").padEnd(4)} ${r.host.padEnd(22)} ${chain.padEnd(18)} tls:${r.tls?.ok ? "ok" : "fail"}`);
+    const label = r.ok ? "PASS" : r.optional ? "PEND" : "FAIL";
+    console.log(`${label.padEnd(4)} ${r.host.padEnd(22)} ${chain.padEnd(18)} tls:${r.tls?.ok ? "ok" : "fail"}`);
     for (const note of r.notes) console.log(`      ${note}`);
   }
 }
 
-const failed = results.filter((r) => !r.ok);
-console.log(`\n${results.length - failed.length}/${results.length} hostnames healthy.`);
+const failed = results.filter((r) => !r.ok && !r.optional);
+const pending = results.filter((r) => !r.ok && r.optional);
+if (pending.length > 0) {
+  console.log(`${pending.length} hostname(s) pending deployment by another project: ${pending.map((r) => r.host).join(", ")}`);
+}
+console.log(`\n${results.filter((r) => r.ok).length}/${results.length} hostnames healthy.`);
 process.exit(failed.length ? 1 : 0);

@@ -57,15 +57,29 @@ describe("diagnosePaymentsConfig", () => {
     expect(d.issues[0].message).toMatch(/must be 'sandbox' or 'live'/);
   });
 
-  it("flags a sandbox token used with the live environment", () => {
+  it("keeps checkout enabled and warns when the env override contradicts the token", () => {
     const d = diagnosePaymentsConfig({
       VITE_PAYMENTS_CLIENT_TOKEN: "test_abcdef1234567890",
       VITE_PAYMENTS_ENVIRONMENT: "live",
     });
-    expect(d.ok).toBe(false);
+    // The token prefix wins: a stale override must never disable purchases.
+    expect(d.ok).toBe(true);
     expect(d.tokenEnvironment).toBe("sandbox");
-    expect(d.reason).toMatch(/mismatch/i);
+    expect(d.environment).toBe("sandbox");
+    expect(d.issues).toEqual([]);
+    expect(d.warnings[0].message).toMatch(/using 'sandbox'/);
   });
+
+  it("resolves live from a live token even when the override says sandbox", () => {
+    const d = diagnosePaymentsConfig({
+      VITE_PAYMENTS_CLIENT_TOKEN: "live_abcdef1234567890",
+      VITE_PAYMENTS_ENVIRONMENT: "sandbox",
+    });
+    expect(d.ok).toBe(true);
+    expect(d.environment).toBe("live");
+    expect(d.reason).toBeNull();
+  });
+
 
   it("never exposes the full token in the preview", () => {
     const token = "test_supersecrettokenvalue";
