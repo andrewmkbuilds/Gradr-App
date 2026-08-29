@@ -8,6 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { currentPaymentsDiagnostics } from "@/lib/paymentsConfig";
+import { validatePaymentsConfig } from "@/lib/payments/validate";
+import { buildGoLiveChecklist } from "@/lib/payments/goLive";
+import { catalogPriceIds, runPaymentsPreflight } from "@/lib/payments/preflight";
+import { fetchBothBuildManifests } from "@/lib/payments/buildManifest";
+import { GoLiveChecklist } from "@/components/billing/GoLiveChecklist";
+import { PaymentsBuildMatrix } from "@/components/billing/PaymentsBuildMatrix";
 import { LEGAL_PAGES } from "@/content/legal";
 import { TIERS, CREDIT_PACKS } from "@/config/tiers";
 import { PageHeader } from "@/components/app/PageHeader";
@@ -98,6 +104,25 @@ export default function AdminPaymentsStatus() {
     },
   });
 
+  // Catalog preflight + build manifests feed the go-live checklist.
+  const preflight = useQuery({
+    queryKey: ["payments-status-preflight", diag.environment],
+    enabled: Boolean(isAdmin),
+    retry: false,
+    staleTime: 30_000,
+    queryFn: () => runPaymentsPreflight(catalogPriceIds()),
+  });
+
+  const buildProbe = useQuery({
+    queryKey: ["payments-build-manifests"],
+    enabled: Boolean(isAdmin),
+    retry: false,
+    staleTime: 60_000,
+    queryFn: fetchBothBuildManifests,
+  });
+
+
+
   if (authLoading || roleLoading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
@@ -166,6 +191,13 @@ export default function AdminPaymentsStatus() {
 
   const blocking = [...configRows, ...runtimeRows].filter((r) => r.status === "fail").length;
 
+  const goLiveSteps = buildGoLiveChecklist({
+    validation: validatePaymentsConfig(diag),
+    preflight: preflight.data ?? null,
+    policies: policyProbe.data?.map((p) => ({ path: p.path, ok: p.ok })) ?? null,
+    builds: buildProbe.data ?? null,
+  });
+
   return (
     <div className="page-shell page-stack">
       <PageHeader
@@ -203,6 +235,12 @@ export default function AdminPaymentsStatus() {
         </p>
         {diag.reason && <p className="mt-1 text-sm text-muted-foreground">{diag.reason}</p>}
       </Card>
+
+      <GoLiveChecklist steps={goLiveSteps} />
+
+      <PaymentsBuildMatrix />
+
+
 
       <Card className="p-5">
         <h2 className="mb-2 text-lg font-semibold text-foreground">Build configuration</h2>
