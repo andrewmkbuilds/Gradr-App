@@ -38,6 +38,9 @@ export const EMAIL_TEMPLATE_CATALOG: EmailTemplateInfo[] = [
   { name: "security-alert", kind: "transactional", category: "essential", trigger: "Security event on the account", group: "Account & security" },
   { name: "student-verification-code", kind: "transactional", category: "essential", trigger: "Student verification code requested", group: "Account & security" },
 
+  { name: "trial-started", kind: "transactional", category: "essential", trigger: "Free trial started", group: "Billing" },
+  { name: "trial-ending", kind: "transactional", category: "essential", trigger: "Free trial ends soon — card will be charged", group: "Billing" },
+  { name: "trial-cancelled", kind: "transactional", category: "essential", trigger: "Free trial cancelled before any charge", group: "Billing" },
   { name: "subscription-started", kind: "transactional", category: "essential", trigger: "Subscription started", group: "Billing" },
   { name: "subscription-upgraded", kind: "transactional", category: "essential", trigger: "Plan upgraded", group: "Billing" },
   { name: "subscription-downgraded", kind: "transactional", category: "essential", trigger: "Plan downgraded", group: "Billing" },
