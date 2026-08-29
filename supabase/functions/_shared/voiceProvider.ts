@@ -36,6 +36,30 @@ export const VOICE_PROFILES: Record<string, VoiceProfile> = {
   stress: { voiceId: "iP95p4xoKVk53GoZ742B", stability: 0.38, similarityBoost: 0.8, style: 0.22, speed: 1.09 },
 };
 
+/**
+ * Deepgram Aura-2 voice per persona — the PRIMARY interviewer voice.
+ *
+ * Chosen for conversational realism rather than broadcast polish: every one of
+ * these is a calm, professional register. No announcer voices, nothing
+ * over-enthusiastic. The persona changes who is in the room, not how theatrical
+ * the delivery is.
+ */
+export const DEEPGRAM_VOICES: Record<string, string> = {
+  friendly: "aura-2-cora-en", // warm, approachable screening voice
+  "hiring-manager": "aura-2-arcas-en", // grounded, natural, measured
+  technical: "aura-2-apollo-en", // precise, unhurried, matter-of-fact
+  executive: "aura-2-orion-en", // deliberate, senior, low energy
+  stress: "aura-2-draco-en", // direct and clipped, never shouty
+};
+
+export const DEFAULT_DEEPGRAM_VOICE = "aura-2-arcas-en";
+
+export function deepgramVoiceFor(personaId: string, config?: VoiceConfig): string {
+  const override = config?.deepgramOverrides?.[personaId];
+  if (override) return override;
+  return DEEPGRAM_VOICES[personaId] ?? DEFAULT_DEEPGRAM_VOICE;
+}
+
 export const DEFAULT_MODEL_ID = "eleven_turbo_v2_5";
 export const DEFAULT_OUTPUT_FORMAT = "mp3_44100_128";
 
