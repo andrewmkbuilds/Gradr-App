@@ -24,8 +24,25 @@ jobs:
 
       # No dependency cache on purpose: this job proves a cold, clean install
       # resolves exactly what the lockfile records and still builds.
+      #
+      # Output is mirrored into the observability log the preview uses, so the
+      # gate below reads the same signal locally and in CI.
       - name: Clean install and build
-        run: node scripts/ci-build.mjs
+        run: |
+          mkdir -p /tmp/observability
+          {
+            echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] ci build"
+            node scripts/ci-build.mjs 2>&1 && echo "build OK"
+          } | tee -a /tmp/observability/build-errors.log
+          exit "${PIPESTATUS[0]}"
+        shell: bash
+
+      # Red build-errors entry means the preview is broken — fail the pipeline
+      # even if a later step would otherwise have passed.
+      - name: Fail on recorded build errors
+        if: always()
+        run: node scripts/check-build-errors.mjs
+
 
       - name: Report failure context
         if: failure()
