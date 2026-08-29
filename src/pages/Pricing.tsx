@@ -446,7 +446,13 @@ export default function Pricing() {
                     onClick={() => (current ? navigate("/billing") : handleSelect(tier))}
                     variant={tier.highlighted ? "default" : "outline"}
                     className="w-full"
-                    disabled={pending === pendingKey}
+                    data-testid={`plan-cta-${tier.key}`}
+                    disabled={pending === pendingKey || unavailable(priceId)}
+                    title={
+                      unavailable(priceId)
+                        ? "This plan is still being set up with our payment provider."
+                        : undefined
+                    }
                   >
                     {current ? (
                       "Current plan"
@@ -454,10 +460,15 @@ export default function Pricing() {
                       <span className="inline-flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" /> Opening checkout…
                       </span>
+                    ) : unavailable(priceId) ? (
+                      // A disabled button with no explanation reads as a broken
+                      // page, so the reason lives in the label itself.
+                      `${tier.name} not available yet`
                     ) : isSubscribed ? (
                       `Change to ${tier.name}`
                     ) : (
                       `Subscribe to ${tier.name}`
+
                     )}
 
                   </Button>
