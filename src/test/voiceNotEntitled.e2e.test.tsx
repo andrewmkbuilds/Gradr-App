@@ -10,6 +10,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { useState } from "react";
 import { InterviewStudio } from "@/components/interview/InterviewStudio";
 import type { VoiceErrorCode } from "@/lib/interview/voiceErrors";
@@ -83,7 +84,11 @@ afterEach(() => vi.clearAllMocks());
 describe("VOICE_NOT_ENTITLED keeps the interview alive", () => {
   it("leaves the transcript intact and lets the candidate type straight away", async () => {
     const user = userEvent.setup();
-    render(<Harness initialError="VOICE_NOT_ENTITLED" />);
+    render(
+      <MemoryRouter>
+        <Harness initialError="VOICE_NOT_ENTITLED" />
+      </MemoryRouter>,
+    );
 
     // No blocking recovery dialog for a plan limit.
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
@@ -110,7 +115,11 @@ describe("VOICE_NOT_ENTITLED keeps the interview alive", () => {
 
   it("preserves transcript and draft answer through Retry after reconnect", async () => {
     const user = userEvent.setup();
-    render(<Harness initialError="VOICE_CONNECTION_FAILED" />);
+    render(
+      <MemoryRouter>
+        <Harness initialError="VOICE_CONNECTION_FAILED" />
+      </MemoryRouter>,
+    );
 
     // A real outage does get the recovery panel, with the quotable request id.
     const dialog = await screen.findByRole("alertdialog");
