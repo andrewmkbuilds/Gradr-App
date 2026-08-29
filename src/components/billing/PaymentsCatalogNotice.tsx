@@ -67,7 +67,7 @@ export function PaymentsCatalogNotice({
               {preflight.missing.map((id, i) => (
                 <span key={id}>
                   {i > 0 && ", "}
-                  <code className="rounded bg-surface-muted px-1.5 py-0.5 text-caption text-foreground">
+                  <code className="rounded-control bg-surface-muted px-1.5 py-0.5 text-caption text-foreground">
                     {id}
                   </code>
                 </span>

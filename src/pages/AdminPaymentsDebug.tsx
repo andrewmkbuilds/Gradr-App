@@ -82,7 +82,7 @@ export default function AdminPaymentsDebug() {
 
   if (authLoading || roleLoading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="flex items-center justify-center py-16">
         <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
         <span className="sr-only">Loading</span>
       </div>
