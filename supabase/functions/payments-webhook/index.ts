@@ -17,6 +17,70 @@ import {
   reverseEntitlementsForAdjustment,
 } from "../_shared/entitlementLedger.ts";
 
+/** ---- Paddle event payload shapes (loosely typed to match Paddle's webhook JSON) ---- */
+
+interface PaddleMoneyTotals {
+  total?: string | number | null;
+  subtotal?: string | number | null;
+  discount?: string | number | null;
+  grandTotal?: string | number | null;
+}
+
+interface PaddlePriceRef {
+  id?: string | null;
+  productId?: string | null;
+  unitPrice?: { amount?: string | number | null } | null;
+  customData?: Record<string, unknown> | null;
+  custom_data?: Record<string, unknown> | null;
+  importMeta?: { externalId?: string | null } | null;
+}
+
+interface PaddleProductRef {
+  customData?: Record<string, unknown> | null;
+  importMeta?: { externalId?: string | null } | null;
+}
+
+interface PaddleLineItem {
+  price?: PaddlePriceRef | null;
+  product?: PaddleProductRef | null;
+  quantity?: number | null;
+}
+
+/** Union-ish shape covering the fields used across the various Paddle event types. */
+interface PaddleEventData {
+  id?: string | null;
+  email?: string | null;
+  customerId?: string | null;
+  customData?: { userId?: string | null } | null;
+  status?: string | null;
+  items?: PaddleLineItem[] | null;
+  scheduledChange?: { action?: string | null; effectiveAt?: string | null } | null;
+  currentBillingPeriod?: { endsAt?: string | null } | null;
+  billingPeriod?: { endsAt?: string | null } | null;
+  subscriptionId?: string | null;
+  subscription_id?: string | null;
+  transactionId?: string | null;
+  transaction_id?: string | null;
+  details?: { totals?: PaddleMoneyTotals | null } | null;
+  totals?: PaddleMoneyTotals | null;
+  payoutTotals?: PaddleMoneyTotals | null;
+  currencyCode?: string | null;
+  currency_code?: string | null;
+  discountId?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  canceledAt?: string | null;
+  billedAt?: string | null;
+  invoiceNumber?: string | null;
+  action?: string | null;
+}
+
+interface PaddleWebhookEvent {
+  eventType: string;
+  eventId?: string | null;
+  data: PaddleEventData;
+}
+
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
   if (!_supabase) {
