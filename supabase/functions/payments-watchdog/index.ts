@@ -530,7 +530,7 @@ async function runTrialReminders(): Promise<{ notified: number }> {
       return null;
     });
 
-    await db.rpc("enqueue_notification", {
+    await (db.rpc("enqueue_notification", {
       _user_id: row.user_id,
       _type: "billing_trial_ending",
       _title: daysLeft === 1 ? "Your trial ends tomorrow" : `Your trial ends in ${daysLeft} days`,
