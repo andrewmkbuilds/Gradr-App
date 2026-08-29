@@ -12,9 +12,9 @@ import { Button } from "@/components/ds/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, BookOpen, LifeBuoy, Mail, Activity } from "lucide-react";
+import { ArrowRight, BookOpen, Facebook, LifeBuoy, Mail, Activity } from "lucide-react";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL } from "@/config/community";
+import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
 
 const SUPPORT_EMAIL = "support@gradr.me";
 
