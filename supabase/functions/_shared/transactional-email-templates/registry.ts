@@ -26,6 +26,9 @@ import { template as verificationSubmitted } from './verification-submitted.tsx'
 import { template as verificationApproved } from './verification-approved.tsx'
 import { template as verificationRejected } from './verification-rejected.tsx'
 import { template as verificationNeedsInfo } from './verification-needs-info.tsx'
+import { template as trialStarted } from './trial-started.tsx'
+import { template as trialEnding } from './trial-ending.tsx'
+import { template as trialCancelled } from './trial-cancelled.tsx'
 import { template as studentVerificationCode } from './student-verification-code.tsx'
 
 export interface TemplateEntry {
@@ -47,6 +50,9 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'password-reset': passwordReset,
   'sign-in-alert': signInAlert,
   'security-alert': securityAlert,
+  'trial-started': trialStarted,
+  'trial-ending': trialEnding,
+  'trial-cancelled': trialCancelled,
   'subscription-started': subscriptionStarted,
   'subscription-upgraded': subscriptionUpgraded,
   'subscription-downgraded': subscriptionDowngraded,

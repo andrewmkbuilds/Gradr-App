@@ -14,6 +14,8 @@ export interface SubscriptionState {
   billingInterval: "monthly" | "annual" | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  /** Set while the plan is inside its free trial (Paddle `trialing`). */
+  trialEnd: string | null;
 }
 
 const EMPTY: SubscriptionState = {
@@ -23,6 +25,7 @@ const EMPTY: SubscriptionState = {
   billingInterval: null,
   currentPeriodEnd: null,
   cancelAtPeriodEnd: false,
+  trialEnd: null,
 };
 
 /** Test and live rows share one table — every read must be scoped. */
@@ -40,7 +43,7 @@ export function useSubscription() {
       const { data, error } = await supabase
         .from("subscribers")
         .select(
-          "subscribed, subscription_tier, subscription_status, billing_interval, current_period_end, cancel_at_period_end",
+          "subscribed, subscription_tier, subscription_status, billing_interval, current_period_end, cancel_at_period_end, trial_end",
         )
         .eq("user_id", user!.id)
         .eq("environment", env)
@@ -54,6 +57,7 @@ export function useSubscription() {
         billingInterval: (data.billing_interval as "monthly" | "annual" | null) ?? null,
         currentPeriodEnd: data.current_period_end,
         cancelAtPeriodEnd: data.cancel_at_period_end,
+        trialEnd: data.trial_end ?? null,
       };
     },
   });
@@ -72,9 +76,18 @@ export function useSubscription() {
       ? (tier as PlanKey)
       : "free";
 
+  const isTrialing = state.status === "trialing" &&
+    (!state.trialEnd || new Date(state.trialEnd) > new Date());
+  const trialDaysLeft = isTrialing && state.trialEnd
+    ? Math.max(0, Math.ceil((new Date(state.trialEnd).getTime() - Date.now()) / 86_400_000))
+    : null;
+
   return {
     ...state,
     plan,
+    /** Full plan access, but nothing has been charged yet. */
+    isTrialing,
+    trialDaysLeft,
     isLoading: query.isLoading,
     /** The plan could not be verified — callers must not treat this as "free". */
     isError: query.isError,

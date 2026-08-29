@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Seo } from "@/components/Seo";
+import { TrialBanner } from "@/components/billing/TrialBanner";
 import { useRealtimeBilling } from "@/hooks/useRealtimeBilling";
 import { useSubscriptionActions, useSubscriptionDetails } from "@/hooks/useSubscriptionManagement";
 import { PLAN_PRICING, type PlanId } from "@/config/pricing";
@@ -88,6 +89,8 @@ export default function Subscription() {
           Everything about your plan — renewal, payment method and cancellation — in one place.
         </p>
       </header>
+
+      <TrialBanner />
 
       {isLoading ? (
         <Card className="space-y-4 p-6">

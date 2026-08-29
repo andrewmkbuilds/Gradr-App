@@ -14,8 +14,10 @@ import {
   annualListPrice,
   annualSavingsPercent,
   formatUsd,
+  hasTrial,
   planAmount,
   planPriceLabel,
+  TRIAL_DAYS,
   type PlanId,
 } from "@/config/pricing";
 import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
@@ -466,12 +468,22 @@ export default function Pricing() {
                       `${tier.name} not available yet`
                     ) : isSubscribed ? (
                       `Change to ${tier.name}`
+                    ) : hasTrial(tier.key as PlanId, interval) ? (
+                      `Start ${TRIAL_DAYS}-day free trial`
                     ) : (
                       `Subscribe to ${tier.name}`
 
                     )}
 
                   </Button>
+                  {!current && !unavailable(priceId) && !isSubscribed &&
+                    hasTrial(tier.key as PlanId, interval) && (
+                    <Text variant="caption" tone="muted" className="mt-2">
+                      {TRIAL_DAYS} days free, then {planPriceLabel(tier.key as PlanId, interval)}/
+                      {interval === "annual" ? "year" : "month"}. Cancel any time before it ends and
+                      you won't be charged.
+                    </Text>
+                  )}
                 </Card>
                 </SpatialCard>
               );

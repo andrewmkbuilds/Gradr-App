@@ -4003,6 +4003,8 @@ export type Database = {
           subscribed: boolean
           subscription_status: string | null
           subscription_tier: string | null
+          trial_end: string | null
+          trial_start: string | null
           updated_at: string
           user_id: string
         }
@@ -4020,6 +4022,8 @@ export type Database = {
           subscribed?: boolean
           subscription_status?: string | null
           subscription_tier?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
           user_id: string
         }
@@ -4037,6 +4041,8 @@ export type Database = {
           subscribed?: boolean
           subscription_status?: string | null
           subscription_tier?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -5061,6 +5067,10 @@ export type Database = {
       best_discount_for: {
         Args: { _interval?: string; _plan?: string; _user_id: string }
         Returns: Json
+      }
+      billing_period_start: {
+        Args: { _at?: string; _env?: string; _user_id: string }
+        Returns: string
       }
       build_email_weekly_report: { Args: { _end?: string }; Returns: Json }
       consume_entitlement: {

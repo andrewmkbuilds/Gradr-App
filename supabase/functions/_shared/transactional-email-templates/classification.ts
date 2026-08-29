@@ -43,6 +43,9 @@ export const EMAIL_CLASSIFICATIONS: Record<string, EmailClassification> = {
   'student-verification-code': { kind: 'transactional', category: 'essential', trigger: 'Student verification code requested' },
 
   // --- Billing (essential) ---
+  'trial-started': { kind: 'transactional', category: 'essential', trigger: 'Free trial started' },
+  'trial-ending': { kind: 'transactional', category: 'essential', trigger: 'Free trial ends soon — card will be charged' },
+  'trial-cancelled': { kind: 'transactional', category: 'essential', trigger: 'Free trial cancelled before any charge' },
   'subscription-started': { kind: 'transactional', category: 'essential', trigger: 'Subscription started' },
   'subscription-upgraded': { kind: 'transactional', category: 'essential', trigger: 'Plan upgraded' },
   'subscription-downgraded': { kind: 'transactional', category: 'essential', trigger: 'Plan downgraded' },

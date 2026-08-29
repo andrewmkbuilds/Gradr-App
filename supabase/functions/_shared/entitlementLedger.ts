@@ -213,6 +213,23 @@ export async function reverseEntitlementsForAdjustment(
 
   if (!transactionId) return result;
 
+  // Idempotency: Paddle retries adjustment.created, and the watchdog replays
+  // failed deliveries. A reversal that already ran must never claw back a
+  // second time, so the ledger entry for this event is the guard.
+  const guardKey = providerEventId ?? `adjustment:${transactionId}:${action}`;
+  const { data: alreadyReversed } = await db()
+    .from("entitlement_ledger")
+    .select("id, user_id")
+    .eq("entry_type", "reversal")
+    .eq("provider_event_id", guardKey)
+    .limit(1);
+  if (alreadyReversed?.length) {
+    result.ok = true;
+    result.reason = "already_reversed";
+    result.userId = (alreadyReversed[0]?.user_id as string | undefined) ?? null;
+    return result;
+  }
+
   // The purchase row is the record of what the transaction actually granted.
   const { data: purchase } = await db()
     .from("purchases")
@@ -283,7 +300,7 @@ export async function reverseEntitlementsForAdjustment(
       delta: -removed,
       balanceAfter,
       reason: `${action}: ${purchase.pack_label ?? purchase.pack_key}`,
-      providerEventId: providerEventId ?? null,
+      providerEventId: guardKey,
       transactionId,
       amount,
       currency,
@@ -325,7 +342,7 @@ export async function reverseEntitlementsForAdjustment(
       feature: "subscription",
       delta: isFull ? -1 : 0,
       reason: `${action} on subscription`,
-      providerEventId: providerEventId ?? null,
+      providerEventId: guardKey,
       transactionId,
       subscriptionId,
       amount,

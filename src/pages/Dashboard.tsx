@@ -11,6 +11,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { CreditsBalance } from "@/components/CreditsBalance";
 import { PaymentIssueBanner } from "@/components/PaymentIssueBanner";
+import { TrialBanner } from "@/components/billing/TrialBanner";
 import { UsageBars } from "@/components/UsageBars";
 import { Surface, SurfaceHeader } from "@/components/ui/surface";
 import { Badge, Text } from "@/design-system/gradr-9b9b95";
@@ -293,6 +294,7 @@ export default function Dashboard() {
         <Text variant="body" tone="muted" className="mt-1">Your AI-powered career command center</Text>
       </div>
 
+      <TrialBanner />
       <PaymentIssueBanner />
       <CreditsBalance />
       <UsageBars />
