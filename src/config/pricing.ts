@@ -91,3 +91,21 @@ export function billingPeriodLabel(plan: PlanId, interval: BillingInterval): str
 export function planPriceLabel(plan: PlanId, interval: BillingInterval): string {
   return formatUsd(planAmount(plan, interval));
 }
+
+/**
+ * Free-trial policy. The trial itself lives on the Paddle price
+ * (`trial_period: 7 days` on every monthly plan) — this constant is what the
+ * UI and emails quote, so the two must be changed together.
+ */
+export const TRIAL_DAYS = 7;
+
+/** Monthly plans carry the free trial; yearly plans are billed immediately. */
+export function hasTrial(plan: PlanId, interval: BillingInterval): boolean {
+  return interval === "monthly" && plan !== "free";
+}
+
+/** CTA copy for a plan card: trial-aware. */
+export function checkoutCtaLabel(plan: PlanId, interval: BillingInterval): string {
+  if (plan === "free") return "Get started free";
+  return hasTrial(plan, interval) ? `Start ${TRIAL_DAYS}-day free trial` : "Upgrade";
+}
