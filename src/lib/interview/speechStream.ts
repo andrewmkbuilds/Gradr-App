@@ -303,8 +303,14 @@ export class SpeechQueue {
       if (this.stopped) break;
 
       if ("error" in result) {
-        // No substitute voice: end the turn and let the UI offer a retry.
         if (result.error === VOICE_ABORTED) break;
+        // Backend voice is unavailable for this thought — speak it in the
+        // browser rather than dropping the turn.
+        if (await this.speakViaFallback(item.text, result.error)) {
+          if (this.stopped) break;
+          await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));
+          continue;
+        }
         this.failure = result.error;
         break;
       }
@@ -315,10 +321,19 @@ export class SpeechQueue {
         this.opts.onChunkSpoken(item.text);
       } catch (error) {
         console.error("[voice] playback failed", error);
-        this.failure = playbackErrorCode(error);
+        const code = playbackErrorCode(error);
+        // Autoplay blocks aren't fixed by another engine — the browser voice
+        // needs the same gesture, so surface it instead of retrying.
+        if (code !== "VOICE_PERMISSION_DENIED" && await this.speakViaFallback(item.text, code)) {
+          if (this.stopped) break;
+          await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));
+          continue;
+        }
+        this.failure = code;
         break;
       }
       if (this.stopped) break;
+
 
 
       await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));
