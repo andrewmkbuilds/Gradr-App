@@ -124,7 +124,7 @@ export default function AdminVoiceSettings() {
     setTesting(true);
     setTestResult(null);
     try {
-      const data = (await callDiagnostics({ action: "stream-test", personaId })) as TestResult;
+      const data = (await callDiagnostics({ action: "stream-test", personaId })) as unknown as TestResult;
       setTestResult(data);
       if (data.ok && data.audioBase64) {
         const audio = new Audio(`data:audio/mpeg;base64,${data.audioBase64}`);
@@ -289,7 +289,7 @@ export default function AdminVoiceSettings() {
           <div className="rounded-xl border border-border/60 bg-muted/40 p-4 text-sm">
             {testResult.ok ? (
               <p>
-                Realtime session verified — <strong>{testResult.bytes.toLocaleString()} bytes</strong> of audio,
+                Realtime session verified — <strong>{(testResult.bytes ?? 0).toLocaleString()} bytes</strong> of audio,
                 first byte in <strong>{testResult.ttfbMs} ms</strong>, voice {testResult.voiceId}, model {testResult.modelId}.
               </p>
             ) : (
