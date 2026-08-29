@@ -34,7 +34,7 @@ function harness(
   return { queue, spoken, fallbacks, failures, isDrained: () => drained };
 }
 
-const settle = () => new Promise((r) => setTimeout(r, 40));
+const settle = () => new Promise((r) => setTimeout(r, 600));
 
 describe("SpeechQueue browser fallback", () => {
   it("speaks the thought through the browser when the backend fails", async () => {
