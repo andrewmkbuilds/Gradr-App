@@ -19,13 +19,20 @@ import {
   type PlanId,
 } from "@/config/pricing";
 import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
+import {
+  isPriceUnavailable,
+  runPaymentsPreflight,
+  type PaymentsPreflight,
+} from "@/lib/payments/preflight";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
+import { PaymentsCatalogNotice } from "@/components/billing/PaymentsCatalogNotice";
 import { VerificationDialog } from "@/components/VerificationDialog";
 import { useDiscountPrograms, useMyEligibility } from "@/hooks/useEligibility";
 import { PromoCodeField, type AppliedPromo } from "@/components/billing/PromoCodeField";
+
 
 const TIER_ICONS: Record<string, typeof Sparkles> = {
   Starter: Zap,
