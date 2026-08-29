@@ -133,6 +133,16 @@ export default function Pricing() {
       toast.success("You're on the Free plan!");
       return;
     }
+    // Belt and braces: the CTA is already disabled for a plan that is missing
+    // from the catalog, but keyboard/programmatic activation must not be able
+    // to open an overlay we know will fail.
+    const tierPriceId = interval === "annual" ? tier.priceId.year : tier.priceId.month;
+    if (unavailable(tierPriceId)) {
+      toast.error(`${tier.name} isn't available to buy yet`, {
+        description: "Our payment provider is still setting this plan up. Email support@gradr.me and we'll sort it manually.",
+      });
+      return;
+    }
     // An existing subscriber must never open a second checkout: Paddle would
     // create a parallel subscription and bill them twice. Plan and interval
     // moves belong to the change-plan flow, which modifies the subscription
@@ -154,8 +164,15 @@ export default function Pricing() {
       navigate("/auth?next=/pricing");
       return;
     }
+    if (unavailable(key)) {
+      toast.error("This pack isn't available to buy yet", {
+        description: "Our payment provider is still setting it up. Email support@gradr.me and we'll sort it manually.",
+      });
+      return;
+    }
     void buyPack(key, promo?.discountId ?? null);
   };
+
 
   /**
    * List price comes from Paddle verbatim. When the signed-in visitor has a
