@@ -245,19 +245,46 @@ export function PublicShell({ children, source }: PublicShellProps) {
               href={DISCORD_INVITE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              aria-label="Join our Discord"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
             >
               <DiscordIcon size={16} aria-hidden="true" />
-              Join our Discord
+            </a>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Gradr on Instagram"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
+            >
+              <Instagram className="h-4 w-4" aria-hidden="true" />
+            </a>
+            <a
+              href={X_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Gradr on X"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
+            >
+              <XIcon size={16} aria-hidden="true" />
             </a>
             <a
               href={FACEBOOK_PAGE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              aria-label="Gradr on Facebook"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
             >
               <Facebook className="h-4 w-4" aria-hidden="true" />
-              Facebook
+            </a>
+            <a
+              href={YOUTUBE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Gradr on YouTube"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
+            >
+              <Youtube className="h-4 w-4" aria-hidden="true" />
             </a>
           </div>
         </div>
