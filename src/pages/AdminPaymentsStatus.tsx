@@ -104,6 +104,25 @@ export default function AdminPaymentsStatus() {
     },
   });
 
+  // Catalog preflight + build manifests feed the go-live checklist.
+  const preflight = useQuery({
+    queryKey: ["payments-status-preflight", diag.environment],
+    enabled: Boolean(isAdmin),
+    retry: false,
+    staleTime: 30_000,
+    queryFn: () => runPaymentsPreflight(catalogPriceIds()),
+  });
+
+  const buildProbe = useQuery({
+    queryKey: ["payments-build-manifests"],
+    enabled: Boolean(isAdmin),
+    retry: false,
+    staleTime: 60_000,
+    queryFn: fetchBothBuildManifests,
+  });
+
+
+
   if (authLoading || roleLoading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
