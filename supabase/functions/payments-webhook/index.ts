@@ -138,6 +138,9 @@ async function mirrorSubscription(data: PaddleEventData, env: PaddleEnv) {
 
 
 
+/** Free-trial length, mirrored from src/config/pricing.ts and the Paddle price. */
+const TRIAL_DAYS = 7;
+
 function planFromItems(data: PaddleEventData) {
   const item = data?.items?.[0];
   const externalPriceId = priceExternalId(item);
@@ -202,7 +205,7 @@ async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
       planName: planLabel(plan?.tier, plan?.interval),
       trialDays: TRIAL_DAYS,
       trialEndsOn: formatDate(trialEnd ?? periodEnd),
-      firstChargeAmount: plan?.amountLabel ?? undefined,
+      interval: plan?.interval ?? undefined,
     });
   } else if (entitled) {
     // Idempotency is keyed on the subscription id so Paddle retries of the same
@@ -891,8 +894,11 @@ Deno.serve(async (req) => {
             _metadata: { subscription_id: cancelData?.id ?? null },
           });
           // Keyed on the subscription id so Paddle retries never re-send it.
+          const cancelledInTrial = Boolean(cancelData?.status === "trialing") ||
+            (Boolean(trialEndOf(cancelData)) &&
+              new Date(trialEndOf(cancelData) as string) > new Date());
           await billingEmail(
-            "subscription-cancelled",
+            cancelledInTrial ? "trial-cancelled" : "subscription-cancelled",
             await emailFor(eventUserId, env),
             `sub-cancelled-${cancelData?.id}`,
             {
