@@ -54,7 +54,9 @@ export interface PaddleEventData {
   items?: PaddleLineItem[] | null;
   scheduledChange?: { action?: string | null; effectiveAt?: string | null } | null;
   scheduled_change?: { action?: string | null; effective_at?: string | null } | null;
-  currentBillingPeriod?: { endsAt?: string | null } | null;
+  currentBillingPeriod?: { endsAt?: string | null; startsAt?: string | null } | null;
+  trialDates?: { startsAt?: string | null; endsAt?: string | null } | null;
+  trial_dates?: { starts_at?: string | null; ends_at?: string | null } | null;
   current_billing_period?: { ends_at?: string | null } | null;
   billingPeriod?: { endsAt?: string | null } | null;
   billing_period?: { ends_at?: string | null } | null;
@@ -135,6 +137,27 @@ export function periodEndOf(data: PaddleEventData): string | null {
     data?.billing_period?.ends_at ??
     null
   );
+}
+
+/** Start of the free trial, when the subscription was created with one. */
+export function trialStartOf(data: PaddleEventData): string | null {
+  return data?.trialDates?.startsAt ?? data?.trial_dates?.starts_at ?? null;
+}
+
+/** End of the free trial — the moment the first real charge is attempted. */
+export function trialEndOf(data: PaddleEventData): string | null {
+  return data?.trialDates?.endsAt ?? data?.trial_dates?.ends_at ?? null;
+}
+
+/**
+ * True while the subscription is inside its free trial. Paddle reports this
+ * with `status: "trialing"`; the trial dates are a fallback for events (like
+ * transaction payloads) that carry the dates but not the status.
+ */
+export function isTrialing(data: PaddleEventData): boolean {
+  if (data?.status === "trialing") return true;
+  const end = trialEndOf(data);
+  return Boolean(end) && new Date(end as string) > new Date();
 }
 
 /** True when the subscription is scheduled to cancel at period end. */
