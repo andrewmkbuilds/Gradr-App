@@ -246,6 +246,10 @@ function renderHtml(data) {
 
 console.log(`\nReports written: ${jsonPath} · ${htmlPath}`);
 
+// `--no-fail` writes the report and exits 0 so CI can decide the gate from the
+// baseline diff (only *new* serious/critical findings should block a merge).
+const NO_FAIL = args.includes("--no-fail");
+
 if (!results.length) {
   console.log("✓ No WCAG A/AA violations found across public routes (light + dark, mobile + desktop).");
   process.exit(0);
@@ -267,5 +271,6 @@ for (const [key, list] of grouped) {
 }
 
 console.log(`\n${results.length} violation group(s), ${instances} element(s); ${blocking.length} blocking.`);
-process.exit(blocking.length ? 1 : 0);
+process.exit(!NO_FAIL && blocking.length ? 1 : 0);
+
 
