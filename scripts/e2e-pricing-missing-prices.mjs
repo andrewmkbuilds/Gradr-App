@@ -58,6 +58,28 @@ async function stubResolver(page, resolved) {
   });
 }
 
+/**
+ * Stubs Paddle's localized price preview.
+ *
+ * The stubbed resolver hands the page synthetic `pri_...` ids, so a real call
+ * to Paddle would 400 on ids that do not exist — noise from the fixture, not
+ * from the app. Localized pricing has its own coverage; here we only care
+ * about the catalog-availability behaviour.
+ */
+async function stubPricePreview(page) {
+  await page.route(/paddle\.com\/.*pricing-preview/i, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: JSON.stringify({
+        data: { currency_code: "USD", details: { line_items: [] } },
+        meta: { request_id: "stub" },
+      }),
+    });
+  });
+}
+
 async function openPricing(page) {
   await page.goto(`${BASE}/pricing`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => {});
@@ -78,6 +100,7 @@ async function run() {
     page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${e.message}`));
 
     await stubResolver(page, {});
+    await stubPricePreview(page);
     await openPricing(page);
 
     const notice = page.getByTestId("payments-catalog-notice");
@@ -139,6 +162,7 @@ async function run() {
 
     // Only the yearly Pro price exists; the page defaults to the yearly tab.
     await stubResolver(page2, { pro_annual: "pri_live_pro_annual" });
+    await stubPricePreview(page2);
     await openPricing(page2);
 
     const notice2 = page2.getByTestId("payments-catalog-notice");
