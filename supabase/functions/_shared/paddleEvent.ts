@@ -116,11 +116,14 @@ export function productExternalId(item: PaddleLineItem | null | undefined): stri
 }
 
 /** The app user this event belongs to, as passed through checkout `customData`. */
-export function userIdOf(data: PaddleEventData): string | undefined {
-  return (data?.customData?.userId ??
+export function userIdOf(data: PaddleEventData): string | null {
+  return (
+    data?.customData?.userId ??
     data?.customData?.user_id ??
     data?.custom_data?.userId ??
-    data?.custom_data?.user_id) ?? undefined;
+    data?.custom_data?.user_id ??
+    null
+  );
 }
 
 /** End of the current paid period, whichever field Paddle used for this event. */

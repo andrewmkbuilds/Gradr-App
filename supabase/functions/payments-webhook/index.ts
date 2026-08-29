@@ -160,7 +160,7 @@ async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
   }
 
   const status: string = data.status ?? "active";
-  const periodEnd = data.currentBillingPeriod?.endsAt ?? null;
+  const periodEnd = periodEndOf(data);
   const entitled = isEntitled(status, periodEnd);
 
   await db().from("subscribers").upsert(
@@ -201,7 +201,7 @@ async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
 
 async function updateSubscription(data: PaddleEventData, env: PaddleEnv) {
   const status: string = data.status ?? "active";
-  const periodEnd = data.currentBillingPeriod?.endsAt ?? null;
+  const periodEnd = periodEndOf(data);
   const entitled = isEntitled(status, periodEnd);
   const { externalPriceId, plan } = planFromItems(data);
 
