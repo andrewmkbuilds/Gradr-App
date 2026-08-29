@@ -36,8 +36,9 @@ const TIER_ICONS: Record<string, typeof Sparkles> = {
 export default function Pricing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { plan: currentPlan, billingInterval } = useSubscription();
+  const { plan: currentPlan, billingInterval, isSubscribed } = useSubscription();
   const { pending, startSubscription, buyPack } = useBillingActions();
+
   const [tab, setTab] = useState<"plans" | "packs">("plans");
   const [interval, setInterval] = useState<"monthly" | "annual">("annual");
   const [verifyOpen, setVerifyOpen] = useState(false);
@@ -104,8 +105,20 @@ export default function Pricing() {
       toast.success("You're on the Free plan!");
       return;
     }
+    // An existing subscriber must never open a second checkout: Paddle would
+    // create a parallel subscription and bill them twice. Plan and interval
+    // moves belong to the change-plan flow, which modifies the subscription
+    // they already have.
+    if (isSubscribed) {
+      toast.info("You already have an active plan", {
+        description: "Change your plan from billing so you're never charged twice.",
+      });
+      navigate("/billing");
+      return;
+    }
     void startSubscription(interval, tier.key as PlanKey, promo?.discountId ?? null);
   };
+
 
   const handlePack = (key: string) => {
     trackUpgradeCta({ location: "pricing", text: "Buy pack", plan: "credit_pack", feature: key });
@@ -385,9 +398,12 @@ export default function Pricing() {
                       <span className="inline-flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" /> Opening checkout…
                       </span>
+                    ) : isSubscribed ? (
+                      `Change to ${tier.name}`
                     ) : (
                       `Subscribe to ${tier.name}`
                     )}
+
                   </Button>
                 </Card>
                 </SpatialCard>
