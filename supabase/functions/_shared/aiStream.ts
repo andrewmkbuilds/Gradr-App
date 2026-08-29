@@ -169,7 +169,7 @@ export async function streamGatewayChat(opts: {
       const payload = line.slice(5).trim();
       if (!payload || payload === "[DONE]") continue;
 
-      let parsed: any;
+      let parsed: { choices?: { delta?: { content?: string; tool_calls?: { index?: number; function?: { name?: string; arguments?: string } }[] } }[] };
       try {
         parsed = JSON.parse(payload);
       } catch {
