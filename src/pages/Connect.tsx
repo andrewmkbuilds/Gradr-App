@@ -207,6 +207,23 @@ export default function Connect() {
         </span>
         <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
       </a>
+      <a
+        href={FACEBOOK_PAGE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="interactive flex items-center gap-3 rounded-card border border-border/60 bg-card p-4 elev-1 transition-colors hover:bg-muted"
+      >
+        <Facebook className="h-5 w-5 shrink-0" aria-hidden="true" />
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold text-foreground">
+            Follow Gradr on Facebook
+          </span>
+          <span className="block text-xs text-muted-foreground">
+            Product news, announcements and career tips from the team.
+          </span>
+        </span>
+        <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+      </a>
 
       <Card className="space-y-3 p-6">
         <h2 className="text-sm font-semibold text-foreground">Your connection URL</h2>
