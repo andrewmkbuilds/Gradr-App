@@ -32,8 +32,9 @@ const TIMELINE_TONE: Record<string, string> = {
 
 export default function BillingHistory() {
   useRealtimeBilling();
-  const { data: invoices, isLoading: invoicesLoading } = useInvoices();
-  const { data: timeline, isLoading: timelineLoading } = useBillingTimeline();
+  const { data: invoices, isLoading: invoicesLoading, isError: invoicesError } = useInvoices();
+  const { data: timeline, isLoading: timelineLoading, isError: timelineError } = useBillingTimeline();
+
   const { data: purchases } = usePurchases();
   const [downloading, setDownloading] = useState<string | null>(null);
 
