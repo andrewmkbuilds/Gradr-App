@@ -13,9 +13,11 @@ import { VOICE_ABORTED, toVoiceErrorCode, type VoiceErrorCode } from "./voiceErr
  *   pauses: each chunk is fetched while the previous one is still playing.
  * - The transcript only reveals a chunk when its audio actually starts, so the
  *   caption never runs ahead of the voice.
- * - There is deliberately NO silent fallback to another voice engine. If
- *   the voice backend fails, the turn stops and the caller surfaces a retryable error,
- *   so a broken integration can never hide behind a robotic substitute voice.
+ * - The backend serves Deepgram audio. When it cannot (outage, network, or an
+ *   unusable response), the queue speaks the same thought through the browser's
+ *   Web Speech API so the interview continues, and reports the fallback once.
+ *   If even that is unavailable, the turn stops with a retryable error rather
+ *   than going silent.
  */
 
 
@@ -266,6 +268,7 @@ export class SpeechQueue {
     this.stopped = false;
     this.closed = false;
     this.failure = null;
+    this.fallbackAnnounced = false;
   }
 
   private teardownAudio() {
