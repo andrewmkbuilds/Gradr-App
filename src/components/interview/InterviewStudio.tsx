@@ -631,12 +631,12 @@ export function InterviewStudio(props: Props) {
                   {!voiceAvailable
                     ? "Voice interviews are a Pro feature — you can keep typing"
                     : usingFallbackVoice
-                      ? "Studio voice is unavailable — using your browser's voice for now"
-                      : voiceRecovering
-                        ? "Checking whether interviewer audio is back…"
-                      : voiceOn
-                        ? "Interviewer audio on"
-                        : "Interviewer audio off"}
+                    ? "Studio voice is unavailable — using your browser's voice for now"
+                    : voiceRecovering
+                    ? "Checking whether interviewer audio is back…"
+                    : voiceOn
+                    ? "Interviewer audio on"
+                    : "Interviewer audio off"}
                 </TooltipContent>
               </Tooltip>
 
