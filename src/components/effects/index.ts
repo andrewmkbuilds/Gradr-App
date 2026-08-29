@@ -9,6 +9,7 @@
 export { AnimatedHeading } from "./AnimatedHeading";
 export type { AnimatedHeadingProps, HeadingMotion } from "./AnimatedHeading";
 export { BlurText } from "./BlurText";
+export { CursorEffects } from "./CursorEffects";
 export { GradientText } from "./GradientText";
 export { TextLoop } from "./TextLoop";
 export { SpotlightCard } from "./SpotlightCard";
