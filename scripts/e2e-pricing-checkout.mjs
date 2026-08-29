@@ -117,8 +117,9 @@ try {
 
   const priceResolverErrors = [];
   page.on("response", async (res) => {
-    if (!res.url().includes("get-paddle-price") || res.ok()) return;
+    if (!res.url().includes("get-paddle-price")) return;
     const body = await res.text().catch(() => "");
+    if (res.ok() && /"paddleId"/.test(body)) return;
     priceResolverErrors.push(body.slice(0, 200) || `HTTP ${res.status()}`);
   });
 
