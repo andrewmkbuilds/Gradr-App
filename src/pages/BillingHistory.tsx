@@ -158,7 +158,7 @@ export default function BillingHistory() {
         {timelineLoading
           ? <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
           : timelineError
-          ? <p role="alert" className="text-sm text-muted-foreground">
+          ? <p role="alert" className="text-body-sm text-muted-foreground">
               We couldn't load your subscription activity right now. Reload the page to try again.
             </p>
           : !timeline?.length
