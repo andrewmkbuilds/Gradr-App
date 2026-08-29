@@ -16,6 +16,7 @@ import { RouteSeo } from "@/components/RouteSeo";
 import { CANONICAL_ALIASES } from "@/lib/seo/canonical";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CursorEffects } from "@/components/effects/CursorEffects";
+import { DepthDebugOverlay } from "@/components/dev/DepthDebugOverlay";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { PublicShell } from "@/components/PublicShell";
 import { RouteSkeleton } from "@/components/states/PageSkeletons";
@@ -548,6 +549,7 @@ const App = () => (
             <CookieConsent />
             <OfflineBanner />
             <CursorEffects />
+            <DepthDebugOverlay />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

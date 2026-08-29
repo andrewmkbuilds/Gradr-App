@@ -181,6 +181,7 @@
     "test:audit-retention": "RUN_DB_TESTS=1 vitest run src/test/adminRpcAuditRetention.integration.test.ts",
     "test:checkout:missing-prices": "node scripts/e2e-pricing-missing-prices.mjs",
     "test:checkout:prod": "node scripts/e2e-pricing-checkout.mjs",
+    "test:cursor": "node scripts/e2e-cursor-effects.mjs",
     "test:db": "RUN_DB_TESTS=1 vitest run src/test/dbSchema.integration.test.ts",
     "test:depth": "node scripts/depth-smoke.mjs",
     "test:e2e": "node scripts/e2e-authenticated.mjs",

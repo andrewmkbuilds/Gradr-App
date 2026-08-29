@@ -63,6 +63,7 @@ export function CursorEffects({ className }: { className?: string }) {
   return (
     <div
       aria-hidden
+      data-cursor-effects="true"
       className={cn("pointer-events-none fixed inset-0 z-50 hidden md:block", className)}
     >
       <AnimatePresence>
@@ -71,6 +72,7 @@ export function CursorEffects({ className }: { className?: string }) {
             {/* Halo — lazy spring, the source of the "trail" impression. */}
             <motion.span
               key="halo"
+              data-cursor-layer="halo"
               className="absolute left-0 top-0"
               style={{ x: haloX, y: haloY }}
               initial={{ opacity: 0, scale: 0.8 }}
@@ -84,6 +86,7 @@ export function CursorEffects({ className }: { className?: string }) {
             {/* Ring — snappy spring, reacts to hover and press. */}
             <motion.span
               key="ring"
+              data-cursor-layer="ring"
               className="absolute left-0 top-0"
               style={{ x: ringX, y: ringY }}
               initial={{ opacity: 0, scale: 0.5 }}
@@ -97,6 +100,7 @@ export function CursorEffects({ className }: { className?: string }) {
             {/* Dot — raw motion value, zero latency. */}
             <motion.span
               key="dot"
+              data-cursor-layer="dot"
               className="absolute left-0 top-0"
               style={{ x, y }}
               initial={{ opacity: 0 }}

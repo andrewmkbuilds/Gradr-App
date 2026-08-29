@@ -31,18 +31,71 @@ const SAMPLE_MS = 1600;
 /** How many consecutive bad windows before we downgrade. */
 const BAD_WINDOWS = 2;
 
+/** Static device hints the capability gate reasons about. */
+export interface DeviceHints {
+  /** `(pointer: coarse)` — touch-first input. */
+  coarse: boolean;
+  /** Viewport width in CSS pixels. */
+  width: number;
+  /** `navigator.hardwareConcurrency`, when exposed. */
+  cores?: number;
+  /** `navigator.deviceMemory` in GB, when exposed. */
+  memory?: number;
+  /** `navigator.connection.saveData`. */
+  saveData?: boolean;
+}
+
+/** Pure capability gate — the only place device hints turn into a level. */
+export function deviceLevelFrom(hints: DeviceHints): DepthLevel {
+  if (hints.saveData === true) return "off";
+  const narrow = hints.width < 768;
+  const lowCores = (hints.cores ?? 8) <= 4;
+  const lowMemory = (hints.memory ?? 8) <= 4;
+  if (hints.coarse || narrow || lowCores || lowMemory) return "lite";
+  return "full";
+}
+
+/** FPS floor a given ceiling must clear to stay where it is. */
+export function fpsFloorFor(ceiling: DepthLevel): number {
+  return ceiling === "full" ? FULL_MIN_FPS : LITE_MIN_FPS;
+}
+
+/** One step down the ladder when the frame probe keeps missing its budget. */
+export function stepCeilingDown(ceiling: DepthLevel): DepthLevel {
+  return ceiling === "full" ? "lite" : "off";
+}
+
 export function detectDeviceLevel(): DepthLevel {
   if (typeof window === "undefined") return "lite";
   const nav = navigator as NavigatorWithHints;
-  const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
-  const narrow = window.innerWidth < 768;
-  const lowCores = (nav.hardwareConcurrency ?? 8) <= 4;
-  const lowMemory = (nav.deviceMemory ?? 8) <= 4;
-  const saveData = nav.connection?.saveData === true;
+  return deviceLevelFrom({
+    coarse: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+    width: window.innerWidth,
+    cores: nav.hardwareConcurrency,
+    memory: nav.deviceMemory,
+    saveData: nav.connection?.saveData === true,
+  });
+}
 
-  if (saveData) return "off";
-  if (coarse || narrow || lowCores || lowMemory) return "lite";
-  return "full";
+
+const OVERRIDE_KEY = "gradr-depth-override";
+
+/**
+ * QA/dev seam: `?depth=full|lite|off` pins the level for the session
+ * (`?depth=auto` clears it). Also readable from localStorage so a pinned level
+ * survives client-side navigation.
+ */
+function readOverride(): DepthLevel | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const param = new URLSearchParams(window.location.search).get("depth");
+    if (param === "auto") localStorage.removeItem(OVERRIDE_KEY);
+    else if (param && ORDER.includes(param as DepthLevel)) localStorage.setItem(OVERRIDE_KEY, param);
+    const stored = localStorage.getItem(OVERRIDE_KEY);
+    return stored && ORDER.includes(stored as DepthLevel) ? (stored as DepthLevel) : null;
+  } catch {
+    return null;
+  }
 }
 
 function prefersReducedMotion(): boolean {
@@ -89,10 +142,16 @@ class DepthManager {
     };
   };
 
-  /** Force a level (admin/QA). Pass `null` to hand control back to detection. */
+  /**
+   * Force a level (admin/QA). Pass `null` to hand control back to detection.
+   * An explicit override also lifts the frame-probe ceiling and stops the
+   * probe, so a deliberately pinned level cannot drift underneath the tester.
+   */
   setOverride(level: DepthLevel | null) {
     this.override = level;
+    if (level !== null) this.ceiling = "full";
     this.recompute();
+    if (level === null && this.started && this.rafId === null) this.probe();
   }
 
   /** Called by the motion-preference provider when the in-app toggle changes. */
@@ -127,6 +186,7 @@ class DepthManager {
     this.started = true;
     this.device = detectDeviceLevel();
     this.reduced = this.reduced || prefersReducedMotion();
+    this.override = this.override ?? readOverride();
 
     const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     mq?.addEventListener?.("change", this.onReducedChange);
@@ -158,6 +218,7 @@ class DepthManager {
    */
   private probe() {
     if (typeof window === "undefined" || typeof requestAnimationFrame !== "function") return;
+    if (this.override !== null) return;
     let frames = 0;
     let windowStart = performance.now();
 
@@ -180,7 +241,7 @@ class DepthManager {
   }
 
   private consumeFps(fps: number) {
-    const floor = this.ceiling === "full" ? FULL_MIN_FPS : LITE_MIN_FPS;
+    const floor = fpsFloorFor(this.ceiling);
     if (fps >= floor) {
       this.badWindows = 0;
       return;
@@ -188,7 +249,7 @@ class DepthManager {
     this.badWindows += 1;
     if (this.badWindows < BAD_WINDOWS) return;
     this.badWindows = 0;
-    this.ceiling = this.ceiling === "full" ? "lite" : "off";
+    this.ceiling = stepCeilingDown(this.ceiling);
     this.recompute();
   }
 
