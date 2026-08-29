@@ -86,10 +86,15 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    await admin.from("subscribers").upsert(
+    // `subscribers` is unique on (user_id, environment) — inferring on user_id
+    // alone raises 42P10 and the entitlement never lands.
+    const environment = Deno.env.get("PAYMENTS_ENVIRONMENT") === "sandbox" ? "sandbox" : "live";
+
+    const { error: subscriberError } = await admin.from("subscribers").upsert(
       {
         user_id: user.id,
         email: user.email,
+        environment,
         subscribed: active,
         subscription_tier: active ? tierFor(productIdentifier) : null,
         billing_interval: active ? intervalFor(productIdentifier) : null,
@@ -98,8 +103,12 @@ Deno.serve(async (req) => {
         current_period_end: expiresDate,
         cancel_at_period_end: active ? !willRenew : false,
       },
-      { onConflict: "user_id" },
+      { onConflict: "user_id,environment" },
     );
+    if (subscriberError) {
+      console.error("revenuecat-sync subscriber upsert failed", subscriberError);
+      return json({ error: "Unable to sync entitlements right now." }, 500);
+    }
 
     return json({ subscribed: active, tier: active ? tierFor(productIdentifier) : null });
   } catch (err) {

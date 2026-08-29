@@ -3824,6 +3824,42 @@ export type Database = {
         }
         Relationships: []
       }
+      security_finding_issues: {
+        Row: {
+          commit_sha: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          internal_id: string
+          issue_number: number | null
+          issue_url: string | null
+          repo: string
+          run_id: string | null
+        }
+        Insert: {
+          commit_sha?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          internal_id: string
+          issue_number?: number | null
+          issue_url?: string | null
+          repo: string
+          run_id?: string | null
+        }
+        Update: {
+          commit_sha?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          internal_id?: string
+          issue_number?: number | null
+          issue_url?: string | null
+          repo?: string
+          run_id?: string | null
+        }
+        Relationships: []
+      }
       security_scan_findings: {
         Row: {
           created_at: string
@@ -4320,6 +4356,33 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      verification_email_claims: {
+        Row: {
+          created_at: string
+          domain: string | null
+          email: string
+          id: string
+          last_verified_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          email: string
+          id?: string
+          last_verified_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          email?: string
+          id?: string
+          last_verified_at?: string
           user_id?: string
         }
         Relationships: []

@@ -790,7 +790,9 @@ Deno.serve(async (req) => {
           payload: event.data as unknown as Record<string, unknown>,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "event_id" },
+        // The table's uniqueness is (provider, event_id) — inferring on
+        // event_id alone raises 42P10 and drops the delivery record.
+        { onConflict: "provider,event_id" },
       );
     }
 
