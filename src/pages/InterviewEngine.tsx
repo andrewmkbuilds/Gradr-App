@@ -619,6 +619,13 @@ function InterviewEngineInner() {
           <PreflightCheck
             onCancel={() => setStage("setup")}
             onReady={() => sessionCtx && void startSession(sessionCtx)}
+            onTextOnly={() => {
+              // Camera/mic blocked: drop to typed turns rather than stranding
+              // the candidate on the device check.
+              setVoiceMode(false);
+              voiceModeRef.current = false;
+              if (sessionCtx) void startSession(sessionCtx);
+            }}
           />
         )}
 

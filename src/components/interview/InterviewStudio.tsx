@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Mic, MicOff, Send, Loader2, RotateCcw, User, Bot, Volume2, VolumeX,
-  Square, Radio, Hand, Zap, Captions, WifiOff, Search, X, ChevronUp, ChevronDown,
+  Square, Radio, Hand, Zap, Captions, WifiOff, Search, X, ChevronUp, ChevronDown, Sparkles,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ds/Button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -534,6 +535,26 @@ export function InterviewStudio(props: Props) {
                 </AnimatePresence>
               </div>
             </Surface>
+
+            {/* ---------- Free-tier voice upgrade prompt ---------- */}
+            {!voiceAvailable && (
+              <div
+                data-testid="voice-upgrade-prompt"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3"
+              >
+                <div className="flex items-start gap-2.5">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Spoken interviews are a Pro feature.</span>{" "}
+                    You're in text mode — type your answers below and you'll still get a full scored
+                    report at the end.
+                  </p>
+                </div>
+                <Button asChild size="sm" className="shrink-0">
+                  <Link to="/pricing">Upgrade for voice</Link>
+                </Button>
+              </div>
+            )}
 
             {/* ---------- Control dock ---------- */}
             <motion.div

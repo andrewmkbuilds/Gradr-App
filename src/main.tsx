@@ -13,7 +13,9 @@ import { registerServiceWorker } from "./lib/offline/registerServiceWorker";
 import { initCspReporting } from "./lib/security/cspReport";
 import { initSentry } from "./lib/telemetry/sentry";
 import { installQaSandbox } from "./lib/qa/sandbox/install";
+import { silenceTaggerRefWarning } from "./lib/dev/silenceTaggerRefWarning";
 
+silenceTaggerRefWarning();
 installQaSandbox();
 initSentry();
 initTelemetry();
