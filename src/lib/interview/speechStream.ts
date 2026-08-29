@@ -13,9 +13,11 @@ import { VOICE_ABORTED, toVoiceErrorCode, type VoiceErrorCode } from "./voiceErr
  *   pauses: each chunk is fetched while the previous one is still playing.
  * - The transcript only reveals a chunk when its audio actually starts, so the
  *   caption never runs ahead of the voice.
- * - There is deliberately NO silent fallback to another voice engine. If
- *   the voice backend fails, the turn stops and the caller surfaces a retryable error,
- *   so a broken integration can never hide behind a robotic substitute voice.
+ * - The backend serves Deepgram audio. When it cannot (outage, network, or an
+ *   unusable response), the queue speaks the same thought through the browser's
+ *   Web Speech API so the interview continues, and reports the fallback once.
+ *   If even that is unavailable, the turn stops with a retryable error rather
+ *   than going silent.
  */
 
 
@@ -177,6 +179,15 @@ export interface SpeechQueueOptions {
   onDrained: () => void;
   /** Voice failed — the turn is aborted and must be retried by the user. */
   onFailure: (code: VoiceErrorCode) => void;
+  /**
+   * Browser-side substitute voice (Web Speech API). Used only when the Gradr
+   * voice backend cannot deliver audio for a chunk — it keeps the interview
+   * going instead of ending the turn. Returns a handle so barge-in can cut it
+   * off exactly like backend audio.
+   */
+  speakFallback?: (text: string) => { done: Promise<void>; cancel: () => void };
+  /** Fired the first time a turn falls back to the browser voice. */
+  onFallbackEngaged?: (code: VoiceErrorCode) => void;
   /** Extra silence between thoughts, from the persona profile. */
   beatMs?: number;
 }
@@ -199,6 +210,10 @@ export class SpeechQueue {
   private failure: VoiceErrorCode | null = null;
   /** Caption scheduler for the chunk currently playing. */
   private reveal: TimedReveal | null = null;
+  /** Active browser-fallback utterance, cancellable for barge-in. */
+  private fallbackHandle: { cancel: () => void } | null = null;
+  /** One fallback notice per turn, not one per chunk. */
+  private fallbackAnnounced = false;
 
 
   constructor(private opts: SpeechQueueOptions) {}
@@ -253,10 +268,13 @@ export class SpeechQueue {
     this.stopped = false;
     this.closed = false;
     this.failure = null;
+    this.fallbackAnnounced = false;
   }
 
   private teardownAudio() {
     this.reveal?.cancel();
+    this.fallbackHandle?.cancel();
+    this.fallbackHandle = null;
     if (this.audio) {
       this.audio.onended = null;
       this.audio.onerror = null;
@@ -269,6 +287,42 @@ export class SpeechQueue {
       this.url = null;
     }
   }
+
+  /**
+   * Speaks one thought through the browser voice. Returns false when there is
+   * no usable fallback, in which case the caller surfaces the original error.
+   */
+  private async speakViaFallback(text: string, code: VoiceErrorCode): Promise<boolean> {
+    const speak = this.opts.speakFallback;
+    if (!speak) return false;
+
+    this.opts.onChunkStart(text);
+    const reveal = new TimedReveal(text, (revealed) => this.opts.onChunkReveal(revealed));
+    this.reveal = reveal;
+    // No audio element to sync against, so pace the caption by speaking rate.
+    reveal.startPaced();
+
+    const handle = speak(text);
+    this.fallbackHandle = handle;
+    try {
+      await handle.done;
+    } catch (e) {
+      console.error("[voice] browser fallback voice failed", e);
+      reveal.cancel();
+      this.fallbackHandle = null;
+      return false;
+    }
+    reveal.finish();
+    this.fallbackHandle = null;
+    if (!this.fallbackAnnounced) {
+      this.fallbackAnnounced = true;
+      console.warn("[voice] using browser fallback voice", code);
+      this.opts.onFallbackEngaged?.(code);
+    }
+    if (!this.stopped) this.opts.onChunkSpoken(text);
+    return true;
+  }
+
 
   private async pump() {
     if (this.running || this.stopped) return;
@@ -294,8 +348,14 @@ export class SpeechQueue {
       if (this.stopped) break;
 
       if ("error" in result) {
-        // No substitute voice: end the turn and let the UI offer a retry.
         if (result.error === VOICE_ABORTED) break;
+        // Backend voice is unavailable for this thought — speak it in the
+        // browser rather than dropping the turn.
+        if (await this.speakViaFallback(item.text, result.error)) {
+          if (this.stopped) break;
+          await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));
+          continue;
+        }
         this.failure = result.error;
         break;
       }
@@ -306,10 +366,19 @@ export class SpeechQueue {
         this.opts.onChunkSpoken(item.text);
       } catch (error) {
         console.error("[voice] playback failed", error);
-        this.failure = playbackErrorCode(error);
+        const code = playbackErrorCode(error);
+        // Autoplay blocks aren't fixed by another engine — the browser voice
+        // needs the same gesture, so surface it instead of retrying.
+        if (code !== "VOICE_PERMISSION_DENIED" && await this.speakViaFallback(item.text, code)) {
+          if (this.stopped) break;
+          await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));
+          continue;
+        }
+        this.failure = code;
         break;
       }
       if (this.stopped) break;
+
 
 
       await delay(pauseAfter(item.text, this.opts.beatMs ?? 260));

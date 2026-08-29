@@ -28,7 +28,11 @@ serve(async (req) => {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   const tier = await planTier(user.id, resolveEnv(body.environment));
   const entitled = new Set(["starter", "pro", "advanced"]).has(tier);
-  const configured = Boolean(Deno.env.get("ELEVENLABS_API_KEY"));
+  const configured = Boolean(
+    Deno.env.get("DEEPGRAM_API_KEY") ??
+      Deno.env.get("ELEVENLABS_API_KEY") ??
+      Deno.env.get("FISH_AUDIO_API_KEY"),
+  );
 
   const { data: events } = await serviceClient()
     .from("voice_provider_events")
