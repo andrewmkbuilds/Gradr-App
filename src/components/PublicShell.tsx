@@ -8,7 +8,7 @@ import { LEGAL_PAGES } from "@/content/legal";
 import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
 import { cn } from "@/lib/utils";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL } from "@/config/community";
+import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
 
 interface PublicShellProps {
   children: React.ReactNode;
