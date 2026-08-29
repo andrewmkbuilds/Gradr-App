@@ -126,7 +126,11 @@ try {
           await page.waitForLoadState("networkidle").catch(() => {});
           await page.addScriptTag({ content: AXE });
         });
-        const finalUrl = new URL(page.url()).pathname;
+        // Cross-origin redirects matter: several SEO paths on the app host
+        // hand off to the marketing site, and a report that showed only the
+        // pathname would blame the wrong codebase.
+        const landed = new URL(page.url());
+        const finalUrl = landed.origin === new URL(BASE).origin ? landed.pathname : landed.href;
         const run = await page.evaluate(async () => {
           // eslint-disable-next-line no-undef
           return await window.axe.run(document, {
