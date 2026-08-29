@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, Mic, Wifi, CheckCircle2, XCircle, Loader2, RefreshCw } from "lucide-react";
+import { Camera, Mic, Wifi, CheckCircle2, XCircle, Loader2, RefreshCw, Keyboard } from "lucide-react";
 import { Button } from "@/components/ds/Button";
 
 /**
@@ -11,10 +11,16 @@ type CheckState = "idle" | "checking" | "pass" | "fail";
 
 interface Props {
   onReady: (stream: MediaStream) => void;
+  /**
+   * Start the session without camera/mic. Offered whenever the device check
+   * can't pass, so a blocked permission never dead-ends the interview — the
+   * candidate answers by typing and still gets a scored report.
+   */
+  onTextOnly?: () => void;
   onCancel?: () => void;
 }
 
-export function PreflightCheck({ onReady, onCancel }: Props) {
+export function PreflightCheck({ onReady, onTextOnly, onCancel }: Props) {
   const [camera, setCamera] = useState<CheckState>("idle");
   const [mic, setMic] = useState<CheckState>("idle");
   const [network, setNetwork] = useState<CheckState>("idle");
@@ -114,6 +120,8 @@ export function PreflightCheck({ onReady, onCancel }: Props) {
   }, []);
 
   const ready = camera === "pass" && mic === "pass";
+  /** Devices can't be used — offer the typed session instead of a dead end. */
+  const blocked = camera === "fail" || mic === "fail";
 
   const rows: { icon: typeof Camera; label: string; state: CheckState; hint: string }[] = [
     { icon: Camera, label: "Camera", state: camera, hint: "Used for on-device presence coaching only." },
@@ -179,12 +187,27 @@ export function PreflightCheck({ onReady, onCancel }: Props) {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          role="alert"
+          data-testid="preflight-error"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+        >
           {error}
         </div>
       )}
 
-      <div className="flex items-center gap-2">
+      {blocked && onTextOnly && (
+        <div
+          data-testid="preflight-text-fallback"
+          className="rounded-lg border border-border bg-secondary/50 p-3 text-sm text-muted-foreground"
+        >
+          You don't need a camera or microphone to practise. Start in text mode and type your
+          answers — the interviewer still asks the full set of questions and you still get a scored
+          report at the end.
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           onClick={() => streamRef.current && onReady(streamRef.current)}
           disabled={!ready}
@@ -192,6 +215,12 @@ export function PreflightCheck({ onReady, onCancel }: Props) {
         >
           {ready ? "Start interview" : "Waiting for camera & mic"}
         </Button>
+        {blocked && onTextOnly && (
+          <Button variant="outline" onClick={onTextOnly} data-testid="preflight-start-text">
+            <Keyboard className="h-4 w-4 mr-2" aria-hidden="true" />
+            Continue in text mode
+          </Button>
+        )}
         <Button variant="outline" onClick={() => void run()}>
           <RefreshCw className="h-4 w-4 mr-2" />
           Re-run check
