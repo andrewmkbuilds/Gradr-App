@@ -48,6 +48,18 @@ function pixelDiff(baselineBuf, currentBuf, diffPath) {
   return { ratio, note: `${changed} px` };
 }
 
+/** Pre-decides cookie consent so the banner never intercepts clicks. */
+async function dismissConsent(context) {
+  await context.addInitScript(() => {
+    try {
+      window.localStorage.setItem(
+        "gradr-cookie-consent",
+        JSON.stringify({ version: 1, decidedAt: new Date().toISOString(), choices: { analytics: false, marketing: false, functional: false } }),
+      );
+    } catch { /* private mode */ }
+  });
+}
+
 /** Rejects password grants so the error state is reproducible offline. */
 async function stubAuthFailure(context) {
   await context.route("**/auth/v1/token*", (route) =>
@@ -118,6 +130,7 @@ try {
           colorScheme: scheme,
           reducedMotion: "reduce",
         });
+        await dismissConsent(context);
         if (state.stub) await state.stub(context);
         const page = await context.newPage();
         await state.run(page);

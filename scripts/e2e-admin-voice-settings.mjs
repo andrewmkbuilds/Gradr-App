@@ -62,6 +62,15 @@ const saved = [];
 
 const browser = await launchBrowser({ headless: true });
 const context = await browser.newContext({ viewport: { width: 1280, height: 1400 } });
+await context.addInitScript(() => {
+  try {
+    window.localStorage.setItem(
+      "gradr-cookie-consent",
+      JSON.stringify({ version: 1, decidedAt: new Date().toISOString(), choices: { analytics: false, marketing: false, functional: false } }),
+    );
+  } catch { /* private mode */ }
+});
+
 const page = await context.newPage();
 
 page.on("console", (msg) => {

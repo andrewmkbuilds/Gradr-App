@@ -52,6 +52,15 @@ await context.addInitScript(() => {
   });
 });
 
+await context.addInitScript(() => {
+  try {
+    window.localStorage.setItem(
+      "gradr-cookie-consent",
+      JSON.stringify({ version: 1, decidedAt: new Date().toISOString(), choices: { analytics: false, marketing: false, functional: false } }),
+    );
+  } catch { /* private mode */ }
+});
+
 const page = await context.newPage();
 const pageErrors = [];
 page.on("pageerror", (e) => pageErrors.push(e.message));
