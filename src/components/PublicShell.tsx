@@ -218,7 +218,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
             href={DISCORD_INVITE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-control border border-border/60 px-3 py-1.5 transition-colors hover:bg-muted hover:text-foreground"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             <DiscordIcon size={16} className="text-[#5865F2]" />
             Join our Discord
