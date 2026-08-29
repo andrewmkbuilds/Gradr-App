@@ -266,6 +266,8 @@ export class SpeechQueue {
 
   private teardownAudio() {
     this.reveal?.cancel();
+    this.fallbackHandle?.cancel();
+    this.fallbackHandle = null;
     if (this.audio) {
       this.audio.onended = null;
       this.audio.onerror = null;
@@ -278,6 +280,42 @@ export class SpeechQueue {
       this.url = null;
     }
   }
+
+  /**
+   * Speaks one thought through the browser voice. Returns false when there is
+   * no usable fallback, in which case the caller surfaces the original error.
+   */
+  private async speakViaFallback(text: string, code: VoiceErrorCode): Promise<boolean> {
+    const speak = this.opts.speakFallback;
+    if (!speak) return false;
+
+    this.opts.onChunkStart(text);
+    const reveal = new TimedReveal(text, (revealed) => this.opts.onChunkReveal(revealed));
+    this.reveal = reveal;
+    // No audio element to sync against, so pace the caption by speaking rate.
+    reveal.startPaced();
+
+    const handle = speak(text);
+    this.fallbackHandle = handle;
+    try {
+      await handle.done;
+    } catch (e) {
+      console.error("[voice] browser fallback voice failed", e);
+      reveal.cancel();
+      this.fallbackHandle = null;
+      return false;
+    }
+    reveal.finish();
+    this.fallbackHandle = null;
+    if (!this.fallbackAnnounced) {
+      this.fallbackAnnounced = true;
+      console.warn("[voice] using browser fallback voice", code);
+      this.opts.onFallbackEngaged?.(code);
+    }
+    if (!this.stopped) this.opts.onChunkSpoken(text);
+    return true;
+  }
+
 
   private async pump() {
     if (this.running || this.stopped) return;
