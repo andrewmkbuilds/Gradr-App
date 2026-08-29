@@ -58,7 +58,18 @@ export function AccountDataPanel() {
       };
 
       for (const table of EXPORT_TABLES) {
-        const { data, error } = await (supabase as any).from(table).select("*").eq("user_id", user.id);
+        const { data, error } = await (
+          supabase as unknown as {
+            from: (t: string) => {
+              select: (cols: string) => {
+                eq: (col: string, val: string) => Promise<{ data: unknown; error: { message: string } | null }>;
+              };
+            };
+          }
+        )
+          .from(table)
+          .select("*")
+          .eq("user_id", user.id);
         archive[table] = error ? { error: error.message } : data ?? [];
       }
 
