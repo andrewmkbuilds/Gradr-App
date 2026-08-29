@@ -11,20 +11,32 @@
  *   node scripts/a11y-audit.mjs https://gradr.me
  */
 import { chromium } from "playwright";
-import { existsSync, readdirSync, readFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { createRequire } from "module";
 import { join } from "path";
 
 const require = createRequire(import.meta.url);
-const BASE = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const args = process.argv.slice(2);
+const flag = (name, fallback) => {
+  const hit = args.find((a) => a.startsWith(`--${name}=`));
+  return hit ? hit.slice(name.length + 3) : fallback;
+};
+const BASE = (args.find((a) => !a.startsWith("--")) ?? process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(
+  /\/$/,
+  "",
+);
+// Report file stem — one per audited surface (app / marketing).
+const LABEL = flag("label", new URL(BASE).hostname.replace(/[^a-z0-9.-]/gi, "-"));
+const OUT_DIR = flag("out", "reports/a11y");
 const AXE = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 const BLOCKING = new Set(["serious", "critical"]);
+
 
 // Signed-out reachable surfaces. Everything else in the app sits behind auth
 // and is covered by the route-guard suite. `/landing` and `/home` stay in the
 // list on purpose: they must keep redirecting after the marketing pages were
 // deleted, and the audit checks the page they land on.
-const ROUTES = [
+const DEFAULT_ROUTES = [
   "/",
   "/auth",
   "/forgot-password",
@@ -34,6 +46,16 @@ const ROUTES = [
   "/unsubscribe",
   "/this-route-does-not-exist",
 ];
+
+// `--routes=/,/pricing,/blog` audits another surface (e.g. the marketing site)
+// with the same rules and the same report format.
+const ROUTES = flag("routes", "")
+  ? flag("routes", "")
+      .split(",")
+      .map((r) => r.trim())
+      .filter(Boolean)
+  : DEFAULT_ROUTES;
+
 
 
 const VIEWPORTS = [
@@ -104,7 +126,11 @@ try {
           await page.waitForLoadState("networkidle").catch(() => {});
           await page.addScriptTag({ content: AXE });
         });
-        const finalUrl = new URL(page.url()).pathname;
+        // Cross-origin redirects matter: several SEO paths on the app host
+        // hand off to the marketing site, and a report that showed only the
+        // pathname would blame the wrong codebase.
+        const landed = new URL(page.url());
+        const finalUrl = landed.origin === new URL(BASE).origin ? landed.pathname : landed.href;
         const run = await page.evaluate(async () => {
           // eslint-disable-next-line no-undef
           return await window.axe.run(document, {
@@ -120,7 +146,14 @@ try {
             id: violation.id,
             impact: violation.impact,
             help: violation.help,
-            nodes: violation.nodes.slice(0, 3).map((n) => n.target.join(" ")),
+            helpUrl: violation.helpUrl,
+            // Full selector list, not a sample: the report has to name every
+            // element a fix must touch.
+            nodes: violation.nodes.map((n) => ({
+              selector: n.target.join(" "),
+              html: (n.html ?? "").slice(0, 400),
+              summary: (n.failureSummary ?? "").replace(/\s+/g, " ").trim(),
+            })),
           });
         }
       }
@@ -131,12 +164,93 @@ try {
   await browser.close();
 }
 
+// Rules that gate the pipeline no matter what impact axe assigns them. These
+// are the regressions this suite exists to catch: contrast collapses from
+// class merging, and keyboard traps around scrollable panes.
+const GATED_RULES = new Set([
+  "color-contrast",
+  "color-contrast-enhanced",
+  "scrollable-region-focusable",
+  "focus-order-semantics",
+  "tabindex",
+  "aria-hidden-focus",
+]);
+
+const isBlocking = (r) => BLOCKING.has(r.impact) || GATED_RULES.has(r.id);
+const blocking = results.filter(isBlocking);
+
+// ---- Reports -------------------------------------------------------------
+const instances = results.reduce((n, r) => n + r.nodes.length, 0);
+const report = {
+  target: BASE,
+  label: LABEL,
+  generatedAt: new Date().toISOString(),
+  routes: ROUTES,
+  viewports: VIEWPORTS.map((v) => v.name),
+  themes: THEMES,
+  gatedRules: [...GATED_RULES],
+  summary: {
+    violations: results.length,
+    nodeInstances: instances,
+    blocking: blocking.length,
+    byRule: Object.fromEntries(
+      [...results.reduce((m, r) => m.set(r.id, (m.get(r.id) ?? 0) + r.nodes.length), new Map())],
+    ),
+  },
+  violations: results.map((r) => ({ ...r, blocking: isBlocking(r) })),
+};
+
+mkdirSync(OUT_DIR, { recursive: true });
+const jsonPath = join(OUT_DIR, `${LABEL}.json`);
+const htmlPath = join(OUT_DIR, `${LABEL}.html`);
+writeFileSync(jsonPath, `${JSON.stringify(report, null, 2)}\n`);
+writeFileSync(htmlPath, renderHtml(report));
+
+function esc(value) {
+  return String(value).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+}
+
+function renderHtml(data) {
+  const rows = data.violations
+    .flatMap((v) =>
+      v.nodes.map(
+        (n) => `<tr class="${v.blocking ? "blocking" : ""}">
+  <td>${v.blocking ? "BLOCKING" : "advisory"}</td>
+  <td><a href="${esc(v.helpUrl ?? "#")}">${esc(v.id)}</a><br><small>${esc(v.impact ?? "n/a")}</small></td>
+  <td>${esc(v.route)}<br><small>${esc(v.viewport)} / ${esc(v.theme)}</small></td>
+  <td><code>${esc(n.selector)}</code></td>
+  <td><small>${esc(n.summary || v.help)}</small><br><code>${esc(n.html)}</code></td>
+</tr>`,
+      ),
+    )
+    .join("\n");
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Accessibility audit — ${esc(data.label)}</title>
+<style>
+ body{font:14px/1.5 system-ui,sans-serif;margin:2rem;color:#12212b}
+ h1{font-size:1.4rem} table{border-collapse:collapse;width:100%}
+ th,td{border:1px solid #d5dee2;padding:.5rem;text-align:left;vertical-align:top}
+ th{background:#f2f0ef} code{font:12px/1.4 ui-monospace,monospace;word-break:break-all}
+ tr.blocking td:first-child{color:#8a1c1c;font-weight:700}
+ .meta{color:#55676d}
+</style></head><body>
+<h1>Accessibility audit — ${esc(data.label)}</h1>
+<p class="meta">${esc(data.target)} · generated ${esc(data.generatedAt)} · ${data.summary.nodeInstances} failing element(s) across ${data.summary.violations} rule/route combination(s) · <strong>${data.summary.blocking} blocking</strong></p>
+<p class="meta">Routes: ${data.routes.map(esc).join(", ")} · widths: ${data.viewports.map(esc).join(", ")} · themes: ${data.themes.map(esc).join(", ")}</p>
+<table><thead><tr><th>Gate</th><th>Rule</th><th>Route</th><th>Selector</th><th>Failure</th></tr></thead>
+<tbody>${rows || '<tr><td colspan="5">No violations found.</td></tr>'}</tbody></table>
+</body></html>
+`;
+}
+
+console.log(`\nReports written: ${jsonPath} · ${htmlPath}`);
+
 if (!results.length) {
   console.log("✓ No WCAG A/AA violations found across public routes (light + dark, mobile + desktop).");
   process.exit(0);
 }
 
-const blocking = results.filter((r) => BLOCKING.has(r.impact));
 const grouped = new Map();
 for (const r of results) {
   const key = `${r.id} [${r.impact}]`;
@@ -145,12 +259,13 @@ for (const r of results) {
 }
 
 for (const [key, list] of grouped) {
-  console.log(`\n${BLOCKING.has(list[0].impact) ? "✖" : "•"} ${key} — ${list[0].help}`);
+  console.log(`\n${isBlocking(list[0]) ? "✖" : "•"} ${key} — ${list[0].help}`);
   for (const r of list.slice(0, 8)) {
-    console.log(`    ${r.route} (${r.viewport}/${r.theme}) → ${r.nodes.join(" | ")}`);
+    console.log(`    ${r.route} (${r.viewport}/${r.theme}) → ${r.nodes.map((n) => n.selector).join(" | ")}`);
   }
   if (list.length > 8) console.log(`    … and ${list.length - 8} more occurrences`);
 }
 
-console.log(`\n${results.length} violation instance(s); ${blocking.length} blocking.`);
+console.log(`\n${results.length} violation group(s), ${instances} element(s); ${blocking.length} blocking.`);
 process.exit(blocking.length ? 1 : 0);
+

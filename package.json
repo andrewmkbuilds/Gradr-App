@@ -169,7 +169,6 @@
     "test:admin-csv": "node scripts/e2e-admin-audit-csv.mjs",
     "test:audit-retention": "RUN_DB_TESTS=1 vitest run src/test/adminRpcAuditRetention.integration.test.ts",
     "check:ds-text": "node scripts/check-ds-text-import.mjs",
-
     "test:db": "RUN_DB_TESTS=1 vitest run src/test/dbSchema.integration.test.ts",
     "test:depth": "node scripts/depth-smoke.mjs",
     "test:e2e": "node scripts/e2e-authenticated.mjs",
@@ -209,7 +208,9 @@
     "visual:logo-shell": "node scripts/logo-shell-visual.mjs",
     "test:email-preferences": "node scripts/email-preference-enforcement.mjs",
     "audit:spacing": "node scripts/spacing-audit.mjs",
-    "audit:spacing:update": "node scripts/spacing-audit.mjs --update"
+    "audit:spacing:update": "node scripts/spacing-audit.mjs --update",
+    "audit:a11y:app": "node scripts/a11y-audit.mjs --label=app.gradr.me",
+    "audit:a11y:marketing": "node scripts/a11y-audit.mjs https://gradr.me --label=gradr.me --routes=/,/ats-resume-checker,/ai-interview-coach,/ai-cover-letter-generator,/job-application-tracker,/career-advice,/job-search,/blog/ai-resume-optimization,/career-advice/interview-questions,/job-search/frontend-developer-remote,/pricing,/terms,/privacy"
   },
   "type": "module",
   "version": "0.0.0"

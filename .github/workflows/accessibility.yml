@@ -1,0 +1,62 @@
+name: Accessibility
+
+# Fails the pipeline on new WCAG violations in the app surface — with a hard
+# gate on the rules that keep regressing: colour contrast (class-merge
+# collapses), scrollable regions without keyboard access, and focus-order /
+# tabindex mistakes. Reports are uploaded as artifacts on every run.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  a11y:
+    name: Axe audit (contrast, focus, scrollable regions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Start preview server
+        run: |
+          bun run build
+          bunx vite preview --port 8080 --host 127.0.0.1 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://127.0.0.1:8080/ && break
+            sleep 2
+          done
+
+      # Public routes, light + dark, 390px + 1440px. Any serious/critical
+      # violation — or any hit on a gated rule at any impact — exits non-zero.
+      - name: App accessibility audit
+        run: bun run audit:a11y:app http://127.0.0.1:8080
+
+      # Sidebar, submenu, breadcrumbs and the mobile drawer focus trap.
+      - name: Navigation accessibility audit
+        run: bun run test:a11y http://127.0.0.1:8080
+
+      # The marketing site is a separate repo and deploy, so its findings are
+      # reported here but never block this pipeline.
+      - name: Marketing site accessibility audit (report only)
+        continue-on-error: true
+        run: bun run audit:a11y:marketing
+
+      - name: Upload accessibility reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-reports
+          path: reports/a11y
+          if-no-files-found: ignore

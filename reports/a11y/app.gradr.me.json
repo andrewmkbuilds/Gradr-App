@@ -1,0 +1,38 @@
+{
+  "target": "http://localhost:8080",
+  "label": "app.gradr.me",
+  "generatedAt": "2026-08-29T14:35:58.043Z",
+  "routes": [
+    "/",
+    "/auth",
+    "/forgot-password",
+    "/reset-password",
+    "/landing",
+    "/home",
+    "/unsubscribe",
+    "/this-route-does-not-exist"
+  ],
+  "viewports": [
+    "mobile",
+    "desktop"
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "gatedRules": [
+    "color-contrast",
+    "color-contrast-enhanced",
+    "scrollable-region-focusable",
+    "focus-order-semantics",
+    "tabindex",
+    "aria-hidden-focus"
+  ],
+  "summary": {
+    "violations": 0,
+    "nodeInstances": 0,
+    "blocking": 0,
+    "byRule": {}
+  },
+  "violations": []
+}
