@@ -6,6 +6,9 @@
 /** Official Gradr Discord — the community hub for users, partners and support. */
 export const DISCORD_INVITE_URL = "https://discord.gg/uujhVW5f";
 
+/** Official Gradr Facebook page — news, product updates and announcements. */
+export const FACEBOOK_PAGE_URL = "https://www.facebook.com/gradr.me/";
+
 export type CommunityLink = {
   label: string;
   href: string;
@@ -18,5 +21,10 @@ export const COMMUNITY_LINKS: CommunityLink[] = [
     label: "Discord",
     href: DISCORD_INVITE_URL,
     description: "Join the Gradr community for help, product updates and sneak peeks.",
+  },
+  {
+    label: "Facebook",
+    href: FACEBOOK_PAGE_URL,
+    description: "Follow Gradr for product news, announcements and career tips.",
   },
 ];

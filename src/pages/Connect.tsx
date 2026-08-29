@@ -5,15 +5,16 @@ import {
   Check,
   Copy,
   Download,
-  ExternalLink,
-  LifeBuoy,
-  Loader2,
-  RefreshCw,
-  ShieldCheck,
-  Terminal,
-  Wrench,
-  XCircle,
-} from "lucide-react";
+   ExternalLink,
+   LifeBuoy,
+   Loader2,
+   RefreshCw,
+   ShieldCheck,
+   Terminal,
+   Wrench,
+   XCircle,
+   Facebook,
+ } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ds/Button";
 import { Badge } from "@/design-system/gradr-9b9b95";
@@ -31,7 +32,7 @@ import {
 } from "@/lib/mcp/clients";
 import { verifyMcpEndpoint, type McpVerifyResult } from "@/lib/mcp/verify";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL } from "@/config/community";
+import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
 
 /**
  * Resolve the public MCP endpoint from the browser-reachable backend URL, so it
@@ -203,6 +204,23 @@ export default function Connect() {
           </span>
           <span className="block text-xs text-muted-foreground">
             Get help connecting, share automations and talk to the team.
+          </span>
+        </span>
+        <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+      </a>
+      <a
+        href={FACEBOOK_PAGE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="interactive flex items-center gap-3 rounded-card border border-border/60 bg-card p-4 elev-1 transition-colors hover:bg-muted"
+      >
+        <Facebook className="h-5 w-5 shrink-0" aria-hidden="true" />
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold text-foreground">
+            Follow Gradr on Facebook
+          </span>
+          <span className="block text-xs text-muted-foreground">
+            Product news, announcements and career tips from the team.
           </span>
         </span>
         <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />

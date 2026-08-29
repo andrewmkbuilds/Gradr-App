@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, Facebook, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackSignupCta } from "@/lib/telemetry/events";
@@ -8,7 +8,7 @@ import { LEGAL_PAGES } from "@/content/legal";
 import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
 import { cn } from "@/lib/utils";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL } from "@/config/community";
+import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
 
 interface PublicShellProps {
   children: React.ReactNode;
@@ -214,15 +214,26 @@ export function PublicShell({ children, source }: PublicShellProps) {
 
         <div className="page-shell section-gap flex flex-col gap-4 border-t border-border/60 pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Gradr. All rights reserved.</p>
-          <a
-            href={DISCORD_INVITE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <DiscordIcon size={16} aria-hidden="true" />
-            Join our Discord
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href={DISCORD_INVITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <DiscordIcon size={16} aria-hidden="true" />
+              Join our Discord
+            </a>
+            <a
+              href={FACEBOOK_PAGE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <Facebook className="h-4 w-4" aria-hidden="true" />
+              Facebook
+            </a>
+          </div>
         </div>
       </footer>
     </div>

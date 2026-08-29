@@ -12,9 +12,9 @@ import { Button } from "@/components/ds/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, BookOpen, LifeBuoy, Mail, Activity } from "lucide-react";
+import { ArrowRight, BookOpen, Facebook, LifeBuoy, Mail, Activity } from "lucide-react";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL } from "@/config/community";
+import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
 
 const SUPPORT_EMAIL = "support@gradr.me";
 
@@ -105,6 +105,18 @@ function SupportHome() {
           <h2 className="mt-3 text-sm font-semibold text-foreground">Join the community</h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Chat with the team and other job seekers in our Discord.
+          </p>
+        </a>
+        <a
+          href={FACEBOOK_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="interactive group rounded-xl border border-border/60 bg-card p-5 elev-1"
+        >
+          <Facebook className="h-5 w-5" aria-hidden="true" />
+          <h2 className="mt-3 text-sm font-semibold text-foreground">Follow on Facebook</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Product news, announcements and career tips from the Gradr team.
           </p>
         </a>
       </div>
