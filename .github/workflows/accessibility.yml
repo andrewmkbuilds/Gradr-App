@@ -38,25 +38,42 @@ jobs:
             sleep 2
           done
 
-      # Public routes, light + dark, 390px + 1440px. Any serious/critical
-      # violation — or any hit on a gated rule at any impact — exits non-zero.
-      - name: App accessibility audit
-        run: bun run audit:a11y:app http://127.0.0.1:8080
+      # Both surfaces are audited on every run and always produce a report.
+      # `--no-fail` keeps the audit itself green: the merge gate is the
+      # baseline diff below, which blocks only on findings this branch adds.
+      - name: App accessibility audit (app.gradr.me)
+        run: bun run audit:a11y:app http://127.0.0.1:8080 --no-fail
 
       # Sidebar, submenu, breadcrumbs and the mobile drawer focus trap.
       - name: Navigation accessibility audit
         run: bun run test:a11y http://127.0.0.1:8080
 
-      # The marketing site is a separate repo and deploy, so its findings are
-      # reported here but never block this pipeline.
-      - name: Marketing site accessibility audit (report only)
+      # The marketing site is a separate repo and deploy. Its findings are
+      # recorded here so regressions are visible, and its baseline is diffed
+      # the same way — a *new* marketing regression still surfaces, while the
+      # known backlog does not block unrelated app PRs.
+      - name: Marketing site accessibility audit (gradr.me)
         continue-on-error: true
-        run: bun run audit:a11y:marketing
+        run: bun run audit:a11y:marketing --no-fail
+
+      # THE GATE: serious/critical (and gated-rule) findings that are not in
+      # reports/a11y/baseline/<surface>.json fail the run. Resolved findings
+      # are reported and never fail. Re-record with
+      # `bun run audit:a11y:baseline:update` when a finding is accepted.
+      - name: Block on new serious/critical findings
+        run: bun run audit:a11y:baseline
 
       - name: Upload accessibility reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: accessibility-reports
-          path: reports/a11y
-          if-no-files-found: ignore
+          path: |
+            reports/a11y/app.gradr.me.html
+            reports/a11y/app.gradr.me.json
+            reports/a11y/gradr.me.html
+            reports/a11y/gradr.me.json
+            reports/a11y/baseline
+          if-no-files-found: warn
+          retention-days: 30
+

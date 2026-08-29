@@ -1,0 +1,12 @@
+{
+  "label": "gradr.me",
+  "target": "https://gradr.me",
+  "recordedAt": "2026-08-29T16:47:49.208Z",
+  "note": "Accepted blocking findings. New entries block a merge; removing one is always safe.",
+  "blocking": [
+    "color-contrast|/ai-interview-coach|.transition-transform",
+    "color-contrast|/job-application-tracker|.hover\\:opacity-90.h-12.text-body",
+    "scrollable-region-focusable|/ai-interview-coach|.mt-4.overflow-x-auto",
+    "scrollable-region-focusable|/ai-interview-coach|.overflow-x-auto.mt-6"
+  ]
+}

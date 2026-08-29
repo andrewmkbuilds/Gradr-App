@@ -1,7 +1,7 @@
 {
   "target": "http://localhost:8080",
   "label": "app.gradr.me",
-  "generatedAt": "2026-08-29T14:35:58.043Z",
+  "generatedAt": "2026-08-29T16:46:42.364Z",
   "routes": [
     "/",
     "/auth",

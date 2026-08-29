@@ -1,0 +1,7 @@
+{
+  "label": "app.gradr.me",
+  "target": "http://localhost:8080",
+  "recordedAt": "2026-08-29T16:47:49.201Z",
+  "note": "Accepted blocking findings. New entries block a merge; removing one is always safe.",
+  "blocking": []
+}
