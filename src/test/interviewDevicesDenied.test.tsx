@@ -61,19 +61,27 @@ describe("free-tier voice prompt", () => {
           partialUser=""
           partialModel=""
           interviewerState="idle"
-          input=""
-          setInput={() => {}}
-          onSend={() => {}}
-          onEnd={() => {}}
-          sending={false}
-          micMuted={false}
-          onToggleMic={() => {}}
           realtime={false}
-          voiceAvailable={false}
+          connecting={false}
+          canReconnect={false}
+          micMuted={false}
+          micLabel="Mute microphone"
           voiceOn={false}
-          onToggleVoice={() => {}}
+          thinking={false}
+          ending={false}
+          input=""
           limits={null}
-          elapsedSec={0}
+          startedAt={Date.now()}
+          voiceAvailable={false}
+          onInputChange={() => {}}
+          onSubmit={() => {}}
+          onToggleMic={() => {}}
+          onToggleVoice={() => {}}
+          onInterrupt={() => {}}
+          onReconnect={() => {}}
+          onEnd={() => {}}
+          onReset={() => {}}
+          onSnapshot={() => {}}
         />
       </MemoryRouter>,
     );
