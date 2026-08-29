@@ -1,7 +1,7 @@
 {
   "target": "https://gradr.me",
   "label": "gradr.me",
-  "generatedAt": "2026-08-29T14:33:27.362Z",
+  "generatedAt": "2026-08-29T16:41:26.378Z",
   "routes": [
     "/",
     "/ats-resume-checker",
@@ -53,7 +53,7 @@
       "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
       "nodes": [
         {
-          "selector": ".hover\\:opacity-90.h-12.px-6",
+          "selector": ".transition-transform",
           "html": "<a href=\"https://app.gradr.me...\" class=\"inline-flex shrink-0...\">",
           "summary": "Fix any of the following: Element has insufficient color contrast of 2.15 (foreground color: #18292f, background color: #256074, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
@@ -109,7 +109,7 @@
       "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
       "nodes": [
         {
-          "selector": ".hover\\:opacity-90.h-12.px-6",
+          "selector": ".transition-transform",
           "html": "<a href=\"https://app.gradr.me...\" class=\"inline-flex shrink-0...\">",
           "summary": "Fix any of the following: Element has insufficient color contrast of 2.31 (foreground color: #f7f4f3, background color: #5baec2, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
@@ -165,7 +165,7 @@
       "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
       "nodes": [
         {
-          "selector": ".hover\\:opacity-90.h-12.px-6",
+          "selector": ".transition-transform",
           "html": "<a href=\"https://app.gradr.me...\" class=\"inline-flex shrink-0...\">",
           "summary": "Fix any of the following: Element has insufficient color contrast of 2.15 (foreground color: #18292f, background color: #256074, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
@@ -199,7 +199,7 @@
       "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
       "nodes": [
         {
-          "selector": ".hover\\:opacity-90.h-12.px-6",
+          "selector": ".transition-transform",
           "html": "<a href=\"https://app.gradr.me...\" class=\"inline-flex shrink-0...\">",
           "summary": "Fix any of the following: Element has insufficient color contrast of 2.31 (foreground color: #f7f4f3, background color: #5baec2, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
