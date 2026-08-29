@@ -4516,6 +4516,78 @@ export type Database = {
           },
         ]
       }
+      voice_provider_config: {
+        Row: {
+          deepgram_overrides: Json
+          id: boolean
+          model_id: string
+          output_format: string
+          updated_at: string
+          updated_by: string | null
+          voice_overrides: Json
+        }
+        Insert: {
+          deepgram_overrides?: Json
+          id?: boolean
+          model_id?: string
+          output_format?: string
+          updated_at?: string
+          updated_by?: string | null
+          voice_overrides?: Json
+        }
+        Update: {
+          deepgram_overrides?: Json
+          id?: boolean
+          model_id?: string
+          output_format?: string
+          updated_at?: string
+          updated_by?: string | null
+          voice_overrides?: Json
+        }
+        Relationships: []
+      }
+      voice_provider_events: {
+        Row: {
+          code: string | null
+          context: string
+          created_at: string
+          id: string
+          outcome: string
+          persona_id: string | null
+          provider_detail: string | null
+          provider_reason: string | null
+          request_id: string | null
+          upstream_status: number | null
+          user_id: string | null
+        }
+        Insert: {
+          code?: string | null
+          context?: string
+          created_at?: string
+          id?: string
+          outcome: string
+          persona_id?: string | null
+          provider_detail?: string | null
+          provider_reason?: string | null
+          request_id?: string | null
+          upstream_status?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          code?: string | null
+          context?: string
+          created_at?: string
+          id?: string
+          outcome?: string
+          persona_id?: string | null
+          provider_detail?: string | null
+          provider_reason?: string | null
+          request_id?: string | null
+          upstream_status?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       webhook_deliveries: {
         Row: {
           alerted_at: string | null
