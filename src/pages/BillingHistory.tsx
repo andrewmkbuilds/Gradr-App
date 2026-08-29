@@ -155,8 +155,13 @@ export default function BillingHistory() {
         </div>
         {timelineLoading
           ? <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+          : timelineError
+          ? <p role="alert" className="text-sm text-muted-foreground">
+              We couldn't load your subscription activity right now. Reload the page to try again.
+            </p>
           : !timeline?.length
           ? <p className="text-sm text-muted-foreground">Nothing here yet — plan changes and payment events will show up as they happen.</p>
+
           : (
             <ol className="space-y-3">
               {timeline.map((entry) => (
