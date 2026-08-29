@@ -672,6 +672,7 @@ function InterviewEngineInner() {
       canReconnect={streamFailed || (Boolean(voiceError) && voiceError !== "VOICE_NOT_ENTITLED")}
       voiceAvailable={voiceEntitled}
       voiceRecovering={voiceRecovering}
+      usingFallbackVoice={interviewer.usingFallbackVoice}
       voiceErrorRequestId={interviewer.errorRequestId}
 
       micMuted={!voice.listening}
