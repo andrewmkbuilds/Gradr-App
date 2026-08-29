@@ -327,7 +327,7 @@ export default function DesignSystem() {
               <AlertTitle>Informational</AlertTitle>
               <AlertDescription>Scores refresh each time you upload a new resume version.</AlertDescription>
             </Alert>
-            <Alert variant="destructive">
+            <Alert variant="danger">
               <AlertTriangle className="h-4 w-4" aria-hidden="true" />
               <AlertTitle>Payment failed</AlertTitle>
               <AlertDescription>Update your billing details to keep Pro features active.</AlertDescription>
