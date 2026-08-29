@@ -15,14 +15,32 @@
  * Skips cleanly without E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD (falls back to
  * E2E_EMAIL / E2E_PASSWORD when the primary test user is an admin).
  */
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { launchBrowser } from "./lib/browser.mjs";
 
 const BASE = (process.argv.find((a) => a.startsWith("http")) || process.env.E2E_BASE_URL || "http://localhost:8080").replace(/\/$/, "");
 const EMAIL = process.env.E2E_ADMIN_EMAIL || process.env.E2E_EMAIL;
 const PASSWORD = process.env.E2E_ADMIN_PASSWORD || process.env.E2E_PASSWORD;
 
-if (!EMAIL || !PASSWORD) {
-  console.log("SKIP  admin voice settings smoke — E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD not set.");
+/**
+ * A restored preview/CI session is used when one exists; password sign-in is
+ * the fallback. Without either there is nothing to test, so skip cleanly.
+ */
+function loadSession() {
+  const key = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
+  const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
+  if (key && session) return { key, session };
+  const file = join(homedir(), ".cache/lovable-auth/session.json");
+  if (!existsSync(file)) return null;
+  const minted = JSON.parse(readFileSync(file, "utf8"));
+  return { key: minted.storage_key, session: JSON.stringify(minted.session) };
+}
+
+const SESSION = loadSession();
+if (!SESSION && (!EMAIL || !PASSWORD)) {
+  console.log("SKIP  admin voice settings smoke — no admin session and no E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD.");
   process.exit(0);
 }
 
@@ -105,11 +123,16 @@ const check = (name, ok, detail = "") => {
 };
 
 try {
-  await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
-  await page.getByLabel(/email/i).first().fill(EMAIL);
-  await page.getByLabel(/password/i).first().fill(PASSWORD);
-  await page.getByRole("button", { name: /sign in|log in/i }).first().click();
-  await page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 30_000 });
+  if (SESSION) {
+    await page.goto(BASE, { waitUntil: "domcontentloaded" });
+    await page.evaluate(([k, v]) => window.localStorage.setItem(k, v), [SESSION.key, SESSION.session]);
+  } else {
+    await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
+    await page.getByLabel(/email/i).first().fill(EMAIL);
+    await page.getByLabel(/password/i).first().fill(PASSWORD);
+    await page.getByRole("button", { name: /sign in|log in/i }).first().click();
+    await page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 30_000 });
+  }
 
   await page.goto(`${BASE}/admin/voice`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => {});
