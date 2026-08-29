@@ -37,7 +37,20 @@ export interface SetupDraft {
   jobDescription?: string;
 }
 
-const CONTROL_CHARS = /[\u0000-\u0008\u000e-\u001f]/;
+/**
+ * True when the value carries a C0 control character other than tab (\t),
+ * newline (\n) or carriage return (\r), which are handled separately below.
+ * Expressed as a codepoint scan rather than a regex so the source stays free
+ * of literal control characters.
+ */
+function hasControlChars(value: string): boolean {
+  for (const char of value) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code <= 0x08 || (code >= 0x0e && code <= 0x1f)) return true;
+  }
+  return false;
+}
+
 
 function validateName(
   value: string,
