@@ -49,7 +49,7 @@ async function main() {
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
 
-  await page.goto(`${BASE}${ROUTE}`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}${ROUTE}?depth=full`, { waitUntil: "domcontentloaded" });
   await settle(page, 1200);
 
   const rootMounted = (await page.locator('[data-cursor-effects="true"]').count()) > 0;

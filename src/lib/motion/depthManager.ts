@@ -78,6 +78,26 @@ export function detectDeviceLevel(): DepthLevel {
 }
 
 
+const OVERRIDE_KEY = "gradr-depth-override";
+
+/**
+ * QA/dev seam: `?depth=full|lite|off` pins the level for the session
+ * (`?depth=auto` clears it). Also readable from localStorage so a pinned level
+ * survives client-side navigation.
+ */
+function readOverride(): DepthLevel | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const param = new URLSearchParams(window.location.search).get("depth");
+    if (param === "auto") localStorage.removeItem(OVERRIDE_KEY);
+    else if (param && ORDER.includes(param as DepthLevel)) localStorage.setItem(OVERRIDE_KEY, param);
+    const stored = localStorage.getItem(OVERRIDE_KEY);
+    return stored && ORDER.includes(stored as DepthLevel) ? (stored as DepthLevel) : null;
+  } catch {
+    return null;
+  }
+}
+
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
@@ -122,10 +142,16 @@ class DepthManager {
     };
   };
 
-  /** Force a level (admin/QA). Pass `null` to hand control back to detection. */
+  /**
+   * Force a level (admin/QA). Pass `null` to hand control back to detection.
+   * An explicit override also lifts the frame-probe ceiling and stops the
+   * probe, so a deliberately pinned level cannot drift underneath the tester.
+   */
   setOverride(level: DepthLevel | null) {
     this.override = level;
+    if (level !== null) this.ceiling = "full";
     this.recompute();
+    if (level === null && this.started && this.rafId === null) this.probe();
   }
 
   /** Called by the motion-preference provider when the in-app toggle changes. */
@@ -160,6 +186,7 @@ class DepthManager {
     this.started = true;
     this.device = detectDeviceLevel();
     this.reduced = this.reduced || prefersReducedMotion();
+    this.override = this.override ?? readOverride();
 
     const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     mq?.addEventListener?.("change", this.onReducedChange);
@@ -191,6 +218,7 @@ class DepthManager {
    */
   private probe() {
     if (typeof window === "undefined" || typeof requestAnimationFrame !== "function") return;
+    if (this.override !== null) return;
     let frames = 0;
     let windowStart = performance.now();
 
