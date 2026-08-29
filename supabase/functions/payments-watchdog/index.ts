@@ -485,6 +485,66 @@ async function applyScheduledPlanChanges(): Promise<{ applied: number; failed: n
   return { applied, failed };
 }
 
+/**
+ * 5. Trial reminders — Paddle does not send these, so we do. Anyone whose free
+ * trial ends in 3 days or tomorrow gets one notice per milestone; the
+ * idempotency key on the send makes repeated sweeps safe.
+ */
+async function runTrialReminders(): Promise<{ notified: number }> {
+  const db = admin();
+  const now = Date.now();
+  const horizon = new Date(now + 4 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: trials } = await db
+    .from("subscribers")
+    .select("user_id, email, environment, subscription_tier, subscription_status, trial_end, cancel_at_period_end")
+    .eq("subscription_status", "trialing")
+    .not("trial_end", "is", null)
+    .lte("trial_end", horizon)
+    .gt("trial_end", new Date(now).toISOString());
+
+  let notified = 0;
+  for (const row of trials ?? []) {
+    // Already cancelled: no charge is coming, so no reminder is owed.
+    if (row.cancel_at_period_end) continue;
+    const endsAt = new Date(String(row.trial_end));
+    const daysLeft = Math.ceil((endsAt.getTime() - now) / (24 * 60 * 60 * 1000));
+    if (daysLeft !== 3 && daysLeft !== 1) continue;
+
+    const planName = row.subscription_tier
+      ? String(row.subscription_tier).charAt(0).toUpperCase() + String(row.subscription_tier).slice(1)
+      : "Pro";
+
+    const sent = await sendTransactionalEmail({
+      templateName: "trial-ending",
+      recipientEmail: String(row.email),
+      // One mail per milestone per subscriber, whatever the sweep cadence.
+      idempotencyKey: `trial-ending-${row.user_id}-${row.environment}-${daysLeft}d-${String(row.trial_end).slice(0, 10)}`,
+      templateData: {
+        planName,
+        daysLeft,
+        trialEndsOn: formatDate(String(row.trial_end)),
+      },
+    }).catch((err) => {
+      console.error("trial reminder failed", String(err));
+      return null;
+    });
+
+    await db.rpc("enqueue_notification", {
+      _user_id: row.user_id,
+      _type: "billing_trial_ending",
+      _title: daysLeft === 1 ? "Your trial ends tomorrow" : `Your trial ends in ${daysLeft} days`,
+      _body: `Keep ${planName} and your first payment is taken on ${formatDate(String(row.trial_end))}. Cancel before then and you are not charged.`,
+      _link: "/subscription",
+      _metadata: { trial_end: row.trial_end, days_left: daysLeft },
+    }).catch(() => {});
+
+    if (sent) notified += 1;
+  }
+
+  return { notified };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -537,7 +597,8 @@ Deno.serve(async (req) => {
     const delayed = await checkDelayedEntitlements();
     const dunning = await runDunning();
     const planChanges = await applyScheduledPlanChanges();
-    return json({ ok: true, retry, delayedEntitlements: delayed, dunning, planChanges });
+    const trials = await runTrialReminders();
+    return json({ ok: true, retry, delayedEntitlements: delayed, dunning, planChanges, trials });
   } catch (err) {
     console.error("payments-watchdog error", err);
     return json({ error: "watchdog_failed", message: String(err) }, 500);
