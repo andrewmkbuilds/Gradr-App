@@ -81,8 +81,8 @@ function ApplicationEngineInner() {
           jobDescription: jobDescription || undefined,
           userName: profile?.display_name || user.email,
         });
-      } catch (e: any) {
-        toast.error(e?.message || "Generation failed");
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Generation failed");
       } finally {
         setPreparing(false);
       }

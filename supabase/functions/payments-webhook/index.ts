@@ -17,6 +17,70 @@ import {
   reverseEntitlementsForAdjustment,
 } from "../_shared/entitlementLedger.ts";
 
+/** ---- Paddle event payload shapes (loosely typed to match Paddle's webhook JSON) ---- */
+
+interface PaddleMoneyTotals {
+  total?: string | number | null;
+  subtotal?: string | number | null;
+  discount?: string | number | null;
+  grandTotal?: string | number | null;
+}
+
+interface PaddlePriceRef {
+  id?: string | null;
+  productId?: string | null;
+  unitPrice?: { amount?: string | number | null } | null;
+  customData?: Record<string, unknown> | null;
+  custom_data?: Record<string, unknown> | null;
+  importMeta?: { externalId?: string | null } | null;
+}
+
+interface PaddleProductRef {
+  customData?: Record<string, unknown> | null;
+  importMeta?: { externalId?: string | null } | null;
+}
+
+interface PaddleLineItem {
+  price?: PaddlePriceRef | null;
+  product?: PaddleProductRef | null;
+  quantity?: number | null;
+}
+
+/** Union-ish shape covering the fields used across the various Paddle event types. */
+interface PaddleEventData {
+  id?: string | null;
+  email?: string | null;
+  customerId?: string | null;
+  customData?: { userId?: string | null } | null;
+  status?: string | null;
+  items?: PaddleLineItem[] | null;
+  scheduledChange?: { action?: string | null; effectiveAt?: string | null } | null;
+  currentBillingPeriod?: { endsAt?: string | null } | null;
+  billingPeriod?: { endsAt?: string | null } | null;
+  subscriptionId?: string | null;
+  subscription_id?: string | null;
+  transactionId?: string | null;
+  transaction_id?: string | null;
+  details?: { totals?: PaddleMoneyTotals | null } | null;
+  totals?: PaddleMoneyTotals | null;
+  payoutTotals?: PaddleMoneyTotals | null;
+  currencyCode?: string | null;
+  currency_code?: string | null;
+  discountId?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  canceledAt?: string | null;
+  billedAt?: string | null;
+  invoiceNumber?: string | null;
+  action?: string | null;
+}
+
+interface PaddleWebhookEvent {
+  eventType: string;
+  eventId?: string | null;
+  data: PaddleEventData;
+}
+
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
   if (!_supabase) {
@@ -42,7 +106,6 @@ async function emailFor(userId: string, env: PaddleEnv): Promise<string> {
 }
 
 /** Billing emails are best-effort; a delivery problem never fails a webhook. */
-// deno-lint-ignore no-explicit-any
 async function billingEmail(
   template: string,
   recipient: string | null | undefined,
@@ -75,8 +138,7 @@ async function existingEmail(customerId: string): Promise<string | null> {
   return (data?.email as string | undefined) ?? null;
 }
 
-// deno-lint-ignore no-explicit-any
-async function mirrorCustomer(data: any, env: PaddleEnv, userId?: string | null) {
+async function mirrorCustomer(data: PaddleEventData, env: PaddleEnv, userId?: string | null) {
   if (!data?.id) return;
   const patch: Record<string, unknown> = {
     customer_id: data.id,
@@ -91,8 +153,7 @@ async function mirrorCustomer(data: any, env: PaddleEnv, userId?: string | null)
   await db().from("paddle_customers").upsert(patch, { onConflict: "customer_id" });
 }
 
-// deno-lint-ignore no-explicit-any
-async function mirrorSubscription(data: any, env: PaddleEnv) {
+async function mirrorSubscription(data: PaddleEventData, env: PaddleEnv) {
   if (!data?.id) return;
   const item = data.items?.[0];
   const userId = data?.customData?.userId ?? null;
@@ -141,22 +202,19 @@ function isEntitled(status: string, periodEnd: string | null): boolean {
  * it in `custom_data.external_id`; prices imported into Paddle carry it in
  * `import_meta.external_id`. Support both so either catalog resolves.
  */
-// deno-lint-ignore no-explicit-any
-function priceExternalId(item: any): string | undefined {
+function priceExternalId(item: PaddleLineItem | null | undefined): string | undefined {
   return (item?.price?.customData?.external_id ??
     item?.price?.custom_data?.external_id ??
     item?.price?.importMeta?.externalId) as string | undefined;
 }
 
-// deno-lint-ignore no-explicit-any
-function planFromItems(data: any) {
+function planFromItems(data: PaddleEventData) {
   const item = data?.items?.[0];
   const externalPriceId = priceExternalId(item);
   return { externalPriceId, plan: externalPriceId ? PLAN_PRICES[externalPriceId] : undefined };
 }
 
-// deno-lint-ignore no-explicit-any
-async function upsertSubscription(data: any, env: PaddleEnv) {
+async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
   const userId = data?.customData?.userId;
   if (!userId) {
     console.error("payments-webhook: no userId in customData");
@@ -213,8 +271,7 @@ async function upsertSubscription(data: any, env: PaddleEnv) {
   }
 }
 
-// deno-lint-ignore no-explicit-any
-async function updateSubscription(data: any, env: PaddleEnv) {
+async function updateSubscription(data: PaddleEventData, env: PaddleEnv) {
   const status: string = data.status ?? "active";
   const periodEnd = data.currentBillingPeriod?.endsAt ?? null;
   const entitled = isEntitled(status, periodEnd);
@@ -260,8 +317,7 @@ async function updateSubscription(data: any, env: PaddleEnv) {
  * recovery cycle, and tells the customer what happens next. Access is NOT
  * revoked here — Paddle keeps retrying and the watchdog escalates messaging.
  */
-// deno-lint-ignore no-explicit-any
-async function handlePaymentFailed(data: any, env: PaddleEnv) {
+async function handlePaymentFailed(data: PaddleEventData, env: PaddleEnv) {
   const subscriptionId = data?.subscriptionId ?? null;
   const userId = data?.customData?.userId ?? null;
 
@@ -335,8 +391,7 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
 }
 
 /** A completed payment clears a prior dunning state and confirms the resume. */
-// deno-lint-ignore no-explicit-any
-async function clearPaymentIssue(data: any, env: PaddleEnv) {
+async function clearPaymentIssue(data: PaddleEventData, env: PaddleEnv) {
   const subscriptionId = data?.subscriptionId ?? null;
   if (!subscriptionId) return;
   const { data: recovered } = await db()
@@ -378,8 +433,7 @@ async function clearPaymentIssue(data: any, env: PaddleEnv) {
  * verified eligibility is logged as a denied security event so it can be
  * investigated — the sale is never blocked after the fact.
  */
-// deno-lint-ignore no-explicit-any
-async function recordDiscountUse(data: any, env: PaddleEnv) {
+async function recordDiscountUse(data: PaddleEventData, env: PaddleEnv) {
   const userId = data?.customData?.userId;
   const discountAmount = Number(data?.details?.totals?.discount ?? 0);
   if (!userId || !data?.id || discountAmount <= 0) return;
@@ -438,8 +492,7 @@ async function recordDiscountUse(data: any, env: PaddleEnv) {
  * create a second commission for the same source record, so webhook retries and
  * duplicate deliveries can never double-pay.
  */
-// deno-lint-ignore no-explicit-any
-async function recordAffiliateCommission(data: any, env: PaddleEnv) {
+async function recordAffiliateCommission(data: PaddleEventData, env: PaddleEnv) {
   const userId = data?.customData?.userId;
   if (!userId || !data?.id) return;
 
@@ -485,8 +538,7 @@ async function recordAffiliateCommission(data: any, env: PaddleEnv) {
 }
 
 /** Refunds, chargebacks and cancellations reverse the matching commission. */
-// deno-lint-ignore no-explicit-any
-async function reverseAffiliateCommission(data: any, env: PaddleEnv, reason: string) {
+async function reverseAffiliateCommission(data: PaddleEventData, env: PaddleEnv, reason: string) {
   const sourceId = data?.transactionId ?? data?.id;
   if (!sourceId) return;
   const { data: count, error } = await db().rpc("reverse_commission_for_source", {
@@ -586,8 +638,7 @@ async function grantAnnualBonus(
 }
 
 /** One-off credit packs are granted from completed transactions. */
-// deno-lint-ignore no-explicit-any
-async function grantPackCredits(data: any, env: PaddleEnv) {
+async function grantPackCredits(data: PaddleEventData, env: PaddleEnv) {
   const userId = data?.customData?.userId;
   if (!userId) return;
 
@@ -666,8 +717,7 @@ async function grantPackCredits(data: any, env: PaddleEnv) {
  * Refunds and chargebacks: reverse the entitlements the transaction granted,
  * write the ledger entries, and tell the customer what changed.
  */
-// deno-lint-ignore no-explicit-any
-async function handleAdjustment(data: any, env: PaddleEnv, providerEventId: string | null) {
+async function handleAdjustment(data: PaddleEventData, env: PaddleEnv, providerEventId: string | null) {
   const outcome = await reverseEntitlementsForAdjustment(data, env, providerEventId);
   if (!outcome.userId) {
     console.warn("adjustment could not be attributed to a user", {
@@ -744,19 +794,15 @@ Deno.serve(async (req) => {
     const cronSecret = Deno.env.get("CRON_SECRET");
     const isReplay = Boolean(replaySecret && cronSecret && replaySecret === cronSecret);
 
-    const event = isReplay
+    const event = (isReplay
       ? await (async () => {
         const body = await req.json();
-        return { eventType: body.eventType, data: body.data, eventId: body.eventId } as Awaited<
-          ReturnType<typeof verifyWebhook>
-        >;
+        return { eventType: body.eventType, data: body.data, eventId: body.eventId };
       })()
-      : await verifyWebhook(req, env);
-    // deno-lint-ignore no-explicit-any
-    const eventUserId = ((event.data as any)?.customData?.userId ?? null) as string | null;
+      : await verifyWebhook(req, env)) as unknown as PaddleWebhookEvent;
+    const eventUserId = (event.data?.customData?.userId ?? null) as string | null;
 
-    // deno-lint-ignore no-explicit-any
-    deliveryEventId = ((event as any)?.eventId ?? null) as string | null;
+    deliveryEventId = event.eventId ?? null;
 
     if (deliveryEventId) {
       await db().from("webhook_deliveries").upsert(
@@ -784,14 +830,10 @@ Deno.serve(async (req) => {
       env,
       source: "payments-webhook",
       details: {
-        // deno-lint-ignore no-explicit-any
-        event_id: (event as any)?.eventId ?? null,
-        // deno-lint-ignore no-explicit-any
-        status: (event.data as any)?.status ?? null,
-        // deno-lint-ignore no-explicit-any
-        customer_id: (event.data as any)?.customerId ?? (event.data as any)?.id ?? null,
-        // deno-lint-ignore no-explicit-any
-        subscription_id: (event.data as any)?.subscriptionId ?? null,
+        event_id: event.eventId ?? null,
+        status: event.data?.status ?? null,
+        customer_id: event.data?.customerId ?? event.data?.id ?? null,
+        subscription_id: event.data?.subscriptionId ?? null,
       },
     });
 
@@ -799,16 +841,13 @@ Deno.serve(async (req) => {
       case EventName.SubscriptionCreated: {
         await mirrorSubscription(event.data, env);
         await upsertSubscription(event.data, env);
-        // deno-lint-ignore no-explicit-any
-        const created = planFromItems(event.data as any);
+        const created = planFromItems(event.data);
         const revenueProps = {
           plan: created.plan?.tier ?? "unknown",
           billing_period: created.plan?.interval ?? "unknown",
           environment: env,
-          // deno-lint-ignore no-explicit-any
-          amount: Number((event.data as any)?.items?.[0]?.price?.unitPrice?.amount ?? 0) / 100,
-          // deno-lint-ignore no-explicit-any
-          currency: (event.data as any)?.currencyCode ?? null,
+          amount: Number(event.data?.items?.[0]?.price?.unitPrice?.amount ?? 0) / 100,
+          currency: event.data?.currencyCode ?? null,
         };
         // Ledgered against the Paddle event id so a missing or duplicated
         // conversion event is detectable, not just invisible.
@@ -828,10 +867,8 @@ Deno.serve(async (req) => {
           eventType: "subscription_started",
           title: `${planLabel(created.plan?.tier, created.plan?.interval)} started`,
           description: "Your subscription is active.",
-          // deno-lint-ignore no-explicit-any
-          subscriptionId: (event.data as any)?.id ?? null,
-          // deno-lint-ignore no-explicit-any
-          occurredAt: (event.data as any)?.createdAt ?? null,
+          subscriptionId: event.data?.id ?? null,
+          occurredAt: event.data?.createdAt ?? null,
         });
         break;
       }
@@ -840,8 +877,7 @@ Deno.serve(async (req) => {
         // scheduled change but keep the status Paddle reports.
         await mirrorSubscription(event.data, env);
         await updateSubscription(event.data, env);
-        // deno-lint-ignore no-explicit-any
-        const updatedData = event.data as any;
+        const updatedData = event.data;
         const updatedPlan = planFromItems(updatedData).plan;
         const scheduled = updatedData?.scheduledChange?.action ?? null;
         await recordBillingEvent({
@@ -866,8 +902,7 @@ Deno.serve(async (req) => {
       case EventName.SubscriptionCanceled: {
         await mirrorSubscription({ ...event.data, status: "canceled" }, env);
         await updateSubscription({ ...event.data, status: "canceled" }, env);
-        // deno-lint-ignore no-explicit-any
-        const canceled = planFromItems(event.data as any);
+        const canceled = planFromItems(event.data);
         await phCapture("subscription_cancelled", eventUserId, {
           plan: canceled.plan?.tier ?? "unknown",
           billing_period: canceled.plan?.interval ?? "unknown",
@@ -875,8 +910,7 @@ Deno.serve(async (req) => {
         }, { providerEventId: deliveryEventId, source: "payments-webhook", environment: env });
         await phSetPerson(eventUserId, { is_paying: false, subscription_status: "canceled" });
         if (eventUserId) {
-          // deno-lint-ignore no-explicit-any
-          const cancelData = event.data as any;
+          const cancelData = event.data;
           await db().rpc("enqueue_notification", {
             _user_id: eventUserId,
             _type: "billing_subscription_cancelled",
@@ -922,18 +956,14 @@ Deno.serve(async (req) => {
         await recordAffiliateCommission(event.data, env);
         await phCapture("payment_completed", eventUserId, {
           environment: env,
-          // deno-lint-ignore no-explicit-any
-          amount: Number((event.data as any)?.details?.totals?.grandTotal ?? 0) / 100,
-          // deno-lint-ignore no-explicit-any
-          currency: (event.data as any)?.currencyCode ?? null,
-          // deno-lint-ignore no-explicit-any
-          product_type: (event.data as any)?.subscriptionId ? "subscription" : "pack",
+          amount: Number(event.data?.details?.totals?.grandTotal ?? 0) / 100,
+          currency: event.data?.currencyCode ?? null,
+          product_type: event.data?.subscriptionId ? "subscription" : "pack",
         }, { providerEventId: deliveryEventId, source: "payments-webhook", environment: env });
 
         // Receipt for every successful charge — subscription renewals and
         // one-off credit packs alike. Idempotent on the transaction id.
-        // deno-lint-ignore no-explicit-any
-        const txn = event.data as any;
+        const txn = event.data;
         const paidTotal = Number(txn?.details?.totals?.grandTotal ?? txn?.details?.totals?.total ?? 0);
         if (eventUserId && paidTotal > 0) {
           const paidPlan = planFromItems(txn).plan;

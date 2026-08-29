@@ -19,7 +19,7 @@ const url = process.env.VITE_SUPABASE_URL ?? import.meta.env?.VITE_SUPABASE_URL;
 const key =
   process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-const client = url && key ? createClient<any>(url, key, { auth: { persistSession: false } }) : null;
+const client = url && key ? createClient(url, key, { auth: { persistSession: false } }) : null;
 
 describe.skipIf(!enabled || !client)("database schema integration", () => {
   it("has credentials configured", () => {
@@ -48,7 +48,7 @@ describe.skipIf(!enabled || !client)("database schema integration", () => {
   describe("RPCs are callable", () => {
     for (const rpc of CORE_RPCS) {
       it(`rpc ${rpc.name}`, async () => {
-        const { error } = await client!.rpc(rpc.name, rpc.args as any);
+        const { error } = await client!.rpc(rpc.name, rpc.args);
         // Permission/auth errors are acceptable — they prove the function exists.
         expect(isMissingFunction(error), `missing rpc ${rpc.name}: ${error?.message}`).toBe(false);
       });

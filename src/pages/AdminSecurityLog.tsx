@@ -80,7 +80,16 @@ export default function AdminSecurityLog() {
 
   const buildQuery = (limit: number, offset = 0) => {
     const { since, until } = rangeBounds();
-    let q = (supabase as any)
+    type SecurityLogQuery = Promise<{ data: unknown; error: { message: string } | null }> & {
+      eq: (col: string, val: string) => SecurityLogQuery;
+      gte: (col: string, val: string) => SecurityLogQuery;
+      lte: (col: string, val: string) => SecurityLogQuery;
+      order: (col: string, opts: { ascending: boolean }) => SecurityLogQuery;
+      range: (from: number, to: number) => SecurityLogQuery;
+    };
+    let q = (
+      supabase as unknown as { from: (t: string) => { select: (cols: string) => SecurityLogQuery } }
+    )
       .from("security_audit_log")
       .select("*")
       .gte("created_at", since)

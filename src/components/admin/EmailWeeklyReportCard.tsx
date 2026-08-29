@@ -34,7 +34,9 @@ export function useEmailWeeklyReport() {
   return useQuery({
     queryKey: ["admin", "email-weekly-report"],
     queryFn: async (): Promise<ReportResponse> => {
-      const { data, error } = await (supabase as any).rpc("admin_email_weekly_report");
+      const { data, error } = await (supabase as unknown as { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> }).rpc(
+        "admin_email_weekly_report",
+      );
       if (error) throw error;
       return data as ReportResponse;
     },

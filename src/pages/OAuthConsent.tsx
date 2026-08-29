@@ -6,17 +6,40 @@ import { AuthLayout } from "@/components/AuthLayout";
 import { Shield, CheckCircle2 } from "lucide-react";
 
 // Beta namespace typing shim
+interface OAuthAuthorizationClient {
+  name?: string;
+  client_name?: string;
+  redirect_uris?: string[];
+}
+
+interface OAuthAuthorizationDetails {
+  redirect_url?: string;
+  redirect_to?: string;
+  redirect_uri?: string;
+  client?: OAuthAuthorizationClient;
+}
+
+interface OAuthApiError {
+  message?: string;
+}
+
 type OAuthApi = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: any; error: any }>;
-  approveAuthorization: (id: string) => Promise<{ data: any; error: any }>;
-  denyAuthorization: (id: string) => Promise<{ data: any; error: any }>;
+  getAuthorizationDetails: (
+    id: string,
+  ) => Promise<{ data: OAuthAuthorizationDetails | null; error: OAuthApiError | null }>;
+  approveAuthorization: (
+    id: string,
+  ) => Promise<{ data: OAuthAuthorizationDetails | null; error: OAuthApiError | null }>;
+  denyAuthorization: (
+    id: string,
+  ) => Promise<{ data: OAuthAuthorizationDetails | null; error: OAuthApiError | null }>;
 };
 const oauth = (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 
 export default function OAuthConsent() {
   const [params] = useSearchParams();
   const authorizationId = params.get("authorization_id") ?? "";
-  const [details, setDetails] = useState<any>(null);
+  const [details, setDetails] = useState<OAuthAuthorizationDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 

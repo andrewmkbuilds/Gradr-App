@@ -619,20 +619,26 @@ function patchHoverRules() {
               /:hover\b/g,
               HOVER_REWRITE,
             );
-          } catch {}
+          } catch {
+        // Cross-origin stylesheet or unsupported rule type - skip it.
+      }
         }
         if (rule.cssRules.length) walk(rule.cssRules);
       } else if ("cssRules" in rule) {
         try {
           walk((rule as CSSGroupingRule).cssRules);
-        } catch {}
+        } catch {
+        // Cross-origin stylesheet or unsupported rule type - skip it.
+      }
       }
     }
   };
   for (const sheet of Array.from(document.styleSheets)) {
     try {
       walk(sheet.cssRules);
-    } catch {}
+    } catch {
+        // Cross-origin stylesheet or unsupported rule type - skip it.
+      }
   }
   const style = document.createElement("style");
   style.textContent = `[${CONTENT_ATTR}], [${CONTENT_ATTR}] * { cursor: var(--canvasui-cursor, auto) !important; }`;
@@ -679,7 +685,9 @@ export function createHexFloat(
         sourceCtx!.drawElementImage!(content, 0, 0);
         contentDirty = true;
         wake();
-      } catch {}
+      } catch {
+        // Cross-origin stylesheet or unsupported rule type - skip it.
+      }
     };
   }
 

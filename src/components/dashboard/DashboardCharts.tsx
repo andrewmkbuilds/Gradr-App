@@ -24,12 +24,25 @@ const axisProps = {
   axisLine: false,
 } as const;
 
-function ChartTooltip({ active, payload, label }: any) {
+interface ChartTooltipPayloadItem {
+  dataKey: string | number;
+  color?: string;
+  name?: string;
+  value?: string | number;
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: ChartTooltipPayloadItem[];
+  label?: string | number;
+}
+
+function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="elev-4 rounded-lg px-3 py-2 text-xs">
       <p className="mb-1 font-medium text-foreground">{label}</p>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <p key={p.dataKey} className="flex items-center gap-2 text-muted-foreground">
           <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
           <span className="capitalize">{p.name}</span>

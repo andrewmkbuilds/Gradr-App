@@ -22,7 +22,7 @@ const FROM_DOMAIN = "notify.app.gradr.me"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
 // Template mapping for preview mode
-const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
+const EMAIL_TEMPLATES: Record<string, React.ComponentType<Record<string, unknown>>> = {
   signup: SignupEmail,
   invite: InviteEmail,
   magiclink: MagicLinkEmail,

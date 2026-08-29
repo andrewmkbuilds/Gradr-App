@@ -43,16 +43,15 @@ export default function Settings() {
       .maybeSingle();
 
     if (data) {
-      const p = data as any;
-      setDisplayName(p.display_name || "");
-      setTargetJobTitle(p.target_job_title || "");
-      setTargetSalary(p.target_salary || "");
-      setTargetIndustry(p.target_industry || "");
-      setCareerStage(p.career_stage || "");
-      setSkills(p.skills?.join(", ") || "");
+      setDisplayName(data.display_name || "");
+      setTargetJobTitle(data.target_job_title || "");
+      setTargetSalary(data.target_salary || "");
+      setTargetIndustry(data.target_industry || "");
+      setCareerStage(data.career_stage || "");
+      setSkills(data.skills?.join(", ") || "");
     }
 
-    const { data: prefs } = await (supabase as any)
+    const { data: prefs } = await supabase
       .from("user_preferences")
       .select("digest_enabled, digest_send_time, digest_timezone")
       .eq("user_id", user!.id)
@@ -66,7 +65,7 @@ export default function Settings() {
       setDigestTimezone(prefs.digest_timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York");
     }
 
-    const { data: lastLog } = await (supabase as any)
+    const { data: lastLog } = await supabase
       .from("digest_send_logs")
       .select("status, sent_at, jobs_count, reminders_count, error_message")
       .eq("user_id", user!.id)
@@ -96,7 +95,7 @@ export default function Settings() {
         skills: skills ? skills.split(",").map((s) => s.trim()).filter(Boolean) : null,
       }, { onConflict: "user_id" });
 
-    const { error: prefError } = await (supabase as any)
+    const { error: prefError } = await supabase
       .from("user_preferences")
       .upsert({
         user_id: user.id,

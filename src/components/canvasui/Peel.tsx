@@ -339,7 +339,9 @@ export function createPeel(
       sourceCtx!.reset();
       hasTexture = true;
       wake();
-    } catch {}
+    } catch {
+      // Source element may be mid-teardown; the next frame retries.
+    }
   };
 
   function syncCanvasSize() {

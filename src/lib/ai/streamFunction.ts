@@ -125,7 +125,7 @@ export async function streamEdgeFunction<TResult>(
   let failure: AiStreamError | null = null;
 
   const dispatch = (event: string, raw: string) => {
-    let data: any;
+    let data: Record<string, unknown>;
     try {
       data = raw ? JSON.parse(raw) : {};
     } catch {
@@ -146,11 +146,11 @@ export async function streamEdgeFunction<TResult>(
         }
         break;
       case "partial":
-        handlers.onPartial?.(data as TResult);
+        handlers.onPartial?.(data as unknown as TResult);
         break;
       case "result":
-        result = data as TResult;
-        handlers.onResult?.(data as TResult);
+        result = data as unknown as TResult;
+        handlers.onResult?.(data as unknown as TResult);
         break;
       case "error":
         failure = new AiStreamError(String(data.message ?? "Generation failed"), Number(data.status) || 500);

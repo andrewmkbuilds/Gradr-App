@@ -257,9 +257,12 @@ async function checkDelayedEntitlements(): Promise<number> {
 
   let flagged = 0;
   for (const row of rows ?? []) {
-    const payload = (row.payload ?? {}) as Record<string, unknown>;
-    // deno-lint-ignore no-explicit-any
-    const userId = (payload as any)?.customData?.userId as string | undefined;
+    const payload = (row.payload ?? {}) as {
+      customData?: { userId?: string };
+      id?: string;
+      subscriptionId?: string;
+    };
+    const userId = payload?.customData?.userId;
     const env = String(row.environment ?? "sandbox");
     if (!userId) continue;
 
@@ -273,10 +276,8 @@ async function checkDelayedEntitlements(): Promise<number> {
         .maybeSingle();
       granted = Boolean(sub?.subscribed);
     } else {
-      // deno-lint-ignore no-explicit-any
-      const txnId = (payload as any)?.id as string | undefined;
-      // deno-lint-ignore no-explicit-any
-      const isPack = !(payload as any)?.subscriptionId;
+      const txnId = payload?.id;
+      const isPack = !payload?.subscriptionId;
       if (!isPack || !txnId) continue;
       const { data: purchase } = await db
         .from("purchases")

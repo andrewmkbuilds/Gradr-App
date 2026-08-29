@@ -29,13 +29,10 @@ import { template as verificationNeedsInfo } from './verification-needs-info.tsx
 import { template as studentVerificationCode } from './student-verification-code.tsx'
 
 export interface TemplateEntry {
-  // deno-lint-ignore no-explicit-any
-  component: React.ComponentType<any>
-  // deno-lint-ignore no-explicit-any
-  subject: string | ((data: Record<string, any>) => string)
+  component: React.ComponentType<Record<string, unknown>>
+  subject: string | ((data: Record<string, unknown>) => string)
   displayName?: string
-  // deno-lint-ignore no-explicit-any
-  previewData?: Record<string, any>
+  previewData?: Record<string, unknown>
   to?: string
 }
 

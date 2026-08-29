@@ -39,8 +39,12 @@ function admin() {
   );
 }
 
-// deno-lint-ignore no-explicit-any
-async function portalSession(env: PaddleEnv, customerId: string, subscriptionId?: string | null): Promise<any> {
+interface PortalSession {
+  urls?: { general?: { overview?: string } };
+  [key: string]: unknown;
+}
+
+async function portalSession(env: PaddleEnv, customerId: string, subscriptionId?: string | null): Promise<PortalSession | null> {
   const res = await gatewayFetch(env, `/customers/${customerId}/portal-sessions`, {
     method: "POST",
     body: JSON.stringify({ subscription_ids: subscriptionId ? [subscriptionId] : [] }),
@@ -116,8 +120,16 @@ Deno.serve(async (req) => {
           .limit(1)
           .maybeSingle();
 
-        // deno-lint-ignore no-explicit-any
-        let remote: any = null;
+        interface RemoteSubscription {
+          status?: string;
+          current_billing_period?: { ends_at?: string | null } | null;
+          scheduled_change?: { action?: string } | null;
+          next_billed_at?: string | null;
+          next_transaction?: { details?: { totals?: { total?: string | number } } } | null;
+          currency_code?: string | null;
+          payment_method?: unknown;
+        }
+        let remote: RemoteSubscription | null = null;
         if (subscriptionId) {
           const res = await gatewayFetch(env, `/subscriptions/${subscriptionId}`);
           if (res.ok) remote = (await res.json())?.data ?? null;
@@ -332,8 +344,18 @@ Deno.serve(async (req) => {
           console.error("invoice list failed", res.status, await res.text());
           return json({ invoices: [] });
         }
-        // deno-lint-ignore no-explicit-any
-        const rows: any[] = (await res.json())?.data ?? [];
+        interface InvoiceTxn {
+          id: string;
+          invoice_number?: string | null;
+          status: string;
+          details?: { totals?: { grand_total?: string | number; total?: string | number } };
+          currency_code?: string | null;
+          billed_at?: string | null;
+          created_at?: string | null;
+          subscription_id?: string | null;
+          items?: { price?: { description?: string | null; name?: string | null } }[];
+        }
+        const rows: InvoiceTxn[] = (await res.json())?.data ?? [];
         const invoices = rows
           .filter((t) => ["completed", "billed", "past_due"].includes(t.status))
           .map((t) => ({

@@ -61,7 +61,7 @@ interface LookupEvent {
 async function callDiagnostics(body: Record<string, unknown>) {
   const { data, error } = await supabase.functions.invoke("voice-diagnostics", { body });
   if (error) throw error;
-  return data as any;
+  return data as Record<string, unknown>;
 }
 
 export default function AdminVoiceSettings() {
@@ -69,7 +69,19 @@ export default function AdminVoiceSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<any>(null);
+  interface TestResult {
+  ok: boolean;
+  audioBase64?: string;
+  bytes?: number;
+  ttfbMs?: number;
+  code?: string;
+  reason?: string;
+  voiceId?: string;
+  modelId?: string;
+  upstreamStatus?: number;
+}
+
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [modelId, setModelId] = useState("eleven_turbo_v2_5");
   const [outputFormat, setOutputFormat] = useState("mp3_44100_128");
   const [overrides, setOverrides] = useState<Record<string, string>>({});
@@ -81,13 +93,13 @@ export default function AdminVoiceSettings() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await callDiagnostics({ action: "status" });
+      const data = (await callDiagnostics({ action: "status" })) as unknown as StatusPayload;
       setStatus(data);
       setModelId(data.config?.modelId ?? "eleven_turbo_v2_5");
       setOutputFormat(data.config?.outputFormat ?? "mp3_44100_128");
       setOverrides(data.config?.voiceOverrides ?? {});
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not load voice status");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not load voice status");
     } finally {
       setLoading(false);
     }
@@ -101,8 +113,8 @@ export default function AdminVoiceSettings() {
       await callDiagnostics({ action: "save-config", modelId, outputFormat, voiceOverrides: overrides });
       toast.success("Voice configuration saved");
       await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not save configuration");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not save configuration");
     } finally {
       setSaving(false);
     }
@@ -112,7 +124,7 @@ export default function AdminVoiceSettings() {
     setTesting(true);
     setTestResult(null);
     try {
-      const data = await callDiagnostics({ action: "stream-test", personaId });
+      const data = (await callDiagnostics({ action: "stream-test", personaId })) as unknown as TestResult;
       setTestResult(data);
       if (data.ok && data.audioBase64) {
         const audio = new Audio(`data:audio/mpeg;base64,${data.audioBase64}`);
@@ -122,8 +134,8 @@ export default function AdminVoiceSettings() {
       } else {
         toast.error(`Streaming session failed — ${[data.code, data.reason].filter(Boolean).join(" · ")}`);
       }
-    } catch (e: any) {
-      toast.error(e?.message ?? "Stream test failed");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Stream test failed");
     } finally {
       setTesting(false);
     }
@@ -136,11 +148,11 @@ export default function AdminVoiceSettings() {
     setLookupLoading(true);
     setLookupResult(null);
     try {
-      const data = await callDiagnostics({ action: "lookup", requestId });
+      const data = (await callDiagnostics({ action: "lookup", requestId })) as { requestId: string; events?: LookupEvent[] };
       setLookupResult({ requestId: data.requestId, events: data.events ?? [] });
       if (!data.events?.length) toast.info("No voice events recorded for that request id");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Lookup failed");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Lookup failed");
     } finally {
       setLookupLoading(false);
     }
@@ -277,7 +289,7 @@ export default function AdminVoiceSettings() {
           <div className="rounded-xl border border-border/60 bg-muted/40 p-4 text-sm">
             {testResult.ok ? (
               <p>
-                Realtime session verified — <strong>{testResult.bytes.toLocaleString()} bytes</strong> of audio,
+                Realtime session verified — <strong>{(testResult.bytes ?? 0).toLocaleString()} bytes</strong> of audio,
                 first byte in <strong>{testResult.ttfbMs} ms</strong>, voice {testResult.voiceId}, model {testResult.modelId}.
               </p>
             ) : (

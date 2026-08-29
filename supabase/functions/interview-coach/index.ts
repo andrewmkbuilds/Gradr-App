@@ -62,9 +62,9 @@ serve(async (req) => {
     }
     // Sanitize: only allow user/assistant roles + bounded content; cap message count
     const safeMessages = messages
-      .filter((m: any) => m && typeof m.content === "string")
+      .filter((m: Record<string, unknown>) => m && typeof m.content === "string")
       .slice(-50)
-      .map((m: any) => ({
+      .map((m: Record<string, unknown>) => ({
         role: m.role === "assistant" ? "assistant" : "user",
         content: String(m.content).slice(0, 4000),
       }));

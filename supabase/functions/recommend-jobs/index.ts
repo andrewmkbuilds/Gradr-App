@@ -44,7 +44,7 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
     // Truncate to keep prompt small
-    const compact = jobs.slice(0, 20).map((j: any, i: number) => ({
+    const compact = jobs.slice(0, 20).map((j: { title?: string; company?: string; description?: string }, i: number) => ({
       i,
       title: j.title,
       company: j.company,

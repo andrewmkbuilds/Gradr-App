@@ -44,7 +44,25 @@ export default function AdminEmailTemplates() {
   const { data: stats, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin", "email-send-stats"],
     queryFn: async (): Promise<Record<string, SendStat>> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (
+        supabase as unknown as {
+          from: (t: string) => {
+            select: (cols: string) => {
+              order: (
+                col: string,
+                opts: { ascending: boolean },
+              ) => {
+                limit: (
+                  n: number,
+                ) => Promise<{
+                  data: { template_name: string; status: string; created_at: string }[] | null;
+                  error: { message: string } | null;
+                }>;
+              };
+            };
+          };
+        }
+      )
         .from("email_send_log")
         .select("template_name, status, created_at")
         .order("created_at", { ascending: false })

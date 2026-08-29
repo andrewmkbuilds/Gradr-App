@@ -60,8 +60,15 @@ Deno.serve(async (req) => {
   }
 
   const res = await gatewayFetch(env, `/discounts?code=${encodeURIComponent(code)}&status=active`);
-  // deno-lint-ignore no-explicit-any
-  const rows: any[] = res.ok ? ((await res.json())?.data ?? []) : [];
+  interface PromoRow {
+    code?: string;
+    status?: string;
+    enabled_for_checkout?: boolean;
+    expires_at?: string | null;
+    usage_limit?: number | null;
+    times_used?: number | null;
+  }
+  const rows: PromoRow[] = res.ok ? ((await res.json())?.data ?? []) : [];
   const match = rows.find((d) => String(d.code ?? "").toUpperCase() === code);
 
   const now = Date.now();

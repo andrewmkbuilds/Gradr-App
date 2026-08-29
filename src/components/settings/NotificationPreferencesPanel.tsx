@@ -107,7 +107,17 @@ export function NotificationPreferencesPanel() {
     if (!user) return;
     let active = true;
     (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await (
+        supabase as unknown as {
+          from: (t: string) => {
+            select: (cols: string) => {
+              eq: (col: string, val: string) => {
+                maybeSingle: () => Promise<{ data: Prefs | null }>;
+              };
+            };
+          };
+        }
+      )
         .from("notification_preferences")
         .select("*")
         .eq("user_id", user.id)
@@ -127,7 +137,16 @@ export function NotificationPreferencesPanel() {
     const next = { ...prefs, [key]: value };
     setPrefs(next);
     setSavingKey(key);
-    const { error } = await (supabase as any)
+    const { error } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          upsert: (
+            row: Record<string, unknown>,
+            opts: { onConflict: string },
+          ) => Promise<{ error: unknown }>;
+        };
+      }
+    )
       .from("notification_preferences")
       .upsert({ user_id: user.id, ...next, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
     setSavingKey(null);

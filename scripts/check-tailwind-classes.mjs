@@ -61,11 +61,14 @@ const IGNORE = [
 function collectCandidates() {
   // The vendored design system is Tailwind v4 source we must not edit; its
   // internal helpers (e.g. cn.ts merge groups) are not app class literals.
+  // src/lib/utils.ts is the app-side twin: it configures tailwind-merge class
+  // *groups* ("font-size", "text-color"), which are not utility classes either.
   const files = fg.sync(["src/**/*.{ts,tsx,js,jsx}", "index.html"], {
     cwd: ROOT,
     absolute: true,
-    ignore: ["src/design-system/**"],
+    ignore: ["src/design-system/**", "src/lib/utils.ts"],
   });
+
   const found = new Map(); // class -> Set(files)
   for (const file of files) {
     const src = readFileSync(file, "utf8");

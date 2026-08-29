@@ -42,7 +42,9 @@ export function EmailRetentionCard() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "email-retention"],
     queryFn: async (): Promise<RetentionSettings | null> => {
-      const { data: row, error } = await (supabase as any).rpc("admin_email_retention_settings");
+      const { data: row, error } = await (supabase as unknown as { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> }).rpc(
+        "admin_email_retention_settings",
+      );
       if (error) throw error;
       return (row ?? null) as RetentionSettings | null;
     },
@@ -58,7 +60,7 @@ export function EmailRetentionCard() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await (supabase as any).rpc("admin_update_email_retention", {
+      const { error } = await (supabase as unknown as { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> }).rpc("admin_update_email_retention", {
         _audit_retention_days: Number(audit),
         _report_retention_days: Number(reports),
         _alert_retention_days: Number(alerts),
@@ -75,7 +77,9 @@ export function EmailRetentionCard() {
 
   const runNow = useMutation({
     mutationFn: async () => {
-      const { data: result, error } = await (supabase as any).rpc("admin_run_email_retention_purge");
+      const { data: result, error } = await (supabase as unknown as { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> }).rpc(
+        "admin_run_email_retention_purge",
+      );
       if (error) throw error;
       return result as RetentionSettings["last_purge_result"];
     },
