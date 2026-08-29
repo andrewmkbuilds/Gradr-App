@@ -74,6 +74,20 @@ function StateBadge({ state }: { state: string }) {
   return <Badge variant="outline">{state}</Badge>;
 }
 
+type QueryResult<T> = Promise<{ data: T[] | null; error: { message: string } | null }>;
+type Chainable<T> = QueryResult<T> & {
+  is: (col: string, val: null) => Chainable<T>;
+  not: (col: string, op: string, val: null) => Chainable<T>;
+  eq: (col: string, val: string) => Chainable<T>;
+  order: (col: string, opts: { ascending: boolean }) => Chainable<T>;
+  select: (cols: string) => Chainable<T>;
+  limit: (n: number) => Chainable<T>;
+};
+
+function fromTable<T>(table: string): Chainable<T> {
+  return (supabase as unknown as { from: (t: string) => Chainable<T> }).from(table);
+}
+
 export default function AdminBillingOps() {
   const qc = useQueryClient();
   const [alertFilter, setAlertFilter] = useState("open");
@@ -84,7 +98,7 @@ export default function AdminBillingOps() {
   const alerts = useQuery({
     queryKey: ["billing-alerts", alertFilter],
     queryFn: async () => {
-      let q = (supabase as any).from("billing_alerts").select("*").order("created_at", { ascending: false }).limit(100);
+      let q = fromTable<AlertRow>("billing_alerts").select("*").order("created_at", { ascending: false }).limit(100);
       if (alertFilter === "open") q = q.is("resolved_at", null);
       if (alertFilter === "resolved") q = q.not("resolved_at", "is", null);
       const { data, error } = await q;
@@ -96,9 +110,13 @@ export default function AdminBillingOps() {
   const deliveries = useQuery({
     queryKey: ["billing-deliveries", deliveryFilter],
     queryFn: async () => {
-      let q = (supabase as any).from("webhook_deliveries").select(
-        "id, event_id, event_type, environment, state, attempts, replays, last_error, next_retry_at, updated_at",
-      ).eq("provider", "paddle").order("updated_at", { ascending: false }).limit(100);
+      let q = fromTable<DeliveryRow>("webhook_deliveries")
+        .select(
+          "id, event_id, event_type, environment, state, attempts, replays, last_error, next_retry_at, updated_at",
+        )
+        .eq("provider", "paddle")
+        .order("updated_at", { ascending: false })
+        .limit(100);
       if (deliveryFilter !== "all") q = q.eq("state", deliveryFilter);
       const { data, error } = await q;
       if (error) throw error;
@@ -109,9 +127,10 @@ export default function AdminBillingOps() {
   const simulations = useQuery({
     queryKey: ["payment-simulations"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("payment_simulations").select("id, scenario, ok, result, created_at")
-        .order("created_at", { ascending: false }).limit(25);
+      const { data, error } = await fromTable<SimulationRow>("payment_simulations")
+        .select("id, scenario, ok, result, created_at")
+        .order("created_at", { ascending: false })
+        .limit(25);
       if (error) throw error;
       return (data ?? []) as SimulationRow[];
     },
@@ -121,8 +140,9 @@ export default function AdminBillingOps() {
     setBusy(key);
     const { data, error } = await supabase.functions.invoke("payments-watchdog", { body });
     setBusy(null);
-    if (error || (data as any)?.ok === false) {
-      toast.error(`${label} failed`, { description: (data as any)?.error ?? error?.message });
+    const payload = data as { ok?: boolean; error?: string } | null;
+    if (error || payload?.ok === false) {
+      toast.error(`${label} failed`, { description: payload?.error ?? error?.message });
       return;
     }
     toast.success(`${label} complete`);
@@ -139,8 +159,12 @@ export default function AdminBillingOps() {
     if (error) {
       toast.error("Simulation failed", { description: error.message });
     } else {
-      const ok = (data as any)?.ok;
-      ok ? toast.success("Simulation dispatched") : toast.error("Simulation returned an error");
+      const ok = (data as { ok?: boolean } | null)?.ok;
+      if (ok) {
+        toast.success("Simulation dispatched");
+      } else {
+        toast.error("Simulation returned an error");
+      }
     }
     qc.invalidateQueries({ queryKey: ["payment-simulations"] });
     qc.invalidateQueries({ queryKey: ["billing-deliveries"] });
