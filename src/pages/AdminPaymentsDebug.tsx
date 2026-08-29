@@ -100,7 +100,7 @@ export default function AdminPaymentsDebug() {
   return (
     <div className="mx-auto max-w-4xl section-stack">
       <PageHeader
-        icon={CreditCard}
+        icon={<CreditCard className="h-5 w-5" aria-hidden="true" />}
         title="Payments debug"
         description="Exactly which Paddle token, environment and price ids this build resolves at runtime."
       />
