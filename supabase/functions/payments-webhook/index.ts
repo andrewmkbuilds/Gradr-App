@@ -7,6 +7,15 @@ import {
   verifyWebhook,
   type PaddleEnv,
 } from "../_shared/paddle.ts";
+import {
+  isEntitled,
+  periodEndOf,
+  priceExternalId,
+  userIdOf,
+  type PaddleEventData,
+  type PaddleLineItem,
+  type PaddleWebhookEvent,
+} from "../_shared/paddleEvent.ts";
 import { logSecurityEvent } from "../_shared/securityAudit.ts";
 import { capture as phCapture, setPerson as phSetPerson } from "../_shared/posthog.ts";
 import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
@@ -17,69 +26,11 @@ import {
   reverseEntitlementsForAdjustment,
 } from "../_shared/entitlementLedger.ts";
 
-/** ---- Paddle event payload shapes (loosely typed to match Paddle's webhook JSON) ---- */
-
-interface PaddleMoneyTotals {
-  total?: string | number | null;
-  subtotal?: string | number | null;
-  discount?: string | number | null;
-  grandTotal?: string | number | null;
-}
-
-interface PaddlePriceRef {
-  id?: string | null;
-  productId?: string | null;
-  unitPrice?: { amount?: string | number | null } | null;
-  customData?: Record<string, unknown> | null;
-  custom_data?: Record<string, unknown> | null;
-  importMeta?: { externalId?: string | null } | null;
-}
-
-interface PaddleProductRef {
-  customData?: Record<string, unknown> | null;
-  importMeta?: { externalId?: string | null } | null;
-}
-
-interface PaddleLineItem {
-  price?: PaddlePriceRef | null;
-  product?: PaddleProductRef | null;
-  quantity?: number | null;
-}
-
-/** Union-ish shape covering the fields used across the various Paddle event types. */
-interface PaddleEventData {
-  id?: string | null;
-  email?: string | null;
-  customerId?: string | null;
-  customData?: { userId?: string | null } | null;
-  status?: string | null;
-  items?: PaddleLineItem[] | null;
-  scheduledChange?: { action?: string | null; effectiveAt?: string | null } | null;
-  currentBillingPeriod?: { endsAt?: string | null } | null;
-  billingPeriod?: { endsAt?: string | null } | null;
-  subscriptionId?: string | null;
-  subscription_id?: string | null;
-  transactionId?: string | null;
-  transaction_id?: string | null;
-  details?: { totals?: PaddleMoneyTotals | null } | null;
-  totals?: PaddleMoneyTotals | null;
-  payoutTotals?: PaddleMoneyTotals | null;
-  currencyCode?: string | null;
-  currency_code?: string | null;
-  discountId?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-  canceledAt?: string | null;
-  billedAt?: string | null;
-  invoiceNumber?: string | null;
-  action?: string | null;
-}
-
-interface PaddleWebhookEvent {
-  eventType: string;
-  eventId?: string | null;
-  data: PaddleEventData;
-}
+/**
+ * Payload shapes and every field accessor live in `_shared/paddleEvent.ts` so
+ * they can be contract-tested against real Paddle events
+ * (src/test/paymentsWebhookContract.test.ts).
+ */
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function db() {
@@ -183,30 +134,7 @@ async function mirrorSubscription(data: PaddleEventData, env: PaddleEnv) {
   await db().from("paddle_subscriptions").upsert(patch, { onConflict: "subscription_id" });
 }
 
-/**
- * Access is granted while Paddle is still collecting: `past_due` keeps working
- * through dunning, and a cancelled/paused plan keeps working until the paid
- * period actually ends. Revoking early and re-granting is worse than trusting
- * Paddle's retry flow.
- */
-function isEntitled(status: string, periodEnd: string | null): boolean {
-  if (["active", "trialing", "past_due"].includes(status)) return true;
-  if (["canceled", "paused"].includes(status)) {
-    return Boolean(periodEnd) && new Date(periodEnd as string) > new Date();
-  }
-  return false;
-}
 
-/**
- * Human-readable price id for a line item. Catalog prices created in-app carry
- * it in `custom_data.external_id`; prices imported into Paddle carry it in
- * `import_meta.external_id`. Support both so either catalog resolves.
- */
-function priceExternalId(item: PaddleLineItem | null | undefined): string | undefined {
-  return (item?.price?.customData?.external_id ??
-    item?.price?.custom_data?.external_id ??
-    item?.price?.importMeta?.externalId) as string | undefined;
-}
 
 function planFromItems(data: PaddleEventData) {
   const item = data?.items?.[0];
