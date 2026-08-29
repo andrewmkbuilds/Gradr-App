@@ -61,6 +61,8 @@ interface Props {
   voiceAvailable?: boolean;
   /** A background health check is currently probing for voice recovery. */
   voiceRecovering?: boolean;
+  /** Studio voice is down, so the interviewer is using the browser's voice. */
+  usingFallbackVoice?: boolean;
   onDismissConnectionError?: () => void;
 
 
@@ -112,7 +114,8 @@ export function InterviewStudio(props: Props) {
     targetRole, messages, partialUser, partialModel, interviewerState, realtime, connecting,
     canReconnect, micMuted, micLabel, voiceOn, thinking, ending, input, limits, startedAt,
     connectionLost, voiceErrorCode, voiceErrorReason, voiceErrorRequestId,
-    voiceAvailable = true, voiceRecovering = false, onDismissConnectionError,
+    voiceAvailable = true, voiceRecovering = false, usingFallbackVoice = false,
+    onDismissConnectionError,
 
     onInputChange, onSubmit, onToggleMic, onToggleVoice, onInterrupt, onReconnect, onEnd, onReset, onSnapshot,
   } = props;
@@ -204,6 +207,11 @@ export function InterviewStudio(props: Props) {
                   <Badge variant="outline" className="gap-1.5 font-medium">
                     <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
                     Connecting
+                  </Badge>
+                ) : realtime && usingFallbackVoice ? (
+                  <Badge variant="secondary" className="gap-1.5 font-medium">
+                    <Volume2 className="h-3 w-3" aria-hidden="true" />
+                    Backup voice
                   </Badge>
                 ) : realtime ? (
                   <Badge variant="outline" className="gap-1.5 border-primary/50 font-medium text-primary">
@@ -622,8 +630,10 @@ export function InterviewStudio(props: Props) {
                 <TooltipContent>
                   {!voiceAvailable
                     ? "Voice interviews are a Pro feature — you can keep typing"
-                    : voiceRecovering
-                      ? "Checking whether interviewer audio is back…"
+                    : usingFallbackVoice
+                      ? "Studio voice is unavailable — using your browser's voice for now"
+                      : voiceRecovering
+                        ? "Checking whether interviewer audio is back…"
                       : voiceOn
                         ? "Interviewer audio on"
                         : "Interviewer audio off"}
