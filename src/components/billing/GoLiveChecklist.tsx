@@ -3,6 +3,7 @@ import { CheckCircle2, Circle, ExternalLink, Loader2, XCircle } from "lucide-rea
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ds/Button";
+import { Progress } from "@/components/ui/progress";
 import { goLiveProgress, type GoLiveState, type GoLiveStep } from "@/lib/payments/goLive";
 
 const STATE_META: Record<
