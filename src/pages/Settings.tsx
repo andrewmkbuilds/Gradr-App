@@ -2,7 +2,8 @@ import { ThemeSegmentedControl } from "@/components/ThemeToggle";
 import { MotionSegmentedControl } from "@/components/MotionToggle";
 import { useState, useEffect } from "react";
 import { Palette, User, Save, Loader2, Bell, Send } from "lucide-react";
-import { Button, Input } from "@/design-system/gradr-9b9b95";
+import { Input } from "@/design-system/gradr-9b9b95";
+import { Button } from "@/components/ds/Button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -208,8 +209,8 @@ export default function Settings() {
           </div>
         </div>
 
-        <Button onClick={saveProfile} disabled={saving} className="w-full">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+        <Button onClick={saveProfile} loading={saving} className="w-full">
+          {!saving && <Save className="h-4 w-4 mr-2" />}
           Save Profile
         </Button>
       </div>
