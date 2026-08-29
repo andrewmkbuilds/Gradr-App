@@ -501,10 +501,21 @@ export default function Pricing() {
                 variant="outline"
                 className="w-full"
                 onClick={() => handlePack(pack.priceId)}
-                disabled={pending === pack.priceId}
+                data-testid={`pack-cta-${pack.priceId}`}
+                disabled={pending === pack.priceId || unavailable(pack.priceId)}
+                title={
+                  unavailable(pack.priceId)
+                    ? "This pack is still being set up with our payment provider."
+                    : undefined
+                }
               >
-                {pending === pack.priceId ? "Opening checkout…" : "Buy pack"}
+                {pending === pack.priceId
+                  ? "Opening checkout…"
+                  : unavailable(pack.priceId)
+                    ? "Not available yet"
+                    : "Buy pack"}
               </Button>
+
             </Card>
             </SpatialCard>
           ))}
