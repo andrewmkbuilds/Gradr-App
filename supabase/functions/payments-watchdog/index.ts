@@ -352,7 +352,7 @@ async function runDunning(): Promise<{ notified: number; paused: number }> {
       });
     }
 
-    await (db.rpc("enqueue_notification", {
+    await db.rpc("enqueue_notification", {
       _user_id: row.user_id,
       _type: final ? "billing_subscription_paused" : "billing_payment_retry",
       _title: final ? "Your plan is paused" : `We'll retry your payment (attempt ${attempt})`,
