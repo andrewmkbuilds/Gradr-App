@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Facebook, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -45,7 +45,21 @@ export function PublicShell({ children, source }: PublicShellProps) {
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
+
 
   return (
     <div className="relative min-h-dvh bg-background">
@@ -69,7 +83,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
             Gradr
           </Link>
 
-          <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+          <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
             {NAV.map((item) => (
               <Link
                 key={item.to}
@@ -114,7 +128,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
               onClick={() => setMenuOpen((v) => !v)}
               aria-expanded={menuOpen}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground md:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground lg:hidden"
             >
               {menuOpen ? <X className="h-4 w-4" aria-hidden="true" /> : <Menu className="h-4 w-4" aria-hidden="true" />}
             </button>
@@ -122,20 +136,31 @@ export function PublicShell({ children, source }: PublicShellProps) {
         </div>
 
         {menuOpen && (
-          <nav aria-label="Mobile" className="border-t border-border/60 bg-background md:hidden">
+          <nav aria-label="Mobile" className="border-t border-border/60 bg-background lg:hidden">
             <ul className="page-shell py-2">
               {NAV.map((item) => (
                 <li key={item.to}>
                   <Link
                     to={item.to}
                     onClick={() => setMenuOpen(false)}
+                    aria-current={isActive(item.to) ? "page" : undefined}
                     className="block rounded-lg px-2 py-3 text-sm text-foreground hover:bg-muted"
                   >
                     {item.label}
                   </Link>
                 </li>
               ))}
+              <li className="sm:hidden">
+                <Link
+                  to="/auth"
+                  onClick={() => setMenuOpen(false)}
+                  className="block rounded-lg px-2 py-3 text-sm text-foreground hover:bg-muted"
+                >
+                  Sign in
+                </Link>
+              </li>
             </ul>
+
           </nav>
         )}
       </header>
