@@ -304,10 +304,11 @@ function InterviewEngineInner() {
       },
     });
     if (error) {
-      let payload: { limits?: { studioVoice?: boolean } & Record<string, unknown>; reason?: unknown } | null = null;
+      type LimitsPayload = { limits?: { studioVoice?: boolean } & Record<string, unknown>; reason?: unknown };
+      let payload: LimitsPayload | null = null;
       try {
         const ctx = (error as { context?: { json?: () => Promise<unknown> } })?.context;
-        payload = (await ctx?.json?.()) as typeof payload;
+        payload = (await ctx?.json?.()) as LimitsPayload | null;
       } catch { /* not json */ }
       if (payload?.limits) {
         setLimits({ ...payload.limits, sessionsRemaining: null });
