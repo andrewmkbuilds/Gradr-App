@@ -177,6 +177,15 @@ export interface SpeechQueueOptions {
   onDrained: () => void;
   /** Voice failed — the turn is aborted and must be retried by the user. */
   onFailure: (code: VoiceErrorCode) => void;
+  /**
+   * Browser-side substitute voice (Web Speech API). Used only when the Gradr
+   * voice backend cannot deliver audio for a chunk — it keeps the interview
+   * going instead of ending the turn. Returns a handle so barge-in can cut it
+   * off exactly like backend audio.
+   */
+  speakFallback?: (text: string) => { done: Promise<void>; cancel: () => void };
+  /** Fired the first time a turn falls back to the browser voice. */
+  onFallbackEngaged?: (code: VoiceErrorCode) => void;
   /** Extra silence between thoughts, from the persona profile. */
   beatMs?: number;
 }
