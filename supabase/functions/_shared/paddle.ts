@@ -117,7 +117,11 @@ export async function resolvePaddlePriceId(
     const res = await gatewayFetch(env, query);
     if (!res.ok) throw new Error(`paddle_catalog_${res.status}`);
     const body = await res.json();
-    const rows: Array<Record<string, any>> = body?.data ?? [];
+    const rows: Array<{
+      id?: string;
+      custom_data?: { external_id?: string };
+      import_meta?: { external_id?: string };
+    }> = body?.data ?? [];
 
     for (const row of rows) {
       const rowExternalId = row?.custom_data?.external_id ?? row?.import_meta?.external_id;
