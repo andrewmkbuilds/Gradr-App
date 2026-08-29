@@ -304,7 +304,7 @@ function InterviewEngineInner() {
       },
     });
     if (error) {
-      type LimitsPayload = { limits?: { studioVoice?: boolean } & Record<string, unknown>; reason?: unknown };
+      type LimitsPayload = { limits?: Omit<SessionLimits, "sessionsRemaining">; reason?: unknown };
       let payload: LimitsPayload | null = null;
       try {
         const ctx = (error as { context?: { json?: () => Promise<unknown> } })?.context;
