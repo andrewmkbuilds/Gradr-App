@@ -59,6 +59,13 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: bun run test:visual:key-pages
 
+      # Auth error + loading states. No account needed: the auth endpoint is
+      # stubbed in-page, so these run on every PR.
+      - name: Auth state visual regression
+        env:
+          E2E_BASE_URL: http://localhost:8080
+        run: bun run test:visual:auth-states
+
       - name: Upload screenshots and diffs
         if: always()
         uses: actions/upload-artifact@v4
@@ -67,6 +74,8 @@ jobs:
           path: |
             tests/visual/key-pages/current
             tests/visual/key-pages/diff
+            tests/visual/auth-states/current
+            tests/visual/auth-states/diff
           if-no-files-found: ignore
           retention-days: 14
 

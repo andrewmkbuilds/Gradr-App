@@ -104,6 +104,16 @@ jobs:
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
 
 
+      # Admin voice console: controls render and Save submits. The speech
+      # provider is stubbed; skips itself without admin credentials.
+      - name: Admin voice settings smoke
+        run: bun run test:admin-voice http://127.0.0.1:8080
+        env:
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
       # 404 rendering, session persistence, axe a11y, redirect headers and
       # sign-in/dashboard visual snapshots.
       - name: Route guards (404, a11y, headers, visuals)
