@@ -115,6 +115,13 @@ try {
     .catch(() => false);
   check("Paddle.js loaded and initialized", paddleReady);
 
+  const priceResolverErrors = [];
+  page.on("response", async (res) => {
+    if (!res.url().includes("get-paddle-price") || res.ok()) return;
+    const body = await res.text().catch(() => "");
+    priceResolverErrors.push(body.slice(0, 200) || `HTTP ${res.status()}`);
+  });
+
   const ctas = page.getByRole("button", { name: /^(subscribe to|change to) /i });
   const count = await ctas.count();
   check("paid-plan CTAs are present", count > 0, `${count} found`);
@@ -134,8 +141,12 @@ try {
         check(`checkout initializes — ${label}`, false, "redirected to /auth — the session was not accepted");
         break;
       }
-      const text = await page.locator("body").innerText();
-      const err = /price|checkout|unavailable|error/i.test(text) ? "checkout never initialized" : "no Checkout.open call";
+      // Name the real cause: an unresolved price means the Paddle catalog for
+      // this environment is missing, which is an owner-side task, not a bug.
+      const resolverError = priceResolverErrors.at(-1);
+      const err = resolverError
+        ? `price resolver failed — ${resolverError}`
+        : "checkout never initialized";
       check(`checkout initializes — ${label}`, false, err);
       continue;
     }
