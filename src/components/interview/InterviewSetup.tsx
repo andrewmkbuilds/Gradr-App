@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useEntitlements } from "@/hooks/useSubscription";
 import {
   PERSONAS,
   DIFFICULTIES,
@@ -96,11 +97,14 @@ export function InterviewSetup({ initial, turnTiming, onTurnTimingChange, onCont
   const [resumeText, setResumeText] = useState(initial?.resumeText ?? "");
   const [resumeLabel, setResumeLabel] = useState<string | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
-  const [tier, setTier] = useState<string | null>(null);
   const [touched, setTouched] = useState<Partial<Record<SetupField, boolean>>>({});
   const [attempted, setAttempted] = useState(false);
 
-  const ent = entitlementFor(tier);
+  // Gating reads the same authoritative snapshot the rest of the app uses.
+  // Reading `subscribers` directly used to disagree with it (credit packs,
+  // trials and multi-environment rows are invisible to that table alone).
+  const { data: entitlements } = useEntitlements();
+  const ent = entitlementFor(entitlements?.tier ?? null);
   const reduced = useReducedMotionPref();
 
   const validation = useMemo(
@@ -136,7 +140,7 @@ export function InterviewSetup({ initial, turnTiming, onTurnTimingChange, onCont
         const uid = userData.user?.id;
         if (!uid) return;
 
-        const [{ data: profile }, { data: resume }, { data: sub }] = await Promise.all([
+        const [{ data: profile }, { data: resume }] = await Promise.all([
           supabase.from("profiles").select("target_job_title").eq("user_id", uid).maybeSingle(),
           supabase
             .from("resumes")
@@ -145,14 +149,8 @@ export function InterviewSetup({ initial, turnTiming, onTurnTimingChange, onCont
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle(),
-          supabase
-            .from("subscribers")
-            .select("subscribed, subscription_tier")
-            .eq("user_id", uid)
-            .maybeSingle(),
         ]);
         if (cancelled) return;
-        setTier(sub?.subscribed ? (sub.subscription_tier ?? "free") : "free");
         if (!initial?.targetRole && profile?.target_job_title) setTargetRole(profile.target_job_title);
         if (!initial?.resumeText && resume?.parsed_text) {
           setResumeText(resume.parsed_text);
