@@ -236,6 +236,12 @@ export default function AdminPaymentsStatus() {
         {diag.reason && <p className="mt-1 text-sm text-muted-foreground">{diag.reason}</p>}
       </Card>
 
+      <GoLiveChecklist steps={goLiveSteps} />
+
+      <PaymentsBuildMatrix />
+
+
+
       <Card className="p-5">
         <h2 className="mb-2 text-lg font-semibold text-foreground">Build configuration</h2>
         <ul>
