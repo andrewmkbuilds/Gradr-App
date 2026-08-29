@@ -68,10 +68,18 @@ async function main() {
     const idleRing = await layerScale(page, "ring");
 
     // Hover an interactive target: the ring and halo grow.
-    const target = page
-      .locator('button:visible, a:visible, [data-cursor="interactive"]:visible')
-      .first();
-    const box = (await target.count()) ? await target.boundingBox() : null;
+    // Prefer a side-effect-free target: pressing a real button on the route
+    // can toggle app state (theme, motion) and unmount the layer mid-assert.
+    const candidates = ['input:visible', '[data-cursor="interactive"]:visible', 'textarea:visible', 'a:visible'];
+    let target = null;
+    for (const sel of candidates) {
+      const loc = page.locator(sel).first();
+      if (await loc.count()) {
+        target = loc;
+        break;
+      }
+    }
+    const box = target ? await target.boundingBox() : null;
     if (box) {
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await settle(page, 900);
