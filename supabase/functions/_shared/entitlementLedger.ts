@@ -177,9 +177,21 @@ export interface RefundResult {
  * (a credit or proration) leaves access alone and records the money movement
  * only, because the customer still paid for the period.
  */
-// deno-lint-ignore no-explicit-any
+export interface AdjustmentPayload {
+  transactionId?: string | null;
+  transaction_id?: string | null;
+  action?: string;
+  totals?: { total?: string | number | null } | null;
+  payoutTotals?: { total?: string | number | null } | null;
+  currencyCode?: string | null;
+  currency_code?: string | null;
+  customData?: { userId?: string | null } | null;
+  subscriptionId?: string | null;
+  subscription_id?: string | null;
+}
+
 export async function reverseEntitlementsForAdjustment(
-  adjustment: any,
+  adjustment: AdjustmentPayload,
   env: string,
   providerEventId?: string | null,
 ): Promise<RefundResult> {

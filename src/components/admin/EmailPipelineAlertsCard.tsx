@@ -39,7 +39,16 @@ export function EmailPipelineAlertsCard() {
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["admin", "email-pipeline-alerts", showResolved],
     queryFn: async (): Promise<AlertRow[]> => {
-      let query = (supabase as unknown as { from: typeof supabase.from })
+      type AlertsQuery = Promise<{ data: unknown; error: unknown }> & {
+        order: (col: string, opts: { ascending: boolean }) => AlertsQuery;
+        limit: (n: number) => AlertsQuery;
+        is: (col: string, val: null) => AlertsQuery;
+      };
+      let query = (
+        supabase as unknown as {
+          from: (table: string) => { select: (cols: string) => AlertsQuery };
+        }
+      )
         .from("email_pipeline_alerts")
         .select(
           "id, event, stage, template_name, category_label, reason, recipients, recipient_count, occurrence_count, first_occurred_at, last_occurred_at, resolved_at",
@@ -56,7 +65,9 @@ export function EmailPipelineAlertsCard() {
 
   const resolve = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as unknown as { rpc: typeof supabase.rpc }).rpc("admin_resolve_email_alert", { _alert_id: id });
+      const { error } = await (
+        supabase as unknown as { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: unknown }> }
+      ).rpc("admin_resolve_email_alert", { _alert_id: id });
       if (error) throw error;
     },
     onSuccess: () => {
