@@ -40,7 +40,7 @@ function formatAmount(minor: string | number | null | undefined, currency: strin
 export default function Subscription() {
   const navigate = useNavigate();
   useRealtimeBilling();
-  const { data, isLoading } = useSubscriptionDetails();
+  const { data, isLoading, isError, refetch, isFetching } = useSubscriptionDetails();
   const { updatePaymentMethod, cancel, resume, changePlan, cancelScheduledPlanChange } = useSubscriptionActions();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [immediate, setImmediate] = useState(false);
