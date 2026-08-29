@@ -213,96 +213,144 @@ serve(async (req) => {
     const previousText = typeof body.previousText === "string" ? body.previousText.slice(-400) : "";
     const nextText = typeof body.nextText === "string" ? body.nextText.slice(0, 400) : "";
 
-    const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
-    if (!apiKey) {
-      console.error("[voice] provider credential missing — ELEVENLABS_API_KEY unavailable", { requestId });
-      await recordVoiceEvent({
-        userId: user.id,
-        outcome: "failure",
-        code: "VOICE_CONFIGURATION_ERROR",
-        reason: "PROVIDER_CREDENTIAL_MISSING",
-        requestId,
-        personaId,
-        providerDetail: "No speech credential configured in the workspace.",
-      });
-      return voiceError("VOICE_CONFIGURATION_ERROR", 503, requestId, "PROVIDER_CREDENTIAL_MISSING");
-    }
+    const audioHeaders = (provider: string) => ({
+      ...corsHeaders,
+      "Content-Type": "audio/mpeg",
+      "Cache-Control": "no-store",
+      "X-Voice-Provider": provider,
+      "Access-Control-Expose-Headers": "X-Voice-Provider",
+    });
 
-    // One retry: transient 429/5xx from the provider shouldn't drop a thought.
-    let res: Response | null = null;
-    let networkError = false;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        res = await synthesize(apiKey, profile, config, text, previousText, nextText);
-      } catch (e) {
-        networkError = true;
-        console.error("[voice] provider request threw", { requestId, error: String(e) });
-        res = null;
+    // ---- Primary: Deepgram Aura-2 -----------------------------------------
+    const deepgramKey = Deno.env.get("DEEPGRAM_API_KEY");
+    let deepgramStatus = 0;
+    let deepgramDetail = "";
+    if (deepgramKey) {
+      const voice = deepgramVoiceFor(personaId, config);
+      // One retry only: a transient 429/5xx shouldn't drop a thought, and more
+      // than one retry would delay speech more than the fallback would.
+      let dg: Response | null = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        dg = await synthesizeDeepgram(deepgramKey, voice, text);
+        if (dg && dg.ok) break;
+        if (dg && dg.status < 500 && dg.status !== 429) break;
+        if (attempt === 0) await new Promise((r) => setTimeout(r, 300));
       }
-      if (res && res.ok) break;
-      if (res && res.status < 500 && res.status !== 429) break;
-      if (attempt === 0) await new Promise((r) => setTimeout(r, 350));
-    }
-
-    if (!res || !res.ok || !res.body) {
-      const upstreamStatus = res?.status ?? 0;
-      const rawDetail = res ? await res.text().catch(() => "") : "no response body";
-      // Server-side only: the full provider detail is diagnosable from logs and
-      // is deliberately excluded from the response payload.
-      console.error("[voice] provider failure", {
-        requestId,
-        userId: user.id,
-        personaId,
-        upstreamStatus,
-        providerDetail: providerDetail(rawDetail),
-      });
-      const mapped = networkError && !res
-        ? { code: "VOICE_CONNECTION_FAILED" as VoiceErrorCode, status: 502, reason: "PROVIDER_NETWORK" as VoiceProviderReason }
-        : classifyProviderFailure(upstreamStatus, rawDetail);
-
-      // Primary provider is down for this account — try the secondary before
-      // leaving the interviewer silent.
-      const fallback = await synthesizeFallback(text, profile);
-      if (fallback?.ok && fallback.body) {
-        console.warn("[voice] primary failed, served via fallback provider", { requestId, upstreamStatus });
+      if (dg?.ok && dg.body) {
+        console.info("[voice] deepgram audio stream started", { requestId, personaId, voice });
         await recordVoiceEvent({
           userId: user.id,
           outcome: "ok",
           requestId,
           personaId,
-          providerDetail: `fallback:fish-audio (primary ${upstreamStatus})`,
+          providerDetail: `deepgram:${voice}`,
         });
-        return new Response(fallback.body, {
-          headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
-        });
+        return new Response(dg.body, { headers: audioHeaders("deepgram") });
       }
-      if (fallback && !fallback.ok) {
-        console.error("[voice] fallback provider failure", {
-          requestId,
-          status: fallback.status,
-          detail: providerDetail(await fallback.text().catch(() => "")),
-        });
-      }
-
-      await recordVoiceEvent({
-        userId: user.id,
-        outcome: "failure",
-        code: mapped.code,
-        reason: mapped.reason,
-        upstreamStatus,
+      deepgramStatus = dg?.status ?? 0;
+      deepgramDetail = dg ? await dg.text().catch(() => "") : "no response body";
+      console.error("[voice] deepgram failure", {
         requestId,
         personaId,
-        providerDetail: providerDetail(rawDetail),
+        voice,
+        upstreamStatus: deepgramStatus,
+        providerDetail: providerDetail(deepgramDetail),
       });
-      return voiceError(mapped.code, mapped.status, requestId, mapped.reason);
+    } else {
+      console.warn("[voice] DEEPGRAM_API_KEY not configured — using secondary providers", { requestId });
     }
 
-    console.info("[voice] audio stream started", { requestId, personaId });
-    await recordVoiceEvent({ userId: user.id, outcome: "ok", requestId, personaId });
+    // ---- Secondary: ElevenLabs (only when configured) ----------------------
+    const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
+    let res: Response | null = null;
+    let networkError = false;
+    if (apiKey) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          res = await synthesize(apiKey, profile, config, text, previousText, nextText);
+        } catch (e) {
+          networkError = true;
+          console.error("[voice] provider request threw", { requestId, error: String(e) });
+          res = null;
+        }
+        if (res && res.ok) break;
+        if (res && res.status < 500 && res.status !== 429) break;
+        if (attempt === 0) await new Promise((r) => setTimeout(r, 350));
+      }
+      if (res?.ok && res.body) {
+        console.info("[voice] audio stream started via elevenlabs", { requestId, personaId });
+        await recordVoiceEvent({
+          userId: user.id,
+          outcome: "ok",
+          requestId,
+          personaId,
+          providerDetail: deepgramKey ? `elevenlabs (deepgram ${deepgramStatus})` : "elevenlabs",
+        });
+        return new Response(res.body, { headers: audioHeaders("elevenlabs") });
+      }
+    }
 
-    return new Response(res.body, {
-      headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
+    // ---- Every server-side provider failed ---------------------------------
+    const upstreamStatus = res?.status ?? deepgramStatus;
+    const rawDetail = res
+      ? await res.text().catch(() => "")
+      : deepgramDetail || "no speech provider configured";
+    // Server-side only: the full provider detail is diagnosable from logs and
+    // is deliberately excluded from the response payload.
+    console.error("[voice] all speech providers failed", {
+      requestId,
+      userId: user.id,
+      personaId,
+      upstreamStatus,
+      providerDetail: providerDetail(rawDetail),
     });
+    const mapped = !deepgramKey && !apiKey
+      ? {
+        code: "VOICE_CONFIGURATION_ERROR" as VoiceErrorCode,
+        status: 503,
+        reason: "PROVIDER_CREDENTIAL_MISSING" as VoiceProviderReason,
+      }
+      : networkError && !res && !deepgramStatus
+      ? {
+        code: "VOICE_CONNECTION_FAILED" as VoiceErrorCode,
+        status: 502,
+        reason: "PROVIDER_NETWORK" as VoiceProviderReason,
+      }
+      : classifyProviderFailure(upstreamStatus, rawDetail);
+
+    // Last server-side resort before the browser's own voice takes over.
+    const fallback = await synthesizeFallback(text, profile);
+    if (fallback?.ok && fallback.body) {
+      console.warn("[voice] served via fish audio", { requestId, upstreamStatus });
+      await recordVoiceEvent({
+        userId: user.id,
+        outcome: "ok",
+        requestId,
+        personaId,
+        providerDetail: `fallback:fish-audio (primary ${upstreamStatus})`,
+      });
+      return new Response(fallback.body, { headers: audioHeaders("fish-audio") });
+    }
+    if (fallback && !fallback.ok) {
+      console.error("[voice] fallback provider failure", {
+        requestId,
+        status: fallback.status,
+        detail: providerDetail(await fallback.text().catch(() => "")),
+      });
+    }
+
+    await recordVoiceEvent({
+      userId: user.id,
+      outcome: "failure",
+      code: mapped.code,
+      reason: mapped.reason,
+      upstreamStatus,
+      requestId,
+      personaId,
+      providerDetail: providerDetail(rawDetail),
+    });
+    // The browser now speaks this sentence through the Web Speech API.
+    return voiceError(mapped.code, mapped.status, requestId, mapped.reason);
   } catch (e) {
     console.error("[voice] unhandled failure", e);
     return json({ code: "VOICE_UNAVAILABLE" }, 500);
