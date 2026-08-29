@@ -56,9 +56,9 @@ serve(async (req) => {
     const durationSec = Number.isFinite(body.durationSec) ? Math.max(0, Math.round(body.durationSec)) : 0;
 
     const transcript = messages
-      .filter((m: any) => m && typeof m.content === "string")
+      .filter((m: Record<string, unknown>) => m && typeof m.content === "string")
       .slice(-60)
-      .map((m: any) => `${m.role === "assistant" ? "Interviewer" : "Candidate"}: ${String(m.content).slice(0, 3000)}`)
+      .map((m: Record<string, unknown>) => `${m.role === "assistant" ? "Interviewer" : "Candidate"}: ${String(m.content).slice(0, 3000)}`)
       .join("\n\n");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");

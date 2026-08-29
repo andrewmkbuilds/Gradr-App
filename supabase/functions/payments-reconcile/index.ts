@@ -42,8 +42,26 @@ function isEntitled(status: string, periodEnd: string | null): boolean {
   return false;
 }
 
-// deno-lint-ignore no-explicit-any
-function externalPriceId(sub: any): string | undefined {
+interface PaddleSubscriptionItem {
+  price?: {
+    id?: string;
+    product_id?: string;
+    import_meta?: { external_id?: string };
+    importMeta?: { externalId?: string };
+  };
+}
+
+interface PaddleSubscription {
+  id: string;
+  status?: string;
+  customer_id?: string;
+  current_billing_period?: { ends_at?: string | null } | null;
+  custom_data?: { userId?: string | null } | null;
+  items?: PaddleSubscriptionItem[];
+  scheduled_change?: { action?: string; effective_at?: string } | null;
+}
+
+function externalPriceId(sub: PaddleSubscription): string | undefined {
   const item = sub?.items?.[0];
   return item?.price?.import_meta?.external_id ?? item?.price?.importMeta?.externalId ?? undefined;
 }
@@ -82,8 +100,7 @@ Deno.serve(async (req) => {
       return json({ error: `Paddle API error ${res.status}` }, 502);
     }
     const payload = await res.json();
-    // deno-lint-ignore no-explicit-any
-    const remote: any[] = payload?.data ?? [];
+    const remote: PaddleSubscription[] = payload?.data ?? [];
 
     const repaired: { subscription_id: string; field: string; from: unknown; to: unknown }[] = [];
 

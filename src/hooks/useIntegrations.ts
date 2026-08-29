@@ -77,7 +77,29 @@ export function integrationCatalog(): IntegrationMeta[] {
   ];
 }
 
-const table = () => (supabase as any).from("user_integrations");
+interface UserIntegrationRow {
+  provider: string;
+  enabled: boolean;
+  status: string;
+  last_synced_at: string | null;
+  last_error: string | null;
+}
+
+interface UserIntegrationsTable {
+  select: (cols: string) => {
+    eq: (
+      col: string,
+      val: string,
+    ) => Promise<{ data: UserIntegrationRow[] | null; error: { code?: string; message: string } | null }>;
+  };
+  upsert: (
+    row: Record<string, unknown>,
+    opts: { onConflict: string },
+  ) => Promise<{ error: { code?: string; message: string } | null }>;
+}
+
+const table = (): UserIntegrationsTable =>
+  (supabase as unknown as { from: (t: string) => UserIntegrationsTable }).from("user_integrations");
 
 export function useIntegrations() {
   const { user } = useAuth();
@@ -102,9 +124,9 @@ export function useIntegrations() {
     const next: Record<string, IntegrationState> = {};
     for (const row of data || []) {
       next[row.provider] = {
-        provider: row.provider,
+        provider: row.provider as IntegrationId,
         enabled: row.enabled,
-        status: row.status,
+        status: row.status as IntegrationState["status"],
         lastSyncedAt: row.last_synced_at,
         lastError: row.last_error,
       };
