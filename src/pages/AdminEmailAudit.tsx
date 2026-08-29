@@ -73,7 +73,16 @@ export default function AdminEmailAudit() {
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["admin", "email-delivery-audit", eventFilter, fromDate, toDate],
     queryFn: async (): Promise<AuditRow[]> => {
-      let query = (supabase as any)
+      type AuditQuery = Promise<{ data: unknown; error: { message: string } | null }> & {
+        eq: (col: string, val: string) => AuditQuery;
+        gte: (col: string, val: string) => AuditQuery;
+        lte: (col: string, val: string) => AuditQuery;
+        order: (col: string, opts: { ascending: boolean }) => AuditQuery;
+        limit: (n: number) => AuditQuery;
+      };
+      let query = (
+        supabase as unknown as { from: (t: string) => { select: (cols: string) => AuditQuery } }
+      )
         .from("email_delivery_audit")
         .select(
           "id, occurred_at, event, template_name, category_label, recipient_email, recipient_user_id, message_id, reason, source",
