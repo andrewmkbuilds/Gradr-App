@@ -112,11 +112,29 @@ for (const route of routes) {
 await browser.close();
 
 mkdirSync(OUT_DIR, { recursive: true });
-const report = { base: BASE, signedIn: Boolean(session), total: routes.length, failed: failures.length, routes: swept };
+const suppressedSummary = [...suppressed.entries()].map(([id, count]) => ({
+  id,
+  count,
+  reason: CONSOLE_ALLOWLIST.find((e) => e.id === id)?.reason ?? "",
+}));
+const report = {
+  base: BASE,
+  signedIn: Boolean(session),
+  total: routes.length,
+  failed: failures.length,
+  // Recorded so a growing allowlist is visible in review rather than silent.
+  suppressed: suppressedSummary,
+  routes: swept,
+};
 writeFileSync(join(OUT_DIR, "console-sweep.json"), JSON.stringify(report, null, 2));
 
 if (AS_JSON) console.log(JSON.stringify(report, null, 2));
 console.log(`\n${routes.length - failures.length}/${routes.length} routes clean (${session ? "signed in" : "signed out"}).`);
+if (suppressedSummary.length) {
+  console.log(
+    `Suppressed known noise: ${suppressedSummary.map((s) => `${s.id}\u00d7${s.count}`).join(", ")}`,
+  );
+}
 
 if (failures.length) {
   console.error(`\nConsole errors on ${failures.length} route(s). Full report: ${OUT_DIR}/console-sweep.json`);
