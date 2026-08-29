@@ -51,6 +51,8 @@ export default function Pricing() {
   const [prices, setPrices] = useState<Record<string, PreviewedPrice>>({});
   const [pricesLoading, setPricesLoading] = useState(true);
   const [pricesError, setPricesError] = useState<string | null>(null);
+  const [preflight, setPreflight] = useState<PaymentsPreflight | null>(null);
+  const [preflightLoading, setPreflightLoading] = useState(true);
 
   // Localized prices come straight from Paddle — no client-side math, no
   // re-formatting of the strings Paddle returns.
@@ -81,7 +83,26 @@ export default function Pricing() {
     };
   }, [priceAttempt]);
 
+  /**
+   * Catalog preflight: which plans can actually be bought in this environment.
+   * Separate from the price preview above because they fail differently — a
+   * price preview outage is cosmetic (we fall back to USD), whereas a price
+   * missing from the catalog means checkout would die inside the overlay.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    setPreflightLoading(true);
+    runPaymentsPreflight()
+      .then((result) => !cancelled && setPreflight(result))
+      .finally(() => !cancelled && setPreflightLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [priceAttempt]);
+
   const priceFor = (id: string) => prices[id]?.formattedTotal;
+  const unavailable = (id: string) => isPriceUnavailable(preflight, id);
+
 
   const handleSelect = (tier: Tier | null) => {
     trackUpgradeCta({
