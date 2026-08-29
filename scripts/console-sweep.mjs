@@ -6,8 +6,8 @@
  * session is available, otherwise signed out) and fails the build if any route
  * emits a console error, a page error, or an unhandled promise rejection.
  *
- * Known, environment-only noise lives in IGNORED below — keep that list short
- * and justified; everything else is a real regression.
+ * Known, environment-only noise lives in scripts/lib/console-allowlist.mjs —
+ * every entry there carries a reason. Everything else is a real regression.
  *
  * Usage: node scripts/console-sweep.mjs [baseUrl] [--json]
  */
@@ -54,7 +54,14 @@ function loadSession() {
   return { key: minted.storage_key, session: JSON.stringify(minted.session) };
 }
 
-const isIgnored = (text) => IGNORED.some((re) => re.test(text));
+/** Counts of suppressed messages by allowlist id, reported at the end. */
+const suppressed = new Map();
+function isIgnored(text) {
+  const entry = matchAllowlist(text);
+  if (!entry) return false;
+  suppressed.set(entry.id, (suppressed.get(entry.id) ?? 0) + 1);
+  return true;
+}
 
 const routes = routesFromApp();
 const session = loadSession();
