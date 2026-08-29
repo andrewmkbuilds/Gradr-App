@@ -18,7 +18,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
 import { DUNNING_MAX_ATTEMPTS, nextDunningRetry } from "../_shared/billingLedger.ts";
-import { gatewayFetch, type PaddleEnv } from "../_shared/paddle.ts";
+import { gatewayFetch, resolvePaddlePriceId, type PaddleEnv } from "../_shared/paddle.ts";
 
 const MAX_REPLAY_ATTEMPTS = 5;
 /** Backoff per attempt, in minutes. */
