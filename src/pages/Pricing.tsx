@@ -14,8 +14,10 @@ import {
   annualListPrice,
   annualSavingsPercent,
   formatUsd,
+  hasTrial,
   planAmount,
   planPriceLabel,
+  TRIAL_DAYS,
   type PlanId,
 } from "@/config/pricing";
 import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
