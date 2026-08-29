@@ -171,6 +171,8 @@ export interface VoiceConfig {
   modelId: string;
   outputFormat: string;
   voiceOverrides: Record<string, string>;
+  /** Optional per-persona Deepgram voice overrides (admin-configurable). */
+  deepgramOverrides?: Record<string, string>;
 }
 
 export async function loadVoiceConfig(): Promise<VoiceConfig> {
