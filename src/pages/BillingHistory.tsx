@@ -106,7 +106,8 @@ export default function BillingHistory() {
         {invoicesLoading
           ? <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
           : invoicesError
-          ? <p role="alert" className="text-sm text-muted-foreground">
+          ? <p role="alert" className="text-body-sm text-muted-foreground">
+
               We couldn't load your invoices right now. Reload the page, or email{" "}
               <a className="underline hover:text-foreground" href="mailto:support@gradr.me">support@gradr.me</a>{" "}
               if it keeps happening.
