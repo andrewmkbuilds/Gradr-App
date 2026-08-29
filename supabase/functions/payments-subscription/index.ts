@@ -13,16 +13,22 @@
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { gatewayFetch, PLAN_PRICES, type PaddleEnv } from "../_shared/paddle.ts";
+import {
+  gatewayFetch,
+  PLAN_PRICES,
+  resolvePaddlePriceId,
+  type PaddleEnv,
+} from "../_shared/paddle.ts";
 
 const TIER_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, advanced: 3 };
 
 /** Resolve a human-readable price id (e.g. `pro_annual`) to Paddle's `pri_...`. */
 async function resolvePriceId(env: PaddleEnv, externalId: string): Promise<string | null> {
-  const res = await gatewayFetch(env, `/prices?external_id=${encodeURIComponent(externalId)}&status=active`);
-  if (!res.ok) return null;
-  const rows = (await res.json())?.data ?? [];
-  return rows[0]?.id ?? null;
+  try {
+    return await resolvePaddlePriceId(env, externalId);
+  } catch {
+    return null;
+  }
 }
 
 const json = (body: unknown, status = 200) =>

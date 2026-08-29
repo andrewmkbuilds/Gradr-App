@@ -18,7 +18,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { formatDate, formatMoney, sendTransactionalEmail } from "../_shared/sendTransactional.ts";
 import { DUNNING_MAX_ATTEMPTS, nextDunningRetry } from "../_shared/billingLedger.ts";
-import { gatewayFetch, type PaddleEnv } from "../_shared/paddle.ts";
+import { gatewayFetch, resolvePaddlePriceId, type PaddleEnv } from "../_shared/paddle.ts";
 
 const MAX_REPLAY_ATTEMPTS = 5;
 /** Backoff per attempt, in minutes. */
@@ -421,11 +421,7 @@ async function applyScheduledPlanChanges(): Promise<{ applied: number; failed: n
   for (const row of due ?? []) {
     const env = (row.environment === "live" ? "live" : "sandbox") as PaddleEnv;
     try {
-      const lookup = await gatewayFetch(
-        env,
-        `/prices?external_id=${encodeURIComponent(row.target_price_id)}&status=active`,
-      );
-      const paddlePriceId = lookup.ok ? (await lookup.json())?.data?.[0]?.id : null;
+      const paddlePriceId = await resolvePaddlePriceId(env, row.target_price_id);
       if (!paddlePriceId) throw new Error(`price_unavailable:${row.target_price_id}`);
 
       const res = await gatewayFetch(env, `/subscriptions/${row.subscription_id}`, {

@@ -95,3 +95,39 @@ export const ANNUAL_BONUS: Record<
   pro: { application: 25, interview: 6 },
   advanced: { application: 50, interview: 12 },
 };
+
+/**
+ * Resolves a human-readable price id (`pro_monthly`) to a Paddle `pri_...` id.
+ *
+ * Paddle's `?external_id=` filter only matches `import_meta.external_id`, which
+ * is set by catalog *imports*. Prices created through the Lovable catalog tools
+ * carry their external id in `custom_data.external_id` instead, so the filter
+ * silently returns an empty list for every price we own. Paging the catalog and
+ * matching client-side is the only lookup that actually works; `import_meta` is
+ * kept as a fallback so imported prices keep resolving too.
+ */
+export async function resolvePaddlePriceId(
+  env: PaddleEnv,
+  externalId: string,
+): Promise<string | null> {
+  let after: string | null = null;
+
+  for (let page = 0; page < 10; page += 1) {
+    const query = `/prices?per_page=200&status=active${after ? `&after=${encodeURIComponent(after)}` : ""}`;
+    const res = await gatewayFetch(env, query);
+    if (!res.ok) throw new Error(`paddle_catalog_${res.status}`);
+    const body = await res.json();
+    const rows: Array<Record<string, any>> = body?.data ?? [];
+
+    for (const row of rows) {
+      const rowExternalId = row?.custom_data?.external_id ?? row?.import_meta?.external_id;
+      if (rowExternalId === externalId && row?.id) return row.id as string;
+    }
+
+    if (!body?.meta?.pagination?.has_more || rows.length === 0) break;
+    after = rows[rows.length - 1]?.id ?? null;
+    if (!after) break;
+  }
+
+  return null;
+}

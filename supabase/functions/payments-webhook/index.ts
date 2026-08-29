@@ -728,7 +728,7 @@ Deno.serve(async (req) => {
         return { eventType: body.eventType, data: body.data, eventId: body.eventId };
       })()
       : await verifyWebhook(req, env)) as unknown as PaddleWebhookEvent;
-    const eventUserId = (event.userIdOf(data)) as string | null;
+    const eventUserId = userIdOf(event.data as PaddleEventData) ?? null;
 
     deliveryEventId = event.eventId ?? null;
 

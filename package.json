@@ -213,6 +213,7 @@
     "test:watch": "vitest",
     "theme:check": "node scripts/theme-regression-check.mjs",
     "typecheck": "tsgo -p tsconfig.app.json && tsgo -p tsconfig.node.json",
+    "typecheck:functions": "node scripts/typecheck-functions.mjs",
     "types:check": "node scripts/check-type-drift.mjs",
     "types:generate": "node scripts/generate-db-types.mjs",
     "visual:baseline:approve": "node scripts/baseline-approve.mjs --approve",

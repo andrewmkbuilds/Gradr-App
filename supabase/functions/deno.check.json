@@ -1,0 +1,9 @@
+{
+  "//": "Typecheck-only Deno config. Supabase's own deploy does NOT read this file (it looks for deno.json), so it can turn on npm resolution for `deno check` in CI without changing runtime behaviour. Used by `bun run typecheck:functions`.",
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": false,
+    "lib": ["deno.window", "dom", "esnext"]
+  }
+}

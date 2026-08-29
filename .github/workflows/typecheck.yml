@@ -23,6 +23,16 @@ jobs:
       - name: Typecheck (app + node)
         run: bun run typecheck
 
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # Edge functions are not covered by tsgo. A `ReferenceError: data is not
+      # defined` once shipped in the payments webhook and broke every Paddle
+      # delivery, so unresolved names are now a hard failure here.
+      - name: Typecheck (edge functions)
+        run: bun run typecheck:functions
+
       # Guards against schema/type drift: fails when a migration adds a table
       # the committed Supabase types don't know about.
       - name: Database type drift
