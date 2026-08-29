@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, BookOpen, LifeBuoy, Mail, Activity } from "lucide-react";
+import { DiscordIcon } from "@/components/icons/DiscordIcon";
+import { DISCORD_INVITE_URL } from "@/config/community";
 
 const SUPPORT_EMAIL = "support@gradr.me";
 
@@ -62,7 +64,7 @@ function SupportHome() {
         </p>
       </header>
 
-      <div className="section-gap grid gap-4 sm:grid-cols-3">
+      <div className="section-gap grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SLink
           to="/contact"
           className="interactive group rounded-xl border border-border/60 bg-card p-5 elev-1"
@@ -93,6 +95,18 @@ function SupportHome() {
             See whether a Gradr service is currently degraded.
           </p>
         </CrossLink>
+        <a
+          href={DISCORD_INVITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="interactive group rounded-xl border border-border/60 bg-card p-5 elev-1"
+        >
+          <DiscordIcon size={20} aria-hidden="true" />
+          <h2 className="mt-3 text-sm font-semibold text-foreground">Join the community</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Chat with the team and other job seekers in our Discord.
+          </p>
+        </a>
       </div>
 
       <section className="section-gap max-w-3xl">

@@ -7,6 +7,8 @@ import { trackSignupCta } from "@/lib/telemetry/events";
 import { LEGAL_PAGES } from "@/content/legal";
 import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
 import { cn } from "@/lib/utils";
+import { DiscordIcon } from "@/components/icons/DiscordIcon";
+import { DISCORD_INVITE_URL } from "@/config/community";
 
 interface PublicShellProps {
   children: React.ReactNode;
@@ -191,9 +193,6 @@ export function PublicShell({ children, source }: PublicShellProps) {
               ))}
             </ul>
           </nav>
-
-
-
           <nav aria-label="Legal" className="space-y-3 text-sm">
             <p className="type-overline text-muted-foreground">Legal</p>
             <ul className="space-y-2">
@@ -213,8 +212,17 @@ export function PublicShell({ children, source }: PublicShellProps) {
           </nav>
         </div>
 
-        <div className="page-shell section-gap border-t border-border/60 pt-6 text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Gradr. All rights reserved.
+        <div className="page-shell section-gap flex flex-col gap-4 border-t border-border/60 pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} Gradr. All rights reserved.</p>
+          <a
+            href={DISCORD_INVITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <DiscordIcon size={16} aria-hidden="true" />
+            Join our Discord
+          </a>
         </div>
       </footer>
     </div>
