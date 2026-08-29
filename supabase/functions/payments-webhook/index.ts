@@ -10,6 +10,8 @@ import {
 import {
   isEntitled,
   periodEndOf,
+  trialEndOf,
+  trialStartOf,
   priceExternalId,
   userIdOf,
   type PaddleEventData,
@@ -162,6 +164,9 @@ async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
   const status: string = data.status ?? "active";
   const periodEnd = periodEndOf(data);
   const entitled = isEntitled(status, periodEnd);
+  const trialStart = trialStartOf(data);
+  const trialEnd = trialEndOf(data);
+  const trialing = status === "trialing";
 
   await db().from("subscribers").upsert(
     {
@@ -180,6 +185,8 @@ async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
       price_id: externalPriceId,
       current_period_end: periodEnd,
       cancel_at_period_end: data.scheduledChange?.action === "cancel",
+      trial_start: trialStart,
+      trial_end: trialEnd,
     },
     { onConflict: "user_id,environment" },
   );
@@ -188,7 +195,16 @@ async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
     await grantAnnualBonus(userId, String(data.id), plan.tier, env);
   }
 
-  if (entitled) {
+  if (entitled && trialing) {
+    // A trial start is not a purchase — the customer has been charged nothing
+    // yet, so they get the trial mail instead of the welcome-to-Pro receipt.
+    await billingEmail("trial-started", await emailFor(userId, env), `trial-started-${data.id}`, {
+      planName: planLabel(plan?.tier, plan?.interval),
+      trialDays: TRIAL_DAYS,
+      trialEndsOn: formatDate(trialEnd ?? periodEnd),
+      firstChargeAmount: plan?.amountLabel ?? undefined,
+    });
+  } else if (entitled) {
     // Idempotency is keyed on the subscription id so Paddle retries of the same
     // created event never double-send the welcome-to-Pro mail.
     await billingEmail("subscription-started", await emailFor(userId, env), `sub-started-${data.id}`, {
@@ -205,12 +221,14 @@ async function updateSubscription(data: PaddleEventData, env: PaddleEnv) {
   const entitled = isEntitled(status, periodEnd);
   const { externalPriceId, plan } = planFromItems(data);
 
+  const trialEnd = trialEndOf(data);
   const patch: Record<string, unknown> = {
     subscribed: entitled,
     subscription_status: status,
     current_period_end: periodEnd,
     cancel_at_period_end: data.scheduledChange?.action === "cancel",
     subscription_tier: entitled ? plan?.tier ?? undefined : null,
+    ...(trialEnd ? { trial_end: trialEnd } : {}),
   };
   if (externalPriceId) {
     // Plan changes arrive as subscription.updated with new items.
@@ -219,12 +237,37 @@ async function updateSubscription(data: PaddleEventData, env: PaddleEnv) {
   }
   if (patch.subscription_tier === undefined) delete patch.subscription_tier;
 
+  const { data: previous } = await db()
+    .from("subscribers")
+    .select("user_id, subscription_status")
+    .eq("stripe_subscription_id", data.id)
+    .eq("environment", env)
+    .maybeSingle();
+
   const { data: updated } = await db()
     .from("subscribers")
     .update(patch)
     .eq("stripe_subscription_id", data.id)
     .eq("environment", env)
     .select("user_id");
+
+  // Trial converted into a paying subscription — now the welcome/receipt mail
+  // is the right message. Keyed on the subscription id, so retries are safe.
+  if (previous?.subscription_status === "trialing" && status === "active") {
+    const convertedUser = (previous.user_id as string | undefined) ?? userIdOf(data);
+    if (convertedUser) {
+      await billingEmail(
+        "subscription-started",
+        await emailFor(convertedUser, env),
+        `trial-converted-${data.id}`,
+        {
+          planName: planLabel(plan?.tier, plan?.interval),
+          interval: plan?.interval ?? undefined,
+          nextBillingDate: formatDate(periodEnd),
+        },
+      );
+    }
+  }
 
   // Switching to yearly billing earns the annual bonus too (granted once per
   // subscription, so a renewal or a later change never repeats it).
