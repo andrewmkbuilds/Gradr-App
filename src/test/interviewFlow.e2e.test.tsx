@@ -108,7 +108,14 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const wrap = (ui: React.ReactNode) => render(<MemoryRouter>{ui}</MemoryRouter>);
+// InterviewSetup reads entitlements through react-query, so the harness needs
+// a client just like the app shell provides one.
+const wrap = (ui: React.ReactNode) =>
+  render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>,
+  );
 
 /* -------------------------------- the flow -------------------------------- */
 
