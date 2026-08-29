@@ -32,8 +32,9 @@ const TIMELINE_TONE: Record<string, string> = {
 
 export default function BillingHistory() {
   useRealtimeBilling();
-  const { data: invoices, isLoading: invoicesLoading } = useInvoices();
-  const { data: timeline, isLoading: timelineLoading } = useBillingTimeline();
+  const { data: invoices, isLoading: invoicesLoading, isError: invoicesError } = useInvoices();
+  const { data: timeline, isLoading: timelineLoading, isError: timelineError } = useBillingTimeline();
+
   const { data: purchases } = usePurchases();
   const [downloading, setDownloading] = useState<string | null>(null);
 
@@ -104,8 +105,16 @@ export default function BillingHistory() {
         </div>
         {invoicesLoading
           ? <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          : invoicesError
+          ? <p role="alert" className="text-body-sm text-muted-foreground">
+
+              We couldn't load your invoices right now. Reload the page, or email{" "}
+              <a className="underline hover:text-foreground" href="mailto:support@gradr.me">support@gradr.me</a>{" "}
+              if it keeps happening.
+            </p>
           : !invoices?.length
           ? <p className="text-sm text-muted-foreground">No invoices yet. They'll appear here after your first payment.</p>
+
           : (
             <ul className="divide-y divide-border">
               {invoices.map((invoice) => (
@@ -148,8 +157,13 @@ export default function BillingHistory() {
         </div>
         {timelineLoading
           ? <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+          : timelineError
+          ? <p role="alert" className="text-body-sm text-muted-foreground">
+              We couldn't load your subscription activity right now. Reload the page to try again.
+            </p>
           : !timeline?.length
           ? <p className="text-sm text-muted-foreground">Nothing here yet — plan changes and payment events will show up as they happen.</p>
+
           : (
             <ol className="space-y-3">
               {timeline.map((entry) => (

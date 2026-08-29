@@ -40,7 +40,7 @@ function formatAmount(minor: string | number | null | undefined, currency: strin
 export default function Subscription() {
   const navigate = useNavigate();
   useRealtimeBilling();
-  const { data, isLoading } = useSubscriptionDetails();
+  const { data, isLoading, isError, refetch, isFetching } = useSubscriptionDetails();
   const { updatePaymentMethod, cancel, resume, changePlan, cancelScheduledPlanChange } = useSubscriptionActions();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [immediate, setImmediate] = useState(false);
@@ -98,7 +98,30 @@ export default function Subscription() {
           <Skeleton className="h-4 w-72" />
           <Skeleton className="h-10 w-40" />
         </Card>
+      ) : isError ? (
+        <Card className="space-y-4 p-6" role="alert">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-destructive" aria-hidden />
+            <h2 className="text-h6 text-foreground">We couldn't load your subscription</h2>
+          </div>
+          <p className="text-body-sm text-muted-foreground">
+            Your plan is safe — this is only a problem reading the billing service. Try again, or email{" "}
+            <a className="underline hover:text-foreground" href="mailto:support@gradr.me">support@gradr.me</a>{" "}
+            if it keeps happening.
+          </p>
+
+          <Button
+            variant="secondary"
+            className="self-start"
+            loading={isFetching}
+            onClick={() => void refetch()}
+          >
+            Try again
+          </Button>
+
+        </Card>
       ) : !data?.hasSubscription ? (
+
         <Card className="space-y-4 p-6">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" aria-hidden />
