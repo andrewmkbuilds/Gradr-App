@@ -10,11 +10,17 @@ export function handleAiFunctionError(
   data?: { error?: string } | null,
 ): boolean {
   // supabase.functions.invoke surfaces non-2xx as FunctionsHttpError with .context.response
-  const anyErr = fnError as any;
+  const errObj = fnError as
+    | {
+        message?: string;
+        status?: number;
+        context?: { status?: number; response?: { status?: number } };
+      }
+    | undefined;
   const status: number | undefined =
-    anyErr?.context?.status ?? anyErr?.status ?? anyErr?.context?.response?.status;
+    errObj?.context?.status ?? errObj?.status ?? errObj?.context?.response?.status;
   const message: string =
-    data?.error ?? anyErr?.message ?? "Something went wrong";
+    data?.error ?? errObj?.message ?? "Something went wrong";
 
   if (status === 401 || /unauthorized/i.test(message)) {
     toast.error("Please sign in to use this feature", {

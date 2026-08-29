@@ -156,9 +156,10 @@ export function useInterviewVoice(opts: UseInterviewVoiceOptions) {
         return { error: "VOICE_UNAVAILABLE" };
       }
       return { blob };
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (signal.aborted) return { error: VOICE_ABORTED };
-      const code: VoiceErrorCode = e?.name === "AbortError" ? "VOICE_TIMEOUT" : "VOICE_CONNECTION_FAILED";
+      const code: VoiceErrorCode =
+        e instanceof Error && e.name === "AbortError" ? "VOICE_TIMEOUT" : "VOICE_CONNECTION_FAILED";
       console.error("[voice] request error", code);
       return { error: code };
     } finally {
