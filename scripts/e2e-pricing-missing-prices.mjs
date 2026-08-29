@@ -101,7 +101,7 @@ async function run() {
       );
     }
 
-    const subscribeButtons = page.getByRole("button", { name: /^Subscribe to /i });
+    const subscribeButtons = page.locator('[data-testid^="plan-cta-"]');
     const count = await subscribeButtons.count();
     record("empty catalog: plan CTAs are present", count > 0, `${count} CTAs`);
     let enabled = 0;
@@ -114,7 +114,7 @@ async function run() {
     const firstCta = count > 0 ? await subscribeButtons.first().innerText() : "";
     record(
       "empty catalog: disabled CTA explains itself",
-      /unavailable|not available|coming soon|set up/i.test(firstCta),
+      /not available yet/i.test(firstCta),
       firstCta,
     );
 
@@ -147,12 +147,12 @@ async function run() {
       (await notice2.getAttribute("data-preflight-status").catch(() => null)) === "partial",
     );
 
-    const proCta = page2.getByRole("button", { name: /^Subscribe to Pro$/i }).first();
+    const proCta = page2.getByTestId("plan-cta-pro");
     record(
       "partial catalog: the available plan stays purchasable",
       await proCta.isEnabled().catch(() => false),
     );
-    const starterCta = page2.getByRole("button", { name: /Starter/i }).first();
+    const starterCta = page2.getByTestId("plan-cta-starter");
     record(
       "partial catalog: the missing plan is disabled",
       !(await starterCta.isEnabled().catch(() => true)),

@@ -106,6 +106,7 @@ const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
 const AdminVerifications = lazy(() => import("@/pages/AdminVerifications"));
 const AdminSearchConsole = lazy(() => import("./pages/AdminSearchConsole"));
 const AdminPaymentsStatus = lazy(() => import("@/pages/AdminPaymentsStatus"));
+const AdminPaymentsDebug = lazy(() => import("@/pages/AdminPaymentsDebug"));
 const Privacy = lazy(() => import("./pages/legal/Privacy"));
 const Terms = lazy(() => import("./pages/legal/Terms"));
 const RefundPolicy = lazy(() => import("./pages/legal/RefundPolicy"));
@@ -248,6 +249,7 @@ function ProtectedRoutes() {
         <Route path="/admin/revenue" element={<RequireAdmin><AnimatedPage><AdminRevenue /></AnimatedPage></RequireAdmin>} />
         <Route path="/admin/usage" element={<RequireAdmin><AnimatedPage><AdminUsage /></AnimatedPage></RequireAdmin>} />
         <Route path="/admin/paddle" element={<RequireAdmin><AnimatedPage><AdminPaddle /></AnimatedPage></RequireAdmin>} />
+        <Route path="/admin/payments-debug" element={<RequireAdmin><AnimatedPage><AdminPaymentsDebug /></AnimatedPage></RequireAdmin>} />
          <Route path="/admin/payments-status" element={<RequireAdmin><AnimatedPage><AdminPaymentsStatus /></AnimatedPage></RequireAdmin>} />
 
          <Route path="/admin/search-console" element={<RequireAdmin><AnimatedPage><AdminSearchConsole /></AnimatedPage></RequireAdmin>} />
