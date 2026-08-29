@@ -102,13 +102,14 @@ export default function Subscription() {
         <Card className="space-y-4 p-6" role="alert">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-destructive" aria-hidden />
-            <h2 className="text-sm font-semibold text-foreground">We couldn't load your subscription</h2>
+            <h2 className="text-h6 text-foreground">We couldn't load your subscription</h2>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body-sm text-muted-foreground">
             Your plan is safe — this is only a problem reading the billing service. Try again, or email{" "}
             <a className="underline hover:text-foreground" href="mailto:support@gradr.me">support@gradr.me</a>{" "}
             if it keeps happening.
           </p>
+
           <Button variant="secondary" className="gap-2 self-start" onClick={() => void refetch()} disabled={isFetching}>
             {isFetching ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <RotateCcw className="h-4 w-4" aria-hidden />}
             {isFetching ? "Retrying…" : "Try again"}
