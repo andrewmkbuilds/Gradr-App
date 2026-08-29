@@ -188,6 +188,24 @@ export default function Connect() {
         description="Link ChatGPT, Claude or any assistant that supports remote connectors to your Gradr account. It signs in as you, so it only ever sees your own resumes, job matches and applications."
       />
 
+      <a
+        href={DISCORD_INVITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="interactive flex items-center gap-3 rounded-card border border-border/60 bg-card p-4 elev-1 transition-colors hover:bg-muted"
+      >
+        <DiscordIcon size={20} className="shrink-0 text-[#5865F2]" />
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold text-foreground">
+            Join the official Gradr Discord
+          </span>
+          <span className="block text-xs text-muted-foreground">
+            Get help connecting, share automations and talk to the team.
+          </span>
+        </span>
+        <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+      </a>
+
       <Card className="space-y-3 p-6">
         <h2 className="text-sm font-semibold text-foreground">Your connection URL</h2>
         <p className="text-sm text-muted-foreground">
