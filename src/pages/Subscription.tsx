@@ -110,10 +110,15 @@ export default function Subscription() {
             if it keeps happening.
           </p>
 
-          <Button variant="secondary" className="gap-2 self-start" onClick={() => void refetch()} disabled={isFetching}>
-            {isFetching ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <RotateCcw className="h-4 w-4" aria-hidden />}
-            {isFetching ? "Retrying…" : "Try again"}
+          <Button
+            variant="secondary"
+            className="self-start"
+            loading={isFetching}
+            onClick={() => void refetch()}
+          >
+            Try again
           </Button>
+
         </Card>
       ) : !data?.hasSubscription ? (
 
