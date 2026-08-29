@@ -32,7 +32,7 @@ import {
 } from "@/lib/mcp/clients";
 import { verifyMcpEndpoint, type McpVerifyResult } from "@/lib/mcp/verify";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL } from "@/config/community";
+import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
 
 /**
  * Resolve the public MCP endpoint from the browser-reachable backend URL, so it
