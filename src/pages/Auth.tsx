@@ -455,7 +455,7 @@ export default function Auth() {
               />
             </div>
             {fieldErrors.fullName && (
-              <p id="error-fullName" className="text-caption text-destructive">{fieldErrors.fullName}</p>
+              <Text id="error-fullName" variant="caption" tone="destructive">{fieldErrors.fullName}</Text>
             )}
           </div>
         )}
@@ -477,7 +477,7 @@ export default function Auth() {
             />
           </div>
           {fieldErrors.email && (
-            <p id="error-email" className="text-caption text-destructive">{fieldErrors.email}</p>
+            <Text id="error-email" variant="caption" tone="destructive">{fieldErrors.email}</Text>
           )}
         </div>
         <div className="space-y-1.5">
@@ -497,7 +497,7 @@ export default function Auth() {
             />
           </div>
           {fieldErrors.password && (
-            <p id="error-password" className="text-caption text-destructive">{fieldErrors.password}</p>
+            <Text id="error-password" variant="caption" tone="destructive">{fieldErrors.password}</Text>
           )}
         </div>
 
@@ -570,7 +570,7 @@ export default function Auth() {
               </span>
             </label>
             {consentError && (
-              <p id="consent-error" role="alert" className="text-caption text-destructive">{consentError}</p>
+              <Text id="consent-error" role="alert" variant="caption" tone="destructive">{consentError}</Text>
             )}
           </fieldset>
         )}
