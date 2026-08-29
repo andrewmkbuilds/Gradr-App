@@ -69,12 +69,12 @@ function Metric({
 }) {
   return (
     <Card className="space-y-1 p-4">
-      <p className="flex items-center gap-2 text-xs text-muted-foreground">
+      <p className="flex items-center gap-2 text-caption text-muted-foreground">
         <Icon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
         {label}
       </p>
-      <p className="font-display text-2xl font-semibold tabular-nums text-foreground">{value}</p>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      <p className="font-display text-h4 tabular-nums text-foreground">{value}</p>
+      {hint && <p className="text-caption text-muted-foreground">{hint}</p>}
     </Card>
   );
 }
@@ -167,17 +167,17 @@ export default function AdminVoiceHealth() {
 
           <Card className="p-0">
             <div className="border-b border-border p-4">
-              <h2 className="font-display font-semibold text-foreground">Per persona</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="font-display text-h6 text-foreground">Per persona</h2>
+              <p className="text-body-sm text-muted-foreground">
                 Every interviewer persona and the voice currently assigned to it.
               </p>
             </div>
             {data?.personas.length ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-body-sm">
                   <caption className="sr-only">Voice health metrics by interviewer persona</caption>
                   <thead>
-                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b border-border text-left text-caption uppercase tracking-wide text-muted-foreground">
                       <th scope="col" className="p-3 font-medium">Persona</th>
                       <th scope="col" className="p-3 font-medium">Voice</th>
                       <th scope="col" className="p-3 font-medium">Calls</th>
@@ -220,7 +220,7 @@ export default function AdminVoiceHealth() {
                 </table>
               </div>
             ) : (
-              <p className="p-4 text-sm text-muted-foreground">
+              <p className="p-4 text-body-sm text-muted-foreground">
                 No synthesis activity in this window.
               </p>
             )}
