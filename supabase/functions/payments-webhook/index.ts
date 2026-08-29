@@ -107,7 +107,7 @@ async function mirrorCustomer(data: PaddleEventData, env: PaddleEnv, userId?: st
 async function mirrorSubscription(data: PaddleEventData, env: PaddleEnv) {
   if (!data?.id) return;
   const item = data.items?.[0];
-  const userId = data?.customData?.userId ?? null;
+  const userId = userIdOf(data);
 
   if (data.customerId) {
     await mirrorCustomer(
@@ -143,7 +143,7 @@ function planFromItems(data: PaddleEventData) {
 }
 
 async function upsertSubscription(data: PaddleEventData, env: PaddleEnv) {
-  const userId = data?.customData?.userId;
+  const userId = userIdOf(data);
   if (!userId) {
     console.error("payments-webhook: no userId in customData");
     return;
@@ -228,14 +228,14 @@ async function updateSubscription(data: PaddleEventData, env: PaddleEnv) {
 
   // Switching to yearly billing earns the annual bonus too (granted once per
   // subscription, so a renewal or a later change never repeats it).
-  const changedUser = (updated?.[0]?.user_id as string | undefined) ?? data?.customData?.userId ?? null;
+  const changedUser = (updated?.[0]?.user_id as string | undefined) ?? userIdOf(data);
   if (entitled && changedUser && plan?.interval === "annual" && plan.tier) {
     await grantAnnualBonus(changedUser, String(data.id), plan.tier, env);
   }
 
   // Out-of-order delivery: an update can arrive before the created event.
   // Rebuild the row from the event rather than dropping the entitlement.
-  if (!updated?.length && data?.customData?.userId) {
+  if (!updated?.length && userIdOf(data)) {
     await upsertSubscription(data, env);
   }
 }
@@ -247,7 +247,7 @@ async function updateSubscription(data: PaddleEventData, env: PaddleEnv) {
  */
 async function handlePaymentFailed(data: PaddleEventData, env: PaddleEnv) {
   const subscriptionId = data?.subscriptionId ?? null;
-  const userId = data?.customData?.userId ?? null;
+  const userId = userIdOf(data);
 
   let query = db()
     .from("subscribers")
@@ -331,7 +331,7 @@ async function clearPaymentIssue(data: PaddleEventData, env: PaddleEnv) {
     .select("user_id");
 
   const wasDunning = await closeDunning({ environment: env, subscriptionId });
-  const target = (recovered?.[0]?.user_id as string | undefined) ?? data?.customData?.userId ?? null;
+  const target = (recovered?.[0]?.user_id as string | undefined) ?? userIdOf(data);
   if (!target || !(wasDunning || recovered?.length)) return;
 
   await db().rpc("enqueue_notification", {
@@ -362,7 +362,7 @@ async function clearPaymentIssue(data: PaddleEventData, env: PaddleEnv) {
  * investigated — the sale is never blocked after the fact.
  */
 async function recordDiscountUse(data: PaddleEventData, env: PaddleEnv) {
-  const userId = data?.customData?.userId;
+  const userId = userIdOf(data);
   const discountAmount = Number(data?.details?.totals?.discount ?? 0);
   if (!userId || !data?.id || discountAmount <= 0) return;
 
@@ -421,7 +421,7 @@ async function recordDiscountUse(data: PaddleEventData, env: PaddleEnv) {
  * duplicate deliveries can never double-pay.
  */
 async function recordAffiliateCommission(data: PaddleEventData, env: PaddleEnv) {
-  const userId = data?.customData?.userId;
+  const userId = userIdOf(data);
   if (!userId || !data?.id) return;
 
   // Commission basis is configurable: 'net' pays on what the customer actually
@@ -482,7 +482,7 @@ async function reverseAffiliateCommission(data: PaddleEventData, env: PaddleEnv,
       category: "affiliate",
       event: "commission_reversed",
       decision: "allowed",
-      userId: data?.customData?.userId ?? null,
+      userId: userIdOf(data),
       env,
       source: "payments-webhook",
       details: { reversed: count, reason, source_record_id: String(sourceId) },
@@ -567,7 +567,7 @@ async function grantAnnualBonus(
 
 /** One-off credit packs are granted from completed transactions. */
 async function grantPackCredits(data: PaddleEventData, env: PaddleEnv) {
-  const userId = data?.customData?.userId;
+  const userId = userIdOf(data);
   if (!userId) return;
 
   for (const item of data.items ?? []) {
@@ -728,7 +728,7 @@ Deno.serve(async (req) => {
         return { eventType: body.eventType, data: body.data, eventId: body.eventId };
       })()
       : await verifyWebhook(req, env)) as unknown as PaddleWebhookEvent;
-    const eventUserId = (event.data?.customData?.userId ?? null) as string | null;
+    const eventUserId = (event.userIdOf(data)) as string | null;
 
     deliveryEventId = event.eventId ?? null;
 
