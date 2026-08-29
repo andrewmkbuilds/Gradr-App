@@ -14,11 +14,31 @@
  *   node scripts/e2e-pricing-checkout.mjs                      # production
  *   node scripts/e2e-pricing-checkout.mjs http://localhost:8080
  */
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { launchBrowser } from "./lib/browser.mjs";
 
 const BASE = (process.argv.find((a) => a.startsWith("http")) || process.env.CHECKOUT_BASE_URL || "https://gradr-app.lovable.app").replace(/\/$/, "");
 const EMAIL = process.env.E2E_EMAIL;
 const PASSWORD = process.env.E2E_PASSWORD;
+
+/** Checkout requires a signed-in user, so a session is restored when present. */
+function loadSession() {
+  const key = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
+  const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
+  if (key && session) return { key, session };
+  const file = join(homedir(), ".cache/lovable-auth/session.json");
+  if (!existsSync(file)) return null;
+  const minted = JSON.parse(readFileSync(file, "utf8"));
+  return { key: minted.storage_key, session: JSON.stringify(minted.session) };
+}
+
+const SESSION = loadSession();
+if (!SESSION && (!EMAIL || !PASSWORD)) {
+  console.log("SKIP  pricing checkout smoke — no session and no E2E_EMAIL / E2E_PASSWORD (checkout requires sign-in).");
+  process.exit(0);
+}
 
 const checks = [];
 const check = (name, ok, detail = "") => {
@@ -66,14 +86,15 @@ const pageErrors = [];
 page.on("pageerror", (e) => pageErrors.push(e.message));
 
 try {
-  if (EMAIL && PASSWORD) {
+  if (SESSION) {
+    await page.goto(BASE, { waitUntil: "domcontentloaded" });
+    await page.evaluate(([k, v]) => window.localStorage.setItem(k, v), [SESSION.key, SESSION.session]);
+  } else if (EMAIL && PASSWORD) {
     await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
     await page.getByLabel(/email/i).first().fill(EMAIL);
     await page.getByLabel(/password/i).first().fill(PASSWORD);
     await page.getByRole("button", { name: /^sign in$/i }).first().click();
     await page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 30_000 }).catch(() => {});
-  } else {
-    console.log("(no E2E_EMAIL/E2E_PASSWORD — running signed out; CTAs that require auth will be reported)");
   }
 
   await page.goto(`${BASE}/pricing`, { waitUntil: "domcontentloaded" });
@@ -94,6 +115,14 @@ try {
     .catch(() => false);
   check("Paddle.js loaded and initialized", paddleReady);
 
+  const priceResolverErrors = [];
+  page.on("response", async (res) => {
+    if (!res.url().includes("get-paddle-price")) return;
+    const body = await res.text().catch(() => "");
+    if (res.ok() && /"paddleId"/.test(body)) return;
+    priceResolverErrors.push(body.slice(0, 200) || `HTTP ${res.status()}`);
+  });
+
   const ctas = page.getByRole("button", { name: /^(subscribe to|change to) /i });
   const count = await ctas.count();
   check("paid-plan CTAs are present", count > 0, `${count} found`);
@@ -109,8 +138,16 @@ try {
       .catch(() => false);
 
     if (!opened) {
-      const text = await page.locator("body").innerText();
-      const err = /price|checkout|unavailable|error/i.test(text) ? "checkout never initialized" : "no Checkout.open call";
+      if (new URL(page.url()).pathname.startsWith("/auth")) {
+        check(`checkout initializes — ${label}`, false, "redirected to /auth — the session was not accepted");
+        break;
+      }
+      // Name the real cause: an unresolved price means the Paddle catalog for
+      // this environment is missing, which is an owner-side task, not a bug.
+      const resolverError = priceResolverErrors.at(-1);
+      const err = resolverError
+        ? `price resolver failed — ${resolverError}`
+        : "checkout never initialized";
       check(`checkout initializes — ${label}`, false, err);
       continue;
     }
