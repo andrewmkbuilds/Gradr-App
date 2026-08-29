@@ -235,9 +235,10 @@ export default function ResumeEngine() {
       });
 
       toast.success("Resume analyzed and saved as a version");
-    } catch (error: any) {
-      track("resume_analysis_failed", { reason: String(error?.message ?? "unknown").slice(0, 120) });
-      toast.error(error.message || "Failed to analyze resume");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown";
+      track("resume_analysis_failed", { reason: message.slice(0, 120) });
+      toast.error(message || "Failed to analyze resume");
       console.error(error);
     } finally {
       setUploading(false);

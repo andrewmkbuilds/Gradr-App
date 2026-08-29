@@ -99,7 +99,7 @@ export default function AdminVoiceSettings() {
       setOutputFormat(data.config?.outputFormat ?? "mp3_44100_128");
       setOverrides(data.config?.voiceOverrides ?? {});
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message ?? "Could not load voice status");
+      toast.error(e instanceof Error ? e.message : "Could not load voice status");
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,7 @@ export default function AdminVoiceSettings() {
       toast.success("Voice configuration saved");
       await load();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message ?? "Could not save configuration");
+      toast.error(e instanceof Error ? e.message : "Could not save configuration");
     } finally {
       setSaving(false);
     }
@@ -135,7 +135,7 @@ export default function AdminVoiceSettings() {
         toast.error(`Streaming session failed — ${[data.code, data.reason].filter(Boolean).join(" · ")}`);
       }
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message ?? "Stream test failed");
+      toast.error(e instanceof Error ? e.message : "Stream test failed");
     } finally {
       setTesting(false);
     }
@@ -152,7 +152,7 @@ export default function AdminVoiceSettings() {
       setLookupResult({ requestId: data.requestId, events: data.events ?? [] });
       if (!data.events?.length) toast.info("No voice events recorded for that request id");
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message ?? "Lookup failed");
+      toast.error(e instanceof Error ? e.message : "Lookup failed");
     } finally {
       setLookupLoading(false);
     }

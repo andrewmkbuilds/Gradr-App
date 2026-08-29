@@ -20,9 +20,9 @@ const enabled = process.env.RUN_DB_TESTS === "1";
 const url = process.env.VITE_SUPABASE_URL ?? import.meta.env?.VITE_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const admin: SupabaseClient<any> | null =
+const admin: SupabaseClient | null =
   enabled && url && serviceKey
-    ? createClient<any>(url, serviceKey, { auth: { persistSession: false } })
+    ? createClient(url, serviceKey, { auth: { persistSession: false } })
     : null;
 
 const MARKER = `retention-test-${Date.now()}`;
@@ -82,13 +82,13 @@ describe.skipIf(!admin)("admin_rpc_audit retention sweep", () => {
 
     const { data: result, error: purgeError } = await admin!.rpc("purge_admin_rpc_audit");
     expect(purgeError, purgeError?.message).toBeNull();
-    expect((result as any)?.skipped).toBeFalsy();
+    expect((result as { skipped?: boolean } | null)?.skipped).toBeFalsy();
 
     const { data: live } = await admin!
       .from("admin_rpc_audit")
       .select("function_name")
       .eq("request_id", MARKER);
-    const liveNames = (live ?? []).map((r: any) => r.function_name);
+    const liveNames = (live ?? []).map((r: { function_name: string }) => r.function_name);
     expect(liveNames).toContain("retention_probe_fresh");
     expect(liveNames).not.toContain("retention_probe_old");
     expect(liveNames).not.toContain("retention_probe_old2");
@@ -97,7 +97,7 @@ describe.skipIf(!admin)("admin_rpc_audit retention sweep", () => {
       .from("admin_rpc_audit_archive")
       .select("function_name")
       .eq("request_id", MARKER);
-    const archivedNames = (archived ?? []).map((r: any) => r.function_name);
+    const archivedNames = (archived ?? []).map((r: { function_name: string }) => r.function_name);
     expect(archivedNames).toContain("retention_probe_old");
     expect(archivedNames).toContain("retention_probe_old2");
     // Past the archive window -> gone entirely.
@@ -107,7 +107,7 @@ describe.skipIf(!admin)("admin_rpc_audit retention sweep", () => {
   it("skips the sweep when automatic clean-up is disabled", async () => {
     await admin!.from("admin_rpc_audit_retention").update({ purge_enabled: false }).eq("id", true);
     const { data } = await admin!.rpc("purge_admin_rpc_audit");
-    expect((data as any)?.skipped).toBe(true);
+    expect((data as { skipped?: boolean } | null)?.skipped).toBe(true);
     await admin!.from("admin_rpc_audit_retention").update({ purge_enabled: true }).eq("id", true);
   });
 
@@ -126,7 +126,7 @@ describe.skipIf(!admin)("admin_rpc_audit retention sweep", () => {
     });
 
     const { data } = await admin!.rpc("purge_admin_rpc_audit");
-    expect(Number((data as any)?.deleted ?? 0)).toBeGreaterThan(0);
+    expect(Number((data as { deleted?: number } | null)?.deleted ?? 0)).toBeGreaterThan(0);
 
     const { data: archived } = await admin!
       .from("admin_rpc_audit_archive")

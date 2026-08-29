@@ -282,11 +282,11 @@ function InterviewEngineInner() {
     setStreamFailed(false);
     try {
       await streamChat(nextMessages);
-    } catch (e: any) {
+    } catch (e) {
       setStreamFailed(true);
       setConnectionErrorDismissed(false);
       interviewerRef.current.stop();
-      toast.error(e?.message || "The interviewer lost connection.");
+      toast.error(e instanceof Error ? e.message : "The interviewer lost connection.");
     } finally {
       setIsLoading(false);
     }
@@ -304,8 +304,11 @@ function InterviewEngineInner() {
       },
     });
     if (error) {
-      let payload: any = null;
-      try { payload = await (error as any)?.context?.json?.(); } catch { /* not json */ }
+      let payload: { limits?: { studioVoice?: boolean } & Record<string, unknown>; reason?: unknown } | null = null;
+      try {
+        const ctx = (error as { context?: { json?: () => Promise<unknown> } })?.context;
+        payload = (await ctx?.json?.()) as typeof payload;
+      } catch { /* not json */ }
       if (payload?.limits) {
         setLimits({ ...payload.limits, sessionsRemaining: null });
         studioVoiceAllowedRef.current = Boolean(payload.limits.studioVoice);
