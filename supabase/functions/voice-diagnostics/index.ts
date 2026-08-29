@@ -6,6 +6,7 @@ import {
   DEFAULT_MODEL_ID,
   DEFAULT_OUTPUT_FORMAT,
   jsonResponse as json,
+  DEEPGRAM_VOICES,
   deepgramVoiceFor,
   loadVoiceConfig,
   providerDetail,
@@ -112,6 +113,15 @@ serve(async (req) => {
         overrides[persona] = value.trim();
       }
     }
+    // Per-persona Deepgram voice overrides — the primary interviewer voice.
+    const deepgramOverrides: Record<string, string> = {};
+    const incomingDeepgram = body.deepgramOverrides ?? {};
+    for (const persona of Object.keys(DEEPGRAM_VOICES)) {
+      const value = incomingDeepgram?.[persona];
+      if (typeof value === "string" && /^aura-2?-[a-z]+-[a-z]{2}$/.test(value.trim())) {
+        deepgramOverrides[persona] = value.trim();
+      }
+    }
     const modelId = typeof body.modelId === "string" && /^[a-z0-9_\-.]{3,64}$/.test(body.modelId)
       ? body.modelId
       : DEFAULT_MODEL_ID;
@@ -124,6 +134,7 @@ serve(async (req) => {
       model_id: modelId,
       output_format: outputFormat,
       voice_overrides: overrides,
+      deepgram_overrides: deepgramOverrides,
       updated_by: user.id,
       updated_at: new Date().toISOString(),
     });
@@ -132,7 +143,113 @@ serve(async (req) => {
       return json({ error: "Could not save voice configuration" }, 500);
     }
     console.info("[voice-diagnostics] config saved", { by: user.id, modelId, outputFormat });
-    return json({ saved: true, config: { modelId, outputFormat, voiceOverrides: overrides } });
+    return json({ saved: true, config: { modelId, outputFormat, voiceOverrides: overrides, deepgramOverrides } });
+  }
+
+
+  // ---- health -------------------------------------------------------------
+  // Aggregated voice health for the admin dashboard: success rate, fallback
+  // rate, latency and the last failure reason, broken down per persona.
+  if (action === "health") {
+    const hours = Number.isFinite(Number(body.hours)) ? Math.min(720, Math.max(1, Number(body.hours))) : 24;
+    const since = new Date(Date.now() - hours * 3_600_000).toISOString();
+
+    const { data: rows, error } = await serviceClient()
+      .from("voice_provider_events")
+      .select("outcome, code, provider_reason, provider, latency_ms, cache_hit, persona_id, context, created_at")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(5000);
+
+    if (error) {
+      console.error("[voice-diagnostics] health query failed", error.message);
+      return json({ error: "Could not load voice health" }, 500);
+    }
+
+    interface Bucket {
+      personaId: string;
+      total: number;
+      ok: number;
+      failures: number;
+      cacheHits: number;
+      fallbacks: number;
+      latencies: number[];
+      lastFailure: { code: string | null; reason: string | null; at: string } | null;
+    }
+    const buckets = new Map<string, Bucket>();
+    const bucketFor = (persona: string) => {
+      let b = buckets.get(persona);
+      if (!b) {
+        b = { personaId: persona, total: 0, ok: 0, failures: 0, cacheHits: 0, fallbacks: 0, latencies: [], lastFailure: null };
+        buckets.set(persona, b);
+      }
+      return b;
+    };
+
+    for (const row of rows ?? []) {
+      const b = bucketFor(row.persona_id ?? "unknown");
+      b.total += 1;
+      if (row.outcome === "ok") {
+        b.ok += 1;
+        if (row.cache_hit) b.cacheHits += 1;
+        // Anything not served by the primary engine counts as a fallback.
+        if (row.provider && row.provider !== "deepgram" && row.provider !== "cache") b.fallbacks += 1;
+      } else {
+        b.failures += 1;
+        // Rows arrive newest-first, so the first failure seen is the latest.
+        if (!b.lastFailure) {
+          b.lastFailure = { code: row.code ?? null, reason: row.provider_reason ?? null, at: row.created_at };
+        }
+      }
+      if (typeof row.latency_ms === "number" && row.latency_ms > 0) b.latencies.push(row.latency_ms);
+    }
+
+    const percentile = (values: number[], p: number) => {
+      if (!values.length) return null;
+      const sorted = [...values].sort((a, b) => a - b);
+      const index = Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length));
+      return sorted[index];
+    };
+
+    const personas = [...buckets.values()]
+      .map((b) => ({
+        personaId: b.personaId,
+        voiceId: deepgramVoiceFor(b.personaId, config),
+        total: b.total,
+        successRate: b.total ? b.ok / b.total : null,
+        fallbackRate: b.total ? b.fallbacks / b.total : null,
+        cacheHitRate: b.total ? b.cacheHits / b.total : null,
+        medianLatencyMs: percentile(b.latencies, 50),
+        p95LatencyMs: percentile(b.latencies, 95),
+        lastFailure: b.lastFailure,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    const all = rows ?? [];
+    const allLatencies = all.map((r) => r.latency_ms).filter((v): v is number => typeof v === "number" && v > 0);
+    const okRows = all.filter((r) => r.outcome === "ok");
+    const { count: cacheEntries } = await serviceClient()
+      .from("voice_audio_cache")
+      .select("cache_key", { count: "exact", head: true });
+
+    return json({
+      hours,
+      since,
+      totals: {
+        total: all.length,
+        ok: okRows.length,
+        failures: all.length - okRows.length,
+        successRate: all.length ? okRows.length / all.length : null,
+        fallbackRate: all.length
+          ? okRows.filter((r) => r.provider && r.provider !== "deepgram" && r.provider !== "cache").length / all.length
+          : null,
+        cacheHitRate: all.length ? okRows.filter((r) => r.cache_hit).length / all.length : null,
+        medianLatencyMs: percentile(allLatencies, 50),
+        p95LatencyMs: percentile(allLatencies, 95),
+        cacheEntries: cacheEntries ?? 0,
+      },
+      personas,
+    });
   }
 
   // ---- stream-test --------------------------------------------------------
@@ -322,7 +439,12 @@ serve(async (req) => {
       code: deepgramConfigured ? null : "VOICE_CONFIGURATION_ERROR",
       reason: deepgramConfigured ? null : "PROVIDER_CREDENTIAL_MISSING",
       config,
-      personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({ id, defaultVoiceId: p.voiceId })),
+      personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({
+      id,
+      defaultVoiceId: p.voiceId,
+      defaultDeepgramVoice: DEEPGRAM_VOICES[id] ?? null,
+      resolvedDeepgramVoice: deepgramVoiceFor(id, config),
+    })),
       recent: recent ?? [],
     });
   }
@@ -337,7 +459,12 @@ serve(async (req) => {
     reason: subscription.ok ? null : subscription.reason ?? "PROVIDER_UNKNOWN",
     subscription: subscription.ok ? subscription : null,
     config,
-    personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({ id, defaultVoiceId: p.voiceId })),
+    personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({
+      id,
+      defaultVoiceId: p.voiceId,
+      defaultDeepgramVoice: DEEPGRAM_VOICES[id] ?? null,
+      resolvedDeepgramVoice: deepgramVoiceFor(id, config),
+    })),
     recent: recent ?? [],
   });
 });

@@ -3,14 +3,18 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit as durableRateLimit } from "../_shared/rateLimit.ts";
 import { planTier, resolveEnv } from "../_shared/entitlements.ts";
 import {
+  afterResponse,
   classifyProviderFailure,
   corsHeaders,
   deepgramVoiceFor,
   jsonResponse as json,
   loadVoiceConfig,
   providerDetail,
+  readVoiceCache,
   recordVoiceEvent,
   resolveProfile,
+  voiceCacheKey,
+  writeVoiceCache,
   type VoiceConfig,
   type VoiceErrorCode,
   type VoiceProfile,
@@ -213,12 +217,14 @@ serve(async (req) => {
     const previousText = typeof body.previousText === "string" ? body.previousText.slice(-400) : "";
     const nextText = typeof body.nextText === "string" ? body.nextText.slice(0, 400) : "";
 
-    const audioHeaders = (provider: string) => ({
+    const startedAt = Date.now();
+    const audioHeaders = (provider: string, cacheHit = false) => ({
       ...corsHeaders,
       "Content-Type": "audio/mpeg",
       "Cache-Control": "no-store",
       "X-Voice-Provider": provider,
-      "Access-Control-Expose-Headers": "X-Voice-Provider",
+      "X-Voice-Cache": cacheHit ? "hit" : "miss",
+      "Access-Control-Expose-Headers": "X-Voice-Provider, X-Voice-Cache",
     });
 
     // ---- Primary: Deepgram Aura-2 -----------------------------------------
@@ -227,6 +233,34 @@ serve(async (req) => {
     let deepgramDetail = "";
     if (deepgramKey) {
       const voice = deepgramVoiceFor(personaId, config);
+
+      // ---- Spoken-audio cache -------------------------------------------
+      // Keyed on the exact sentence *and* the voice that would speak it, so a
+      // repeat line is served without touching the provider at all.
+      const cacheKey = await voiceCacheKey({
+        provider: "deepgram",
+        voiceId: voice,
+        modelId: "aura-2",
+        outputFormat: "mp3",
+        text,
+      });
+      const cached = await readVoiceCache(cacheKey);
+      if (cached) {
+        const latencyMs = Date.now() - startedAt;
+        console.info("[voice] served from cache", { requestId, personaId, voice, latencyMs });
+        afterResponse(recordVoiceEvent({
+          userId: user.id,
+          outcome: "ok",
+          requestId,
+          personaId,
+          provider: "cache",
+          latencyMs,
+          cacheHit: true,
+          providerDetail: `cache:deepgram:${voice}`,
+        }));
+        return new Response(cached, { headers: audioHeaders("cache", true) });
+      }
+
       // One retry only: a transient 429/5xx shouldn't drop a thought, and more
       // than one retry would delay speech more than the fallback would.
       let dg: Response | null = null;
@@ -237,15 +271,32 @@ serve(async (req) => {
         if (attempt === 0) await new Promise((r) => setTimeout(r, 300));
       }
       if (dg?.ok && dg.body) {
-        console.info("[voice] deepgram audio stream started", { requestId, personaId, voice });
+        const latencyMs = Date.now() - startedAt;
+        console.info("[voice] deepgram audio stream started", { requestId, personaId, voice, latencyMs });
         await recordVoiceEvent({
           userId: user.id,
           outcome: "ok",
           requestId,
           personaId,
+          provider: "deepgram",
+          latencyMs,
           providerDetail: `deepgram:${voice}`,
         });
-        return new Response(dg.body, { headers: audioHeaders("deepgram") });
+        // Tee so the candidate hears the stream immediately while the same
+        // bytes are banked for the next time this sentence comes up.
+        const [toClient, toCache] = dg.body.tee();
+        afterResponse(
+          new Response(toCache).arrayBuffer().then((buf) =>
+            writeVoiceCache({
+              cacheKey,
+              personaId,
+              voiceId: voice,
+              provider: "deepgram",
+              bytes: new Uint8Array(buf),
+            })
+          ).catch((e) => console.error("[voice] cache tee failed", String(e))),
+        );
+        return new Response(toClient, { headers: audioHeaders("deepgram") });
       }
       deepgramStatus = dg?.status ?? 0;
       deepgramDetail = dg ? await dg.text().catch(() => "") : "no response body";
@@ -284,6 +335,8 @@ serve(async (req) => {
           outcome: "ok",
           requestId,
           personaId,
+          provider: "elevenlabs",
+          latencyMs: Date.now() - startedAt,
           providerDetail: deepgramKey ? `elevenlabs (deepgram ${deepgramStatus})` : "elevenlabs",
         });
         return new Response(res.body, { headers: audioHeaders("elevenlabs") });
@@ -327,6 +380,8 @@ serve(async (req) => {
         outcome: "ok",
         requestId,
         personaId,
+        provider: "fish-audio",
+        latencyMs: Date.now() - startedAt,
         providerDetail: `fallback:fish-audio (primary ${upstreamStatus})`,
       });
       return new Response(fallback.body, { headers: audioHeaders("fish-audio") });
@@ -347,6 +402,7 @@ serve(async (req) => {
       upstreamStatus,
       requestId,
       personaId,
+      latencyMs: Date.now() - startedAt,
       providerDetail: providerDetail(rawDetail),
     });
     // The browser now speaks this sentence through the Web Speech API.

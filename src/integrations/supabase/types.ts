@@ -4516,6 +4516,42 @@ export type Database = {
           },
         ]
       }
+      voice_audio_cache: {
+        Row: {
+          byte_size: number
+          cache_key: string
+          created_at: string
+          hits: number
+          last_used_at: string
+          persona_id: string
+          provider: string
+          storage_path: string
+          voice_id: string
+        }
+        Insert: {
+          byte_size?: number
+          cache_key: string
+          created_at?: string
+          hits?: number
+          last_used_at?: string
+          persona_id: string
+          provider: string
+          storage_path: string
+          voice_id: string
+        }
+        Update: {
+          byte_size?: number
+          cache_key?: string
+          created_at?: string
+          hits?: number
+          last_used_at?: string
+          persona_id?: string
+          provider?: string
+          storage_path?: string
+          voice_id?: string
+        }
+        Relationships: []
+      }
       voice_provider_config: {
         Row: {
           deepgram_overrides: Json
@@ -4548,12 +4584,15 @@ export type Database = {
       }
       voice_provider_events: {
         Row: {
+          cache_hit: boolean
           code: string | null
           context: string
           created_at: string
           id: string
+          latency_ms: number | null
           outcome: string
           persona_id: string | null
+          provider: string | null
           provider_detail: string | null
           provider_reason: string | null
           request_id: string | null
@@ -4561,12 +4600,15 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cache_hit?: boolean
           code?: string | null
           context?: string
           created_at?: string
           id?: string
+          latency_ms?: number | null
           outcome: string
           persona_id?: string | null
+          provider?: string | null
           provider_detail?: string | null
           provider_reason?: string | null
           request_id?: string | null
@@ -4574,12 +4616,15 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cache_hit?: boolean
           code?: string | null
           context?: string
           created_at?: string
           id?: string
+          latency_ms?: number | null
           outcome?: string
           persona_id?: string | null
+          provider?: string | null
           provider_detail?: string | null
           provider_reason?: string | null
           request_id?: string | null
@@ -5278,6 +5323,10 @@ export type Database = {
       subscription_grants_access: {
         Args: { _current_period_end: string; _status: string }
         Returns: boolean
+      }
+      touch_voice_audio_cache: {
+        Args: { _cache_key: string }
+        Returns: undefined
       }
     }
     Enums: {

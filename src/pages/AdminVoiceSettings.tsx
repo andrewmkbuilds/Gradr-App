@@ -21,7 +21,14 @@ import { voiceReasonCopy, toVoiceProviderReason } from "@/lib/interview/voiceErr
  * and the per-persona voice ids used by every interview.
  */
 
-interface PersonaRow { id: string; defaultVoiceId: string }
+interface PersonaRow {
+  id: string;
+  defaultVoiceId: string;
+  /** Deepgram Aura-2 voice shipped as this persona's default. */
+  defaultDeepgramVoice?: string | null;
+  /** What the backend resolves to right now, override included. */
+  resolvedDeepgramVoice?: string | null;
+}
 
 interface StatusPayload {
   credential: "present" | "missing";
@@ -29,7 +36,12 @@ interface StatusPayload {
   code?: string | null;
   reason?: string | null;
   subscription?: { tier: string; charactersUsed: number; characterLimit: number; status: string } | null;
-  config: { modelId: string; outputFormat: string; voiceOverrides: Record<string, string> };
+  config: {
+    modelId: string;
+    outputFormat: string;
+    voiceOverrides: Record<string, string>;
+    deepgramOverrides?: Record<string, string>;
+  };
   personas: PersonaRow[];
   recent: Array<{
     outcome: string;
@@ -85,6 +97,7 @@ export default function AdminVoiceSettings() {
   const [modelId, setModelId] = useState("eleven_turbo_v2_5");
   const [outputFormat, setOutputFormat] = useState("mp3_44100_128");
   const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const [deepgramOverrides, setDeepgramOverrides] = useState<Record<string, string>>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [lookupId, setLookupId] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -98,6 +111,7 @@ export default function AdminVoiceSettings() {
       setModelId(data.config?.modelId ?? "eleven_turbo_v2_5");
       setOutputFormat(data.config?.outputFormat ?? "mp3_44100_128");
       setOverrides(data.config?.voiceOverrides ?? {});
+      setDeepgramOverrides(data.config?.deepgramOverrides ?? {});
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Could not load voice status");
     } finally {
@@ -110,7 +124,13 @@ export default function AdminVoiceSettings() {
   const save = async () => {
     setSaving(true);
     try {
-      await callDiagnostics({ action: "save-config", modelId, outputFormat, voiceOverrides: overrides });
+      await callDiagnostics({
+        action: "save-config",
+        modelId,
+        outputFormat,
+        voiceOverrides: overrides,
+        deepgramOverrides,
+      });
       toast.success("Voice configuration saved");
       await load();
     } catch (e: unknown) {
@@ -276,6 +296,37 @@ export default function AdminVoiceSettings() {
                 )}
                 Stream test
               </Button>
+            </div>
+          ))}
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Primary voice per persona (Deepgram)</h3>
+            <p className="text-sm text-muted-foreground">
+              The voice candidates actually hear. Leave blank to keep the Gradr default for that persona.
+            </p>
+          </div>
+          {(status?.personas ?? []).map((p) => (
+            <div key={`dg-${p.id}`} className="space-y-1.5">
+              <Label htmlFor={`deepgram-${p.id}`}>
+                {p.id}{" "}
+                <span className="text-xs text-muted-foreground">
+                  (default {p.defaultDeepgramVoice ?? "—"}
+                  {p.resolvedDeepgramVoice && p.resolvedDeepgramVoice !== p.defaultDeepgramVoice
+                    ? `, currently ${p.resolvedDeepgramVoice}`
+                    : ""}
+                  )
+                </span>
+              </Label>
+              <Input
+                id={`deepgram-${p.id}`}
+                placeholder={p.defaultDeepgramVoice ?? "aura-2-arcas-en"}
+                value={deepgramOverrides[p.id] ?? ""}
+                onChange={(e) => setDeepgramOverrides((prev) => ({ ...prev, [p.id]: e.target.value }))}
+              />
             </div>
           ))}
         </div>
