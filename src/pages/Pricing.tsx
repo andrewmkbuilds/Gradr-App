@@ -265,6 +265,17 @@ export default function Pricing() {
 
       <PaymentsConfigBanner context="pricing" className="mx-auto max-w-3xl" />
 
+      {/* Products missing from the active Paddle catalog — a different failure
+          from a missing client token, and the one that silently breaks a live
+          launch until the catalog is synced. */}
+      <PaymentsCatalogNotice
+        preflight={preflight}
+        loading={preflightLoading}
+        onRetry={() => setPriceAttempt((n) => n + 1)}
+        className="mx-auto max-w-3xl"
+      />
+
+
       {/* Eligibility discounts: advertised to everyone, confirmed for the verified. */}
       {(discountPercent > 0 || topProgram) && (
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4">
