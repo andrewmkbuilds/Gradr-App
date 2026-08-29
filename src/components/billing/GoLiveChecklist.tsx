@@ -77,19 +77,12 @@ export function GoLiveChecklist({ steps }: { steps: GoLiveStep[] }) {
         </Badge>
       </div>
 
-      <div
-        className="mt-3 h-1.5 w-full overflow-hidden rounded-control bg-muted"
-        role="progressbar"
-        aria-valuenow={done}
-        aria-valuemin={0}
-        aria-valuemax={total}
+      <Progress
+        className="mt-3"
+        value={total ? (done / total) * 100 : 0}
         aria-label="Go-live progress"
-      >
-        <div
-          className="h-full bg-primary transition-all"
-          style={{ width: `${total ? (done / total) * 100 : 0}%` }}
-        />
-      </div>
+      />
+
 
       <ul className="mt-3">
         {steps.map((step) => (
