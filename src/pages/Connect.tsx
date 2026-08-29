@@ -12,8 +12,10 @@ import {
   ShieldCheck,
   Terminal,
   Wrench,
-  XCircle,
-} from "lucide-react";
+   XCircle,
+   ExternalLink,
+   Facebook,
+ } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ds/Button";
 import { Badge } from "@/design-system/gradr-9b9b95";
