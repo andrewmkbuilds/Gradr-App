@@ -191,6 +191,13 @@ export default function AdminPaymentsStatus() {
 
   const blocking = [...configRows, ...runtimeRows].filter((r) => r.status === "fail").length;
 
+  const goLiveSteps = buildGoLiveChecklist({
+    validation: validatePaymentsConfig(diag),
+    preflight: preflight.data ?? null,
+    policies: policyProbe.data?.map((p) => ({ path: p.path, ok: p.ok })) ?? null,
+    builds: buildProbe.data ?? null,
+  });
+
   return (
     <div className="page-shell page-stack">
       <PageHeader
