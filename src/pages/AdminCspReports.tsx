@@ -150,7 +150,7 @@ export default function AdminCspReports() {
       />
 
       {spiking && (
-        <Alert variant="danger">
+        <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           <AlertTitle>Violation spike detected</AlertTitle>
           <AlertDescription>
