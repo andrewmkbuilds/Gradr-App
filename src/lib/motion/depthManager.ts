@@ -213,7 +213,7 @@ class DepthManager {
   }
 
   private consumeFps(fps: number) {
-    const floor = this.ceiling === "full" ? FULL_MIN_FPS : LITE_MIN_FPS;
+    const floor = fpsFloorFor(this.ceiling);
     if (fps >= floor) {
       this.badWindows = 0;
       return;
@@ -221,7 +221,7 @@ class DepthManager {
     this.badWindows += 1;
     if (this.badWindows < BAD_WINDOWS) return;
     this.badWindows = 0;
-    this.ceiling = this.ceiling === "full" ? "lite" : "off";
+    this.ceiling = stepCeilingDown(this.ceiling);
     this.recompute();
   }
 
