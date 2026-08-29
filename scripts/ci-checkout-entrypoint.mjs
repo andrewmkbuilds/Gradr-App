@@ -96,7 +96,7 @@ try {
     !/products (aren't|are not) set up/i.test(body),
   );
 
-  const ctas = page.locator('[data-testid="plan-cta"], button:has-text("Start"), button:has-text("Upgrade")');
+  const ctas = page.locator('[data-testid^="plan-cta-"], [data-testid^="pack-cta-"]');
   const total = await ctas.count();
   let enabled = 0;
   for (let i = 0; i < total; i += 1) {
