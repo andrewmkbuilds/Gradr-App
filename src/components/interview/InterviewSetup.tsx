@@ -26,9 +26,19 @@ import {
   validateSetup,
   type SetupField,
 } from "@/lib/interview/setupValidation";
+import {
+  DEFAULT_TURN_TIMING,
+  TURN_TIMING_LIMITS,
+  normalizeTurnTiming,
+  saveTurnTiming,
+  type TurnTiming,
+} from "@/lib/interview/turnTaking";
 
 interface Props {
   initial?: Partial<SessionContext>;
+  /** Candidate-configurable end-of-turn and barge-in timing. */
+  turnTiming?: TurnTiming;
+  onTurnTimingChange?: (timing: TurnTiming) => void;
   onContinue: (ctx: SessionContext) => void;
 }
 
@@ -71,7 +81,13 @@ function Field({
 }
 
 /** Pre-session setup: interviewer persona, difficulty and role/resume grounding. */
-export function InterviewSetup({ initial, onContinue }: Props) {
+export function InterviewSetup({ initial, turnTiming, onTurnTimingChange, onContinue }: Props) {
+  const timing = normalizeTurnTiming(turnTiming ?? DEFAULT_TURN_TIMING);
+  const updateTiming = (patch: Partial<TurnTiming>) => {
+    const next = normalizeTurnTiming({ ...timing, ...patch });
+    saveTurnTiming(next);
+    onTurnTimingChange?.(next);
+  };
   const [personaId, setPersonaId] = useState<PersonaId>(initial?.personaId ?? DEFAULT_PERSONA);
   const [difficultyId, setDifficultyId] = useState<DifficultyId>(initial?.difficultyId ?? DEFAULT_DIFFICULTY);
   const [targetRole, setTargetRole] = useState(initial?.targetRole ?? "");
@@ -347,6 +363,60 @@ export function InterviewSetup({ initial, onContinue }: Props) {
         ) : (
           <>Upload a resume in Resume Intelligence for questions tailored to your real projects.</>
         )}
+      </motion.div>
+
+      <motion.div variants={fadeUp} className="space-y-4 rounded-xl border border-border bg-secondary/30 p-4">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold text-foreground">Turn timing</h3>
+          <p className="text-xs text-muted-foreground">
+            How the interviewer shares the floor with you. Raise the pause if you think out loud;
+            lower it for a snappier loop.
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <Label htmlFor="turn-end-of-turn">Pause before your answer is submitted</Label>
+            <span className="text-[11px] tabular-nums text-muted-foreground">
+              {(timing.endOfTurnMs / 1000).toFixed(1)}s
+            </span>
+          </div>
+          <input
+            id="turn-end-of-turn"
+            type="range"
+            className="w-full accent-primary"
+            min={TURN_TIMING_LIMITS.endOfTurnMs.min}
+            max={TURN_TIMING_LIMITS.endOfTurnMs.max}
+            step={TURN_TIMING_LIMITS.endOfTurnMs.step}
+            value={timing.endOfTurnMs}
+            onChange={(e) => updateTiming({ endOfTurnMs: Number(e.target.value) })}
+            aria-describedby="turn-end-of-turn-hint"
+          />
+          <p id="turn-end-of-turn-hint" className="text-xs text-muted-foreground">
+            Trailing words like “and…” automatically buy you extra time on top of this.
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <Label htmlFor="turn-barge-in">Hand-over beat before the mic opens</Label>
+            <span className="text-[11px] tabular-nums text-muted-foreground">{timing.bargeInMs} ms</span>
+          </div>
+          <input
+            id="turn-barge-in"
+            type="range"
+            className="w-full accent-primary"
+            min={TURN_TIMING_LIMITS.bargeInMs.min}
+            max={TURN_TIMING_LIMITS.bargeInMs.max}
+            step={TURN_TIMING_LIMITS.bargeInMs.step}
+            value={timing.bargeInMs}
+            onChange={(e) => updateTiming({ bargeInMs: Number(e.target.value) })}
+            aria-describedby="turn-barge-in-hint"
+          />
+          <p id="turn-barge-in-hint" className="text-xs text-muted-foreground">
+            Keeps the interviewer's last word out of your recording. You can always cut in with the mic button.
+          </p>
+        </div>
       </motion.div>
 
       <motion.div variants={fadeUp} className="space-y-3">

@@ -180,11 +180,12 @@ export async function loadVoiceConfig(): Promise<VoiceConfig> {
     modelId: DEFAULT_MODEL_ID,
     outputFormat: DEFAULT_OUTPUT_FORMAT,
     voiceOverrides: {},
+    deepgramOverrides: {},
   };
   try {
     const { data } = await serviceClient()
       .from("voice_provider_config")
-      .select("model_id, output_format, voice_overrides")
+      .select("model_id, output_format, voice_overrides, deepgram_overrides")
       .eq("id", true)
       .maybeSingle();
     if (!data) return fallback;
@@ -192,11 +193,101 @@ export async function loadVoiceConfig(): Promise<VoiceConfig> {
       modelId: data.model_id || fallback.modelId,
       outputFormat: data.output_format || fallback.outputFormat,
       voiceOverrides: (data.voice_overrides ?? {}) as Record<string, string>,
+      deepgramOverrides: (data.deepgram_overrides ?? {}) as Record<string, string>,
     };
   } catch (e) {
     console.error("[voice] config load failed", String(e));
     return fallback;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Spoken-audio cache
+//
+// Interviewers repeat themselves: greetings, hand-overs, closing lines and the
+// same probing questions across sessions. Caching the synthesised audio by the
+// exact spoken text (plus the voice that spoke it) removes a full provider
+// round-trip from those turns. The key includes every input that changes the
+// waveform, so a persona/voice/model change can never serve the wrong voice.
+// ---------------------------------------------------------------------------
+
+export const VOICE_CACHE_BUCKET = "voice-cache";
+
+export async function voiceCacheKey(parts: {
+  provider: string;
+  voiceId: string;
+  modelId: string;
+  outputFormat: string;
+  text: string;
+}): Promise<string> {
+  const payload = [parts.provider, parts.voiceId, parts.modelId, parts.outputFormat, parts.text].join("\u0000");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload));
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Returns cached audio bytes for this exact spoken thought, or null. */
+export async function readVoiceCache(cacheKey: string): Promise<Uint8Array | null> {
+  try {
+    const client = serviceClient();
+    const { data: row } = await client
+      .from("voice_audio_cache")
+      .select("storage_path")
+      .eq("cache_key", cacheKey)
+      .maybeSingle();
+    if (!row?.storage_path) return null;
+
+    const { data: file, error } = await client.storage.from(VOICE_CACHE_BUCKET).download(row.storage_path);
+    if (error || !file) return null;
+    // Best-effort usage accounting; never blocks the turn.
+    void client.rpc("touch_voice_audio_cache", { _cache_key: cacheKey });
+    return new Uint8Array(await file.arrayBuffer());
+  } catch (e) {
+    console.error("[voice] cache read failed", String(e));
+    return null;
+  }
+}
+
+/**
+ * Stores audio for reuse. Upsert on the cache key so two turns racing on the
+ * same sentence converge on one row instead of duplicating the clip.
+ */
+export async function writeVoiceCache(args: {
+  cacheKey: string;
+  personaId: string;
+  voiceId: string;
+  provider: string;
+  bytes: Uint8Array;
+}): Promise<void> {
+  try {
+    if (!args.bytes.byteLength || args.bytes.byteLength > 4_000_000) return;
+    const client = serviceClient();
+    const storagePath = `${args.provider}/${args.cacheKey}.mp3`;
+    const { error: uploadError } = await client.storage
+      .from(VOICE_CACHE_BUCKET)
+      .upload(storagePath, args.bytes, { contentType: "audio/mpeg", upsert: true });
+    if (uploadError) {
+      console.error("[voice] cache upload failed", uploadError.message);
+      return;
+    }
+    await client.from("voice_audio_cache").upsert({
+      cache_key: args.cacheKey,
+      persona_id: args.personaId,
+      voice_id: args.voiceId,
+      provider: args.provider,
+      storage_path: storagePath,
+      byte_size: args.bytes.byteLength,
+      last_used_at: new Date().toISOString(),
+    }, { onConflict: "cache_key" });
+  } catch (e) {
+    console.error("[voice] cache write failed", String(e));
+  }
+}
+
+/** Runs background work after the response is returned, when supported. */
+export function afterResponse(task: Promise<unknown>) {
+  const runtime = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+  if (runtime?.waitUntil) runtime.waitUntil(task);
+  else void task;
 }
 
 export function resolveProfile(personaId: string, config: VoiceConfig): VoiceProfile {
@@ -220,6 +311,12 @@ export interface VoiceEvent {
    * diagnostics and never returned on any candidate-facing response.
    */
   providerDetail?: string | null;
+  /** Which engine actually spoke: deepgram | elevenlabs | fish-audio | cache. */
+  provider?: string | null;
+  /** Wall-clock ms from request start to usable audio. */
+  latencyMs?: number | null;
+  /** True when the audio came from the spoken-audio cache. */
+  cacheHit?: boolean;
 }
 
 /** Best-effort: recording health must never break a live interview turn. */
@@ -234,6 +331,9 @@ export async function recordVoiceEvent(ev: VoiceEvent) {
       request_id: ev.requestId ?? null,
       persona_id: ev.personaId ?? null,
       provider_detail: ev.providerDetail ? ev.providerDetail.slice(0, 300) : null,
+      provider: ev.provider ?? null,
+      latency_ms: ev.latencyMs ?? null,
+      cache_hit: ev.cacheHit ?? false,
       context: ev.context ?? "interview",
     });
   } catch (e) {

@@ -2,7 +2,27 @@ import { jsPDF } from "jspdf";
 import { downloadBlob } from "@/lib/interview/reportPdf";
 import { yachtClub } from "@/lib/design/yachtClub";
 
-export type TranscriptTurn = { role: "user" | "assistant"; content: string };
+export type TranscriptTurn = {
+  role: "user" | "assistant";
+  content: string;
+  /** Epoch ms the turn was spoken/submitted — drives the [mm:ss] stamps. */
+  at?: number;
+};
+
+/** Elapsed stamp relative to the first recorded turn, e.g. "04:12". */
+function stamp(turn: TranscriptTurn, startedAt: number | null): string {
+  if (!turn.at || startedAt === null) return "";
+  const elapsed = Math.max(0, Math.round((turn.at - startedAt) / 1000));
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const ss = String(elapsed % 60).padStart(2, "0");
+  return `${mm}:${ss}`;
+}
+
+/** The clock the transcript counts from: the first timestamped turn. */
+function originOf(messages: TranscriptTurn[]): number | null {
+  const first = messages.find((m) => typeof m.at === "number");
+  return first?.at ?? null;
+}
 
 interface Args {
   messages: TranscriptTurn[];
@@ -50,8 +70,11 @@ export function downloadTranscriptPdf(args: Args) {
   write(header(args), 10);
   y += 8;
 
+  const origin = originOf(args.messages);
   args.messages.forEach((m) => {
-    write(m.role === "assistant" ? "Interviewer" : "You", 11, "bold");
+    const time = stamp(m, origin);
+    const speaker = m.role === "assistant" ? "Interviewer" : "You";
+    write(time ? `[${time}]  ${speaker}` : speaker, 11, "bold");
     write(m.content, 11);
     y += 6;
   });
@@ -67,12 +90,15 @@ const escapeHtml = (s: string) =>
  * Word and Google Docs both open this format with formatting preserved.
  */
 export function downloadTranscriptDoc(args: Args) {
+  const origin = originOf(args.messages);
   const body = args.messages
     .map(
       (m) =>
         `<p style="margin:0 0 4pt 0;font-weight:bold;color:${
           m.role === "assistant" ? yachtClub.oceanTeal : yachtClub.ink
-        }">${m.role === "assistant" ? "Interviewer" : "You"}</p>` +
+        }">${stamp(m, origin) ? `<span style="color:${yachtClub.stone};font-weight:normal">[${stamp(m, origin)}]</span> ` : ""}${
+          m.role === "assistant" ? "Interviewer" : "You"
+        }</p>` +
         `<p style="margin:0 0 12pt 0;line-height:1.5">${escapeHtml(m.content).replace(/\n/g, "<br/>")}</p>`,
     )
     .join("");

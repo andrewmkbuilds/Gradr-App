@@ -31,12 +31,13 @@ import { SessionDebrief } from "@/components/interview/SessionDebrief";
 import type { InterviewerState } from "@/components/interview/InterviewerOrb";
 import { buildSessionDirective, type SessionContext } from "@/lib/interview/personas";
 import { voiceProfileFor } from "@/lib/interview/voiceProfiles";
+import { endOfTurnDelay, loadTurnTiming, type TurnTiming } from "@/lib/interview/turnTaking";
 
 import type { IntegritySnapshot } from "@/lib/cv/faceMonitor";
 import type { Json } from "@/integrations/supabase/types";
 import { trackJourney } from "@/lib/telemetry/journey";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; at?: number };
 
 interface SessionLimits {
   tier: string;
@@ -47,9 +48,6 @@ interface SessionLimits {
 }
 
 const INTERVIEW_URL = `${SUPABASE_FUNCTIONS_BASE}/interview-coach`;
-
-/** How long the candidate can go quiet before their answer is submitted. */
-const ANSWER_SILENCE_MS = 1900;
 
 function InterviewEngineInner() {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -97,6 +95,10 @@ function InterviewEngineInner() {
   const voiceModeRef = useRef(voiceMode);
   const handsFreeRef = useRef(true);
   const silenceTimer = useRef<number | null>(null);
+  /** Candidate-configurable end-of-turn and barge-in timing. */
+  const [turnTiming, setTurnTiming] = useState<TurnTiming>(() => loadTurnTiming());
+  const turnTimingRef = useRef(turnTiming);
+  turnTimingRef.current = turnTiming;
   const navigate = useNavigate();
 
   const voice = useVoiceSession();
@@ -126,12 +128,13 @@ function InterviewEngineInner() {
       spokenRef.current = "";
       setSpoken("");
       if (finalText) {
-        setMessages((prev) => [...prev, { role: "assistant", content: finalText }]);
+        setMessages((prev) => [...prev, { role: "assistant", content: finalText, at: Date.now() }]);
         metrics.markModelResponse();
       }
-      // Natural hand-over: a short beat, then the interviewer starts listening.
+      // Natural hand-over: the configured beat, then the mic opens. Long enough
+      // that the interviewer's last word never bleeds into the recording.
       if (handsFreeRef.current && voiceModeRef.current && voice.supported) {
-        window.setTimeout(() => listenRef.current(), 420);
+        window.setTimeout(() => listenRef.current(), turnTimingRef.current.bargeInMs);
       }
     },
     onVoiceError: (code) => {
@@ -195,12 +198,15 @@ function InterviewEngineInner() {
   useEffect(() => {
     if (!voice.listening || !voice.transcript.trim()) return;
     clearSilenceTimer();
+    // A trailing "and…" or filler extends the window so a thinking pause is
+    // never mistaken for the end of an answer.
+    const wait = endOfTurnDelay(voice.transcript, turnTiming);
     silenceTimer.current = window.setTimeout(() => {
       const finalText = voice.stopListening();
       if (finalText.trim()) submitRef.current(finalText);
-    }, ANSWER_SILENCE_MS);
+    }, wait);
     return clearSilenceTimer;
-  }, [voice.transcript, voice.listening, voice.stopListening, clearSilenceTimer]);
+  }, [voice.transcript, voice.listening, voice.stopListening, clearSilenceTimer, turnTiming]);
 
   useEffect(() => () => clearSilenceTimer(), [clearSilenceTimer]);
 
@@ -391,7 +397,7 @@ function InterviewEngineInner() {
       interviewerRef.current.stop();
       stopSpeaking();
 
-      const nextMessages: Msg[] = [...messagesRef.current, { role: "user", content: answer }];
+      const nextMessages: Msg[] = [...messagesRef.current, { role: "user", content: answer, at: Date.now() }];
       setMessages(nextMessages);
       setInput("");
       voice.setTranscript("");
@@ -609,6 +615,8 @@ function InterviewEngineInner() {
         {stage === "setup" ? (
           <InterviewSetup
             {...(sessionCtx ? { initial: sessionCtx } : {})}
+            turnTiming={turnTiming}
+            onTurnTimingChange={setTurnTiming}
             onContinue={(ctx) => {
               setSessionCtx(ctx);
               setTargetRole(ctx.targetRole ?? "");
