@@ -466,12 +466,22 @@ export default function Pricing() {
                       `${tier.name} not available yet`
                     ) : isSubscribed ? (
                       `Change to ${tier.name}`
+                    ) : hasTrial(tier.key as PlanId, interval) ? (
+                      `Start ${TRIAL_DAYS}-day free trial`
                     ) : (
                       `Subscribe to ${tier.name}`
 
                     )}
 
                   </Button>
+                  {!current && !unavailable(priceId) && !isSubscribed &&
+                    hasTrial(tier.key as PlanId, interval) && (
+                    <p className="mt-2 text-caption text-muted-foreground">
+                      {TRIAL_DAYS} days free, then {planPriceLabel(tier.key as PlanId, interval)}/
+                      {interval === "annual" ? "year" : "month"}. Cancel any time before it ends and
+                      you won't be charged.
+                    </p>
+                  )}
                 </Card>
                 </SpatialCard>
               );
