@@ -352,7 +352,7 @@ async function runDunning(): Promise<{ notified: number; paused: number }> {
       });
     }
 
-    await db.rpc("enqueue_notification", {
+    await (db.rpc("enqueue_notification", {
       _user_id: row.user_id,
       _type: final ? "billing_subscription_paused" : "billing_payment_retry",
       _title: final ? "Your plan is paused" : `We'll retry your payment (attempt ${attempt})`,
@@ -537,7 +537,7 @@ async function runTrialReminders(): Promise<{ notified: number }> {
       _body: `Keep ${planName} and your first payment is taken on ${formatDate(String(row.trial_end))}. Cancel before then and you are not charged.`,
       _link: "/subscription",
       _metadata: { trial_end: row.trial_end, days_left: daysLeft },
-    }).catch(() => {});
+    }) as unknown as Promise<unknown>).catch(() => {});
 
     if (sent) notified += 1;
   }
