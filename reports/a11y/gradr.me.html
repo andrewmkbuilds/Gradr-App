@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Accessibility audit — gradr.me</title>
+<style>
+ body{font:14px/1.5 system-ui,sans-serif;margin:2rem;color:#12212b}
+ h1{font-size:1.4rem} table{border-collapse:collapse;width:100%}
+ th,td{border:1px solid #d5dee2;padding:.5rem;text-align:left;vertical-align:top}
+ th{background:#f2f0ef} code{font:12px/1.4 ui-monospace,monospace;word-break:break-all}
+ tr.blocking td:first-child{color:#8a1c1c;font-weight:700}
+ .meta{color:#55676d}
+</style></head><body>
+<h1>Accessibility audit — gradr.me</h1>
+<p class="meta">https://gradr.me · generated 2026-08-29T14:23:10.722Z · 12 failing element(s) across 10 rule/route combination(s) · <strong>10 blocking</strong></p>
+<p class="meta">Routes: /, /ats-resume-checker, /ai-interview-coach, /ai-cover-letter-generator, /job-application-tracker, /career-advice, /job-search, /blog/ai-resume-optimization, /career-advice/interview-questions, /job-search/frontend-developer-remote, /pricing, /terms, /privacy · widths: mobile, desktop · themes: light, dark</p>
+<table><thead><tr><th>Gate</th><th>Rule</th><th>Route</th><th>Selector</th><th>Failure</th></tr></thead>
+<tbody><tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>mobile / light</small></td>
+  <td><code>.hover\:opacity-90.h-12.px-6</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.15 (foreground color: #18292f, background color: #256074, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/scrollable-region-focusable?application=axeAPI">scrollable-region-focusable</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>mobile / light</small></td>
+  <td><code>.overflow-x-auto.mt-6</code></td>
+  <td><small>Fix any of the following: Element should have focusable content Element should be focusable</small><br><code>&lt;div class=&quot;mt-6 overflow-x-auto&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/scrollable-region-focusable?application=axeAPI">scrollable-region-focusable</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>mobile / light</small></td>
+  <td><code>.mt-4.overflow-x-auto</code></td>
+  <td><small>Fix any of the following: Element should have focusable content Element should be focusable</small><br><code>&lt;div class=&quot;mt-4 overflow-x-auto&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/job-application-tracker<br><small>mobile / light</small></td>
+  <td><code>.hover\:opacity-90.h-12.text-body</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.15 (foreground color: #18292f, background color: #256074, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>mobile / dark</small></td>
+  <td><code>.hover\:opacity-90.h-12.px-6</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.31 (foreground color: #f7f4f3, background color: #5baec2, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/scrollable-region-focusable?application=axeAPI">scrollable-region-focusable</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>mobile / dark</small></td>
+  <td><code>.overflow-x-auto.mt-6</code></td>
+  <td><small>Fix any of the following: Element should have focusable content Element should be focusable</small><br><code>&lt;div class=&quot;mt-6 overflow-x-auto&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/scrollable-region-focusable?application=axeAPI">scrollable-region-focusable</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>mobile / dark</small></td>
+  <td><code>.mt-4.overflow-x-auto</code></td>
+  <td><small>Fix any of the following: Element should have focusable content Element should be focusable</small><br><code>&lt;div class=&quot;mt-4 overflow-x-auto&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/job-application-tracker<br><small>mobile / dark</small></td>
+  <td><code>.hover\:opacity-90.h-12.text-body</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.31 (foreground color: #f7f4f3, background color: #5baec2, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>desktop / light</small></td>
+  <td><code>.hover\:opacity-90.h-12.px-6</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.15 (foreground color: #18292f, background color: #256074, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/job-application-tracker<br><small>desktop / light</small></td>
+  <td><code>.hover\:opacity-90.h-12.text-body</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.15 (foreground color: #18292f, background color: #256074, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/ai-interview-coach<br><small>desktop / dark</small></td>
+  <td><code>.hover\:opacity-90.h-12.px-6</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.31 (foreground color: #f7f4f3, background color: #5baec2, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr>
+<tr class="blocking">
+  <td>BLOCKING</td>
+  <td><a href="https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI">color-contrast</a><br><small>serious</small></td>
+  <td>/job-application-tracker<br><small>desktop / dark</small></td>
+  <td><code>.hover\:opacity-90.h-12.text-body</code></td>
+  <td><small>Fix any of the following: Element has insufficient color contrast of 2.31 (foreground color: #f7f4f3, background color: #5baec2, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1</small><br><code>&lt;a href=&quot;https://app.gradr.me...&quot; class=&quot;inline-flex shrink-0...&quot;&gt;</code></td>
+</tr></tbody></table>
+</body></html>
