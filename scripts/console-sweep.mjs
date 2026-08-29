@@ -15,25 +15,20 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { launchBrowser } from "./lib/browser.mjs";
+import { matchAllowlist, CONSOLE_ALLOWLIST } from "./lib/console-allowlist.mjs";
 
 const args = process.argv.slice(2);
 const BASE = (args.find((a) => a.startsWith("http")) ?? process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 const AS_JSON = args.includes("--json");
 const OUT_DIR = "test-results/console-sweep";
 
-/** Messages that are environment noise, not app defects. */
-const IGNORED = [
-  /Failed to load resource: the server responded with a status of 401/i,
-  /Failed to load resource: the server responded with a status of 403/i,
-  /net::ERR_INTERNET_DISCONNECTED/i,
-  /Download the React DevTools/i,
-  /\[vite\] connecting/i,
-  /ResizeObserver loop/i,
-  // Paddle.js and PostHog are not reachable from CI runners.
-  /cdn\.paddle\.com/i,
-  /(app|us|eu)\.posthog\.com/i,
-  /sentry\.io/i,
-];
+/**
+ * Messages that are environment noise, not app defects.
+ *
+ * The list itself lives in scripts/lib/console-allowlist.mjs so route-smoke
+ * and this sweep can never drift apart, and so every suppression carries a
+ * documented reason. Anything not matched there still fails the build.
+ */
 
 /** Routes that intentionally cannot be swept (params, external redirects). */
 const SKIP = new Set(["*", "/auth/callback"]);
