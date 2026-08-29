@@ -2,7 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Document-level CSP. `<meta http-equiv>` honours base-uri, object-src and
+      form-action; frame-ancestors / report-only / X-Frame-Options are
+      header-only and must come from the hosting edge (docs/security-headers.md).
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="base-uri 'self'; object-src 'none'; form-action 'self' https://*.supabase.co https://accounts.google.com"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
     <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16" />

@@ -5,11 +5,12 @@ import { ROUTES, checkRoute } from "../../scripts/lib/securityHeaders.mjs";
 /**
  * Runtime security-header assertions.
  *
- * Runs against production (or SECURITY_HEADERS_TARGET) and verifies CSP, HSTS
- * and Referrer-Policy on `/auth` and OAuth-related paths. Skipped unless
+ * Runs against production (or SECURITY_HEADERS_TARGET) and verifies the
+ * headers the platform serves plus the document CSP on `/auth` and
+ * OAuth-related paths. Edge-only headers surface as warnings, not failures. Skipped unless
  * RUN_HEADER_CHECKS=1 so local unit runs stay offline.
  */
-const target = (process.env.SECURITY_HEADERS_TARGET || "https://gradr.me").replace(/\/$/, "");
+const target = (process.env.SECURITY_HEADERS_TARGET || "https://app.gradr.me").replace(/\/$/, "");
 const enabled = process.env.RUN_HEADER_CHECKS === "1";
 
 describe.skipIf(!enabled)(`security headers on ${target}`, () => {

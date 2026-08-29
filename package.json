@@ -144,7 +144,7 @@
     "icons:check": "node scripts/generate-app-icons.mjs --check",
     "icons:generate": "node scripts/generate-app-icons.mjs",
     "lint": "eslint .",
-    "lint:rhythm": "eslint src/surfaces src/components/PublicShell.tsx src/pages/legal src/pages/blog src/pages/AiCareerCoach.tsx src/pages/AtsResumeChecker.tsx src/pages/AiCoverLetterGenerator.tsx src/pages/AiInterviewCoach.tsx src/pages/JobApplicationTracker.tsx src/pages/JobSearchIndex.tsx src/pages/JobLanding.tsx src/pages/GuideArticle.tsx src/pages/CareerAdvice.tsx src/pages/Pricing.tsx src/pages/AffiliateProgram.tsx",
+    "lint:rhythm": "node scripts/lint-rhythm.mjs",
     "lint:design": "eslint --config eslint.design.config.js .",
     "og:check": "node scripts/generate-og-images.mjs --check",
     "og:generate": "node scripts/generate-og-images.mjs",
@@ -210,7 +210,8 @@
     "audit:spacing": "node scripts/spacing-audit.mjs",
     "audit:spacing:update": "node scripts/spacing-audit.mjs --update",
     "audit:a11y:app": "node scripts/a11y-audit.mjs --label=app.gradr.me",
-    "audit:a11y:marketing": "node scripts/a11y-audit.mjs https://gradr.me --label=gradr.me --routes=/,/ats-resume-checker,/ai-interview-coach,/ai-cover-letter-generator,/job-application-tracker,/career-advice,/job-search,/blog/ai-resume-optimization,/career-advice/interview-questions,/job-search/frontend-developer-remote,/pricing,/terms,/privacy"
+    "audit:a11y:marketing": "node scripts/a11y-audit.mjs https://gradr.me --label=gradr.me --routes=/,/ats-resume-checker,/ai-interview-coach,/ai-cover-letter-generator,/job-application-tracker,/career-advice,/job-search,/blog/ai-resume-optimization,/career-advice/interview-questions,/job-search/frontend-developer-remote,/pricing,/terms,/privacy",
+    "check:security-headers": "node scripts/check-security-headers.mjs"
   },
   "type": "module",
   "version": "0.0.0"
