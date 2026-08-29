@@ -101,7 +101,7 @@ function SupportHome() {
           rel="noopener noreferrer"
           className="interactive group rounded-xl border border-border/60 bg-card p-5 elev-1"
         >
-          <DiscordIcon size={20} className="text-[#5865F2]" aria-hidden="true" />
+          <DiscordIcon size={20} aria-hidden="true" />
           <h2 className="mt-3 text-sm font-semibold text-foreground">Join the community</h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Chat with the team and other job seekers in our Discord.

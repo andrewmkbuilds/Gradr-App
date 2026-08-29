@@ -220,7 +220,7 @@ export function PublicShell({ children, source }: PublicShellProps) {
             rel="noopener noreferrer"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            <DiscordIcon size={16} className="text-[#5865F2]" />
+            <DiscordIcon size={16} aria-hidden="true" />
             Join our Discord
           </a>
         </div>
