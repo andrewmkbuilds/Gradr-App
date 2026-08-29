@@ -122,8 +122,12 @@ export const META_CSP_DIRECTIVES = [
 export function metaCspFromHtml(html) {
   const match = /<meta[^>]+http-equiv=["']content-security-policy["'][^>]*>/i.exec(html || "");
   if (!match) return null;
-  return /content=["']([^"']+)["']/i.exec(match[0])?.[1] ?? null;
+  // Capture up to the *matching* quote: policy values contain single quotes
+  // ('self', 'none'), so a ["'] terminator would truncate at the first one.
+  const attr = /content=(["'])([\s\S]*?)\1/i.exec(match[0]);
+  return attr?.[2] ?? null;
 }
+
 
 
 /**
