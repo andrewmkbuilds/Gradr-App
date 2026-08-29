@@ -1,0 +1,45 @@
+name: Staging checkout entrypoint smoke
+
+# Fails when a deployed staging surface cannot sell: no inlined Paddle token,
+# a token pointing at the wrong catalog, a disabled pricing CTA, or the
+# "payments are not configured" banner. Never opens the checkout overlay, so no
+# transaction is ever started and no sign-in is required.
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Staging base URL to smoke test
+        required: false
+      expected_env:
+        description: Expected Paddle environment (sandbox|live)
+        required: false
+        default: sandbox
+  schedule:
+    - cron: "42 5 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  checkout-entrypoint:
+    name: Checkout entrypoint is live
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Smoke the checkout entrypoint
+        env:
+          STAGING_BASE_URL: ${{ github.event.inputs.base_url || vars.STAGING_BASE_URL || 'https://id-preview--f78c841e-e2fb-4d2f-9257-e2f5bc19315f.lovable.app' }}
+          EXPECTED_PAYMENTS_ENV: ${{ github.event.inputs.expected_env || vars.EXPECTED_PAYMENTS_ENV || 'sandbox' }}
+        run: bun run test:checkout:entrypoint
