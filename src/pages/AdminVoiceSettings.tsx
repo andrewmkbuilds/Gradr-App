@@ -304,7 +304,7 @@ export default function AdminVoiceSettings() {
 
         <div className="space-y-3">
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Primary voice per persona (Deepgram)</h3>
+            <h3 className="text-h6 text-foreground">Primary voice per persona (Deepgram)</h3>
             <p className="text-sm text-muted-foreground">
               The voice candidates actually hear. Leave blank to keep the Gradr default for that persona.
             </p>
@@ -313,7 +313,7 @@ export default function AdminVoiceSettings() {
             <div key={`dg-${p.id}`} className="space-y-1.5">
               <Label htmlFor={`deepgram-${p.id}`}>
                 {p.id}{" "}
-                <span className="text-xs text-muted-foreground">
+                <span className="text-caption text-muted-foreground">
                   (default {p.defaultDeepgramVoice ?? "—"}
                   {p.resolvedDeepgramVoice && p.resolvedDeepgramVoice !== p.defaultDeepgramVoice
                     ? `, currently ${p.resolvedDeepgramVoice}`
