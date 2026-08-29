@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, Facebook, Menu, X } from "lucide-react";
+import { ArrowRight, Facebook, Instagram, Menu, X, Youtube } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackSignupCta } from "@/lib/telemetry/events";
@@ -8,7 +8,8 @@ import { LEGAL_PAGES } from "@/content/legal";
 import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
 import { cn } from "@/lib/utils";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
+import { XIcon } from "@/components/icons/XIcon";
+import { DISCORD_INVITE_URL, SOCIAL_LINKS } from "@/config/community";
 
 interface PublicShellProps {
   children: React.ReactNode;
