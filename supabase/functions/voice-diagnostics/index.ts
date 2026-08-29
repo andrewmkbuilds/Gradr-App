@@ -6,6 +6,7 @@ import {
   DEFAULT_MODEL_ID,
   DEFAULT_OUTPUT_FORMAT,
   jsonResponse as json,
+  deepgramVoiceFor,
   loadVoiceConfig,
   providerDetail,
   recordVoiceEvent,
@@ -136,6 +137,64 @@ serve(async (req) => {
 
   // ---- stream-test --------------------------------------------------------
   if (action === "stream-test") {
+    const personaForTest = typeof body.personaId === "string" ? body.personaId : "hiring-manager";
+    const testText = typeof body.text === "string" && body.text.trim()
+      ? body.text.trim().slice(0, 240)
+      : "Thanks for making time today. Let's start with a quick introduction.";
+
+    // Primary provider first — this is the voice candidates actually hear.
+    const deepgramKey = Deno.env.get("DEEPGRAM_API_KEY");
+    if (deepgramKey && body.provider !== "elevenlabs") {
+      const voice = deepgramVoiceFor(personaForTest, config);
+      const startedAt = Date.now();
+      const dg = await fetch(
+        `https://api.deepgram.com/v1/speak?model=${encodeURIComponent(voice)}&encoding=mp3`,
+        {
+          method: "POST",
+          headers: { Authorization: `Token ${deepgramKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ text: testText }),
+        },
+      ).catch((e) => {
+        console.error("[voice-diagnostics] deepgram test threw", String(e));
+        return null;
+      });
+
+      if (dg?.ok && dg.body) {
+        const buf = new Uint8Array(await dg.arrayBuffer());
+        let bin = "";
+        for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+        await recordVoiceEvent({ userId: user.id, outcome: "ok", context: "diagnostics", providerDetail: `deepgram:${voice}` });
+        console.info("[voice-diagnostics] deepgram test ok", { bytes: buf.length, voice });
+        return json({
+          ok: true,
+          provider: "deepgram",
+          credential: "present",
+          bytes: buf.length,
+          totalMs: Date.now() - startedAt,
+          personaId: personaForTest,
+          voiceId: voice,
+          audioBase64: btoa(bin),
+        });
+      }
+
+      const rawDg = dg ? await dg.text().catch(() => "") : "";
+      const mappedDg = classifyProviderFailure(dg?.status ?? 0, rawDg);
+      console.error("[voice-diagnostics] deepgram test failed", {
+        status: dg?.status ?? 0,
+        detail: providerDetail(rawDg),
+      });
+      await recordVoiceEvent({
+        userId: user.id,
+        outcome: "failure",
+        code: mappedDg.code,
+        reason: mappedDg.reason,
+        upstreamStatus: dg?.status ?? 0,
+        context: "diagnostics",
+        providerDetail: providerDetail(rawDg),
+      });
+      // Fall through to the secondary so the admin sees whether *any* provider works.
+    }
+
     if (!apiKey) {
       return json({ ok: false, credential: "missing", code: "VOICE_CONFIGURATION_ERROR", reason: "PROVIDER_CREDENTIAL_MISSING" });
     }
@@ -245,13 +304,23 @@ serve(async (req) => {
     .order("created_at", { ascending: false })
     .limit(20);
 
+  const deepgramConfigured = Boolean(Deno.env.get("DEEPGRAM_API_KEY"));
+
   if (!apiKey) {
-    console.error("[voice-diagnostics] credential missing");
+    // Deepgram is the primary voice; a missing ElevenLabs key is only a
+    // degraded secondary, not an outage.
+    console[deepgramConfigured ? "info" : "error"](
+      deepgramConfigured
+        ? "[voice-diagnostics] running on Deepgram only"
+        : "[voice-diagnostics] credential missing",
+    );
     return json({
-      credential: "missing",
-      synthesis: "unavailable",
-      code: "VOICE_CONFIGURATION_ERROR",
-      reason: "PROVIDER_CREDENTIAL_MISSING",
+      primaryProvider: deepgramConfigured ? "deepgram" : null,
+      deepgramConfigured,
+      credential: deepgramConfigured ? "present" : "missing",
+      synthesis: deepgramConfigured ? "ok" : "unavailable",
+      code: deepgramConfigured ? null : "VOICE_CONFIGURATION_ERROR",
+      reason: deepgramConfigured ? null : "PROVIDER_CREDENTIAL_MISSING",
       config,
       personas: Object.entries(VOICE_PROFILES).map(([id, p]) => ({ id, defaultVoiceId: p.voiceId })),
       recent: recent ?? [],
@@ -260,6 +329,8 @@ serve(async (req) => {
 
   const subscription = await providerSubscription(apiKey);
   return json({
+    primaryProvider: deepgramConfigured ? "deepgram" : "elevenlabs",
+    deepgramConfigured,
     credential: "present",
     synthesis: subscription.ok ? "ok" : "failing",
     code: subscription.ok ? null : subscription.code ?? "VOICE_UNAVAILABLE",
