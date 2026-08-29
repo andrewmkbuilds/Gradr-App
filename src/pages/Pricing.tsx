@@ -19,13 +19,20 @@ import {
   type PlanId,
 } from "@/config/pricing";
 import { formatMinorAmount, previewPrices, type PreviewedPrice } from "@/lib/paddle";
+import {
+  isPriceUnavailable,
+  runPaymentsPreflight,
+  type PaymentsPreflight,
+} from "@/lib/payments/preflight";
 import type { PlanKey } from "@/lib/billing";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { PaymentsConfigBanner } from "@/components/PaymentsConfigBanner";
+import { PaymentsCatalogNotice } from "@/components/billing/PaymentsCatalogNotice";
 import { VerificationDialog } from "@/components/VerificationDialog";
 import { useDiscountPrograms, useMyEligibility } from "@/hooks/useEligibility";
 import { PromoCodeField, type AppliedPromo } from "@/components/billing/PromoCodeField";
+
 
 const TIER_ICONS: Record<string, typeof Sparkles> = {
   Starter: Zap,
@@ -51,6 +58,8 @@ export default function Pricing() {
   const [prices, setPrices] = useState<Record<string, PreviewedPrice>>({});
   const [pricesLoading, setPricesLoading] = useState(true);
   const [pricesError, setPricesError] = useState<string | null>(null);
+  const [preflight, setPreflight] = useState<PaymentsPreflight | null>(null);
+  const [preflightLoading, setPreflightLoading] = useState(true);
 
   // Localized prices come straight from Paddle — no client-side math, no
   // re-formatting of the strings Paddle returns.
@@ -81,7 +90,26 @@ export default function Pricing() {
     };
   }, [priceAttempt]);
 
+  /**
+   * Catalog preflight: which plans can actually be bought in this environment.
+   * Separate from the price preview above because they fail differently — a
+   * price preview outage is cosmetic (we fall back to USD), whereas a price
+   * missing from the catalog means checkout would die inside the overlay.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    setPreflightLoading(true);
+    runPaymentsPreflight()
+      .then((result) => !cancelled && setPreflight(result))
+      .finally(() => !cancelled && setPreflightLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [priceAttempt]);
+
   const priceFor = (id: string) => prices[id]?.formattedTotal;
+  const unavailable = (id: string) => isPriceUnavailable(preflight, id);
+
 
   const handleSelect = (tier: Tier | null) => {
     trackUpgradeCta({
@@ -105,6 +133,16 @@ export default function Pricing() {
       toast.success("You're on the Free plan!");
       return;
     }
+    // Belt and braces: the CTA is already disabled for a plan that is missing
+    // from the catalog, but keyboard/programmatic activation must not be able
+    // to open an overlay we know will fail.
+    const tierPriceId = interval === "annual" ? tier.priceId.year : tier.priceId.month;
+    if (unavailable(tierPriceId)) {
+      toast.error(`${tier.name} isn't available to buy yet`, {
+        description: "Our payment provider is still setting this plan up. Email support@gradr.me and we'll sort it manually.",
+      });
+      return;
+    }
     // An existing subscriber must never open a second checkout: Paddle would
     // create a parallel subscription and bill them twice. Plan and interval
     // moves belong to the change-plan flow, which modifies the subscription
@@ -126,8 +164,15 @@ export default function Pricing() {
       navigate("/auth?next=/pricing");
       return;
     }
+    if (unavailable(key)) {
+      toast.error("This pack isn't available to buy yet", {
+        description: "Our payment provider is still setting it up. Email support@gradr.me and we'll sort it manually.",
+      });
+      return;
+    }
     void buyPack(key, promo?.discountId ?? null);
   };
+
 
   /**
    * List price comes from Paddle verbatim. When the signed-in visitor has a
@@ -219,6 +264,17 @@ export default function Pricing() {
       </div>
 
       <PaymentsConfigBanner context="pricing" className="mx-auto max-w-3xl" />
+
+      {/* Products missing from the active Paddle catalog — a different failure
+          from a missing client token, and the one that silently breaks a live
+          launch until the catalog is synced. */}
+      <PaymentsCatalogNotice
+        preflight={preflight}
+        loading={preflightLoading}
+        onRetry={() => setPriceAttempt((n) => n + 1)}
+        className="mx-auto max-w-3xl"
+      />
+
 
       {/* Eligibility discounts: advertised to everyone, confirmed for the verified. */}
       {(discountPercent > 0 || topProgram) && (
@@ -390,7 +446,13 @@ export default function Pricing() {
                     onClick={() => (current ? navigate("/billing") : handleSelect(tier))}
                     variant={tier.highlighted ? "default" : "outline"}
                     className="w-full"
-                    disabled={pending === pendingKey}
+                    data-testid={`plan-cta-${tier.key}`}
+                    disabled={pending === pendingKey || unavailable(priceId)}
+                    title={
+                      unavailable(priceId)
+                        ? "This plan is still being set up with our payment provider."
+                        : undefined
+                    }
                   >
                     {current ? (
                       "Current plan"
@@ -398,10 +460,15 @@ export default function Pricing() {
                       <span className="inline-flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" /> Opening checkout…
                       </span>
+                    ) : unavailable(priceId) ? (
+                      // A disabled button with no explanation reads as a broken
+                      // page, so the reason lives in the label itself.
+                      `${tier.name} not available yet`
                     ) : isSubscribed ? (
                       `Change to ${tier.name}`
                     ) : (
                       `Subscribe to ${tier.name}`
+
                     )}
 
                   </Button>
@@ -434,10 +501,21 @@ export default function Pricing() {
                 variant="outline"
                 className="w-full"
                 onClick={() => handlePack(pack.priceId)}
-                disabled={pending === pack.priceId}
+                data-testid={`pack-cta-${pack.priceId}`}
+                disabled={pending === pack.priceId || unavailable(pack.priceId)}
+                title={
+                  unavailable(pack.priceId)
+                    ? "This pack is still being set up with our payment provider."
+                    : undefined
+                }
               >
-                {pending === pack.priceId ? "Opening checkout…" : "Buy pack"}
+                {pending === pack.priceId
+                  ? "Opening checkout…"
+                  : unavailable(pack.priceId)
+                    ? "Not available yet"
+                    : "Buy pack"}
               </Button>
+
             </Card>
             </SpatialCard>
           ))}

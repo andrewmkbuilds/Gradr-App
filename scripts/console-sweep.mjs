@@ -6,8 +6,8 @@
  * session is available, otherwise signed out) and fails the build if any route
  * emits a console error, a page error, or an unhandled promise rejection.
  *
- * Known, environment-only noise lives in IGNORED below — keep that list short
- * and justified; everything else is a real regression.
+ * Known, environment-only noise lives in scripts/lib/console-allowlist.mjs —
+ * every entry there carries a reason. Everything else is a real regression.
  *
  * Usage: node scripts/console-sweep.mjs [baseUrl] [--json]
  */
@@ -15,25 +15,20 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { launchBrowser } from "./lib/browser.mjs";
+import { matchAllowlist, CONSOLE_ALLOWLIST } from "./lib/console-allowlist.mjs";
 
 const args = process.argv.slice(2);
 const BASE = (args.find((a) => a.startsWith("http")) ?? process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 const AS_JSON = args.includes("--json");
 const OUT_DIR = "test-results/console-sweep";
 
-/** Messages that are environment noise, not app defects. */
-const IGNORED = [
-  /Failed to load resource: the server responded with a status of 401/i,
-  /Failed to load resource: the server responded with a status of 403/i,
-  /net::ERR_INTERNET_DISCONNECTED/i,
-  /Download the React DevTools/i,
-  /\[vite\] connecting/i,
-  /ResizeObserver loop/i,
-  // Paddle.js and PostHog are not reachable from CI runners.
-  /cdn\.paddle\.com/i,
-  /(app|us|eu)\.posthog\.com/i,
-  /sentry\.io/i,
-];
+/**
+ * Messages that are environment noise, not app defects.
+ *
+ * The list itself lives in scripts/lib/console-allowlist.mjs so route-smoke
+ * and this sweep can never drift apart, and so every suppression carries a
+ * documented reason. Anything not matched there still fails the build.
+ */
 
 /** Routes that intentionally cannot be swept (params, external redirects). */
 const SKIP = new Set(["*", "/auth/callback"]);
@@ -59,7 +54,14 @@ function loadSession() {
   return { key: minted.storage_key, session: JSON.stringify(minted.session) };
 }
 
-const isIgnored = (text) => IGNORED.some((re) => re.test(text));
+/** Counts of suppressed messages by allowlist id, reported at the end. */
+const suppressed = new Map();
+function isIgnored(text) {
+  const entry = matchAllowlist(text);
+  if (!entry) return false;
+  suppressed.set(entry.id, (suppressed.get(entry.id) ?? 0) + 1);
+  return true;
+}
 
 const routes = routesFromApp();
 const session = loadSession();
@@ -110,11 +112,29 @@ for (const route of routes) {
 await browser.close();
 
 mkdirSync(OUT_DIR, { recursive: true });
-const report = { base: BASE, signedIn: Boolean(session), total: routes.length, failed: failures.length, routes: swept };
+const suppressedSummary = [...suppressed.entries()].map(([id, count]) => ({
+  id,
+  count,
+  reason: CONSOLE_ALLOWLIST.find((e) => e.id === id)?.reason ?? "",
+}));
+const report = {
+  base: BASE,
+  signedIn: Boolean(session),
+  total: routes.length,
+  failed: failures.length,
+  // Recorded so a growing allowlist is visible in review rather than silent.
+  suppressed: suppressedSummary,
+  routes: swept,
+};
 writeFileSync(join(OUT_DIR, "console-sweep.json"), JSON.stringify(report, null, 2));
 
 if (AS_JSON) console.log(JSON.stringify(report, null, 2));
 console.log(`\n${routes.length - failures.length}/${routes.length} routes clean (${session ? "signed in" : "signed out"}).`);
+if (suppressedSummary.length) {
+  console.log(
+    `Suppressed known noise: ${suppressedSummary.map((s) => `${s.id}\u00d7${s.count}`).join(", ")}`,
+  );
+}
 
 if (failures.length) {
   console.error(`\nConsole errors on ${failures.length} route(s). Full report: ${OUT_DIR}/console-sweep.json`);

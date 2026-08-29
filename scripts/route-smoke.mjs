@@ -20,6 +20,7 @@
  * Usage: node scripts/route-smoke.mjs [baseUrl]     (default http://localhost:8080)
  */
 import { chromium } from "playwright";
+import { partitionConsoleMessages, describeIgnored } from "./lib/console-allowlist.mjs";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -89,20 +90,11 @@ async function run() {
     // ---- signed out -------------------------------------------------------
     const guest = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await guest.newPage();
-    const consoleErrors = [];
-    // Dev-only noise: the Lovable component tagger attaches a callback ref to
-    // every JSX component element in the dev server bundle, which makes React
-    // warn about refs on function components. It does not exist in production
-    // builds and is not app code, so it must not fail the smoke test.
-    const IGNORED_CONSOLE = [/Function components cannot be given refs/];
-    page.on(
-      "console",
-      (m) =>
-        m.type() === "error" &&
-        !IGNORED_CONSOLE.some((re) => re.test(m.text())) &&
-        consoleErrors.push(m.text()),
-    );
-
+    // Known environment noise is filtered through the shared, documented
+    // allowlist (scripts/lib/console-allowlist.mjs) so every suppression has a
+    // reason attached and is suppressed identically in every smoke script.
+    const consoleMessages = [];
+    page.on("console", (m) => m.type() === "error" && consoleMessages.push(m.text()));
 
     await checkRedirect(page, "/", "/auth", "guest");
     await checkRedirect(page, "/landing", "/auth", "guest");
@@ -121,6 +113,8 @@ async function run() {
       missing.path,
     );
 
+    const { failures: consoleErrors, ignored } = partitionConsoleMessages(consoleMessages);
+    if (ignored.length) console.log(`      (ignored known noise: ${describeIgnored(ignored)})`);
     record("guest: no console errors", consoleErrors.length === 0, consoleErrors.slice(0, 2).join(" | "));
     await guest.close();
 
