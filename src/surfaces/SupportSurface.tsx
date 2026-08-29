@@ -107,6 +107,18 @@ function SupportHome() {
             Chat with the team and other job seekers in our Discord.
           </p>
         </a>
+        <a
+          href={FACEBOOK_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="interactive group rounded-xl border border-border/60 bg-card p-5 elev-1"
+        >
+          <Facebook className="h-5 w-5" aria-hidden="true" />
+          <h2 className="mt-3 text-sm font-semibold text-foreground">Follow on Facebook</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Product news, announcements and career tips from the Gradr team.
+          </p>
+        </a>
       </div>
 
       <section className="section-gap max-w-3xl">
