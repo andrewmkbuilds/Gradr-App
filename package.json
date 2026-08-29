@@ -179,6 +179,7 @@
     "test:admin-throttle": "node scripts/e2e-admin-rpc-throttle.mjs",
     "test:admin-voice": "node scripts/e2e-admin-voice-settings.mjs",
     "test:audit-retention": "RUN_DB_TESTS=1 vitest run src/test/adminRpcAuditRetention.integration.test.ts",
+    "test:checkout:entrypoint": "node scripts/ci-checkout-entrypoint.mjs",
     "test:checkout:missing-prices": "node scripts/e2e-pricing-missing-prices.mjs",
     "test:checkout:prod": "node scripts/e2e-pricing-checkout.mjs",
     "test:cursor": "node scripts/e2e-cursor-effects.mjs",
