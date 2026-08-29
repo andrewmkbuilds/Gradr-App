@@ -134,6 +134,8 @@ try {
         if (state.stub) await state.stub(context);
         const page = await context.newPage();
         await state.run(page);
+        // Freeze spinners so the loading capture is a stable frame, not a race.
+        await page.addStyleTag({ content: "*,*::before,*::after{animation-play-state:paused !important;transition:none !important}" }).catch(() => {});
 
         const file = `${state.name}-${vp}-${scheme}.png`;
         const shot = await page.screenshot();
