@@ -78,3 +78,10 @@ instead.
 
 When adding a new `data-cursor="interactive"` surface, no test update is needed;
 the e2e script picks the first visible interactive target on the route.
+
+## Pinning a level for testing
+
+`?depth=full|lite|off` pins the depth capability for the session (`?depth=auto`
+hands control back to detection). A pinned level also freezes the frame-rate
+probe, so a slow or headless device cannot silently downgrade mid-test.
+Reduced motion still wins over any pin.
