@@ -5,6 +5,7 @@ import { planTier, resolveEnv } from "../_shared/entitlements.ts";
 import {
   classifyProviderFailure,
   corsHeaders,
+  deepgramVoiceFor,
   jsonResponse as json,
   loadVoiceConfig,
   providerDetail,
@@ -17,18 +18,20 @@ import {
 } from "../_shared/voiceProvider.ts";
 
 /**
- * Interviewer speech (ElevenLabs).
+ * Interviewer speech.
+ *
+ *   Deepgram Aura-2 (primary)
+ *     -> ElevenLabs / Fish Audio (server-side secondaries, only if configured)
+ *       -> sanitized error, and the browser speaks the same sentence through
+ *          the Web Speech API so the interview never goes silent.
  *
  * Voices one spoken thought at a time so the client can start playback while
- * the reasoning model is still generating the rest of the turn. The persona ->
- * voice mapping, model and delivery settings are resolved here, server-side
- * (with admin overrides from voice_provider_config), so a client can never
- * point the interviewer at an arbitrary voice.
+ * the reasoning model (Gemini, in interview-coach) is still generating the rest
+ * of the turn. The persona -> voice mapping is resolved here, server-side, so a
+ * client can never point the interviewer at an arbitrary voice.
  *
- * ELEVENLABS_API_KEY never leaves this function. The client receives a Gradr
- * error code plus a safe enumerated provider reason (e.g.
- * PROVIDER_UNUSUAL_ACTIVITY) so the interview UI can explain entitlement
- * problems precisely without ever surfacing provider prose.
+ * No provider credential ever leaves this function. The client receives a Gradr
+ * error code plus a safe enumerated provider reason.
  */
 
 function voiceError(
@@ -52,6 +55,33 @@ async function rateLimited(userId: string): Promise<boolean> {
   const r = await durableRateLimit(userId, ENDPOINT, RATE_LIMIT, WINDOW_SECONDS);
   return !r.allowed;
 }
+
+/** Primary provider: Deepgram Aura-2, streamed as MP3. */
+async function synthesizeDeepgram(
+  apiKey: string,
+  voice: string,
+  text: string,
+): Promise<Response | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+  try {
+    return await fetch(
+      `https://api.deepgram.com/v1/speak?model=${encodeURIComponent(voice)}&encoding=mp3`,
+      {
+        method: "POST",
+        signal: controller.signal,
+        headers: { Authorization: `Token ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      },
+    );
+  } catch (e) {
+    console.error("[voice] deepgram request threw", String(e));
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 
 async function synthesize(
   apiKey: string,
