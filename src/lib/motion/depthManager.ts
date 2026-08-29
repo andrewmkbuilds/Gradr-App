@@ -31,19 +31,52 @@ const SAMPLE_MS = 1600;
 /** How many consecutive bad windows before we downgrade. */
 const BAD_WINDOWS = 2;
 
+/** Static device hints the capability gate reasons about. */
+export interface DeviceHints {
+  /** `(pointer: coarse)` — touch-first input. */
+  coarse: boolean;
+  /** Viewport width in CSS pixels. */
+  width: number;
+  /** `navigator.hardwareConcurrency`, when exposed. */
+  cores?: number;
+  /** `navigator.deviceMemory` in GB, when exposed. */
+  memory?: number;
+  /** `navigator.connection.saveData`. */
+  saveData?: boolean;
+}
+
+/** Pure capability gate — the only place device hints turn into a level. */
+export function deviceLevelFrom(hints: DeviceHints): DepthLevel {
+  if (hints.saveData === true) return "off";
+  const narrow = hints.width < 768;
+  const lowCores = (hints.cores ?? 8) <= 4;
+  const lowMemory = (hints.memory ?? 8) <= 4;
+  if (hints.coarse || narrow || lowCores || lowMemory) return "lite";
+  return "full";
+}
+
+/** FPS floor a given ceiling must clear to stay where it is. */
+export function fpsFloorFor(ceiling: DepthLevel): number {
+  return ceiling === "full" ? FULL_MIN_FPS : LITE_MIN_FPS;
+}
+
+/** One step down the ladder when the frame probe keeps missing its budget. */
+export function stepCeilingDown(ceiling: DepthLevel): DepthLevel {
+  return ceiling === "full" ? "lite" : "off";
+}
+
 export function detectDeviceLevel(): DepthLevel {
   if (typeof window === "undefined") return "lite";
   const nav = navigator as NavigatorWithHints;
-  const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
-  const narrow = window.innerWidth < 768;
-  const lowCores = (nav.hardwareConcurrency ?? 8) <= 4;
-  const lowMemory = (nav.deviceMemory ?? 8) <= 4;
-  const saveData = nav.connection?.saveData === true;
-
-  if (saveData) return "off";
-  if (coarse || narrow || lowCores || lowMemory) return "lite";
-  return "full";
+  return deviceLevelFrom({
+    coarse: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+    width: window.innerWidth,
+    cores: nav.hardwareConcurrency,
+    memory: nav.deviceMemory,
+    saveData: nav.connection?.saveData === true,
+  });
 }
+
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
