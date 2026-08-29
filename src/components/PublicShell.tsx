@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, Facebook, Menu, X } from "lucide-react";
+import { ArrowRight, Facebook, Instagram, Menu, X, Youtube } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackSignupCta } from "@/lib/telemetry/events";
@@ -8,7 +8,14 @@ import { LEGAL_PAGES } from "@/content/legal";
 import { buttonVariants } from "@/design-system/gradr-9b9b95/gradr/components/button";
 import { cn } from "@/lib/utils";
 import { DiscordIcon } from "@/components/icons/DiscordIcon";
-import { DISCORD_INVITE_URL, FACEBOOK_PAGE_URL } from "@/config/community";
+import { XIcon } from "@/components/icons/XIcon";
+import {
+  DISCORD_INVITE_URL,
+  FACEBOOK_PAGE_URL,
+  INSTAGRAM_URL,
+  X_URL,
+  YOUTUBE_URL,
+} from "@/config/community";
 
 interface PublicShellProps {
   children: React.ReactNode;
@@ -244,19 +251,46 @@ export function PublicShell({ children, source }: PublicShellProps) {
               href={DISCORD_INVITE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              aria-label="Join our Discord"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
             >
               <DiscordIcon size={16} aria-hidden="true" />
-              Join our Discord
+            </a>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Gradr on Instagram"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
+            >
+              <Instagram className="h-4 w-4" aria-hidden="true" />
+            </a>
+            <a
+              href={X_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Gradr on X"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
+            >
+              <XIcon size={16} aria-hidden="true" />
             </a>
             <a
               href={FACEBOOK_PAGE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              aria-label="Gradr on Facebook"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
             >
               <Facebook className="h-4 w-4" aria-hidden="true" />
-              Facebook
+            </a>
+            <a
+              href={YOUTUBE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Gradr on YouTube"
+              className={buttonVariants({ variant: "outline", size: "icon-sm" })}
+            >
+              <Youtube className="h-4 w-4" aria-hidden="true" />
             </a>
           </div>
         </div>
