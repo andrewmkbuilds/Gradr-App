@@ -122,6 +122,8 @@
   "scripts": {
     "audit:a11y": "node scripts/a11y-audit.mjs",
     "audit:a11y:app": "node scripts/a11y-audit.mjs --label=app.gradr.me",
+    "audit:a11y:baseline": "node scripts/a11y-baseline-diff.mjs app.gradr.me gradr.me",
+    "audit:a11y:baseline:update": "node scripts/a11y-baseline-diff.mjs --update app.gradr.me gradr.me",
     "audit:a11y:marketing": "node scripts/a11y-audit.mjs https://gradr.me --label=gradr.me --routes=/,/ats-resume-checker,/ai-interview-coach,/ai-cover-letter-generator,/job-application-tracker,/career-advice,/job-search,/blog/ai-resume-optimization,/career-advice/interview-questions,/job-search/frontend-developer-remote,/pricing,/terms,/privacy",
     "audit:deps": "node scripts/dependency-audit.mjs",
     "audit:impeccable": "node scripts/impeccable-audit.mjs",
