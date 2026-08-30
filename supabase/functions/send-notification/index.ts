@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { connectorConfigured, gatewayFetch, GatewayError } from "../_shared/gateway.ts";
+import { raiseAdminAlert } from "../_shared/adminAlert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -205,7 +206,18 @@ serve(async (req) => {
         status: "failed",
         error: detail.slice(0, 500),
       });
+      // A provider rejection means no user gets mail (e.g. unverified sender
+      // domain). Surface it to admins instead of burying it in function logs.
+      await raiseAdminAlert({
+        alertType: "email_provider_rejected",
+        severity: "critical",
+        subject: "Email provider rejected an outgoing message",
+        dedupeKey: `email-provider-${status}-${new Date().toISOString().slice(0, 10)}`,
+        details: { function: "send-notification", template, status, detail: detail.slice(0, 500) },
+        link: "/admin/email-logs",
+      }).catch((err) => console.error("alert fan-out failed", String(err)));
       return json({ error: "Email provider request failed", status, details: detail }, status);
+
     }
   } catch (e) {
     console.error("send-notification error:", e);
