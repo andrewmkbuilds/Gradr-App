@@ -23,7 +23,7 @@ const SENDER_DOMAIN = "notify.app.gradr.me"
 // FROM_DOMAIN is the domain shown in the From: header (e.g., "example.com").
 // When display_from_root is enabled, this can be the root domain for cleaner branding,
 // even though actual sending uses the subdomain above.
-const FROM_DOMAIN = "gradr.me"
+const FROM_DOMAIN = "app.gradr.me"
 
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {
@@ -432,7 +432,7 @@ Deno.serve(async (req) => {
     payload: {
       message_id: messageId,
       to: effectiveRecipient,
-      from: `${FROM_NAME} <noreply@${FROM_DOMAIN}>`,
+      from: `${FROM_NAME} <notify@${FROM_DOMAIN}>`,
       sender_domain: SENDER_DOMAIN,
       subject: resolvedSubject,
       html,

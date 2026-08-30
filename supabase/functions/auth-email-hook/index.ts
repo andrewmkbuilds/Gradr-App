@@ -18,7 +18,7 @@ const corsHeaders = {
 const SITE_NAME = "Gradr"
 const SENDER_DOMAIN = "notify.app.gradr.me"
 const ROOT_DOMAIN = "gradr.me"
-const FROM_DOMAIN = "notify.app.gradr.me"
+const FROM_DOMAIN = "app.gradr.me"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
 // Template mapping for preview mode
@@ -124,7 +124,7 @@ async function handlePreview(req: Request): Promise<Response> {
 // owns only the email decisions: subjects, templates, and per-type props.
 const handler = createAuthEmailHandler({
   apiKey: Deno.env.get('LOVABLE_API_KEY')!,
-  from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+  from: `${SITE_NAME} <notify@${FROM_DOMAIN}>`,
   senderDomain: SENDER_DOMAIN,
   sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
   emails: {
