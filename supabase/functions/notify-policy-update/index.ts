@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { connectorConfigured, gatewayFetch } from "../_shared/gateway.ts";
+import { raiseAdminAlert } from "../_shared/adminAlert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -141,6 +142,19 @@ serve(async (req) => {
         error: errorMessage,
         metadata: { document_id: doc.id, doc_type: doc.doc_type, version: doc.version },
       });
+    }
+
+    if (failed > 0) {
+      // Any provider rejection here usually means the sender domain is not
+      // verified, so no recipient is reachable — tell admins, not just the log.
+      await raiseAdminAlert({
+        alertType: "email_provider_rejected",
+        severity: "critical",
+        subject: "Policy update emails were rejected by the email provider",
+        dedupeKey: `policy-email-failed-${doc.id}-${new Date().toISOString().slice(0, 10)}`,
+        details: { function: "notify-policy-update", document_id: doc.id, sent, failed },
+        link: "/admin/email-logs",
+      }).catch((err) => console.error("alert fan-out failed", String(err)));
     }
 
     return json({ sent, failed, recipients: recipients.length });
