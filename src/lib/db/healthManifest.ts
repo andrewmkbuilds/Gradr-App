@@ -44,14 +44,19 @@ export const SUPPORTING_TABLES = [
   "digest_send_logs",
 ] as const;
 
+/** Never a real user — only used so overloaded RPCs resolve during probing. */
+const PROBE_UUID = "00000000-0000-0000-0000-000000000000";
+
 /**
  * RPCs the app calls. `args` are safe probe arguments — the probe only asserts
  * that the function exists, not that the call succeeds under RLS.
  */
 export const CORE_RPCS: { name: string; args: Record<string, unknown> }[] = [
   { name: "is_admin", args: {} },
-  { name: "has_role", args: { _role: "admin" } },
-  { name: "current_plan_tier", args: {} },
+  // Both take an explicit subject; PostgREST resolves overloads by argument
+  // name, so the probe must pass every non-defaulted parameter.
+  { name: "has_role", args: { _user_id: PROBE_UUID, _role: "admin" } },
+  { name: "current_plan_tier", args: { _user_id: PROBE_UUID, _env: "live" } },
   { name: "entitlement_snapshot", args: {} },
   { name: "my_affiliate_overview", args: {} },
   { name: "affiliate_leaderboard", args: {} },

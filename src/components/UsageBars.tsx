@@ -1,5 +1,6 @@
 import { FileText, Zap, Mic, Infinity as InfinityIcon, ArrowUpRight, Info } from "lucide-react";
 import { Button } from "@/components/ds/Button";
+import { Badge } from "@/design-system/gradr-9b9b95";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
@@ -115,14 +116,18 @@ export function UsageBars({ compact }: UsageBarsProps) {
                       <span
                         tabIndex={0}
                         aria-label={`${label} usage details`}
-                        className={`text-xs font-medium shrink-0 cursor-help rounded outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                          low ? "text-destructive" : "text-muted-foreground"
-                        }`}
+                        className="text-xs font-medium shrink-0 cursor-help rounded outline-none focus-visible:ring-2 focus-visible:ring-ring text-muted-foreground"
                       >
                         {unlimited ? (
                           <span className="inline-flex items-center gap-1 text-foreground">
                             <InfinityIcon className="h-3.5 w-3.5" /> Unlimited
                           </span>
+                        ) : low ? (
+                          // Exhausted allowance: the danger badge keeps the alert
+                          // readable at 12px, which bare destructive text does not.
+                          <Badge variant="danger">
+                            {f.used} / {allowance} used
+                          </Badge>
                         ) : (
                           <>
                             <span className="text-foreground">{f.used}</span> / {allowance} used

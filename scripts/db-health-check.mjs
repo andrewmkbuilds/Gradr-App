@@ -64,10 +64,13 @@ const QUERIES = [
   { group: "jobs", name: "resumes", run: () => supabase.from("resumes").select("id, ats_score").limit(1) },
 ];
 
+// Never a real user — only so overloaded RPCs resolve while probing.
+const PROBE_UUID = "00000000-0000-0000-0000-000000000000";
+
 const RPCS = [
   { name: "is_admin", args: {} },
-  { name: "has_role", args: { _role: "admin" } },
-  { name: "current_plan_tier", args: {} },
+  { name: "has_role", args: { _user_id: PROBE_UUID, _role: "admin" } },
+  { name: "current_plan_tier", args: { _user_id: PROBE_UUID, _env: "live" } },
   { name: "entitlement_snapshot", args: {} },
   { name: "my_affiliate_overview", args: {} },
   { name: "affiliate_leaderboard", args: {} },
