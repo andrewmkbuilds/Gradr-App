@@ -229,7 +229,7 @@ export function ResumeAnalysisDemo({ className }: { className?: string }) {
           )}
         </p>
         <ul className="space-y-1.5" aria-live="polite">
-          <AnimatePresence initial={false} mode="popLayout">
+          <AnimatePresence initial={false}>
             {missing.slice(0, 3).map((s) => (
               <motion.li
                 key={s.id}
@@ -310,7 +310,7 @@ export function JobMatchDemo({ className }: { className?: string }) {
       </div>
 
       <ul className="space-y-2" aria-live="polite">
-        <AnimatePresence initial={false} mode="popLayout">
+        <AnimatePresence initial={false}>
           {ranked.map((job) => (
             <motion.li
               key={job.id}

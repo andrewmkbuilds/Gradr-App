@@ -256,7 +256,7 @@ export default function JobMatchingEngine() {
           </Surface>
         </motion.div>
 
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence>
           {matches.length > 0 && (
             <motion.div
               key="results"

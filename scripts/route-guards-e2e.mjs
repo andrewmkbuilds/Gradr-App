@@ -211,14 +211,22 @@ async function checkResponseHeaders(page, path, { expectStatus = 200 } = {}) {
     `cache-control: ${cache || "(none)"}`,
   );
 
-  // The router marks / and /landing noindex client-side; assert the tag lands.
+  // `/` and `/auth` are the indexable primary-domain entries; every other
+  // app route stays out of the index. Assert whichever applies to this path.
   await page.waitForTimeout(300);
   const robots = await page
     .locator('meta[name="robots"]')
     .first()
     .getAttribute("content")
     .catch(() => null);
-  record(`headers: ${path} is marked noindex`, /noindex/i.test(robots ?? ""), `robots: ${robots ?? "(none)"}`);
+  // Redirecting routes render the destination's tag, so judge by where we landed.
+  const landed = new URL(page.url()).pathname;
+  const indexable = landed === "/" || landed === "/auth";
+  record(
+    `headers: ${path} is marked ${indexable ? "indexable" : "noindex"}`,
+    indexable ? /(^|,\s*)index/i.test(robots ?? "") && !/noindex/i.test(robots ?? "") : /noindex/i.test(robots ?? ""),
+    `robots: ${robots ?? "(none)"}`,
+  );
 }
 
 /** The 404 page must be a real, navigable layout — not a blank shell. */
