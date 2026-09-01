@@ -7,6 +7,7 @@ import App from "./App.tsx";
 import "./index.css";
 // Design system theme layer — must load after the app's own CSS.
 import "./styles/gradr-design-system.css";
+import "./styles/gradr-visual-enhancements.css";
 import { initTelemetry } from "./lib/telemetry/journey";
 import RootErrorBoundary from "./components/RootErrorBoundary";
 import { registerServiceWorker } from "./lib/offline/registerServiceWorker";
