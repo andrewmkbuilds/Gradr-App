@@ -1,0 +1,285 @@
+/* ============================================================
+   Gradr — Visual Enhancement Layer
+   ------------------------------------------------------------
+   Builds on the existing design system to add premium polish:
+   deeper glass, glow-on-hover cards, branded scrollbars,
+   gradient borders, and refined micro-interactions.
+   Every rule here is additive — it never overrides token values,
+   only enhances how existing surfaces render.
+   ============================================================ */
+
+/* ---------- Premium font rendering ---------- */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- Branded scrollbars ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.2);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.4);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.25) transparent;
+}
+
+/* ---------- Enhanced glassmorphism ---------- */
+.glassmorphic {
+  background: hsl(var(--surface) / 0.68);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow:
+    var(--shadow-elevated),
+    inset 0 1px 0 hsl(0 0% 100% / 0.12),
+    inset 0 0 0 1px hsl(var(--border) / 0.5);
+}
+.dark .glassmorphic {
+  background: hsl(var(--surface) / 0.55);
+  box-shadow:
+    var(--shadow-elevated),
+    inset 0 1px 0 hsl(0 0% 100% / 0.06),
+    inset 0 0 0 1px hsl(var(--border) / 0.4);
+}
+
+.glass-panel {
+  background: hsl(var(--surface) / 0.72);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  box-shadow:
+    var(--shadow-elevated),
+    inset 0 1px 0 hsl(0 0% 100% / 0.1);
+}
+.dark .glass-panel {
+  background: hsl(var(--surface) / 0.5);
+  box-shadow:
+    var(--shadow-elevated),
+    inset 0 1px 0 hsl(0 0% 100% / 0.05);
+}
+
+.glass-bar {
+  background: hsl(var(--background) / 0.72);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+.glass-bar[data-scrolled] {
+  background: hsl(var(--background) / 0.85);
+  box-shadow:
+    0 4px 30px hsl(var(--primary) / 0.06),
+    inset 0 1px 0 hsl(0 0% 100% / 0.08);
+}
+.dark .glass-bar[data-scrolled] {
+  box-shadow:
+    0 4px 30px hsl(198 60% 2% / 0.4),
+    inset 0 1px 0 hsl(0 0% 100% / 0.04);
+}
+
+/* ---------- Enhanced card hover with glow ---------- */
+.elev-interactive:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    var(--elev-3-shadow),
+    0 0 24px -4px hsl(var(--primary) / 0.12);
+  border-color: hsl(var(--primary) / 0.3);
+}
+.depth-hover:hover {
+  transform: translate3d(0, -4px, 0);
+  box-shadow:
+    var(--elev-4-shadow),
+    0 0 32px -6px hsl(var(--primary) / 0.18),
+    0 0 0 1px hsl(var(--primary) / 0.2);
+  border-color: hsl(var(--primary) / 0.35);
+}
+
+/* ---------- Premium gradient border on feature surfaces ---------- */
+.elev-3, .elev-4 {
+  position: relative;
+}
+.elev-3::after, .elev-4::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.2),
+    transparent 40%,
+    transparent 60%,
+    hsl(var(--brand-secondary) / 0.15)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 260ms ease;
+}
+.elev-3:hover::after, .elev-4:hover::after {
+  opacity: 1;
+}
+
+/* ---------- Enhanced stat cards ---------- */
+.stat-value {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--foreground)),
+    hsl(var(--primary-glow)) 120%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ---------- Polished buttons ---------- */
+[data-variant="primary"]:not(:disabled),
+button[class*="bg-primary"]:not(:disabled) {
+  box-shadow:
+    0 2px 8px -2px hsl(var(--primary) / 0.35),
+    inset 0 1px 0 hsl(0 0% 100% / 0.15);
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    background-color var(--dur-base) var(--ease-out-soft);
+}
+[data-variant="primary"]:not(:disabled):hover,
+button[class*="bg-primary"]:not(:disabled):hover {
+  box-shadow:
+    0 4px 20px -4px hsl(var(--primary) / 0.5),
+    0 0 0 1px hsl(var(--primary) / 0.2),
+    inset 0 1px 0 hsl(0 0% 100% / 0.2);
+  transform: translateY(-1px);
+}
+[data-variant="primary"]:not(:disabled):active,
+button[class*="bg-primary"]:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 1px 4px -1px hsl(var(--primary) / 0.3),
+    inset 0 1px 0 hsl(0 0% 100% / 0.1);
+}
+
+/* ---------- Enhanced input focus ---------- */
+.field-motion:focus-visible,
+.field-motion:focus-within {
+  border-color: hsl(var(--primary) / 0.55);
+  box-shadow:
+    0 0 0 3px hsl(var(--primary) / 0.14),
+    0 0 20px -4px hsl(var(--primary) / 0.12);
+}
+
+/* ---------- Enhanced ambient orbs ---------- */
+.ambient-orb {
+  filter: blur(100px);
+  opacity: calc(var(--ambient-opacity) * 1.15);
+}
+.ambient-grid {
+  opacity: 0.7;
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 25%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 25%, #000, transparent 75%);
+}
+
+/* ---------- Sidebar premium polish ---------- */
+[data-sidebar="sidebar"] {
+  background: hsl(var(--sidebar-background) / 0.85);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+[data-sidebar="sidebar"] [data-sidebar="header"] {
+  border-bottom: 1px solid hsl(var(--sidebar-border) / 0.6);
+}
+[data-sidebar="sidebar"] [data-sidebar="footer"] {
+  border-top: 1px solid hsl(var(--sidebar-border) / 0.6);
+}
+
+/* Active nav row — gradient glow */
+.nav-item[data-active="true"] {
+  box-shadow:
+    inset 0 0 0 1px hsl(var(--primary) / 0.2),
+    0 4px 16px -8px hsl(var(--primary) / 0.3);
+}
+
+/* ---------- Conic spin enhancement ---------- */
+.conic-spin {
+  background: conic-gradient(
+    from 0deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--brand-secondary)) 25%,
+    hsl(var(--primary-glow)) 50%,
+    hsl(var(--brand-secondary)) 75%,
+    transparent 100%
+  );
+  filter: blur(0.5px);
+}
+
+/* ---------- Smooth page entrance ---------- */
+main#main-content {
+  animation: page-enter 420ms var(--ease-out-soft) both;
+}
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Progress bar shimmer ---------- */
+[class*="bg-primary"][class*="rounded-full"][class*="h-1"] {
+  background-image: linear-gradient(
+    90deg,
+    hsl(var(--primary)),
+    hsl(var(--primary-glow)),
+    hsl(var(--primary))
+  );
+  background-size: 200% 100%;
+  animation: progress-shimmer 2.5s linear infinite;
+}
+@keyframes progress-shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* ---------- Badge polish ---------- */
+[class*="badge"] {
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.08);
+}
+
+/* ---------- Link underline animation ---------- */
+a[class*="text-primary"]:hover,
+a[class*="link"]:hover {
+  text-decoration-color: hsl(var(--primary) / 0.4);
+}
+
+/* ---------- Respect reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  main#main-content { animation: none; }
+  [class*="bg-primary"][class*="rounded-full"][class*="h-1"] { animation: none; }
+  .stat-value {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    color: hsl(var(--foreground));
+    background: none;
+  }
+}

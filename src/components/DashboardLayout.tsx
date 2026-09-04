@@ -83,7 +83,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               stops wide children (tables, charts) creating a horizontal bar. */}
           <main
             id="main-content"
-            className="min-w-0 flex-1 overflow-x-clip p-4 pb-24 sm:p-6 md:pb-6"
+            className="min-w-0 flex-1 overflow-x-clip p-4 pb-24 sm:p-6 md:pb-6 stagger-children"
           >
             {children}
           </main>

@@ -7,6 +7,7 @@ import App from "./App.tsx";
 import "./index.css";
 // Design system theme layer — must load after the app's own CSS.
 import "./styles/gradr-design-system.css";
+import "./styles/gradr-visual-enhancements.css";
 import { initTelemetry } from "./lib/telemetry/journey";
 import RootErrorBoundary from "./components/RootErrorBoundary";
 import { registerServiceWorker } from "./lib/offline/registerServiceWorker";
@@ -43,4 +44,8 @@ function removeSplash() {
   window.setTimeout(drop, 500);
 }
 
+// rAF fires after first paint so users go splash → real UI with no gap.
+// In hidden/background contexts rAF is throttled and never fires, so a
+// setTimeout fallback guarantees the splash is always removed.
 requestAnimationFrame(() => requestAnimationFrame(removeSplash));
+window.setTimeout(removeSplash, 1500);

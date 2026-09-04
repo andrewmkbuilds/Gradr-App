@@ -11,7 +11,7 @@ const TITLE = "Gradr";
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-dvh flex items-center justify-center aurora-bg overflow-hidden relative">
+    <div className="min-h-dvh flex items-center justify-center aurora-bg overflow-hidden relative noise-layer">
       <div className="absolute right-4 top-4 z-20">
         <ThemeToggle />
       </div>
@@ -63,7 +63,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="text-center space-y-3">
             <div className="relative h-14 w-14 mx-auto">
               <div className="conic-spin absolute inset-0 rounded-control opacity-90" />
-              <BrandLogo size={52} className="absolute inset-[2px] rounded-control bg-shell" />
+              <BrandLogo size={52} className="absolute inset-[2px] rounded-control bg-ink dark:bg-shell" />
             </div>
             <div className="text-2xl font-bold kinetic-text">{TITLE}</div>
             <p

@@ -23,7 +23,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, glowing }: StatCa
       className={glowing ? "border-primary/30 shadow-raise" : undefined}
     >
       <div className="mb-3 flex items-start justify-between">
-        <div className="flex h-9 w-9 items-center justify-center rounded-control bg-primary/10">
+        <div className="flex h-9 w-9 items-center justify-center rounded-control bg-primary/10 ring-1 ring-primary/15">
           <Icon className="h-4 w-4 text-primary" />
         </div>
       </div>
