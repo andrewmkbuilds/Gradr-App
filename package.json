@@ -108,7 +108,7 @@
     "esbuild": "^0.25.12",
     "fast-uri": "^4.1.2",
     "hono": "^4.13.1",
-    "ip-address": "^10.5.0"
+    "ip-address": "^10.7.2"
   },
   "private": true,
   "resolutions": {
@@ -117,7 +117,7 @@
     "esbuild": "^0.25.12",
     "fast-uri": "^4.1.2",
     "hono": "^4.13.1",
-    "ip-address": "^10.5.0"
+    "ip-address": "^10.7.2"
   },
   "scripts": {
     "audit:a11y": "node scripts/a11y-audit.mjs",
