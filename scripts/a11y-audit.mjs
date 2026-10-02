@@ -69,7 +69,13 @@ function findChromium() {
   for (const envPath of [process.env.PLAYWRIGHT_CHROMIUM_PATH, process.env.CHROME_PATH]) {
     if (envPath && existsSync(envPath)) return envPath;
   }
-  for (const root of ["/opt/ms-playwright", join(process.env.HOME ?? "", ".cache/ms-playwright")]) {
+  const roots = [
+    "/opt/ms-playwright",
+    process.env.PLAYWRIGHT_BROWSERS_PATH,
+    join(process.env.HOME ?? "", ".cache/ms-playwright"),
+    "/home/runner/.cache/ms-playwright",
+  ].filter(Boolean);
+  for (const root of roots) {
     if (!existsSync(root)) continue;
     for (const dir of readdirSync(root).filter((d) => d.startsWith("chromium"))) {
       for (const rel of [
@@ -88,9 +94,9 @@ function findChromium() {
 async function launch() {
   try {
     return await chromium.launch();
-  } catch {
+  } catch (err) {
     const executablePath = findChromium();
-    if (!executablePath) throw new Error("No Chromium build available for Playwright.");
+    if (!executablePath) throw err;
     return chromium.launch({ executablePath });
   }
 }
@@ -272,5 +278,4 @@ for (const [key, list] of grouped) {
 
 console.log(`\n${results.length} violation group(s), ${instances} element(s); ${blocking.length} blocking.`);
 process.exit(!NO_FAIL && blocking.length ? 1 : 0);
-
 
