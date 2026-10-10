@@ -12,8 +12,8 @@
  *   node scripts/visual-regression.mjs --update   # (re)write baselines
  *   node scripts/visual-regression.mjs            # compare against baselines
  */
-import { chromium } from "playwright";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { launchBrowser } from "./lib/browser.mjs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const BASE = (process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
@@ -21,7 +21,7 @@ const UPDATE = process.argv.includes("--update");
 const ROOT = process.cwd();
 const BASELINE_DIR = join(ROOT, "tests/visual/baseline");
 const CURRENT_DIR = join(ROOT, "tests/visual/current");
-const DIFF_TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.03); // 3% of pixels
+const DIFF_TOLERANCE = Number(process.env.VISUAL_TOLERANCE ?? 0.03);
 
 const ROUTES = [
   ["landing", "/landing"],
@@ -40,37 +40,6 @@ const VIEWPORTS = [
   ["desktop", 1440, 900],
 ];
 
-function findChromium() {
-  for (const envPath of [process.env.PLAYWRIGHT_CHROMIUM_PATH, process.env.CHROME_PATH]) {
-    if (envPath && existsSync(envPath)) return envPath;
-  }
-  for (const root of ["/opt/ms-playwright", join(process.env.HOME ?? "", ".cache/ms-playwright")]) {
-    if (!existsSync(root)) continue;
-    for (const dir of readdirSync(root).filter((d) => d.startsWith("chromium"))) {
-      for (const rel of [
-        "chrome-linux/chrome",
-        "chrome-linux/headless_shell",
-        "chrome-linux64/chrome-headless-shell",
-      ]) {
-        const candidate = join(root, dir, rel);
-        if (existsSync(candidate)) return candidate;
-      }
-    }
-  }
-  return undefined;
-}
-
-async function launch() {
-  try {
-    return await chromium.launch();
-  } catch {
-    const executablePath = findChromium();
-    if (!executablePath) throw new Error("No Chromium build available for Playwright.");
-    return chromium.launch({ executablePath });
-  }
-}
-
-/** Coarse byte-level difference ratio — enough to catch layout/palette drift. */
 function differenceRatio(a, b) {
   if (a.length !== b.length) return 1;
   let diff = 0;
@@ -82,13 +51,13 @@ mkdirSync(BASELINE_DIR, { recursive: true });
 mkdirSync(CURRENT_DIR, { recursive: true });
 
 const failures = [];
-const browser = await launch();
+const browser = await launchBrowser();
 try {
   for (const [vpName, width, height] of VIEWPORTS) {
     const context = await browser.newContext({
       viewport: { width, height },
       colorScheme: "light",
-      reducedMotion: "reduce", // deterministic captures
+      reducedMotion: "reduce",
     });
     const page = await context.newPage();
     for (const [name, path] of ROUTES) {
