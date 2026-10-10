@@ -25,17 +25,11 @@ const BASE = (args.find((a) => !a.startsWith("--")) ?? process.env.SMOKE_BASE_UR
   /\/$/,
   "",
 );
-// Report file stem — one per audited surface (app / marketing).
 const LABEL = flag("label", new URL(BASE).hostname.replace(/[^a-z0-9.-]/gi, "-"));
 const OUT_DIR = flag("out", "reports/a11y");
 const AXE = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 const BLOCKING = new Set(["serious", "critical"]);
 
-
-// Signed-out reachable surfaces. Everything else in the app sits behind auth
-// and is covered by the route-guard suite. `/landing` and `/home` stay in the
-// list on purpose: they must keep redirecting after the marketing pages were
-// deleted, and the audit checks the page they land on.
 const DEFAULT_ROUTES = [
   "/",
   "/auth",
@@ -47,16 +41,12 @@ const DEFAULT_ROUTES = [
   "/this-route-does-not-exist",
 ];
 
-// `--routes=/,/pricing,/blog` audits another surface (e.g. the marketing site)
-// with the same rules and the same report format.
 const ROUTES = flag("routes", "")
   ? flag("routes", "")
       .split(",")
       .map((r) => r.trim())
       .filter(Boolean)
   : DEFAULT_ROUTES;
-
-
 
 const VIEWPORTS = [
   { name: "mobile", width: 390, height: 844 },
@@ -75,7 +65,7 @@ try {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         colorScheme: theme,
-        reducedMotion: "reduce", // measure settled colors, not mid-animation frames
+        reducedMotion: "reduce",
       });
       const page = await context.newPage();
       await page.addInitScript((t) => {
@@ -88,22 +78,15 @@ try {
 
       for (const route of ROUTES) {
         await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
-        // Routes such as /landing redirect on mount; wait for the navigation to
-        // settle before injecting axe, or the execution context is destroyed
-        // mid-injection and the whole run crashes.
         await page.waitForLoadState("networkidle").catch(() => {});
         await page.waitForTimeout(1200);
         await page.addScriptTag({ content: AXE }).catch(async () => {
           await page.waitForLoadState("networkidle").catch(() => {});
           await page.addScriptTag({ content: AXE });
         });
-        // Cross-origin redirects matter: several SEO paths on the app host
-        // hand off to the marketing site, and a report that showed only the
-        // pathname would blame the wrong codebase.
         const landed = new URL(page.url());
         const finalUrl = landed.origin === new URL(BASE).origin ? landed.pathname : landed.href;
         const run = await page.evaluate(async () => {
-          // eslint-disable-next-line no-undef
           return await window.axe.run(document, {
             resultTypes: ["violations"],
             runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] },
@@ -118,8 +101,6 @@ try {
             impact: violation.impact,
             help: violation.help,
             helpUrl: violation.helpUrl,
-            // Full selector list, not a sample: the report has to name every
-            // element a fix must touch.
             nodes: violation.nodes.map((n) => ({
               selector: n.target.join(" "),
               html: (n.html ?? "").slice(0, 400),
@@ -135,9 +116,6 @@ try {
   await browser.close();
 }
 
-// Rules that gate the pipeline no matter what impact axe assigns them. These
-// are the regressions this suite exists to catch: contrast collapses from
-// class merging, and keyboard traps around scrollable panes.
 const GATED_RULES = new Set([
   "color-contrast",
   "color-contrast-enhanced",
@@ -150,7 +128,6 @@ const GATED_RULES = new Set([
 const isBlocking = (r) => BLOCKING.has(r.impact) || GATED_RULES.has(r.id);
 const blocking = results.filter(isBlocking);
 
-// ---- Reports -------------------------------------------------------------
 const instances = results.reduce((n, r) => n + r.nodes.length, 0);
 const report = {
   target: BASE,
@@ -178,7 +155,7 @@ writeFileSync(jsonPath, `${JSON.stringify(report, null, 2)}\n`);
 writeFileSync(htmlPath, renderHtml(report));
 
 function esc(value) {
-  return String(value).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  return String(value).replace(/[&<>\"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 }
 
 function renderHtml(data) {
@@ -217,8 +194,6 @@ function renderHtml(data) {
 
 console.log(`\nReports written: ${jsonPath} · ${htmlPath}`);
 
-// `--no-fail` writes the report and exits 0 so CI can decide the gate from the
-// baseline diff (only *new* serious/critical findings should block a merge).
 const NO_FAIL = args.includes("--no-fail");
 
 if (!results.length) {

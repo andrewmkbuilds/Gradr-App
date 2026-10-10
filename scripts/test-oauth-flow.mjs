@@ -6,20 +6,8 @@
  * the public provider request. When GOOGLE_E2E_STORAGE_STATE points to an
  * approved Playwright storage-state file, it also completes sign-in and checks
  * the authenticated landing.
- *
- *   1. /auth renders and exposes a "Continue with Google" control.
- *   2. Clicking it leaves Gradr and reaches Google's authorization endpoint
- *      (directly or via the Lovable OAuth broker).
- *   3. The authorization request carries client_id, a redirect_uri on an
- *      allowed origin, response_type and a non-trivial state value.
- *   4. The `?next=` destination survives the hop.
- *   5. No token, code or secret is exposed in the page or in the console.
- *
- * Exits non-zero on any failure so CI can page us.
- *
- * Usage: node scripts/test-oauth-flow.mjs [baseUrl]
  */
-import { chromium } from "playwright";
+import { launchBrowser } from "./lib/browser.mjs";
 
 const BASE = (process.argv[2] || process.env.OAUTH_FLOW_TARGET || "https://app.gradr.me").replace(/\/$/, "");
 const NEXT = "/dashboard";
@@ -34,8 +22,6 @@ const record = (ok, label, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${label}${detail ? ` — ${detail}` : ""}`);
 };
 
-// Edge preflight runs before Chromium so a hosting alias redirect is reported
-// clearly even when the browser image is unavailable in a CI runner.
 const callbackProbe = await fetch(`${BASE}/~oauth/callback?gradr_probe=1`, { redirect: "manual" });
 const callbackLocation = callbackProbe.headers.get("location") ?? "";
 const callbackIsServed =
@@ -53,7 +39,7 @@ if (!callbackIsServed) {
   process.exit(1);
 }
 
-const browser = await chromium.launch();
+const browser = await launchBrowser();
 const storageState = process.env.GOOGLE_E2E_STORAGE_STATE;
 const context = await browser.newContext({
   viewport: { width: 1280, height: 1000 },
@@ -66,7 +52,6 @@ page.on("console", (msg) => {
   if (msg.type() === "error") consoleErrors.push(msg.text());
 });
 
-/** URLs the browser attempted, so we can reconstruct the redirect chain. */
 const chain = [];
 page.on("request", (req) => {
   if (req.isNavigationRequest()) chain.push(req.url());
@@ -87,7 +72,6 @@ try {
       page.waitForURL((url) => PROVIDER_HOSTS.includes(url.hostname), { timeout: 45_000 }).catch(() => {}),
       googleButton.click({ timeout: 15_000 }),
     ]);
-    // Broker hop → provider can take one more redirect.
     await page.waitForTimeout(2_500);
 
     const current = new URL(page.url());
@@ -106,12 +90,6 @@ try {
       record(state.length >= 16, "carries a non-trivial state value", `${state.length} chars`);
 
       const redirectUri = params.get("redirect_uri") ?? "";
-      let redirectHost = "";
-      try {
-        redirectHost = new URL(redirectUri).hostname;
-      } catch {
-        /* reported below */
-      }
       record(redirectUri === EXPECTED_CALLBACK, "uses the exact app callback URI", redirectUri || "<missing>");
       record(
         params.get("scope")?.includes("email") ?? false,
@@ -142,6 +120,7 @@ try {
 } catch (error) {
   record(false, "flow completed without a crash", error instanceof Error ? error.message : String(error));
 } finally {
+  await context.close();
   await browser.close();
 }
 

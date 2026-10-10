@@ -3,6 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <!--
+      Load the consent autoblocker without blocking HTML parsing or the React entrypoint.
+      Third-party scripts are appended only after the autoblocker has loaded, preserving
+      the consent-blocking order while keeping app startup independent of CMP network latency.
+    -->
+    <script>
+      (function () {
+        var blocker = document.createElement("script");
+        blocker.src = "https://web.cmp.usercentrics.eu/modules/autoblocker.js";
+        blocker.async = true;
+        blocker.onload = function () {
+          var cmp = document.createElement("script");
+          cmp.id = "usercentrics-cmp";
+          cmp.src = "https://web.cmp.usercentrics.eu/ui/loader.js";
+          cmp.dataset.rulesetId = "3si2nNX8NWaUX8";
+          cmp.async = true;
+          document.head.appendChild(cmp);
+
+          var tolt = document.createElement("script");
+          tolt.src = "https://files.tlt-cdn.com/tlt.js";
+          tolt.dataset.tolt = "pk_uGU5pP75M6VToSuBhyYTYggc";
+          tolt.async = true;
+          document.head.appendChild(tolt);
+        };
+        blocker.onerror = function () {
+          console.error("[consent] Usercentrics autoblocker failed to load");
+        };
+        document.head.appendChild(blocker);
+      })();
+    </script>
+    <!--
       Document-level CSP. `<meta http-equiv>` honours base-uri, object-src and
       form-action; frame-ancestors / report-only / X-Frame-Options are
       header-only and must come from the hosting edge (docs/security-headers.md).
@@ -62,8 +92,7 @@
     />
     <link rel="preconnect" href="https://zdlajleqgmmbfsdnelch.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://zdlajleqgmmbfsdnelch.supabase.co" />
-    <!-- Tolt referral tracking -->
-    <script async src="https://files.tlt-cdn.com/tlt.js" data-tolt="pk_uGU5pP75M6VToSuBhyYTYggc"></script>
+    <!-- Tolt is loaded after the consent autoblocker by the bootstrap above. -->
     <!--
       Content Security Policy: delivered as a REPORT-ONLY *response header* by
       the edge (see scripts/lib/securityHeaders.mjs for the contract we gate on

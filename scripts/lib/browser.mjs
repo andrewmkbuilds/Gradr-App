@@ -13,15 +13,30 @@ export function findChromium() {
   for (const envPath of [process.env.PLAYWRIGHT_CHROMIUM_PATH, process.env.CHROME_PATH]) {
     if (envPath && existsSync(envPath)) return envPath;
   }
+
   for (const root of ["/opt/ms-playwright", join(process.env.HOME ?? "", ".cache/ms-playwright")]) {
     if (!existsSync(root)) continue;
-    for (const dir of readdirSync(root).filter((d) => d.startsWith("chromium"))) {
-      for (const rel of ["chrome-linux/chrome", "chrome-linux/headless_shell", "chrome-linux64/chrome-headless-shell"]) {
+
+    // Prefer the newest installed Chromium directory so a stale runner cache
+    // cannot win over the browser downloaded for the current Playwright CLI.
+    const dirs = readdirSync(root)
+      .filter((d) => d.startsWith("chromium"))
+      .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+
+    for (const dir of dirs) {
+      for (const rel of [
+        "chrome-linux/chrome",
+        "chrome-linux64/chrome",
+        "chrome-linux/headless_shell",
+        "chrome-headless-shell-linux64/chrome-headless-shell",
+        "chrome-linux64/chrome-headless-shell",
+      ]) {
         const candidate = join(root, dir, rel);
         if (existsSync(candidate)) return candidate;
       }
     }
   }
+
   return undefined;
 }
 
@@ -63,7 +78,6 @@ export async function sampleForFlash(page, { samples = 30, intervalMs = 60 } = {
         if (style.visibility === "hidden" || style.display === "none") return false;
         if (Number(style.opacity) === 0) return false;
         const r = rects[0];
-        // sr-only style clipping (1px boxes) does not count as painted.
         return r.width > 4 && r.height > 4;
       };
 
@@ -75,7 +89,6 @@ export async function sampleForFlash(page, { samples = 30, intervalMs = 60 } = {
         const text = body ? body.innerText || "" : "";
         const hit = phrases.find((p) => text.includes(p));
         if (hit) {
-          // Confirm the node carrying it is actually painted (not <noscript>).
           const els = Array.from(document.body.querySelectorAll("h1,h2,p,li,main,div"));
           const painted = els.some((el) => (el.textContent || "").includes(hit) && isPainted(el));
           if (painted) seoVisibleFrames.push({ sample: i, phrase: hit });
