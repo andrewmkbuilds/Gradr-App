@@ -25,19 +25,25 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # Static guard: no fixed py-12 / mt-16 / space-y-10 on public routes.
       - name: Lint (rhythm utilities)
         run: bun run lint:rhythm
 
-      # Locks the scale itself: one fluid unit, no hand-rolled clamp()s.
       - name: Rhythm token tests
         run: bunx vitest run src/test/verticalRhythm.test.ts
 
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
 
-      # Boots its own Vite server in multi-surface mode so every public route
-      # resolves, measures 26 routes x 3 breakpoints, screenshots and diffs.
+      # Playwright's package registry can expect a different browser revision
+      # from the one the CI CLI downloads. Resolve the actual installed binary
+      # once and pass it explicitly to the spacing audit, which owns its
+      # browser launch instead of going through the shared helper.
+      - name: Resolve Chromium executable
+        run: |
+          CHROMIUM_PATH="$(node --input-type=module -e "import { findChromium } from './scripts/lib/browser.mjs'; const p = findChromium(); if (!p) process.exit(1); process.stdout.write(p)")"
+          echo "CHROMIUM_PATH=$CHROMIUM_PATH" >> "$GITHUB_ENV"
+          echo "Using Chromium: $CHROMIUM_PATH"
+
       - name: Vertical spacing audit
         run: bun run audit:spacing
 
