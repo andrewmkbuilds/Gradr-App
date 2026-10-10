@@ -10,10 +10,10 @@
  *   node scripts/a11y-audit.mjs                 # localhost:8080
  *   node scripts/a11y-audit.mjs https://gradr.me
  */
-import { chromium } from "playwright";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { createRequire } from "module";
 import { join } from "path";
+import { launchBrowser } from "./lib/browser.mjs";
 
 const require = createRequire(import.meta.url);
 const args = process.argv.slice(2);
@@ -65,45 +65,10 @@ const VIEWPORTS = [
 
 const THEMES = ["light", "dark"];
 
-function findChromium() {
-  for (const envPath of [process.env.PLAYWRIGHT_CHROMIUM_PATH, process.env.CHROME_PATH]) {
-    if (envPath && existsSync(envPath)) return envPath;
-  }
-  const roots = [
-    "/opt/ms-playwright",
-    process.env.PLAYWRIGHT_BROWSERS_PATH,
-    join(process.env.HOME ?? "", ".cache/ms-playwright"),
-    "/home/runner/.cache/ms-playwright",
-  ].filter(Boolean);
-  for (const root of roots) {
-    if (!existsSync(root)) continue;
-    for (const dir of readdirSync(root).filter((d) => d.startsWith("chromium"))) {
-      for (const rel of [
-        "chrome-linux/chrome",
-        "chrome-linux/headless_shell",
-        "chrome-linux64/chrome-headless-shell",
-      ]) {
-        const candidate = join(root, dir, rel);
-        if (existsSync(candidate)) return candidate;
-      }
-    }
-  }
-  return undefined;
-}
-
-async function launch() {
-  try {
-    return await chromium.launch();
-  } catch (err) {
-    const executablePath = findChromium();
-    if (!executablePath) throw err;
-    return chromium.launch({ executablePath });
-  }
-}
 
 const results = [];
 
-const browser = await launch();
+const browser = await launchBrowser();
 try {
   for (const viewport of VIEWPORTS) {
     for (const theme of THEMES) {
