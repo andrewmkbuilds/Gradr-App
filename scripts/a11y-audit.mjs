@@ -10,7 +10,7 @@
  *   node scripts/a11y-audit.mjs                 # localhost:8080
  *   node scripts/a11y-audit.mjs https://gradr.me
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { createRequire } from "module";
 import { join } from "path";
 import { launchBrowser } from "./lib/browser.mjs";
@@ -55,7 +55,9 @@ const VIEWPORTS = [
 
 const THEMES = ["light", "dark"];
 
+
 const results = [];
+
 const browser = await launchBrowser();
 try {
   for (const viewport of VIEWPORTS) {
@@ -216,3 +218,4 @@ for (const [key, list] of grouped) {
 
 console.log(`\n${results.length} violation group(s), ${instances} element(s); ${blocking.length} blocking.`);
 process.exit(!NO_FAIL && blocking.length ? 1 : 0);
+
