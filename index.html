@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <!-- KookiOk consent manager must run before third-party trackers. -->
     <script src="https://cdn.kookiok.com/consent.js?id=01a129a3-1dce-7f13-82d8-77496a188dfc"></script>
+    <!-- Google Analytics 4: load only after the visitor grants analytics consent in KookiOk. -->
+    <script type="text/plain" data-ag-consent="analytics" data-ag-src="https://www.googletagmanager.com/gtag/js?id=G-BW6PV5CECY" async></script>
+    <script type="text/plain" data-ag-consent="analytics">
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-BW6PV5CECY');
+    </script>
 <!-- Tolt referral tracking stays blocked until marketing consent is granted by KookiOk. -->
     <script type="text/plain" data-ag-consent="marketing" data-ag-src="https://files.tlt-cdn.com/tlt.js" data-tolt="pk_uGU5pP75M6VToSuBhyYTYggc"></script>
     <!--
