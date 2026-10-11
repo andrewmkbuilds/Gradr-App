@@ -72,6 +72,13 @@ export const CONSOLE_ALLOWLIST = [
     reason: "Affiliate tracking script is blocked in CI.",
   },
   {
+    id: "usercentrics-ci",
+    pattern: /(?:web\.cmp\.usercentrics\.eu|CMP initialization failed|No ruleset data)/i,
+    kind: "ci-network",
+    reason:
+      "Usercentrics is a third-party consent service. The CI runner can reach the loader but the configured ruleset is not returned in the test environment; consent enforcement is covered by the production CMP configuration rather than route console sweeps.",
+  },
+  {
     id: "unauthenticated-api-reads",
     pattern: /Failed to load resource: the server responded with a status of (401|403)/i,
     kind: "ci-network",
