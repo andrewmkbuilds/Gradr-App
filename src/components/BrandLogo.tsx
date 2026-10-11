@@ -1,6 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils";
-import gradrLogoUrl from "@/design-system/gradr-9b9b95/assets/logos/gradr-logo.png";
 
 /**
  * Official Gradr brand mark.
@@ -13,9 +12,9 @@ import gradrLogoUrl from "@/design-system/gradr-9b9b95/assets/logos/gradr-logo.p
  * surface hurts legibility, the background adapts — never the logo.
  */
 /** Primary transparent colour mark (256px build for UI, 512px master). */
-export const BRAND_LOGO_URL = gradrLogoUrl;
+export const BRAND_LOGO_URL = "/gradr-logo.png";
 /** Kept for existing call sites — resolves to the same official mark. */
-export const BRAND_LOGO_DARK_URL = gradrLogoUrl;
+export const BRAND_LOGO_DARK_URL = "/gradr-logo.png";
 export const BRAND_LOGO_FULL_URL = "/gradr-logo.png";
 /** Official app icon — favicon, PWA, avatars, tiny surfaces. */
 export const BRAND_APP_ICON_URL = "/icon-512.png";
