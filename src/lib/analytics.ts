@@ -1,6 +1,5 @@
 /**
  * Lightweight client analytics.
- * - Pushes to window.dataLayer (GTM/GA4 compatible)
  * - Dispatches a CustomEvent("app:analytics") for local listeners
  * - Persists events to Lovable Cloud (analytics_events table) for the
  *   internal admin dashboard
@@ -10,12 +9,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type AnalyticsProps = Record<string, string | number | boolean | undefined | null>;
-
-declare global {
-  interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
-  }
-}
 
 const SESSION_KEY = "cf_session_id";
 
@@ -77,8 +70,6 @@ export function trackEvent(event: string, props: AnalyticsProps = {}) {
   if (typeof window === "undefined") return;
   const payload = { event, ...props, ts: Date.now() };
   try {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(payload);
     window.dispatchEvent(new CustomEvent("app:analytics", { detail: payload }));
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
