@@ -79,6 +79,13 @@ async function stubAuthPending(context) {
   });
 }
 
+const waitForAuthUi = async (page) => {
+  // Do not guess a fixed startup delay. The app may legitimately defer
+  // optional integrations, fonts, or the auth bundle. Wait for the actual
+  // interactive control so the screenshot is of the page, not its loader.
+  await page.getByRole("button", { name: /^sign in$/i }).first().waitFor({ state: "visible", timeout: 10000 });
+};
+
 const fill = async (page) => {
   await page.getByLabel(/email/i).first().fill("visual@gradr.me");
   await page.getByLabel(/password/i).first().fill("Sup3rSecret!23");
@@ -90,9 +97,10 @@ const STATES = [
     name: "validation-errors",
     async run(page) {
       await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
-      await page.waitForTimeout(800);
+      await waitForAuthUi(page);
       await submit(page).click();
-      await page.waitForTimeout(600);
+      await page.getByText(/invalid|must be|enter your|password/i).first().waitFor({ state: "visible", timeout: 3000 }).catch(() => {});
+      await page.waitForTimeout(150);
     },
   },
   {
@@ -100,10 +108,11 @@ const STATES = [
     stub: stubAuthFailure,
     async run(page) {
       await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
-      await page.waitForTimeout(800);
+      await waitForAuthUi(page);
       await fill(page);
       await submit(page).click();
-      await page.waitForTimeout(1500);
+      await page.getByRole("alert").first().waitFor({ state: "visible", timeout: 5000 });
+      await page.waitForTimeout(150);
     },
   },
   {
@@ -111,10 +120,10 @@ const STATES = [
     stub: stubAuthPending,
     async run(page) {
       await page.goto(`${BASE}/auth`, { waitUntil: "domcontentloaded" });
-      await page.waitForTimeout(800);
+      await waitForAuthUi(page);
       await fill(page);
       await submit(page).click({ noWaitAfter: true });
-      await page.waitForTimeout(700); // captured mid-flight, before the abort lands
+      await page.waitForTimeout(250);
     },
   },
 ];
