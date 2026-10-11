@@ -13,42 +13,12 @@
  *
  *   node scripts/logo-shell-visual.mjs [baseUrl]
  */
-import { chromium } from "playwright";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
+import { launchBrowser } from "./lib/browser.mjs";
+import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const BASE = (process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 const OUT = join(process.cwd(), "artifacts/logo-shell");
-
-function findChromium() {
-  for (const envPath of [process.env.PLAYWRIGHT_CHROMIUM_PATH, process.env.CHROME_PATH]) {
-    if (envPath && existsSync(envPath)) return envPath;
-  }
-  for (const root of ["/opt/ms-playwright", join(process.env.HOME ?? "", ".cache/ms-playwright")]) {
-    if (!existsSync(root)) continue;
-    for (const dir of readdirSync(root).filter((d) => d.startsWith("chromium"))) {
-      for (const rel of [
-        "chrome-linux/chrome",
-        "chrome-linux/headless_shell",
-        "chrome-linux64/chrome-headless-shell",
-      ]) {
-        const candidate = join(root, dir, rel);
-        if (existsSync(candidate)) return candidate;
-      }
-    }
-  }
-  return undefined;
-}
-
-async function launch() {
-  try {
-    return await chromium.launch();
-  } catch {
-    const executablePath = findChromium();
-    if (!executablePath) throw new Error("No Chromium build available for Playwright.");
-    return chromium.launch({ executablePath });
-  }
-}
 
 mkdirSync(OUT, { recursive: true });
 
@@ -141,7 +111,7 @@ async function checkLogoShell(page, label) {
 }
 
 const failures = [];
-const browser = await launch();
+const browser = await launchBrowser({ headless: true });
 
 try {
   for (const theme of ["light", "dark"]) {
