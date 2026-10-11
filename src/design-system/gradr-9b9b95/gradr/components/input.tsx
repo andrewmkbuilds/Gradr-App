@@ -12,7 +12,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       ref={ref}
       aria-invalid={invalid || undefined}
       className={cn(
-        "h-10 w-full rounded-control border border-border bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+        "h-10 w-full rounded-control border border-border bg-surface px-3 text-sm text-ink placeholder:text-slate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-shell dark:placeholder:text-fog disabled:opacity-50",
         invalid && "border-destructive focus-visible:ring-destructive",
         className,
       )}

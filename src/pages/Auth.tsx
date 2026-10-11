@@ -50,8 +50,6 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  // Consent is captured as an explicit, unbundled action: the legal box and the
-  // eligibility box are mandatory, product news is optional and defaults to off.
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [confirmedEligible, setConfirmedEligible] = useState(false);
   const [marketingOptIn, setMarketingOptIn] = useState(false);
@@ -61,22 +59,15 @@ export default function Auth() {
   const [resending, setResending] = useState(false);
   const [resendIn, setResendIn] = useState(0);
 
-  // Single source of truth for the post-auth destination (validated, loop-safe).
   const nextParam = readNext(location.search);
   const nextTarget = nextParam ?? "/";
-  // Email links and OAuth always come back to /auth: the session is established
-  // from the URL first, then AuthRoute forwards to `next`.
   const postAuthUrl = authCallbackUrl(nextParam);
 
-  // Surface expired/invalid confirmation links instead of silently showing the form.
   useEffect(() => {
     const message = consumeAuthCallbackError();
     if (message) toast.error(message);
   }, []);
 
-  // Forensics: record where the provider actually landed us, and whether the
-  // state/nonce parameters survived the round trip. Runs once per mount, before
-  // `consumeAuthCallbackError` strips anything from the address bar.
   useEffect(() => {
     const url = new URL(window.location.href);
     const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
@@ -95,16 +86,9 @@ export default function Auth() {
     });
   }, []);
 
-
-
-  // Belt and braces: AuthRoute redirects once a real session exists, but if this
-  // page is ever rendered with one (e.g. session restored after confirmation),
-  // forward to the destination rather than stranding the user on the form.
   useEffect(() => {
     if (user && user.is_anonymous !== true) {
       const finalPath = nextTarget === "/" ? "/dashboard" : nextTarget;
-      // Resolved against the *active* hostname: on app.gradr.me this stays a
-      // client-side navigation, and it never hardcodes the apex origin.
       const finalUrl = urlFor("app", finalPath);
       if (finalUrl.startsWith(window.location.origin)) {
         navigate(finalPath, { replace: true });
@@ -116,15 +100,12 @@ export default function Auth() {
     }
   }, [user, nextTarget, navigate]);
 
-
-  // Countdown for the "resend verification email" cooldown.
   useEffect(() => {
     if (resendIn <= 0) return;
     const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [resendIn]);
 
-  /** Validate the visible fields; returns the cleaned values or null. */
   const validateForm = () => {
     const errors: FieldErrors = {};
     const emailResult = emailSchema.safeParse(email);
@@ -163,13 +144,6 @@ export default function Auth() {
     }
   };
 
-  /**
-   * Mandatory consent gate — runs only when an account is being created.
-   * Existing-user sign-in (email or any provider) short-circuits to `bypass`
-   * so a returning user can never be blocked by it.
-   * Returns the recorded consent, `"bypass"` when the gate does not apply, or
-   * null after surfacing the reason the account cannot be created yet.
-   */
   const requireConsent = (method: SignupMethod): SignupConsent | "bypass" | null => {
     if (!ageGateApplies({ isSignUp })) {
       trackAgeGateOutcome("bypass", method, "existing_account_signin");
@@ -199,14 +173,12 @@ export default function Auth() {
     const { email, password, fullName } = valid;
     const consent = requireConsent("email");
     if (!consent) return;
-    // `bypass` means this is an existing-user sign-in; only signup carries consent.
     const signupConsent = consent === "bypass" ? null : consent;
     setLoading(true);
     if (isSignUp) markSignupIntent("email");
     try {
       if (isSignUp) {
         if (isGuest) {
-          // Upgrade the existing anonymous session so guest data is preserved.
           const { error } = await supabase.auth.updateUser(
             { email, password, data: { full_name: fullName, ...signupConsentMetadata(signupConsent!) } },
             { emailRedirectTo: postAuthUrl },
@@ -226,7 +198,6 @@ export default function Auth() {
         });
         if (error) throw error;
         if (data.session) {
-          // Email confirmation is disabled — the user is signed in right now.
           navigate(nextTarget, { replace: true });
           return;
         }
@@ -245,18 +216,10 @@ export default function Auth() {
     }
   };
 
-
-
-
   const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
-    // Same consent gate as the email form — a provider button must not become a
-    // way to create an account without accepting the terms. On the sign-in tab
-    // the gate reports `bypass` and never blocks the provider handoff.
     if (!requireConsent(provider)) return;
-    // Recorded before the redirect so the funnel survives the round trip.
     if (isSignUp) markSignupIntent(provider);
 
-    // Forensics: record the outbound hop before we hand control to the provider.
     void recordOAuthHop({
       provider,
       stage: "initiate",
@@ -299,9 +262,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInAnonymously();
       if (error) throw error;
       toast.success("Signed in as guest");
-      // Guests stay allowed on /auth (so they can upgrade later), so navigate explicitly.
       navigate(nextTarget, { replace: true });
-
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Guest sign-in failed";
       toast.error(message);
@@ -372,8 +333,6 @@ export default function Auth() {
   return (
     <AuthLayout>
       <OAuthHostMismatchNotice />
-
-
       <div className="space-y-2">
         <Text variant="h4" as="h1">
           {isSignUp ? "Create your account" : "Sign in to Gradr"}
@@ -385,14 +344,8 @@ export default function Auth() {
         </Text>
       </div>
 
-      {/* OAuth buttons */}
       <div className="space-y-2.5">
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full"
-          onClick={() => handleOAuth("google")}
-        >
+        <Button variant="outline" size="lg" className="w-full" onClick={() => handleOAuth("google")}>
           <svg className="h-4 w-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -401,23 +354,13 @@ export default function Auth() {
           </svg>
           Continue with Google
         </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full"
-          onClick={() => handleOAuth("apple")}
-        >
+        <Button variant="outline" size="lg" className="w-full" onClick={() => handleOAuth("apple")}>
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
           </svg>
           Continue with Apple
         </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full"
-          onClick={() => handleOAuth("microsoft")}
-        >
+        <Button variant="outline" size="lg" className="w-full" onClick={() => handleOAuth("microsoft")}>
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z"/>
           </svg>
@@ -425,17 +368,15 @@ export default function Auth() {
         </Button>
       </div>
 
-      {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-overline">
-          <span className="bg-surface px-3 text-foreground">or</span>
+          <span className="bg-surface px-3 text-ink dark:text-shell">or</span>
         </div>
       </div>
 
-      {/* Email form */}
       <form onSubmit={handleEmailAuth} noValidate className="space-y-3.5">
         {isSignUp && (
           <div className="space-y-1.5">
@@ -454,72 +395,33 @@ export default function Auth() {
                 className="pl-10"
               />
             </div>
-            {fieldErrors.fullName && (
-              <Text id="error-fullName" variant="caption" tone="destructive">{fieldErrors.fullName}</Text>
-            )}
+            {fieldErrors.fullName && <Text id="error-fullName" variant="caption" tone="destructive">{fieldErrors.fullName}</Text>}
           </div>
         )}
         <div className="space-y-1.5">
           <div className="relative">
             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="auth-email"
-              name="email"
-              autoComplete="email"
-              aria-label="Email address"
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }}
-              invalid={!!fieldErrors.email || !!formError}
-              aria-describedby={fieldErrors.email ? "error-email" : undefined}
-              className="pl-10"
-            />
+            <Input id="auth-email" name="email" autoComplete="email" aria-label="Email address" type="email" placeholder="Email address" value={email} onChange={(e) => { setEmail(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, email: undefined })); }} invalid={!!fieldErrors.email || !!formError} aria-describedby={fieldErrors.email ? "error-email" : undefined} className="pl-10" />
           </div>
-          {fieldErrors.email && (
-            <Text id="error-email" variant="caption" tone="destructive">{fieldErrors.email}</Text>
-          )}
+          {fieldErrors.email && <Text id="error-email" variant="caption" tone="destructive">{fieldErrors.email}</Text>}
         </div>
         <div className="space-y-1.5">
           <div className="relative">
             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="auth-password"
-              name="password"
-              aria-label="Password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }}
-              invalid={!!fieldErrors.password}
-              aria-describedby={fieldErrors.password ? "error-password" : undefined}
-              className="pl-10"
-            />
+            <Input id="auth-password" name="password" aria-label="Password" type="password" placeholder="Password" value={password} onChange={(e) => { setPassword(e.target.value); setFormError(null); setFieldErrors((p) => ({ ...p, password: undefined })); }} invalid={!!fieldErrors.password} aria-describedby={fieldErrors.password ? "error-password" : undefined} className="pl-10" />
           </div>
-          {fieldErrors.password && (
-            <Text id="error-password" variant="caption" tone="destructive">{fieldErrors.password}</Text>
-          )}
+          {fieldErrors.password && <Text id="error-password" variant="caption" tone="destructive">{fieldErrors.password}</Text>}
         </div>
-
 
         {!isSignUp && (
           <div className="flex justify-end">
-            <Link
-              to={nextParam ? `/forgot-password?next=${encodeURIComponent(nextParam)}` : "/forgot-password"}
-              className="text-caption text-muted-foreground transition-colors hover:text-primary"
-            >
-              Forgot password?
-            </Link>
-
+            <Link to={nextParam ? `/forgot-password?next=${encodeURIComponent(nextParam)}` : "/forgot-password"} className="text-caption text-muted-foreground transition-colors hover:text-primary">Forgot password?</Link>
           </div>
         )}
 
         {formError && (
           <Alert variant="danger" role="alert" aria-live="polite">
-            <span className="flex items-start gap-2">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>{formError}</span>
-            </span>
+            <span className="flex items-start gap-2"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" /><span>{formError}</span></span>
           </Alert>
         )}
 
@@ -527,99 +429,40 @@ export default function Auth() {
           <fieldset className="space-y-2.5 rounded-control border border-border bg-surface-muted p-3">
             <legend className="sr-only">Consent</legend>
             <label htmlFor="consent-terms" className="flex cursor-pointer items-start gap-2.5 text-caption text-muted-foreground">
-              <input
-                id="consent-terms"
-                type="checkbox"
-                checked={acceptedTerms}
-                onChange={(e) => { setAcceptedTerms(e.target.checked); setConsentError(null); }}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-                aria-describedby={consentError ? "consent-error" : undefined}
-              />
-              <span>
-                I agree to the{" "}
-                <Link to="/terms" className="text-primary underline underline-offset-2">Terms &amp; Conditions</Link>{" "}
-                and have read the{" "}
-                <Link to="/privacy" className="text-primary underline underline-offset-2">Privacy Notice</Link>.
-                <span className="text-destructive"> *</span>
-              </span>
+              <input id="consent-terms" type="checkbox" checked={acceptedTerms} onChange={(e) => { setAcceptedTerms(e.target.checked); setConsentError(null); }} className="mt-0.5 h-4 w-4 shrink-0 accent-primary" aria-describedby={consentError ? "consent-error" : undefined} />
+              <span>I agree to the{" "}<Link to="/terms" className="text-primary underline underline-offset-2">Terms &amp; Conditions</Link>{" "}and have read the{" "}<Link to="/privacy" className="text-primary underline underline-offset-2">Privacy Notice</Link>.<span className="text-destructive"> *</span></span>
             </label>
             <label htmlFor="consent-age" className="flex cursor-pointer items-start gap-2.5 text-caption text-muted-foreground">
-              <input
-                id="consent-age"
-                type="checkbox"
-                checked={confirmedEligible}
-                onChange={(e) => { setConfirmedEligible(e.target.checked); setConsentError(null); }}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-              />
-              <span>
-                I am at least 13 years old, and the age information I provide is truthful.
-                <span className="text-destructive"> *</span>
-              </span>
+              <input id="consent-age" type="checkbox" checked={confirmedEligible} onChange={(e) => { setConfirmedEligible(e.target.checked); setConsentError(null); }} className="mt-0.5 h-4 w-4 shrink-0 accent-primary" />
+              <span>I am at least 13 years old, and the age information I provide is truthful.<span className="text-destructive"> *</span></span>
             </label>
             <label htmlFor="consent-marketing" className="flex cursor-pointer items-start gap-2.5 text-caption text-muted-foreground">
-              <input
-                id="consent-marketing"
-                type="checkbox"
-                checked={marketingOptIn}
-                onChange={(e) => setMarketingOptIn(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-              />
-              <span>
-                Optional: send me product news and job-search tips. You can unsubscribe at any time,
-                and this has no effect on your account.
-              </span>
+              <input id="consent-marketing" type="checkbox" checked={marketingOptIn} onChange={(e) => setMarketingOptIn(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-primary" />
+              <span>Optional: send me product news and job-search tips. You can unsubscribe at any time, and this has no effect on your account.</span>
             </label>
-            {consentError && (
-              <Text id="consent-error" role="alert" variant="caption" tone="destructive">{consentError}</Text>
-            )}
+            {consentError && <Text id="consent-error" role="alert" variant="caption" tone="destructive">{consentError}</Text>}
           </fieldset>
         )}
 
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full"
-          loading={loading}
-        >
+        <Button type="submit" size="lg" className="w-full" loading={loading}>
           {isSignUp ? "Create account" : "Sign in"}
           <ArrowRight className="h-4 w-4" />
         </Button>
 
-
         {isSignUp && (
           <p className="text-center text-caption text-muted-foreground">
             Gradr uses AI to analyse what you upload — see the{" "}
-            <Link to="/ai-disclosure" className="text-primary underline underline-offset-2">
-              AI disclosure
-            </Link>{" "}
-            and{" "}
-            <Link to="/legal" className="text-primary underline underline-offset-2">
-              all policies
-            </Link>
-            .
+            <Link to="/ai-disclosure" className="text-primary underline underline-offset-2">AI disclosure</Link>{" "}and{" "}
+            <Link to="/legal" className="text-primary underline underline-offset-2">all policies</Link>.
           </p>
         )}
       </form>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="lg"
-        className="w-full"
-        onClick={handleGuest}
-        disabled={loading}
-      >
-        Continue as guest
-      </Button>
+      <Button type="button" variant="ghost" size="lg" className="w-full" onClick={handleGuest} disabled={loading}>Continue as guest</Button>
 
       <Text variant="body-sm" tone="muted" className="text-center">
         {isSignUp ? "Already have an account?" : "No account yet?"}{" "}
-        <Button
-          type="button"
-          variant="link"
-          size="inline"
-          onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); setConsentError(null); }}
-        >
+        <Button type="button" variant="link" size="inline" onClick={() => { setIsSignUp(!isSignUp); setFormError(null); setFieldErrors({}); setConsentError(null); }}>
           {isSignUp ? "Sign in" : "Create one"}
         </Button>
       </Text>
