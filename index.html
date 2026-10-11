@@ -2,36 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!--
-      Load the consent autoblocker without blocking HTML parsing or the React entrypoint.
-      Third-party scripts are appended only after the autoblocker has loaded, preserving
-      the consent-blocking order while keeping app startup independent of CMP network latency.
-    -->
-    <script>
-      (function () {
-        var blocker = document.createElement("script");
-        blocker.src = "https://web.cmp.usercentrics.eu/modules/autoblocker.js";
-        blocker.async = true;
-        blocker.onload = function () {
-          var cmp = document.createElement("script");
-          cmp.id = "usercentrics-cmp";
-          cmp.src = "https://web.cmp.usercentrics.eu/ui/loader.js";
-          cmp.dataset.rulesetId = "3si2nNX8NWaUX8";
-          cmp.async = true;
-          document.head.appendChild(cmp);
-
-          var tolt = document.createElement("script");
-          tolt.src = "https://files.tlt-cdn.com/tlt.js";
-          tolt.dataset.tolt = "pk_uGU5pP75M6VToSuBhyYTYggc";
-          tolt.async = true;
-          document.head.appendChild(tolt);
-        };
-        blocker.onerror = function () {
-          console.error("[consent] Usercentrics autoblocker failed to load");
-        };
-        document.head.appendChild(blocker);
-      })();
-    </script>
+    <!-- KookiOk consent manager must run before third-party trackers. -->
+    <script src="https://cdn.kookiok.com/consent.js?id=01a129a3-1dce-7f13-82d8-77496a188dfc"></script>
+    <!-- Tolt referral tracking stays blocked until marketing consent is granted by KookiOk. -->
+    <script type="text/plain" data-ag-consent="marketing" data-ag-src="https://files.tlt-cdn.com/tlt.js" data-tolt="pk_uGU5pP75M6VToSuBhyYTYggc"></script>
     <!--
       Document-level CSP. `<meta http-equiv>` honours base-uri, object-src and
       form-action; frame-ancestors / report-only / X-Frame-Options are
