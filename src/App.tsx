@@ -14,7 +14,6 @@ import { MotionPreferenceProvider } from "@/hooks/useMotionPreference";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { RouteSeo } from "@/components/RouteSeo";
 import { CANONICAL_ALIASES } from "@/lib/seo/canonical";
-import { CookieConsent } from "@/components/CookieConsent";
 import { CursorEffects } from "@/components/effects/CursorEffects";
 import { DepthDebugOverlay } from "@/components/dev/DepthDebugOverlay";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -546,8 +545,7 @@ const App = () => (
             <Suspense fallback={<RouteFallback />}>
               <AppRoutes />
             </Suspense>
-            <CookieConsent />
-            <OfflineBanner />
+<OfflineBanner />
             <CursorEffects />
             <DepthDebugOverlay />
           </AuthProvider>
